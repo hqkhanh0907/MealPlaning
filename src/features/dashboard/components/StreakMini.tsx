@@ -9,7 +9,7 @@ import { calculateStreak } from '../../fitness/utils/gamification';
 
 const DOT_COLORS: Record<string, string> = {
   completed: 'bg-primary',
-  rest: 'bg-status-info',
+  rest: 'bg-info',
   missed: 'border-2 border-border bg-transparent',
   upcoming: 'border-2 border-border bg-transparent',
   today: 'border-2 border-primary bg-transparent',
@@ -85,7 +85,7 @@ function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactEleme
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5" data-testid="streak-count">
-          <Trophy className="text-color-energy h-4 w-4" aria-hidden={true} />
+          <Trophy className="text-energy h-4 w-4" aria-hidden={true} />
           <span className="text-foreground text-base font-semibold tabular-nums">
             {t('dashboard.streakMini.days', {
               count: streakInfo.currentStreak,

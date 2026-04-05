@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import type { FitnessNutritionInsight } from '../hooks/useFitnessNutritionBridge';
 
 const COLOR_MAP: Record<FitnessNutritionInsight['severity'], string> = {
-  info: 'bg-status-info/10 border-status-info/20 text-status-info',
-  warning: 'bg-status-warning/10 border-status-warning/20 text-status-warning',
+  info: 'bg-info/10 border-info/20 text-info',
+  warning: 'bg-warning/10 border-warning/20 text-warning',
   success: 'bg-primary-subtle border-primary/20 text-primary-emphasis',
 };
 

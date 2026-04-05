@@ -23,8 +23,8 @@ interface SettingsMenuProps {
 }
 
 const THEME_OPTIONS = [
-  { value: 'light', labelKey: 'settings.themeLight', icon: Sun, color: 'text-color-energy' },
-  { value: 'dark', labelKey: 'settings.themeDark', icon: Moon, color: 'text-status-info' },
+  { value: 'light', labelKey: 'settings.themeLight', icon: Sun, color: 'text-energy' },
+  { value: 'dark', labelKey: 'settings.themeDark', icon: Moon, color: 'text-info' },
   { value: 'system', labelKey: 'settings.themeSystem', icon: Monitor, color: 'text-muted-foreground' },
   { value: 'schedule', labelKey: 'settings.themeSchedule', icon: Clock, color: 'text-muted-foreground' },
 ] as const;
@@ -65,7 +65,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
     () => [
       {
         id: 'health-profile',
-        icon: <Heart className="text-color-rose h-5 w-5" />,
+        icon: <Heart className="text-rose h-5 w-5" />,
         titleKey: 'settings.healthProfileSection',
         summary: `BMR: ${bmr} • TDEE: ${tdee}`,
         keywords: [t('settings.healthProfileSection'), t('healthProfile.title'), 'BMR', 'TDEE'],
@@ -79,7 +79,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
       },
       {
         id: 'training-profile',
-        icon: <Dumbbell className="text-status-info h-5 w-5" />,
+        icon: <Dumbbell className="text-info h-5 w-5" />,
         titleKey: 'settings.trainingProfileSection',
         summary: trainingSummary,
         keywords: [
@@ -199,8 +199,8 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
       {visibleInlineSections.has('data') && (
         <section className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm sm:p-6">
           <div className="mb-4 flex items-center gap-3">
-            <div className="bg-color-ai-subtle flex h-10 w-10 items-center justify-center rounded-xl">
-              <Database className="text-color-ai h-5 w-5" />
+            <div className="bg-ai-subtle flex h-10 w-10 items-center justify-center rounded-xl">
+              <Database className="text-ai h-5 w-5" />
             </div>
             <div>
               <h3 className="text-foreground font-semibold">{t('settings.data')}</h3>

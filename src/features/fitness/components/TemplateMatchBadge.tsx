@@ -7,7 +7,7 @@ interface TemplateMatchBadgeProps {
 
 function getScoreColor(score: number): string {
   if (score >= 80) return 'bg-primary/10 text-primary-emphasis';
-  if (score >= 60) return 'bg-color-energy-subtle text-color-energy';
+  if (score >= 60) return 'bg-energy-subtle text-energy';
   return 'bg-muted text-foreground-secondary';
 }
 

@@ -72,7 +72,7 @@ function MealsSection({
   return (
     <div data-testid="meals-section">
       <div className="mb-2 flex items-center gap-1.5">
-        <UtensilsCrossed className="text-color-energy h-4 w-4" aria-hidden="true" />
+        <UtensilsCrossed className="text-energy h-4 w-4" aria-hidden="true" />
         <span className="text-foreground-secondary text-xs font-medium">{t('dashboard.todaysPlan.meals')}</span>
       </div>
       <div data-testid="meals-progress" className="text-foreground text-sm font-semibold">
@@ -149,7 +149,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
           <div className="grid grid-cols-2 gap-4">
             <div data-testid="workout-section">
               <div className="mb-2 flex items-center gap-1.5">
-                <Dumbbell className="text-status-info h-4 w-4" aria-hidden="true" />
+                <Dumbbell className="text-info h-4 w-4" aria-hidden="true" />
                 <span className="text-foreground-secondary text-xs font-medium">
                   {t('dashboard.todaysPlan.workout')}
                 </span>
@@ -250,7 +250,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
                   })}
                 </p>
                 {data.completedWorkout.hasPR && (
-                  <p data-testid="pr-highlight" className="text-color-energy text-sm font-semibold">
+                  <p data-testid="pr-highlight" className="text-energy text-sm font-semibold">
                     {t('dashboard.todaysPlan.prHighlight')}
                   </p>
                 )}

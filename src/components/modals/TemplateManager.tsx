@@ -224,22 +224,19 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                         <div className="text-muted-foreground mb-3 space-y-0.5 text-xs">
                           {template.breakfastDishIds.length > 0 && (
                             <p className="flex items-center gap-1">
-                              <Sunrise
-                                className="text-color-energy inline-block size-3.5 shrink-0"
-                                aria-hidden="true"
-                              />{' '}
+                              <Sunrise className="text-energy inline-block size-3.5 shrink-0" aria-hidden="true" />{' '}
                               {getDishNames(template.breakfastDishIds)}
                             </p>
                           )}
                           {template.lunchDishIds.length > 0 && (
                             <p className="flex items-center gap-1">
-                              <Sun className="text-color-energy inline-block size-3.5 shrink-0" aria-hidden="true" />{' '}
+                              <Sun className="text-energy inline-block size-3.5 shrink-0" aria-hidden="true" />{' '}
                               {getDishNames(template.lunchDishIds)}
                             </p>
                           )}
                           {template.dinnerDishIds.length > 0 && (
                             <p className="flex items-center gap-1">
-                              <Moon className="text-status-info inline-block size-3.5 shrink-0" aria-hidden="true" />{' '}
+                              <Moon className="text-info inline-block size-3.5 shrink-0" aria-hidden="true" />{' '}
                               {getDishNames(template.dinnerDishIds)}
                             </p>
                           )}
@@ -268,7 +265,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                           <button
                             onClick={() => onDelete(template.id)}
                             data-testid={`btn-delete-template-${template.id}`}
-                            className="bg-color-rose/10 text-color-rose hover:bg-color-rose/15 flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all active:scale-[0.98]"
+                            className="bg-rose/10 text-rose hover:bg-rose/15 flex min-h-11 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-all active:scale-[0.98]"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                             {t('template.delete')}

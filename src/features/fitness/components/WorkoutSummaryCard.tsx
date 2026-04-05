@@ -56,12 +56,12 @@ export function WorkoutSummaryCard({
             <span className="ml-auto font-semibold">{formatElapsed(durationSeconds)}</span>
           </div>
           <div className="bg-muted flex items-center gap-3 rounded-lg p-3">
-            <Dumbbell className="text-status-info h-5 w-5" aria-hidden="true" />
+            <Dumbbell className="text-info h-5 w-5" aria-hidden="true" />
             <span className="text-muted-foreground">{t('fitness.logger.totalVolume')}</span>
             <span className="ml-auto font-semibold">{totalVolume.toLocaleString()} kg</span>
           </div>
           <div className="bg-muted flex items-center gap-3 rounded-lg p-3">
-            <CheckCircle2 className="text-status-success h-5 w-5" aria-hidden="true" />
+            <CheckCircle2 className="text-success h-5 w-5" aria-hidden="true" />
             <span className="text-muted-foreground">{t('fitness.logger.setsCompleted')}</span>
             <span className="ml-auto font-semibold">{setsCompleted}</span>
           </div>

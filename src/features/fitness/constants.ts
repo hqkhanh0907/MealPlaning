@@ -45,13 +45,13 @@ export const EQUIPMENT_DISPLAY: Record<string, string> = {
 
 // Cardio types
 export const CARDIO_TYPES: { type: CardioType; icon: LucideIcon; i18nKey: string; color: string }[] = [
-  { type: 'running', icon: PersonStanding, i18nKey: 'fitness.cardio.running', color: 'text-status-info' },
-  { type: 'cycling', icon: Bike, i18nKey: 'fitness.cardio.cycling', color: 'text-status-info' },
-  { type: 'swimming', icon: Waves, i18nKey: 'fitness.cardio.swimming', color: 'text-status-info' },
-  { type: 'hiit', icon: Zap, i18nKey: 'fitness.cardio.hiit', color: 'text-status-info' },
-  { type: 'walking', icon: Footprints, i18nKey: 'fitness.cardio.walking', color: 'text-status-info' },
-  { type: 'elliptical', icon: Activity, i18nKey: 'fitness.cardio.elliptical', color: 'text-status-info' },
-  { type: 'rowing', icon: Ship, i18nKey: 'fitness.cardio.rowing', color: 'text-status-info' },
+  { type: 'running', icon: PersonStanding, i18nKey: 'fitness.cardio.running', color: 'text-info' },
+  { type: 'cycling', icon: Bike, i18nKey: 'fitness.cardio.cycling', color: 'text-info' },
+  { type: 'swimming', icon: Waves, i18nKey: 'fitness.cardio.swimming', color: 'text-info' },
+  { type: 'hiit', icon: Zap, i18nKey: 'fitness.cardio.hiit', color: 'text-info' },
+  { type: 'walking', icon: Footprints, i18nKey: 'fitness.cardio.walking', color: 'text-info' },
+  { type: 'elliptical', icon: Activity, i18nKey: 'fitness.cardio.elliptical', color: 'text-info' },
+  { type: 'rowing', icon: Ship, i18nKey: 'fitness.cardio.rowing', color: 'text-info' },
 ];
 export const DISTANCE_CARDIO_TYPES: CardioType[] = ['running', 'cycling', 'swimming'];
 

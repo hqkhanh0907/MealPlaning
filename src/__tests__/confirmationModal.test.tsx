@@ -132,13 +132,13 @@ describe('ConfirmationModal', () => {
   it('warning variant applies amber button styles', () => {
     renderModal({ variant: 'warning' });
     const confirmBtn = screen.getByTestId('btn-confirm-action');
-    expect(confirmBtn.className).toContain('bg-status-warning');
-    expect(confirmBtn.className).toContain('hover:bg-status-warning/90');
+    expect(confirmBtn.className).toContain('bg-warning');
+    expect(confirmBtn.className).toContain('hover:bg-warning/90');
   });
 
   it('warning variant applies amber icon background', () => {
     const { container } = renderModal({ variant: 'warning' });
-    const iconWrapper = container.querySelector('.bg-status-warning\\/10');
+    const iconWrapper = container.querySelector('.bg-warning\\/10');
     expect(iconWrapper).toBeInTheDocument();
   });
 
@@ -159,7 +159,7 @@ describe('ConfirmationModal', () => {
 
   it('renders default icon for warning variant when no icon provided', () => {
     const { container } = renderModal({ variant: 'warning' });
-    const iconContainer = container.querySelector('.bg-status-warning\\/10');
+    const iconContainer = container.querySelector('.bg-warning\\/10');
     expect(iconContainer).toBeInTheDocument();
     const svgIcon = iconContainer?.querySelector('svg');
     expect(svgIcon).toBeInTheDocument();

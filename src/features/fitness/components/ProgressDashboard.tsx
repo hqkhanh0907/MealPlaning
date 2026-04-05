@@ -338,7 +338,7 @@ function ProgressDashboardInner() {
           aria-label={t('fitness.progress.weight')}
           className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
-          <Scale className="text-status-info h-5 w-5" aria-hidden="true" />
+          <Scale className="text-info h-5 w-5" aria-hidden="true" />
           <p className="text-foreground mt-2 text-xl font-semibold">
             {latestWeight ? `${latestWeight.weightKg}kg` : '—'}
           </p>
@@ -365,7 +365,7 @@ function ProgressDashboardInner() {
           aria-label={t('fitness.progress.estimated1rm')}
           className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
-          <Dumbbell className="text-color-ai h-5 w-5" aria-hidden="true" />
+          <Dumbbell className="text-ai h-5 w-5" aria-hidden="true" />
           <p className="text-foreground mt-2 text-xl font-semibold">{best1RM > 0 ? `${best1RM}kg` : '—'}</p>
           <p className="text-muted-foreground text-xs">{t('fitness.progress.estimated1rm')}</p>
         </button>
@@ -377,7 +377,7 @@ function ProgressDashboardInner() {
           aria-label={t('fitness.progress.adherence')}
           className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
-          <Target className="text-status-warning h-5 w-5" aria-hidden="true" />
+          <Target className="text-warning h-5 w-5" aria-hidden="true" />
           <p className="text-foreground mt-2 text-xl font-semibold">{adherencePercent}%</p>
           <p className="text-muted-foreground text-xs">{t('fitness.progress.adherence')}</p>
         </button>

@@ -17,7 +17,7 @@ function getDayOfYear(): number {
 
 function getBarColorClass(pct: number): string {
   if (pct >= 80) return 'bg-primary';
-  if (pct >= 50) return 'bg-status-warning';
+  if (pct >= 50) return 'bg-warning';
   return 'bg-muted-foreground';
 }
 

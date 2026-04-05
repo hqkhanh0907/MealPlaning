@@ -47,9 +47,9 @@ const getDishIdsForMeal = (plan: DayPlan, type: MealType): string[] => {
 };
 
 const MEAL_TABS: { type: MealType; icon: LucideIcon; labelKey: string; color: string }[] = [
-  { type: 'breakfast', icon: Sunrise, labelKey: 'meal.breakfastFull', color: 'text-color-energy' },
-  { type: 'lunch', icon: Sun, labelKey: 'meal.lunchFull', color: 'text-color-energy' },
-  { type: 'dinner', icon: Moon, labelKey: 'meal.dinnerFull', color: 'text-status-info' },
+  { type: 'breakfast', icon: Sunrise, labelKey: 'meal.breakfastFull', color: 'text-energy' },
+  { type: 'lunch', icon: Sun, labelKey: 'meal.lunchFull', color: 'text-energy' },
+  { type: 'dinner', icon: Moon, labelKey: 'meal.dinnerFull', color: 'text-info' },
 ];
 
 interface MealPlannerModalProps {
@@ -317,7 +317,7 @@ export const MealPlannerModal = ({
                       {getLocalizedField(dish.name, lang)}
                     </h4>
                     <div className="mt-1 flex gap-2">
-                      <span className="bg-color-energy-subtle text-color-energy inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold">
+                      <span className="bg-energy-subtle text-energy inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold">
                         <Flame className="inline-block size-3.5" aria-hidden="true" /> {Math.round(nutrition.calories)}{' '}
                         kcal
                       </span>

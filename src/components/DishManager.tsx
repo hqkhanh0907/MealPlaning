@@ -310,7 +310,7 @@ export const DishManager = ({
                 {dish.rating && dish.rating > 0 && (
                   <div className="mb-2 flex items-center gap-0.5" data-testid={`dish-rating-${dish.id}`}>
                     {[1, 2, 3, 4, 5].map(s => (
-                      <span key={s} className={`text-sm ${s <= dish.rating! ? 'text-color-energy' : 'text-muted'}`}>
+                      <span key={s} className={`text-sm ${s <= dish.rating! ? 'text-energy' : 'text-muted'}`}>
                         ★
                       </span>
                     ))}
@@ -615,14 +615,14 @@ export const DishManager = ({
                     <span className="text-macro-protein text-xs font-medium">g</span>
                   </p>
                 </div>
-                <div className="bg-color-energy-subtle rounded-xl p-3.5">
+                <div className="bg-energy-subtle rounded-xl p-3.5">
                   <p className="text-macro-carbs mb-1 text-xs font-semibold uppercase">{t('common.carbs')}</p>
                   <p className="text-macro-carbs text-xl font-semibold">
                     {Math.round(nutrition.carbs)}
                     <span className="text-macro-carbs text-xs font-medium">g</span>
                   </p>
                 </div>
-                <div className="bg-color-rose-subtle rounded-xl p-3.5">
+                <div className="bg-rose-subtle rounded-xl p-3.5">
                   <p className="text-macro-fat mb-1 text-xs font-semibold uppercase">{t('common.fat')}</p>
                   <p className="text-macro-fat text-xl font-semibold">
                     {Math.round(nutrition.fat)}
@@ -723,7 +723,7 @@ export const DishManager = ({
               >
                 <div className="bg-card border-border-subtle sticky top-0 z-10 flex items-center justify-between border-b p-4">
                   <h3 className="text-foreground flex items-center gap-2 text-lg font-semibold">
-                    <GitCompareArrows className="text-status-info h-5 w-5" />
+                    <GitCompareArrows className="text-info h-5 w-5" />
                     {t('dish.compareNutrition')}
                   </h3>
                   <button

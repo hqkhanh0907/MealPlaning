@@ -217,7 +217,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                   <Button
                     variant="default"
                     onClick={handlePauseStopwatch}
-                    className="bg-color-energy hover:bg-color-energy/90 text-color-energy-emphasis flex-1 py-2.5"
+                    className="bg-energy hover:bg-energy/90 text-energy-emphasis flex-1 py-2.5"
                     data-testid="pause-button"
                   >
                     {t('fitness.cardio.pause')}

@@ -53,7 +53,7 @@ const RecommendationPanel = ({
 
   return (
     <div className="bg-card border-border-subtle flex flex-col rounded-2xl border p-6 shadow-sm">
-      <div className="text-color-ai mb-4 flex items-center gap-2 font-semibold">
+      <div className="text-ai mb-4 flex items-center gap-2 font-semibold">
         <Info className="h-5 w-5" aria-hidden="true" />
         <h3>{t('recommendation.title')}</h3>
       </div>
@@ -91,7 +91,7 @@ const RecommendationPanel = ({
             data-testid="btn-switch-to-meals"
             className="bg-primary-subtle text-primary-emphasis border-primary/20 hover:bg-primary/10 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all active:scale-[0.98]"
           >
-            <UtensilsCrossed className="text-color-energy h-4 w-4" aria-hidden="true" />
+            <UtensilsCrossed className="text-energy h-4 w-4" aria-hidden="true" />
             {t('schedule.switchToMeals')}
           </button>
         )}

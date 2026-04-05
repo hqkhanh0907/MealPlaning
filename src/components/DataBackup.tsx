@@ -60,9 +60,9 @@ const HEALTH_STYLES = {
     Icon: ShieldCheck,
   },
   warning: {
-    bg: 'bg-color-energy-subtle',
-    border: 'border-status-warning/30',
-    text: 'text-status-warning',
+    bg: 'bg-energy-subtle',
+    border: 'border-warning/30',
+    text: 'text-warning',
     Icon: ShieldAlert,
   },
   critical: {
@@ -203,7 +203,7 @@ export const DataBackup = () => {
           onClick={() => fileInputRef.current?.click()}
           disabled={isImporting}
           data-testid="btn-import"
-          className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/15 flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold transition-all active:scale-[0.98] disabled:opacity-50"
+          className="bg-ai-subtle text-ai hover:bg-ai/15 flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold transition-all active:scale-[0.98] disabled:opacity-50"
         >
           {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           {t('backup.import')}

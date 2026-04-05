@@ -88,7 +88,7 @@ export const AISuggestIngredientsPreview = ({
       <ModalBackdrop onClose={onClose} zIndex="z-70">
         <div className="bg-card relative w-full rounded-t-2xl p-6 shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-2xl">
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-color-ai text-base font-semibold">✨ {t('dish.aiSuggestTitle', { name: dishName })}</p>
+            <p className="text-ai text-base font-semibold">✨ {t('dish.aiSuggestTitle', { name: dishName })}</p>
             <button
               type="button"
               onClick={onClose}
@@ -118,7 +118,7 @@ export const AISuggestIngredientsPreview = ({
     <ModalBackdrop onClose={onClose} zIndex="z-70">
       <div className="bg-card relative flex h-[85dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:h-auto sm:max-h-[85dvh] sm:max-w-lg sm:rounded-2xl">
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
-          <p className="text-color-ai text-base font-semibold">✨ {t('dish.aiSuggestTitle', { name: dishName })}</p>
+          <p className="text-ai text-base font-semibold">✨ {t('dish.aiSuggestTitle', { name: dishName })}</p>
           <button
             type="button"
             onClick={onClose}
@@ -158,7 +158,7 @@ export const AISuggestIngredientsPreview = ({
                       </span>
                     ) : (
                       <span
-                        className="bg-color-energy-subtle text-color-energy-emphasis shrink-0 rounded-full px-2 py-0.5 text-xs font-medium"
+                        className="bg-energy-subtle text-energy-emphasis shrink-0 rounded-full px-2 py-0.5 text-xs font-medium"
                         data-testid={`ai-suggest-badge-new-${index}`}
                       >
                         {t('dish.aiSuggestNew')}

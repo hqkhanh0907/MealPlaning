@@ -125,9 +125,7 @@ function ProgressiveOverloadChip({
       onClick={() => onApply(suggestion)}
       className={cn(
         'rounded-full px-3 py-1.5 text-xs',
-        isPlateaued
-          ? 'bg-status-warning/10 text-status-warning hover:bg-status-warning/15'
-          : 'bg-status-info/10 text-status-info hover:bg-status-info/15',
+        isPlateaued ? 'bg-warning/10 text-warning hover:bg-warning/15' : 'bg-info/10 text-info hover:bg-info/15',
       )}
       data-testid="overload-chip"
     >

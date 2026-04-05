@@ -16,9 +16,9 @@ export interface QuickPreviewPanelProps {
 }
 
 const MEAL_SLOTS: { type: MealType; icon: LucideIcon; key: string; color: string }[] = [
-  { type: 'breakfast', icon: Sunrise, key: 'meal.breakfast', color: 'text-color-energy' },
-  { type: 'lunch', icon: Sun, key: 'meal.lunch', color: 'text-color-energy' },
-  { type: 'dinner', icon: Moon, key: 'meal.dinner', color: 'text-status-info' },
+  { type: 'breakfast', icon: Sunrise, key: 'meal.breakfast', color: 'text-energy' },
+  { type: 'lunch', icon: Sun, key: 'meal.lunch', color: 'text-energy' },
+  { type: 'dinner', icon: Moon, key: 'meal.dinner', color: 'text-info' },
 ];
 
 const DAILY_CALORIES = 2000;
@@ -164,7 +164,7 @@ const MealRow = React.memo(function MealRow({
               title={`${nutrition.calories.toFixed(0)} kcal`}
             >
               <div
-                className="bg-color-energy h-full rounded-full transition-all"
+                className="bg-energy h-full rounded-full transition-all"
                 style={{ width: `${calPercent}%` }}
                 data-testid={`cal-bar-${type}`}
               />

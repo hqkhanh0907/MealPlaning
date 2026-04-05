@@ -31,7 +31,7 @@ export const Summary = React.memo(function Summary({
     <div className="bg-card border-border-subtle rounded-2xl border p-4 shadow-xl shadow-black/5 sm:p-6 md:p-8 dark:shadow-black/10">
       <div className="mb-4 flex items-center justify-between sm:mb-6">
         <div className="flex items-center gap-3">
-          <div className="bg-color-ai-subtle text-color-ai rounded-xl p-2.5 sm:p-3">
+          <div className="bg-ai-subtle text-ai rounded-xl p-2.5 sm:p-3">
             <Activity className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div>
@@ -59,7 +59,7 @@ export const Summary = React.memo(function Summary({
         <div className="min-w-[200px] flex-1 space-y-2">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div className="text-foreground flex items-center gap-1.5 font-medium sm:gap-2">
-              <Flame className="text-color-energy h-4 w-4 sm:h-5 sm:w-5" />{' '}
+              <Flame className="text-energy h-4 w-4 sm:h-5 sm:w-5" />{' '}
               <span className="text-sm sm:text-base">{t('common.calories')}</span>
             </div>
             <div className="text-left sm:text-right">
@@ -71,7 +71,7 @@ export const Summary = React.memo(function Summary({
           </div>
           <progress
             data-testid="progress-calories"
-            className={`[&::-webkit-progress-bar]:bg-muted h-2.5 w-full appearance-none overflow-hidden rounded-full sm:h-3 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500 ${totalCalories > targetCalories ? '[&::-moz-progress-bar]:bg-destructive [&::-webkit-progress-value]:bg-destructive' : '[&::-moz-progress-bar]:bg-color-energy [&::-webkit-progress-value]:bg-color-energy'}`}
+            className={`[&::-webkit-progress-bar]:bg-muted h-2.5 w-full appearance-none overflow-hidden rounded-full sm:h-3 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:transition-all [&::-moz-progress-bar]:duration-500 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all [&::-webkit-progress-value]:duration-500 ${totalCalories > targetCalories ? '[&::-moz-progress-bar]:bg-destructive [&::-webkit-progress-value]:bg-destructive' : '[&::-moz-progress-bar]:bg-energy [&::-webkit-progress-value]:bg-energy'}`}
             aria-label={t('common.calories')}
             value={Math.round(totalCalories)}
             max={targetCalories}

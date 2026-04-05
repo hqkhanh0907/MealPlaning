@@ -179,13 +179,13 @@ export const MealsSubTab = React.memo(function MealsSubTab({
 
       {/* Inline tip */}
       {allEmpty && (
-        <div className="border-status-info/15 bg-status-info/10 text-status-info flex items-center gap-2 rounded-xl border p-3 text-sm">
+        <div className="border-info/15 bg-info/10 text-info flex items-center gap-2 rounded-xl border p-3 text-sm">
           <ClipboardList className="size-4 shrink-0" aria-hidden="true" />
           <p className="font-medium">{t('tips.noPlan')}</p>
         </div>
       )}
       {!allEmpty && !isComplete && (
-        <div className="border-status-warning/15 bg-status-warning/10 text-status-warning flex items-center gap-2 rounded-xl border p-3 text-sm">
+        <div className="border-warning/15 bg-warning/10 text-warning flex items-center gap-2 rounded-xl border p-3 text-sm">
           <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
           <p className="font-medium">
             {t('recommendation.missing')} {missingSlots}

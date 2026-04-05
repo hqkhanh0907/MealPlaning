@@ -60,13 +60,13 @@ describe('ProteinProgress', () => {
   it('shows amber bar when 50-79%', () => {
     render(<ProteinProgress current={60} target={100} />);
 
-    expect(screen.getByTestId('protein-bar').className).toContain('status-warning');
+    expect(screen.getByTestId('protein-bar').className).toContain('bg-warning');
   });
 
   it('shows amber bar at exactly 50%', () => {
     render(<ProteinProgress current={50} target={100} />);
 
-    expect(screen.getByTestId('protein-bar').className).toContain('status-warning');
+    expect(screen.getByTestId('protein-bar').className).toContain('bg-warning');
   });
 
   it('shows muted-foreground bar when <50%', () => {

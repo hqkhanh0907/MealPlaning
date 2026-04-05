@@ -41,31 +41,31 @@ interface ColorConfig {
 
 const COLOR_MAP: Record<InsightColor, ColorConfig> = {
   'dark-amber': {
-    bg: 'bg-status-warning/20',
-    border: 'border-status-warning',
-    icon: 'text-status-warning',
-    title: 'text-status-warning',
-    message: 'text-status-warning/80',
-    action: 'text-status-warning hover:bg-status-warning/10',
-    dismiss: 'text-status-warning/70 hover:text-status-warning',
+    bg: 'bg-warning/20',
+    border: 'border-warning',
+    icon: 'text-warning',
+    title: 'text-warning',
+    message: 'text-warning/80',
+    action: 'text-warning hover:bg-warning/10',
+    dismiss: 'text-warning/70 hover:text-warning',
   },
   amber: {
-    bg: 'bg-status-warning/10',
-    border: 'border-status-warning',
-    icon: 'text-status-warning',
-    title: 'text-status-warning',
-    message: 'text-status-warning/80',
-    action: 'text-status-warning hover:bg-status-warning/10',
-    dismiss: 'text-status-warning/70 hover:text-status-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning',
+    icon: 'text-warning',
+    title: 'text-warning',
+    message: 'text-warning/80',
+    action: 'text-warning hover:bg-warning/10',
+    dismiss: 'text-warning/70 hover:text-warning',
   },
   blue: {
-    bg: 'bg-status-info/10',
-    border: 'border-status-info',
-    icon: 'text-status-info',
-    title: 'text-status-info',
-    message: 'text-status-info/80',
-    action: 'text-status-info hover:bg-status-info/10',
-    dismiss: 'text-status-info/70 hover:text-status-info',
+    bg: 'bg-info/10',
+    border: 'border-info',
+    icon: 'text-info',
+    title: 'text-info',
+    message: 'text-info/80',
+    action: 'text-info hover:bg-info/10',
+    dismiss: 'text-info/70 hover:text-info',
   },
   green: {
     bg: 'bg-primary-subtle',
@@ -99,8 +99,8 @@ const ICON_PREFIX_MAP: Record<InsightType, string> = {
 };
 
 const ICON_COLOR_OVERRIDE: Partial<Record<InsightType, string>> = {
-  action: 'text-color-ai',
-  motivate: 'text-color-ai',
+  action: 'text-ai',
+  motivate: 'text-ai',
 };
 
 export const AiInsightCard = React.memo(function AiInsightCard() {

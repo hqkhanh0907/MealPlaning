@@ -90,7 +90,7 @@ const IngredientRow = ({ ing }: { ing: AnalyzedIngredient }) => {
       <td className="text-foreground-secondary px-3 py-2">
         {ing.amount} {ing.unit}
       </td>
-      <td className="text-color-energy px-3 py-2 font-medium">{Math.round(n.calories)}</td>
+      <td className="text-energy px-3 py-2 font-medium">{Math.round(n.calories)}</td>
       <td className="text-macro-protein px-3 py-2 font-medium">{Math.round(n.protein)}</td>
       <td className="text-macro-carbs px-3 py-2 font-medium">{Math.round(n.carbs)}</td>
       <td className="text-macro-fat px-3 py-2 font-medium">{Math.round(n.fat)}</td>
@@ -112,7 +112,7 @@ const IngredientCard = ({ ing }: { ing: AnalyzedIngredient }) => {
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="text-center">
           <p className="text-muted-foreground text-xs font-semibold uppercase">{t('common.calories')}</p>
-          <p className="text-color-energy text-sm font-semibold">{Math.round(n.calories)}</p>
+          <p className="text-energy text-sm font-semibold">{Math.round(n.calories)}</p>
         </div>
         <div className="text-center">
           <p className="text-muted-foreground text-xs font-semibold uppercase">{t('common.protein')}</p>
@@ -148,7 +148,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
           label={t('ai.estimateCalories')}
           value={result.totalNutrition?.calories}
           unit="kcal"
-          color="text-color-energy"
+          color="text-energy"
         />
         <NutritionCard
           label={t('ai.estimateProtein')}
@@ -197,7 +197,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
         </div>
       </div>
 
-      <div className="border-color-ai/20 bg-color-ai-subtle text-color-ai rounded-xl border p-4 text-sm">
+      <div className="border-ai/20 bg-ai-subtle text-ai rounded-xl border p-4 text-sm">
         <p className="mb-1 font-semibold">{t('ai.disclaimer')}</p>
         <p className="opacity-80">{t('ai.disclaimerText')}</p>
       </div>
@@ -205,7 +205,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
       {onOpenSaveModal && (
         <button
           onClick={onOpenSaveModal}
-          className="bg-color-ai hover:bg-color-ai/90 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-semibold text-white transition-all"
+          className="bg-ai hover:bg-ai/90 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-semibold text-white transition-all"
         >
           <Save className="h-5 w-5" aria-hidden="true" />
           {t('ai.saveToLibrary')}

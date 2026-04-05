@@ -329,8 +329,8 @@ describe('AppNavigation', () => {
     const onTabChange = vi.fn();
     render(<BottomNavBar activeTab="calendar" onTabChange={onTabChange} showAIBadge={true} />);
     const aiTab = screen.getByTestId('nav-ai-analysis');
-    // The badge is a small div with bg-color-rose
-    const badge = aiTab.querySelector('.bg-color-rose');
+    // The badge is a small div with bg-rose
+    const badge = aiTab.querySelector('.bg-rose');
     expect(badge).toBeTruthy();
   });
 });

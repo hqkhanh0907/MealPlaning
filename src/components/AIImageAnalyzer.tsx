@@ -77,14 +77,14 @@ export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerP
           </div>
           <ArrowRight className="text-muted-foreground h-4 w-4" aria-hidden="true" />
           <div className="flex items-center gap-1.5">
-            <span className="bg-color-ai-subtle text-color-ai flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
+            <span className="bg-ai-subtle text-ai flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
               2
             </span>
             <span>{t('ai.step2')}</span>
           </div>
           <ArrowRight className="text-muted-foreground h-4 w-4" aria-hidden="true" />
           <div className="flex items-center gap-1.5">
-            <span className="bg-color-energy-subtle text-color-energy flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
+            <span className="bg-energy-subtle text-energy flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
               3
             </span>
             <span>{t('ai.step3')}</span>
@@ -107,7 +107,7 @@ export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerP
               </>
             ) : (
               <>
-                <Sparkles className="text-color-ai h-5 w-5" aria-hidden="true" />
+                <Sparkles className="text-ai h-5 w-5" aria-hidden="true" />
                 {t('ai.analyzeDish')}
               </>
             )}

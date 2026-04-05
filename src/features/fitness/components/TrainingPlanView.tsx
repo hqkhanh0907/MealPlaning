@@ -361,7 +361,7 @@ function TrainingPlanViewInner({
 
           let colorClass = 'bg-muted text-muted-foreground';
           if (planDay) {
-            colorClass = isCardio ? 'bg-status-info/15 text-status-info' : 'bg-primary/10 text-primary-emphasis';
+            colorClass = isCardio ? 'bg-info/15 text-info' : 'bg-primary/10 text-primary-emphasis';
           }
 
           let ringClass: string;
@@ -464,7 +464,7 @@ function TrainingPlanViewInner({
               type="button"
               role="menuitem"
               onClick={() => handleConvertToRest(dayContextMenu.dayNum)}
-              className="focus-visible:ring-ring hover:bg-accent text-color-rose flex min-h-[44px] w-full items-center gap-2 px-4 py-2.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-ring hover:bg-accent text-rose flex min-h-[44px] w-full items-center gap-2 px-4 py-2.5 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               <Trash2 className="h-4 w-4" aria-hidden="true" />
               {t('fitness.plan.convertToRest')}
@@ -658,7 +658,7 @@ function TrainingPlanViewInner({
               data-testid="day-convert-rest-btn"
               type="button"
               onClick={() => handleConvertToRest(viewedDay)}
-              className="focus-visible:ring-ring border-color-rose/20 bg-color-rose/10 text-color-rose hover:bg-color-rose/15 flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-ring border-rose/20 bg-rose/10 text-rose hover:bg-rose/15 flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
             >
               <Moon className="h-4 w-4" aria-hidden="true" />
               {t('fitness.plan.convertToRest')}

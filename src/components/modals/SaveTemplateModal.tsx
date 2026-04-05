@@ -134,19 +134,19 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
       key: 'breakfast',
       label: t('calendar.morning'),
       items: preview.breakfast,
-      color: 'bg-status-warning/10 text-status-warning',
+      color: 'bg-warning/10 text-warning',
     },
     {
       key: 'lunch',
       label: t('calendar.afternoon'),
       items: preview.lunch,
-      color: 'bg-status-info/10 text-status-info',
+      color: 'bg-info/10 text-info',
     },
     {
       key: 'dinner',
       label: t('calendar.evening'),
       items: preview.dinner,
-      color: 'bg-color-ai-subtle text-color-ai',
+      color: 'bg-ai-subtle text-ai',
     },
   ];
 
@@ -215,7 +215,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
                     type="button"
                     data-testid={`remove-tag-${tag}`}
                     onClick={() => removeTag(tag)}
-                    className="hover:text-color-rose ml-0.5 transition-colors"
+                    className="hover:text-rose ml-0.5 transition-colors"
                     aria-label={`${t('common.delete')} ${tag}`}
                   >
                     <X className="h-3 w-3" />

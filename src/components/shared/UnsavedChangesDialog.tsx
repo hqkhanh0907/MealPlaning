@@ -38,7 +38,7 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
             <button
               onClick={onDiscard}
               data-testid="btn-discard-unsaved"
-              className="text-color-rose hover:bg-color-rose/10 min-h-12 w-full rounded-xl py-3 font-semibold transition-all active:scale-[0.98]"
+              className="text-rose hover:bg-rose/10 min-h-12 w-full rounded-xl py-3 font-semibold transition-all active:scale-[0.98]"
             >
               {t('unsavedChanges.discard')}
             </button>

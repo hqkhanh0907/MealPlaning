@@ -47,8 +47,8 @@ const getDayButtonClass = (
   }
   if (isSunday) {
     return variant === 'week'
-      ? 'bg-color-rose-subtle text-color-rose hover:bg-color-rose/10 active:bg-color-rose/20'
-      : 'bg-color-rose-subtle text-color-rose hover:bg-color-rose/10 border border-transparent hover:border-color-rose/30';
+      ? 'bg-rose-subtle text-rose hover:bg-rose/10 active:bg-rose/20'
+      : 'bg-rose-subtle text-rose hover:bg-rose/10 border border-transparent hover:border-rose/30';
   }
   return variant === 'week'
     ? 'bg-muted text-foreground hover:bg-accent active:bg-muted'
@@ -58,7 +58,7 @@ const getDayButtonClass = (
 // Helper to get week day label color class
 const getWeekDayLabelClass = (isSelected: boolean, isSunday: boolean): string => {
   if (isSelected) return 'text-white/80';
-  if (isSunday) return 'text-color-rose';
+  if (isSunday) return 'text-rose';
   return 'text-muted-foreground';
 };
 
@@ -293,14 +293,12 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
                 <span className="text-lg font-semibold">{date.getDate()}</span>
                 <div className="mt-0.5 flex gap-0.5">
                   <div
-                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-color-energy')}`}
+                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-energy')}`}
                   />
                   <div
                     className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-macro-carbs')}`}
                   />
-                  <div
-                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-color-ai')}`}
-                  />
+                  <div className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-ai')}`} />
                 </div>
               </button>
             );
@@ -315,7 +313,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             {weekDays.map((day, idx) => (
               <div
                 key={day}
-                className={`py-2 text-center text-xs font-semibold uppercase ${idx === 6 ? 'text-color-rose' : 'text-muted-foreground'}`}
+                className={`py-2 text-center text-xs font-semibold uppercase ${idx === 6 ? 'text-rose' : 'text-muted-foreground'}`}
               >
                 {day}
               </div>
@@ -364,14 +362,12 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
 
                   <div className="absolute bottom-1 flex gap-0.5 sm:bottom-2">
                     <div
-                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-color-energy')}`}
+                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-energy')}`}
                     />
                     <div
                       className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-macro-carbs')}`}
                     />
-                    <div
-                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-color-ai')}`}
-                    />
+                    <div className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-ai')}`} />
                   </div>
                 </button>
               );
@@ -397,13 +393,13 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             })()}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1">
-                <div className="bg-color-energy h-2 w-2 rounded-full"></div> {t('calendar.morning')}
+                <div className="bg-energy h-2 w-2 rounded-full"></div> {t('calendar.morning')}
               </div>
               <div className="flex items-center gap-1">
                 <div className="bg-macro-carbs h-2 w-2 rounded-full"></div> {t('calendar.afternoon')}
               </div>
               <div className="flex items-center gap-1">
-                <div className="bg-color-ai h-2 w-2 rounded-full"></div> {t('calendar.evening')}
+                <div className="bg-ai h-2 w-2 rounded-full"></div> {t('calendar.evening')}
               </div>
             </div>
           </div>
@@ -415,13 +411,13 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
           {!hintDismissed && <span>{t('calendar.swipeHint')}</span>}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
-              <div className="bg-color-energy h-2 w-2 rounded-full"></div> {t('calendar.morning')}
+              <div className="bg-energy h-2 w-2 rounded-full"></div> {t('calendar.morning')}
             </div>
             <div className="flex items-center gap-1">
               <div className="bg-macro-carbs h-2 w-2 rounded-full"></div> {t('calendar.afternoon')}
             </div>
             <div className="flex items-center gap-1">
-              <div className="bg-color-ai h-2 w-2 rounded-full"></div> {t('calendar.evening')}
+              <div className="bg-ai h-2 w-2 rounded-full"></div> {t('calendar.evening')}
             </div>
           </div>
         </div>

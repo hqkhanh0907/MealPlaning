@@ -12,7 +12,7 @@ export interface EnergyBalanceMiniProps {
 function getNetColorClass(net: number, target: number): string {
   const diff = net - target;
   if (Math.abs(diff) <= 100) return 'text-primary';
-  if (diff > 100) return 'text-color-energy';
+  if (diff > 100) return 'text-energy';
   return 'text-foreground-secondary';
 }
 
@@ -46,7 +46,7 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
       {/* Eaten */}
       <div className="flex flex-col items-center gap-0.5">
         <div className="flex items-center gap-1">
-          <UtensilsCrossed className="text-color-energy h-3.5 w-3.5" aria-hidden="true" />
+          <UtensilsCrossed className="text-energy h-3.5 w-3.5" aria-hidden="true" />
           <span data-testid="mini-eaten" className="text-foreground text-sm font-semibold tabular-nums">
             {Math.round(eaten)}
           </span>
@@ -59,7 +59,7 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
       {/* Burned */}
       <div className="flex flex-col items-center gap-0.5">
         <div className="flex items-center gap-1">
-          <Flame className="text-color-energy h-3.5 w-3.5" aria-hidden="true" />
+          <Flame className="text-energy h-3.5 w-3.5" aria-hidden="true" />
           <span data-testid="mini-burned" className="text-foreground text-sm font-semibold tabular-nums">
             {Math.round(burned)}
           </span>

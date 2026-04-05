@@ -221,7 +221,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
                   data-testid="btn-qa-ai-fill"
                   title={t('dish.quickAddAiFillButton')}
                   aria-label={t('dish.quickAddAiFillButton')}
-                  className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/10 rounded-lg p-1.5 transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                  className="bg-ai-subtle text-ai hover:bg-ai/10 rounded-lg p-1.5 transition-all disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                 </button>

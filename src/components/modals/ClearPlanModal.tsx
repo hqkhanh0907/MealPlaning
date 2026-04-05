@@ -132,7 +132,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 onClick={() => toggleMeal(type)}
                 className={`flex-1 rounded-xl border-2 px-3 py-2 text-sm font-semibold transition-all ${
                   selectedMeals.has(type)
-                    ? 'border-color-rose bg-color-rose-subtle text-color-rose-emphasis'
+                    ? 'border-rose bg-rose-subtle text-rose-emphasis'
                     : 'border-border text-muted-foreground'
                 }`}
               >
@@ -150,31 +150,29 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 className={`group flex min-h-16 w-full items-center gap-4 rounded-2xl border-2 p-4 transition-all ${
                   count === 0
                     ? 'border-border bg-muted cursor-not-allowed opacity-50'
-                    : 'border-border-subtle hover:border-color-rose hover:bg-color-rose-subtle active:scale-[0.98]'
+                    : 'border-border-subtle hover:border-rose hover:bg-rose-subtle active:scale-[0.98]'
                 }`}
               >
                 <div
                   className={`flex h-12 w-12 items-center justify-center rounded-xl transition-transform ${
-                    count > 0
-                      ? 'bg-color-rose/15 text-color-rose group-hover:scale-110'
-                      : 'bg-muted text-muted-foreground'
+                    count > 0 ? 'bg-rose/15 text-rose group-hover:scale-110' : 'bg-muted text-muted-foreground'
                   }`}
                 >
                   <CalendarDays className="h-6 w-6" />
                 </div>
                 <div className="flex-1 text-left">
                   <p
-                    className={`text-lg font-semibold ${count > 0 ? 'text-foreground group-hover:text-color-rose-emphasis' : 'text-muted-foreground'}`}
+                    className={`text-lg font-semibold ${count > 0 ? 'text-foreground group-hover:text-rose-emphasis' : 'text-muted-foreground'}`}
                   >
                     {label}
                   </p>
                   <p className="text-muted-foreground text-sm">{desc}</p>
                   {count > 0 && mealCount > 0 && (
-                    <p className="text-color-rose mt-0.5 text-xs">{t('clearPlan.totalMeals', { count: mealCount })}</p>
+                    <p className="text-rose mt-0.5 text-xs">{t('clearPlan.totalMeals', { count: mealCount })}</p>
                   )}
                 </div>
                 {count > 0 && (
-                  <span className="bg-color-rose/10 text-color-rose shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold">
+                  <span className="bg-rose/10 text-rose shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold">
                     {t('clearPlan.dayCount', { count })}
                   </span>
                 )}
@@ -194,7 +192,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                   {[...dates]
                     .sort((a, b) => a.localeCompare(b))
                     .map(d => (
-                      <span key={d} className="bg-color-rose/10 text-color-rose rounded-full px-2 py-0.5 text-xs">
+                      <span key={d} className="bg-rose/10 text-rose rounded-full px-2 py-0.5 text-xs">
                         {formatShortDate(d)}
                       </span>
                     ))}

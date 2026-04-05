@@ -137,17 +137,17 @@ export const EnergyDetailSheet = React.memo(function EnergyDetailSheet({ onClose
           <div className="bg-muted space-y-2 rounded-xl p-4">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground flex items-center gap-2">
-                <UtensilsCrossed className="text-color-energy h-4 w-4" />
+                <UtensilsCrossed className="text-energy h-4 w-4" />
                 {t('energyDetail.caloriesIn')}
               </span>
               <span className="text-foreground font-semibold">{Math.round(eaten)} kcal</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground flex items-center gap-2">
-                <Zap className="text-color-rose h-4 w-4" />
+                <Zap className="text-rose h-4 w-4" />
                 {t('energyDetail.caloriesOut')}
               </span>
-              <span className="text-status-info font-semibold">-{Math.round(caloriesOut)} kcal</span>
+              <span className="text-info font-semibold">-{Math.round(caloriesOut)} kcal</span>
             </div>
             <div className="border-border-subtle border-t pt-2">
               <div className="flex items-center justify-between text-sm">

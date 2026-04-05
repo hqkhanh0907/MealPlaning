@@ -94,9 +94,9 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
     if (total === 0) return null;
 
     return [
-      { key: 'b', label: t('calendar.morning'), items: breakfast, color: 'text-status-warning' },
-      { key: 'l', label: t('calendar.afternoon'), items: lunch, color: 'text-status-info' },
-      { key: 'd', label: t('calendar.evening'), items: dinner, color: 'text-color-ai' },
+      { key: 'b', label: t('calendar.morning'), items: breakfast, color: 'text-warning' },
+      { key: 'l', label: t('calendar.afternoon'), items: lunch, color: 'text-info' },
+      { key: 'd', label: t('calendar.evening'), items: dinner, color: 'text-ai' },
     ];
   }, [getDishInfo, sourcePlan, t]);
 
@@ -227,7 +227,7 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
                     <span className="text-primary-emphasis text-sm font-medium">{formatDate(date, dateLocale)}</span>
                     <button
                       onClick={() => handleRemoveDate(date)}
-                      className="text-muted-foreground hover:text-color-rose flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 transition-all"
+                      className="text-muted-foreground hover:text-rose flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 transition-all"
                       aria-label={t('copyPlan.remove')}
                     >
                       <Trash2 className="h-4 w-4" />

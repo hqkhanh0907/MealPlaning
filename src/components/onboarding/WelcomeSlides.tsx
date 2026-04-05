@@ -18,7 +18,7 @@ interface SlideContent {
 
 const SLIDES: SlideContent[] = [
   {
-    icon: <UtensilsCrossed className="text-color-energy h-12 w-12" aria-hidden="true" />,
+    icon: <UtensilsCrossed className="text-energy h-12 w-12" aria-hidden="true" />,
     titleKey: 'welcome.slide1Title',
     descKey: 'welcome.slide1Desc',
   },
@@ -28,7 +28,7 @@ const SLIDES: SlideContent[] = [
     descKey: 'welcome.slide2Desc',
   },
   {
-    icon: <Dumbbell className="text-status-info h-12 w-12" aria-hidden="true" />,
+    icon: <Dumbbell className="text-info h-12 w-12" aria-hidden="true" />,
     titleKey: 'welcome.slide3Title',
     descKey: 'welcome.slide3Desc',
   },

@@ -12,19 +12,19 @@ import { ModalBackdrop } from '../shared/ModalBackdrop';
 
 const MEAL_TYPE_COLORS: Record<MealType, { bg: string; border: string; text: string }> = {
   breakfast: {
-    bg: 'bg-color-energy-subtle',
-    border: 'border-status-warning/30',
-    text: 'text-status-warning',
+    bg: 'bg-energy-subtle',
+    border: 'border-warning/30',
+    text: 'text-warning',
   },
   lunch: {
     bg: 'bg-macro-carbs-subtle',
-    border: 'border-status-info/30',
-    text: 'text-status-info',
+    border: 'border-info/30',
+    text: 'text-info',
   },
   dinner: {
-    bg: 'bg-color-ai-subtle',
-    border: 'border-color-ai/30',
-    text: 'text-color-ai',
+    bg: 'bg-ai-subtle',
+    border: 'border-ai/30',
+    text: 'text-ai',
   },
 };
 
@@ -138,10 +138,10 @@ export const AISuggestionPreviewModal = ({
     <ModalBackdrop onClose={onClose}>
       <div className="bg-card relative flex h-[95dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:h-auto sm:max-h-[90dvh] sm:max-w-2xl sm:rounded-2xl">
         {/* Header */}
-        <div className="border-border-subtle bg-color-ai-subtle flex items-center justify-between border-b px-6 py-4">
+        <div className="border-border-subtle bg-ai-subtle flex items-center justify-between border-b px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="bg-color-ai-subtle flex h-10 w-10 items-center justify-center rounded-xl">
-              <Sparkles className="text-color-ai h-5 w-5" aria-hidden="true" />
+            <div className="bg-ai-subtle flex h-10 w-10 items-center justify-center rounded-xl">
+              <Sparkles className="text-ai h-5 w-5" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-foreground text-lg font-semibold">{t('ai.suggestionTitle')}</h3>
@@ -162,15 +162,15 @@ export const AISuggestionPreviewModal = ({
           {/* Loading State */}
           {isLoading && (
             <div className="flex flex-col items-center justify-center space-y-4 py-16">
-              <div className="bg-color-ai-subtle flex h-16 w-16 animate-pulse items-center justify-center rounded-full">
-                <Sparkles className="text-color-ai h-6 w-6" />
+              <div className="bg-ai-subtle flex h-16 w-16 animate-pulse items-center justify-center rounded-full">
+                <Sparkles className="text-ai h-6 w-6" />
               </div>
               <div className="text-center">
                 <p className="text-foreground text-lg font-semibold">{t('ai.suggestionLoading')}</p>
                 <p className="text-muted-foreground mt-1 text-sm">{t('ai.suggestionLoadingHint')}</p>
               </div>
               <div className="bg-muted h-2 w-48 overflow-hidden rounded-full">
-                <div className="animate-loading-bar bg-color-ai h-full w-3/5 rounded-full" />
+                <div className="animate-loading-bar bg-ai h-full w-3/5 rounded-full" />
               </div>
             </div>
           )}
@@ -187,7 +187,7 @@ export const AISuggestionPreviewModal = ({
               </div>
               <button
                 onClick={onRegenerate}
-                className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/15 flex items-center gap-2 rounded-xl px-6 py-2.5 font-medium transition-all"
+                className="bg-ai-subtle text-ai hover:bg-ai/15 flex items-center gap-2 rounded-xl px-6 py-2.5 font-medium transition-all"
               >
                 <RefreshCw className="h-4 w-4" />
                 {t('common.retry')}
@@ -198,8 +198,8 @@ export const AISuggestionPreviewModal = ({
           {/* Empty Suggestion State */}
           {!isLoading && !error && !hasAnySuggestion && (
             <div className="flex flex-col items-center justify-center space-y-4 py-12">
-              <div className="bg-status-warning/15 flex h-16 w-16 items-center justify-center rounded-full">
-                <ChefHat className="text-status-warning h-6 w-6" />
+              <div className="bg-warning/15 flex h-16 w-16 items-center justify-center rounded-full">
+                <ChefHat className="text-warning h-6 w-6" />
               </div>
               <div className="text-center">
                 <p className="text-foreground text-lg font-semibold">{t('ai.suggestionEmpty')}</p>
@@ -207,7 +207,7 @@ export const AISuggestionPreviewModal = ({
               </div>
               <button
                 onClick={onRegenerate}
-                className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/15 flex items-center gap-2 rounded-xl px-6 py-2.5 font-medium transition-all"
+                className="bg-ai-subtle text-ai hover:bg-ai/15 flex items-center gap-2 rounded-xl px-6 py-2.5 font-medium transition-all"
               >
                 <RefreshCw className="h-4 w-4" />
                 {t('ai.suggestionRegenerate')}
@@ -220,14 +220,14 @@ export const AISuggestionPreviewModal = ({
             <>
               {/* Reasoning Card */}
               {suggestion.reasoning && (
-                <div className="border-color-ai/30 bg-color-ai-subtle rounded-2xl border p-4">
+                <div className="border-ai/30 bg-ai-subtle rounded-2xl border p-4">
                   <div className="flex items-start gap-3">
-                    <div className="bg-color-ai-subtle mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
-                      <Sparkles className="text-color-ai h-4 w-4" aria-hidden="true" />
+                    <div className="bg-ai-subtle mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                      <Sparkles className="text-ai h-4 w-4" aria-hidden="true" />
                     </div>
                     <div>
-                      <p className="text-color-ai mb-1 text-sm font-semibold">{t('ai.reasoning')}</p>
-                      <p className="text-color-ai text-sm leading-relaxed">{suggestion.reasoning}</p>
+                      <p className="text-ai mb-1 text-sm font-semibold">{t('ai.reasoning')}</p>
+                      <p className="text-ai text-sm leading-relaxed">{suggestion.reasoning}</p>
                     </div>
                   </div>
                 </div>
@@ -308,9 +308,7 @@ export const AISuggestionPreviewModal = ({
                           <span className={`font-semibold ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>
                             {nutrition.calories} kcal
                           </span>
-                          <span
-                            className={`font-semibold ${isSelected ? 'text-status-info' : 'text-muted-foreground'}`}
-                          >
+                          <span className={`font-semibold ${isSelected ? 'text-info' : 'text-muted-foreground'}`}>
                             {nutrition.protein}g protein
                           </span>
                         </div>
@@ -362,14 +360,14 @@ export const AISuggestionPreviewModal = ({
                     <div className="mb-1 flex justify-between text-xs">
                       <span className="text-muted-foreground">{t('common.protein')}</span>
                       <span
-                        className={`font-medium ${nutritionSummary.protein >= targetProtein ? 'text-primary' : 'text-status-warning'}`}
+                        className={`font-medium ${nutritionSummary.protein >= targetProtein ? 'text-primary' : 'text-warning'}`}
                       >
                         {targetProtein > 0 ? Math.round((nutritionSummary.protein / targetProtein) * 100) : 0}%
                       </span>
                     </div>
                     <div className="bg-muted h-2 overflow-hidden rounded-full">
                       <div
-                        className={`h-full rounded-full transition-all ${nutritionSummary.protein >= targetProtein ? 'bg-primary' : 'bg-status-warning'}`}
+                        className={`h-full rounded-full transition-all ${nutritionSummary.protein >= targetProtein ? 'bg-primary' : 'bg-warning'}`}
                         style={{
                           width: `${targetProtein > 0 ? Math.min(100, (nutritionSummary.protein / targetProtein) * 100) : 0}%`,
                         }}
@@ -395,7 +393,7 @@ export const AISuggestionPreviewModal = ({
               <div className="flex items-center gap-2">
                 <button
                   onClick={onRegenerate}
-                  className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/15 flex items-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all"
+                  className="bg-ai-subtle text-ai hover:bg-ai/15 flex items-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all"
                 >
                   <RefreshCw className="h-4 w-4" />
                   <span>{t('ai.suggestionRegenerate')}</span>

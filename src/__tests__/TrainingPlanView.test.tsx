@@ -426,7 +426,7 @@ describe('TrainingPlanView', () => {
     const pushDay = screen.getByTestId('day-pill-1');
     expect(pushDay.className).toContain('bg-primary/10');
     const cardioDay = screen.getByTestId('day-pill-6');
-    expect(cardioDay.className).toContain('bg-status-info');
+    expect(cardioDay.className).toContain('bg-info');
   });
 
   it('rest days show gray color', () => {

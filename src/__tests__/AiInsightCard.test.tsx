@@ -138,8 +138,8 @@ describe('AiInsightCard', () => {
       });
       render(<AiInsightCard />);
       const card = screen.getByTestId('ai-insight-card');
-      expect(card.className).toContain('border-status-warning');
-      expect(card.className).toContain('bg-status-warning/20');
+      expect(card.className).toContain('border-warning');
+      expect(card.className).toContain('bg-warning/20');
     });
 
     it('does not show dismiss button (P1 not dismissable)', () => {
@@ -181,8 +181,8 @@ describe('AiInsightCard', () => {
       });
       render(<AiInsightCard />);
       const card = screen.getByTestId('ai-insight-card');
-      expect(card.className).toContain('border-status-warning');
-      expect(card.className).toContain('bg-status-warning/10');
+      expect(card.className).toContain('border-warning');
+      expect(card.className).toContain('bg-warning/10');
     });
 
     it('shows both action and dismiss buttons', () => {
@@ -229,8 +229,8 @@ describe('AiInsightCard', () => {
       });
       render(<AiInsightCard />);
       const card = screen.getByTestId('ai-insight-card');
-      expect(card.className).toContain('border-status-info');
-      expect(card.className).toContain('bg-status-info/10');
+      expect(card.className).toContain('border-info');
+      expect(card.className).toContain('bg-info/10');
     });
   });
 
@@ -352,9 +352,9 @@ describe('AiInsightCard', () => {
       color: Insight['color'];
       borderClass: string;
     }> = [
-      { color: 'dark-amber', borderClass: 'border-status-warning' },
-      { color: 'amber', borderClass: 'border-status-warning' },
-      { color: 'blue', borderClass: 'border-status-info' },
+      { color: 'dark-amber', borderClass: 'border-warning' },
+      { color: 'amber', borderClass: 'border-warning' },
+      { color: 'blue', borderClass: 'border-info' },
       { color: 'green', borderClass: 'border-primary' },
       { color: 'gray', borderClass: 'border-border' },
     ];

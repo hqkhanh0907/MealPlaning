@@ -1291,7 +1291,7 @@ describe('DishEditModal', () => {
   it('sets and clears rating via star clicks', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('star-3'));
-    expect(screen.getByTestId('star-3').className).toContain('text-color-energy');
+    expect(screen.getByTestId('star-3').className).toContain('text-energy');
     fireEvent.click(screen.getByTestId('star-3'));
     expect(screen.getByTestId('star-3').className).toContain('text-muted-foreground');
   });
@@ -1299,7 +1299,7 @@ describe('DishEditModal', () => {
   it('pre-populates rating and notes from existing dish', () => {
     const ratedDish = { ...existingDish, rating: 4, notes: 'Delicious' };
     render(<DishEditModal editingItem={ratedDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
-    expect(screen.getByTestId('star-4').className).toContain('text-color-energy');
+    expect(screen.getByTestId('star-4').className).toContain('text-energy');
     expect(screen.getByTestId('star-5').className).toContain('text-muted-foreground');
     expect(screen.getByTestId('dish-notes')).toHaveValue('Delicious');
   });

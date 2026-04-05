@@ -35,7 +35,7 @@ function TrainingProfileDetailPageInner({ onBack }: Readonly<{ onBack: () => voi
   return (
     <SettingsDetailLayout
       title={t('settings.trainingProfileSection')}
-      icon={<Dumbbell className="text-status-info h-5 w-5" />}
+      icon={<Dumbbell className="text-info h-5 w-5" />}
       isEditing={isEditing}
       hasChanges={isEditing}
       isSaving={isSaving}

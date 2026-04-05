@@ -31,10 +31,10 @@ const VARIANT_STYLES: Record<
     btnShadow: 'shadow-destructive/20',
   },
   warning: {
-    iconBg: 'bg-status-warning/10',
-    iconText: 'text-status-warning',
-    btnBg: 'bg-status-warning',
-    btnHover: 'hover:bg-status-warning/90',
+    iconBg: 'bg-warning/10',
+    iconText: 'text-warning',
+    btnBg: 'bg-warning',
+    btnHover: 'hover:bg-warning/90',
     btnShadow: 'shadow-status-warning/20',
   },
 };

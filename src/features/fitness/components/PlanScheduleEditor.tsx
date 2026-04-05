@@ -228,7 +228,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
               onClick={handleAutoAssign}
               className="focus-visible:ring-ring bg-muted text-foreground hover:bg-accent flex touch-manipulation items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none"
             >
-              <Wand2 className="text-color-ai h-3.5 w-3.5" />
+              <Wand2 className="text-ai h-3.5 w-3.5" />
               {t('fitness.scheduleEditor.autoAssign')}
             </button>
             <button

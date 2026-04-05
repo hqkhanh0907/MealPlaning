@@ -24,8 +24,7 @@ const buttonVariants = cva(
         warning:
           'bg-amber-500 text-amber-950 shadow-xs hover:bg-amber-600 dark:bg-amber-400 dark:text-background dark:hover:bg-amber-500',
         ai: 'bg-indigo-500 text-white shadow-xs hover:bg-indigo-600 dark:bg-indigo-400 dark:text-background dark:hover:bg-indigo-500',
-        energy:
-          'bg-color-energy/20 text-color-energy hover:bg-color-energy/30 dark:bg-color-energy/30 dark:hover:bg-color-energy/40',
+        energy: 'bg-energy/20 text-energy hover:bg-energy/30 dark:bg-energy/30 dark:hover:bg-energy/40',
       },
       size: {
         default: 'h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',

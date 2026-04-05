@@ -379,10 +379,10 @@ export const DishEditModal = ({
                 />
                 {aiSuggestLoading ? (
                   <div
-                    className="bg-color-ai-subtle flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl"
+                    className="bg-ai-subtle flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl"
                     data-testid="ai-suggest-loading"
                   >
-                    <Loader2 className="text-color-ai h-5 w-5 animate-spin" />
+                    <Loader2 className="text-ai h-5 w-5 animate-spin" />
                   </div>
                 ) : (
                   <button
@@ -392,7 +392,7 @@ export const DishEditModal = ({
                     title={t('dish.aiSuggestButton')}
                     aria-label={t('dish.aiSuggestButton')}
                     data-testid="btn-ai-suggest"
-                    className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/10 flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                    className="bg-ai-subtle text-ai hover:bg-ai/10 flex h-10 min-h-11 w-10 min-w-11 shrink-0 items-center justify-center rounded-xl transition-all disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Sparkles className="h-5 w-5" />
                   </button>
@@ -413,7 +413,7 @@ export const DishEditModal = ({
                   {aiSuggestError}
                 </p>
               )}
-              {aiSuggestLoading && <p className="text-color-ai mt-1 text-xs">{t('dish.aiSuggestLoading')}</p>}
+              {aiSuggestLoading && <p className="text-ai mt-1 text-xs">{t('dish.aiSuggestLoading')}</p>}
             </div>
             <div>
               <p
@@ -455,7 +455,7 @@ export const DishEditModal = ({
                       type="button"
                       data-testid={`star-${star}`}
                       onClick={() => setValue('rating', watchedRating === star ? 0 : star, { shouldDirty: true })}
-                      className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 text-2xl transition-all ${star <= watchedRating ? 'text-color-energy' : 'text-muted-foreground hover:text-color-energy/70'}`}
+                      className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 text-2xl transition-all ${star <= watchedRating ? 'text-energy' : 'text-muted-foreground hover:text-energy/70'}`}
                       aria-label={`${star} ${t('dish.stars')}`}
                     >
                       ★
@@ -545,10 +545,10 @@ export const DishEditModal = ({
                           <>
                             <div
                               data-testid="recently-used-header"
-                              className="bg-color-energy-subtle/50 flex items-center gap-1.5 px-4 py-2"
+                              className="bg-energy-subtle/50 flex items-center gap-1.5 px-4 py-2"
                             >
-                              <Clock className="text-color-energy h-3 w-3" aria-hidden="true" />
-                              <span className="text-color-energy-emphasis text-xs font-semibold tracking-wider uppercase">
+                              <Clock className="text-energy h-3 w-3" aria-hidden="true" />
+                              <span className="text-energy-emphasis text-xs font-semibold tracking-wider uppercase">
                                 {t('dish.recentlyUsed')}
                               </span>
                             </div>

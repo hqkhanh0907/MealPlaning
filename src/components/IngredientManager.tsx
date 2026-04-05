@@ -194,11 +194,11 @@ export const IngredientManager = ({
                   <span className="text-macro-protein text-xs font-semibold uppercase">{t('common.protein')}</span>
                   <span className="text-macro-protein text-sm font-semibold">{ing.proteinPer100}g</span>
                 </div>
-                <div className="bg-color-energy-subtle flex items-center justify-between rounded-lg p-2">
+                <div className="bg-energy-subtle flex items-center justify-between rounded-lg p-2">
                   <span className="text-macro-carbs text-xs font-semibold uppercase">{t('common.carbs')}</span>
                   <span className="text-macro-carbs text-sm font-semibold">{ing.carbsPer100}g</span>
                 </div>
-                <div className="bg-color-rose-subtle flex items-center justify-between rounded-lg p-2">
+                <div className="bg-rose-subtle flex items-center justify-between rounded-lg p-2">
                   <span className="text-macro-fat text-xs font-semibold uppercase">{t('common.fat')}</span>
                   <span className="text-macro-fat text-sm font-semibold">{ing.fatPer100}g</span>
                 </div>
@@ -414,14 +414,14 @@ export const IngredientManager = ({
                     <span className="text-macro-protein text-xs font-medium">g</span>
                   </p>
                 </div>
-                <div className="bg-color-energy-subtle rounded-xl p-3.5">
+                <div className="bg-energy-subtle rounded-xl p-3.5">
                   <p className="text-macro-carbs mb-1 text-xs font-semibold uppercase">{t('common.carbs')}</p>
                   <p className="text-macro-carbs text-xl font-semibold">
                     {ing.carbsPer100}
                     <span className="text-macro-carbs text-xs font-medium">g</span>
                   </p>
                 </div>
-                <div className="bg-color-rose-subtle rounded-xl p-3.5">
+                <div className="bg-rose-subtle rounded-xl p-3.5">
                   <p className="text-macro-fat mb-1 text-xs font-semibold uppercase">{t('common.fat')}</p>
                   <p className="text-macro-fat text-xl font-semibold">
                     {ing.fatPer100}

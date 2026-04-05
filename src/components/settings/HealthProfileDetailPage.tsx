@@ -109,7 +109,7 @@ function HealthProfileViewMode() {
             </div>
             <div className="bg-card rounded-lg p-4">
               <p className="text-muted-foreground">{t('common.fat')}</p>
-              <p className="text-color-energy font-semibold">{macros.fatG}g</p>
+              <p className="text-energy font-semibold">{macros.fatG}g</p>
             </div>
             <div className="bg-card rounded-lg p-4">
               <p className="text-muted-foreground">{t('common.carbs')}</p>
@@ -149,7 +149,7 @@ function HealthProfileDetailPageInner({ onBack }: Readonly<{ onBack: () => void 
   return (
     <SettingsDetailLayout
       title={t('settings.healthProfileSection')}
-      icon={<Heart className="text-color-rose h-5 w-5" />}
+      icon={<Heart className="text-rose h-5 w-5" />}
       isEditing={isEditing}
       hasChanges={isEditing}
       isSaving={isSaving}

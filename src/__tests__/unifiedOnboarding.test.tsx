@@ -2199,7 +2199,7 @@ describe('SleepHoursStep', () => {
     );
     const btn6 = screen.getByText('6');
     fireEvent.click(btn6);
-    expect(btn6.className).toContain('border-status-warning');
+    expect(btn6.className).toContain('border-warning');
   });
 
   it('shows emerald styling for adequate sleep selection', () => {

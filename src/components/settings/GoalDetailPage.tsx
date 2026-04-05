@@ -14,9 +14,9 @@ const GOAL_ICON: Record<string, typeof TrendingDown> = {
 };
 
 const GOAL_COLOR: Record<string, string> = {
-  cut: 'text-status-info',
+  cut: 'text-info',
   maintain: 'text-primary',
-  bulk: 'text-color-energy',
+  bulk: 'text-energy',
 };
 
 function GoalViewMode() {
@@ -33,7 +33,7 @@ function GoalViewMode() {
         label: t('goal.rateOfChange'),
         value: t(`goal.${activeGoal.rateOfChange}`),
         icon: Zap,
-        color: 'text-status-warning',
+        color: 'text-warning',
       });
     }
     if (activeGoal.targetWeightKg) {
@@ -56,7 +56,7 @@ function GoalViewMode() {
       label: t('goal.calorieOffset'),
       value: calorieLabel,
       icon: Flame,
-      color: 'text-color-energy',
+      color: 'text-energy',
     });
     return result;
   }, [activeGoal, t]);
