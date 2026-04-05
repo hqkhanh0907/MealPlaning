@@ -536,6 +536,7 @@
     "notConfiguredDesc": "Bạn cần hoàn thành thiết lập tập luyện trước",
     "edit": "Chỉnh sửa",
     "cancel": "Hủy",
+    "saving": "Đang lưu...",
     "back": "Quay lại",
     "goalNotSet": "Chưa thiết lập mục tiêu",
     "trainingProfileEditHint": "Để thay đổi hồ sơ tập luyện, vui lòng quay lại tab Tập luyện và chạy lại thiết lập ban đầu.",
@@ -1752,5 +1753,14 @@
       "nameRequired": "Tên mẫu không được bỏ trống",
       "nameMaxLength": "Tên mẫu không được vượt quá {{max}} ký tự"
     }
+  },
+  "disabledReason": {
+    "noChanges": "Chưa có thay đổi nào để lưu",
+    "selectDifferentSplit": "Vui lòng chọn kiểu split khác để áp dụng",
+    "enterTemplateName": "Nhập tên cho template trước khi lưu",
+    "invalidWeight": "Nhập cân nặng hợp lệ (30–300 kg)",
+    "selectIngredient": "Chọn ít nhất một thành phần để xác nhận",
+    "selectMeal": "Chọn ít nhất một bữa ăn để áp dụng",
+    "enterNameAndUnit": "Nhập tên và chọn đơn vị trước khi tra cứu AI"
   }
 }

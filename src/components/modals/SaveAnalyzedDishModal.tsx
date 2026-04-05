@@ -147,7 +147,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
           <button
             onClick={onClose}
             aria-label={t('common.closeDialog')}
-            className="dark:text-muted-foreground text-muted-foreground hover:bg-accent rounded-full p-2"
+            className="dark:text-muted-foreground text-muted-foreground hover:bg-accent rounded-full p-2 transition-colors"
           >
             <X className="h-5 w-5" />
           </button>

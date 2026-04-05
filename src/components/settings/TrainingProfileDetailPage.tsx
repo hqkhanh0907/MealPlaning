@@ -10,14 +10,20 @@ import { SettingsDetailLayout } from './SettingsDetailLayout';
 function TrainingProfileDetailPageInner({ onBack }: Readonly<{ onBack: () => void }>) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const trainingProfile = useFitnessStore(s => s.trainingProfile);
   const saveRef = useRef<(() => Promise<boolean>) | null>(null);
 
   const handleSave = async () => {
     if (saveRef.current) {
-      const success = await saveRef.current();
-      if (success) {
-        setIsEditing(false);
+      setIsSaving(true);
+      try {
+        const success = await saveRef.current();
+        if (success) {
+          setIsEditing(false);
+        }
+      } finally {
+        setIsSaving(false);
       }
     }
   };
@@ -32,6 +38,7 @@ function TrainingProfileDetailPageInner({ onBack }: Readonly<{ onBack: () => voi
       icon={<Dumbbell className="text-info h-5 w-5" />}
       isEditing={isEditing}
       hasChanges={isEditing}
+      isSaving={isSaving}
       onBack={onBack}
       onEdit={() => setIsEditing(true)}
       onSave={() => void handleSave()}

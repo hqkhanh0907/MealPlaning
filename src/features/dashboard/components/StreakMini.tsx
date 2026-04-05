@@ -59,7 +59,7 @@ function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactEleme
         aria-label={t('dashboard.streakMini.a11yEmpty')}
         onClick={handleTap}
         onKeyDown={handleKeyDown}
-        className="focus:ring-ring bg-muted flex items-center gap-3 rounded-2xl p-3 focus:ring-2 focus:ring-offset-2 focus:outline-none"
+        className="focus:ring-ring bg-muted flex items-center gap-3 rounded-2xl p-3 transition-transform focus:ring-2 focus:ring-offset-2 focus:outline-none active:scale-[0.98]"
       >
         <Flame className="text-muted-foreground h-5 w-5" aria-hidden={true} />
         <div>

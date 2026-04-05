@@ -18,6 +18,7 @@ import { suggestIngredientInfo } from '../../services/geminiService';
 import { Ingredient, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { logger } from '../../utils/logger';
+import { DisabledReason } from '../shared/DisabledReason';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { UnitSelector } from '../shared/UnitSelector';
 import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
@@ -79,6 +80,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
 
   const watchName = watch('name.vi');
   const watchUnit = watch('unit');
+  const aiSearchMissingInput = !watchName || !getLocalizedField(watchUnit, lang);
 
   const buildIngredient = useCallback(
     (data: IngredientEditFormData): Ingredient => ({
@@ -182,7 +184,8 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                 <button
                   type="button"
                   onClick={handleAISearch}
-                  disabled={!watchName || !getLocalizedField(watchUnit, lang) || isSearchingAI}
+                  disabled={aiSearchMissingInput || isSearchingAI}
+                  aria-describedby={aiSearchMissingInput && !isSearchingAI ? 'ai-search-disabled-reason' : undefined}
                   data-testid="btn-ai-search"
                   className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/10 rounded-xl px-3 py-2 transition-all disabled:cursor-not-allowed disabled:opacity-50"
                   aria-label={
@@ -192,6 +195,11 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                   {isSearchingAI ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
                 </button>
               </div>
+              <DisabledReason
+                id="ai-search-disabled-reason"
+                reason={t('disabledReason.enterNameAndUnit')}
+                show={aiSearchMissingInput && !isSearchingAI}
+              />
               {errors.name?.vi && (
                 <p data-testid="error-ing-name" className="text-destructive mt-1 text-xs" role="alert">
                   {errors.name.vi.message}

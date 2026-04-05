@@ -21,7 +21,7 @@ export const PRToast = React.memo(function PRToast({ pr, onDismiss }: PRToastPro
     <button
       type="button"
       data-testid="pr-toast"
-      className="from-color-energy to-color-energy/80 fixed inset-x-4 top-4 z-50 w-auto cursor-pointer appearance-none rounded-xl border-none bg-gradient-to-r p-4 text-left shadow-lg"
+      className="from-color-energy to-color-energy/80 fixed inset-x-4 top-4 z-50 w-auto cursor-pointer appearance-none rounded-xl border-none bg-gradient-to-r p-4 text-left shadow-lg transition-transform active:scale-[0.98]"
       onClick={onDismiss}
       aria-label={t('fitness.gamification.newPR')}
     >

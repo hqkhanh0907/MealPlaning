@@ -7,6 +7,7 @@ import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { Dish, Ingredient, MealPlanSuggestion, MealType, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { calculateDishesNutrition } from '../../utils/nutrition';
+import { DisabledReason } from '../shared/DisabledReason';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 
 const MEAL_TYPE_COLORS: Record<MealType, { bg: string; border: string; text: string }> = {
@@ -383,30 +384,39 @@ export const AISuggestionPreviewModal = ({
 
         {/* Footer */}
         {!isLoading && !error && hasAnySuggestion && (
-          <div className="border-border-subtle bg-muted flex items-center justify-between gap-3 border-t px-6 py-4">
-            <button
-              onClick={onClose}
-              className="text-foreground-secondary hover:bg-accent rounded-xl px-5 py-2.5 font-medium transition-all"
-            >
-              {t('common.cancel')}
-            </button>
-            <div className="flex items-center gap-2">
+          <div className="border-border-subtle bg-muted flex flex-col gap-2 border-t px-6 py-4">
+            <div className="flex items-center justify-between gap-3">
               <button
-                onClick={onRegenerate}
-                className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/15 flex items-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all"
+                onClick={onClose}
+                className="text-foreground-secondary hover:bg-accent rounded-xl px-5 py-2.5 font-medium transition-all"
               >
-                <RefreshCw className="h-4 w-4" />
-                <span>{t('ai.suggestionRegenerate')}</span>
+                {t('common.cancel')}
               </button>
-              <button
-                onClick={() => onApply(selectedMeals)}
-                disabled={!hasAnySelected}
-                className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex items-center gap-2 rounded-xl px-6 py-2.5 font-semibold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-                {t('common.apply')}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={onRegenerate}
+                  className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/15 flex items-center gap-2 rounded-xl px-4 py-2.5 font-medium transition-all"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  <span>{t('ai.suggestionRegenerate')}</span>
+                </button>
+                <button
+                  onClick={() => onApply(selectedMeals)}
+                  disabled={!hasAnySelected}
+                  aria-describedby={!hasAnySelected ? 'ai-apply-disabled-reason' : undefined}
+                  className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex items-center gap-2 rounded-xl px-6 py-2.5 font-semibold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                  {t('common.apply')}
+                </button>
+              </div>
             </div>
+            <DisabledReason
+              id="ai-apply-disabled-reason"
+              reason={t('disabledReason.selectMeal')}
+              show={!hasAnySelected}
+              className="text-center"
+            />
           </div>
         )}
       </div>

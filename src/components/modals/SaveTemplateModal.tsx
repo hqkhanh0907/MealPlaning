@@ -215,7 +215,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
                     type="button"
                     data-testid={`remove-tag-${tag}`}
                     onClick={() => removeTag(tag)}
-                    className="hover:text-color-rose ml-0.5"
+                    className="hover:text-color-rose ml-0.5 transition-colors"
                     aria-label={`${t('common.delete')} ${tag}`}
                   >
                     <X className="h-3 w-3" />

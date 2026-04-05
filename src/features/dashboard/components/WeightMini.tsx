@@ -160,7 +160,7 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
         aria-label={t('dashboard.weightMini.a11yEmpty')}
         onClick={handleTap}
         onKeyDown={handleKeyDown}
-        className="bg-muted flex items-center gap-3 rounded-2xl p-3"
+        className="bg-muted flex items-center gap-3 rounded-2xl p-3 transition-transform active:scale-[0.98]"
       >
         <Scale className="text-muted-foreground h-5 w-5" aria-hidden={true} />
         <div>

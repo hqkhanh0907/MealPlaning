@@ -2,6 +2,7 @@ import { AlertCircle, ArrowLeft, CalendarDays, Dumbbell, RotateCcw, Save, Wand2 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { DisabledReason } from '../../../components/shared/DisabledReason';
 import { UnsavedChangesDialog } from '../../../components/shared/UnsavedChangesDialog';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useFitnessStore } from '../../../store/fitnessStore';
@@ -268,6 +269,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
           type="button"
           data-testid="save-button"
           disabled={!hasChanges}
+          aria-describedby={!hasChanges ? 'schedule-save-disabled-reason' : undefined}
           onClick={handleSave}
           className={[
             'flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold shadow-md',
@@ -283,6 +285,12 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
           <Save className="h-4 w-4" />
           {t('fitness.scheduleEditor.save')}
         </button>
+        <DisabledReason
+          id="schedule-save-disabled-reason"
+          reason={t('disabledReason.noChanges')}
+          show={!hasChanges}
+          className="text-center"
+        />
       </div>
 
       {/* Day Assignment Sheet */}

@@ -1,12 +1,15 @@
-import { ChevronLeft, Pencil } from 'lucide-react';
+import { ChevronLeft, Loader2, Pencil } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { DisabledReason } from '@/components/shared/DisabledReason';
 
 interface SettingsDetailLayoutProps {
   title: string;
   icon: React.ReactNode;
   isEditing: boolean;
   hasChanges: boolean;
+  isSaving?: boolean;
   onBack: () => void;
   onEdit: () => void;
   onSave: () => void;
@@ -19,6 +22,7 @@ export function SettingsDetailLayout({
   icon,
   isEditing,
   hasChanges,
+  isSaving = false,
   onBack,
   onEdit,
   onSave,
@@ -84,16 +88,24 @@ export function SettingsDetailLayout({
               type="button"
               onClick={onSave}
               data-testid="settings-detail-save"
-              disabled={!hasChanges}
-              className={`flex-1 rounded-xl py-3 text-sm font-semibold text-white transition-all ${
-                hasChanges
+              disabled={!hasChanges || isSaving}
+              aria-describedby={!hasChanges ? 'settings-save-disabled-reason' : undefined}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition-all ${
+                hasChanges && !isSaving
                   ? 'bg-primary hover:bg-primary active:scale-[0.98]'
                   : 'bg-muted-foreground/30 cursor-not-allowed'
               }`}
             >
-              {t('healthProfile.save')}
+              {isSaving && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+              {isSaving ? t('settings.saving') : t('healthProfile.save')}
             </button>
           </div>
+          <DisabledReason
+            id="settings-save-disabled-reason"
+            reason={t('disabledReason.noChanges')}
+            show={!hasChanges}
+            className="text-center"
+          />
         </div>
       )}
     </div>

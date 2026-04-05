@@ -43,7 +43,7 @@ export const MilestonesList = React.memo(function MilestonesList() {
         data-testid="milestones-toggle"
         onClick={() => setIsExpanded(v => !v)}
         aria-expanded={isExpanded}
-        className="bg-card text-foreground flex w-full items-center justify-between rounded-lg px-4 py-3 text-left font-semibold shadow-sm"
+        className="bg-card text-foreground flex w-full items-center justify-between rounded-lg px-4 py-3 text-left font-semibold shadow-sm transition-all active:scale-[0.98]"
       >
         <span>{t('fitness.gamification.milestones')}</span>
         <ChevronDown

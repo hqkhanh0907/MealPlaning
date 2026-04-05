@@ -50,7 +50,7 @@ export const AdjustmentHistory = React.memo(function AdjustmentHistory({
         type="button"
         onClick={toggleCollapsed}
         aria-expanded={!collapsed}
-        className="bg-muted hover:bg-accent flex w-full items-center justify-between px-4 py-3 transition-colors"
+        className="bg-muted hover:bg-accent flex w-full items-center justify-between px-4 py-3 transition-all active:scale-[0.98]"
       >
         <span className="text-foreground text-sm font-semibold">{t('adjustmentHistory.title')}</span>
         {collapsed ? (

@@ -67,7 +67,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           </div>
           {this.state.error && (
             <details className="mt-6 w-full max-w-md text-left">
-              <summary className="hover:text-muted-foreground text-muted-foreground cursor-pointer text-xs">
+              <summary className="text-muted-foreground hover:text-foreground-secondary cursor-pointer text-xs transition-colors">
                 {i18n.t('errorBoundary.errorDetails')}
               </summary>
               <pre className="border-border text-foreground-secondary bg-muted mt-2 overflow-x-auto rounded-xl border p-3 text-xs">

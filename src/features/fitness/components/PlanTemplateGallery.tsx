@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 
 import { ConfirmationModal } from '@/components/modals/ConfirmationModal';
+import { DisabledReason } from '@/components/shared/DisabledReason';
 import { ModalBackdrop } from '@/components/shared/ModalBackdrop';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNotification } from '@/contexts/NotificationContext';
@@ -365,12 +366,19 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
                 data-testid="save-template-confirm"
                 onClick={handleConfirmSave}
                 disabled={!saveName.trim() || isSaving}
+                aria-describedby={!saveName.trim() && !isSaving ? 'save-template-disabled-reason' : undefined}
                 className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring flex min-h-[44px] flex-1 touch-manipulation items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
               >
                 {isSaving && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
                 {t('fitness.templateGallery.confirm')}
               </button>
             </div>
+            <DisabledReason
+              id="save-template-disabled-reason"
+              reason={t('disabledReason.enterTemplateName')}
+              show={!saveName.trim() && !isSaving}
+              className="text-center"
+            />
           </div>
         </ModalBackdrop>
       )}

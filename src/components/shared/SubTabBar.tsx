@@ -32,7 +32,7 @@ export const SubTabBar = React.memo(function SubTabBar({
             aria-controls={`tabpanel-${id}`}
             onClick={() => onTabChange(id)}
             data-testid={`subtab-${id}`}
-            className={`flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all md:flex-initial ${
+            className={`flex min-h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all active:scale-[0.98] md:flex-initial ${
               isActive ? 'text-primary-emphasis bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'
             }`}
           >

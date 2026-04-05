@@ -101,13 +101,19 @@ function GoalDetailPageInner({ onBack }: Readonly<{ onBack: () => void }>) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [isFormValid, setIsFormValid] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const saveRef = useRef<(() => Promise<boolean>) | null>(null);
 
   const handleSave = async () => {
     if (saveRef.current) {
-      const success = await saveRef.current();
-      if (success) {
-        setIsEditing(false);
+      setIsSaving(true);
+      try {
+        const success = await saveRef.current();
+        if (success) {
+          setIsEditing(false);
+        }
+      } finally {
+        setIsSaving(false);
       }
     }
   };
@@ -123,6 +129,7 @@ function GoalDetailPageInner({ onBack }: Readonly<{ onBack: () => void }>) {
       icon={<Target className="text-primary h-5 w-5" />}
       isEditing={isEditing}
       hasChanges={isEditing && isFormValid}
+      isSaving={isSaving}
       onBack={onBack}
       onEdit={() => setIsEditing(true)}
       onSave={() => void handleSave()}

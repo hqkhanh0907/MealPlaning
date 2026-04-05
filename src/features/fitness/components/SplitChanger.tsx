@@ -12,6 +12,7 @@ import {
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { DisabledReason } from '@/components/shared/DisabledReason';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useFitnessStore } from '@/store/fitnessStore';
@@ -125,7 +126,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
           {SPLIT_OPTIONS.map(option => (
             <label
               key={option.value}
-              className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-colors ${
+              className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 p-4 transition-all active:scale-[0.98] ${
                 selectedSplit === option.value ? 'border-primary bg-primary-subtle' : 'bg-card border-border'
               } touch-manipulation`}
               data-testid={`split-option-${option.value}`}
@@ -287,11 +288,18 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
         <Button
           onClick={handleApply}
           disabled={!isDifferentSplit || isApplying}
+          aria-describedby={!isDifferentSplit && !isApplying ? 'split-apply-disabled-reason' : undefined}
           className="w-full touch-manipulation"
           data-testid="apply-button"
         >
           {t('fitness.splitChanger.apply')}
         </Button>
+        <DisabledReason
+          id="split-apply-disabled-reason"
+          reason={t('disabledReason.selectDifferentSplit')}
+          show={!isDifferentSplit && !isApplying}
+          className="text-center"
+        />
       </div>
 
       {/* Confirmation sheet */}

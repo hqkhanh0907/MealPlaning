@@ -261,7 +261,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
                       onClick={() => handleToggle(workout.id)}
                       aria-expanded={isExpanded}
                       aria-label={`${workout.name} - ${getRelativeDate(workout.date, t)}`}
-                      className="focus-visible:ring-ring flex w-full items-center justify-between rounded-xl px-4 py-3 text-left focus-visible:ring-2 focus-visible:ring-offset-2"
+                      className="focus-visible:ring-ring flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-all focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98]"
                     >
                       <div className="flex flex-col gap-1">
                         <span data-testid={`workout-name-${workout.id}`} className="text-foreground font-medium">

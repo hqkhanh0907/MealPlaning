@@ -228,7 +228,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
           type="button"
           onClick={handleBack}
           aria-label={t('common.back')}
-          className="text-primary-foreground active:bg-primary/80 flex h-11 w-11 items-center justify-center rounded-lg"
+          className="text-primary-foreground active:bg-primary/80 flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -246,7 +246,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
           type="button"
           onClick={handleRestore}
           aria-label={t('fitness.plan.restore')}
-          className="text-primary-foreground active:bg-primary/80 flex h-11 items-center gap-1 rounded-lg px-3 text-sm"
+          className="text-primary-foreground active:bg-primary/80 flex h-11 items-center gap-1 rounded-lg px-3 text-sm transition-colors"
         >
           <RotateCcw className="h-4 w-4" />
           <span className="hidden sm:inline">{t('fitness.plan.restore')}</span>
@@ -255,7 +255,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
         <button
           type="button"
           onClick={handleSave}
-          className="text-primary-emphasis active:bg-primary-subtle bg-card flex h-11 items-center gap-1 rounded-lg px-4 text-sm font-medium"
+          className="text-primary-emphasis active:bg-primary-subtle bg-card flex h-11 items-center gap-1 rounded-lg px-4 text-sm font-medium transition-colors"
         >
           <Save className="h-4 w-4" />
           {t('fitness.plan.save')}
@@ -308,7 +308,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                         type="button"
                         onClick={() => handleOpenSwap(index)}
                         aria-label={`${t('fitness.swap.title')} ${item.exercise.nameVi}`}
-                        className="text-primary focus-visible:ring-ring active:bg-primary-subtle flex min-h-[44px] min-w-[44px] items-center justify-center rounded focus-visible:ring-2 focus-visible:outline-none"
+                        className="text-primary focus-visible:ring-ring active:bg-primary-subtle flex min-h-[44px] min-w-[44px] items-center justify-center rounded transition-colors focus-visible:ring-2 focus-visible:outline-none"
                         data-testid={`swap-exercise-${index}`}
                       >
                         <ArrowLeftRight className="h-4 w-4" />
@@ -318,7 +318,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                         onClick={() => handleMoveUp(index)}
                         aria-label={`Move up ${item.exercise.nameVi}`}
                         disabled={index === 0}
-                        className="focus-visible:ring-ring text-muted-foreground enabled:active:bg-muted flex min-h-[44px] min-w-[44px] items-center justify-center rounded focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
+                        className="focus-visible:ring-ring text-muted-foreground enabled:active:bg-muted flex min-h-[44px] min-w-[44px] items-center justify-center rounded transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
                       >
                         <ChevronUp className="h-4 w-4" />
                       </button>
@@ -327,7 +327,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                         onClick={() => handleMoveDown(index)}
                         aria-label={`Move down ${item.exercise.nameVi}`}
                         disabled={index === localExercises.length - 1}
-                        className="focus-visible:ring-ring text-muted-foreground enabled:active:bg-muted flex min-h-[44px] min-w-[44px] items-center justify-center rounded focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
+                        className="focus-visible:ring-ring text-muted-foreground enabled:active:bg-muted flex min-h-[44px] min-w-[44px] items-center justify-center rounded transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
                       >
                         <ChevronDown className="h-4 w-4" />
                       </button>
@@ -335,7 +335,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                         type="button"
                         onClick={() => handleRemove(index)}
                         aria-label={`Remove ${item.exercise.nameVi}`}
-                        className="text-destructive active:bg-destructive/10 focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded focus-visible:ring-2 focus-visible:outline-none"
+                        className="text-destructive active:bg-destructive/10 focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded transition-colors focus-visible:ring-2 focus-visible:outline-none"
                       >
                         <X className="h-4 w-4" />
                       </button>

@@ -2,6 +2,7 @@ import { Check, Minus, Plus, Scale } from 'lucide-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { DisabledReason } from '@/components/shared/DisabledReason';
 import { Input } from '@/components/ui/input';
 import { generateUUID } from '@/utils/helpers';
 
@@ -270,6 +271,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             type="button"
             data-testid="save-weight-btn"
             aria-label={isSaved ? t('fitness.weight.saved') : t('common.save')}
+            aria-describedby={!isValid ? 'weight-save-disabled-reason' : undefined}
             disabled={!isValid}
             onClick={handleSave}
             className={`ml-1 flex h-11 w-11 items-center justify-center rounded-lg transition-colors active:scale-95 disabled:opacity-50 ${
@@ -337,6 +339,12 @@ function DailyWeightInputInner(): React.JSX.Element {
           </span>
         )}
       </div>
+      <DisabledReason
+        id="weight-save-disabled-reason"
+        reason={t('disabledReason.invalidWeight')}
+        show={!isValid}
+        className="ml-6"
+      />
     </div>
   );
 }

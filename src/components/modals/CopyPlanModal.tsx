@@ -239,7 +239,9 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
           )}
 
           {selectedDates.length === 0 && (
-            <p className="text-muted-foreground py-4 text-center text-sm">{t('copyPlan.noSelection')}</p>
+            <p id="copy-plan-no-selection" className="text-muted-foreground py-4 text-center text-sm">
+              {t('copyPlan.noSelection')}
+            </p>
           )}
         </div>
 
@@ -249,6 +251,7 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
             data-testid="btn-copy-confirm"
             onClick={handleConfirm}
             disabled={selectedDates.length === 0}
+            aria-describedby={selectedDates.length === 0 ? 'copy-plan-no-selection' : undefined}
             className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold shadow-sm transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Copy className="h-4 w-4" />

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 
 import { Ingredient, SuggestedDishIngredient } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
+import { DisabledReason } from '../shared/DisabledReason';
 
 let _keyCounter = 0;
 const nextKey = () => `ai-sug-${++_keyCounter}`;
@@ -93,7 +94,7 @@ export const AISuggestIngredientsPreview = ({
               onClick={onClose}
               data-testid="btn-ai-suggest-close"
               aria-label={t('common.closeDialog')}
-              className="text-muted-foreground hover:bg-accent rounded-full p-2"
+              className="text-muted-foreground hover:bg-accent rounded-full p-2 transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -123,7 +124,7 @@ export const AISuggestIngredientsPreview = ({
             onClick={onClose}
             data-testid="btn-ai-suggest-close"
             aria-label={t('common.closeDialog')}
-            className="text-muted-foreground hover:bg-accent rounded-full p-2"
+            className="text-muted-foreground hover:bg-accent rounded-full p-2 transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -200,12 +201,19 @@ export const AISuggestIngredientsPreview = ({
             type="button"
             onClick={handleConfirm}
             disabled={selectedCount === 0}
+            aria-describedby={selectedCount === 0 ? 'ai-suggest-disabled-reason' : undefined}
             data-testid="btn-ai-suggest-confirm"
             className="bg-primary text-primary-foreground hover:bg-primary flex flex-[2] items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Check className="h-4 w-4" /> {t('dish.aiSuggestConfirm', { count: selectedCount })}
           </button>
         </div>
+        <DisabledReason
+          id="ai-suggest-disabled-reason"
+          reason={t('disabledReason.selectIngredient')}
+          show={selectedCount === 0}
+          className="px-4 pb-2 text-center"
+        />
       </div>
     </ModalBackdrop>
   );
