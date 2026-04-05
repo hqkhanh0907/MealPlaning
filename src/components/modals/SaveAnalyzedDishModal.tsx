@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 
 import { useNotification } from '../../contexts/NotificationContext';
-import { getMealTagOptions } from '../../data/constants';
+import { getMealTagOptions, MEAL_TYPE_ICON_COLORS } from '../../data/constants';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { type SaveAnalyzedDishFormData, saveAnalyzedDishSchema } from '../../schemas/saveAnalyzedDishSchema';
 import { suggestIngredientInfo } from '../../services/geminiService';
@@ -246,7 +246,11 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                                   : 'text-muted-foreground bg-muted hover:bg-accent active:bg-accent'
                               }`}
                             >
-                              <opt.icon className="inline-block size-4" aria-hidden="true" /> {opt.label}
+                              <opt.icon
+                                className={`inline-block size-4 ${!isActive ? MEAL_TYPE_ICON_COLORS[opt.type] : ''}`}
+                                aria-hidden="true"
+                              />{' '}
+                              {opt.label}
                             </button>
                           );
                         })}

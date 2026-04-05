@@ -8,6 +8,7 @@ import {
   getBaseSortOptions,
   getMealTagOptions,
   getTagShortLabels,
+  MEAL_TYPE_ICON_COLORS,
   MEAL_TYPE_ICONS,
   UNDO_TOAST_DURATION_MS,
 } from '../data/constants';
@@ -247,7 +248,11 @@ export const DishManager = ({
                 aria-pressed={filterTag === type}
                 className={`focus-visible:ring-ring inline-flex min-h-11 items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:outline-none ${filterTag === type ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
               >
-                <TagIcon className="size-3.5" aria-hidden="true" /> {label} ({count})
+                <TagIcon
+                  className={`size-3.5 ${filterTag !== type ? MEAL_TYPE_ICON_COLORS[type] : ''}`}
+                  aria-hidden="true"
+                />{' '}
+                {label} ({count})
               </button>
             );
           })}
@@ -297,7 +302,9 @@ export const DishManager = ({
                                 key={tag}
                                 className="text-muted-foreground bg-muted inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-semibold"
                               >
-                                {TagIcon && <TagIcon className="size-3" aria-hidden="true" />}
+                                {TagIcon && (
+                                  <TagIcon className={`size-3 ${MEAL_TYPE_ICON_COLORS[tag]}`} aria-hidden="true" />
+                                )}
                                 {tagLabels[tag]}
                               </span>
                             );
@@ -436,7 +443,9 @@ export const DishManager = ({
                                 key={tag}
                                 className="text-muted-foreground bg-muted inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-semibold"
                               >
-                                {TagIcon && <TagIcon className="size-3" aria-hidden="true" />}
+                                {TagIcon && (
+                                  <TagIcon className={`size-3 ${MEAL_TYPE_ICON_COLORS[tag]}`} aria-hidden="true" />
+                                )}
                                 {tagLabels[tag]}
                               </span>
                             );
@@ -592,7 +601,9 @@ export const DishManager = ({
                             key={tag}
                             className="bg-primary-subtle text-primary inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-semibold"
                           >
-                            {TagIcon && <TagIcon className="size-3.5" aria-hidden="true" />}
+                            {TagIcon && (
+                              <TagIcon className={`size-3.5 ${MEAL_TYPE_ICON_COLORS[tag]}`} aria-hidden="true" />
+                            )}
                             {tagLabels[tag]}
                           </span>
                         );

@@ -2,7 +2,7 @@ import { AlertCircle, CheckCircle2, ChefHat, Edit3, RefreshCw, Sparkles, X } fro
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { getMealTypeLabels, MEAL_TYPE_ICONS } from '../../data/constants';
+import { getMealTypeLabels, MEAL_TYPE_ICON_COLORS, MEAL_TYPE_ICONS } from '../../data/constants';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { Dish, Ingredient, MealPlanSuggestion, MealType, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
@@ -271,7 +271,12 @@ export const AISuggestionPreviewModal = ({
                           >
                             {(() => {
                               const Icon = MEAL_TYPE_ICONS[type];
-                              return <Icon className="mr-1 inline-block size-4" aria-hidden="true" />;
+                              return (
+                                <Icon
+                                  className={`mr-1 inline-block size-4 ${MEAL_TYPE_ICON_COLORS[type]}`}
+                                  aria-hidden="true"
+                                />
+                              );
                             })()}
                             {mealTypeLabels[type]}
                           </span>

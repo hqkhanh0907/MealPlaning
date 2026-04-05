@@ -38,6 +38,7 @@ const FIELD_ICON: Record<string, LucideIcon> = {
 const FIELD_COLOR: Partial<Record<string, string>> = {
   injuryRestrictions: 'text-warning',
   cardioSessionsWeek: 'text-rose',
+  avgSleepHours: 'text-info',
 };
 
 export function TrainingProfileSection() {

@@ -1,8 +1,8 @@
-import type { LucideIcon } from 'lucide-react';
-import { ChefHat, Edit3, Minus, Moon, Plus, Sun, Sunrise } from 'lucide-react';
+import { ChefHat, Edit3, Minus, Plus } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { MEAL_TYPE_ICON_COLORS, MEAL_TYPE_ICONS } from '../../data/constants';
 import { Dish, MealType, SlotInfo, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 
@@ -14,18 +14,6 @@ export interface MealSlotProps {
   onEdit: () => void;
   onUpdateServings?: (dishId: string, servings: number) => void;
 }
-
-const MEAL_ICONS: Record<MealType, LucideIcon> = {
-  breakfast: Sunrise,
-  lunch: Sun,
-  dinner: Moon,
-};
-
-const MEAL_ICON_COLORS: Record<MealType, string> = {
-  breakfast: 'text-energy',
-  lunch: 'text-energy',
-  dinner: 'text-info',
-};
 
 const MAX_VISIBLE_DISHES = 2;
 
@@ -46,8 +34,7 @@ export const MealSlot = React.memo(function MealSlot({
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   const hasDishes = slot.dishIds.length > 0;
-  const MealIcon = MEAL_ICONS[type];
-  const mealIconColor = MEAL_ICON_COLORS[type];
+  const MealIcon = MEAL_TYPE_ICONS[type];
   const label = t(`meal.${type}`);
 
   const resolvedDishes = useMemo(() => {
@@ -73,7 +60,7 @@ export const MealSlot = React.memo(function MealSlot({
         data-testid={TEST_ID_MAP[type]}
         className="bg-muted hover:bg-accent flex items-center gap-3 rounded-xl p-3 transition-colors"
       >
-        <MealIcon className={`size-5 shrink-0 ${mealIconColor}`} aria-hidden="true" />
+        <MealIcon className={`size-5 shrink-0 ${MEAL_TYPE_ICON_COLORS[type]}`} aria-hidden="true" />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
             <span className="text-foreground text-sm font-medium">{label}</span>
@@ -100,7 +87,7 @@ export const MealSlot = React.memo(function MealSlot({
     >
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MealIcon className={`size-5 shrink-0 ${mealIconColor}`} aria-hidden="true" />
+          <MealIcon className={`size-5 shrink-0 ${MEAL_TYPE_ICON_COLORS[type]}`} aria-hidden="true" />
           <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">{label}</span>
         </div>
         <button
