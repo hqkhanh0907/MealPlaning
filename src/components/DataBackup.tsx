@@ -60,15 +60,15 @@ const HEALTH_STYLES = {
     Icon: ShieldCheck,
   },
   warning: {
-    bg: 'bg-amber-50 dark:bg-amber-900/20',
-    border: 'border-amber-200 dark:border-amber-800',
-    text: 'text-amber-700 dark:text-amber-400',
+    bg: 'bg-color-energy-subtle',
+    border: 'border-status-warning/30',
+    text: 'text-status-warning',
     Icon: ShieldAlert,
   },
   critical: {
-    bg: 'bg-rose-50 dark:bg-rose-900/20',
-    border: 'border-rose-200 dark:border-rose-800',
-    text: 'text-rose-700 dark:text-rose-400',
+    bg: 'bg-destructive-subtle',
+    border: 'border-destructive/30',
+    text: 'text-destructive',
     Icon: ShieldX,
   },
 };
@@ -203,7 +203,7 @@ export const DataBackup = () => {
           onClick={() => fileInputRef.current?.click()}
           disabled={isImporting}
           data-testid="btn-import"
-          className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-indigo-50 px-4 py-2.5 font-semibold text-indigo-700 transition-all hover:bg-indigo-100 active:scale-[0.98] disabled:opacity-50 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+          className="bg-color-ai-subtle text-color-ai hover:bg-color-ai/15 flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold transition-all active:scale-[0.98] disabled:opacity-50"
         >
           {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           {t('backup.import')}

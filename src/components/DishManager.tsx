@@ -310,7 +310,7 @@ export const DishManager = ({
                 {dish.rating && dish.rating > 0 && (
                   <div className="mb-2 flex items-center gap-0.5" data-testid={`dish-rating-${dish.id}`}>
                     {[1, 2, 3, 4, 5].map(s => (
-                      <span key={s} className={`text-sm ${s <= dish.rating! ? 'text-amber-400' : 'text-muted'}`}>
+                      <span key={s} className={`text-sm ${s <= dish.rating! ? 'text-color-energy' : 'text-muted'}`}>
                         ★
                       </span>
                     ))}
@@ -323,7 +323,7 @@ export const DishManager = ({
                       {Math.round(nutrition.calories)}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between rounded-lg bg-blue-50 p-2 dark:bg-blue-900/30">
+                  <div className="bg-macro-carbs-subtle flex items-center justify-between rounded-lg p-2">
                     <span className="text-macro-protein text-xs font-semibold uppercase">{t('common.protein')}</span>
                     <span className="text-macro-protein text-sm font-semibold">{Math.round(nutrition.protein)}g</span>
                   </div>
@@ -608,21 +608,21 @@ export const DishManager = ({
                     {Math.round(nutrition.calories)} <span className="text-primary text-xs font-medium">kcal</span>
                   </p>
                 </div>
-                <div className="rounded-xl bg-blue-50 p-3.5 dark:bg-blue-900/30">
+                <div className="bg-macro-carbs-subtle rounded-xl p-3.5">
                   <p className="text-macro-protein mb-1 text-xs font-semibold uppercase">{t('common.protein')}</p>
                   <p className="text-macro-protein text-xl font-semibold">
                     {Math.round(nutrition.protein)}
                     <span className="text-macro-protein text-xs font-medium">g</span>
                   </p>
                 </div>
-                <div className="rounded-xl bg-amber-50 p-3.5 dark:bg-amber-900/30">
+                <div className="bg-color-energy-subtle rounded-xl p-3.5">
                   <p className="text-macro-carbs mb-1 text-xs font-semibold uppercase">{t('common.carbs')}</p>
                   <p className="text-macro-carbs text-xl font-semibold">
                     {Math.round(nutrition.carbs)}
                     <span className="text-macro-carbs text-xs font-medium">g</span>
                   </p>
                 </div>
-                <div className="rounded-xl bg-rose-50 p-3.5 dark:bg-rose-900/30">
+                <div className="bg-color-rose-subtle rounded-xl p-3.5">
                   <p className="text-macro-fat mb-1 text-xs font-semibold uppercase">{t('common.fat')}</p>
                   <p className="text-macro-fat text-xl font-semibold">
                     {Math.round(nutrition.fat)}
@@ -723,7 +723,7 @@ export const DishManager = ({
               >
                 <div className="bg-card border-border-subtle sticky top-0 z-10 flex items-center justify-between border-b p-4">
                   <h3 className="text-foreground flex items-center gap-2 text-lg font-semibold">
-                    <GitCompareArrows className="h-5 w-5 text-blue-500" />
+                    <GitCompareArrows className="text-status-info h-5 w-5" />
                     {t('dish.compareNutrition')}
                   </h3>
                   <button

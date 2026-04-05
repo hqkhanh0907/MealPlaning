@@ -223,7 +223,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                 </div>
                 <div>
                   <span className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">
-                    {t('saveAnalyzed.suitableFor')} <span className="text-rose-500">*</span>
+                    {t('saveAnalyzed.suitableFor')} <span className="text-destructive">*</span>
                   </span>
                   <Controller
                     name="dishTags"

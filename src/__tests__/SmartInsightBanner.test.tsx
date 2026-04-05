@@ -46,7 +46,7 @@ describe('SmartInsightBanner', () => {
     render(<SmartInsightBanner insight={makeInsight()} />);
     const banner = screen.getByTestId('smart-insight-banner');
     expect(banner).toBeInTheDocument();
-    expect(banner.className).toContain('border-amber-200');
+    expect(banner.className).toContain('border-status-warning');
     expect(screen.getByTestId('icon-warning')).toBeInTheDocument();
   });
 
@@ -62,7 +62,7 @@ describe('SmartInsightBanner', () => {
       />,
     );
     const banner = screen.getByTestId('smart-insight-banner');
-    expect(banner.className).toContain('border-blue-200');
+    expect(banner.className).toContain('border-status-info');
     expect(screen.getByTestId('icon-info')).toBeInTheDocument();
   });
 

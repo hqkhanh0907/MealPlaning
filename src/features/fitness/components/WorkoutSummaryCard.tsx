@@ -34,7 +34,7 @@ export function WorkoutSummaryCard({
       <div className="flex flex-1 flex-col items-center justify-center p-6">
         {hasPR && (
           <div
-            className="from-color-energy to-color-energy/80 mb-4 rounded-xl bg-gradient-to-r px-6 py-3 text-amber-950 shadow-lg"
+            className="from-color-energy to-color-energy/80 text-foreground mb-4 rounded-xl bg-gradient-to-r px-6 py-3 shadow-lg"
             data-testid="pr-celebration"
           >
             <Trophy className="mx-auto mb-1 h-6 w-6" aria-hidden="true" />
@@ -61,7 +61,7 @@ export function WorkoutSummaryCard({
             <span className="ml-auto font-semibold">{totalVolume.toLocaleString()} kg</span>
           </div>
           <div className="bg-muted flex items-center gap-3 rounded-lg p-3">
-            <Flame className="h-5 w-5 text-orange-500" aria-hidden="true" />
+            <Flame className="text-color-energy h-5 w-5" aria-hidden="true" />
             <span className="text-muted-foreground">{t('fitness.logger.setsCompleted')}</span>
             <span className="ml-auto font-semibold">{setsCompleted}</span>
           </div>

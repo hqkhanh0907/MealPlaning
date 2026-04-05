@@ -47,8 +47,8 @@ const getDayButtonClass = (
   }
   if (isSunday) {
     return variant === 'week'
-      ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 active:bg-rose-200'
-      : 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/30 border border-transparent hover:border-rose-200 dark:hover:border-rose-700';
+      ? 'bg-color-rose-subtle text-color-rose hover:bg-color-rose/10 active:bg-color-rose/20'
+      : 'bg-color-rose-subtle text-color-rose hover:bg-color-rose/10 border border-transparent hover:border-color-rose/30';
   }
   return variant === 'week'
     ? 'bg-muted text-foreground hover:bg-accent active:bg-muted'
@@ -58,7 +58,7 @@ const getDayButtonClass = (
 // Helper to get week day label color class
 const getWeekDayLabelClass = (isSelected: boolean, isSunday: boolean): string => {
   if (isSelected) return 'text-white/80';
-  if (isSunday) return 'text-rose-400';
+  if (isSunday) return 'text-color-rose';
   return 'text-muted-foreground';
 };
 
@@ -315,7 +315,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             {weekDays.map((day, idx) => (
               <div
                 key={day}
-                className={`py-2 text-center text-xs font-semibold uppercase ${idx === 6 ? 'text-rose-400' : 'text-muted-foreground'}`}
+                className={`py-2 text-center text-xs font-semibold uppercase ${idx === 6 ? 'text-color-rose' : 'text-muted-foreground'}`}
               >
                 {day}
               </div>

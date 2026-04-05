@@ -190,15 +190,15 @@ export const IngredientManager = ({
                   <span className="text-muted-foreground text-xs font-semibold uppercase">{t('common.calories')}</span>
                   <span className="text-foreground text-sm font-semibold">{ing.caloriesPer100}</span>
                 </div>
-                <div className="flex items-center justify-between rounded-lg bg-blue-50 p-2 dark:bg-blue-900/30">
+                <div className="bg-macro-carbs-subtle flex items-center justify-between rounded-lg p-2">
                   <span className="text-macro-protein text-xs font-semibold uppercase">{t('common.protein')}</span>
                   <span className="text-macro-protein text-sm font-semibold">{ing.proteinPer100}g</span>
                 </div>
-                <div className="flex items-center justify-between rounded-lg bg-amber-50 p-2 dark:bg-amber-900/30">
+                <div className="bg-color-energy-subtle flex items-center justify-between rounded-lg p-2">
                   <span className="text-macro-carbs text-xs font-semibold uppercase">{t('common.carbs')}</span>
                   <span className="text-macro-carbs text-sm font-semibold">{ing.carbsPer100}g</span>
                 </div>
-                <div className="flex items-center justify-between rounded-lg bg-rose-50 p-2 dark:bg-rose-900/30">
+                <div className="bg-color-rose-subtle flex items-center justify-between rounded-lg p-2">
                   <span className="text-macro-fat text-xs font-semibold uppercase">{t('common.fat')}</span>
                   <span className="text-macro-fat text-sm font-semibold">{ing.fatPer100}g</span>
                 </div>
@@ -216,7 +216,7 @@ export const IngredientManager = ({
                   data-testid={`btn-delete-ingredient-${ing.id}`}
                   onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
                   disabled={isUsed(ing.id)}
-                  className={`focus-visible:ring-ring flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'dark:text-muted-foreground text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                  className={`focus-visible:ring-ring flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'dark:text-muted-foreground text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
                 >
                   <Trash2 className="h-4 w-4" /> {t('common.delete')}
                 </button>
@@ -310,7 +310,7 @@ export const IngredientManager = ({
                           onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
                           disabled={isUsed(ing.id)}
                           aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`}
-                          className={`focus-visible:ring-ring rounded-lg p-2 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                          className={`focus-visible:ring-ring rounded-lg p-2 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -359,7 +359,7 @@ export const IngredientManager = ({
                     onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
                     disabled={isUsed(ing.id)}
                     aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`}
-                    className={`focus-visible:ring-ring rounded-lg p-2.5 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                    className={`focus-visible:ring-ring rounded-lg p-2.5 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -407,21 +407,21 @@ export const IngredientManager = ({
                     {ing.caloriesPer100} <span className="text-muted-foreground text-xs font-medium">kcal</span>
                   </p>
                 </div>
-                <div className="rounded-xl bg-blue-50 p-3.5 dark:bg-blue-900/30">
+                <div className="bg-macro-carbs-subtle rounded-xl p-3.5">
                   <p className="text-macro-protein mb-1 text-xs font-semibold uppercase">{t('common.protein')}</p>
                   <p className="text-macro-protein text-xl font-semibold">
                     {ing.proteinPer100}
                     <span className="text-macro-protein text-xs font-medium">g</span>
                   </p>
                 </div>
-                <div className="rounded-xl bg-amber-50 p-3.5 dark:bg-amber-900/30">
+                <div className="bg-color-energy-subtle rounded-xl p-3.5">
                   <p className="text-macro-carbs mb-1 text-xs font-semibold uppercase">{t('common.carbs')}</p>
                   <p className="text-macro-carbs text-xl font-semibold">
                     {ing.carbsPer100}
                     <span className="text-macro-carbs text-xs font-medium">g</span>
                   </p>
                 </div>
-                <div className="rounded-xl bg-rose-50 p-3.5 dark:bg-rose-900/30">
+                <div className="bg-color-rose-subtle rounded-xl p-3.5">
                   <p className="text-macro-fat mb-1 text-xs font-semibold uppercase">{t('common.fat')}</p>
                   <p className="text-macro-fat text-xl font-semibold">
                     {ing.fatPer100}

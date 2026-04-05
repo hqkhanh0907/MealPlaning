@@ -371,7 +371,7 @@ export const DishEditModal = ({
                     }
                     setAiSuggestError('');
                   }}
-                  className={`flex-1 ${errors.name ? 'border-rose-500' : ''}`}
+                  className={`flex-1 ${errors.name ? 'border-destructive' : ''}`}
                   placeholder={t('dish.namePlaceholder')}
                   data-testid="input-dish-name"
                   aria-invalid={!!errors.name}
@@ -419,7 +419,7 @@ export const DishEditModal = ({
               <p
                 className={`mb-1.5 block text-xs font-semibold uppercase ${errors.tags ? 'text-destructive' : 'text-muted-foreground'}`}
               >
-                {t('dish.suitableFor')} <span className="text-rose-500">*</span>
+                {t('dish.suitableFor')} <span className="text-destructive">*</span>
               </p>
               <div className="flex flex-wrap gap-2">
                 {getMealTagOptions(t).map(({ type, label, icon: TagIcon }) => {
@@ -455,7 +455,7 @@ export const DishEditModal = ({
                       type="button"
                       data-testid={`star-${star}`}
                       onClick={() => setValue('rating', watchedRating === star ? 0 : star, { shouldDirty: true })}
-                      className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 text-2xl transition-all ${star <= watchedRating ? 'text-amber-400' : 'text-muted-foreground hover:text-amber-300'}`}
+                      className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 text-2xl transition-all ${star <= watchedRating ? 'text-color-energy' : 'text-muted-foreground hover:text-color-energy/70'}`}
                       aria-label={`${star} ${t('dish.stars')}`}
                     >
                       ★
@@ -545,10 +545,10 @@ export const DishEditModal = ({
                           <>
                             <div
                               data-testid="recently-used-header"
-                              className="flex items-center gap-1.5 bg-amber-50/50 px-4 py-2 dark:bg-amber-900/10"
+                              className="bg-color-energy-subtle/50 flex items-center gap-1.5 px-4 py-2"
                             >
-                              <Clock className="h-3 w-3 text-amber-500" aria-hidden="true" />
-                              <span className="text-xs font-semibold tracking-wider text-amber-600 uppercase dark:text-amber-400">
+                              <Clock className="text-color-energy h-3 w-3" aria-hidden="true" />
+                              <span className="text-color-energy-emphasis text-xs font-semibold tracking-wider uppercase">
                                 {t('dish.recentlyUsed')}
                               </span>
                             </div>
@@ -611,7 +611,7 @@ export const DishEditModal = ({
                               testId={`input-dish-amount-${field.ingredientId}`}
                               ariaLabel={getLocalizedField(ing.name, lang)}
                               aria-required={true}
-                              className={`w-16 rounded-lg border px-2 py-1 text-center text-sm ${errors.ingredients?.[index]?.amount ? 'border-rose-500' : 'border-border'} focus:border-primary bg-card transition-all outline-none`}
+                              className={`w-16 rounded-lg border px-2 py-1 text-center text-sm ${errors.ingredients?.[index]?.amount ? 'border-destructive' : 'border-border'} focus:border-primary bg-card transition-all outline-none`}
                             />
                             <button
                               type="button"
@@ -649,7 +649,7 @@ export const DishEditModal = ({
                           type="button"
                           onClick={() => handleRemoveIngredient(field.ingredientId)}
                           aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`}
-                          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 text-rose-400 transition-all hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/30"
+                          className="text-destructive/70 hover:bg-destructive/10 hover:text-destructive flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>

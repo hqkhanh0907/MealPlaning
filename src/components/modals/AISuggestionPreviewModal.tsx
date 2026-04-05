@@ -11,19 +11,19 @@ import { ModalBackdrop } from '../shared/ModalBackdrop';
 
 const MEAL_TYPE_COLORS: Record<MealType, { bg: string; border: string; text: string }> = {
   breakfast: {
-    bg: 'bg-amber-50 dark:bg-amber-900/20',
-    border: 'border-amber-200 dark:border-amber-700',
-    text: 'text-amber-700 dark:text-amber-400',
+    bg: 'bg-color-energy-subtle',
+    border: 'border-status-warning/30',
+    text: 'text-status-warning',
   },
   lunch: {
-    bg: 'bg-blue-50 dark:bg-blue-900/20',
-    border: 'border-blue-200 dark:border-blue-700',
-    text: 'text-blue-700 dark:text-blue-400',
+    bg: 'bg-macro-carbs-subtle',
+    border: 'border-status-info/30',
+    text: 'text-status-info',
   },
   dinner: {
-    bg: 'bg-indigo-50 dark:bg-indigo-900/20',
-    border: 'border-indigo-200 dark:border-indigo-700',
-    text: 'text-indigo-700 dark:text-indigo-400',
+    bg: 'bg-color-ai-subtle',
+    border: 'border-color-ai/30',
+    text: 'text-color-ai',
   },
 };
 
@@ -308,7 +308,7 @@ export const AISuggestionPreviewModal = ({
                             {nutrition.calories} kcal
                           </span>
                           <span
-                            className={`font-semibold ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'}`}
+                            className={`font-semibold ${isSelected ? 'text-status-info' : 'text-muted-foreground'}`}
                           >
                             {nutrition.protein}g protein
                           </span>
@@ -343,14 +343,14 @@ export const AISuggestionPreviewModal = ({
                     <div className="mb-1 flex justify-between text-xs">
                       <span className="text-muted-foreground">{t('common.calories')}</span>
                       <span
-                        className={`font-medium ${nutritionSummary.calories > targetCalories ? 'text-rose-600' : 'text-primary'}`}
+                        className={`font-medium ${nutritionSummary.calories > targetCalories ? 'text-destructive' : 'text-primary'}`}
                       >
                         {targetCalories > 0 ? Math.round((nutritionSummary.calories / targetCalories) * 100) : 0}%
                       </span>
                     </div>
                     <div className="bg-muted h-2 overflow-hidden rounded-full">
                       <div
-                        className={`h-full rounded-full transition-all ${nutritionSummary.calories > targetCalories ? 'bg-rose-500' : 'bg-primary'}`}
+                        className={`h-full rounded-full transition-all ${nutritionSummary.calories > targetCalories ? 'bg-destructive' : 'bg-primary'}`}
                         style={{
                           width: `${targetCalories > 0 ? Math.min(100, (nutritionSummary.calories / targetCalories) * 100) : 0}%`,
                         }}
@@ -361,14 +361,14 @@ export const AISuggestionPreviewModal = ({
                     <div className="mb-1 flex justify-between text-xs">
                       <span className="text-muted-foreground">{t('common.protein')}</span>
                       <span
-                        className={`font-medium ${nutritionSummary.protein >= targetProtein ? 'text-primary' : 'text-amber-600'}`}
+                        className={`font-medium ${nutritionSummary.protein >= targetProtein ? 'text-primary' : 'text-status-warning'}`}
                       >
                         {targetProtein > 0 ? Math.round((nutritionSummary.protein / targetProtein) * 100) : 0}%
                       </span>
                     </div>
                     <div className="bg-muted h-2 overflow-hidden rounded-full">
                       <div
-                        className={`h-full rounded-full transition-all ${nutritionSummary.protein >= targetProtein ? 'bg-primary' : 'bg-amber-500'}`}
+                        className={`h-full rounded-full transition-all ${nutritionSummary.protein >= targetProtein ? 'bg-primary' : 'bg-status-warning'}`}
                         style={{
                           width: `${targetProtein > 0 ? Math.min(100, (nutritionSummary.protein / targetProtein) * 100) : 0}%`,
                         }}

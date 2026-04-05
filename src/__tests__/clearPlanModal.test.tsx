@@ -152,9 +152,9 @@ describe('ClearPlanModal', () => {
     const lunchBtn = screen.getByTestId('meal-toggle-lunch');
     const dinnerBtn = screen.getByTestId('meal-toggle-dinner');
 
-    expect(breakfastBtn.className).toContain('border-rose-500');
-    expect(lunchBtn.className).toContain('border-rose-500');
-    expect(dinnerBtn.className).toContain('border-rose-500');
+    expect(breakfastBtn.className).toContain('border-color-rose');
+    expect(lunchBtn.className).toContain('border-color-rose');
+    expect(dinnerBtn.className).toContain('border-color-rose');
   });
 
   it('deselecting one meal sends remaining meals in onClear', () => {

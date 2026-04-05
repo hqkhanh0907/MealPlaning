@@ -126,8 +126,8 @@ function ProgressiveOverloadChip({
       className={cn(
         'rounded-full px-3 py-1.5 text-xs',
         isPlateaued
-          ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-300'
-          : 'bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300',
+          ? 'bg-status-warning/10 text-status-warning hover:bg-status-warning/15'
+          : 'bg-status-info/10 text-status-info hover:bg-status-info/15',
       )}
       data-testid="overload-chip"
     >
@@ -529,7 +529,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                         <button
                           type="button"
                           onClick={() => handleDeleteSet(set.id)}
-                          className="text-muted-foreground inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-rose-50 hover:text-rose-500 focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:outline-none dark:hover:bg-rose-900/20 dark:hover:text-rose-400"
+                          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:ring-destructive/50 inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:outline-none"
                           aria-label={t('fitness.logger.deleteSet')}
                           data-testid={`delete-set-${set.id}`}
                         >

@@ -361,9 +361,7 @@ function TrainingPlanViewInner({
 
           let colorClass = 'bg-muted text-muted-foreground';
           if (planDay) {
-            colorClass = isCardio
-              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300'
-              : 'bg-primary/10 text-primary-emphasis';
+            colorClass = isCardio ? 'bg-status-info/15 text-status-info' : 'bg-primary/10 text-primary-emphasis';
           }
 
           let ringClass: string;
