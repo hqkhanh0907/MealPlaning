@@ -162,7 +162,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
               <Sun className="text-warning h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-foreground font-bold">{t('settings.theme')}</h3>
+              <h3 className="text-foreground font-semibold">{t('settings.theme')}</h3>
               <p className="text-muted-foreground text-xs">{t('settings.themeDesc')}</p>
             </div>
           </div>
@@ -203,7 +203,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
               <Database className="text-color-ai h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-foreground font-bold">{t('settings.data')}</h3>
+              <h3 className="text-foreground font-semibold">{t('settings.data')}</h3>
               <p className="text-muted-foreground text-xs">{t('settings.dataDesc')}</p>
             </div>
           </div>

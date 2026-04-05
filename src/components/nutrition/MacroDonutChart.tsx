@@ -104,7 +104,7 @@ export const MacroDonutChart = React.memo(function MacroDonutChart({
           y={cy - 4}
           textAnchor="middle"
           dominantBaseline="central"
-          className="fill-foreground text-lg font-bold"
+          className="fill-foreground text-lg font-semibold"
           style={{ fontSize: size * 0.15 }}
           data-testid="donut-total-cal"
         >

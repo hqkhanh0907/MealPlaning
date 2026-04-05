@@ -252,7 +252,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             value={displayValue}
             onChange={handleInputChange}
             onBlur={handleInputBlur}
-            className="text-foreground w-16 text-center text-lg font-bold tabular-nums"
+            className="text-foreground w-16 text-center text-lg font-semibold tabular-nums"
           />
 
           <span className="text-muted-foreground text-xs">{t('fitness.weight.kg')}</span>

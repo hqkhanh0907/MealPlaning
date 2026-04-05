@@ -56,7 +56,7 @@ export function CustomExerciseModal({
   return (
     <ModalBackdrop onClose={onClose}>
       <div className="bg-card w-full max-w-sm rounded-2xl p-6" data-testid="custom-exercise-modal">
-        <h3 className="text-foreground text-lg font-bold">{t('fitness.exerciseSelector.addCustom')}</h3>
+        <h3 className="text-foreground text-lg font-semibold">{t('fitness.exerciseSelector.addCustom')}</h3>
         <form onSubmit={handleSubmit(onFormSubmit)} className="mt-4 space-y-3">
           <div>
             <label htmlFor="custom-exercise-name" className="text-foreground mb-1 block text-sm font-medium">

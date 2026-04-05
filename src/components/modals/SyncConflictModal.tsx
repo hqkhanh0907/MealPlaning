@@ -21,7 +21,7 @@ export const SyncConflictModal = ({ localTime, remoteTime, onResolve, onClose }:
       <div className="bg-card w-full max-w-sm rounded-2xl p-5 shadow-xl">
         <div className="mb-4 flex items-center gap-2">
           <AlertTriangle className="text-warning h-5 w-5" />
-          <h3 className="text-foreground font-bold">{t('syncConflict.title')}</h3>
+          <h3 className="text-foreground font-semibold">{t('syncConflict.title')}</h3>
         </div>
 
         <p className="text-foreground-secondary mb-4 text-sm">{t('syncConflict.description')}</p>

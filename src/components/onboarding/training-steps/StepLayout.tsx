@@ -16,7 +16,7 @@ export function StepLayout({ title, subtitle, goNext, goBack, children }: Readon
   return (
     <div className="flex flex-1 flex-col">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="text-foreground mb-1 text-xl font-bold">{title}</h2>
+        <h2 className="text-foreground mb-1 text-xl font-semibold">{title}</h2>
         <p className="text-muted-foreground mb-6 text-sm">{subtitle}</p>
         {children}
       </div>

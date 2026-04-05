@@ -35,7 +35,7 @@ export const Summary = React.memo(function Summary({
             <Activity className="h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div>
-            <h2 className="text-foreground text-lg font-bold sm:text-xl">{t('summary.title')}</h2>
+            <h2 className="text-foreground text-lg font-semibold sm:text-xl">{t('summary.title')}</h2>
             <p className="text-muted-foreground text-xs sm:text-sm">
               {t('summary.goal', { cal: targetCalories, pro: targetProtein })}
             </p>
@@ -117,7 +117,7 @@ export const Summary = React.memo(function Summary({
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-        <div className="border-macro-carbs/20 bg-macro-carbs/10 rounded-2xl border p-3 sm:p-4">
+        <div className="border-macro-carbs/20 bg-macro-carbs/10 rounded-2xl border p-4">
           <div className="text-macro-carbs mb-1 flex items-center gap-1.5 sm:gap-2">
             <Wheat className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="text-xs font-medium sm:text-sm">{t('common.carbs')}</span>
@@ -127,7 +127,7 @@ export const Summary = React.memo(function Summary({
             <span className="text-macro-carbs/70 ml-1 text-xs font-normal sm:text-sm">g</span>
           </p>
         </div>
-        <div className="border-macro-fat/20 bg-macro-fat/10 rounded-2xl border p-3 sm:p-4">
+        <div className="border-macro-fat/20 bg-macro-fat/10 rounded-2xl border p-4">
           <div className="text-macro-fat mb-1 flex items-center gap-1.5 sm:gap-2">
             <Droplet className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="text-xs font-medium sm:text-sm">{t('common.fat')}</span>
@@ -137,7 +137,7 @@ export const Summary = React.memo(function Summary({
             <span className="text-macro-fat/70 ml-1 text-xs font-normal sm:text-sm">g</span>
           </p>
         </div>
-        <div className="bg-primary-subtle border-primary/10 rounded-2xl border p-3 sm:p-4">
+        <div className="bg-primary-subtle border-primary/10 rounded-2xl border p-4">
           <div className="text-primary-emphasis mb-1 flex items-center gap-1.5 sm:gap-2">
             <Leaf className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="text-xs font-medium sm:text-sm">{t('common.fiber')}</span>
@@ -189,7 +189,7 @@ export const Summary = React.memo(function Summary({
                 <td className="py-1 text-right">{Math.round(dayNutrition.dinner.fat)}g</td>
                 <td className="py-1 text-right">{Math.round(dayNutrition.dinner.fiber)}g</td>
               </tr>
-              <tr className="border-border border-t font-bold">
+              <tr className="border-border border-t font-semibold">
                 <td className="pt-2">{t('summary.total')}</td>
                 <td className="pt-2 text-right">{Math.round(totalCarbs)}g</td>
                 <td className="pt-2 text-right">{Math.round(totalFat)}g</td>

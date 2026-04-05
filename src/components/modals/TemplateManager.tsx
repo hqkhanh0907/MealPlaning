@@ -91,7 +91,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
       >
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-5 sm:px-8 sm:py-6">
           <div>
-            <h3 className="text-foreground text-xl font-bold">{t('template.title')}</h3>
+            <h3 className="text-foreground text-xl font-semibold">{t('template.title')}</h3>
           </div>
           <button
             onClick={onClose}
@@ -198,7 +198,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                         </div>
                       ) : (
                         <div className="mb-3">
-                          <h4 className="text-foreground font-bold">{template.name}</h4>
+                          <h4 className="text-foreground font-semibold">{template.name}</h4>
                           <p className="text-muted-foreground mt-0.5 text-xs">
                             {t('template.dishes', { count: getDishCount(template) })} · {t('template.created')}{' '}
                             {new Date(template.createdAt).toLocaleDateString(lang === 'vi' ? 'vi-VN' : 'en-US')}

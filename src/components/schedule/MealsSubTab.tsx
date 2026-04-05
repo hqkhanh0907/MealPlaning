@@ -119,7 +119,7 @@ export const MealsSubTab = React.memo(function MealsSubTab({
       {recentDishes.length > 0 && emptySlots.length > 0 && onQuickAdd && (
         <div
           data-testid="recent-dishes-section"
-          className="bg-card border-border-subtle rounded-2xl border p-3 shadow-sm"
+          className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm"
         >
           <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase">
             <Clock className="h-3.5 w-3.5" aria-hidden="true" />

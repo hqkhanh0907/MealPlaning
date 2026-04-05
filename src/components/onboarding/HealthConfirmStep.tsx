@@ -130,7 +130,7 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
   return (
     <div className="flex flex-1 flex-col" data-testid="health-confirm-step">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="text-foreground mb-1 text-xl font-bold">
+        <h2 className="text-foreground mb-1 text-xl font-semibold">
           {t('onboarding.confirm.title', { name: values.name })}
         </h2>
         <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.confirm.subtitle')}</p>

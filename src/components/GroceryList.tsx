@@ -176,13 +176,13 @@ const GroceryEmptyState = ({ t }: { t: (key: string) => string }) => (
     <div className="bg-primary-subtle mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full">
       <ShoppingCart className="text-primary/40 h-12 w-12" aria-hidden="true" />
     </div>
-    <h3 className="text-foreground mb-2 text-lg font-bold">{t('grocery.emptyTitle')}</h3>
+    <h3 className="text-foreground mb-2 text-lg font-semibold">{t('grocery.emptyTitle')}</h3>
     <p className="text-muted-foreground mx-auto mb-2 max-w-sm text-sm">{t('grocery.emptyDescription')}</p>
     <p className="text-muted-foreground mx-auto mb-6 max-w-sm text-xs">{t('grocery.emptyAutoHint')}</p>
     <button
       type="button"
       aria-label={t('grocery.emptyAction')}
-      className="bg-primary-subtle text-primary-emphasis hover:bg-primary/10 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition-all"
+      className="bg-primary-subtle text-primary-emphasis hover:bg-primary/10 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all"
     >
       <CalendarDays className="h-4 w-4" aria-hidden="true" />
       {t('grocery.emptyAction')}
@@ -346,7 +346,7 @@ export const GroceryList = React.memo(function GroceryList({
             </div>
             {isExpanded && hasDishes && (
               <div data-testid={`grocery-dishes-${item.id}`} className="space-y-1 px-12 pb-3">
-                <span className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
+                <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                   {t('grocery.usedIn')}
                 </span>
                 {item.usedInDishes.map(d => (
@@ -414,7 +414,7 @@ export const GroceryList = React.memo(function GroceryList({
               setPersistedCheckedSnapshots([]);
             }}
             data-testid={`tab-grocery-${key}`}
-            className={`min-h-11 flex-1 rounded-lg px-4 py-2.5 text-sm font-bold whitespace-nowrap transition-all ${
+            className={`min-h-11 flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-all ${
               scope === key ? 'text-primary-emphasis bg-card shadow-sm' : 'text-muted-foreground active:bg-muted'
             }`}
           >
@@ -432,7 +432,7 @@ export const GroceryList = React.memo(function GroceryList({
             <div className="flex items-center gap-3">
               <ShoppingCart className="text-primary-emphasis h-5 w-5 sm:h-6 sm:w-6" />
               <div>
-                <h3 className="text-primary text-base font-bold sm:text-lg">
+                <h3 className="text-primary text-base font-semibold sm:text-lg">
                   {groceryItems.length} {t('grocery.ingredientCount')}
                 </h3>
                 {checkedCount > 0 && (
@@ -469,7 +469,7 @@ export const GroceryList = React.memo(function GroceryList({
               type="button"
               onClick={() => setGroupByAisle(g => !g)}
               data-testid="btn-group-aisle"
-              className={`focus-visible:ring-ring min-h-11 rounded-lg px-3 py-1.5 text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 ${
+              className={`focus-visible:ring-ring min-h-11 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all focus-visible:ring-2 focus-visible:ring-offset-2 ${
                 groupByAisle ? 'text-primary-emphasis bg-primary/10' : 'text-muted-foreground bg-muted'
               }`}
             >
@@ -518,7 +518,7 @@ export const GroceryList = React.memo(function GroceryList({
               data-testid="grocery-all-bought"
               className="bg-primary-subtle border-primary/10 border-t px-4 py-4 text-center sm:px-6"
             >
-              <div className="text-primary flex items-center justify-center gap-2 font-bold">
+              <div className="text-primary flex items-center justify-center gap-2 font-semibold">
                 <CheckCircle2 className="h-5 w-5" />
                 <span>{t('grocery.allBought')}</span>
               </div>

@@ -304,7 +304,7 @@ function ProgressDashboardInner() {
     <div data-testid="progress-dashboard" className="space-y-4 pb-4">
       <div
         data-testid="hero-metric-card"
-        className="from-primary/90 to-primary rounded-2xl bg-gradient-to-br p-5 text-white shadow-lg"
+        className="from-primary/90 to-primary rounded-2xl bg-gradient-to-br p-4 text-white shadow-lg"
       >
         <p className="text-sm font-medium opacity-80">{t('fitness.progress.volumeThisWeek')}</p>
         <div className="mt-1 flex items-baseline gap-2">
@@ -339,7 +339,9 @@ function ProgressDashboardInner() {
           className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
           <Scale className="h-5 w-5 text-blue-500" aria-hidden="true" />
-          <p className="text-foreground mt-2 text-xl font-bold">{latestWeight ? `${latestWeight.weightKg}kg` : '—'}</p>
+          <p className="text-foreground mt-2 text-xl font-semibold">
+            {latestWeight ? `${latestWeight.weightKg}kg` : '—'}
+          </p>
           <p className="text-muted-foreground text-xs">{t('fitness.progress.weight')}</p>
           {weightDelta !== 0 && (
             <span
@@ -364,7 +366,7 @@ function ProgressDashboardInner() {
           className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
           <Dumbbell className="h-5 w-5 text-indigo-500 dark:text-indigo-400" aria-hidden="true" />
-          <p className="text-foreground mt-2 text-xl font-bold">{best1RM > 0 ? `${best1RM}kg` : '—'}</p>
+          <p className="text-foreground mt-2 text-xl font-semibold">{best1RM > 0 ? `${best1RM}kg` : '—'}</p>
           <p className="text-muted-foreground text-xs">{t('fitness.progress.estimated1rm')}</p>
         </button>
 
@@ -376,7 +378,7 @@ function ProgressDashboardInner() {
           className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
           <Target className="h-5 w-5 text-amber-500" aria-hidden="true" />
-          <p className="text-foreground mt-2 text-xl font-bold">{adherencePercent}%</p>
+          <p className="text-foreground mt-2 text-xl font-semibold">{adherencePercent}%</p>
           <p className="text-muted-foreground text-xs">{t('fitness.progress.adherence')}</p>
         </button>
 
@@ -388,7 +390,7 @@ function ProgressDashboardInner() {
           className="bg-card min-w-[140px] flex-shrink-0 cursor-pointer rounded-xl p-4 text-left shadow-sm active:scale-95"
         >
           <Calendar className="text-primary h-5 w-5" aria-hidden="true" />
-          <p className="text-foreground mt-2 text-xl font-bold">{completedSessions}</p>
+          <p className="text-foreground mt-2 text-xl font-semibold">{completedSessions}</p>
           <p className="text-muted-foreground text-xs">{t('fitness.progress.sessions')}</p>
         </button>
       </div>
@@ -426,7 +428,7 @@ function ProgressDashboardInner() {
             <div
               key={insight.id}
               data-testid={`insight-${insight.id}`}
-              className="bg-card flex items-center justify-between rounded-lg p-3 shadow-sm"
+              className="bg-card flex items-center justify-between rounded-lg p-4 shadow-sm"
             >
               <p className="text-foreground-secondary text-sm">{insight.text}</p>
               <button

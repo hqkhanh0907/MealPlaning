@@ -46,21 +46,21 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           <div className="bg-warning/10 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
             <AlertTriangle className="text-warning h-6 w-6" />
           </div>
-          <h3 className="text-foreground mb-2 text-lg font-bold">
+          <h3 className="text-foreground mb-2 text-lg font-semibold">
             {this.props.fallbackTitle || i18n.t('errorBoundary.defaultTitle')}
           </h3>
           <p className="text-muted-foreground mb-6 max-w-sm text-sm">{i18n.t('errorBoundary.description')}</p>
           <div className="flex gap-3">
             <button
               onClick={this.handleRetry}
-              className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-11 items-center gap-2 rounded-xl px-5 py-2.5 font-bold shadow-sm transition-all active:scale-[0.98]"
+              className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-11 items-center gap-2 rounded-xl px-5 py-2.5 font-semibold shadow-sm transition-all active:scale-[0.98]"
             >
               <RefreshCw className="h-4 w-4" />
               {i18n.t('errorBoundary.retry')}
             </button>
             <button
               onClick={() => globalThis.location.reload()}
-              className="text-foreground-secondary bg-muted hover:bg-accent min-h-11 rounded-xl px-5 py-2.5 font-bold transition-all active:scale-[0.98]"
+              className="text-foreground-secondary bg-muted hover:bg-accent min-h-11 rounded-xl px-5 py-2.5 font-semibold transition-all active:scale-[0.98]"
             >
               {i18n.t('errorBoundary.reload')}
             </button>

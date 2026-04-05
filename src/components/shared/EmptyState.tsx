@@ -25,7 +25,7 @@ export const EmptyState = ({
       <div className="bg-primary-subtle mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
         {icon}
       </div>
-      <h3 className="text-foreground mb-2 text-lg font-bold">
+      <h3 className="text-foreground mb-2 text-lg font-semibold">
         {searchQuery
           ? t('emptyState.notFound', { entity: entityName })
           : t('emptyState.noItems', { entity: entityName })}
@@ -36,7 +36,7 @@ export const EmptyState = ({
       {!searchQuery && actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold shadow-sm transition-all active:scale-[0.98]"
+          className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 font-semibold shadow-sm transition-all active:scale-[0.98]"
         >
           <Plus className="h-5 w-5" aria-hidden="true" /> {actionLabel}
         </button>

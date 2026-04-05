@@ -252,7 +252,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
         <div className="flex items-center justify-between px-6 pt-5 pb-3">
           <div className="flex items-center gap-2">
             <Scale className="text-primary h-5 w-5" aria-hidden="true" />
-            <h2 className="text-foreground text-lg font-bold">{t('fitness.weight.quickLogTitle')}</h2>
+            <h2 className="text-foreground text-lg font-semibold">{t('fitness.weight.quickLogTitle')}</h2>
           </div>
           <button
             type="button"
@@ -368,7 +368,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
             data-testid="save-btn"
             disabled={!isValid}
             onClick={handleSave}
-            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary/90 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 font-bold shadow-sm transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary/90 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 font-semibold shadow-sm transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {t('common.save')}
           </button>

@@ -87,7 +87,7 @@ export const AISuggestIngredientsPreview = ({
       <ModalBackdrop onClose={onClose} zIndex="z-70">
         <div className="bg-card relative w-full rounded-t-2xl p-6 shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-2xl">
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-base font-bold text-indigo-600 dark:text-indigo-400">
+            <p className="text-base font-semibold text-indigo-600 dark:text-indigo-400">
               ✨ {t('dish.aiSuggestTitle', { name: dishName })}
             </p>
             <button
@@ -119,7 +119,7 @@ export const AISuggestIngredientsPreview = ({
     <ModalBackdrop onClose={onClose} zIndex="z-70">
       <div className="bg-card relative flex h-[85dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:h-auto sm:max-h-[85dvh] sm:max-w-lg sm:rounded-2xl">
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
-          <p className="text-base font-bold text-indigo-600 dark:text-indigo-400">
+          <p className="text-base font-semibold text-indigo-600 dark:text-indigo-400">
             ✨ {t('dish.aiSuggestTitle', { name: dishName })}
           </p>
           <button
@@ -136,7 +136,7 @@ export const AISuggestIngredientsPreview = ({
           {items.map((item, index) => (
             <div
               key={keys[index]}
-              className="border-border bg-muted rounded-xl border p-3"
+              className="border-border bg-muted rounded-xl border p-4"
               data-testid={`ai-suggest-item-${index}`}
             >
               <div className="flex items-center gap-3">
@@ -205,7 +205,7 @@ export const AISuggestIngredientsPreview = ({
             onClick={handleConfirm}
             disabled={selectedCount === 0}
             data-testid="btn-ai-suggest-confirm"
-            className="bg-primary text-primary-foreground hover:bg-primary flex flex-[2] items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold transition-all disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary text-primary-foreground hover:bg-primary flex flex-[2] items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Check className="h-4 w-4" /> {t('dish.aiSuggestConfirm', { count: selectedCount })}
           </button>

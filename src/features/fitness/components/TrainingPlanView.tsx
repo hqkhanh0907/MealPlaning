@@ -270,7 +270,7 @@ function TrainingPlanViewInner({
       <div data-testid="training-plan-view" className="flex flex-col items-center justify-center py-12 text-center">
         <div data-testid="plan-expired-cta" className="flex flex-col items-center gap-4">
           <RefreshCw className="text-warning h-12 w-12" aria-hidden="true" />
-          <h3 className="text-foreground text-lg font-bold">{t('fitness.plan.planExpired')}</h3>
+          <h3 className="text-foreground text-lg font-semibold">{t('fitness.plan.planExpired')}</h3>
           <p className="text-muted-foreground max-w-xs text-sm">{t('fitness.plan.planExpiredMessage')}</p>
           <button
             data-testid="create-new-cycle-btn"
@@ -292,7 +292,7 @@ function TrainingPlanViewInner({
         <div data-testid="training-plan-view" className="flex flex-col items-center justify-center py-12 text-center">
           <div data-testid="manual-plan-cta" className="flex flex-col items-center gap-4">
             <CalendarPlus className="dark:text-primary text-primary h-12 w-12" aria-hidden="true" />
-            <h3 className="text-foreground text-lg font-bold">{t('fitness.plan.manualEmpty')}</h3>
+            <h3 className="text-foreground text-lg font-semibold">{t('fitness.plan.manualEmpty')}</h3>
             <p className="text-muted-foreground max-w-xs text-sm">{t('fitness.plan.manualEmptyDesc')}</p>
             <button
               data-testid="create-manual-plan-btn"
@@ -515,7 +515,7 @@ function TrainingPlanViewInner({
       </button>
 
       {viewedPlanDay ? (
-        <div data-testid="today-workout-card" className="bg-card border-border rounded-2xl border p-5">
+        <div data-testid="today-workout-card" className="bg-card border-border rounded-2xl border p-4">
           {viewedDaySessions.length >= 1 && (
             <SessionTabs
               sessions={viewedDaySessions}
@@ -537,7 +537,7 @@ function TrainingPlanViewInner({
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h3 className="text-foreground text-lg font-bold">
+              <h3 className="text-foreground text-lg font-semibold">
                 {translateWorkoutType(t, viewedPlanDay.workoutType)}
               </h3>
               {viewedPlanDay.originalExercises != null &&
@@ -647,7 +647,7 @@ function TrainingPlanViewInner({
               data-testid="start-workout-btn"
               type="button"
               onClick={() => handleStartWorkout(viewedPlanDay)}
-              className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-lg font-bold transition-[colors,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
+              className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-lg font-semibold transition-[colors,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
             >
               <Play className="h-5 w-5" aria-hidden="true" />
               {t('fitness.plan.startWorkout')}
@@ -668,10 +668,10 @@ function TrainingPlanViewInner({
           </div>
         </div>
       ) : (
-        <div data-testid="rest-day-card" className="from-info/80 to-info rounded-2xl bg-gradient-to-br p-5 text-white">
+        <div data-testid="rest-day-card" className="from-info/80 to-info rounded-2xl bg-gradient-to-br p-4 text-white">
           <div className="mb-3 flex items-center gap-2">
             <Moon className="h-5 w-5" aria-hidden="true" />
-            <h3 className="text-lg font-bold">{t('fitness.plan.restDay')}</h3>
+            <h3 className="text-lg font-semibold">{t('fitness.plan.restDay')}</h3>
           </div>
           <ul className="space-y-2 text-sm text-white/90">
             <li>{t('fitness.plan.restDayTip1')}</li>

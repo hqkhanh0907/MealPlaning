@@ -136,7 +136,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
       />
       <div className="bg-card relative max-h-[80dvh] w-full space-y-4 overflow-y-auto overscroll-contain rounded-t-2xl p-6 shadow-xl sm:max-w-md sm:rounded-2xl">
         <div className="flex items-center justify-between">
-          <p className="text-primary text-base font-bold">{t('dish.quickAddTitle')}</p>
+          <p className="text-primary text-base font-semibold">{t('dish.quickAddTitle')}</p>
           <button
             type="button"
             onClick={handleCancel}
@@ -265,7 +265,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
             type="button"
             onClick={handleFormSubmit}
             data-testid="btn-qa-submit"
-            className="bg-primary text-primary-foreground hover:bg-primary flex flex-[2] items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold transition-all"
+            className="bg-primary text-primary-foreground hover:bg-primary flex flex-[2] items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold transition-all"
           >
             <Plus className="h-4 w-4" /> {t('dish.quickAddSubmit')}
           </button>

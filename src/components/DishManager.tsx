@@ -233,7 +233,7 @@ export const DishManager = ({
             onClick={() => setFilterTag(null)}
             data-testid="btn-filter-all-dishes"
             aria-pressed={!filterTag}
-            className={`focus-visible:ring-ring min-h-11 rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:outline-none ${filterTag ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground'}`}
+            className={`focus-visible:ring-ring min-h-11 rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:outline-none ${filterTag ? 'bg-muted text-muted-foreground hover:bg-accent' : 'bg-primary text-primary-foreground'}`}
           >
             {t('common.all')} ({dishes.length})
           </button>
@@ -245,7 +245,7 @@ export const DishManager = ({
                 onClick={() => setFilterTag(filterTag === type ? null : type)}
                 data-testid={`btn-filter-${type}`}
                 aria-pressed={filterTag === type}
-                className={`focus-visible:ring-ring inline-flex min-h-11 items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:outline-none ${filterTag === type ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
+                className={`focus-visible:ring-ring inline-flex min-h-11 items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:outline-none ${filterTag === type ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
               >
                 <TagIcon className="size-3.5" aria-hidden="true" /> {label} ({count})
               </button>
@@ -262,7 +262,7 @@ export const DishManager = ({
             return (
               <div
                 key={dish.id}
-                className={`group bg-card relative flex w-full flex-col rounded-2xl border p-5 text-left shadow-sm transition-all hover:shadow-md ${compareIds.has(dish.id) ? 'border-blue-400 ring-2 ring-blue-100 dark:border-blue-500 dark:ring-blue-900/50' : 'border-border-subtle'}`}
+                className={`group bg-card relative flex w-full flex-col rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${compareIds.has(dish.id) ? 'border-blue-400 ring-2 ring-blue-100 dark:border-blue-500 dark:ring-blue-900/50' : 'border-border-subtle'}`}
               >
                 <button
                   data-testid={`btn-compare-${dish.id}`}
@@ -281,7 +281,7 @@ export const DishManager = ({
                       <button
                         type="button"
                         onClick={() => modal.openView(dish)}
-                        className="focus-visible:ring-ring text-foreground cursor-pointer rounded text-left text-lg font-bold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                        className="focus-visible:ring-ring text-foreground cursor-pointer rounded text-left text-lg font-semibold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                       >
                         {getLocalizedField(dish.name, lang)}
                       </button>
@@ -295,7 +295,7 @@ export const DishManager = ({
                             return (
                               <span
                                 key={tag}
-                                className="text-muted-foreground bg-muted inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-bold"
+                                className="text-muted-foreground bg-muted inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-semibold"
                               >
                                 {TagIcon && <TagIcon className="size-3" aria-hidden="true" />}
                                 {tagLabels[tag]}
@@ -318,26 +318,28 @@ export const DishManager = ({
                 )}
                 <div className="mb-4 grid grid-cols-2 gap-2">
                   <div className="bg-primary-subtle flex items-center justify-between rounded-lg p-2">
-                    <span className="text-primary text-xs font-bold uppercase">{t('common.calories')}</span>
-                    <span className="text-primary-emphasis text-sm font-bold">{Math.round(nutrition.calories)}</span>
+                    <span className="text-primary text-xs font-semibold uppercase">{t('common.calories')}</span>
+                    <span className="text-primary-emphasis text-sm font-semibold">
+                      {Math.round(nutrition.calories)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between rounded-lg bg-blue-50 p-2 dark:bg-blue-900/30">
-                    <span className="text-macro-protein text-xs font-bold uppercase">{t('common.protein')}</span>
-                    <span className="text-macro-protein text-sm font-bold">{Math.round(nutrition.protein)}g</span>
+                    <span className="text-macro-protein text-xs font-semibold uppercase">{t('common.protein')}</span>
+                    <span className="text-macro-protein text-sm font-semibold">{Math.round(nutrition.protein)}g</span>
                   </div>
                 </div>
                 <div className="border-border relative z-10 mt-auto flex items-center gap-4 border-t pt-4">
                   <button
                     data-testid={`btn-clone-dish-${dish.id}`}
                     onClick={() => handleClone(dish)}
-                    className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all focus-visible:ring-2 focus-visible:outline-none"
+                    className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none"
                   >
                     <Copy className="h-4 w-4" /> {t('dish.clone')}
                   </button>
                   <button
                     data-testid={`btn-edit-dish-${dish.id}`}
                     onClick={() => modal.openEdit(dish)}
-                    className="text-muted-foreground hover:bg-primary-subtle hover:text-primary focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all focus-visible:ring-2 focus-visible:outline-none"
+                    className="text-muted-foreground hover:bg-primary-subtle hover:text-primary focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none"
                   >
                     <Edit3 className="h-4 w-4" /> {t('common.edit')}
                   </button>
@@ -345,7 +347,7 @@ export const DishManager = ({
                     data-testid={`btn-delete-dish-${dish.id}`}
                     onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
                     disabled={isUsed(dish.id)}
-                    className={`focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(dish.id) ? 'dark:text-muted-foreground text-muted-foreground' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
+                    className={`focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(dish.id) ? 'dark:text-muted-foreground text-muted-foreground' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
                   >
                     <Trash2 className="h-4 w-4" /> {t('common.delete')}
                   </button>
@@ -415,7 +417,7 @@ export const DishManager = ({
                             <button
                               type="button"
                               onClick={() => modal.openView(dish)}
-                              className="hover:text-primary text-foreground focus-visible:ring-ring cursor-pointer text-left font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                              className="hover:text-primary text-foreground focus-visible:ring-ring cursor-pointer text-left font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none"
                             >
                               {getLocalizedField(dish.name, lang)}
                             </button>
@@ -432,7 +434,7 @@ export const DishManager = ({
                             return (
                               <span
                                 key={tag}
-                                className="text-muted-foreground bg-muted inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-bold"
+                                className="text-muted-foreground bg-muted inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-semibold"
                               >
                                 {TagIcon && <TagIcon className="size-3" aria-hidden="true" />}
                                 {tagLabels[tag]}
@@ -442,10 +444,10 @@ export const DishManager = ({
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <span className="text-foreground font-bold">{Math.round(nutrition.calories)}</span>
+                        <span className="text-foreground font-semibold">{Math.round(nutrition.calories)}</span>
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <span className="text-macro-protein font-bold">{Math.round(nutrition.protein)}g</span>
+                        <span className="text-macro-protein font-semibold">{Math.round(nutrition.protein)}g</span>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-3">
@@ -507,7 +509,7 @@ export const DishManager = ({
                       <button
                         type="button"
                         onClick={() => modal.openView(dish)}
-                        className="focus-visible:ring-ring text-foreground cursor-pointer truncate rounded text-left font-bold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2"
+                        className="focus-visible:ring-ring text-foreground cursor-pointer truncate rounded text-left font-semibold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2"
                       >
                         {getLocalizedField(dish.name, lang)}
                       </button>
@@ -577,7 +579,7 @@ export const DishManager = ({
                   <ChefHat className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-foreground text-xl font-bold">{getLocalizedField(dish.name, lang)}</h3>
+                  <h3 className="text-foreground text-xl font-semibold">{getLocalizedField(dish.name, lang)}</h3>
                   <p className="text-muted-foreground text-sm font-medium">
                     {dish.ingredients.length} {t('dish.ingredients')}
                   </p>
@@ -588,7 +590,7 @@ export const DishManager = ({
                         return (
                           <span
                             key={tag}
-                            className="bg-primary-subtle text-primary inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-bold"
+                            className="bg-primary-subtle text-primary inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-semibold"
                           >
                             {TagIcon && <TagIcon className="size-3.5" aria-hidden="true" />}
                             {tagLabels[tag]}
@@ -601,28 +603,28 @@ export const DishManager = ({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-primary-subtle rounded-xl p-3.5">
-                  <p className="text-primary mb-1 text-xs font-bold uppercase">{t('common.calories')}</p>
-                  <p className="text-primary-emphasis text-xl font-bold">
+                  <p className="text-primary mb-1 text-xs font-semibold uppercase">{t('common.calories')}</p>
+                  <p className="text-primary-emphasis text-xl font-semibold">
                     {Math.round(nutrition.calories)} <span className="text-primary text-xs font-medium">kcal</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-blue-50 p-3.5 dark:bg-blue-900/30">
-                  <p className="text-macro-protein mb-1 text-xs font-bold uppercase">{t('common.protein')}</p>
-                  <p className="text-macro-protein text-xl font-bold">
+                  <p className="text-macro-protein mb-1 text-xs font-semibold uppercase">{t('common.protein')}</p>
+                  <p className="text-macro-protein text-xl font-semibold">
                     {Math.round(nutrition.protein)}
                     <span className="text-macro-protein text-xs font-medium">g</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-amber-50 p-3.5 dark:bg-amber-900/30">
-                  <p className="text-macro-carbs mb-1 text-xs font-bold uppercase">{t('common.carbs')}</p>
-                  <p className="text-macro-carbs text-xl font-bold">
+                  <p className="text-macro-carbs mb-1 text-xs font-semibold uppercase">{t('common.carbs')}</p>
+                  <p className="text-macro-carbs text-xl font-semibold">
                     {Math.round(nutrition.carbs)}
                     <span className="text-macro-carbs text-xs font-medium">g</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-rose-50 p-3.5 dark:bg-rose-900/30">
-                  <p className="text-macro-fat mb-1 text-xs font-bold uppercase">{t('common.fat')}</p>
-                  <p className="text-macro-fat text-xl font-bold">
+                  <p className="text-macro-fat mb-1 text-xs font-semibold uppercase">{t('common.fat')}</p>
+                  <p className="text-macro-fat text-xl font-semibold">
                     {Math.round(nutrition.fat)}
                     <span className="text-macro-fat text-xs font-medium">g</span>
                   </p>
@@ -647,7 +649,7 @@ export const DishManager = ({
                             {getLocalizedField(ing.name, lang)}
                           </span>
                         </div>
-                        <span className="text-foreground-secondary text-sm font-bold">
+                        <span className="text-foreground-secondary text-sm font-semibold">
                           {si.amount} {getLocalizedField(ing.unit, lang)}
                         </span>
                       </div>
@@ -678,7 +680,7 @@ export const DishManager = ({
         message={
           <p>
             {t('dish.confirmDeleteMsg')}{' '}
-            <span className="text-foreground font-bold">&quot;{deleteConfirmation.dishName}&quot;</span>
+            <span className="text-foreground font-semibold">&quot;{deleteConfirmation.dishName}&quot;</span>
             ?<br />
             {t('common.cannotUndo')}
           </p>
@@ -693,7 +695,7 @@ export const DishManager = ({
         <button
           data-testid="btn-open-compare"
           onClick={() => setShowCompare(true)}
-          className="bg-primary text-primary-foreground hover:bg-primary-emphasis focus-visible:ring-ring fixed right-4 bottom-24 z-40 flex items-center gap-2 rounded-full px-5 py-3 text-sm font-bold shadow-lg transition-all focus-visible:ring-2 focus-visible:outline-none"
+          className="bg-primary text-primary-foreground hover:bg-primary-emphasis focus-visible:ring-ring fixed right-4 bottom-24 z-40 flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold shadow-lg transition-all focus-visible:ring-2 focus-visible:outline-none"
         >
           <GitCompareArrows className="h-5 w-5" />
           {t('dish.compareSelected', { count: compareIds.size })}
@@ -720,7 +722,7 @@ export const DishManager = ({
                 aria-label={t('dish.compareNutrition')}
               >
                 <div className="bg-card border-border-subtle sticky top-0 z-10 flex items-center justify-between border-b p-4">
-                  <h3 className="text-foreground flex items-center gap-2 text-lg font-bold">
+                  <h3 className="text-foreground flex items-center gap-2 text-lg font-semibold">
                     <GitCompareArrows className="h-5 w-5 text-blue-500" />
                     {t('dish.compareNutrition')}
                   </h3>
@@ -740,7 +742,7 @@ export const DishManager = ({
                           &nbsp;
                         </th>
                         {compareDishes.map(d => (
-                          <th key={d.id} className="text-foreground px-2 py-2 text-center text-sm font-bold">
+                          <th key={d.id} className="text-foreground px-2 py-2 text-center text-sm font-semibold">
                             {getLocalizedField(d.name, lang)}
                           </th>
                         ))}
@@ -761,7 +763,7 @@ export const DishManager = ({
                             {values.map((v, i) => (
                               <td key={compareDishes[i].id} className="px-2 py-2.5 text-center">
                                 <span
-                                  className={`text-lg font-bold ${NUTRITION_COLORS[key]} ${v === best ? 'underline decoration-blue-400 decoration-2' : ''}`}
+                                  className={`text-lg font-semibold ${NUTRITION_COLORS[key]} ${v === best ? 'underline decoration-blue-400 decoration-2' : ''}`}
                                 >
                                   {v}
                                   {key === 'calories' ? '' : 'g'}

@@ -37,7 +37,7 @@ export function PlanStrategyChoice({
   return (
     <div className="flex flex-1 flex-col" data-testid="plan-strategy-choice">
       <div className="flex flex-1 flex-col items-center justify-center px-6">
-        <h2 className="text-foreground mb-2 text-center text-xl font-bold">
+        <h2 className="text-foreground mb-2 text-center text-xl font-semibold">
           {t('onboarding.strategy.title', { name: values.name })}
         </h2>
         <p className="text-muted-foreground mb-8 text-center text-sm">{t('onboarding.strategy.subtitle')}</p>
@@ -56,7 +56,7 @@ export function PlanStrategyChoice({
               <Sparkles className="text-primary h-6 w-6" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-primary-emphasis text-sm font-bold">{t('onboarding.strategy.auto')}</p>
+              <p className="text-primary-emphasis text-sm font-semibold">{t('onboarding.strategy.auto')}</p>
               <p className="text-primary/70/70 text-xs">{t('onboarding.strategy.autoDesc')}</p>
             </div>
           </button>
@@ -75,7 +75,7 @@ export function PlanStrategyChoice({
               <PenLine className="text-muted-foreground h-6 w-6" aria-hidden="true" />
             </div>
             <div>
-              <p className="text-foreground text-sm font-bold">{t('onboarding.strategy.manual')}</p>
+              <p className="text-foreground text-sm font-semibold">{t('onboarding.strategy.manual')}</p>
               <p className="text-muted-foreground/70 text-xs">{t('onboarding.strategy.manualDesc')}</p>
             </div>
           </button>

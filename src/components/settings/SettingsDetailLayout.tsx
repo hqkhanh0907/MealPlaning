@@ -43,7 +43,7 @@ export function SettingsDetailLayout({
           </button>
           <div className="flex items-center gap-2.5">
             {icon}
-            <h3 className="text-foreground text-lg font-bold">
+            <h3 className="text-foreground text-lg font-semibold">
               {isEditing ? `${t('settings.edit')} ${title}` : title}
             </h3>
           </div>
@@ -85,7 +85,7 @@ export function SettingsDetailLayout({
               onClick={onSave}
               data-testid="settings-detail-save"
               disabled={!hasChanges}
-              className={`flex-1 rounded-xl py-3 text-sm font-bold text-white transition-all ${
+              className={`flex-1 rounded-xl py-3 text-sm font-semibold text-white transition-all ${
                 hasChanges
                   ? 'bg-primary hover:bg-primary active:scale-[0.98]'
                   : 'bg-muted-foreground/30 cursor-not-allowed'

@@ -92,7 +92,7 @@ export const MacroChart = React.memo(function MacroChart({ dayNutrition }: Macro
 
   return (
     <div data-testid="macro-chart" className="bg-card border-border-subtle rounded-2xl border p-6 shadow-sm">
-      <h3 className="text-foreground mb-4 text-sm font-bold">{t('macro.title')}</h3>
+      <h3 className="text-foreground mb-4 text-sm font-semibold">{t('macro.title')}</h3>
       <div className="flex items-center gap-6">
         <svg viewBox="0 0 100 100" className="h-24 w-24 shrink-0 -rotate-90" aria-hidden="true">
           {arcs.map(arc => (

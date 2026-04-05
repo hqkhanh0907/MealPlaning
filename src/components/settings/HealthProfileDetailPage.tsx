@@ -103,15 +103,15 @@ function HealthProfileViewMode() {
         <div className="border-primary/20 border-t pt-2">
           <p className="text-foreground mb-2 text-sm font-medium">{t('healthProfile.macroPreview')}</p>
           <div className="grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-3">
-            <div className="bg-card rounded-lg p-2">
+            <div className="bg-card rounded-lg p-4">
               <p className="text-muted-foreground">{t('common.protein')}</p>
               <p className="text-primary font-semibold">{macros.proteinG}g</p>
             </div>
-            <div className="bg-card rounded-lg p-2">
+            <div className="bg-card rounded-lg p-4">
               <p className="text-muted-foreground">{t('common.fat')}</p>
               <p className="font-semibold text-amber-600 dark:text-amber-400">{macros.fatG}g</p>
             </div>
-            <div className="bg-card rounded-lg p-2">
+            <div className="bg-card rounded-lg p-4">
               <p className="text-muted-foreground">{t('common.carbs')}</p>
               <p className="font-semibold text-blue-600 dark:text-blue-400">{macros.carbsG}g</p>
             </div>

@@ -201,7 +201,7 @@ function WeightMiniInner({ onTap }: Readonly<WeightMiniProps>): React.ReactEleme
       className={`flex items-center gap-3 rounded-2xl ${colorClasses.bg} cursor-pointer p-3 transition-transform active:scale-[0.98]`}
     >
       <div className="min-w-0 flex-1">
-        <span className="text-foreground text-base font-bold tabular-nums" data-testid="weight-value">
+        <span className="text-foreground text-base font-semibold tabular-nums" data-testid="weight-value">
           {latestWeight.weightKg}
           <span className="text-muted-foreground ml-0.5 text-xs font-normal">{t('dashboard.weightMini.unit')}</span>
         </span>

@@ -84,7 +84,7 @@ export const EnergyDetailSheet = React.memo(function EnergyDetailSheet({ onClose
             <div className="rounded-xl bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
               <Activity className="h-5 w-5" />
             </div>
-            <h3 className="text-foreground text-lg font-bold">{t('energyDetail.title')}</h3>
+            <h3 className="text-foreground text-lg font-semibold">{t('energyDetail.title')}</h3>
           </div>
           <button
             onClick={onClose}
@@ -99,23 +99,23 @@ export const EnergyDetailSheet = React.memo(function EnergyDetailSheet({ onClose
         <div className="space-y-6 overflow-y-auto p-6">
           {/* BMR / TDEE / Target */}
           <div className="grid grid-cols-3 gap-3" data-testid="energy-breakdown">
-            <div className="bg-muted rounded-xl p-3 text-center">
+            <div className="bg-muted rounded-xl p-4 text-center">
               <p className="text-muted-foreground text-xs font-medium">BMR</p>
-              <p className="text-foreground text-lg font-bold" data-testid="bmr-value">
+              <p className="text-foreground text-lg font-semibold" data-testid="bmr-value">
                 {Math.round(bmr)}
               </p>
               <p className="text-muted-foreground text-xs">kcal</p>
             </div>
-            <div className="bg-muted rounded-xl p-3 text-center">
+            <div className="bg-muted rounded-xl p-4 text-center">
               <p className="text-muted-foreground text-xs font-medium">TDEE</p>
-              <p className="text-foreground text-lg font-bold" data-testid="tdee-value">
+              <p className="text-foreground text-lg font-semibold" data-testid="tdee-value">
                 {Math.round(tdee)}
               </p>
               <p className="text-muted-foreground text-xs">kcal</p>
             </div>
-            <div className="bg-primary-subtle rounded-xl p-3 text-center">
+            <div className="bg-primary-subtle rounded-xl p-4 text-center">
               <p className="text-primary text-xs font-medium">{t('energyDetail.target')}</p>
-              <p className="text-primary text-lg font-bold" data-testid="target-value">
+              <p className="text-primary text-lg font-semibold" data-testid="target-value">
                 {Math.round(targetCalories)}
               </p>
               <p className="text-primary text-xs">kcal</p>
@@ -140,14 +140,14 @@ export const EnergyDetailSheet = React.memo(function EnergyDetailSheet({ onClose
                 <UtensilsCrossed className="h-4 w-4" />
                 {t('energyDetail.caloriesIn')}
               </span>
-              <span className="text-foreground font-bold">{Math.round(eaten)} kcal</span>
+              <span className="text-foreground font-semibold">{Math.round(eaten)} kcal</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground flex items-center gap-2">
                 <Dumbbell className="h-4 w-4" />
                 {t('energyDetail.caloriesOut')}
               </span>
-              <span className="text-status-info font-bold">-{Math.round(caloriesOut)} kcal</span>
+              <span className="text-status-info font-semibold">-{Math.round(caloriesOut)} kcal</span>
             </div>
             <div className="border-border-subtle border-t pt-2">
               <div className="flex items-center justify-between text-sm">
@@ -155,7 +155,7 @@ export const EnergyDetailSheet = React.memo(function EnergyDetailSheet({ onClose
                   <Flame className="h-4 w-4" />
                   {t('energyDetail.netCalories')}
                 </span>
-                <span className="text-foreground font-bold">{net} kcal</span>
+                <span className="text-foreground font-semibold">{net} kcal</span>
               </div>
             </div>
             <div className="flex items-center justify-between text-sm">
@@ -163,7 +163,7 @@ export const EnergyDetailSheet = React.memo(function EnergyDetailSheet({ onClose
                 <Target className="h-4 w-4" />
                 {t('energyDetail.remaining')}
               </span>
-              <span className={`font-bold ${remaining >= 0 ? 'text-primary' : 'text-destructive'}`}>
+              <span className={`font-semibold ${remaining >= 0 ? 'text-primary' : 'text-destructive'}`}>
                 {remaining} kcal
               </span>
             </div>
@@ -180,7 +180,7 @@ export const EnergyDetailSheet = React.memo(function EnergyDetailSheet({ onClose
               ].map(meal => (
                 <div key={meal.key} className="bg-muted flex items-center justify-between rounded-lg px-4 py-2.5">
                   <span className="text-foreground text-sm font-medium">{meal.label}</span>
-                  <span className="text-muted-foreground text-sm font-bold">{Math.round(meal.cal)} kcal</span>
+                  <span className="text-muted-foreground text-sm font-semibold">{Math.round(meal.cal)} kcal</span>
                 </div>
               ))}
             </div>

@@ -194,7 +194,7 @@ export const DataBackup = () => {
           onClick={handleExport}
           disabled={isExporting}
           data-testid="btn-export"
-          className="bg-primary-subtle text-primary-emphasis hover:bg-primary/10 flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-bold transition-all active:scale-[0.98] disabled:opacity-50"
+          className="bg-primary-subtle text-primary-emphasis hover:bg-primary/10 flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold transition-all active:scale-[0.98] disabled:opacity-50"
         >
           {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
           {t('backup.export')}
@@ -203,7 +203,7 @@ export const DataBackup = () => {
           onClick={() => fileInputRef.current?.click()}
           disabled={isImporting}
           data-testid="btn-import"
-          className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-indigo-50 px-4 py-2.5 font-bold text-indigo-700 transition-all hover:bg-indigo-100 active:scale-[0.98] disabled:opacity-50 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
+          className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-indigo-50 px-4 py-2.5 font-semibold text-indigo-700 transition-all hover:bg-indigo-100 active:scale-[0.98] disabled:opacity-50 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50"
         >
           {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
           {t('backup.import')}

@@ -14,7 +14,7 @@ export function TrainingConfirmStep({ form, goNext, goBack }: Readonly<StepProps
   return (
     <div className="flex flex-1 flex-col" data-testid="training-confirm-step">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="text-foreground mb-6 text-xl font-bold">{t('onboarding.confirm.trainingTitle')}</h2>
+        <h2 className="text-foreground mb-6 text-xl font-semibold">{t('onboarding.confirm.trainingTitle')}</h2>
         <div className="border-border divide-border divide-y rounded-xl border">
           <SummaryRow label={t('fitness.onboarding.goal')} value={t(`fitness.onboarding.${values.trainingGoal}`)} />
           <SummaryRow

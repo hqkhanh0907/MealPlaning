@@ -114,7 +114,7 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
       >
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-5 sm:px-8 sm:py-6">
           <div>
-            <h3 className="text-foreground text-xl font-bold">{t('copyPlan.title')}</h3>
+            <h3 className="text-foreground text-xl font-semibold">{t('copyPlan.title')}</h3>
             <p className="text-muted-foreground text-sm">
               {formatDate(sourceDate, dateLocale)} — {t('copyPlan.subtitle')}
             </p>
@@ -218,7 +218,7 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
           {/* Selected dates list */}
           {selectedDates.length > 0 && (
             <div className="space-y-2">
-              <h4 className="text-muted-foreground text-sm font-bold tracking-wider uppercase">
+              <h4 className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
                 {t('copyPlan.selectedDates')}
               </h4>
               <div className="space-y-1.5">
@@ -249,7 +249,7 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
             data-testid="btn-copy-confirm"
             onClick={handleConfirm}
             disabled={selectedDates.length === 0}
-            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-6 py-3 font-bold shadow-sm transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold shadow-sm transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Copy className="h-4 w-4" />
             {t('copyPlan.confirm')}

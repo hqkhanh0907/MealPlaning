@@ -99,7 +99,7 @@ export const MealActionBar = React.memo(function MealActionBar({
       <button
         onClick={onOpenTypeSelection}
         data-testid="btn-plan-meal-section"
-        className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-bold shadow-sm transition-all active:scale-[0.98]"
+        className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold shadow-sm transition-all active:scale-[0.98]"
       >
         <Plus className="h-4 w-4" aria-hidden="true" />
         {t('calendar.planMeal')}

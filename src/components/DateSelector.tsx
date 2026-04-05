@@ -217,7 +217,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
   return (
     <div className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm sm:p-6">
       <div className="mb-4 flex items-center justify-between sm:mb-6">
-        <div className="text-foreground flex items-center gap-2 text-lg font-bold">
+        <div className="text-foreground flex items-center gap-2 text-lg font-semibold">
           <CalendarIcon className="text-primary h-5 w-5" />
           <span>{viewMode === 'calendar' ? t('calendar.monthYear', { month: month + 1, year }) : weekLabel}</span>
         </div>
@@ -233,7 +233,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
           <button
             onClick={goToToday}
             data-testid="btn-today"
-            className="bg-primary-subtle text-primary hover:bg-primary/10 active:bg-primary/20 mr-1 flex min-h-11 items-center rounded-xl px-3 py-1.5 text-sm font-bold transition-all sm:mr-2 sm:min-h-9"
+            className="bg-primary-subtle text-primary hover:bg-primary/10 active:bg-primary/20 mr-1 flex min-h-11 items-center rounded-xl px-3 py-1.5 text-sm font-semibold transition-all sm:mr-2 sm:min-h-9"
           >
             {t('calendar.today')}
           </button>
@@ -287,10 +287,10 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
                 }}
                 className={`flex min-h-18 flex-col items-center justify-center rounded-2xl px-1 py-2.5 transition-all ${getDayButtonClass(isSelected, isToday, 'week', isSunday)} ${isToday && !isSelected ? 'animate-pulse-subtle' : ''}`}
               >
-                <span className={`text-xs font-bold uppercase ${getWeekDayLabelClass(isSelected, isSunday)}`}>
+                <span className={`text-xs font-semibold uppercase ${getWeekDayLabelClass(isSelected, isSunday)}`}>
                   {dayLabel}
                 </span>
-                <span className="text-lg font-bold">{date.getDate()}</span>
+                <span className="text-lg font-semibold">{date.getDate()}</span>
                 <div className="mt-0.5 flex gap-0.5">
                   <div
                     className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-color-energy')}`}
@@ -315,7 +315,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             {weekDays.map((day, idx) => (
               <div
                 key={day}
-                className={`py-2 text-center text-xs font-bold uppercase ${idx === 6 ? 'text-rose-400' : 'text-muted-foreground'}`}
+                className={`py-2 text-center text-xs font-semibold uppercase ${idx === 6 ? 'text-rose-400' : 'text-muted-foreground'}`}
               >
                 {day}
               </div>
@@ -360,7 +360,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
                   title={isSelected ? t('calendar.tapToPlan') : t('calendar.selectDay')}
                   className={`relative flex aspect-square flex-col items-center justify-center rounded-2xl transition-all ${getDayButtonClass(isSelected, isToday, 'calendar', isSunday)} ${isToday && !isSelected ? 'animate-pulse-subtle' : ''}`}
                 >
-                  <span className="text-sm font-bold">{day}</span>
+                  <span className="text-sm font-semibold">{day}</span>
 
                   <div className="absolute bottom-1 flex gap-0.5 sm:bottom-2">
                     <div

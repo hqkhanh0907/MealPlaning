@@ -194,7 +194,7 @@ export const MealPlannerModal = ({
         {/* Header */}
         <div className="border-border-subtle flex items-center justify-between border-b px-4 py-4 sm:px-8 sm:py-6">
           <div>
-            <h3 className="text-foreground text-lg font-bold sm:text-xl">
+            <h3 className="text-foreground text-lg font-semibold sm:text-xl">
               {t('planning.planTitle')} — {selectedDate}
             </h3>
             <p className="text-muted-foreground text-xs sm:text-sm">{t('planning.planSubtitle')}</p>
@@ -221,7 +221,7 @@ export const MealPlannerModal = ({
                   onClick={() => handleTabChange(tab.type)}
                   className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-sm transition-all ${
                     isActive
-                      ? 'bg-primary text-primary-foreground font-bold shadow-sm'
+                      ? 'bg-primary text-primary-foreground font-semibold shadow-sm'
                       : 'bg-card text-foreground-secondary hover:bg-accent font-medium'
                   }`}
                 >
@@ -311,7 +311,9 @@ export const MealPlannerModal = ({
                     <ChefHat className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
-                    <h4 className={`truncate text-base font-bold ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                    <h4
+                      className={`truncate text-base font-semibold ${isSelected ? 'text-primary' : 'text-foreground'}`}
+                    >
                       {getLocalizedField(dish.name, lang)}
                     </h4>
                     <div className="mt-1 flex gap-2">
@@ -345,7 +347,7 @@ export const MealPlannerModal = ({
           <div className="mb-2 flex items-center justify-between text-sm">
             <span className="text-muted-foreground font-medium">
               {t('planning.totalDay')}:{' '}
-              <span className="text-foreground font-bold">
+              <span className="text-foreground font-semibold">
                 {totalDayDishCount} {t('common.item')}
               </span>
             </span>
@@ -397,7 +399,7 @@ export const MealPlannerModal = ({
           <button
             onClick={handleConfirm}
             data-testid="btn-confirm-plan"
-            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-12 w-full items-center justify-center gap-2 rounded-xl py-3.5 text-lg font-bold shadow-sm transition-all active:scale-[0.98]"
+            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-12 w-full items-center justify-center gap-2 rounded-xl py-3.5 text-lg font-semibold shadow-sm transition-all active:scale-[0.98]"
           >
             <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
             {confirmButtonLabel}

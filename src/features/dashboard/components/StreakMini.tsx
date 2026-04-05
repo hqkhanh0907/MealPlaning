@@ -86,7 +86,7 @@ function StreakMiniInner({ onTap }: Readonly<StreakMiniProps>): React.ReactEleme
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5" data-testid="streak-count">
           <Flame className="h-4 w-4 text-orange-500" aria-hidden={true} />
-          <span className="text-foreground text-base font-bold tabular-nums">
+          <span className="text-foreground text-base font-semibold tabular-nums">
             {t('dashboard.streakMini.days', {
               count: streakInfo.currentStreak,
             })}

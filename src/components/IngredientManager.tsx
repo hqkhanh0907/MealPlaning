@@ -166,7 +166,7 @@ export const IngredientManager = ({
           {list.filteredItems.map(ing => (
             <div
               key={ing.id}
-              className="group bg-card border-border-subtle relative flex w-full flex-col rounded-2xl border p-5 text-left shadow-sm transition-all hover:shadow-md"
+              className="group bg-card border-border-subtle relative flex w-full flex-col rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md"
             >
               <div className="mb-4 flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -177,7 +177,7 @@ export const IngredientManager = ({
                     <button
                       type="button"
                       onClick={() => modal.openView(ing)}
-                      className="focus-visible:ring-ring text-foreground cursor-pointer rounded text-left text-lg font-bold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                      className="focus-visible:ring-ring text-foreground cursor-pointer rounded text-left text-lg font-semibold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                     >
                       {getLocalizedField(ing.name, lang)}
                     </button>
@@ -187,20 +187,20 @@ export const IngredientManager = ({
               </div>
               <div className="mb-3 grid grid-cols-2 gap-2">
                 <div className="bg-muted flex items-center justify-between rounded-lg p-2">
-                  <span className="text-muted-foreground text-xs font-bold uppercase">{t('common.calories')}</span>
-                  <span className="text-foreground text-sm font-bold">{ing.caloriesPer100}</span>
+                  <span className="text-muted-foreground text-xs font-semibold uppercase">{t('common.calories')}</span>
+                  <span className="text-foreground text-sm font-semibold">{ing.caloriesPer100}</span>
                 </div>
                 <div className="flex items-center justify-between rounded-lg bg-blue-50 p-2 dark:bg-blue-900/30">
-                  <span className="text-macro-protein text-xs font-bold uppercase">{t('common.protein')}</span>
-                  <span className="text-macro-protein text-sm font-bold">{ing.proteinPer100}g</span>
+                  <span className="text-macro-protein text-xs font-semibold uppercase">{t('common.protein')}</span>
+                  <span className="text-macro-protein text-sm font-semibold">{ing.proteinPer100}g</span>
                 </div>
                 <div className="flex items-center justify-between rounded-lg bg-amber-50 p-2 dark:bg-amber-900/30">
-                  <span className="text-macro-carbs text-xs font-bold uppercase">{t('common.carbs')}</span>
-                  <span className="text-macro-carbs text-sm font-bold">{ing.carbsPer100}g</span>
+                  <span className="text-macro-carbs text-xs font-semibold uppercase">{t('common.carbs')}</span>
+                  <span className="text-macro-carbs text-sm font-semibold">{ing.carbsPer100}g</span>
                 </div>
                 <div className="flex items-center justify-between rounded-lg bg-rose-50 p-2 dark:bg-rose-900/30">
-                  <span className="text-macro-fat text-xs font-bold uppercase">{t('common.fat')}</span>
-                  <span className="text-macro-fat text-sm font-bold">{ing.fatPer100}g</span>
+                  <span className="text-macro-fat text-xs font-semibold uppercase">{t('common.fat')}</span>
+                  <span className="text-macro-fat text-sm font-semibold">{ing.fatPer100}g</span>
                 </div>
               </div>
               {renderUsedInDishes(ing.id)}
@@ -208,7 +208,7 @@ export const IngredientManager = ({
                 <button
                   data-testid={`btn-edit-ingredient-${ing.id}`}
                   onClick={() => modal.openEdit(ing)}
-                  className="text-muted-foreground hover:bg-primary-subtle hover:text-primary focus-visible:ring-ring flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all focus-visible:ring-2 focus-visible:outline-none"
+                  className="text-muted-foreground hover:bg-primary-subtle hover:text-primary focus-visible:ring-ring flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none"
                 >
                   <Edit3 className="h-4 w-4" /> {t('common.edit')}
                 </button>
@@ -216,7 +216,7 @@ export const IngredientManager = ({
                   data-testid={`btn-delete-ingredient-${ing.id}`}
                   onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
                   disabled={isUsed(ing.id)}
-                  className={`focus-visible:ring-ring flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-bold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'dark:text-muted-foreground text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
+                  className={`focus-visible:ring-ring flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'dark:text-muted-foreground text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-900/30'}`}
                 >
                   <Trash2 className="h-4 w-4" /> {t('common.delete')}
                 </button>
@@ -275,7 +275,7 @@ export const IngredientManager = ({
                           <button
                             type="button"
                             onClick={() => modal.openView(ing)}
-                            className="hover:text-primary text-foreground focus-visible:ring-ring cursor-pointer text-left font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                            className="hover:text-primary text-foreground focus-visible:ring-ring cursor-pointer text-left font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none"
                           >
                             {getLocalizedField(ing.name, lang)}
                           </button>
@@ -284,16 +284,16 @@ export const IngredientManager = ({
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className="text-foreground font-bold">{ing.caloriesPer100}</span>
+                      <span className="text-foreground font-semibold">{ing.caloriesPer100}</span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className="text-macro-protein font-bold">{ing.proteinPer100}g</span>
+                      <span className="text-macro-protein font-semibold">{ing.proteinPer100}g</span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className="text-macro-carbs font-bold">{ing.carbsPer100}g</span>
+                      <span className="text-macro-carbs font-semibold">{ing.carbsPer100}g</span>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <span className="text-macro-fat font-bold">{ing.fatPer100}g</span>
+                      <span className="text-macro-fat font-semibold">{ing.fatPer100}g</span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-3">
@@ -335,7 +335,7 @@ export const IngredientManager = ({
                     <button
                       type="button"
                       onClick={() => modal.openView(ing)}
-                      className="focus-visible:ring-ring text-foreground cursor-pointer truncate rounded text-left font-bold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2"
+                      className="focus-visible:ring-ring text-foreground cursor-pointer truncate rounded text-left font-semibold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2"
                     >
                       {getLocalizedField(ing.name, lang)}
                     </button>
@@ -396,42 +396,42 @@ export const IngredientManager = ({
                   <Apple className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-foreground text-xl font-bold">{getLocalizedField(ing.name, lang)}</h3>
+                  <h3 className="text-foreground text-xl font-semibold">{getLocalizedField(ing.name, lang)}</h3>
                   <p className="text-muted-foreground text-sm font-medium">{getDisplayUnit(ing.unit, lang)}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-muted rounded-xl p-3.5">
-                  <p className="text-muted-foreground mb-1 text-xs font-bold uppercase">{t('common.calories')}</p>
-                  <p className="text-foreground text-xl font-bold">
+                  <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase">{t('common.calories')}</p>
+                  <p className="text-foreground text-xl font-semibold">
                     {ing.caloriesPer100} <span className="text-muted-foreground text-xs font-medium">kcal</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-blue-50 p-3.5 dark:bg-blue-900/30">
-                  <p className="text-macro-protein mb-1 text-xs font-bold uppercase">{t('common.protein')}</p>
-                  <p className="text-macro-protein text-xl font-bold">
+                  <p className="text-macro-protein mb-1 text-xs font-semibold uppercase">{t('common.protein')}</p>
+                  <p className="text-macro-protein text-xl font-semibold">
                     {ing.proteinPer100}
                     <span className="text-macro-protein text-xs font-medium">g</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-amber-50 p-3.5 dark:bg-amber-900/30">
-                  <p className="text-macro-carbs mb-1 text-xs font-bold uppercase">{t('common.carbs')}</p>
-                  <p className="text-macro-carbs text-xl font-bold">
+                  <p className="text-macro-carbs mb-1 text-xs font-semibold uppercase">{t('common.carbs')}</p>
+                  <p className="text-macro-carbs text-xl font-semibold">
                     {ing.carbsPer100}
                     <span className="text-macro-carbs text-xs font-medium">g</span>
                   </p>
                 </div>
                 <div className="rounded-xl bg-rose-50 p-3.5 dark:bg-rose-900/30">
-                  <p className="text-macro-fat mb-1 text-xs font-bold uppercase">{t('common.fat')}</p>
-                  <p className="text-macro-fat text-xl font-bold">
+                  <p className="text-macro-fat mb-1 text-xs font-semibold uppercase">{t('common.fat')}</p>
+                  <p className="text-macro-fat text-xl font-semibold">
                     {ing.fatPer100}
                     <span className="text-macro-fat text-xs font-medium">g</span>
                   </p>
                 </div>
               </div>
               <div className="bg-primary-subtle rounded-xl p-3.5">
-                <p className="text-primary mb-1 text-xs font-bold uppercase">{t('common.fiber')}</p>
-                <p className="text-primary-emphasis text-xl font-bold">
+                <p className="text-primary mb-1 text-xs font-semibold uppercase">{t('common.fiber')}</p>
+                <p className="text-primary-emphasis text-xl font-semibold">
                   {ing.fiberPer100}
                   <span className="text-primary text-xs font-medium">g</span>
                 </p>
@@ -471,7 +471,7 @@ export const IngredientManager = ({
         message={
           <p>
             {t('ingredient.confirmDeleteMsg')}{' '}
-            <span className="text-foreground font-bold">&quot;{deleteConfirmation.ingredientName}&quot;</span>?
+            <span className="text-foreground font-semibold">&quot;{deleteConfirmation.ingredientName}&quot;</span>?
           </p>
         }
         confirmLabel={t('common.deleteNow')}

@@ -159,7 +159,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-lg font-bold">{t('fitness.scheduleEditor.title')}</h1>
+          <h1 className="text-lg font-semibold">{t('fitness.scheduleEditor.title')}</h1>
         </header>
 
         <div
@@ -193,7 +193,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="flex-1 text-lg font-bold">{t('fitness.scheduleEditor.title')}</h1>
+        <h1 className="flex-1 text-lg font-semibold">{t('fitness.scheduleEditor.title')}</h1>
       </header>
 
       {/* Scrollable content */}
@@ -204,7 +204,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
             <CalendarDays className="text-primary h-4 w-4" />
             {t('fitness.scheduleEditor.stepDays')}
           </h2>
-          <div className="bg-card border-border rounded-xl border p-3 shadow-sm">
+          <div className="bg-card border-border rounded-xl border p-4 shadow-sm">
             <WeeklyCalendarStrip trainingDays={localTrainingDays} onDayToggle={handleDayToggle} interactive />
           </div>
         </section>
@@ -270,7 +270,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
           disabled={!hasChanges}
           onClick={handleSave}
           className={[
-            'flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold shadow-md',
+            'flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold shadow-md',
             'touch-manipulation transition-colors motion-reduce:transition-none',
             'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
             hasChanges

@@ -82,7 +82,7 @@ export const WorkoutAssignmentList = React.memo(function WorkoutAssignmentList({
         <li
           key={day.id}
           data-testid={`workout-item-${day.id}`}
-          className="bg-card border-border flex items-center gap-2 rounded-xl border p-3 shadow-sm"
+          className="bg-card border-border flex items-center gap-2 rounded-xl border p-4 shadow-sm"
         >
           {/* Drag handle */}
           <div

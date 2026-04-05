@@ -15,7 +15,7 @@ export const PlanGeneratedCard = () => {
   return (
     <div
       data-testid="plan-generated-card"
-      className="from-primary/90 to-primary relative mb-4 rounded-2xl bg-gradient-to-br p-5 text-white"
+      className="from-primary/90 to-primary relative mb-4 rounded-2xl bg-gradient-to-br p-4 text-white"
     >
       <button
         data-testid="dismiss-celebration"
@@ -32,7 +32,7 @@ export const PlanGeneratedCard = () => {
           <PartyPopper className="h-6 w-6" aria-hidden="true" />
         </div>
         <div>
-          <h3 className="text-lg font-bold">{t('fitness.celebration.title')}</h3>
+          <h3 className="text-lg font-semibold">{t('fitness.celebration.title')}</h3>
           <p className="text-sm text-white/90">{t('fitness.celebration.subtitle')}</p>
         </div>
       </div>

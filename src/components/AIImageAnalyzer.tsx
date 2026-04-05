@@ -70,21 +70,21 @@ export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerP
       {!image && !result && (
         <div className="text-muted-foreground mb-6 flex items-center justify-center gap-4 text-xs sm:gap-6 sm:text-sm">
           <div className="flex items-center gap-1.5">
-            <span className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold">
+            <span className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
               1
             </span>
             <span>{t('ai.step1')}</span>
           </div>
           <ArrowRight className="text-muted-foreground h-4 w-4" aria-hidden="true" />
           <div className="flex items-center gap-1.5">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
               2
             </span>
             <span>{t('ai.step2')}</span>
           </div>
           <ArrowRight className="text-muted-foreground h-4 w-4" aria-hidden="true" />
           <div className="flex items-center gap-1.5">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 text-xs font-semibold text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
               3
             </span>
             <span>{t('ai.step3')}</span>
@@ -98,7 +98,7 @@ export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerP
           <button
             onClick={handleAnalyze}
             disabled={!image || isAnalyzing}
-            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 font-bold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 font-semibold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isAnalyzing ? (
               <>

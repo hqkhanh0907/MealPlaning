@@ -93,7 +93,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
   return (
     <div className="flex flex-1 flex-col" data-testid="nutrition-goal-step">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="text-foreground mb-1 text-xl font-bold">{t('goal.title')}</h2>
+        <h2 className="text-foreground mb-1 text-xl font-semibold">{t('goal.title')}</h2>
         <p className="text-muted-foreground mb-6 text-sm">{t('goal.subtitle')}</p>
 
         {/* Goal Type */}

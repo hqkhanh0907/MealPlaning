@@ -48,7 +48,7 @@ export function WorkoutSummaryCard({
             ))}
           </div>
         )}
-        <h2 className="mb-6 text-2xl font-bold">{t('fitness.summary.title')}</h2>
+        <h2 className="mb-6 text-2xl font-semibold">{t('fitness.summary.title')}</h2>
         <div className="w-full max-w-sm space-y-3">
           <div className="bg-muted flex items-center gap-3 rounded-lg p-3">
             <Clock className="text-info h-5 w-5" aria-hidden="true" />

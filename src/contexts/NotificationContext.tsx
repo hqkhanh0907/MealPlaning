@@ -164,7 +164,7 @@ const Toast = ({ toast, onDismiss }: { toast: ToastItem; onDismiss: (id: string)
               toast.action?.onClick();
               handleDismiss();
             }}
-            className="focus-visible:ring-ring text-primary hover:text-primary-emphasis active:text-primary mt-1.5 flex min-h-10 items-center rounded text-xs font-bold underline underline-offset-2 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
+            className="focus-visible:ring-ring text-primary hover:text-primary-emphasis active:text-primary mt-1.5 flex min-h-10 items-center rounded text-xs font-semibold underline underline-offset-2 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
           >
             {toast.action.label}
           </button>

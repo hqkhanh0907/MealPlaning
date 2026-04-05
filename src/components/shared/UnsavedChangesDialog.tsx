@@ -26,25 +26,25 @@ export const UnsavedChangesDialog = ({ isOpen, onSave, onDiscard, onCancel }: Un
           <div className="bg-warning/10 text-warning mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
             <Save className="h-6 w-6" />
           </div>
-          <h4 className="text-foreground mb-2 text-xl font-bold">{t('unsavedChanges.title')}</h4>
+          <h4 className="text-foreground mb-2 text-xl font-semibold">{t('unsavedChanges.title')}</h4>
           <p className="text-foreground-secondary mb-6">{t('unsavedChanges.description')}</p>
           <div className="flex flex-col gap-2">
             <button
               onClick={onSave}
-              className="bg-primary text-primary-foreground hover:bg-primary min-h-12 w-full rounded-xl py-3 font-bold transition-all active:scale-[0.98]"
+              className="bg-primary text-primary-foreground hover:bg-primary min-h-12 w-full rounded-xl py-3 font-semibold transition-all active:scale-[0.98]"
             >
               {t('unsavedChanges.saveAndBack')}
             </button>
             <button
               onClick={onDiscard}
               data-testid="btn-discard-unsaved"
-              className="text-color-rose hover:bg-color-rose/10 min-h-12 w-full rounded-xl py-3 font-bold transition-all active:scale-[0.98]"
+              className="text-color-rose hover:bg-color-rose/10 min-h-12 w-full rounded-xl py-3 font-semibold transition-all active:scale-[0.98]"
             >
               {t('unsavedChanges.discard')}
             </button>
             <button
               onClick={onCancel}
-              className="text-muted-foreground hover:bg-accent min-h-12 w-full rounded-xl py-3 font-bold transition-all active:scale-[0.98]"
+              className="text-muted-foreground hover:bg-accent min-h-12 w-full rounded-xl py-3 font-semibold transition-all active:scale-[0.98]"
             >
               {t('unsavedChanges.stayEditing')}
             </button>

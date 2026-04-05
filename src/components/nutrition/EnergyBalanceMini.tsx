@@ -73,7 +73,7 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
       <div className="flex flex-col items-center gap-0.5">
         <div className="flex items-center gap-1">
           <Target className="text-muted-foreground h-3.5 w-3.5" aria-hidden="true" />
-          <span data-testid="mini-net" className={`text-sm font-bold tabular-nums ${netColorClass}`}>
+          <span data-testid="mini-net" className={`text-sm font-semibold tabular-nums ${netColorClass}`}>
             {net}
           </span>
         </div>

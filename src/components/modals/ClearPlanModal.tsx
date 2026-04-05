@@ -110,7 +110,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
       <div className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl">
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-5 sm:px-8 sm:py-6">
           <div>
-            <h3 className="text-foreground text-xl font-bold">{t('clearPlan.title')}</h3>
+            <h3 className="text-foreground text-xl font-semibold">{t('clearPlan.title')}</h3>
             <p className="text-muted-foreground text-sm">{t('clearPlan.subtitle')}</p>
           </div>
           <button
@@ -130,7 +130,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 type="button"
                 data-testid={`meal-toggle-${type}`}
                 onClick={() => toggleMeal(type)}
-                className={`flex-1 rounded-xl border-2 px-3 py-2 text-sm font-bold transition-all ${
+                className={`flex-1 rounded-xl border-2 px-3 py-2 text-sm font-semibold transition-all ${
                   selectedMeals.has(type)
                     ? 'border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'
                     : 'border-border text-muted-foreground'
@@ -164,7 +164,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 </div>
                 <div className="flex-1 text-left">
                   <p
-                    className={`text-lg font-bold ${count > 0 ? 'text-foreground group-hover:text-rose-700 dark:group-hover:text-rose-400' : 'text-muted-foreground'}`}
+                    className={`text-lg font-semibold ${count > 0 ? 'text-foreground group-hover:text-rose-700 dark:group-hover:text-rose-400' : 'text-muted-foreground'}`}
                   >
                     {label}
                   </p>
@@ -174,7 +174,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                   )}
                 </div>
                 {count > 0 && (
-                  <span className="bg-color-rose/10 text-color-rose shrink-0 rounded-full px-2.5 py-1 text-xs font-bold">
+                  <span className="bg-color-rose/10 text-color-rose shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold">
                     {t('clearPlan.dayCount', { count })}
                   </span>
                 )}

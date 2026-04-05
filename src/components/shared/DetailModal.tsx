@@ -22,7 +22,7 @@ export const DetailModal = ({ title, editLabel, onClose, onEdit, children }: Det
       >
         {/* Header */}
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
-          <h4 className="text-foreground text-lg font-bold">{title}</h4>
+          <h4 className="text-foreground text-lg font-semibold">{title}</h4>
           <div className="flex items-center gap-1">
             <button
               onClick={onEdit}
@@ -51,7 +51,7 @@ export const DetailModal = ({ title, editLabel, onClose, onEdit, children }: Det
         <div className="px-6 pb-6">
           <button
             onClick={onEdit}
-            className="bg-primary text-primary-foreground hover:bg-primary flex w-full items-center justify-center gap-2 rounded-xl py-3 font-bold transition-all"
+            className="bg-primary text-primary-foreground hover:bg-primary flex w-full items-center justify-center gap-2 rounded-xl py-3 font-semibold transition-all"
           >
             <Edit3 className="h-5 w-5" /> {editLabel}
           </button>

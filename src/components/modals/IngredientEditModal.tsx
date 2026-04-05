@@ -152,7 +152,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
       <ModalBackdrop onClose={handleClose} zIndex="z-60">
         <div className="bg-card relative max-h-[90dvh] w-full overflow-hidden overflow-y-auto overscroll-contain rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl">
           <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
-            <h4 className="text-foreground text-lg font-bold">
+            <h4 className="text-foreground text-lg font-semibold">
               {editingItem ? t('ingredient.editExisting') : t('ingredient.createNew')}
             </h4>
             <button
@@ -261,7 +261,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
               <button
                 type="submit"
                 data-testid="btn-save-ingredient"
-                className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-lg font-bold shadow-sm transition-all"
+                className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-lg font-semibold shadow-sm transition-all"
               >
                 <Save className="h-5 w-5" aria-hidden="true" /> {t('ingredient.saveIngredient')}
               </button>

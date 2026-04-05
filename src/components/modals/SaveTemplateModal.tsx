@@ -158,7 +158,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
       >
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-5 sm:px-8 sm:py-6">
           <div>
-            <h3 className="text-foreground text-xl font-bold">{t('template.saveTitle')}</h3>
+            <h3 className="text-foreground text-xl font-semibold">{t('template.saveTitle')}</h3>
             <p className="text-muted-foreground text-sm">{t('template.saveSubtitle')}</p>
           </div>
           <button
@@ -277,7 +277,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
           <button
             data-testid="btn-save-template"
             onClick={rhfSubmit(onFormSubmit)}
-            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-6 py-3 font-bold shadow-sm transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-6 py-3 font-semibold shadow-sm transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
             {t('template.save')}

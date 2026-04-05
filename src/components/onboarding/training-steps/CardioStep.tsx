@@ -25,7 +25,7 @@ export function CardioStep({ form, goNext, goBack }: Readonly<StepProps>) {
             aria-pressed={field.field.value === n}
             onClick={() => field.field.onChange(n)}
             className={cn(
-              'focus-visible:ring-ring flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none',
+              'focus-visible:ring-ring flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none',
               field.field.value === n
                 ? 'border-primary bg-primary-subtle text-primary-emphasis'
                 : 'border-border text-foreground-secondary',

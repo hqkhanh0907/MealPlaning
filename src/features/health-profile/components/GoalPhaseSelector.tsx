@@ -216,7 +216,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef, onValidityChange }: GoalP
 
   return (
     <div className="space-y-6" data-testid="goal-phase-selector">
-      {!embedded && <h3 className="text-foreground text-lg font-bold">{t('goal.title')}</h3>}
+      {!embedded && <h3 className="text-foreground text-lg font-semibold">{t('goal.title')}</h3>}
 
       {/* Goal Type Buttons — unified with onboarding NutritionGoalStep */}
       <fieldset className="m-0 space-y-3 border-0 p-0" aria-label={t('goal.title')}>
@@ -305,7 +305,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef, onValidityChange }: GoalP
       <div className="bg-muted space-y-3 rounded-xl p-4">
         <div className="flex items-center justify-between">
           <span className="text-foreground text-sm font-medium">{t('goal.calorieOffset')}</span>
-          <span data-testid="calorie-offset-display" className="text-foreground text-lg font-bold">
+          <span data-testid="calorie-offset-display" className="text-foreground text-lg font-semibold">
             {formatOffset(effectiveOffset)}
           </span>
         </div>
@@ -355,7 +355,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef, onValidityChange }: GoalP
           type="button"
           data-testid="save-goal-button"
           onClick={() => void handleSave()}
-          className="bg-primary text-primary-foreground hover:bg-primary/80 active:bg-primary/70 w-full rounded-xl py-3 font-bold transition-all"
+          className="bg-primary text-primary-foreground hover:bg-primary/80 active:bg-primary/70 w-full rounded-xl py-3 font-semibold transition-all"
         >
           {t('goal.save')}
         </button>

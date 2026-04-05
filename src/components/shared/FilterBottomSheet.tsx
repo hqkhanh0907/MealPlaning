@@ -138,7 +138,7 @@ export const FilterBottomSheet = ({ config, onChange, onClose }: FilterBottomShe
               type="button"
               data-testid="filter-apply-btn"
               onClick={handleApply}
-              className="bg-primary text-primary-foreground hover:bg-primary min-h-11 flex-1 rounded-xl px-4 py-3 text-sm font-bold transition-all active:scale-[0.98]"
+              className="bg-primary text-primary-foreground hover:bg-primary min-h-11 flex-1 rounded-xl px-4 py-3 text-sm font-semibold transition-all active:scale-[0.98]"
             >
               {t('filter.apply')}
             </button>

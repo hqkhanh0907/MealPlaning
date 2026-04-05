@@ -17,7 +17,7 @@ export function DeloadModal({ isOpen, reason, onAccept, onOverride }: Readonly<D
   return (
     <ModalBackdrop onClose={onAccept}>
       <div className="bg-card rounded-2xl p-6" data-testid="deload-modal">
-        <h3 className="text-warning text-lg font-bold">🔄 {t('fitness.deload.title')}</h3>
+        <h3 className="text-warning text-lg font-semibold">🔄 {t('fitness.deload.title')}</h3>
         <p className="text-foreground-secondary mt-2 text-sm">{t('fitness.deload.explanation')}</p>
         <p className="text-muted-foreground mt-1 text-xs">{reason}</p>
         <div className="mt-4 flex gap-3">

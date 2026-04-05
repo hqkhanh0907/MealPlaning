@@ -76,7 +76,7 @@ export function WelcomeSlides({ step, goNext, goToSection }: Readonly<WelcomeSli
         <div className="bg-primary/10 text-primary mb-8 flex h-24 w-24 items-center justify-center rounded-2xl">
           {slide.icon}
         </div>
-        <h1 className="text-foreground mb-4 text-2xl font-bold">{t(slide.titleKey)}</h1>
+        <h1 className="text-foreground mb-4 text-2xl font-semibold">{t(slide.titleKey)}</h1>
         <p className="text-muted-foreground max-w-sm text-base leading-relaxed">{t(slide.descKey)}</p>
       </div>
 

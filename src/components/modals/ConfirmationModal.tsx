@@ -68,20 +68,20 @@ export const ConfirmationModal = ({
           >
             {icon || defaultIcon}
           </div>
-          <h4 className="text-foreground mb-2 text-xl font-bold">{title}</h4>
+          <h4 className="text-foreground mb-2 text-xl font-semibold">{title}</h4>
           <div className="text-foreground-secondary mb-6">{message}</div>
           <div className="flex gap-3">
             <button
               data-testid="btn-cancel-action"
               onClick={onCancel}
-              className="text-foreground-secondary hover:bg-accent active:bg-muted min-h-12 flex-1 rounded-xl py-3 font-bold transition-all"
+              className="text-foreground-secondary hover:bg-accent active:bg-muted min-h-12 flex-1 rounded-xl py-3 font-semibold transition-all"
             >
               {cancelLabel ?? t('common.cancel')}
             </button>
             <button
               data-testid="btn-confirm-action"
               onClick={onConfirm}
-              className={`flex-1 ${styles.btnBg} rounded-xl py-3 font-bold text-white shadow-sm ${styles.btnShadow} ${styles.btnHover} min-h-12 transition-all active:scale-[0.98]`}
+              className={`flex-1 ${styles.btnBg} rounded-xl py-3 font-semibold text-white shadow-sm ${styles.btnShadow} ${styles.btnHover} min-h-12 transition-all active:scale-[0.98]`}
             >
               {confirmLabel ?? t('common.confirm')}
             </button>

@@ -31,7 +31,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
   return (
     <div className="flex flex-1 flex-col" data-testid="health-basic-step">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="text-foreground mb-1 text-xl font-bold">{t('onboarding.health.title')}</h2>
+        <h2 className="text-foreground mb-1 text-xl font-semibold">{t('onboarding.health.title')}</h2>
         <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.health.subtitle')}</p>
 
         <div className="space-y-4">

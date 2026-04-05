@@ -31,7 +31,7 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
   return (
     <div className="flex flex-1 flex-col" data-testid="training-core-step">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="text-foreground mb-1 text-xl font-bold">{t('fitness.onboarding.step1Title')}</h2>
+        <h2 className="text-foreground mb-1 text-xl font-semibold">{t('fitness.onboarding.step1Title')}</h2>
         <p className="text-muted-foreground mb-6 text-sm">{t('fitness.onboarding.step1Desc')}</p>
 
         {/* Training Goal */}
@@ -93,7 +93,7 @@ export function TrainingCoreStep({ form, goNext, goBack }: Readonly<TrainingCore
                 aria-pressed={daysField.field.value === d}
                 onClick={() => daysField.field.onChange(d)}
                 className={cn(
-                  'focus-visible:ring-ring flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none',
+                  'focus-visible:ring-ring flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none',
                   daysField.field.value === d
                     ? 'border-primary bg-primary-subtle text-primary-emphasis'
                     : 'border-border text-foreground-secondary',

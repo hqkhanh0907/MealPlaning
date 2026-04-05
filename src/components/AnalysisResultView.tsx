@@ -33,7 +33,7 @@ const AnalysisSkeleton = () => {
         <Skeleton className="mb-3 h-5 w-48" />
         <div className="space-y-2">
           {['skeleton-ing-1', 'skeleton-ing-2', 'skeleton-ing-3'].map(id => (
-            <div key={id} className="bg-card border-border-subtle flex justify-between rounded-xl border p-3">
+            <div key={id} className="bg-card border-border-subtle flex justify-between rounded-xl border p-4">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 w-16" />
             </div>
@@ -56,7 +56,7 @@ const EmptyState = () => {
         <ImageIcon className="dark:text-primary/40 text-primary/40 h-12 w-12" />
       </div>
       <div className="space-y-2">
-        <h4 className="text-foreground text-lg font-bold">{t('ai.title')}</h4>
+        <h4 className="text-foreground text-lg font-semibold">{t('ai.title')}</h4>
         <p className="text-muted-foreground mx-auto max-w-xs text-sm leading-relaxed">{t('ai.emptyHint')}</p>
       </div>
     </div>
@@ -102,7 +102,7 @@ const IngredientCard = ({ ing }: { ing: AnalyzedIngredient }) => {
   const n = calculateIngredientNutrition(toTempIngredient(ing), ing.amount);
   const { t } = useTranslation();
   return (
-    <div className="bg-card border-border-subtle rounded-xl border p-3">
+    <div className="bg-card border-border-subtle rounded-xl border p-4">
       <div className="mb-2 flex items-center justify-between">
         <p className="text-foreground text-sm font-semibold">{ing.name}</p>
         <span className="text-muted-foreground text-xs font-medium">
@@ -111,19 +111,19 @@ const IngredientCard = ({ ing }: { ing: AnalyzedIngredient }) => {
       </div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="text-center">
-          <p className="text-muted-foreground text-xs font-bold uppercase">{t('common.calories')}</p>
+          <p className="text-muted-foreground text-xs font-semibold uppercase">{t('common.calories')}</p>
           <p className="text-color-energy text-sm font-semibold">{Math.round(n.calories)}</p>
         </div>
         <div className="text-center">
-          <p className="text-muted-foreground text-xs font-bold uppercase">{t('common.protein')}</p>
+          <p className="text-muted-foreground text-xs font-semibold uppercase">{t('common.protein')}</p>
           <p className="text-macro-protein text-sm font-semibold">{Math.round(n.protein)}g</p>
         </div>
         <div className="text-center">
-          <p className="text-muted-foreground text-xs font-bold uppercase">{t('common.carbs')}</p>
+          <p className="text-muted-foreground text-xs font-semibold uppercase">{t('common.carbs')}</p>
           <p className="text-macro-carbs text-sm font-semibold">{Math.round(n.carbs)}g</p>
         </div>
         <div className="text-center">
-          <p className="text-muted-foreground text-xs font-bold uppercase">{t('common.fat')}</p>
+          <p className="text-muted-foreground text-xs font-semibold uppercase">{t('common.fat')}</p>
           <p className="text-macro-fat text-sm font-semibold">{Math.round(n.fat)}g</p>
         </div>
       </div>
@@ -139,7 +139,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-foreground mb-2 text-2xl font-bold">{result.name}</h3>
+        <h3 className="text-foreground mb-2 text-2xl font-semibold">{result.name}</h3>
         <p className="text-foreground-secondary leading-relaxed">{result.description}</p>
       </div>
 
@@ -166,7 +166,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
       </div>
 
       <div>
-        <h4 className="text-foreground mb-3 font-bold">{t('ai.ingredientDetail')}</h4>
+        <h4 className="text-foreground mb-3 font-semibold">{t('ai.ingredientDetail')}</h4>
 
         {/* Desktop: Table view */}
         <div className="hidden overflow-x-auto sm:block">
@@ -198,14 +198,14 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
       </div>
 
       <div className="border-color-ai/20 bg-color-ai-subtle text-color-ai rounded-xl border p-4 text-sm">
-        <p className="mb-1 font-bold">{t('ai.disclaimer')}</p>
+        <p className="mb-1 font-semibold">{t('ai.disclaimer')}</p>
         <p className="opacity-80">{t('ai.disclaimerText')}</p>
       </div>
 
       {onOpenSaveModal && (
         <button
           onClick={onOpenSaveModal}
-          className="bg-color-ai hover:bg-color-ai/90 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-bold text-white transition-all"
+          className="bg-color-ai hover:bg-color-ai/90 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-semibold text-white transition-all"
         >
           <Save className="h-5 w-5" aria-hidden="true" />
           {t('ai.saveToLibrary')}

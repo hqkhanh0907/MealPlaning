@@ -126,14 +126,14 @@ export const AiInsightCard = React.memo(function AiInsightCard() {
     <section
       data-testid="ai-insight-card"
       aria-label={`${iconPrefix} ${currentInsight.title}`}
-      className={`relative min-h-[56px] rounded-lg border-l-4 ${colors.border} ${colors.bg} flex items-start gap-3 p-3`}
+      className={`relative min-h-[56px] rounded-lg border-l-4 ${colors.border} ${colors.bg} flex items-start gap-3 p-4`}
     >
       <div className="mt-0.5 flex-shrink-0" data-testid="insight-icon">
         <IconComponent className={`h-5 w-5 ${colors.icon}`} />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p data-testid="insight-title" className={`text-sm leading-tight font-bold ${colors.title}`}>
+        <p data-testid="insight-title" className={`text-sm leading-tight font-semibold ${colors.title}`}>
           {currentInsight.title}
         </p>
         <p data-testid="insight-message" className={`mt-0.5 text-xs leading-snug ${colors.message}`}>

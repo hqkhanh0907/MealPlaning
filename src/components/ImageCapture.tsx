@@ -155,7 +155,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
               <p className="mb-6 font-medium text-white">{cameraError}</p>
               <button
                 onClick={stopCamera}
-                className="bg-card text-foreground hover:bg-accent rounded-xl px-6 py-2 font-bold transition-all"
+                className="bg-card text-foreground hover:bg-accent rounded-xl px-6 py-2 font-semibold transition-all"
               >
                 {t('imageCapture.closeCamera')}
               </button>
@@ -208,7 +208,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
               />
               <button
                 onClick={onClear}
-                className="bg-card/90 text-foreground hover:bg-card absolute top-4 right-4 rounded-xl px-4 py-2 text-sm font-bold shadow-sm backdrop-blur transition-all"
+                className="bg-card/90 text-foreground hover:bg-card absolute top-4 right-4 rounded-xl px-4 py-2 text-sm font-semibold shadow-sm backdrop-blur transition-all"
               >
                 {t('imageCapture.chooseAnother')}
               </button>
@@ -225,7 +225,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
                       <div className="bg-primary/10 flex h-14 w-14 items-center justify-center rounded-full shadow-sm transition-all">
                         <Camera className="text-primary h-6 w-6" />
                       </div>
-                      <span className="text-primary-emphasis text-sm font-bold">{t('imageCapture.takePhoto')}</span>
+                      <span className="text-primary-emphasis text-sm font-semibold">{t('imageCapture.takePhoto')}</span>
                     </button>
                     <div className="bg-muted h-20 w-px self-center"></div>
                   </>
@@ -237,7 +237,7 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
                   <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full transition-all">
                     <Upload className="text-muted-foreground h-6 w-6" />
                   </div>
-                  <span className="text-muted-foreground text-sm font-bold">{t('imageCapture.uploadImage')}</span>
+                  <span className="text-muted-foreground text-sm font-semibold">{t('imageCapture.uploadImage')}</span>
                 </button>
               </div>
               <p className="text-muted-foreground mt-2 text-center text-xs">

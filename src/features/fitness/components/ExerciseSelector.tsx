@@ -161,7 +161,7 @@ export function ExerciseSelector({
         </div>
 
         {/* Title */}
-        <h2 className="text-foreground px-4 pb-2 text-center text-lg font-bold">
+        <h2 className="text-foreground px-4 pb-2 text-center text-lg font-semibold">
           {t('fitness.exerciseSelector.title')}
         </h2>
 

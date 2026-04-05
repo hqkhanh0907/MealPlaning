@@ -470,7 +470,7 @@ export default function App() {
               <Utensils className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
             <div>
-              <h1 className="text-foreground text-lg font-bold tracking-tight sm:text-xl">
+              <h1 className="text-foreground text-lg font-semibold tracking-tight sm:text-xl">
                 <span className="sm:hidden">{getTabLabels(t)[activeMainTab]}</span>
                 <span className="hidden sm:inline">Smart Meal Planner</span>
               </h1>
@@ -580,7 +580,7 @@ export default function App() {
                 <div className="border-border flex items-center justify-between border-b pb-4">
                   <div className="flex items-center gap-3">
                     <Bot className="text-primary h-6 w-6" />
-                    <h2 className="text-foreground text-2xl font-bold">{t('ai.title')}</h2>
+                    <h2 className="text-foreground text-2xl font-semibold">{t('ai.title')}</h2>
                   </div>
                 </div>
                 <AIImageAnalyzer onAnalysisComplete={handleAnalysisComplete} onSave={handleSaveAnalyzedDish} />
@@ -721,7 +721,7 @@ export default function App() {
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              <h2 className="text-foreground text-lg font-bold">{t('nav.settings')}</h2>
+              <h2 className="text-foreground text-lg font-semibold">{t('nav.settings')}</h2>
             </div>
           </div>
           <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">

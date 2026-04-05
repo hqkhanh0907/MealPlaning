@@ -148,7 +148,7 @@ export function PlanComputingScreen({ form, goNext, goBack }: Readonly<PlanCompu
         <div className="border-t-primary border-primary/20 h-16 w-16 rounded-full border-4" />
       </motion.div>
 
-      <h2 className="text-foreground mb-2 text-lg font-bold">
+      <h2 className="text-foreground mb-2 text-lg font-semibold">
         {t('onboarding.computing.title', { name: form.getValues().name })}
       </h2>
       <p className="text-muted-foreground mb-8 text-center text-sm">{t('onboarding.computing.subtitle')}</p>

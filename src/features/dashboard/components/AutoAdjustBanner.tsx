@@ -63,7 +63,7 @@ export const AutoAdjustBanner = React.memo(function AutoAdjustBanner({
           <AlertTriangle className="h-5 w-5 text-white" data-testid="banner-icon" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
-          <p data-testid="banner-title" className="text-sm leading-tight font-bold text-white">
+          <p data-testid="banner-title" className="text-sm leading-tight font-semibold text-white">
             {t('adjustBanner.title')}
           </p>
           <p data-testid="banner-body" className="mt-1 text-xs leading-snug text-white/90">

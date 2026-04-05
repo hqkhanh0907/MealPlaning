@@ -55,7 +55,7 @@ export const MilestonesList = React.memo(function MilestonesList() {
       {isExpanded && (
         <div data-testid="milestones-content" className="mt-2 space-y-3">
           {nextMilestone && (
-            <div className="bg-card rounded-lg p-3 shadow-sm">
+            <div className="bg-card rounded-lg p-4 shadow-sm">
               <p className="text-muted-foreground mb-2 text-sm">
                 {t('fitness.gamification.nextMilestone')}: {nextMilestone.emoji}{' '}
                 {t(`fitness.gamification.${nextMilestone.label}`)}

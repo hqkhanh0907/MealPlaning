@@ -143,7 +143,7 @@ export const AISuggestionPreviewModal = ({
               <Sparkles className="text-color-ai h-5 w-5" aria-hidden="true" />
             </div>
             <div>
-              <h3 className="text-foreground text-lg font-bold">{t('ai.suggestionTitle')}</h3>
+              <h3 className="text-foreground text-lg font-semibold">{t('ai.suggestionTitle')}</h3>
               <p className="text-muted-foreground text-xs">{t('ai.suggestionDesc')}</p>
             </div>
           </div>
@@ -165,7 +165,7 @@ export const AISuggestionPreviewModal = ({
                 <Sparkles className="text-color-ai h-6 w-6" />
               </div>
               <div className="text-center">
-                <p className="text-foreground text-lg font-bold">{t('ai.suggestionLoading')}</p>
+                <p className="text-foreground text-lg font-semibold">{t('ai.suggestionLoading')}</p>
                 <p className="text-muted-foreground mt-1 text-sm">{t('ai.suggestionLoadingHint')}</p>
               </div>
               <div className="bg-muted h-2 w-48 overflow-hidden rounded-full">
@@ -181,7 +181,7 @@ export const AISuggestionPreviewModal = ({
                 <AlertCircle className="text-destructive h-6 w-6" />
               </div>
               <div className="text-center">
-                <p className="text-foreground text-lg font-bold">{t('ai.suggestionError')}</p>
+                <p className="text-foreground text-lg font-semibold">{t('ai.suggestionError')}</p>
                 <p className="text-muted-foreground mt-1 text-sm">{error}</p>
               </div>
               <button
@@ -201,7 +201,7 @@ export const AISuggestionPreviewModal = ({
                 <ChefHat className="text-status-warning h-6 w-6" />
               </div>
               <div className="text-center">
-                <p className="text-foreground text-lg font-bold">{t('ai.suggestionEmpty')}</p>
+                <p className="text-foreground text-lg font-semibold">{t('ai.suggestionEmpty')}</p>
                 <p className="text-muted-foreground mt-1 text-sm">{t('ai.suggestionEmptyHint')}</p>
               </div>
               <button
@@ -266,7 +266,7 @@ export const AISuggestionPreviewModal = ({
                             className="text-primary focus:ring-ring border-border h-5 w-5 rounded"
                           />
                           <span
-                            className={`text-sm font-bold tracking-wider uppercase ${isSelected ? colors.text : 'text-muted-foreground'}`}
+                            className={`text-sm font-semibold tracking-wider uppercase ${isSelected ? colors.text : 'text-muted-foreground'}`}
                           >
                             {(() => {
                               const Icon = MEAL_TYPE_ICONS[type];
@@ -326,7 +326,7 @@ export const AISuggestionPreviewModal = ({
                     <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase">
                       {t('ai.totalSelected')}
                     </p>
-                    <p className="text-foreground text-lg font-bold">
+                    <p className="text-foreground text-lg font-semibold">
                       {nutritionSummary.calories} kcal · {nutritionSummary.protein}g protein
                     </p>
                   </div>
@@ -401,7 +401,7 @@ export const AISuggestionPreviewModal = ({
               <button
                 onClick={() => onApply(selectedMeals)}
                 disabled={!hasAnySelected}
-                className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex items-center gap-2 rounded-xl px-6 py-2.5 font-bold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex items-center gap-2 rounded-xl px-6 py-2.5 font-semibold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                 {t('common.apply')}

@@ -250,7 +250,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
                   })}
                 </p>
                 {data.completedWorkout.hasPR && (
-                  <p data-testid="pr-highlight" className="text-color-energy text-sm font-bold">
+                  <p data-testid="pr-highlight" className="text-color-energy text-sm font-semibold">
                     {t('dashboard.todaysPlan.prHighlight')}
                   </p>
                 )}

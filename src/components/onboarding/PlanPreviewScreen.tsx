@@ -23,7 +23,7 @@ export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPre
   return (
     <div className="flex flex-1 flex-col" data-testid="plan-preview">
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
-        <h2 className="text-foreground mb-1 text-xl font-bold">
+        <h2 className="text-foreground mb-1 text-xl font-semibold">
           {t('onboarding.preview.title', { name: values.name })}
         </h2>
         <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.preview.subtitle')}</p>
@@ -48,20 +48,20 @@ export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPre
 
         {/* Stats */}
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <div className="bg-muted rounded-xl p-3 text-center">
-            <p className="text-foreground text-lg font-bold">{daysPerWeek}</p>
+          <div className="bg-muted rounded-xl p-4 text-center">
+            <p className="text-foreground text-lg font-semibold">{daysPerWeek}</p>
             <p className="text-muted-foreground text-xs">
               {t('onboarding.preview.workoutDays', { count: daysPerWeek })}
             </p>
           </div>
-          <div className="bg-muted rounded-xl p-3 text-center">
-            <p className="text-foreground text-lg font-bold">{restDays.length}</p>
+          <div className="bg-muted rounded-xl p-4 text-center">
+            <p className="text-foreground text-lg font-semibold">{restDays.length}</p>
             <p className="text-muted-foreground text-xs">
               {t('onboarding.preview.restDays', { count: restDays.length })}
             </p>
           </div>
-          <div className="bg-muted rounded-xl p-3 text-center">
-            <p className="text-foreground text-lg font-bold">{values.sessionDurationMin ?? 60}</p>
+          <div className="bg-muted rounded-xl p-4 text-center">
+            <p className="text-foreground text-lg font-semibold">{values.sessionDurationMin ?? 60}</p>
             <p className="text-muted-foreground text-xs">{t('onboarding.preview.minutesPerSession')}</p>
           </div>
         </div>

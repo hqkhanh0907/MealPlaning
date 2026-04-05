@@ -25,7 +25,7 @@ export const PRToast = React.memo(function PRToast({ pr, onDismiss }: PRToastPro
       onClick={onDismiss}
       aria-label={t('fitness.gamification.newPR')}
     >
-      <p className="flex items-center gap-2 text-lg font-bold text-amber-900">
+      <p className="flex items-center gap-2 text-lg font-semibold text-amber-900">
         <Trophy className="h-5 w-5" aria-hidden="true" />
         {t('fitness.gamification.newPR')}
       </p>

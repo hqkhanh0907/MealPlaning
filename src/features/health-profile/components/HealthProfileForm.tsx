@@ -235,7 +235,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
 
   return (
     <div className="space-y-6" data-testid="health-profile-form">
-      {!embedded && <h3 className="text-foreground text-xl font-bold">{t('healthProfile.title')}</h3>}
+      {!embedded && <h3 className="text-foreground text-xl font-semibold">{t('healthProfile.title')}</h3>}
 
       {/* Name */}
       <FormField label={t('healthProfile.name')} error={errors.name} htmlFor="hp-name" className="">
@@ -462,19 +462,19 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
         <div className="border-primary/20 border-t pt-2">
           <p className="text-foreground mb-2 text-sm font-medium">{t('healthProfile.macroPreview')}</p>
           <div className="grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-3">
-            <div className="bg-card rounded-lg p-2">
+            <div className="bg-card rounded-lg p-4">
               <p className="text-muted-foreground">{t('common.protein')}</p>
               <p className="text-primary font-semibold" data-testid="macro-protein">
                 {macros.proteinG}g
               </p>
             </div>
-            <div className="bg-card rounded-lg p-2">
+            <div className="bg-card rounded-lg p-4">
               <p className="text-muted-foreground">{t('common.fat')}</p>
               <p className="text-macro-fat font-semibold" data-testid="macro-fat">
                 {macros.fatG}g
               </p>
             </div>
-            <div className="bg-card rounded-lg p-2">
+            <div className="bg-card rounded-lg p-4">
               <p className="text-muted-foreground">{t('common.carbs')}</p>
               <p className="text-macro-carbs font-semibold" data-testid="macro-carbs">
                 {macros.carbsG}g

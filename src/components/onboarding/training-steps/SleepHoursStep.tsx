@@ -42,7 +42,7 @@ export function SleepHoursStep({ form, goNext, goBack }: Readonly<StepProps>) {
               aria-pressed={isActive}
               onClick={() => field.field.onChange(hours)}
               className={cn(
-                'focus-visible:ring-ring flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none',
+                'focus-visible:ring-ring flex h-12 w-12 items-center justify-center rounded-xl border-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none',
                 stateClass,
               )}
             >

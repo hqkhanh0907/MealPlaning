@@ -157,7 +157,7 @@ export const GoogleDriveSync = () => {
             <Cloud className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-foreground font-bold">{t('cloudSync.title')}</h3>
+            <h3 className="text-foreground font-semibold">{t('cloudSync.title')}</h3>
             <p className="text-muted-foreground mt-0.5 text-xs">{t('cloudSync.description')}</p>
           </div>
         </div>
@@ -205,7 +205,7 @@ export const GoogleDriveSync = () => {
           <Cloud className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-foreground font-bold">{t('cloudSync.title')}</h3>
+          <h3 className="text-foreground font-semibold">{t('cloudSync.title')}</h3>
           <div className="mt-1 flex items-center gap-2">
             {user.photoUrl && <img src={user.photoUrl} alt="" className="h-5 w-5 rounded-full" />}
             <span className="text-muted-foreground truncate text-xs">{user.email}</span>

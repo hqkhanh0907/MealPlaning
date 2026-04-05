@@ -66,7 +66,7 @@ function DailyScoreHeroInner(): React.ReactElement {
         data-testid="daily-score-hero"
       >
         <p className={`mb-1 text-sm ${textColors.secondary}`}>{greeting}</p>
-        <h2 className={`mb-4 text-xl font-bold ${textColors.primary}`}>{t('dashboard.hero.firstTime.title')}</h2>
+        <h2 className={`mb-4 text-xl font-semibold ${textColors.primary}`}>{t('dashboard.hero.firstTime.title')}</h2>
         <ul className="space-y-2">
           {CHECKLIST_KEYS.map((key, idx) => (
             <li key={key} className={`flex items-center gap-2 text-sm ${textColors.secondary}`}>

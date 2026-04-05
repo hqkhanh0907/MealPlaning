@@ -48,7 +48,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
         <div className="flex items-center gap-3">
           <span
             data-testid="net-calories"
-            className={`text-lg font-bold ${remaining >= 0 ? 'text-primary' : 'text-destructive'}`}
+            className={`text-lg font-semibold ${remaining >= 0 ? 'text-primary' : 'text-destructive'}`}
           >
             {netCalories} {t('nutrition.kcal')}
           </span>

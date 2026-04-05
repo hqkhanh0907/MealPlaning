@@ -22,11 +22,11 @@ function FallbackUI({ onReset }: Readonly<{ onReset: () => void }>) {
         <div className="bg-warning/10 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
           <AlertTriangle aria-hidden="true" className="text-warning h-6 w-6" />
         </div>
-        <h2 className="text-foreground mb-6 text-lg font-bold">{t('onboarding.error.title')}</h2>
+        <h2 className="text-foreground mb-6 text-lg font-semibold">{t('onboarding.error.title')}</h2>
         <button
           type="button"
           onClick={onReset}
-          className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring min-h-[44px] w-full rounded-xl py-3 text-base font-bold transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-[0.98]"
+          className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring min-h-[44px] w-full rounded-xl py-3 text-base font-semibold transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-[0.98]"
         >
           {t('onboarding.error.restart')}
         </button>
