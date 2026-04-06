@@ -204,15 +204,16 @@ const session = await joinSession({
         }
       }
 
-      // Show visible block ONCE per session (first user message)
-      if (!visibleBlockSent) {
-        visibleBlockSent = true;
-        session.send({ prompt: buildVisibleReminder() });
-      }
-
       return {
         additionalContext: REMINDER,
       };
     },
   },
+});
+
+// ─── IDLE EVENT: Show visible block ONCE per session ───
+session.on("session.idle", () => {
+  if (visibleBlockSent) return;
+  visibleBlockSent = true;
+  session.send({ prompt: buildVisibleReminder() });
 });
