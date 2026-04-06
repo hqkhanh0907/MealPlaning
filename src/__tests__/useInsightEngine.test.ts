@@ -10,6 +10,38 @@ import {
 import type { DatabaseService } from '../services/databaseService';
 
 /* ------------------------------------------------------------------ */
+/* Mock useFeedbackLoop (imported by useInsightEngine) */
+/* ------------------------------------------------------------------ */
+const mockApplyAdjustment = vi.fn();
+const mockDismissAdjustment = vi.fn();
+let mockFeedbackAdjustment: {
+  oldTargetCal: number;
+  newTargetCal: number;
+  reason: string;
+  movingAvgWeight: number;
+  triggerType: 'auto';
+} | null = null;
+
+vi.mock('../features/dashboard/hooks/useFeedbackLoop', () => ({
+  useFeedbackLoop: () => ({
+    movingAverage: null,
+    adjustment: mockFeedbackAdjustment,
+    adherence: { calorie: 0, protein: 0 },
+    applyAdjustment: mockApplyAdjustment,
+    dismissAdjustment: mockDismissAdjustment,
+  }),
+  AUTO_ADJUST_CONFIG: {
+    evaluationPeriodDays: 14,
+    minWeightEntries: 10,
+    weightChangeThreshold: 0.2,
+    calorieAdjustment: 150,
+    maxDeficit: 1000,
+    minCalories: 1200,
+    maxSurplus: 700,
+  },
+}));
+
+/* ------------------------------------------------------------------ */
 /* Mock DatabaseContext for hook tests */
 /* ------------------------------------------------------------------ */
 let mockSettingsStore: Record<string, string> = {};
@@ -45,6 +77,118 @@ vi.mock('../services/appSettings', () => ({
 }));
 
 describe('selectInsight', () => {
+  describe('P0: Feedback adjustment (adjust type)', () => {
+    it('returns adjust insight when feedbackAdjustment provided', () => {
+      const input: InsightInput = {
+        feedbackAdjustment: {
+          oldTargetCal: 2000,
+          newTargetCal: 1850,
+          reason: 'Weight loss has stalled during cut phase',
+          movingAvgWeight: 74.5,
+        },
+      };
+      const result = selectInsight(input, [], '2024-01-01');
+      expect(result.priority).toBe(0);
+      expect(result.type).toBe('adjust');
+      expect(result.color).toBe('dark-amber');
+      expect(result.id).toBe('p0-feedback-adjust');
+      expect(result.dismissable).toBe(true);
+      expect(result.actionLabel).toBe('Áp dụng');
+    });
+
+    it('does not trigger when feedbackAdjustment is null', () => {
+      const input: InsightInput = { feedbackAdjustment: null };
+      const result = selectInsight(input, [], '2024-01-01');
+      expect(result.priority).not.toBe(0);
+    });
+
+    it('does not trigger when feedbackAdjustment is undefined', () => {
+      const result = selectInsight({}, [], '2024-01-01');
+      expect(result.priority).not.toBe(0);
+    });
+
+    it('uses bodyGaining message when reason includes "increasing"', () => {
+      const input: InsightInput = {
+        feedbackAdjustment: {
+          oldTargetCal: 2000,
+          newTargetCal: 1850,
+          reason: 'Weight is increasing during cut phase',
+          movingAvgWeight: 75.0,
+        },
+      };
+      const result = selectInsight(input, [], '2024-01-01');
+      expect(result.message).toContain('tăng');
+      expect(result.message).toContain('75.0');
+    });
+
+    it('uses bodyLosing message when reason includes "decreasing"', () => {
+      const input: InsightInput = {
+        feedbackAdjustment: {
+          oldTargetCal: 2500,
+          newTargetCal: 2650,
+          reason: 'Weight is decreasing during bulk phase',
+          movingAvgWeight: 72.0,
+        },
+      };
+      const result = selectInsight(input, [], '2024-01-01');
+      expect(result.message).toContain('giảm');
+      expect(result.message).toContain('72.0');
+    });
+
+    it('uses bodyStalled message for stalled reason', () => {
+      const input: InsightInput = {
+        feedbackAdjustment: {
+          oldTargetCal: 2000,
+          newTargetCal: 1850,
+          reason: 'Weight loss has stalled during cut phase',
+          movingAvgWeight: 74.5,
+        },
+      };
+      const result = selectInsight(input, [], '2024-01-01');
+      expect(result.message).toContain('74.5');
+      expect(result.message).toContain('150');
+    });
+
+    it('computes prevAvg correctly for calorie decrease', () => {
+      const input: InsightInput = {
+        feedbackAdjustment: {
+          oldTargetCal: 2000,
+          newTargetCal: 1850,
+          reason: 'stalled',
+          movingAvgWeight: 74.5,
+        },
+      };
+      const result = selectInsight(input, [], '2024-01-01');
+      expect(result.message).toContain('74.7');
+    });
+
+    it('computes prevAvg correctly for calorie increase', () => {
+      const input: InsightInput = {
+        feedbackAdjustment: {
+          oldTargetCal: 2500,
+          newTargetCal: 2650,
+          reason: 'stalled',
+          movingAvgWeight: 72.0,
+        },
+      };
+      const result = selectInsight(input, [], '2024-01-01');
+      expect(result.message).toContain('71.8');
+    });
+
+    it('title is the adjustment banner title', () => {
+      const input: InsightInput = {
+        feedbackAdjustment: {
+          oldTargetCal: 2000,
+          newTargetCal: 1850,
+          reason: 'stalled',
+          movingAvgWeight: 74.5,
+        },
+      };
+      const result = selectInsight(input, [], '2024-01-01');
+      expect(result.title).toBe('Đề xuất điều chỉnh');
+    });
+  });
+
   describe('P1: Auto-adjust triggered', () => {
     it('returns alert insight when auto-adjust triggered', () => {
       const input: InsightInput = { hasAutoAdjustment: true };
@@ -291,6 +435,20 @@ describe('selectInsight', () => {
   });
 
   describe('Priority ordering', () => {
+    it('P0 overrides P1', () => {
+      const input: InsightInput = {
+        feedbackAdjustment: {
+          oldTargetCal: 2000,
+          newTargetCal: 1850,
+          reason: 'stalled',
+          movingAvgWeight: 74.5,
+        },
+        hasAutoAdjustment: true,
+      };
+      const result = selectInsight(input, [], '2024-01-01');
+      expect(result.priority).toBe(0);
+    });
+
     it('P1 overrides P2', () => {
       const input: InsightInput = {
         hasAutoAdjustment: true,
@@ -514,6 +672,9 @@ describe('TIPS_POOL', () => {
 describe('useInsightEngine', () => {
   beforeEach(() => {
     mockSettingsStore = {};
+    mockFeedbackAdjustment = null;
+    mockApplyAdjustment.mockClear();
+    mockDismissAdjustment.mockClear();
   });
 
   it('returns currentInsight as a tip by default', async () => {
@@ -613,5 +774,112 @@ describe('useInsightEngine', () => {
     expect(new Set(ids).size).toBe(3);
     const stored = JSON.parse(mockSettingsStore['insight_dismissed'] ?? '[]');
     expect(stored.length).toBe(3);
+  });
+
+  describe('adjust insight integration', () => {
+    it('shows adjust insight when useFeedbackLoop returns adjustment', async () => {
+      mockFeedbackAdjustment = {
+        oldTargetCal: 2000,
+        newTargetCal: 1850,
+        reason: 'Weight loss has stalled during cut phase',
+        movingAvgWeight: 74.5,
+        triggerType: 'auto',
+      };
+      const { result } = renderHook(() => useInsightEngine());
+      await waitFor(() => {
+        expect(result.current.currentInsight).not.toBeNull();
+      });
+      expect(result.current.currentInsight?.type).toBe('adjust');
+      expect(result.current.currentInsight?.id).toBe('p0-feedback-adjust');
+      expect(result.current.currentInsight?.priority).toBe(0);
+    });
+
+    it('handleAction calls applyAdjustment for adjust insight', async () => {
+      mockFeedbackAdjustment = {
+        oldTargetCal: 2000,
+        newTargetCal: 1850,
+        reason: 'stalled',
+        movingAvgWeight: 74.5,
+        triggerType: 'auto',
+      };
+      const { result } = renderHook(() => useInsightEngine());
+      await waitFor(() => {
+        expect(result.current.currentInsight?.type).toBe('adjust');
+      });
+
+      act(() => {
+        result.current.handleAction(result.current.currentInsight!);
+      });
+
+      expect(mockApplyAdjustment).toHaveBeenCalledOnce();
+    });
+
+    it('handleAction does not call applyAdjustment for non-adjust insight', async () => {
+      const { result } = renderHook(() => useInsightEngine());
+      await waitFor(() => {
+        expect(result.current.currentInsight).not.toBeNull();
+      });
+      expect(result.current.currentInsight?.type).toBe('tip');
+
+      act(() => {
+        result.current.handleAction(result.current.currentInsight!);
+      });
+
+      expect(mockApplyAdjustment).not.toHaveBeenCalled();
+    });
+
+    it('dismissInsight calls dismissAdjustment for adjust insight', async () => {
+      mockFeedbackAdjustment = {
+        oldTargetCal: 2000,
+        newTargetCal: 1850,
+        reason: 'stalled',
+        movingAvgWeight: 74.5,
+        triggerType: 'auto',
+      };
+      const { result } = renderHook(() => useInsightEngine());
+      await waitFor(() => {
+        expect(result.current.currentInsight?.type).toBe('adjust');
+      });
+
+      act(() => {
+        result.current.dismissInsight('p0-feedback-adjust');
+      });
+
+      expect(mockDismissAdjustment).toHaveBeenCalledOnce();
+    });
+
+    it('dismissInsight does not call dismissAdjustment for other insights', async () => {
+      const { result } = renderHook(() => useInsightEngine());
+      await waitFor(() => {
+        expect(result.current.currentInsight).not.toBeNull();
+      });
+
+      act(() => {
+        result.current.dismissInsight(result.current.currentInsight!.id);
+      });
+
+      expect(mockDismissAdjustment).not.toHaveBeenCalled();
+    });
+
+    it('adjust insight persists to dismissed IDs after action', async () => {
+      mockFeedbackAdjustment = {
+        oldTargetCal: 2000,
+        newTargetCal: 1850,
+        reason: 'stalled',
+        movingAvgWeight: 74.5,
+        triggerType: 'auto',
+      };
+      const { result } = renderHook(() => useInsightEngine());
+      await waitFor(() => {
+        expect(result.current.currentInsight?.type).toBe('adjust');
+      });
+
+      act(() => {
+        result.current.handleAction(result.current.currentInsight!);
+      });
+
+      const stored = JSON.parse(mockSettingsStore['insight_dismissed'] ?? '[]');
+      expect(stored).toContain('p0-feedback-adjust');
+    });
   });
 });

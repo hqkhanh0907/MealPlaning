@@ -217,7 +217,7 @@ describe('Cross-Feature: Nutrition → Dashboard', () => {
     expect(proteinScore).toBeLessThan(100);
   });
 
-  it('DailyScoreHero receives correct macro data through the full pipeline', () => {
+  it('calculateDailyScore receives correct macro data through the full pipeline', () => {
     const plan = mkDayPlan({
       breakfastDishIds: ['dish-egg-rice'],
       lunchDishIds: ['dish-chicken-rice'],
@@ -574,12 +574,12 @@ describe('Cross-Feature: Navigation Integration', () => {
     expect(useNavigationStore.getState().showBottomNav).toBe(true);
   });
 
-  it('QuickActionsBar "Log meal" → navigates to calendar tab', () => {
-    useNavigationStore.getState().navigateTab('calendar');
-    expect(useNavigationStore.getState().activeTab).toBe('calendar');
+  it('QuickActionsBar "Log weight" → navigates to fitness tab', () => {
+    useNavigationStore.getState().navigateTab('fitness');
+    expect(useNavigationStore.getState().activeTab).toBe('fitness');
   });
 
-  it('QuickActionsBar "Start workout" → navigates to fitness tab', () => {
+  it('QuickActionsBar "Log cardio" → navigates to fitness tab', () => {
     useNavigationStore.getState().navigateTab('fitness');
     expect(useNavigationStore.getState().activeTab).toBe('fitness');
   });

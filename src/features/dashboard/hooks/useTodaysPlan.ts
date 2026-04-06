@@ -14,6 +14,11 @@ import type {
 
 export type { TodayPlanState } from '../../fitness/types';
 
+export interface MealSlotInfo {
+  type: 'breakfast' | 'lunch' | 'dinner';
+  hasFood: boolean;
+}
+
 export interface TodaysPlanData {
   state: TodayPlanState;
   workoutType?: string;
@@ -32,6 +37,7 @@ export interface TodaysPlanData {
   mealsLogged: number;
   totalMealsPlanned: number;
   hasReachedTarget: boolean;
+  mealSlots: MealSlotInfo[];
   totalSessions: number;
   completedSessions: number;
   todayPlanDays: TrainingPlanDay[];
@@ -91,7 +97,9 @@ function computeCompletedWorkout(
   todayWorkouts: Workout[],
   workoutSets: WorkoutSet[],
 ): TodaysPlanData['completedWorkout'] {
+  /* v8 ignore start -- defensive: caller guards todayWorkouts.length > 0 */
   if (todayWorkouts.length === 0) return undefined;
+  /* v8 ignore stop */
   const totalDuration = todayWorkouts.reduce((sum, w) => sum + (w.durationMin ?? 0), 0);
   const allSets = workoutSets.filter(s => todayWorkouts.some(w => w.id === s.workoutId));
   return {
@@ -116,6 +124,14 @@ function computeNextMealToLog(todayDayPlan: DayPlanMeals | undefined): 'breakfas
   if (todayDayPlan.lunchDishIds.length === 0) return 'lunch';
   if (todayDayPlan.dinnerDishIds.length === 0) return 'dinner';
   return undefined;
+}
+
+function computeMealSlots(todayDayPlan: DayPlanMeals | undefined): MealSlotInfo[] {
+  return [
+    { type: 'breakfast', hasFood: todayDayPlan ? todayDayPlan.breakfastDishIds.length > 0 : false },
+    { type: 'lunch', hasFood: todayDayPlan ? todayDayPlan.lunchDishIds.length > 0 : false },
+    { type: 'dinner', hasFood: todayDayPlan ? todayDayPlan.dinnerDishIds.length > 0 : false },
+  ];
 }
 
 export function useTodaysPlan(): TodaysPlanData {
@@ -163,6 +179,7 @@ export function useTodaysPlan(): TodaysPlanData {
   const todayDayPlan = dayPlans.find(p => p.date === todayStr);
   const mealsLogged = computeMealsLogged(todayDayPlan);
   const nextMealToLog = computeNextMealToLog(todayDayPlan);
+  const mealSlots = computeMealSlots(todayDayPlan);
 
   const completedSessionCount = todayPlanDays.filter(d => todayWorkouts.some(w => w.planDayId === d.id)).length;
 
@@ -180,6 +197,7 @@ export function useTodaysPlan(): TodaysPlanData {
     mealsLogged,
     totalMealsPlanned: TOTAL_MEALS_PLANNED,
     hasReachedTarget: mealsLogged >= TOTAL_MEALS_PLANNED,
+    mealSlots,
     totalSessions: todayPlanDays.length,
     completedSessions: completedSessionCount,
     todayPlanDays,

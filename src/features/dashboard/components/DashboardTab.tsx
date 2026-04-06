@@ -2,25 +2,18 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ErrorBoundary } from '../../../components/ErrorBoundary';
-import { EnergyBalanceMini } from '../../../components/nutrition/EnergyBalanceMini';
-import { EnergyDetailSheet } from '../../../components/nutrition/EnergyDetailSheet';
-import { useTodayCaloriesOut } from '../../../hooks/useTodayCaloriesOut';
-import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
-import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
-import { useFeedbackLoop } from '../hooks/useFeedbackLoop';
 import { AiInsightCard } from './AiInsightCard';
-import { AutoAdjustBanner } from './AutoAdjustBanner';
-import { DailyScoreHero } from './DailyScoreHero';
-import { ProteinProgress } from './ProteinProgress';
+import { NutritionHero } from './NutritionHero';
 import { QuickActionsBar } from './QuickActionsBar';
-import { StreakMini } from './StreakMini';
 import { TodaysPlanCard } from './TodaysPlanCard';
-import { WeightMini } from './WeightMini';
+import { WeeklySnapshot } from './WeeklySnapshot';
 import { WeightQuickLog } from './WeightQuickLog';
 
 function useReducedMotion(): boolean {
   const [reduced, setReduced] = useState(() => {
+    /* v8 ignore start -- SSR guard: globalThis.window is always defined in jsdom/browser */
     if (globalThis.window === undefined) return false;
+    /* v8 ignore stop */
     return globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
 
@@ -34,22 +27,13 @@ function useReducedMotion(): boolean {
   return reduced;
 }
 
-const STAGGER_DELAYS = { tier2: 30, tier3: 60 } as const;
+const STAGGER_DELAY_TIER2 = 30;
 
 function DashboardTabInner(): React.ReactElement {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
   const [weightQuickLogOpen, setWeightQuickLogOpen] = useState(false);
-  const [energyDetailOpen, setEnergyDetailOpen] = useState(false);
   const [lowerTiersVisible, setLowerTiersVisible] = useState(false);
-
-  const { adjustment, applyAdjustment, dismissAdjustment } = useFeedbackLoop();
-  const { targetCalories, targetProtein } = useNutritionTargets();
-  const { eaten, protein } = useTodayNutrition();
-  const todayCaloriesOut = useTodayCaloriesOut();
-  const hasNutritionTargets = targetCalories > 0 && targetProtein > 0;
-  const safeEaten = eaten ?? 0;
-  const safeProtein = protein ?? 0;
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
@@ -58,21 +42,8 @@ function DashboardTabInner(): React.ReactElement {
     return () => cancelAnimationFrame(id);
   }, []);
 
-  const handleOpenWeightLog = useCallback(() => {
-    setWeightQuickLogOpen(true);
-  }, []);
-
-  const handleCloseWeightLog = useCallback(() => {
-    setWeightQuickLogOpen(false);
-  }, []);
-
-  const handleOpenEnergyDetail = useCallback(() => {
-    setEnergyDetailOpen(true);
-  }, []);
-
-  const handleCloseEnergyDetail = useCallback(() => {
-    setEnergyDetailOpen(false);
-  }, []);
+  const handleOpenWeightLog = useCallback(() => setWeightQuickLogOpen(true), []);
+  const handleCloseWeightLog = useCallback(() => setWeightQuickLogOpen(false), []);
 
   const staggerStyle = useCallback(
     (delayMs: number): React.CSSProperties => {
@@ -86,86 +57,39 @@ function DashboardTabInner(): React.ReactElement {
 
   return (
     <div className="flex flex-col gap-3 overflow-y-auto px-4 pb-6" data-testid="dashboard-tab">
-      {/* Tier 1: DailyScoreHero — immediate render */}
+      {/* Tier 1: NutritionHero — immediate */}
       <ErrorBoundary fallbackTitle={t('dashboard.error.hero')}>
         <div data-testid="dashboard-tier-1">
-          <DailyScoreHero />
+          <NutritionHero />
         </div>
       </ErrorBoundary>
 
-      {/* Tier 2: EnergyBalanceMini + ProteinProgress — 30ms stagger */}
-      <ErrorBoundary fallbackTitle={t('dashboard.error.energy')}>
-        <div
-          className={`flex flex-col gap-3 ${tierClassName}`}
-          data-testid="dashboard-tier-2"
-          style={staggerStyle(STAGGER_DELAYS.tier2)}
-        >
-          {hasNutritionTargets ? (
-            <>
-              <EnergyBalanceMini
-                eaten={safeEaten}
-                burned={todayCaloriesOut}
-                target={targetCalories}
-                hasData={eaten !== null}
-                onTapDetail={handleOpenEnergyDetail}
-              />
-              <ProteinProgress current={safeProtein} target={targetProtein} hasData={protein !== null} />
-            </>
-          ) : (
-            <div
-              data-testid="setup-nutrition-prompt"
-              className="bg-card border-border-subtle rounded-2xl border p-4 text-center shadow-sm"
-            >
-              <p className="text-foreground text-sm font-medium">{t('dashboard.setupNutrition.title')}</p>
-              <p className="text-muted-foreground mt-1 text-xs">{t('dashboard.setupNutrition.description')}</p>
-            </div>
-          )}
-        </div>
-      </ErrorBoundary>
-
-      {/* Tier 3: TodaysPlanCard + WeightMini/StreakMini row — 60ms stagger */}
+      {/* Tier 2: TodaysPlanCard + AiInsightCard — 30ms stagger */}
       <ErrorBoundary fallbackTitle={t('dashboard.error.plan')}>
         <div
           className={`flex flex-col gap-3 ${tierClassName}`}
-          data-testid="dashboard-tier-3"
-          style={staggerStyle(STAGGER_DELAYS.tier3)}
+          data-testid="dashboard-tier-2"
+          style={staggerStyle(STAGGER_DELAY_TIER2)}
         >
           <TodaysPlanCard />
-          <div className="grid grid-cols-2 gap-3">
-            <WeightMini onTap={handleOpenWeightLog} />
-            <StreakMini />
-          </div>
+          <AiInsightCard />
         </div>
       </ErrorBoundary>
 
-      {/* Tier 4: AutoAdjustBanner + AiInsightCard — lazy loaded */}
-      <ErrorBoundary fallbackTitle={t('dashboard.error.insight')}>
-        {lowerTiersVisible ? (
-          <div className="flex min-h-[56px] flex-col gap-3" data-testid="dashboard-tier-4">
-            {adjustment && (
-              <AutoAdjustBanner adjustment={adjustment} onApply={applyAdjustment} onDismiss={dismissAdjustment} />
-            )}
-            <AiInsightCard />
-          </div>
-        ) : (
-          <div className="min-h-[56px]" data-testid="dashboard-tier-4-placeholder" aria-hidden="true" />
-        )}
-      </ErrorBoundary>
-
-      {/* Tier 5: QuickActionsBar — lazy loaded */}
-      {lowerTiersVisible && (
+      {/* Tier 3: WeeklySnapshot + QuickActionsBar — lazy, RAF-gated */}
+      {lowerTiersVisible ? (
         <ErrorBoundary fallbackTitle={t('dashboard.error.quickActions')}>
-          <div data-testid="dashboard-tier-5">
+          <div className="flex flex-col gap-3" data-testid="dashboard-tier-3">
+            <WeeklySnapshot />
             <QuickActionsBar onLogWeight={handleOpenWeightLog} />
           </div>
         </ErrorBoundary>
+      ) : (
+        <div className="min-h-[56px]" data-testid="dashboard-tier-3-placeholder" aria-hidden="true" />
       )}
 
       {/* WeightQuickLog bottom sheet */}
       {weightQuickLogOpen && <WeightQuickLog onClose={handleCloseWeightLog} />}
-
-      {/* EnergyDetailSheet bottom sheet */}
-      {energyDetailOpen && <EnergyDetailSheet onClose={handleCloseEnergyDetail} />}
     </div>
   );
 }

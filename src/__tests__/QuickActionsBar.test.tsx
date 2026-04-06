@@ -3,70 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { QuickActionsBar } from '../features/dashboard/components/QuickActionsBar';
-import { useDayPlanStore } from '../store/dayPlanStore';
-import { useFitnessStore } from '../store/fitnessStore';
 import { useNavigationStore } from '../store/navigationStore';
 
-const today = new Date().toISOString().split('T')[0];
-
 function resetStores() {
-  useDayPlanStore.setState({ dayPlans: [] });
-  useFitnessStore.setState({
-    weightEntries: [],
-    workouts: [],
-    trainingPlans: [],
-  });
   useNavigationStore.setState({ navigateTab: vi.fn() });
-}
-
-function setMeals(meals: { breakfast?: boolean; lunch?: boolean; dinner?: boolean }) {
-  useDayPlanStore.setState({
-    dayPlans: [
-      {
-        date: today,
-        breakfastDishIds: meals.breakfast ? ['d1'] : [],
-        lunchDishIds: meals.lunch ? ['d2'] : [],
-        dinnerDishIds: meals.dinner ? ['d3'] : [],
-        servings: {},
-      },
-    ],
-  });
-}
-
-function setWorkoutCompleted() {
-  useFitnessStore.setState(prev => ({
-    ...prev,
-    workouts: [
-      {
-        id: 'w1',
-        date: `${today}T08:00:00.000Z`,
-        name: 'Push Day',
-        createdAt: today,
-        updatedAt: today,
-      },
-    ],
-  }));
-}
-
-function setActiveTrainingPlan() {
-  useFitnessStore.setState(prev => ({
-    ...prev,
-    trainingPlans: [
-      {
-        id: 'plan-1',
-        name: 'Plan A',
-        status: 'active' as const,
-        splitType: 'ppl',
-        durationWeeks: 8,
-        currentWeek: 1,
-        startDate: today,
-        trainingDays: [1, 3, 5],
-        restDays: [2, 4, 6, 7],
-        createdAt: today,
-        updatedAt: today,
-      },
-    ],
-  }));
 }
 
 afterEach(cleanup);
@@ -77,11 +17,11 @@ describe('QuickActionsBar', () => {
   /* ------------------------------------------------------------ */
   /* Rendering */
   /* ------------------------------------------------------------ */
-  it('renders the quick actions bar with three buttons', () => {
+  it('renders the quick actions bar with two buttons', () => {
     render(<QuickActionsBar />);
     expect(screen.getByTestId('quick-actions-bar')).toBeInTheDocument();
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(3);
+    expect(buttons).toHaveLength(2);
   });
 
   it('renders a nav element with accessible label', () => {
@@ -91,200 +31,54 @@ describe('QuickActionsBar', () => {
   });
 
   /* ------------------------------------------------------------ */
-  /* Context Mapping 1: Morning — nothing logged */
+  /* Fixed actions: log-weight + log-cardio */
   /* ------------------------------------------------------------ */
-  describe('Context: Morning (nothing logged)', () => {
-    beforeEach(() => {
-      resetStores();
-    });
+  it('shows log-weight as the first action', () => {
+    render(<QuickActionsBar />);
+    expect(screen.getByTestId('quick-action-log-weight')).toBeInTheDocument();
+  });
 
-    it('shows log-weight on the left', () => {
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-log-weight')).toBeInTheDocument();
-    });
-
-    it('shows log-breakfast in the center', () => {
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-log-breakfast')).toBeInTheDocument();
-    });
-
-    it('shows log-cardio on the right (no training plan)', () => {
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-log-cardio')).toBeInTheDocument();
-    });
-
-    it('shows start-workout on the right when training plan exists', () => {
-      setActiveTrainingPlan();
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-start-workout')).toBeInTheDocument();
-    });
+  it('shows log-cardio as the second action', () => {
+    render(<QuickActionsBar />);
+    expect(screen.getByTestId('quick-action-log-cardio')).toBeInTheDocument();
   });
 
   /* ------------------------------------------------------------ */
-  /* Context Mapping 2: After meals — breakfast+lunch logged */
+  /* Outline button styling */
   /* ------------------------------------------------------------ */
-  describe('Context: After meals (breakfast+lunch logged)', () => {
-    beforeEach(() => {
-      resetStores();
-      setMeals({ breakfast: true, lunch: true });
-      setActiveTrainingPlan();
-    });
-
-    it('shows log-weight on the left', () => {
+  describe('Outline button styling', () => {
+    it('both buttons use outline variant with card background', () => {
       render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-log-weight')).toBeInTheDocument();
+      const buttons = screen.getAllByRole('button');
+      for (const button of buttons) {
+        expect(button.className).toContain('bg-card');
+        expect(button.className).toContain('text-primary');
+        expect(button.className).toContain('border');
+        expect(button.className).toContain('border-border');
+      }
     });
 
-    it('shows log-dinner in the center', () => {
+    it('both buttons have h-12 height', () => {
       render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-log-dinner')).toBeInTheDocument();
+      const buttons = screen.getAllByRole('button');
+      for (const button of buttons) {
+        expect(button.className).toContain('h-12');
+      }
     });
 
-    it('shows start-workout on the right', () => {
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-start-workout')).toBeInTheDocument();
-    });
-  });
-
-  /* ------------------------------------------------------------ */
-  /* Context Mapping 3: Workout done */
-  /* ------------------------------------------------------------ */
-  describe('Context: Workout done', () => {
-    beforeEach(() => {
-      resetStores();
-      setWorkoutCompleted();
-    });
-
-    it('shows log-weight on the left', () => {
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-log-weight')).toBeInTheDocument();
-    });
-
-    it('shows log-meal in the center', () => {
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-log-meal')).toBeInTheDocument();
-    });
-
-    it('shows view-results on the right', () => {
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-view-results')).toBeInTheDocument();
-    });
-  });
-
-  /* ------------------------------------------------------------ */
-  /* Context Mapping 4: All 3 meals logged (with training plan) */
-  /* ------------------------------------------------------------ */
-  describe('Context: All meals logged', () => {
-    beforeEach(() => {
-      resetStores();
-      setMeals({ breakfast: true, lunch: true, dinner: true });
-      setActiveTrainingPlan();
-    });
-
-    it('shows log-weight on the left', () => {
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-log-weight')).toBeInTheDocument();
-    });
-
-    it('shows start-workout in the center', () => {
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-start-workout')).toBeInTheDocument();
-    });
-
-    it('shows log-snack on the right', () => {
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-log-snack')).toBeInTheDocument();
-    });
-  });
-
-  /* ------------------------------------------------------------ */
-  /* Context Mapping 5: All logged + workout done */
-  /* ------------------------------------------------------------ */
-  describe('Context: All logged + workout done', () => {
-    beforeEach(() => {
-      resetStores();
-      setMeals({ breakfast: true, lunch: true, dinner: true });
-      setWorkoutCompleted();
-    });
-
-    it('shows log-weight on the left', () => {
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-log-weight')).toBeInTheDocument();
-    });
-
-    it('shows view-results in the center', () => {
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-view-results')).toBeInTheDocument();
-    });
-
-    it('shows log-snack on the right', () => {
-      render(<QuickActionsBar />);
-      expect(screen.getByTestId('quick-action-log-snack')).toBeInTheDocument();
-    });
-  });
-
-  /* ------------------------------------------------------------ */
-  /* Primary button always center */
-  /* ------------------------------------------------------------ */
-  describe('Primary button styling', () => {
-    it('center button has primary emerald styling', () => {
-      render(<QuickActionsBar />);
-      const centerButton = screen.getByTestId('quick-action-log-breakfast');
-      expect(centerButton.className).toContain('bg-primary');
-      expect(centerButton.className).toContain('text-primary-foreground');
-    });
-
-    it('center button has shadow-glow via inline style', () => {
-      render(<QuickActionsBar />);
-      const centerButton = screen.getByTestId('quick-action-log-breakfast');
-      expect(centerButton.style.boxShadow).toBe('var(--shadow-glow)');
-    });
-
-    it('center button height is 56px', () => {
-      render(<QuickActionsBar />);
-      const centerButton = screen.getByTestId('quick-action-log-breakfast');
-      expect(centerButton.className).toContain('h-14');
-    });
-
-    it('left button has secondary styling with border', () => {
-      render(<QuickActionsBar />);
-      const leftButton = screen.getByTestId('quick-action-log-weight');
-      expect(leftButton.className).toContain('bg-card');
-      expect(leftButton.className).toContain('text-primary');
-      expect(leftButton.className).toContain('border');
-      expect(leftButton.className).toContain('border-border');
-    });
-
-    it('secondary button height is 48px', () => {
-      render(<QuickActionsBar />);
-      const leftButton = screen.getByTestId('quick-action-log-weight');
-      expect(leftButton.className).toContain('h-12');
-    });
-
-    it('all buttons have rounded-full and min-width', () => {
+    it('both buttons have flex-1 and rounded-full', () => {
       render(<QuickActionsBar />);
       const buttons = screen.getAllByRole('button');
       for (const button of buttons) {
         expect(button.className).toContain('rounded-full');
-        expect(button.className).toContain('min-w-[100px]');
+        expect(button.className).toContain('flex-1');
       }
     });
 
-    it('center is always primary across different contexts', () => {
-      // Context: workout done
-      setWorkoutCompleted();
-      const { unmount } = render(<QuickActionsBar />);
-      const center1 = screen.getByTestId('quick-action-log-meal');
-      expect(center1.className).toContain('bg-primary');
-      expect(center1.className).toContain('h-14');
-      unmount();
-
-      // Context: all meals + workout
-      setMeals({ breakfast: true, lunch: true, dinner: true });
+    it('nav uses compact flex gap-2 layout', () => {
       render(<QuickActionsBar />);
-      const center2 = screen.getByTestId('quick-action-view-results');
-      expect(center2.className).toContain('bg-primary');
-      expect(center2.className).toContain('h-14');
+      const nav = screen.getByTestId('quick-actions-bar');
+      expect(nav.className).toContain('gap-2');
     });
   });
 
@@ -292,7 +86,7 @@ describe('QuickActionsBar', () => {
   /* Action handlers – navigation */
   /* ------------------------------------------------------------ */
   describe('Action handlers', () => {
-    it('tapping left button (log-weight) navigates to fitness tab', async () => {
+    it('tapping log-weight navigates to fitness tab', async () => {
       const mockNavigateTab = vi.fn();
       useNavigationStore.setState({ navigateTab: mockNavigateTab });
       const user = userEvent.setup();
@@ -303,54 +97,14 @@ describe('QuickActionsBar', () => {
       expect(mockNavigateTab).toHaveBeenCalledWith('fitness');
     });
 
-    it('tapping center meal button navigates to calendar tab', async () => {
-      const mockNavigateTab = vi.fn();
-      useNavigationStore.setState({ navigateTab: mockNavigateTab });
+    it('tapping log-weight calls onLogWeight callback when provided', async () => {
+      const mockOnLogWeight = vi.fn();
       const user = userEvent.setup();
 
-      render(<QuickActionsBar />);
-      await user.click(screen.getByTestId('quick-action-log-breakfast'));
+      render(<QuickActionsBar onLogWeight={mockOnLogWeight} />);
+      await user.click(screen.getByTestId('quick-action-log-weight'));
 
-      expect(mockNavigateTab).toHaveBeenCalledWith('calendar');
-    });
-
-    it('tapping start-workout navigates to fitness tab', async () => {
-      const mockNavigateTab = vi.fn();
-      useNavigationStore.setState({ navigateTab: mockNavigateTab });
-      setMeals({ breakfast: true, lunch: true, dinner: true });
-      setActiveTrainingPlan();
-      const user = userEvent.setup();
-
-      render(<QuickActionsBar />);
-      await user.click(screen.getByTestId('quick-action-start-workout'));
-
-      expect(mockNavigateTab).toHaveBeenCalledWith('fitness');
-    });
-
-    it('tapping view-results navigates to fitness tab', async () => {
-      const mockNavigateTab = vi.fn();
-      useNavigationStore.setState({ navigateTab: mockNavigateTab });
-      setMeals({ breakfast: true, lunch: true, dinner: true });
-      setWorkoutCompleted();
-      const user = userEvent.setup();
-
-      render(<QuickActionsBar />);
-      await user.click(screen.getByTestId('quick-action-view-results'));
-
-      expect(mockNavigateTab).toHaveBeenCalledWith('fitness');
-    });
-
-    it('tapping log-snack navigates to calendar tab', async () => {
-      const mockNavigateTab = vi.fn();
-      useNavigationStore.setState({ navigateTab: mockNavigateTab });
-      setMeals({ breakfast: true, lunch: true, dinner: true });
-      setWorkoutCompleted();
-      const user = userEvent.setup();
-
-      render(<QuickActionsBar />);
-      await user.click(screen.getByTestId('quick-action-log-snack'));
-
-      expect(mockNavigateTab).toHaveBeenCalledWith('calendar');
+      expect(mockOnLogWeight).toHaveBeenCalledTimes(1);
     });
 
     it('tapping log-cardio navigates to fitness tab', async () => {
@@ -366,22 +120,13 @@ describe('QuickActionsBar', () => {
   });
 
   /* ------------------------------------------------------------ */
-  /* Each button displays translated label */
+  /* Labels */
   /* ------------------------------------------------------------ */
   describe('Labels', () => {
-    it('buttons show translated text for morning context', () => {
+    it('buttons show translated text', () => {
       render(<QuickActionsBar />);
       expect(screen.getByText('Ghi cân nặng')).toBeInTheDocument();
-      expect(screen.getByText('Ghi bữa sáng')).toBeInTheDocument();
-    });
-
-    it('buttons show translated text for all-logged context', () => {
-      setMeals({ breakfast: true, lunch: true, dinner: true });
-      setWorkoutCompleted();
-      render(<QuickActionsBar />);
-      expect(screen.getByText('Ghi cân nặng')).toBeInTheDocument();
-      expect(screen.getByText('Xem kết quả')).toBeInTheDocument();
-      expect(screen.getByText('Thêm snack')).toBeInTheDocument();
+      expect(screen.getByText('Ghi cardio')).toBeInTheDocument();
     });
   });
 

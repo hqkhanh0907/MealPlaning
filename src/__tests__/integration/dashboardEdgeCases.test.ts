@@ -245,13 +245,9 @@ function createMatchMediaMock(matches: boolean) {
 
 /* ============ import components under test ============ */
 import { AiInsightCard } from '../../features/dashboard/components/AiInsightCard';
-import { DailyScoreHero } from '../../features/dashboard/components/DailyScoreHero';
 import { DashboardTab } from '../../features/dashboard/components/DashboardTab';
-import { ProteinProgress } from '../../features/dashboard/components/ProteinProgress';
 import { QuickActionsBar } from '../../features/dashboard/components/QuickActionsBar';
-import { StreakMini } from '../../features/dashboard/components/StreakMini';
 import { TodaysPlanCard } from '../../features/dashboard/components/TodaysPlanCard';
-import { WeightMini } from '../../features/dashboard/components/WeightMini';
 
 /* ============ helpers ============ */
 function flushRaf() {
@@ -343,48 +339,6 @@ describe('Edge Case 1: First-time user (day 0)', () => {
     expect(screen.getByTestId('dashboard-tier-1')).toBeInTheDocument();
     expect(screen.getByTestId('dashboard-tier-2')).toBeInTheDocument();
     expect(screen.getByTestId('dashboard-tier-3')).toBeInTheDocument();
-    expect(screen.getByTestId('dashboard-tier-4')).toBeInTheDocument();
-    expect(screen.getByTestId('dashboard-tier-5')).toBeInTheDocument();
-  });
-
-  it('DailyScoreHero shows first-time user onboarding checklist', () => {
-    render(React.createElement(DailyScoreHero));
-    const hero = screen.getByTestId('daily-score-hero');
-    expect(hero).toBeInTheDocument();
-    expect(hero.textContent).toContain('dashboard.hero.firstTime.title');
-    expect(hero.textContent).toContain('dashboard.hero.firstTime.step1');
-    expect(hero.textContent).toContain('dashboard.hero.firstTime.step2');
-    expect(hero.textContent).toContain('dashboard.hero.firstTime.step3');
-  });
-
-  it('DailyScoreHero uses slate gradient for first-time user', () => {
-    render(React.createElement(DailyScoreHero));
-    const hero = screen.getByTestId('daily-score-hero');
-    expect(hero.className).toContain('from-slate-500');
-  });
-
-  it('WeightMini shows empty state when no weight entries exist', () => {
-    render(React.createElement(WeightMini));
-    expect(screen.getByTestId('weight-mini-empty')).toBeInTheDocument();
-    expect(screen.queryByTestId('weight-mini')).not.toBeInTheDocument();
-  });
-
-  it('StreakMini shows empty state when no workouts exist', () => {
-    render(React.createElement(StreakMini));
-    expect(screen.getByTestId('streak-mini-empty')).toBeInTheDocument();
-    expect(screen.queryByTestId('streak-mini')).not.toBeInTheDocument();
-  });
-
-  it('ProteinProgress renders with zero values safely', () => {
-    render(
-      React.createElement(ProteinProgress, {
-        current: 0,
-        target: 0,
-      }),
-    );
-    const progress = screen.getByTestId('protein-progress');
-    expect(progress).toBeInTheDocument();
-    expect(screen.getByTestId('protein-display').textContent).toContain('0g');
   });
 
   it('TodaysPlanCard shows no-plan state for first-time user', () => {
@@ -479,31 +433,6 @@ describe('Edge Case 2: Nutrition-only user', () => {
     const cta = screen.getByTestId('create-plan-cta');
     expect(cta).toBeInTheDocument();
     expect(cta.textContent).toContain('dashboard.todaysPlan.createPlan');
-  });
-
-  it('WeightMini shows empty state for nutrition-only user', () => {
-    render(React.createElement(WeightMini));
-    expect(screen.getByTestId('weight-mini-empty')).toBeInTheDocument();
-  });
-
-  it('StreakMini shows empty state when no workouts logged', () => {
-    render(React.createElement(StreakMini));
-    expect(screen.getByTestId('streak-mini-empty')).toBeInTheDocument();
-  });
-
-  it('ProteinProgress works with valid targets', () => {
-    render(
-      React.createElement(ProteinProgress, {
-        current: 50,
-        target: 150,
-      }),
-    );
-    expect(screen.getByTestId('protein-progress')).toBeInTheDocument();
-    const display = screen.getByTestId('protein-display');
-    expect(display.textContent).toContain('50g');
-    expect(display.textContent).toContain('150g');
-    const bar = screen.getByTestId('protein-bar');
-    expect(bar.style.width).toBe('33%');
   });
 });
 
@@ -624,36 +553,6 @@ describe('Edge Case 3: Fitness-only user', () => {
     const mealsProgress = screen.getByTestId('meals-progress');
     expect(mealsProgress.textContent).toContain('0');
   });
-
-  it('WeightMini shows weight data when entries exist', () => {
-    render(React.createElement(WeightMini));
-    expect(screen.getByTestId('weight-mini')).toBeInTheDocument();
-    expect(screen.queryByTestId('weight-mini-empty')).not.toBeInTheDocument();
-    const weightValue = screen.getByTestId('weight-value');
-    expect(weightValue.textContent).toContain('75');
-  });
-
-  it('StreakMini shows streak info when workouts exist', () => {
-    render(React.createElement(StreakMini));
-    expect(screen.getByTestId('streak-mini')).toBeInTheDocument();
-    expect(screen.queryByTestId('streak-mini-empty')).not.toBeInTheDocument();
-    expect(screen.getByTestId('streak-count')).toBeInTheDocument();
-    expect(screen.getByTestId('week-dots')).toBeInTheDocument();
-  });
-
-  it('ProteinProgress renders 0g eaten with valid target', () => {
-    render(
-      React.createElement(ProteinProgress, {
-        current: 0,
-        target: 160,
-      }),
-    );
-    const display = screen.getByTestId('protein-display');
-    expect(display.textContent).toContain('0g');
-    expect(display.textContent).toContain('160g');
-    const bar = screen.getByTestId('protein-bar');
-    expect(bar.style.width).toBe('0%');
-  });
 });
 
 /* ================================================================== */
@@ -702,12 +601,6 @@ describe('Edge Case 4: Offline mode', () => {
     expect(screen.getByTestId('dashboard-tier-1')).toBeInTheDocument();
     expect(screen.getByTestId('dashboard-tier-2')).toBeInTheDocument();
     expect(screen.getByTestId('dashboard-tier-3')).toBeInTheDocument();
-    expect(screen.getByTestId('dashboard-tier-4')).toBeInTheDocument();
-  });
-
-  it('DailyScoreHero renders from local store data without network', () => {
-    render(React.createElement(DailyScoreHero));
-    expect(screen.getByTestId('daily-score-hero')).toBeInTheDocument();
   });
 
   it('TodaysPlanCard renders from local store without network', () => {
@@ -858,27 +751,6 @@ describe('Edge Case 5: Data overflow (365+ days)', () => {
     expect(screen.getByTestId('dashboard-tier-1')).toBeInTheDocument();
     expect(screen.getByTestId('dashboard-tier-2')).toBeInTheDocument();
     expect(screen.getByTestId('dashboard-tier-3')).toBeInTheDocument();
-    expect(screen.getByTestId('dashboard-tier-4')).toBeInTheDocument();
-    expect(screen.getByTestId('dashboard-tier-5')).toBeInTheDocument();
-  });
-
-  it('DailyScoreHero renders with large dataset', () => {
-    render(React.createElement(DailyScoreHero));
-    expect(screen.getByTestId('daily-score-hero')).toBeInTheDocument();
-  });
-
-  it('WeightMini handles 400 weight entries without crashing', () => {
-    render(React.createElement(WeightMini));
-    expect(screen.getByTestId('weight-mini')).toBeInTheDocument();
-    expect(screen.getByTestId('weight-value')).toBeInTheDocument();
-    expect(screen.getByTestId('weight-trend')).toBeInTheDocument();
-    expect(screen.getByTestId('weight-sparkline')).toBeInTheDocument();
-  });
-
-  it('StreakMini handles 200 workouts without crashing', () => {
-    render(React.createElement(StreakMini));
-    expect(screen.getByTestId('streak-mini')).toBeInTheDocument();
-    expect(screen.getByTestId('streak-count')).toBeInTheDocument();
   });
 
   it('TodaysPlanCard processes large dayPlans array safely', () => {
@@ -993,28 +865,6 @@ describe('Edge Case 6: Midnight rollover', () => {
     const mealsProgress = screen.getByTestId('meals-progress');
     expect(mealsProgress.textContent).toContain('0');
     expect(newToday).toBe('2024-06-16');
-  });
-
-  it('DailyScoreHero greeting changes based on time of day', () => {
-    // Morning
-    vi.setSystemTime(new Date(2024, 5, 16, 8, 0, 0));
-    const { unmount: u1 } = render(React.createElement(DailyScoreHero));
-    let hero = screen.getByTestId('daily-score-hero');
-    expect(hero.textContent).toContain('dashboard.greetingMorning');
-    u1();
-
-    // Afternoon
-    vi.setSystemTime(new Date(2024, 5, 16, 14, 0, 0));
-    const { unmount: u2 } = render(React.createElement(DailyScoreHero));
-    hero = screen.getByTestId('daily-score-hero');
-    expect(hero.textContent).toContain('dashboard.greetingAfternoon');
-    u2();
-
-    // Evening
-    vi.setSystemTime(new Date(2024, 5, 16, 20, 0, 0));
-    render(React.createElement(DailyScoreHero));
-    hero = screen.getByTestId('daily-score-hero');
-    expect(hero.textContent).toContain('dashboard.greetingEvening');
   });
 
   it('no console errors during midnight transition', () => {

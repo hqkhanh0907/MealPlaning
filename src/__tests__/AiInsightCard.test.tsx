@@ -121,7 +121,45 @@ describe('AiInsightCard', () => {
     });
   });
 
-  /* ========== PRIORITY-SPECIFIC RENDERING (P1-P8) ========== */
+  /* ========== PRIORITY-SPECIFIC RENDERING (P0-P8) ========== */
+
+  describe('P0: Adjust (dark-amber)', () => {
+    it('renders dark-amber color scheme for adjust insight', () => {
+      mockInsight = makeInsight({
+        id: 'p0-feedback-adjust',
+        priority: 0,
+        type: 'adjust',
+        color: 'dark-amber',
+        title: 'Đề xuất điều chỉnh',
+        message: 'TB 7 ngày: 74.7 → 74.5 kg. Đề xuất Giảm 150 kcal.',
+        actionLabel: 'Áp dụng',
+        dismissable: true,
+      });
+      render(<AiInsightCard />);
+      const card = screen.getByTestId('ai-insight-card');
+      expect(card.className).toContain('border-warning');
+      expect(card.className).toContain('bg-warning/20');
+    });
+
+    it('shows both action and dismiss buttons for adjust insight', () => {
+      mockInsight = makeInsight({
+        type: 'adjust',
+        color: 'dark-amber',
+        actionLabel: 'Áp dụng',
+        dismissable: true,
+      });
+      render(<AiInsightCard />);
+      expect(screen.getByTestId('insight-action-btn')).toHaveTextContent('Áp dụng');
+      expect(screen.getByTestId('insight-dismiss-btn')).toBeInTheDocument();
+    });
+
+    it('aria-label includes adjust type label', () => {
+      mockInsight = makeInsight({ type: 'adjust', color: 'dark-amber', title: 'Đề xuất điều chỉnh' });
+      render(<AiInsightCard />);
+      const region = screen.getByRole('region');
+      expect(region).toHaveAttribute('aria-label', 'Điều chỉnh: Đề xuất điều chỉnh');
+    });
+  });
 
   describe('P1: Alert (dark-amber)', () => {
     it('renders dark-amber color scheme', () => {
@@ -373,6 +411,7 @@ describe('AiInsightCard', () => {
 
   describe('Icon mapping', () => {
     const iconCases: Array<{ type: Insight['type']; typeLabel: string }> = [
+      { type: 'adjust', typeLabel: 'Điều chỉnh' },
       { type: 'alert', typeLabel: 'Cảnh báo' },
       { type: 'action', typeLabel: 'Hành động' },
       { type: 'remind', typeLabel: 'Nhắc nhở' },

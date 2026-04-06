@@ -422,6 +422,40 @@ describe('useTodaysPlan', () => {
     expect(result.current.hasReachedTarget).toBe(false);
   });
 
+  it('returns nextMealToLog as lunch when only breakfast logged', () => {
+    useDayPlanStore.setState({
+      dayPlans: [
+        makeDayPlan({
+          breakfastDishIds: ['dish-1'],
+          lunchDishIds: [],
+          dinnerDishIds: [],
+        }),
+      ],
+    });
+
+    const { result } = renderHook(() => useTodaysPlan());
+
+    expect(result.current.nextMealToLog).toBe('lunch');
+    expect(result.current.mealsLogged).toBe(1);
+  });
+
+  it('returns nextMealToLog as dinner when breakfast and lunch logged', () => {
+    useDayPlanStore.setState({
+      dayPlans: [
+        makeDayPlan({
+          breakfastDishIds: ['dish-1'],
+          lunchDishIds: ['dish-2'],
+          dinnerDishIds: [],
+        }),
+      ],
+    });
+
+    const { result } = renderHook(() => useTodaysPlan());
+
+    expect(result.current.nextMealToLog).toBe('dinner');
+    expect(result.current.mealsLogged).toBe(2);
+  });
+
   it('returns multi-session info for two sessions on the same day', () => {
     vi.setSystemTime(new Date('2025-01-15T10:00:00'));
 

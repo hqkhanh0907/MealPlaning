@@ -1180,6 +1180,20 @@
         "restDayEmpty": "Ngày nghỉ — thư giãn và nạp năng lượng cho ngày mai nhé!"
       }
     },
+    "nutritionHero": {
+      "greetingName": "Chào {{name}}!",
+      "a11y": "Tổng quan dinh dưỡng hôm nay",
+      "scoreA11y": "Điểm: {{score}}",
+      "setupTitle": "Thiết lập hồ sơ sức khỏe",
+      "setupDescription": "Cập nhật hồ sơ để xem mục tiêu dinh dưỡng hàng ngày",
+      "addFirstMeal": "Thêm bữa ăn đầu tiên cho hôm nay",
+      "targetInfo": "Mục tiêu: {{target}} kcal",
+      "remaining": "Còn {{value}} kcal",
+      "over": "Vượt {{value}} kcal",
+      "macroP": "P",
+      "macroF": "F",
+      "macroC": "C"
+    },
     "error": {
       "hero": "Không thể tải tổng quan",
       "energy": "Không thể tải năng lượng",
@@ -1220,7 +1234,11 @@
       "continueSession": "Tiếp tục buổi tập",
       "sessionsToday": "{{count}} buổi tập hôm nay",
       "completedAllSessions": "Hoàn thành {{completed}}/{{total}} buổi",
-      "nextSession": "Tiếp theo: {{name}}"
+      "nextSession": "Tiếp theo: {{name}}",
+      "mealSlotBreakfast": "Bữa sáng",
+      "mealSlotLunch": "Bữa trưa",
+      "mealSlotDinner": "Bữa tối",
+      "addMeal": "Thêm"
     },
     "weightMini": {
       "noData": "Chưa có dữ liệu cân nặng",
@@ -1240,6 +1258,20 @@
       "a11y": "Chuỗi tập {{days}} ngày, kỷ lục {{record}} ngày",
       "days": "{{count}} ngày",
       "record": "Kỷ lục: {{count}} ngày"
+    },
+    "weekly": {
+      "weightUnit": "kg",
+      "weightDown": "↓ {{value}}",
+      "weightUp": "↑ {{value}}",
+      "weightStable": "— ổn định",
+      "noWeight": "—",
+      "logWeight": "Ghi cân nặng",
+      "streakDays": "{{count}} ngày",
+      "streak": "streak",
+      "noStreak": "0 ngày",
+      "adherenceLabel": "tuân thủ",
+      "noAdherence": "—",
+      "a11y": "Tuần này: cân nặng {{weight}}, chuỗi {{streak}} ngày, tuân thủ {{adherence}}"
     },
     "greetingMorning": "Chào buổi sáng!",
     "greetingAfternoon": "Chào buổi chiều!",
@@ -1388,6 +1420,7 @@
   "insightCard": {
     "dismiss": "Bỏ qua",
     "type": {
+      "adjust": "Điều chỉnh",
       "alert": "Cảnh báo",
       "action": "Hành động",
       "remind": "Nhắc nhở",

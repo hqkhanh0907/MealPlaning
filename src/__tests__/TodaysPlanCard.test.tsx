@@ -185,7 +185,7 @@ describe('TodaysPlanCard', () => {
       );
     });
 
-    it('shows meal progress with next meal CTA', () => {
+    it('shows meal progress with inline meal slot CTAs', () => {
       useDayPlanStore.setState({
         dayPlans: [
           makeDayPlan({
@@ -199,7 +199,18 @@ describe('TodaysPlanCard', () => {
       render(<TodaysPlanCard />);
 
       expect(screen.getByTestId('meals-progress')).toHaveTextContent('2/3 bữa');
-      expect(screen.getByTestId('log-meal-cta')).toHaveTextContent('Ghi bữa tối');
+
+      const breakfast = screen.getByTestId('meal-slot-breakfast');
+      expect(breakfast.tagName).toBe('SPAN');
+      expect(breakfast).toHaveTextContent('Bữa sáng');
+
+      const lunch = screen.getByTestId('meal-slot-lunch');
+      expect(lunch.tagName).toBe('SPAN');
+      expect(lunch).toHaveTextContent('Bữa trưa');
+
+      const dinner = screen.getByTestId('meal-slot-dinner');
+      expect(dinner.tagName).toBe('BUTTON');
+      expect(dinner).toHaveTextContent('Bữa tối');
     });
   });
 
@@ -273,12 +284,11 @@ describe('TodaysPlanCard', () => {
       });
     });
 
-    it('renders recovery tips with icons', () => {
+    it('renders recovery tip with icon', () => {
       render(<TodaysPlanCard />);
 
       const tips = screen.getByTestId('recovery-tips');
       expect(tips).toHaveTextContent('Ngủ đủ giấc và uống đủ nước');
-      expect(tips).toHaveTextContent('Ăn giàu protein để phục hồi cơ');
     });
 
     it('renders tomorrow preview', () => {
@@ -441,7 +451,7 @@ describe('TodaysPlanCard', () => {
       expect(screen.getByTestId('meals-progress')).toHaveTextContent('Đã đạt mục tiêu bữa ăn');
     });
 
-    it('shows log breakfast CTA when no meals logged', () => {
+    it('shows empty breakfast slot when no meals logged', () => {
       useFitnessStore.setState({
         trainingPlans: [makePlan()],
         trainingPlanDays: [makePlanDay()],
@@ -449,10 +459,12 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('log-meal-cta')).toHaveTextContent('Ghi bữa sáng');
+      const breakfast = screen.getByTestId('meal-slot-breakfast');
+      expect(breakfast.tagName).toBe('BUTTON');
+      expect(breakfast).toHaveTextContent('Bữa sáng');
     });
 
-    it('shows log lunch CTA when breakfast logged', () => {
+    it('shows empty lunch slot when breakfast logged', () => {
       useFitnessStore.setState({
         trainingPlans: [makePlan()],
         trainingPlanDays: [makePlanDay()],
@@ -469,10 +481,15 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('log-meal-cta')).toHaveTextContent('Ghi bữa trưa');
+      const breakfast = screen.getByTestId('meal-slot-breakfast');
+      expect(breakfast.tagName).toBe('SPAN');
+
+      const lunch = screen.getByTestId('meal-slot-lunch');
+      expect(lunch.tagName).toBe('BUTTON');
+      expect(lunch).toHaveTextContent('Bữa trưa');
     });
 
-    it('shows log dinner CTA when breakfast and lunch logged', () => {
+    it('shows empty dinner slot when breakfast and lunch logged', () => {
       useFitnessStore.setState({
         trainingPlans: [makePlan()],
         trainingPlanDays: [makePlanDay()],
@@ -489,10 +506,12 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.getByTestId('log-meal-cta')).toHaveTextContent('Ghi bữa tối');
+      const dinner = screen.getByTestId('meal-slot-dinner');
+      expect(dinner.tagName).toBe('BUTTON');
+      expect(dinner).toHaveTextContent('Bữa tối');
     });
 
-    it('hides log meal CTA when all meals logged', () => {
+    it('all meal slots are completed spans when all meals logged', () => {
       useFitnessStore.setState({
         trainingPlans: [makePlan()],
         trainingPlanDays: [makePlanDay()],
@@ -501,7 +520,9 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      expect(screen.queryByTestId('log-meal-cta')).not.toBeInTheDocument();
+      expect(screen.getByTestId('meal-slot-breakfast').tagName).toBe('SPAN');
+      expect(screen.getByTestId('meal-slot-lunch').tagName).toBe('SPAN');
+      expect(screen.getByTestId('meal-slot-dinner').tagName).toBe('SPAN');
     });
   });
 
@@ -653,7 +674,7 @@ describe('TodaysPlanCard', () => {
   });
 
   describe('handleLogMeal navigation', () => {
-    it('log meal CTA navigates to calendar tab', () => {
+    it('clicking empty meal slot navigates to calendar tab', () => {
       useFitnessStore.setState({
         trainingPlans: [makePlan()],
         trainingPlanDays: [makePlanDay()],
@@ -661,7 +682,7 @@ describe('TodaysPlanCard', () => {
 
       render(<TodaysPlanCard />);
 
-      fireEvent.click(screen.getByTestId('log-meal-cta'));
+      fireEvent.click(screen.getByTestId('meal-slot-breakfast'));
 
       const { activeTab } = useNavigationStore.getState();
       expect(activeTab).toBe('calendar');

@@ -23,6 +23,11 @@ vi.mock('../features/dashboard/hooks/useTodaysPlan', () => ({
     nextMealToLog: 'lunch',
     tomorrowWorkoutType: 'Push Day',
     tomorrowExerciseCount: 4,
+    mealSlots: [
+      { type: 'breakfast', hasFood: true },
+      { type: 'lunch', hasFood: false },
+      { type: 'dinner', hasFood: false },
+    ],
   })),
 }));
 
@@ -83,10 +88,7 @@ beforeEach(() => {
 
 // ── Imports (after mocks) ──────────────────────────────────────────
 
-import { EnergyBalanceMini } from '../components/nutrition/EnergyBalanceMini';
 import { AdjustmentHistory } from '../features/dashboard/components/AdjustmentHistory';
-import { AutoAdjustBanner } from '../features/dashboard/components/AutoAdjustBanner';
-import { StreakMini } from '../features/dashboard/components/StreakMini';
 import { TodaysPlanCard } from '../features/dashboard/components/TodaysPlanCard';
 import { WeightQuickLog } from '../features/dashboard/components/WeightQuickLog';
 import { MilestonesList } from '../features/fitness/components/MilestonesList';
@@ -376,7 +378,7 @@ describe('TodaysPlanCard a11y', () => {
 
     const recoveryTips = screen.getByTestId('recovery-tips');
     const emojiSpans = recoveryTips.querySelectorAll('[aria-hidden="true"]');
-    expect(emojiSpans.length).toBeGreaterThanOrEqual(2);
+    expect(emojiSpans.length).toBeGreaterThanOrEqual(1);
   });
 
   it('decorative icons have aria-hidden', () => {
@@ -387,52 +389,6 @@ describe('TodaysPlanCard a11y', () => {
     svgs.forEach(svg => {
       expect(svg).toHaveAttribute('aria-hidden', 'true');
     });
-  });
-});
-
-// ── 8. StreakMini ──────────────────────────────────────────────────
-
-describe('StreakMini a11y', () => {
-  it('empty state has role=button with aria-label and focus ring', () => {
-    render(<StreakMini onTap={vi.fn()} />);
-
-    const el = screen.getByTestId('streak-mini-empty');
-    expect(el).toHaveAttribute('tabindex', '0');
-    expect(el).toHaveAttribute('aria-label');
-    expect(el.className).toContain('focus:ring-2');
-  });
-
-  it('main state has role=button with aria-label and focus ring', () => {
-    setupFitnessStore({
-      workouts: [
-        {
-          id: 'w1',
-          date: new Date().toISOString().split('T')[0],
-          name: 'Push',
-          durationMin: 30,
-          notes: '',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ],
-      trainingPlans: [],
-      trainingPlanDays: [],
-    });
-
-    render(<StreakMini onTap={vi.fn()} />);
-
-    const el = screen.getByTestId('streak-mini');
-    expect(el).toHaveAttribute('aria-label');
-    expect(el.className).toContain('focus:ring-2');
-  });
-
-  it('responds to click activation', () => {
-    const onTap = vi.fn();
-    render(<StreakMini onTap={onTap} />);
-
-    const el = screen.getByTestId('streak-mini-empty');
-    fireEvent.click(el);
-    expect(onTap).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -474,35 +430,6 @@ describe('WeightQuickLog a11y', () => {
 
     expect(screen.getByTestId('increment-btn')).toHaveAttribute('aria-label');
     expect(screen.getByTestId('decrement-btn')).toHaveAttribute('aria-label');
-  });
-});
-
-// ── 10. AutoAdjustBanner ──────────────────────────────────────────
-
-describe('AutoAdjustBanner a11y', () => {
-  const adjustment = {
-    id: 'a1',
-    reason: 'Weight is increasing as expected',
-    oldTargetCal: 2000,
-    newTargetCal: 2100,
-    triggerType: 'auto' as const,
-    movingAvgWeight: 75.5,
-    date: new Date().toISOString(),
-  };
-
-  it('has role=alert with aria-label', () => {
-    render(<AutoAdjustBanner adjustment={adjustment} onApply={vi.fn()} onDismiss={vi.fn()} />);
-
-    const banner = screen.getByTestId('auto-adjust-banner');
-    expect(banner).toHaveAttribute('role', 'alert');
-    expect(banner).toHaveAttribute('aria-label');
-  });
-
-  it('icon has aria-hidden', () => {
-    render(<AutoAdjustBanner adjustment={adjustment} onApply={vi.fn()} onDismiss={vi.fn()} />);
-
-    const icon = screen.getByTestId('banner-icon');
-    expect(icon).toHaveAttribute('aria-hidden', 'true');
   });
 });
 
@@ -558,45 +485,5 @@ describe('AdjustmentHistory a11y', () => {
         expect(svg).toHaveAttribute('aria-hidden', 'true');
       });
     });
-  });
-});
-
-// ── 12. EnergyBalanceMini ─────────────────────────────────────────
-
-describe('EnergyBalanceMini a11y', () => {
-  it('decorative icons have aria-hidden', () => {
-    render(<EnergyBalanceMini eaten={1500} burned={300} target={2000} />);
-
-    const container = screen.getByTestId('energy-balance-mini');
-    const svgs = container.querySelectorAll('svg');
-    expect(svgs.length).toBe(4);
-    svgs.forEach(svg => {
-      expect(svg).toHaveAttribute('aria-hidden', 'true');
-    });
-  });
-
-  it('when interactive, has role=button with aria-label and focus ring', () => {
-    render(<EnergyBalanceMini eaten={1500} burned={300} target={2000} onTapDetail={vi.fn()} />);
-
-    const container = screen.getByTestId('energy-balance-mini');
-    expect(container).toHaveAttribute('aria-label');
-    expect(container.className).toContain('focus:ring-2');
-  });
-
-  it('when non-interactive, has no role or tabIndex', () => {
-    render(<EnergyBalanceMini eaten={1500} burned={300} target={2000} />);
-
-    const container = screen.getByTestId('energy-balance-mini');
-    expect(container.tagName).toBe('DIV');
-    expect(container).not.toHaveAttribute('tabIndex');
-  });
-
-  it('responds to click activation when interactive', () => {
-    const onTap = vi.fn();
-    render(<EnergyBalanceMini eaten={1500} burned={300} target={2000} onTapDetail={onTap} />);
-
-    const container = screen.getByTestId('energy-balance-mini');
-    fireEvent.click(container);
-    expect(onTap).toHaveBeenCalledTimes(1);
   });
 });

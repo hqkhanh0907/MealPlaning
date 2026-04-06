@@ -95,7 +95,9 @@ export function useDailyScore(): DailyScoreData {
     const hasAnyMeals = dayPlans.some(
       p => p.breakfastDishIds.length > 0 || p.lunchDishIds.length > 0 || p.dinnerDishIds.length > 0,
     );
-    const isFirstTimeUser = isDefaultProfile(profile) || !hasAnyMeals;
+    const hasLoggedWorkout = workouts.length > 0;
+    const allSetupComplete = !isDefaultProfile(profile) && hasAnyMeals && hasLoggedWorkout;
+    const isFirstTimeUser = !allSetupComplete;
 
     const todayPlan = dayPlans.find(p => p.date === today);
     let actualCalories: number | undefined;

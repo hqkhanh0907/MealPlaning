@@ -187,7 +187,7 @@ describe('useDailyScore', () => {
       expect(result.current.isFirstTimeUser).toBe(true);
     });
 
-    it('returns isFirstTimeUser false when profile configured and meals exist', () => {
+    it('returns isFirstTimeUser false when profile configured and meals exist and workout logged', () => {
       setupHealthProfileStore({
         profile: {
           ...DEFAULT_HEALTH_PROFILE,
@@ -206,9 +206,83 @@ describe('useDailyScore', () => {
           },
         ],
       });
+      setupFitnessStore({
+        workouts: [
+          {
+            id: 'w1',
+            date: '2025-01-14',
+            name: 'Chest Day',
+            createdAt: '',
+            updatedAt: '',
+          },
+        ],
+      });
 
       const { result } = renderHook(() => useDailyScore());
       expect(result.current.isFirstTimeUser).toBe(false);
+    });
+
+    it('returns isFirstTimeUser true when profile configured and meals exist but no workout logged', () => {
+      setupHealthProfileStore({
+        profile: {
+          ...DEFAULT_HEALTH_PROFILE,
+          id: 'custom-id',
+          age: 25,
+          weightKg: 80,
+        },
+      });
+      setupDayPlanStore({
+        dayPlans: [
+          {
+            date: '2025-01-14',
+            breakfastDishIds: ['d1'],
+            lunchDishIds: [],
+            dinnerDishIds: [],
+          },
+        ],
+      });
+      setupFitnessStore({ workouts: [] });
+
+      const { result } = renderHook(() => useDailyScore());
+      expect(result.current.isFirstTimeUser).toBe(true);
+    });
+
+    it('hides checklist when all 3 setup steps are complete', () => {
+      setupHealthProfileStore({
+        profile: {
+          ...DEFAULT_HEALTH_PROFILE,
+          id: 'custom-id',
+          dateOfBirth: '1996-05-15',
+          age: 29,
+          weightKg: 75,
+          heightCm: 175,
+        },
+      });
+      setupDayPlanStore({
+        dayPlans: [
+          {
+            date: '2025-01-15',
+            breakfastDishIds: ['d1'],
+            lunchDishIds: ['d2'],
+            dinnerDishIds: [],
+          },
+        ],
+      });
+      setupFitnessStore({
+        workouts: [
+          {
+            id: 'w1',
+            date: '2025-01-15',
+            name: 'Push Day',
+            createdAt: '',
+            updatedAt: '',
+          },
+        ],
+      });
+
+      const { result } = renderHook(() => useDailyScore());
+      expect(result.current.isFirstTimeUser).toBe(false);
+      expect(result.current.heroContext).not.toBe('first-time');
     });
   });
 
@@ -762,6 +836,136 @@ describe('useDailyScore', () => {
           targetProteinG: 180,
         }),
       );
+    });
+  });
+
+  describe('heroContext determination', () => {
+    const today = '2025-01-15';
+
+    function setupNotFirstTimeUser(
+      overrides: {
+        fitnessOverrides?: Record<string, unknown>;
+        dayPlanOverrides?: Record<string, unknown>;
+      } = {},
+    ) {
+      setupHealthProfileStore({
+        profile: {
+          ...DEFAULT_HEALTH_PROFILE,
+          dateOfBirth: '1996-05-15',
+        },
+      });
+      setupDayPlanStore({
+        dayPlans: [
+          {
+            date: '2025-01-14',
+            breakfastDishIds: ['d1'],
+            lunchDishIds: [],
+            dinnerDishIds: [],
+          },
+        ],
+        ...overrides.dayPlanOverrides,
+      });
+      setupFitnessStore({
+        workouts: [{ id: 'w-hist', date: '2025-01-14', name: 'Hist', createdAt: '', updatedAt: '' }],
+        ...overrides.fitnessOverrides,
+      });
+    }
+
+    it('returns first-time for default profile', () => {
+      const { result } = renderHook(() => useDailyScore());
+      expect(result.current.heroContext).toBe('first-time');
+    });
+
+    it('returns rest-day-with-meals when rest day and meals logged today', () => {
+      setupNotFirstTimeUser({
+        fitnessOverrides: {
+          workouts: [{ id: 'w-hist', date: '2025-01-14', name: 'Hist', createdAt: '', updatedAt: '' }],
+          trainingPlans: [{ id: 'p1', name: 'Plan', status: 'active' }],
+          trainingPlanDays: [{ id: 'pd1', planId: 'p1', dayOfWeek: 1 }],
+        },
+        dayPlanOverrides: {
+          dayPlans: [
+            { date: '2025-01-14', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] },
+            { date: today, breakfastDishIds: ['d2'], lunchDishIds: [], dinnerDishIds: [] },
+          ],
+        },
+      });
+
+      const { result } = renderHook(() => useDailyScore());
+      expect(result.current.heroContext).toBe('rest-day-with-meals');
+    });
+
+    it('returns rest-day-empty when rest day and no meals today', () => {
+      setupNotFirstTimeUser({
+        fitnessOverrides: {
+          workouts: [{ id: 'w-hist', date: '2025-01-14', name: 'Hist', createdAt: '', updatedAt: '' }],
+          trainingPlans: [{ id: 'p1', name: 'Plan', status: 'active' }],
+          trainingPlanDays: [{ id: 'pd1', planId: 'p1', dayOfWeek: 1 }],
+        },
+      });
+
+      const { result } = renderHook(() => useDailyScore());
+      expect(result.current.heroContext).toBe('rest-day-empty');
+    });
+
+    it('returns training-day-needs-workout when training day, no workout, has meals', () => {
+      setupNotFirstTimeUser({
+        fitnessOverrides: {
+          workouts: [{ id: 'w-hist', date: '2025-01-14', name: 'Hist', createdAt: '', updatedAt: '' }],
+          trainingPlans: [{ id: 'p1', name: 'Plan', status: 'active' }],
+          trainingPlanDays: [{ id: 'pd1', planId: 'p1', dayOfWeek: 3 }],
+        },
+        dayPlanOverrides: {
+          dayPlans: [
+            { date: '2025-01-14', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] },
+            { date: today, breakfastDishIds: ['d2'], lunchDishIds: [], dinnerDishIds: [] },
+          ],
+        },
+      });
+
+      const { result } = renderHook(() => useDailyScore());
+      expect(result.current.heroContext).toBe('training-day-needs-workout');
+    });
+
+    it('returns workout-done-needs-fuel when workout done but no meals today', () => {
+      setupNotFirstTimeUser({
+        fitnessOverrides: {
+          workouts: [
+            { id: 'w-hist', date: '2025-01-14', name: 'Hist', createdAt: '', updatedAt: '' },
+            { id: 'w-today', date: today, name: 'Push', createdAt: '', updatedAt: '' },
+          ],
+        },
+      });
+
+      const { result } = renderHook(() => useDailyScore());
+      expect(result.current.heroContext).toBe('workout-done-needs-fuel');
+    });
+
+    it('returns balanced-day when workout done and meals logged', () => {
+      setupNotFirstTimeUser({
+        fitnessOverrides: {
+          workouts: [
+            { id: 'w-hist', date: '2025-01-14', name: 'Hist', createdAt: '', updatedAt: '' },
+            { id: 'w-today', date: today, name: 'Push', createdAt: '', updatedAt: '' },
+          ],
+        },
+        dayPlanOverrides: {
+          dayPlans: [
+            { date: '2025-01-14', breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] },
+            { date: today, breakfastDishIds: ['d2'], lunchDishIds: [], dinnerDishIds: [] },
+          ],
+        },
+      });
+
+      const { result } = renderHook(() => useDailyScore());
+      expect(result.current.heroContext).toBe('balanced-day');
+    });
+
+    it('returns empty-day when no rest day, no workout, no meals', () => {
+      setupNotFirstTimeUser();
+
+      const { result } = renderHook(() => useDailyScore());
+      expect(result.current.heroContext).toBe('empty-day');
     });
   });
 });

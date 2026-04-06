@@ -124,4 +124,16 @@ describe('AdjustmentHistory', () => {
     expect(screen.getByTestId('status-label-adj-1')).toHaveTextContent('Đã áp dụng');
     expect(screen.getByTestId('status-label-adj-2')).toHaveTextContent('Đã từ chối');
   });
+
+  it('shows TrendingUp icon when newTargetCal > oldTargetCal', () => {
+    render(
+      <AdjustmentHistory
+        adjustments={[makeRecord({ id: 'adj-up', oldTargetCal: 2000, newTargetCal: 2150 })]}
+        defaultCollapsed={false}
+      />,
+    );
+    const row = screen.getByTestId('adjustment-row-adj-up');
+    expect(row.textContent).toContain('2000');
+    expect(row.textContent).toContain('2150');
+  });
 });

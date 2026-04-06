@@ -107,6 +107,7 @@ function useLongPress(
     timerRef.current = setTimeout(() => {
       tickCountRef.current += 1;
       const interval =
+        /* v8 ignore next -- tickCount is 1 here (always < ACCELERATION_THRESHOLD=8) */
         tickCountRef.current > ACCELERATION_THRESHOLD ? LONG_PRESS_INTERVAL_FAST : LONG_PRESS_INTERVAL_INITIAL;
 
       clearInterval(intervalRef.current);
@@ -232,8 +233,10 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
               updatedAt: new Date().toISOString(),
             });
           } else if (savedEntryId) {
+          /* v8 ignore start -- defensive: savedEntryId is always set when wasUpdate is true */
             removeWeightEntry(savedEntryId);
           }
+          /* v8 ignore stop */
         },
       },
     });

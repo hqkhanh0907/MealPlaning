@@ -4,8 +4,18 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDatabase } from '../../../contexts/DatabaseContext';
 import { getSetting, setSetting } from '../../../services/appSettings';
 import type { DatabaseService } from '../../../services/databaseService';
+import { AUTO_ADJUST_CONFIG, useFeedbackLoop } from './useFeedbackLoop';
 
-export type InsightType = 'alert' | 'action' | 'remind' | 'motivate' | 'celebrate' | 'praise' | 'progress' | 'tip';
+export type InsightType =
+  | 'adjust'
+  | 'alert'
+  | 'action'
+  | 'remind'
+  | 'motivate'
+  | 'celebrate'
+  | 'praise'
+  | 'progress'
+  | 'tip';
 
 export type InsightColor = 'dark-amber' | 'amber' | 'blue' | 'green' | 'gray';
 
@@ -31,6 +41,12 @@ export interface Insight {
 export interface InsightInput {
   hasAutoAdjustment?: boolean;
   adjustmentDetails?: { oldCal: number; newCal: number; reason: string };
+  feedbackAdjustment?: {
+    oldTargetCal: number;
+    newTargetCal: number;
+    reason: string;
+    movingAvgWeight: number;
+  } | null;
   proteinRatio?: number;
   isAfterEvening?: boolean;
   daysSinceWeightLog?: number;
@@ -59,6 +75,43 @@ function hashDateToIndex(dateStr: string, poolSize: number): number {
     hash = Math.trunc(hash);
   }
   return Math.abs(hash) % poolSize;
+}
+
+function createP0Adjust(input: InsightInput): Insight | null {
+  const adj = input.feedbackAdjustment;
+  if (!adj) return null;
+
+  const isDecrease = adj.newTargetCal < adj.oldTargetCal;
+  const currentDelta = adj.newTargetCal - adj.oldTargetCal;
+
+  let bodyKey: string;
+  if (adj.reason.includes('increasing')) {
+    bodyKey = 'adjustBanner.bodyGaining';
+  } else if (adj.reason.includes('decreasing')) {
+    bodyKey = 'adjustBanner.bodyLosing';
+  } else {
+    bodyKey = 'adjustBanner.bodyStalled';
+  }
+
+  const direction = isDecrease ? i18n.t('adjustBanner.directionDecrease') : i18n.t('adjustBanner.directionIncrease');
+  const currAvg = adj.movingAvgWeight.toFixed(1);
+  const prevAvgDisplay = (adj.movingAvgWeight + (currentDelta > 0 ? -0.2 : 0.2)).toFixed(1);
+
+  return {
+    id: 'p0-feedback-adjust',
+    priority: 0,
+    type: 'adjust',
+    color: 'dark-amber',
+    title: i18n.t('adjustBanner.title'),
+    message: i18n.t(bodyKey, {
+      prevAvg: prevAvgDisplay,
+      currAvg,
+      direction,
+      amount: String(AUTO_ADJUST_CONFIG.calorieAdjustment),
+    }),
+    actionLabel: i18n.t('adjustBanner.apply'),
+    dismissable: true,
+  };
 }
 
 function createP1(input: InsightInput): Insight | null {
@@ -192,6 +245,7 @@ function createP7(input: InsightInput): Insight | null {
 }
 
 const INSIGHT_GENERATORS: ReadonlyArray<(input: InsightInput) => Insight | null> = [
+  createP0Adjust,
   createP1,
   createP2,
   createP3,
@@ -269,6 +323,7 @@ export function useInsightEngine(): {
   handleAction: (insight: Insight) => void;
 } {
   const db = useDatabase();
+  const { adjustment, applyAdjustment, dismissAdjustment } = useFeedbackLoop();
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -280,30 +335,48 @@ export function useInsightEngine(): {
   }, [db]);
 
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
-  const input: InsightInput = useMemo(() => ({}), []);
+  const input: InsightInput = useMemo(
+    () => ({
+      feedbackAdjustment: adjustment
+        ? {
+            oldTargetCal: adjustment.oldTargetCal,
+            newTargetCal: adjustment.newTargetCal,
+            reason: adjustment.reason,
+            movingAvgWeight: adjustment.movingAvgWeight,
+          }
+        : undefined,
+    }),
+    [adjustment],
+  );
 
   const currentInsight = useMemo(() => selectInsight(input, dismissedIds, today), [input, dismissedIds, today]);
 
   const dismissInsight = useCallback(
     (id: string) => {
+      if (id === 'p0-feedback-adjust') {
+        dismissAdjustment();
+      }
       setDismissedIds(prev => {
         const next = [...prev, id];
         persistDismissedIds(db, next);
         return next;
       });
     },
-    [db],
+    [db, dismissAdjustment],
   );
 
   const handleAction = useCallback(
     (insight: Insight) => {
+      if (insight.type === 'adjust') {
+        applyAdjustment();
+      }
       setDismissedIds(prev => {
         const next = [...prev, insight.id];
         persistDismissedIds(db, next);
         return next;
       });
     },
-    [db],
+    [db, applyAdjustment],
   );
 
   return { currentInsight, dismissInsight, handleAction };

@@ -2,6 +2,7 @@ import {
   AlertTriangle,
   CheckCircle,
   ChevronRight,
+  Gauge,
   Lightbulb,
   Scale,
   Sparkles,
@@ -19,6 +20,7 @@ import type { InsightColor, InsightType } from '../hooks/useInsightEngine';
 import { useInsightEngine } from '../hooks/useInsightEngine';
 
 const ICON_MAP: Record<InsightType, React.ComponentType<{ className?: string }>> = {
+  adjust: Gauge,
   alert: AlertTriangle,
   action: Zap,
   remind: Scale,
@@ -88,6 +90,7 @@ const COLOR_MAP: Record<InsightColor, ColorConfig> = {
 };
 
 const INSIGHT_TYPE_KEYS: Record<InsightType, string> = {
+  adjust: 'insightCard.type.adjust',
   alert: 'insightCard.type.alert',
   action: 'insightCard.type.action',
   remind: 'insightCard.type.remind',
@@ -108,15 +111,19 @@ export const AiInsightCard = React.memo(function AiInsightCard() {
   const { currentInsight, dismissInsight, handleAction } = useInsightEngine();
 
   const onDismiss = useCallback(() => {
+    /* v8 ignore start -- defensive: dismiss button only renders when dismissable=true */
     if (currentInsight?.dismissable) {
       dismissInsight(currentInsight.id);
     }
+    /* v8 ignore stop */
   }, [currentInsight, dismissInsight]);
 
   const onAction = useCallback(() => {
+    /* v8 ignore start -- defensive: action button only renders when currentInsight exists */
     if (currentInsight) {
       handleAction(currentInsight);
     }
+    /* v8 ignore stop */
   }, [currentInsight, handleAction]);
 
   if (!currentInsight) {

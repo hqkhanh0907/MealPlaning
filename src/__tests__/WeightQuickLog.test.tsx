@@ -517,6 +517,163 @@ describe('WeightQuickLog', () => {
     vi.useRealTimers();
   });
 
+  it('long press on decrement triggers rapid decrement', () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    resetStore([makeEntry({ date: yesterdayStr(), weightKg: 70.0 })]);
+    renderSheet();
+
+    const decBtn = screen.getByTestId('decrement-btn');
+
+    fireEvent.pointerDown(decBtn);
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    fireEvent.pointerUp(decBtn);
+
+    const displayText = screen.getByTestId('weight-display').textContent;
+    const weight = parseFloat(displayText ?? '0');
+    expect(weight).toBeLessThan(69.9);
+
+    vi.useRealTimers();
+  });
+
+  it('long press increment clamps at MAX_WEIGHT (300) during press', () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    resetStore([makeEntry({ date: yesterdayStr(), weightKg: 299.8 })]);
+    renderSheet();
+
+    const incBtn = screen.getByTestId('increment-btn');
+    fireEvent.pointerDown(incBtn);
+
+    // 500ms delay + enough ticks to pass 300: tick1→299.9, tick2→300.0, tick3→clamped at 300
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    fireEvent.pointerUp(incBtn);
+
+    const displayText = screen.getByTestId('weight-display').textContent;
+    expect(parseFloat(displayText ?? '0')).toBe(300);
+
+    vi.useRealTimers();
+  });
+
+  it('long press decrement clamps at MIN_WEIGHT (30) during press', () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    resetStore([makeEntry({ date: yesterdayStr(), weightKg: 30.2 })]);
+    renderSheet();
+
+    const decBtn = screen.getByTestId('decrement-btn');
+    fireEvent.pointerDown(decBtn);
+
+    // 500ms delay + enough ticks to pass 30: tick1→30.1, tick2→30.0, tick3→clamped at 30
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    fireEvent.pointerUp(decBtn);
+
+    const displayText = screen.getByTestId('weight-display').textContent;
+    expect(parseFloat(displayText ?? '0')).toBe(30);
+
+    vi.useRealTimers();
+  });
+
+  it('pointerLeave stops long press', () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    resetStore([makeEntry({ date: yesterdayStr(), weightKg: 70.0 })]);
+    renderSheet();
+
+    const incBtn = screen.getByTestId('increment-btn');
+    fireEvent.pointerDown(incBtn);
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    act(() => {
+      vi.advanceTimersByTime(150);
+    });
+
+    const weightBefore = parseFloat(screen.getByTestId('weight-display').textContent ?? '0');
+
+    fireEvent.pointerLeave(incBtn);
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    const weightAfter = parseFloat(screen.getByTestId('weight-display').textContent ?? '0');
+    expect(weightAfter).toBe(weightBefore);
+
+    vi.useRealTimers();
+  });
+
+  it('long press does not start when increment is at max bound', () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    resetStore([makeEntry({ date: yesterdayStr(), weightKg: 300 })]);
+    renderSheet();
+
+    const incBtn = screen.getByTestId('increment-btn');
+    fireEvent.pointerDown(incBtn);
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    fireEvent.pointerUp(incBtn);
+
+    expect(screen.getByTestId('weight-display').textContent).toContain('300');
+
+    vi.useRealTimers();
+  });
+
+  it('long press does not start when decrement is at min bound', () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    resetStore([makeEntry({ date: yesterdayStr(), weightKg: 30 })]);
+    renderSheet();
+
+    const decBtn = screen.getByTestId('decrement-btn');
+    fireEvent.pointerDown(decBtn);
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    fireEvent.pointerUp(decBtn);
+
+    expect(screen.getByTestId('weight-display').textContent).toContain('30');
+
+    vi.useRealTimers();
+  });
+
+  it('cleanup stops timers on unmount', () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    resetStore([makeEntry({ date: yesterdayStr(), weightKg: 70.0 })]);
+    const { unmount } = renderSheet();
+
+    const incBtn = screen.getByTestId('increment-btn');
+    fireEvent.pointerDown(incBtn);
+
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+
+    unmount();
+
+    expect(() => {
+      act(() => {
+        vi.advanceTimersByTime(2000);
+      });
+    }).not.toThrow();
+
+    vi.useRealTimers();
+  });
+
   /* ---- tabular-nums styling ---- */
 
   it('weight display uses tabular-nums', () => {
@@ -560,5 +717,33 @@ describe('WeightQuickLog', () => {
     expect(weight).toBeGreaterThan(70.5);
 
     vi.useRealTimers();
+  });
+
+  /* ---- Quick select chips: max 5 unique ---- */
+
+  it('shows at most 5 recent chips', () => {
+    const entries = Array.from({ length: 8 }, (_, i) => makeEntry({ date: daysAgoStr(i + 1), weightKg: 70 + i }));
+    resetStore(entries);
+
+    renderSheet();
+
+    const chipContainer = screen.getByTestId('quick-select-chips');
+    const buttons = chipContainer.querySelectorAll('button');
+    expect(buttons).toHaveLength(5);
+  });
+
+  /* ---- getEntriesLast7Days: entry outside window ---- */
+
+  it('does not show moving average when entries are older than 7 days', () => {
+    const entries = [
+      makeEntry({ date: daysAgoStr(8), weightKg: 72.0 }),
+      makeEntry({ date: daysAgoStr(9), weightKg: 73.0 }),
+      makeEntry({ date: daysAgoStr(10), weightKg: 74.0 }),
+    ];
+    resetStore(entries);
+
+    renderSheet();
+
+    expect(screen.queryByTestId('moving-average')).not.toBeInTheDocument();
   });
 });

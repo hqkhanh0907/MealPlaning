@@ -1,4 +1,4 @@
-import { Activity, Dumbbell, type LucideIcon, Plus, Scale, TrendingUp } from 'lucide-react';
+import { Activity, type LucideIcon, Scale } from 'lucide-react';
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,14 +8,7 @@ import { type ActionType, type QuickAction, useQuickActions } from '../hooks/use
 
 const ACTION_ICON_MAP: Record<ActionType, LucideIcon> = {
   'log-weight': Scale,
-  'log-breakfast': Plus,
-  'log-lunch': Plus,
-  'log-dinner': Plus,
-  'log-meal': Plus,
-  'log-snack': Plus,
-  'start-workout': Dumbbell,
   'log-cardio': Activity,
-  'view-results': TrendingUp,
 };
 
 interface ActionButtonProps {
@@ -31,34 +24,16 @@ const ActionButton = React.memo(function ActionButton({ action, onPress }: Actio
     onPress(action);
   }, [onPress, action]);
 
-  if (action.isPrimary) {
-    return (
-      <Button
-        variant="default"
-        onClick={handleClick}
-        className="bg-primary text-primary-foreground hover:bg-primary flex h-14 min-w-[100px] flex-col items-center justify-center gap-1 rounded-full px-4"
-        style={{
-          boxShadow: 'var(--shadow-glow)',
-        }}
-        aria-label={t(action.label)}
-        data-testid={`quick-action-${action.id}`}
-      >
-        <Icon className="h-6 w-6" aria-hidden="true" />
-        <span className="text-xs leading-tight font-medium">{t(action.label)}</span>
-      </Button>
-    );
-  }
-
   return (
     <Button
       variant="outline"
       onClick={handleClick}
-      className="bg-card text-primary border-border flex h-12 min-w-[100px] flex-col items-center justify-center gap-1 rounded-full px-4"
+      className="bg-card text-primary border-border flex h-12 flex-1 items-center justify-center gap-2 rounded-full"
       aria-label={t(action.label)}
       data-testid={`quick-action-${action.id}`}
     >
       <Icon className="h-5 w-5" aria-hidden="true" />
-      <span className="text-xs leading-tight font-medium">{t(action.label)}</span>
+      <span className="text-sm font-medium">{t(action.label)}</span>
     </Button>
   );
 });
@@ -70,16 +45,11 @@ function QuickActionsBarInner({
 }>): React.ReactElement {
   const { t } = useTranslation();
   const { actions, handleAction } = useQuickActions({ onLogWeight });
-  const [left, center, right] = actions;
+  const [left, right] = actions;
 
   return (
-    <nav
-      className="flex items-end justify-center gap-3 px-4 py-3"
-      aria-label={t('quickActions.ariaLabel')}
-      data-testid="quick-actions-bar"
-    >
+    <nav className="flex gap-2 px-4 py-3" aria-label={t('quickActions.ariaLabel')} data-testid="quick-actions-bar">
       <ActionButton action={left} onPress={handleAction} />
-      <ActionButton action={center} onPress={handleAction} />
       <ActionButton action={right} onPress={handleAction} />
     </nav>
   );

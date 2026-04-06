@@ -1,10 +1,11 @@
 import {
+  Check,
   CheckCircle,
   ChevronRight,
-  Droplets,
   Dumbbell,
   Footprints,
   Play,
+  Plus,
   RotateCw,
   UtensilsCrossed,
 } from 'lucide-react';
@@ -15,16 +16,17 @@ import { Button } from '@/components/ui/button';
 
 import { useNavigationStore } from '../../../store/navigationStore';
 import { translateWorkoutType } from '../../fitness/utils/translateWorkoutType';
+import type { MealSlotInfo } from '../hooks/useTodaysPlan';
 import { useTodaysPlan } from '../hooks/useTodaysPlan';
 import { WeightQuickLog } from './WeightQuickLog';
 
-const MEAL_LOG_KEYS: Record<string, string> = {
-  breakfast: 'dashboard.todaysPlan.logBreakfast',
-  lunch: 'dashboard.todaysPlan.logLunch',
-  dinner: 'dashboard.todaysPlan.logDinner',
+const MEAL_SLOT_I18N: Record<MealSlotInfo['type'], string> = {
+  breakfast: 'dashboard.todaysPlan.mealSlotBreakfast',
+  lunch: 'dashboard.todaysPlan.mealSlotLunch',
+  dinner: 'dashboard.todaysPlan.mealSlotDinner',
 };
 
-const CARD_CLASS = 'bg-card rounded-2xl shadow-md border border-border-subtle p-4';
+const CARD_CLASS = 'bg-card rounded-2xl shadow-md border border-border-subtle p-3';
 
 function SessionInfo({
   totalSessions,
@@ -53,51 +55,61 @@ function SessionInfo({
   );
 }
 
-function MealsSection({
+function MealSlots({
+  mealSlots,
   mealsLogged,
   totalMealsPlanned,
   hasReachedTarget,
-  nextMealToLog,
-  onLogMeal,
+  onAddMeal,
 }: Readonly<{
+  mealSlots: MealSlotInfo[];
   mealsLogged: number;
   totalMealsPlanned: number;
   hasReachedTarget: boolean;
-  nextMealToLog?: string;
-  onLogMeal?: () => void;
+  onAddMeal: () => void;
 }>) {
   const { t } = useTranslation();
-  const nextMealKey = nextMealToLog ? MEAL_LOG_KEYS[nextMealToLog] : undefined;
 
   return (
     <div data-testid="meals-section">
-      <div className="mb-2 flex items-center gap-1.5">
+      <div className="mb-1.5 flex items-center gap-1.5">
         <UtensilsCrossed className="text-energy h-4 w-4" aria-hidden="true" />
         <span className="text-foreground-secondary text-xs font-medium">{t('dashboard.todaysPlan.meals')}</span>
+        <span data-testid="meals-progress" className="text-muted-foreground ml-auto text-xs">
+          {t('dashboard.todaysPlan.mealsProgress', { logged: mealsLogged, total: totalMealsPlanned })}
+          {hasReachedTarget && (
+            <span className="text-primary ml-1 inline-flex items-center gap-0.5">
+              <CheckCircle className="h-3 w-3" aria-hidden="true" />
+              {t('dashboard.todaysPlan.mealsReachedTarget')}
+            </span>
+          )}
+        </span>
       </div>
-      <div data-testid="meals-progress" className="text-foreground text-sm font-semibold">
-        {t('dashboard.todaysPlan.mealsProgress', {
-          logged: mealsLogged,
-          total: totalMealsPlanned,
-        })}
-        {hasReachedTarget && (
-          <span className="text-primary ml-1 inline-flex items-center gap-1">
-            <CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />
-            {t('dashboard.todaysPlan.mealsReachedTarget')}
-          </span>
+      <div className="flex gap-2">
+        {mealSlots.map(slot =>
+          slot.hasFood ? (
+            <span
+              key={slot.type}
+              data-testid={`meal-slot-${slot.type}`}
+              className="text-primary bg-primary/10 flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
+            >
+              <Check className="h-3 w-3" aria-hidden="true" />
+              {t(MEAL_SLOT_I18N[slot.type])}
+            </span>
+          ) : (
+            <button
+              key={slot.type}
+              type="button"
+              data-testid={`meal-slot-${slot.type}`}
+              onClick={onAddMeal}
+              className="text-info hover:bg-info/10 flex items-center gap-1 rounded-full border border-dashed border-current px-2 py-0.5 text-xs font-medium transition-colors"
+            >
+              <Plus className="h-3 w-3" aria-hidden="true" />
+              {t(MEAL_SLOT_I18N[slot.type])}
+            </button>
+          ),
         )}
       </div>
-      {nextMealKey && !hasReachedTarget && (
-        <Button
-          variant="link"
-          size="sm"
-          onClick={onLogMeal}
-          data-testid="log-meal-cta"
-          className="text-info mt-2 h-auto p-0 text-xs"
-        >
-          {t(nextMealKey)}
-        </Button>
-      )}
     </div>
   );
 }
@@ -133,22 +145,22 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
     navigateTab('calendar');
   }, [navigateTab]);
 
-  const mealsProps = {
+  const mealSlotsProps = {
+    mealSlots: data.mealSlots,
     mealsLogged: data.mealsLogged,
     totalMealsPlanned: data.totalMealsPlanned,
     hasReachedTarget: data.hasReachedTarget,
-    nextMealToLog: data.nextMealToLog,
-    onLogMeal: handleLogMeal,
+    onAddMeal: handleLogMeal,
   };
 
   if (data.state === 'training-pending') {
     return (
       <>
         <div data-testid="todays-plan-card" className={CARD_CLASS}>
-          <h3 className="text-foreground mb-3 text-sm font-semibold">{t('dashboard.todaysPlan.title')}</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <h3 className="text-foreground mb-2 text-sm font-semibold">{t('dashboard.todaysPlan.title')}</h3>
+          <div className="grid grid-cols-2 gap-3">
             <div data-testid="workout-section">
-              <div className="mb-2 flex items-center gap-1.5">
+              <div className="mb-1.5 flex items-center gap-1.5">
                 <Dumbbell className="text-info h-4 w-4" aria-hidden="true" />
                 <span className="text-foreground-secondary text-xs font-medium">
                   {t('dashboard.todaysPlan.workout')}
@@ -181,7 +193,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
                 {t('dashboard.todaysPlan.startCta')}
               </Button>
             </div>
-            <MealsSection {...mealsProps} />
+            <MealSlots {...mealSlotsProps} />
           </div>
         </div>
         {showWeightLog && <WeightQuickLog onClose={() => setShowWeightLog(false)} />}
@@ -192,10 +204,10 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
   if (data.state === 'training-partial') {
     return (
       <div data-testid="todays-plan-card" className={CARD_CLASS}>
-        <h3 className="text-foreground mb-3 text-sm font-semibold">{t('dashboard.todaysPlan.title')}</h3>
-        <div className="grid grid-cols-2 gap-4">
+        <h3 className="text-foreground mb-2 text-sm font-semibold">{t('dashboard.todaysPlan.title')}</h3>
+        <div className="grid grid-cols-2 gap-3">
           <div data-testid="partial-progress-section">
-            <div className="mb-2 flex items-center gap-1.5">
+            <div className="mb-1.5 flex items-center gap-1.5">
               <RotateCw className="text-primary h-4 w-4" aria-hidden="true" />
               <span className="text-primary text-xs font-medium">
                 {t('dashboard.todaysPlan.sessionProgress', {
@@ -221,7 +233,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
               {t('dashboard.todaysPlan.continueSession')}
             </Button>
           </div>
-          <MealsSection {...mealsProps} />
+          <MealSlots {...mealSlotsProps} />
         </div>
       </div>
     );
@@ -230,10 +242,10 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
   if (data.state === 'training-completed') {
     return (
       <div data-testid="todays-plan-card" className={CARD_CLASS}>
-        <h3 className="text-foreground mb-3 text-sm font-semibold">{t('dashboard.todaysPlan.title')}</h3>
-        <div className="grid grid-cols-2 gap-4">
+        <h3 className="text-foreground mb-2 text-sm font-semibold">{t('dashboard.todaysPlan.title')}</h3>
+        <div className="grid grid-cols-2 gap-3">
           <div data-testid="workout-summary">
-            <div className="mb-2 flex items-center gap-1.5">
+            <div className="mb-1.5 flex items-center gap-1.5">
               <CheckCircle className="text-primary h-4 w-4" aria-hidden="true" />
               <span className="text-primary text-xs font-medium">{t('dashboard.todaysPlan.completed')}</span>
             </div>
@@ -249,11 +261,14 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
                     count: data.completedWorkout.totalSets,
                   })}
                 </p>
-                {data.completedWorkout.hasPR && (
-                  <p data-testid="pr-highlight" className="text-energy text-sm font-semibold">
-                    {t('dashboard.todaysPlan.prHighlight')}
-                  </p>
-                )}
+                {
+                  /* v8 ignore next -- hasPR currently always false from computeCompletedWorkout */ data
+                    .completedWorkout.hasPR && (
+                    <p data-testid="pr-highlight" className="text-energy text-sm font-semibold">
+                      {t('dashboard.todaysPlan.prHighlight')}
+                    </p>
+                  )
+                }
               </>
             )}
             <SessionInfo
@@ -262,7 +277,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
               variant="completed"
             />
           </div>
-          <MealsSection {...mealsProps} />
+          <MealSlots {...mealSlotsProps} />
         </div>
       </div>
     );
@@ -272,36 +287,37 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
     return (
       <>
         <div data-testid="todays-plan-card" className={CARD_CLASS}>
-          <h3 className="text-foreground mb-3 text-sm font-semibold">{t('dashboard.todaysPlan.restDayTitle')}</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div data-testid="recovery-tips">
-              <p className="text-foreground text-sm">
-                <span aria-hidden="true">
-                  <Footprints className="mr-1 inline-block size-4" />
-                </span>
-                {t('dashboard.todaysPlan.recoveryTip1')}
-              </p>
-              <p className="text-foreground mt-1 text-sm">
-                <span aria-hidden="true">
-                  <Droplets className="mr-1 inline-block size-4" />
-                </span>
-                {t('dashboard.todaysPlan.recoveryTip2')}
-              </p>
-            </div>
-            <div data-testid="tomorrow-preview">
-              {data.tomorrowWorkoutType ? (
+          <h3 className="text-foreground mb-2 text-sm font-semibold">{t('dashboard.todaysPlan.restDayTitle')}</h3>
+          <div className="flex items-start gap-3">
+            <div className="min-w-0 flex-1">
+              <div data-testid="recovery-tips">
                 <p className="text-foreground text-sm">
-                  {t('dashboard.todaysPlan.tomorrowPreview', {
-                    name: translateWorkoutType(t, data.tomorrowWorkoutType),
-                    count: data.tomorrowExerciseCount ?? 0,
-                  })}
+                  <span aria-hidden="true">
+                    <Footprints className="mr-1 inline-block size-4" />
+                  </span>
+                  {t('dashboard.todaysPlan.recoveryTip1')}
                 </p>
-              ) : (
-                <p className="text-muted-foreground text-sm">{t('dashboard.todaysPlan.tomorrowRest')}</p>
-              )}
+              </div>
+              <div data-testid="tomorrow-preview" className="mt-1.5">
+                {data.tomorrowWorkoutType ? (
+                  <p className="text-foreground text-sm">
+                    {t('dashboard.todaysPlan.tomorrowPreview', {
+                      name: translateWorkoutType(t, data.tomorrowWorkoutType),
+                      count:
+                        /* v8 ignore next -- defensive: tomorrowExerciseCount always set when tomorrowWorkoutType exists */ data.tomorrowExerciseCount ??
+                        0,
+                    })}
+                  </p>
+                ) : (
+                  <p className="text-muted-foreground text-sm">{t('dashboard.todaysPlan.tomorrowRest')}</p>
+                )}
+              </div>
             </div>
           </div>
-          <div className="mt-3 flex gap-2" data-testid="quick-actions">
+          <div className="border-border-subtle mt-2 border-t pt-2">
+            <MealSlots {...mealSlotsProps} />
+          </div>
+          <div className="mt-2 flex gap-2" data-testid="quick-actions">
             <Button
               variant="outline"
               size="sm"
@@ -329,10 +345,10 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
 
   return (
     <div data-testid="todays-plan-card" className={CARD_CLASS}>
-      <h3 className="text-foreground mb-3 text-sm font-semibold">{t('dashboard.todaysPlan.title')}</h3>
-      <div data-testid="no-plan-section" className="flex flex-col items-center py-4">
-        <Dumbbell className="text-muted-foreground mb-3 h-12 w-12" aria-hidden="true" />
-        <p className="text-muted-foreground mb-3 text-sm">{t('dashboard.todaysPlan.noPlan')}</p>
+      <h3 className="text-foreground mb-2 text-sm font-semibold">{t('dashboard.todaysPlan.title')}</h3>
+      <div data-testid="no-plan-section" className="flex flex-col items-center py-2">
+        <Dumbbell className="text-muted-foreground mb-2 h-8 w-8" aria-hidden="true" />
+        <p className="text-muted-foreground mb-2 text-sm">{t('dashboard.todaysPlan.noPlan')}</p>
         <Button
           size="sm"
           onClick={handleCreatePlan}
@@ -343,8 +359,8 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
           <ChevronRight className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
-      <div className="border-border-subtle mt-1 border-t pt-3">
-        <MealsSection {...mealsProps} />
+      <div className="border-border-subtle mt-1 border-t pt-2">
+        <MealSlots {...mealSlotsProps} />
       </div>
     </div>
   );
