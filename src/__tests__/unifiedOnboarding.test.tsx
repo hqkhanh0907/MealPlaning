@@ -803,13 +803,13 @@ describe('ActivityLevelStep', () => {
     expect(screen.getByText('health.activityLevel.extra_active')).toBeInTheDocument();
   });
 
-  it('displays TDEE multipliers', () => {
+  it('does not display TDEE multipliers in UI', () => {
     renderWithForm(ActivityLevelStep);
-    expect(screen.getByText('×1.2')).toBeInTheDocument();
-    expect(screen.getByText('×1.375')).toBeInTheDocument();
-    expect(screen.getByText('×1.55')).toBeInTheDocument();
-    expect(screen.getByText('×1.725')).toBeInTheDocument();
-    expect(screen.getByText('×1.9')).toBeInTheDocument();
+    expect(screen.queryByText('×1.2')).not.toBeInTheDocument();
+    expect(screen.queryByText('×1.375')).not.toBeInTheDocument();
+    expect(screen.queryByText('×1.55')).not.toBeInTheDocument();
+    expect(screen.queryByText('×1.725')).not.toBeInTheDocument();
+    expect(screen.queryByText('×1.9')).not.toBeInTheDocument();
   });
 
   it('renders heading and subtitle', () => {
@@ -1054,8 +1054,8 @@ describe('TrainingDetailSteps', () => {
       { step: 1, setOnboardingSection },
     );
     expect(screen.getByText('fitness.onboarding.equipment')).toBeInTheDocument();
-    expect(screen.getByText('Barbell')).toBeInTheDocument();
-    expect(screen.getByText('Dumbbell')).toBeInTheDocument();
+    expect(screen.getByText('Tạ đòn')).toBeInTheDocument();
+    expect(screen.getByText('Tạ tay')).toBeInTheDocument();
   });
 
   it('allows toggling equipment selection', () => {
@@ -1067,12 +1067,12 @@ describe('TrainingDetailSteps', () => {
       }>,
       { step: 1, setOnboardingSection },
     );
-    const barbellBtn = screen.getByText('Barbell').closest('button');
+    const barbellBtn = screen.getByText('Tạ đòn').closest('button');
     if (barbellBtn) {
       fireEvent.click(barbellBtn);
       fireEvent.click(barbellBtn);
     }
-    expect(screen.getByText('Barbell')).toBeInTheDocument();
+    expect(screen.getByText('Tạ đòn')).toBeInTheDocument();
   });
 
   it('renders InjuriesStep at step 2', () => {
@@ -1882,7 +1882,7 @@ describe('TrainingDetailSteps – sub-step interactions', () => {
       }>,
       { step: 1, setOnboardingSection },
     );
-    const barbellBtn = getByText('Barbell');
+    const barbellBtn = getByText('Tạ đòn');
     fireEvent.click(barbellBtn);
     expect(barbellBtn.className).toContain('border-primary');
     // Toggle off

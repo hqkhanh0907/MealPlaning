@@ -1,3 +1,4 @@
+import { BarChart3 } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -74,9 +75,13 @@ export const MacroChart = React.memo(function MacroChart({ dayNutrition }: Macro
     return (
       <div
         data-testid="macro-chart-empty"
-        className="bg-card border-border-subtle text-muted-foreground rounded-2xl border p-6 text-center text-sm shadow-sm"
+        className="bg-card border-border-subtle rounded-2xl border p-6 text-center shadow-sm"
       >
-        {t('macro.noData')}
+        <div className="bg-muted mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full">
+          <BarChart3 className="text-muted-foreground h-5 w-5" aria-hidden="true" />
+        </div>
+        <p className="text-muted-foreground text-sm font-medium">{t('macro.noData')}</p>
+        <p className="text-muted-foreground mt-1 text-xs">{t('emptyState.chartNoData')}</p>
       </div>
     );
   }

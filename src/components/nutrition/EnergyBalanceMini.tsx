@@ -6,6 +6,7 @@ export interface EnergyBalanceMiniProps {
   eaten: number;
   burned: number;
   target: number;
+  hasData?: boolean;
   onTapDetail?: () => void;
 }
 
@@ -20,6 +21,7 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
   eaten,
   burned,
   target,
+  hasData = true,
   onTapDetail,
 }: EnergyBalanceMiniProps) {
   const { t } = useTranslation();
@@ -41,6 +43,9 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
   const interactiveClass =
     'cursor-pointer active:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2';
 
+  const eatenDisplay = hasData ? String(Math.round(eaten)) : '—';
+  const netDisplay = hasData ? String(net) : '—';
+
   const content = (
     <div className="flex items-center justify-around">
       {/* Eaten */}
@@ -48,7 +53,7 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
         <div className="flex items-center gap-1">
           <UtensilsCrossed className="text-energy h-3.5 w-3.5" aria-hidden="true" />
           <span data-testid="mini-eaten" className="text-foreground text-sm font-semibold tabular-nums">
-            {Math.round(eaten)}
+            {eatenDisplay}
           </span>
         </div>
         <span className="text-muted-foreground text-xs">{t('nutrition.caloriesIn')}</span>
@@ -74,7 +79,7 @@ export const EnergyBalanceMini = React.memo(function EnergyBalanceMini({
         <div className="flex items-center gap-1">
           <Target className="text-muted-foreground h-3.5 w-3.5" aria-hidden="true" />
           <span data-testid="mini-net" className={`text-sm font-semibold tabular-nums ${netColorClass}`}>
-            {net}
+            {netDisplay}
           </span>
         </div>
         <span className="text-muted-foreground text-xs">{t('nutrition.netCalories')}</span>

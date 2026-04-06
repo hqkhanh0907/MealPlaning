@@ -93,7 +93,9 @@ function TrainingPlanViewInner({
   );
   const pushPage = useNavigationStore(s => s.pushPage);
   const { targetCalories, targetProtein } = useNutritionTargets();
-  const { eaten, protein } = useTodayNutrition();
+  const { eaten: rawEaten, protein: rawProtein } = useTodayNutrition();
+  const eaten = rawEaten ?? 0;
+  const protein = rawProtein ?? 0;
 
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [activeSessionIds, setActiveSessionIds] = useState<Record<number, string>>({});

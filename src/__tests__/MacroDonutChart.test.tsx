@@ -44,6 +44,19 @@ describe('MacroDonutChart', () => {
     expect(screen.queryByTestId('arc-carbs')).not.toBeInTheDocument();
   });
 
+  it('shows hint text when all values are zero', () => {
+    render(<MacroDonutChart proteinG={0} fatG={0} carbsG={0} />);
+
+    expect(screen.getByTestId('donut-no-data-hint')).toBeInTheDocument();
+    expect(screen.getByTestId('donut-no-data-hint')).toHaveTextContent('Chưa có dữ liệu');
+  });
+
+  it('does not show hint text when values are non-zero', () => {
+    render(<MacroDonutChart proteinG={100} fatG={50} carbsG={200} />);
+
+    expect(screen.queryByTestId('donut-no-data-hint')).not.toBeInTheDocument();
+  });
+
   it('renders with custom size', () => {
     render(<MacroDonutChart {...baseProps} size={200} />);
 

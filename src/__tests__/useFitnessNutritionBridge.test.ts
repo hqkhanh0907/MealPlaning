@@ -38,7 +38,7 @@ describe('deriveInsight', () => {
     expect(result).not.toBeNull();
     expect((result as FitnessNutritionInsight).type).toBe('deficit-on-training');
     expect((result as FitnessNutritionInsight).severity).toBe('warning');
-    expect((result as FitnessNutritionInsight).title).toContain('Thiếu hụt');
+    expect((result as FitnessNutritionInsight).title).toContain('năng lượng');
   });
 
   it('returns null on training day when calories are adequate', () => {

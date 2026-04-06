@@ -28,7 +28,8 @@ export const EnergyDetailSheet = React.memo(function EnergyDetailSheet({ onClose
   useModalBackHandler(true, onClose);
 
   const { bmr, tdee, targetCalories } = useNutritionTargets();
-  const { eaten } = useTodayNutrition();
+  const { eaten: rawEaten } = useTodayNutrition();
+  const eaten = rawEaten ?? 0;
   const caloriesOut = useTodayCaloriesOut();
 
   const today = todayStr();

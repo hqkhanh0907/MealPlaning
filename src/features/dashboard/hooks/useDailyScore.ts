@@ -16,6 +16,15 @@ import { DEFAULT_HEALTH_PROFILE, getAge } from '../../health-profile/types';
 import type { ScoreColor } from '../types';
 import { calculateDailyScore } from '../utils/scoreCalculator';
 
+export type HeroContext =
+  | 'first-time'
+  | 'rest-day-with-meals'
+  | 'training-day-needs-workout'
+  | 'workout-done-needs-fuel'
+  | 'balanced-day'
+  | 'empty-day'
+  | 'rest-day-empty';
+
 export interface DailyScoreData {
   totalScore: number;
   factors: {
@@ -28,6 +37,7 @@ export interface DailyScoreData {
   color: ScoreColor;
   greeting: string;
   isFirstTimeUser: boolean;
+  heroContext: HeroContext;
 }
 
 function formatLocalDate(date: Date): string {
@@ -128,12 +138,36 @@ export function useDailyScore(): DailyScoreData {
       skipWorkoutFactor: !activePlan || scheduledDays.length === 0,
     });
 
+    const hasMealsToday =
+      todayPlan != null &&
+      (todayPlan.breakfastDishIds.length > 0 ||
+        todayPlan.lunchDishIds.length > 0 ||
+        todayPlan.dinnerDishIds.length > 0);
+
+    let heroContext: HeroContext;
+    if (isFirstTimeUser) {
+      heroContext = 'first-time';
+    } else if (isRestDay && hasMealsToday) {
+      heroContext = 'rest-day-with-meals';
+    } else if (isRestDay && !hasMealsToday) {
+      heroContext = 'rest-day-empty';
+    } else if (!isRestDay && !workoutCompleted && hasMealsToday) {
+      heroContext = 'training-day-needs-workout';
+    } else if (workoutCompleted && !hasMealsToday) {
+      heroContext = 'workout-done-needs-fuel';
+    } else if (workoutCompleted && hasMealsToday) {
+      heroContext = 'balanced-day';
+    } else {
+      heroContext = 'empty-day';
+    }
+
     return {
       totalScore: scoreResult.totalScore,
       factors: scoreResult.factors,
       color: scoreResult.color,
       greeting,
       isFirstTimeUser,
+      heroContext,
     };
   }, [
     profile,

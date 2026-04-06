@@ -218,11 +218,18 @@ export function ExerciseSelector({
         {/* Exercise list */}
         <div className="flex-1 overflow-y-auto px-4 pb-3">
           {filteredExercises.length === 0 ? (
-            <div
-              data-testid="exercise-empty-state"
-              className="text-muted-foreground flex flex-col items-center justify-center py-12"
-            >
-              <p className="text-sm">{t('fitness.exerciseSelector.noResults')}</p>
+            <div data-testid="exercise-empty-state" className="flex flex-col items-center justify-center py-12">
+              <div className="bg-muted mb-3 flex h-12 w-12 items-center justify-center rounded-full">
+                <Search className="text-muted-foreground h-5 w-5" aria-hidden="true" />
+              </div>
+              <p className="text-foreground text-sm font-medium">
+                {searchQuery.trim()
+                  ? t('emptyState.exerciseSearchNoResults', { query: searchQuery.trim() })
+                  : t('emptyState.exerciseFilterNoResults')}
+              </p>
+              <p className="text-muted-foreground mt-1 max-w-xs text-center text-xs">
+                {t('emptyState.exerciseNoResultsHint')}
+              </p>
             </div>
           ) : (
             <ul className="divide-border divide-y">

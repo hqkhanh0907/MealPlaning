@@ -208,8 +208,8 @@ describe('PlanTemplateGallery', () => {
     // Check days/week displayed
     const daysLabels = screen.getAllByText(/ngày\/tuần/);
     expect(daysLabels.length).toBeGreaterThan(0);
-    // Equipment labels should be English via EQUIPMENT_DISPLAY constant
-    expect(screen.getAllByText('Barbell').length).toBeGreaterThan(0);
+    // Equipment labels should be Vietnamese via EQUIPMENT_DISPLAY constant
+    expect(screen.getAllByText('Tạ đòn').length).toBeGreaterThan(0);
   });
 
   it('shows TemplateMatchBadge on recommended templates', async () => {

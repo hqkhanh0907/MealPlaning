@@ -236,7 +236,7 @@ describe('ExerciseSelector', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('empty state shown when no exercises match', async () => {
+  it('empty state shown when no exercises match search', async () => {
     const user = userEvent.setup();
     render(<ExerciseSelector {...defaultProps} />);
 
@@ -244,7 +244,22 @@ describe('ExerciseSelector', () => {
     await user.type(input, 'xyznonexistent');
 
     expect(screen.getByTestId('exercise-empty-state')).toBeInTheDocument();
-    expect(screen.getByText('Không tìm thấy bài tập')).toBeInTheDocument();
+    expect(screen.getByText(/Không tìm thấy "xyznonexistent"/)).toBeInTheDocument();
+    expect(screen.getByText(/Thử tìm với từ khóa khác/)).toBeInTheDocument();
+  });
+
+  it('empty state shows filter message when no search query', async () => {
+    const user = userEvent.setup();
+    render(<ExerciseSelector {...defaultProps} />);
+
+    const chipRow = screen.getByTestId('muscle-group-chips');
+    const findChip = (label: string) =>
+      Array.from(chipRow.querySelectorAll('button')).find(btn => btn.textContent === label) as HTMLElement;
+
+    await user.click(findChip('Mông'));
+
+    expect(screen.getByTestId('exercise-empty-state')).toBeInTheDocument();
+    expect(screen.getByText('Không tìm thấy bài tập phù hợp')).toBeInTheDocument();
   });
 
   it('shows exercise details (name, category, equipment)', () => {
@@ -257,8 +272,8 @@ describe('ExerciseSelector', () => {
     const compoundBadges = screen.getAllByText('Đa khớp');
     expect(compoundBadges.length).toBeGreaterThan(0);
 
-    // Equipment text (English via EQUIPMENT_DISPLAY constant)
-    expect(screen.getAllByText('Barbell').length).toBeGreaterThan(0);
+    // Equipment text (Vietnamese via EQUIPMENT_DISPLAY constant)
+    expect(screen.getAllByText('Tạ đòn').length).toBeGreaterThan(0);
 
     // Muscle group label
     expect(screen.getAllByText('Ngực').length).toBeGreaterThan(0);

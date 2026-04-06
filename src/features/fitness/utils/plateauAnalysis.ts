@@ -3,6 +3,7 @@ import type { Workout, WorkoutSet } from '../types';
 export interface PlateauResult {
   strengthPlateau: boolean;
   volumePlateau: boolean;
+  messageKey: string;
   message: string;
 }
 
@@ -13,7 +14,8 @@ export function analyzePlateau(_workouts: Workout[], sets: WorkoutSet[], exercis
     return {
       strengthPlateau: false,
       volumePlateau: false,
-      message: 'Insufficient data',
+      messageKey: 'fitness.coaching.plateau.insufficientData',
+      message: '',
     };
   }
 
@@ -42,13 +44,21 @@ export function analyzePlateau(_workouts: Workout[], sets: WorkoutSet[], exercis
 
   const volumePlateau = lastWeekVol > 0 && thisWeekVol <= lastWeekVol;
 
-  const messages: string[] = [];
-  if (strengthPlateau) messages.push('Strength stagnation');
-  if (volumePlateau) messages.push('Volume plateau');
+  let messageKey: string;
+  if (strengthPlateau && volumePlateau) {
+    messageKey = 'fitness.coaching.plateau.both';
+  } else if (strengthPlateau) {
+    messageKey = 'fitness.coaching.plateau.strength';
+  } else if (volumePlateau) {
+    messageKey = 'fitness.coaching.plateau.volume';
+  } else {
+    messageKey = 'fitness.coaching.plateau.none';
+  }
 
   return {
     strengthPlateau,
     volumePlateau,
-    message: messages.join('; ') || 'No plateau detected',
+    messageKey,
+    message: '',
   };
 }

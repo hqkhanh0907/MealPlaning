@@ -43,11 +43,15 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
     return (values.weightKg / (h * h)).toFixed(1);
   }, [values.heightCm, values.weightKg]);
 
-  const estimatedTdee = useMemo(() => {
-    const base =
+  const estimatedBmr = useMemo(() => {
+    return Math.round(
       values.gender === 'male'
         ? 10 * values.weightKg + 6.25 * values.heightCm - 5 * age + 5
-        : 10 * values.weightKg + 6.25 * values.heightCm - 5 * age - 161;
+        : 10 * values.weightKg + 6.25 * values.heightCm - 5 * age - 161,
+    );
+  }, [values.gender, values.weightKg, values.heightCm, age]);
+
+  const estimatedTdee = useMemo(() => {
     const multipliers: Record<string, number> = {
       sedentary: 1.2,
       light: 1.375,
@@ -55,8 +59,14 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
       active: 1.725,
       extra_active: 1.9,
     };
-    return Math.round(base * (multipliers[values.activityLevel] ?? 1.55));
-  }, [values, age]);
+    return Math.round(estimatedBmr * (multipliers[values.activityLevel] ?? 1.55));
+  }, [estimatedBmr, values.activityLevel]);
+
+  const estimatedTarget = useMemo(() => {
+    if (values.goalType === 'maintain') return estimatedTdee;
+    const offset = getCalorieOffset(values.goalType, values.rateOfChange ?? 'moderate');
+    return estimatedTdee + offset;
+  }, [estimatedTdee, values.goalType, values.rateOfChange]);
 
   const handleConfirm = async () => {
     const healthFields = [...STEP_FIELDS['2a'], ...STEP_FIELDS['2b'], ...STEP_FIELDS['2c']] as const;
@@ -138,9 +148,36 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
         {/* Hero Calorie */}
         <div className="bg-primary-subtle mb-6 rounded-2xl p-6 text-center">
           <p className="text-primary mb-1 text-sm font-medium">{t('onboarding.confirm.dailyCaloriesLabel')}</p>
-          <p className="text-primary-emphasis text-4xl font-bold">{estimatedTdee}</p>
+          <p className="text-primary-emphasis text-4xl font-bold">{estimatedTarget}</p>
           <p className="text-primary/70 mt-1 text-xs">kcal / {t('onboarding.confirm.day')}</p>
-          <p className="text-primary/70/70 mt-2 text-xs leading-relaxed">{t('onboarding.confirm.dailyCaloriesDesc')}</p>
+          <p className="text-primary/70 mt-2 text-xs leading-relaxed">{t('onboarding.confirm.dailyCaloriesDesc')}</p>
+        </div>
+
+        {/* BMR / TDEE / Target breakdown */}
+        <div className="mb-6 grid grid-cols-3 gap-3">
+          <div className="bg-muted rounded-xl p-3 text-center">
+            <p className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
+              {t('onboarding.confirm.bmr')}
+            </p>
+            <p className="text-foreground text-lg font-bold">{estimatedBmr}</p>
+            <p className="text-muted-foreground mt-1 text-[10px] leading-tight">{t('onboarding.confirm.bmrExplain')}</p>
+          </div>
+          <div className="bg-muted rounded-xl p-3 text-center">
+            <p className="text-muted-foreground text-[10px] font-medium tracking-wider uppercase">
+              {t('onboarding.confirm.tdee')}
+            </p>
+            <p className="text-foreground text-lg font-bold">{estimatedTdee}</p>
+            <p className="text-muted-foreground mt-1 text-[10px] leading-tight">
+              {t('onboarding.confirm.tdeeExplain')}
+            </p>
+          </div>
+          <div className="bg-primary-subtle rounded-xl p-3 text-center">
+            <p className="text-primary text-[10px] font-medium tracking-wider uppercase">
+              {t('onboarding.confirm.targetCal')}
+            </p>
+            <p className="text-primary-emphasis text-lg font-bold">{estimatedTarget}</p>
+            <p className="text-primary/70 mt-1 text-[10px] leading-tight">{t('onboarding.confirm.targetExplain')}</p>
+          </div>
         </div>
 
         {/* Summary */}

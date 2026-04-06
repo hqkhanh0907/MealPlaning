@@ -16,7 +16,7 @@ export interface StreakInfo {
 
 export interface Milestone {
   id: string;
-  emoji: string;
+  icon: string;
   label: string;
   threshold: number;
   type: 'sessions' | 'streak';
@@ -35,16 +35,16 @@ export interface PRDetection {
 // ===== Constants =====
 
 export const MILESTONES: Milestone[] = [
-  { id: 'sessions-1', emoji: '🥇', label: 'sessions1', threshold: 1, type: 'sessions' },
-  { id: 'sessions-10', emoji: '💪', label: 'sessions10', threshold: 10, type: 'sessions' },
-  { id: 'sessions-25', emoji: '⚡', label: 'sessions25', threshold: 25, type: 'sessions' },
-  { id: 'sessions-50', emoji: '🔥', label: 'sessions50', threshold: 50, type: 'sessions' },
-  { id: 'sessions-100', emoji: '💎', label: 'sessions100', threshold: 100, type: 'sessions' },
-  { id: 'streak-7', emoji: '📅', label: 'streak7', threshold: 7, type: 'streak' },
-  { id: 'streak-14', emoji: '🌟', label: 'streak14', threshold: 14, type: 'streak' },
-  { id: 'streak-30', emoji: '🦁', label: 'streak30', threshold: 30, type: 'streak' },
-  { id: 'streak-60', emoji: '👑', label: 'streak60', threshold: 60, type: 'streak' },
-  { id: 'streak-90', emoji: '🏆', label: 'streak90', threshold: 90, type: 'streak' },
+  { id: 'sessions-1', icon: 'medal', label: 'sessions1', threshold: 1, type: 'sessions' },
+  { id: 'sessions-10', icon: 'dumbbell', label: 'sessions10', threshold: 10, type: 'sessions' },
+  { id: 'sessions-25', icon: 'zap', label: 'sessions25', threshold: 25, type: 'sessions' },
+  { id: 'sessions-50', icon: 'flame', label: 'sessions50', threshold: 50, type: 'sessions' },
+  { id: 'sessions-100', icon: 'gem', label: 'sessions100', threshold: 100, type: 'sessions' },
+  { id: 'streak-7', icon: 'calendar', label: 'streak7', threshold: 7, type: 'streak' },
+  { id: 'streak-14', icon: 'sparkles', label: 'streak14', threshold: 14, type: 'streak' },
+  { id: 'streak-30', icon: 'shield', label: 'streak30', threshold: 30, type: 'streak' },
+  { id: 'streak-60', icon: 'crown', label: 'streak60', threshold: 60, type: 'streak' },
+  { id: 'streak-90', icon: 'trophy', label: 'streak90', threshold: 90, type: 'streak' },
 ];
 
 // ===== Core Functions =====

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 export interface ProteinProgressProps {
   current: number;
   target: number;
+  hasData?: boolean;
 }
 
 const SUGGESTION_COUNT = 5;
@@ -21,7 +22,11 @@ function getBarColorClass(pct: number): string {
   return 'bg-muted-foreground';
 }
 
-export const ProteinProgress = React.memo(function ProteinProgress({ current, target }: ProteinProgressProps) {
+export const ProteinProgress = React.memo(function ProteinProgress({
+  current,
+  target,
+  hasData = true,
+}: ProteinProgressProps) {
   const { t } = useTranslation();
 
   const roundedCurrent = Math.round(current);
@@ -61,7 +66,7 @@ export const ProteinProgress = React.memo(function ProteinProgress({ current, ta
       <div className="flex items-center justify-between">
         <span className="text-foreground text-xs font-medium">{t('nutrition.protein')}</span>
         <span data-testid="protein-display" className="text-foreground text-xs font-semibold tabular-nums">
-          {roundedCurrent}g / {roundedTarget}g
+          {hasData ? `${roundedCurrent}g / ${roundedTarget}g` : `— / ${roundedTarget}g`}
         </span>
       </div>
 

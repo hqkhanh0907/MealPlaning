@@ -25,6 +25,8 @@ vi.mock('react-i18next', () => ({
         'fitness.history.weekOf': 'Tuần từ {{date}}',
         'fitness.history.notes': 'Ghi chú',
         'fitness.history.completedAt': 'Hoàn thành lúc',
+        'fitness.emptyState.historyTitle': 'Chưa có lịch sử tập luyện',
+        'fitness.emptyState.historyDescription': 'Bắt đầu buổi tập đầu tiên để xem lịch sử tại đây',
       };
       let result = translations[key] ?? key;
       if (opts) {
@@ -175,7 +177,9 @@ describe('WorkoutHistory', () => {
 
     it('shows correct subtitle in empty state', () => {
       render(<WorkoutHistory />);
-      expect(screen.getByTestId('empty-subtitle')).toHaveTextContent('Bắt đầu buổi tập đầu tiên để ghi nhận tại đây');
+      expect(screen.getByTestId('empty-subtitle')).toHaveTextContent(
+        'Bắt đầu buổi tập đầu tiên để xem lịch sử tại đây',
+      );
     });
 
     it('renders skeleton preview with 3 placeholder cards', () => {

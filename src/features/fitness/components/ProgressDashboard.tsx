@@ -145,11 +145,14 @@ function ProgressDashboardInner() {
     for (const eid of exerciseIds) {
       const result = analyzePlateau(workouts, workoutSets, eid);
       if (result.strengthPlateau || result.volumePlateau) {
-        results.push({ id: `plateau-${eid}`, text: result.message });
+        const translated = t(result.messageKey);
+        if (translated) {
+          results.push({ id: `plateau-${eid}`, text: translated });
+        }
       }
     }
     return results;
-  }, [workouts, workoutSets]);
+  }, [workouts, workoutSets, t]);
 
   const insights = useMemo(() => {
     const result: { id: string; text: string }[] = [];
@@ -278,21 +281,26 @@ function ProgressDashboardInner() {
   if (!hasData) {
     return (
       <div data-testid="progress-empty-state" className="flex flex-col items-center px-4 py-12">
-        <div className="w-full space-y-4 opacity-30">
+        <div className="bg-muted mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+          <BarChart3 className="text-muted-foreground h-7 w-7" aria-hidden="true" />
+        </div>
+        <p className="text-foreground mb-1 text-lg font-semibold">{t('fitness.emptyState.progressTitle')}</p>
+        <p className="text-muted-foreground mb-6 max-w-xs text-center text-sm">
+          {t('fitness.emptyState.progressDescription')}
+        </p>
+        <div className="mb-6 w-full space-y-4 opacity-30">
           <div className="bg-muted h-24 rounded-2xl" />
           <div className="flex gap-3">
             <div className="bg-muted h-20 flex-1 rounded-xl" />
             <div className="bg-muted h-20 flex-1 rounded-xl" />
           </div>
-          <div className="bg-muted h-8 rounded-lg" />
         </div>
-        <p className="text-muted-foreground mt-6 text-sm">{t('fitness.progress.noData')}</p>
         <button
           type="button"
           data-testid="start-training-cta"
-          className="bg-primary text-primary-foreground active:bg-primary/80 focus-visible:ring-ring/50 mt-4 rounded-full px-6 py-2.5 text-sm font-medium focus-visible:ring-3"
+          className="bg-primary text-primary-foreground active:bg-primary/80 focus-visible:ring-ring/50 rounded-full px-6 py-2.5 text-sm font-medium focus-visible:ring-3"
         >
-          {t('fitness.progress.startTraining')} →
+          {t('fitness.emptyState.startWorkout')} →
         </button>
       </div>
     );

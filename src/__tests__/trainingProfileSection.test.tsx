@@ -82,7 +82,7 @@ describe('TrainingProfileSection – beginner', () => {
     expect(screen.getByText('Thời lượng buổi tập (phút)')).toBeInTheDocument();
     expect(screen.getByText(/60\s*phút/)).toBeInTheDocument();
     expect(screen.getByText('Thiết bị tập')).toBeInTheDocument();
-    expect(screen.getByText('Barbell, Dumbbell')).toBeInTheDocument();
+    expect(screen.getByText('Tạ đòn, Tạ tay')).toBeInTheDocument();
     expect(screen.getByText('Số buổi cardio/tuần')).toBeInTheDocument();
     expect(screen.getByText(/2\s*buổi\/tuần/)).toBeInTheDocument();
   });

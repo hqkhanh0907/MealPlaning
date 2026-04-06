@@ -1,4 +1,17 @@
-import { CheckCircle, ChevronDown } from 'lucide-react';
+import {
+  Calendar,
+  CheckCircle,
+  ChevronDown,
+  Crown,
+  Dumbbell,
+  Flame,
+  Gem,
+  Medal,
+  Shield,
+  Sparkles,
+  Trophy,
+  Zap,
+} from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
@@ -6,6 +19,19 @@ import { useShallow } from 'zustand/react/shallow';
 import { useFitnessStore } from '../../../store/fitnessStore';
 import { selectActivePlan } from '../../../store/selectors/fitnessSelectors';
 import { calculateStreak, checkMilestones } from '../utils/gamification';
+
+const MILESTONE_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  medal: Medal,
+  dumbbell: Dumbbell,
+  zap: Zap,
+  flame: Flame,
+  gem: Gem,
+  calendar: Calendar,
+  sparkles: Sparkles,
+  shield: Shield,
+  crown: Crown,
+  trophy: Trophy,
+};
 
 export const MilestonesList = React.memo(function MilestonesList() {
   const { t } = useTranslation();
@@ -56,8 +82,12 @@ export const MilestonesList = React.memo(function MilestonesList() {
         <div data-testid="milestones-content" className="mt-2 space-y-3">
           {nextMilestone && (
             <div className="bg-card rounded-lg p-4 shadow-sm">
-              <p className="text-muted-foreground mb-2 text-sm">
-                {t('fitness.gamification.nextMilestone')}: {nextMilestone.emoji}{' '}
+              <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-sm">
+                {t('fitness.gamification.nextMilestone')}:{' '}
+                {(() => {
+                  const NextIcon = MILESTONE_ICON_MAP[nextMilestone.icon];
+                  return NextIcon ? <NextIcon className="inline h-4 w-4" aria-hidden="true" /> : null;
+                })()}{' '}
                 {t(`fitness.gamification.${nextMilestone.label}`)}
               </p>
               <progress
@@ -89,7 +119,12 @@ export const MilestonesList = React.memo(function MilestonesList() {
                   m.achievedDate ? 'bg-primary-subtle' : 'bg-muted/50 opacity-50'
                 }`}
               >
-                <span className="text-xl">{m.emoji}</span>
+                <span className="flex h-6 w-6 items-center justify-center">
+                  {(() => {
+                    const MIcon = MILESTONE_ICON_MAP[m.icon];
+                    return MIcon ? <MIcon className="h-5 w-5" aria-hidden="true" /> : null;
+                  })()}
+                </span>
                 <span className="text-foreground flex-1 text-sm">{t(`fitness.gamification.${m.label}`)}</span>
                 {m.achievedDate && (
                   <span data-testid={`milestone-date-${m.id}`} className="text-primary flex items-center gap-1 text-xs">

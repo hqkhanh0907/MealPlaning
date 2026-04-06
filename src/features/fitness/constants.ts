@@ -30,16 +30,16 @@ export const PUSH_MUSCLES: MuscleGroup[] = ['chest', 'shoulders'];
 export const PULL_MUSCLES: MuscleGroup[] = ['back', 'arms'];
 export const LEG_MUSCLES: MuscleGroup[] = ['legs', 'glutes', 'core'];
 
-// Equipment display names — kept in English as they are universally recognized fitness terms
+// Equipment display names — Vietnamese labels
 export const EQUIPMENT_DISPLAY: Record<string, string> = {
-  barbell: 'Barbell',
-  dumbbell: 'Dumbbell',
-  machine: 'Machine',
-  cable: 'Cable',
-  bodyweight: 'Bodyweight',
-  kettlebell: 'Kettlebell',
-  bands: 'Bands',
-  resistance_band: 'Resistance Band',
+  barbell: 'Tạ đòn',
+  dumbbell: 'Tạ tay',
+  machine: 'Máy tập',
+  cable: 'Dây cáp',
+  bodyweight: 'Tự trọng',
+  kettlebell: 'Tạ ấm',
+  bands: 'Dây kháng lực',
+  resistance_band: 'Dây kháng lực',
   trx: 'TRX',
 };
 

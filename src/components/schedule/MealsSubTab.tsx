@@ -102,6 +102,14 @@ export const MealsSubTab = React.memo(function MealsSubTab({
     [t],
   );
 
+  const filledCount = useMemo(() => {
+    let count = 0;
+    if (dayNutrition.breakfast.dishIds.length > 0) count++;
+    if (dayNutrition.lunch.dishIds.length > 0) count++;
+    if (dayNutrition.dinner.dishIds.length > 0) count++;
+    return count;
+  }, [dayNutrition]);
+
   return (
     <div data-testid="meals-subtab" className="space-y-4">
       <MealActionBar
@@ -163,6 +171,19 @@ export const MealsSubTab = React.memo(function MealsSubTab({
       )}
 
       <div className="bg-card border-border-subtle divide-border divide-y overflow-hidden rounded-2xl border shadow-sm">
+        {!allEmpty && (
+          <div data-testid="meal-progress" className="flex items-center justify-between px-4 py-2">
+            <span className="text-muted-foreground text-xs font-medium">
+              {t('emptyState.mealProgress', { filled: filledCount, total: MEAL_TYPES.length })}
+            </span>
+            <div className="bg-muted flex h-1.5 w-20 overflow-hidden rounded-full" aria-hidden="true">
+              <div
+                className={`h-full rounded-full transition-all ${isComplete ? 'bg-primary' : 'bg-warning'}`}
+                style={{ width: `${(filledCount / MEAL_TYPES.length) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
         {MEAL_TYPES.map(type => (
           <div key={type} className="p-1">
             <MealSlot

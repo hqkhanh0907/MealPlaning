@@ -36,15 +36,15 @@ describe('IngredientEditModal', () => {
   it('renders create new ingredient form with correct title', () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     expect(screen.getByText('Thêm nguyên liệu mới')).toBeInTheDocument();
-    expect(screen.getByLabelText('Tên nguyên liệu')).toHaveValue('');
-    expect(screen.getByLabelText('Đơn vị tính')).toHaveValue('');
+    expect(screen.getByLabelText(/Tên nguyên liệu/)).toHaveValue('');
+    expect(screen.getByLabelText(/Đơn vị tính/)).toHaveValue('');
   });
 
   it('renders edit existing ingredient with pre-populated data', () => {
     render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
     expect(screen.getByText('Sửa nguyên liệu')).toBeInTheDocument();
-    expect(screen.getByLabelText('Tên nguyên liệu')).toHaveValue('Ức gà');
-    expect(screen.getByLabelText('Đơn vị tính')).toHaveValue('g');
+    expect(screen.getByLabelText(/Tên nguyên liệu/)).toHaveValue('Ức gà');
+    expect(screen.getByLabelText(/Đơn vị tính/)).toHaveValue('g');
   });
 
   it('renders all 5 nutrition fields', () => {
@@ -65,7 +65,7 @@ describe('IngredientEditModal', () => {
   it('shows name validation error when submitting without name', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     // Fill unit but no name
-    fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
+    fireEvent.change(screen.getByLabelText(/Đơn vị tính/), { target: { value: 'g' } });
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
 
     await waitFor(() => {
@@ -77,7 +77,7 @@ describe('IngredientEditModal', () => {
   it('shows unit validation error when submitting without unit', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     // Fill name but no unit
-    fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Thịt bò' } });
+    fireEvent.change(screen.getByLabelText(/Tên nguyên liệu/), { target: { value: 'Thịt bò' } });
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
 
     await waitFor(() => {
@@ -104,7 +104,7 @@ describe('IngredientEditModal', () => {
       expect(screen.getByText('Vui lòng nhập tên nguyên liệu')).toBeInTheDocument();
     });
 
-    fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'X' } });
+    fireEvent.change(screen.getByLabelText(/Tên nguyên liệu/), { target: { value: 'X' } });
     await waitFor(() => {
       expect(screen.queryByText('Vui lòng nhập tên nguyên liệu')).not.toBeInTheDocument();
     });
@@ -117,7 +117,7 @@ describe('IngredientEditModal', () => {
       expect(screen.getByText('Vui lòng nhập đơn vị tính')).toBeInTheDocument();
     });
 
-    fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
+    fireEvent.change(screen.getByLabelText(/Đơn vị tính/), { target: { value: 'g' } });
     await waitFor(() => {
       expect(screen.queryByText('Vui lòng nhập đơn vị tính')).not.toBeInTheDocument();
     });
@@ -220,7 +220,7 @@ describe('IngredientEditModal', () => {
   it('AI button is disabled when name is empty', () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     // Fill unit only
-    fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
+    fireEvent.change(screen.getByLabelText(/Đơn vị tính/), { target: { value: 'g' } });
 
     // When unit is filled, aria-label is the AI tooltip but still disabled due to no name
     const aiButton = screen.getByRole('button', { name: 'Tự động điền thông tin bằng AI' });
@@ -229,7 +229,7 @@ describe('IngredientEditModal', () => {
 
   it('AI button is disabled when unit is empty', () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Thịt bò' } });
+    fireEvent.change(screen.getByLabelText(/Tên nguyên liệu/), { target: { value: 'Thịt bò' } });
 
     // When unit is empty, aria-label shows the no-unit tooltip
     const aiButton = screen.getByRole('button', { name: 'Vui lòng nhập đơn vị tính trước' });
@@ -288,8 +288,8 @@ describe('IngredientEditModal', () => {
 
   it('submits valid ingredient with correct data structure', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Thịt bò' } });
-    fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
+    fireEvent.change(screen.getByLabelText(/Tên nguyên liệu/), { target: { value: 'Thịt bò' } });
+    fireEvent.change(screen.getByLabelText(/Đơn vị tính/), { target: { value: 'g' } });
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
 
     await waitFor(() => {
@@ -322,7 +322,7 @@ describe('IngredientEditModal', () => {
 
   it('shows unsaved dialog when closing with name change', () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'New' } });
+    fireEvent.change(screen.getByLabelText(/Tên nguyên liệu/), { target: { value: 'New' } });
 
     const xButton = screen.getAllByRole('button').find(b => b.querySelector('.lucide-x'));
     if (xButton) fireEvent.click(xButton);
@@ -332,7 +332,7 @@ describe('IngredientEditModal', () => {
 
   it('shows unsaved dialog when closing with unit change', () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'ml' } });
+    fireEvent.change(screen.getByLabelText(/Đơn vị tính/), { target: { value: 'ml' } });
 
     const xButton = screen.getAllByRole('button').find(b => b.querySelector('.lucide-x'));
     if (xButton) fireEvent.click(xButton);
@@ -342,7 +342,7 @@ describe('IngredientEditModal', () => {
 
   it('discards changes via unsaved dialog', () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByLabelText(/Tên nguyên liệu/), { target: { value: 'Test' } });
 
     const xButton = screen.getAllByRole('button').find(b => b.querySelector('.lucide-x'));
     if (xButton) fireEvent.click(xButton);
@@ -353,8 +353,8 @@ describe('IngredientEditModal', () => {
 
   it('saves and closes via unsaved dialog when form is valid', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Cà chua' } });
-    fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
+    fireEvent.change(screen.getByLabelText(/Tên nguyên liệu/), { target: { value: 'Cà chua' } });
+    fireEvent.change(screen.getByLabelText(/Đơn vị tính/), { target: { value: 'g' } });
 
     const xButton = screen.getAllByRole('button').find(b => b.querySelector('.lucide-x'));
     if (xButton) fireEvent.click(xButton);
@@ -368,7 +368,7 @@ describe('IngredientEditModal', () => {
   it('stays in dialog when save fails validation from unsaved dialog', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     // Only name filled, no unit
-    fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByLabelText(/Tên nguyên liệu/), { target: { value: 'Test' } });
 
     const xButton = screen.getAllByRole('button').find(b => b.querySelector('.lucide-x'));
     if (xButton) fireEvent.click(xButton);
@@ -383,7 +383,7 @@ describe('IngredientEditModal', () => {
 
   it('cancels unsaved dialog and returns to editing', () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByLabelText(/Tên nguyên liệu/), { target: { value: 'Test' } });
 
     const xButton = screen.getAllByRole('button').find(b => b.querySelector('.lucide-x'));
     if (xButton) fireEvent.click(xButton);
@@ -419,7 +419,7 @@ describe('IngredientEditModal', () => {
   it('AI search returns early when name is empty', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     // Only set unit, not name
-    fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
+    fireEvent.change(screen.getByLabelText(/Đơn vị tính/), { target: { value: 'g' } });
     // AI button should be disabled due to empty name
     const aiButton = screen.getByRole('button', { name: 'Tự động điền thông tin bằng AI' });
     expect(aiButton).toBeDisabled();
@@ -429,7 +429,7 @@ describe('IngredientEditModal', () => {
 
   it('AI search returns early when unit is empty', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('Tên nguyên liệu'), { target: { value: 'Thịt bò' } });
+    fireEvent.change(screen.getByLabelText(/Tên nguyên liệu/), { target: { value: 'Thịt bò' } });
     // Unit is empty, button disabled with no-unit tooltip
     const aiButton = screen.getByRole('button', { name: 'Vui lòng nhập đơn vị tính trước' });
     expect(aiButton).toBeDisabled();
@@ -550,7 +550,7 @@ describe('IngredientEditModal', () => {
   it('handleAISearch returns early when name is empty (line 138)', async () => {
     render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     // Set unit but leave name empty
-    fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
+    fireEvent.change(screen.getByLabelText(/Đơn vị tính/), { target: { value: 'g' } });
     // AI button should be disabled, but the guard at line 138 also exists
     expect(mockSuggestIngredientInfo).not.toHaveBeenCalled();
   });

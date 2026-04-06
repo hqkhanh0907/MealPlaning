@@ -87,15 +87,15 @@ const COLOR_MAP: Record<InsightColor, ColorConfig> = {
   },
 };
 
-const ICON_PREFIX_MAP: Record<InsightType, string> = {
-  alert: '⚠️',
-  action: '⚡',
-  remind: '⚖️',
-  motivate: '✨',
-  celebrate: '🏆',
-  praise: '✅',
-  progress: '📈',
-  tip: '💡',
+const INSIGHT_TYPE_KEYS: Record<InsightType, string> = {
+  alert: 'insightCard.type.alert',
+  action: 'insightCard.type.action',
+  remind: 'insightCard.type.remind',
+  motivate: 'insightCard.type.motivate',
+  celebrate: 'insightCard.type.celebrate',
+  praise: 'insightCard.type.praise',
+  progress: 'insightCard.type.progress',
+  tip: 'insightCard.type.tip',
 };
 
 const ICON_COLOR_OVERRIDE: Partial<Record<InsightType, string>> = {
@@ -125,13 +125,13 @@ export const AiInsightCard = React.memo(function AiInsightCard() {
 
   const IconComponent = ICON_MAP[currentInsight.type];
   const colors = COLOR_MAP[currentInsight.color];
-  const iconPrefix = ICON_PREFIX_MAP[currentInsight.type];
+  const typeLabel = t(INSIGHT_TYPE_KEYS[currentInsight.type]);
   const iconColor = ICON_COLOR_OVERRIDE[currentInsight.type] ?? colors.icon;
 
   return (
     <section
       data-testid="ai-insight-card"
-      aria-label={`${iconPrefix} ${currentInsight.title}`}
+      aria-label={`${typeLabel}: ${currentInsight.title}`}
       className={`relative min-h-[56px] rounded-lg border-l-4 ${colors.border} ${colors.bg} flex items-start gap-3 p-4`}
     >
       <div className="mt-0.5 flex-shrink-0" data-testid="insight-icon">

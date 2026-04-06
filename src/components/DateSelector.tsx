@@ -28,6 +28,10 @@ const getMealDotClass = (hasMeal: boolean, isSelected: boolean, activeColor: str
   return isSelected ? 'bg-card' : activeColor;
 };
 
+const getMealCount = (hasBreakfast: boolean, hasLunch: boolean, hasDinner: boolean): number => {
+  return (hasBreakfast ? 1 : 0) + (hasLunch ? 1 : 0) + (hasDinner ? 1 : 0);
+};
+
 // Helper to get day button style class without nested ternary
 const getDayButtonClass = (
   isSelected: boolean,
@@ -271,12 +275,13 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             const hasBreakfast = (plan?.breakfastDishIds?.length ?? 0) > 0;
             const hasLunch = (plan?.lunchDishIds?.length ?? 0) > 0;
             const hasDinner = (plan?.dinnerDishIds?.length ?? 0) > 0;
+            const mealCount = getMealCount(hasBreakfast, hasLunch, hasDinner);
 
             return (
               <button
                 key={dateStr}
                 data-selected={isSelected}
-                aria-label={`${dayLabel} ${date.getDate()}`}
+                aria-label={`${dayLabel} ${date.getDate()}${mealCount > 0 ? `, ${mealCount} ${t('calendar.mealsPlanned')}` : ''}`}
                 onClick={() => {
                   if (isSelected && onPlanClick) {
                     onPlanClick();
@@ -300,6 +305,11 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
                   />
                   <div className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-ai')}`} />
                 </div>
+                {mealCount > 0 && (
+                  <span className="text-[8px] leading-none font-bold text-current opacity-60" aria-hidden="true">
+                    {mealCount}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -339,6 +349,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
               const hasLunch = (plan?.lunchDishIds?.length ?? 0) > 0;
               const hasDinner = (plan?.dinnerDishIds?.length ?? 0) > 0;
               const isSunday = parseLocalDate(dateStr).getDay() === 0;
+              const mealCount = getMealCount(hasBreakfast, hasLunch, hasDinner);
 
               return (
                 <button
@@ -356,6 +367,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
                     if (onPlanClick) onPlanClick();
                   }}
                   title={isSelected ? t('calendar.tapToPlan') : t('calendar.selectDay')}
+                  aria-label={`${day}${mealCount > 0 ? `, ${mealCount} ${t('calendar.mealsPlanned')}` : ''}`}
                   className={`relative flex aspect-square flex-col items-center justify-center rounded-2xl transition-all ${getDayButtonClass(isSelected, isToday, 'calendar', isSunday)} ${isToday && !isSelected ? 'animate-pulse-subtle' : ''}`}
                 >
                   <span className="text-sm font-semibold">{day}</span>
@@ -369,6 +381,14 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
                     />
                     <div className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-ai')}`} />
                   </div>
+                  {mealCount > 0 && (
+                    <span
+                      className="absolute bottom-[-2px] text-[7px] leading-none font-bold text-current opacity-50 sm:bottom-0"
+                      aria-hidden="true"
+                    >
+                      {mealCount}
+                    </span>
+                  )}
                 </button>
               );
             })}

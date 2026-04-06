@@ -99,18 +99,18 @@ describe('AiInsightCard', () => {
       expect(screen.getByRole('region')).toBeInTheDocument();
     });
 
-    it('aria-label includes icon prefix and title for tip', () => {
+    it('aria-label includes type label and title for tip', () => {
       mockInsight = makeInsight({ type: 'tip', title: 'Nước' });
       render(<AiInsightCard />);
       const region = screen.getByRole('region');
-      expect(region).toHaveAttribute('aria-label', '💡 Nước');
+      expect(region).toHaveAttribute('aria-label', 'Mẹo: Nước');
     });
 
-    it('aria-label includes icon prefix for alert', () => {
+    it('aria-label includes type label for alert', () => {
       mockInsight = makeInsight({ type: 'alert', color: 'dark-amber', title: 'Cảnh báo' });
       render(<AiInsightCard />);
       const region = screen.getByRole('region');
-      expect(region).toHaveAttribute('aria-label', '⚠️ Cảnh báo');
+      expect(region).toHaveAttribute('aria-label', 'Cảnh báo: Cảnh báo');
     });
 
     it('dismiss button has aria-label', () => {
@@ -246,7 +246,7 @@ describe('AiInsightCard', () => {
       });
       render(<AiInsightCard />);
       expect(screen.getByTestId('insight-title')).toHaveTextContent('Kỷ lục mới!');
-      expect(screen.getByRole('region')).toHaveAttribute('aria-label', '🏆 Kỷ lục mới! 🎉');
+      expect(screen.getByRole('region')).toHaveAttribute('aria-label', 'Chúc mừng: Kỷ lục mới! 🎉');
     });
   });
 
@@ -281,7 +281,7 @@ describe('AiInsightCard', () => {
       });
       render(<AiInsightCard />);
       expect(screen.getByTestId('insight-title')).toHaveTextContent('Xu hướng tốt!');
-      expect(screen.getByRole('region')).toHaveAttribute('aria-label', '📈 Xu hướng tốt! 📈');
+      expect(screen.getByRole('region')).toHaveAttribute('aria-label', 'Tiến trình: Xu hướng tốt! 📈');
     });
   });
 
@@ -372,22 +372,22 @@ describe('AiInsightCard', () => {
   /* ========== ICON MAPPING ========== */
 
   describe('Icon mapping', () => {
-    const iconCases: Array<{ type: Insight['type']; prefix: string }> = [
-      { type: 'alert', prefix: '⚠️' },
-      { type: 'action', prefix: '⚡' },
-      { type: 'remind', prefix: '⚖️' },
-      { type: 'motivate', prefix: '✨' },
-      { type: 'celebrate', prefix: '🏆' },
-      { type: 'praise', prefix: '✅' },
-      { type: 'progress', prefix: '📈' },
-      { type: 'tip', prefix: '💡' },
+    const iconCases: Array<{ type: Insight['type']; typeLabel: string }> = [
+      { type: 'alert', typeLabel: 'Cảnh báo' },
+      { type: 'action', typeLabel: 'Hành động' },
+      { type: 'remind', typeLabel: 'Nhắc nhở' },
+      { type: 'motivate', typeLabel: 'Động lực' },
+      { type: 'celebrate', typeLabel: 'Chúc mừng' },
+      { type: 'praise', typeLabel: 'Khen ngợi' },
+      { type: 'progress', typeLabel: 'Tiến trình' },
+      { type: 'tip', typeLabel: 'Mẹo' },
     ];
 
-    it.each(iconCases)('uses $prefix prefix in aria-label for $type', ({ type, prefix }) => {
+    it.each(iconCases)('uses "$typeLabel" label in aria-label for $type', ({ type, typeLabel }) => {
       mockInsight = makeInsight({ type, title: 'Test' });
       render(<AiInsightCard />);
       const region = screen.getByRole('region');
-      expect(region.getAttribute('aria-label')).toContain(prefix);
+      expect(region.getAttribute('aria-label')).toBe(`${typeLabel}: Test`);
       cleanup();
     });
 

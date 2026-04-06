@@ -19,6 +19,12 @@ vi.mock('react-i18next', () => ({
         'fitness.progress.noData': 'Chưa có dữ liệu',
         'fitness.progress.startTraining': 'Bắt đầu tập ngay',
         'fitness.progress.dismiss': 'Bỏ qua',
+        'fitness.emptyState.progressTitle': 'Chưa có dữ liệu tiến trình',
+        'fitness.emptyState.progressDescription': 'Hoàn thành buổi tập đầu tiên để bắt đầu theo dõi tiến trình của bạn',
+        'fitness.emptyState.startWorkout': 'Bắt đầu tập ngay',
+        'fitness.coaching.plateau.strength': 'Tạ đang chững lại — thử thay đổi số rep hoặc tăng volume nhé!',
+        'fitness.coaching.plateau.volume': 'Volume chưa tăng so với tuần trước — thử thêm 1 set phụ nhé!',
+        'fitness.coaching.plateau.both': 'Cả tạ và volume đều chững — đổi bài tập hoặc deload 1 tuần nhé!',
       };
       if (key === 'fitness.progress.weekOf' && params) {
         return `Tuần ${params.current} / ${params.total}`;
@@ -188,6 +194,13 @@ describe('ProgressDashboard', () => {
     const cta = screen.getByTestId('start-training-cta');
     expect(cta).toBeInTheDocument();
     expect(cta.textContent).toContain('Bắt đầu tập ngay');
+  });
+
+  it('empty state shows title and description', () => {
+    setupStore();
+    render(<ProgressDashboard />);
+    expect(screen.getByText('Chưa có dữ liệu tiến trình')).toBeInTheDocument();
+    expect(screen.getByText(/Hoàn thành buổi tập đầu tiên/)).toBeInTheDocument();
   });
 
   it('hero card shows volume change percentage', () => {
@@ -489,6 +502,6 @@ describe('ProgressDashboard', () => {
     render(<ProgressDashboard />);
 
     expect(screen.getByTestId('insight-plateau-e2')).toBeInTheDocument();
-    expect(screen.getByTestId('insight-plateau-e2').textContent).toContain('Strength stagnation');
+    expect(screen.getByTestId('insight-plateau-e2').textContent).toContain('Tạ đang chững');
   });
 });

@@ -72,7 +72,11 @@ export const MacroDonutChart = React.memo(function MacroDonutChart({
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
-        aria-label={`${t('nutrition.protein')}: ${proteinG}${t('nutrition.grams')}, ${t('nutrition.fat')}: ${fatG}${t('nutrition.grams')}, ${t('nutrition.carbs')}: ${carbsG}${t('nutrition.grams')}`}
+        aria-label={
+          totalCal > 0
+            ? `${t('nutrition.protein')}: ${proteinG}${t('nutrition.grams')}, ${t('nutrition.fat')}: ${fatG}${t('nutrition.grams')}, ${t('nutrition.carbs')}: ${carbsG}${t('nutrition.grams')}`
+            : t('emptyState.donutNoData')
+        }
       >
         {/* Background circle */}
         <circle
@@ -121,6 +125,11 @@ export const MacroDonutChart = React.memo(function MacroDonutChart({
           {t('nutrition.kcal')}
         </text>
       </svg>
+      {totalCal === 0 && (
+        <p data-testid="donut-no-data-hint" className="text-muted-foreground text-xs">
+          {t('emptyState.donutNoData')}
+        </p>
+      )}
     </div>
   );
 });

@@ -805,7 +805,7 @@ describe('IngredientManager', () => {
 
     fireEvent.change(screen.getByPlaceholderText('Ví dụ: Thịt bò, Cà chua...'), { target: { value: 'Thịt bò' } });
     // Unit is now a <select> — pick 'g' from the dropdown
-    fireEvent.change(screen.getByLabelText('Đơn vị tính'), { target: { value: 'g' } });
+    fireEvent.change(screen.getByLabelText(/Đơn vị tính/), { target: { value: 'g' } });
 
     fireEvent.click(screen.getByText('Lưu nguyên liệu'));
     await waitFor(() => {

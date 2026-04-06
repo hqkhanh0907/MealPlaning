@@ -2,6 +2,7 @@ import { Beef, Dumbbell, Scale, Trophy, UtensilsCrossed } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import type { HeroContext } from '../hooks/useDailyScore';
 import { useDailyScore } from '../hooks/useDailyScore';
 import type { ScoreColor } from '../types';
 
@@ -31,6 +32,15 @@ const CHECKLIST_KEYS = [
   'dashboard.hero.firstTime.step3',
 ] as const;
 
+const HERO_CONTEXT_KEYS: Record<Exclude<HeroContext, 'first-time'>, string> = {
+  'rest-day-with-meals': 'dashboard.hero.contextual.restDayWithMeals',
+  'training-day-needs-workout': 'dashboard.hero.contextual.trainingDayNeedsWorkout',
+  'workout-done-needs-fuel': 'dashboard.hero.contextual.workoutDoneNeedsFuel',
+  'balanced-day': 'dashboard.hero.contextual.balancedDay',
+  'empty-day': 'dashboard.hero.contextual.emptyDay',
+  'rest-day-empty': 'dashboard.hero.contextual.restDayEmpty',
+};
+
 function getScoreLabelKey(score: number): string {
   if (score >= 80) return 'dashboard.hero.scoreLabel.excellent';
   if (score >= 50) return 'dashboard.hero.scoreLabel.good';
@@ -39,7 +49,7 @@ function getScoreLabelKey(score: number): string {
 
 function DailyScoreHeroInner(): React.ReactElement {
   const { t } = useTranslation();
-  const { totalScore, factors, color, greeting, isFirstTimeUser } = useDailyScore();
+  const { totalScore, factors, color, greeting, isFirstTimeUser, heroContext } = useDailyScore();
 
   const gradient = isFirstTimeUser ? GRADIENT_MAP.slate : GRADIENT_MAP[color];
   const textColors = isFirstTimeUser ? TEXT_COLOR_MAP.slate : TEXT_COLOR_MAP[color];
@@ -91,6 +101,11 @@ function DailyScoreHeroInner(): React.ReactElement {
       data-testid="daily-score-hero"
     >
       <p className={`mb-1 text-sm ${textColors.secondary}`}>{greeting}</p>
+      {heroContext !== 'first-time' && HERO_CONTEXT_KEYS[heroContext] && (
+        <p className={`mb-2 text-xs ${textColors.muted}`} data-testid="hero-contextual-message">
+          {t(HERO_CONTEXT_KEYS[heroContext])}
+        </p>
+      )}
       <div className="mb-1 flex items-baseline gap-2">
         <span className={`text-2xl font-bold tabular-nums ${textColors.primary}`} data-testid="score-number">
           {totalScore}

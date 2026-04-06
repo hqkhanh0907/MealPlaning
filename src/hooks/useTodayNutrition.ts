@@ -12,7 +12,7 @@ function formatLocalDate(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-export function useTodayNutrition(): { eaten: number; protein: number } {
+export function useTodayNutrition(): { eaten: number | null; protein: number | null } {
   const dayPlans = useDayPlanStore(s => s.dayPlans);
   const dishes = useDishStore(s => s.dishes);
   const ingredients = useIngredientStore(s => s.ingredients);
@@ -20,7 +20,7 @@ export function useTodayNutrition(): { eaten: number; protein: number } {
   return useMemo(() => {
     const today = formatLocalDate(new Date());
     const todayPlan = dayPlans.find(p => p.date === today);
-    if (!todayPlan) return { eaten: 0, protein: 0 };
+    if (!todayPlan) return { eaten: null, protein: null };
 
     const allDishIds = [...todayPlan.breakfastDishIds, ...todayPlan.lunchDishIds, ...todayPlan.dinnerDishIds];
     if (allDishIds.length === 0) return { eaten: 0, protein: 0 };

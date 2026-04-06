@@ -78,7 +78,12 @@ export const OnboardingProgress = React.memo(function OnboardingProgress({
           </div>
         ))}
       </div>
-      <p className="text-muted-foreground mt-1.5 text-center text-xs font-medium">{sectionLabel}</p>
+      <div className="mt-1.5 flex items-center justify-between px-1">
+        <p className="text-muted-foreground text-xs font-medium">{sectionLabel}</p>
+        <p className="text-muted-foreground text-xs tabular-nums">
+          {t('onboarding.progress.stepCounter', { current: currentSection, total: totalSections })}
+        </p>
+      </div>
     </div>
   );
 });

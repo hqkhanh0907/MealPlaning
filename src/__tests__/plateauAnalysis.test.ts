@@ -51,7 +51,8 @@ describe('analyzePlateau', () => {
       expect(result).toEqual({
         strengthPlateau: false,
         volumePlateau: false,
-        message: 'Insufficient data',
+        messageKey: 'fitness.coaching.plateau.insufficientData',
+        message: '',
       });
     });
 
@@ -61,7 +62,8 @@ describe('analyzePlateau', () => {
       expect(result).toEqual({
         strengthPlateau: false,
         volumePlateau: false,
-        message: 'Insufficient data',
+        messageKey: 'fitness.coaching.plateau.insufficientData',
+        message: '',
       });
     });
 
@@ -78,7 +80,8 @@ describe('analyzePlateau', () => {
       expect(result).toEqual({
         strengthPlateau: false,
         volumePlateau: false,
-        message: 'Insufficient data',
+        messageKey: 'fitness.coaching.plateau.insufficientData',
+        message: '',
       });
     });
 
@@ -98,7 +101,8 @@ describe('analyzePlateau', () => {
       expect(result).toEqual({
         strengthPlateau: false,
         volumePlateau: false,
-        message: 'Insufficient data',
+        messageKey: 'fitness.coaching.plateau.insufficientData',
+        message: '',
       });
     });
   });
@@ -307,7 +311,7 @@ describe('analyzePlateau', () => {
   });
 
   describe('combined plateau messages', () => {
-    it('returns "Strength stagnation; Volume plateau" when both detected', () => {
+    it('returns both-plateau messageKey when both detected', () => {
       const lastWeekSets = Array.from({ length: 6 }, (_, i) =>
         createSet({
           reps: 10,
@@ -326,10 +330,10 @@ describe('analyzePlateau', () => {
       const result = analyzePlateau(workouts, allSets, exerciseId);
       expect(result.strengthPlateau).toBe(true);
       expect(result.volumePlateau).toBe(true);
-      expect(result.message).toBe('Strength stagnation; Volume plateau');
+      expect(result.messageKey).toBe('fitness.coaching.plateau.both');
     });
 
-    it('returns "Strength stagnation" for strength-only plateau', () => {
+    it('returns strength-plateau messageKey for strength-only plateau', () => {
       const lastWeekSets = Array.from({ length: 3 }, (_, i) =>
         createSet({
           reps: 8,
@@ -355,10 +359,10 @@ describe('analyzePlateau', () => {
       const result = analyzePlateau(workouts, allSets, exerciseId);
       expect(result.strengthPlateau).toBe(true);
       // This week volume higher due to more reps → no volume plateau
-      expect(result.message).toContain('Strength stagnation');
+      expect(result.messageKey).toBe('fitness.coaching.plateau.strength');
     });
 
-    it('returns "No plateau detected" when neither detected', () => {
+    it('returns none messageKey when neither detected', () => {
       const olderSets = Array.from({ length: 3 }, (_, i) =>
         createSet({
           reps: 8,
@@ -384,7 +388,7 @@ describe('analyzePlateau', () => {
       const result = analyzePlateau(workouts, allSets, exerciseId);
       expect(result.strengthPlateau).toBe(false);
       expect(result.volumePlateau).toBe(false);
-      expect(result.message).toBe('No plateau detected');
+      expect(result.messageKey).toBe('fitness.coaching.plateau.none');
     });
   });
 
@@ -444,7 +448,7 @@ describe('analyzePlateau', () => {
       // Should not throw, just compute
       expect(result.strengthPlateau).toBeDefined();
       expect(result.volumePlateau).toBeDefined();
-      expect(typeof result.message).toBe('string');
+      expect(typeof result.messageKey).toBe('string');
     });
   });
 });

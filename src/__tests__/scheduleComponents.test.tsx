@@ -547,6 +547,29 @@ describe('MealsSubTab', () => {
     expect(screen.getByText(/Kế hoạch ngày hôm nay đã hoàn tất/)).toBeInTheDocument();
   });
 
+  it('shows meal progress indicator when not all empty', () => {
+    render(<MealsSubTab {...baseProps} />);
+    const progress = screen.getByTestId('meal-progress');
+    expect(progress).toBeInTheDocument();
+    expect(progress).toHaveTextContent('3/3');
+  });
+
+  it('shows partial progress when some meals filled', () => {
+    const partial: DayNutritionSummary = {
+      breakfast: makeSlot(['d1'], 400, 20),
+      lunch: makeSlot([]),
+      dinner: makeSlot([]),
+    };
+    render(<MealsSubTab {...baseProps} dayNutrition={partial} />);
+    const progress = screen.getByTestId('meal-progress');
+    expect(progress).toHaveTextContent('1/3');
+  });
+
+  it('does not show meal progress when all meals are empty', () => {
+    render(<MealsSubTab {...baseProps} dayNutrition={emptyNutrition} />);
+    expect(screen.queryByTestId('meal-progress')).not.toBeInTheDocument();
+  });
+
   it('integrates MiniNutritionBar', () => {
     render(<MealsSubTab {...baseProps} />);
     expect(screen.getByTestId('mini-nutrition-bar')).toBeInTheDocument();
@@ -790,6 +813,7 @@ describe('MacroChart', () => {
     render(<MacroChart dayNutrition={emptyNutrition} />);
     expect(screen.getByTestId('macro-chart-empty')).toBeInTheDocument();
     expect(screen.getByText('Chưa có dữ liệu dinh dưỡng')).toBeInTheDocument();
+    expect(screen.getByText('Thêm bữa ăn để xem biểu đồ dinh dưỡng')).toBeInTheDocument();
   });
 
   it('renders pie chart with macro percentages', () => {

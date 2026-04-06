@@ -1013,14 +1013,14 @@ describe('TrainingProfileForm – full save flow', () => {
 // ---------- 10. Equipment display labels ----------
 
 describe('TrainingProfileForm – equipment display labels', () => {
-  it('shows English equipment names from EQUIPMENT_DISPLAY constant', () => {
+  it('shows Vietnamese equipment names from EQUIPMENT_DISPLAY constant', () => {
     render(<TrainingProfileForm />);
-    expect(screen.getByText('Barbell')).toBeInTheDocument();
-    expect(screen.getByText('Dumbbell')).toBeInTheDocument();
-    expect(screen.getByText('Machine')).toBeInTheDocument();
-    expect(screen.getByText('Cable')).toBeInTheDocument();
-    expect(screen.getByText('Bodyweight')).toBeInTheDocument();
-    expect(screen.getByText('Bands')).toBeInTheDocument();
+    expect(screen.getByText('Tạ đòn')).toBeInTheDocument();
+    expect(screen.getByText('Tạ tay')).toBeInTheDocument();
+    expect(screen.getByText('Máy tập')).toBeInTheDocument();
+    expect(screen.getByText('Dây cáp')).toBeInTheDocument();
+    expect(screen.getByText('Tự trọng')).toBeInTheDocument();
+    expect(screen.getByText('Dây kháng lực')).toBeInTheDocument();
   });
 });
 

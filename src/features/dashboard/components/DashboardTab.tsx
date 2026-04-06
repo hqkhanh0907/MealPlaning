@@ -48,6 +48,8 @@ function DashboardTabInner(): React.ReactElement {
   const { eaten, protein } = useTodayNutrition();
   const todayCaloriesOut = useTodayCaloriesOut();
   const hasNutritionTargets = targetCalories > 0 && targetProtein > 0;
+  const safeEaten = eaten ?? 0;
+  const safeProtein = protein ?? 0;
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
@@ -101,12 +103,13 @@ function DashboardTabInner(): React.ReactElement {
           {hasNutritionTargets ? (
             <>
               <EnergyBalanceMini
-                eaten={eaten}
+                eaten={safeEaten}
                 burned={todayCaloriesOut}
                 target={targetCalories}
+                hasData={eaten !== null}
                 onTapDetail={handleOpenEnergyDetail}
               />
-              <ProteinProgress current={protein} target={targetProtein} />
+              <ProteinProgress current={safeProtein} target={targetProtein} hasData={protein !== null} />
             </>
           ) : (
             <div

@@ -74,7 +74,7 @@ describe('DishEditModal', () => {
   it('renders create new dish form with correct title', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     expect(screen.getByText('Tạo món ăn mới')).toBeInTheDocument();
-    expect(screen.getByLabelText('Tên món ăn')).toHaveValue('');
+    expect(screen.getByLabelText(/Tên món ăn/)).toHaveValue('');
   });
 
   it('renders edit existing dish form with pre-populated data', () => {
@@ -82,7 +82,7 @@ describe('DishEditModal', () => {
       <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
     );
     expect(screen.getByText('Sửa món ăn')).toBeInTheDocument();
-    expect(screen.getByLabelText('Tên món ăn')).toHaveValue('Cơm gà');
+    expect(screen.getByLabelText(/Tên món ăn/)).toHaveValue('Cơm gà');
     // Should show selected ingredients
     expect(screen.getByText('Ức gà')).toBeInTheDocument();
     expect(screen.getByText('Cơm trắng')).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe('DishEditModal', () => {
   it('shows error when submitting without tags', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     // Fill name and add ingredient but no tags
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Test Dish' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Test Dish' } });
 
     // Add an ingredient
     fireEvent.click(screen.getByText('Ức gà').closest('button') as HTMLElement);
@@ -149,7 +149,7 @@ describe('DishEditModal', () => {
   it('clears tag validation error when a tag is selected', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     // Fill name and add ingredient, submit without tags
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Test' } });
     fireEvent.click(screen.getByText('Ức gà').closest('button') as HTMLElement);
     fireEvent.click(screen.getByText('Lưu món ăn'));
 
@@ -173,7 +173,7 @@ describe('DishEditModal', () => {
   it('does not submit when no ingredients are selected', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     // Add name and tag but no ingredients
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Test Dish' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Test Dish' } });
     fireEvent.click(screen.getByText(/Trưa/).closest('button') as HTMLElement);
 
     fireEvent.click(screen.getByText('Lưu món ăn'));
@@ -294,7 +294,7 @@ describe('DishEditModal', () => {
 
   it('shows ingredients validation error when none selected on submit', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Test dish' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Test dish' } });
     fireEvent.click(screen.getByText(/Trưa/).closest('button') as HTMLElement);
     fireEvent.click(screen.getByText('Lưu món ăn'));
     expect(screen.getByText('Vui lòng chọn ít nhất một nguyên liệu')).toBeInTheDocument();
@@ -305,7 +305,7 @@ describe('DishEditModal', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByText('Lưu món ăn'));
     expect(screen.getByText('Vui lòng nhập tên món ăn')).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'T' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'T' } });
     expect(screen.queryByText('Vui lòng nhập tên món ăn')).not.toBeInTheDocument();
   });
 
@@ -354,7 +354,7 @@ describe('DishEditModal', () => {
   it('submits valid dish with correct data structure', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     // Fill form
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Cơm gà mới' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Cơm gà mới' } });
     fireEvent.click(screen.getByText(/Trưa/).closest('button') as HTMLElement);
     fireEvent.click(screen.getByText('Ức gà').closest('button') as HTMLElement);
 
@@ -391,7 +391,7 @@ describe('DishEditModal', () => {
   it('shows unsaved changes dialog when closing with changes', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     // Make a change
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Test' } });
 
     // Try to close
     fireEvent.click(screen.getByLabelText('Đóng'));
@@ -403,7 +403,7 @@ describe('DishEditModal', () => {
   it('saves and closes via unsaved changes dialog "Save & back"', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     // Fill valid form
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'New Dish' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'New Dish' } });
     fireEvent.click(screen.getByText(/Sáng/).closest('button') as HTMLElement);
     fireEvent.click(screen.getByText('Ức gà').closest('button') as HTMLElement);
 
@@ -416,7 +416,7 @@ describe('DishEditModal', () => {
 
   it('discards changes via unsaved dialog', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Test' } });
 
     fireEvent.click(screen.getByLabelText('Đóng'));
     fireEvent.click(screen.getByText('Bỏ thay đổi'));
@@ -427,7 +427,7 @@ describe('DishEditModal', () => {
 
   it('cancels unsaved dialog and returns to editing', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Test' } });
 
     fireEvent.click(screen.getByLabelText('Đóng'));
     fireEvent.click(screen.getByText('Ở lại chỉnh sửa'));
@@ -450,7 +450,7 @@ describe('DishEditModal', () => {
     render(
       <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
     );
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Modified name' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Modified name' } });
     fireEvent.click(screen.getByLabelText('Đóng'));
     expect(screen.getByText(/Thay đổi chưa lưu/)).toBeInTheDocument();
   });
@@ -771,7 +771,7 @@ describe('DishEditModal', () => {
     fireEvent.click(screen.getByTestId('btn-qa-submit'));
 
     // Fill rest of dish form
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Món test' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Món test' } });
     fireEvent.click(screen.getByText(/Trưa/).closest('button') as HTMLElement);
 
     // Save the dish
@@ -987,7 +987,7 @@ describe('DishEditModal', () => {
   it('handleSaveAndBack returns if validation fails (line 136)', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     // Make a change to trigger unsaved dialog
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Test' } });
     fireEvent.click(screen.getByLabelText('Đóng'));
     expect(screen.getByText(/Thay đổi chưa lưu/)).toBeInTheDocument();
     // Click "Lưu & quay lại" — validation should fail (no tags, no ingredients)
@@ -997,7 +997,7 @@ describe('DishEditModal', () => {
 
   it('clears ingredients form error when adding ingredient (line 145)', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Test' } });
     fireEvent.click(screen.getByText(/Trưa/).closest('button') as HTMLElement);
     fireEvent.click(screen.getByText('Lưu món ăn'));
     expect(screen.getByText('Vui lòng chọn ít nhất một nguyên liệu')).toBeInTheDocument();
@@ -1036,7 +1036,7 @@ describe('DishEditModal', () => {
     fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Hành lá' } });
     fireEvent.click(screen.getByTestId('btn-qa-submit'));
     // Fill form for valid save
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Món mới' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Món mới' } });
     fireEvent.click(screen.getByText(/Trưa/).closest('button') as HTMLElement);
     // Close → unsaved dialog → save & back
     fireEvent.click(screen.getByLabelText('Đóng'));
@@ -1135,7 +1135,7 @@ describe('DishEditModal', () => {
   it('clears tag validation error when an inactive tag is toggled on', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     // Fill name + ingredient so only tag error remains
-    fireEvent.change(screen.getByLabelText('Tên món ăn'), { target: { value: 'Test' } });
+    fireEvent.change(screen.getByLabelText(/Tên món ăn/), { target: { value: 'Test' } });
     fireEvent.click(screen.getByText('Ức gà').closest('button') as HTMLElement);
     // Submit without tags → tag validation error appears
     fireEvent.click(screen.getByTestId('btn-save-dish'));

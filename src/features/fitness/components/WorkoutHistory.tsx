@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, ClipboardList, Clock, StickyNote, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Clock, Dumbbell, StickyNote, Trash2 } from 'lucide-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -194,12 +194,14 @@ function WorkoutHistoryInner(): React.JSX.Element {
   if (workouts.length === 0) {
     return (
       <div data-testid="workout-history-empty" className="flex flex-col items-center justify-center py-16 text-center">
-        <ClipboardList className="text-muted-foreground mb-4 h-12 w-12" aria-hidden="true" />
-        <p data-testid="empty-title" className="text-muted-foreground mb-1 font-medium">
-          {t('fitness.history.noHistory')}
+        <div className="bg-muted mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+          <Dumbbell className="text-muted-foreground h-7 w-7" aria-hidden="true" />
+        </div>
+        <p data-testid="empty-title" className="text-foreground mb-1 text-lg font-semibold">
+          {t('fitness.emptyState.historyTitle')}
         </p>
-        <p data-testid="empty-subtitle" className="text-muted-foreground mb-6 text-sm">
-          {t('fitness.history.emptySubtitle')}
+        <p data-testid="empty-subtitle" className="text-muted-foreground mb-6 max-w-xs text-sm">
+          {t('fitness.emptyState.historyDescription')}
         </p>
         <div
           data-testid="skeleton-preview"

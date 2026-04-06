@@ -46,6 +46,7 @@ function setDailyScore(overrides: Partial<DailyScoreData> = {}): void {
     color: 'emerald',
     greeting: 'Chào buổi sáng!',
     isFirstTimeUser: false,
+    heroContext: 'balanced-day',
     ...overrides,
   });
 }

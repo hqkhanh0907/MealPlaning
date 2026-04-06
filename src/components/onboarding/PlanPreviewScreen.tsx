@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import { Check, Dumbbell } from 'lucide-react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -40,7 +40,13 @@ export function PlanPreviewScreen({ form, completeOnboarding }: Readonly<PlanPre
                 }`}
               >
                 <span>{day}</span>
-                <span className="mt-1 text-xs">{isActive ? '💪' : t('fitness.plan.restDay')}</span>
+                <span className="mt-1 text-xs">
+                  {isActive ? (
+                    <Dumbbell className="mx-auto h-3.5 w-3.5" aria-hidden="true" />
+                  ) : (
+                    t('fitness.plan.restDay')
+                  )}
+                </span>
               </div>
             );
           })}

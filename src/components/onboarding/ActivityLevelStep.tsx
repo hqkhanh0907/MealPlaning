@@ -1,4 +1,4 @@
-import { ChevronRight } from 'lucide-react';
+import { Activity, Armchair, ChevronRight, Dumbbell, Footprints, type LucideIcon, Zap } from 'lucide-react';
 import { useController, type UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
@@ -13,13 +13,13 @@ interface ActivityLevelStepProps {
   goBack: () => void;
 }
 
-const LEVELS = [
-  { value: 'sedentary', emoji: '🪑', multiplier: 1.2 },
-  { value: 'light', emoji: '🚶', multiplier: 1.375 },
-  { value: 'moderate', emoji: '🏃', multiplier: 1.55 },
-  { value: 'active', emoji: '🏋️', multiplier: 1.725 },
-  { value: 'extra_active', emoji: '⚡', multiplier: 1.9 },
-] as const;
+const LEVELS: ReadonlyArray<{ value: string; icon: LucideIcon; multiplier: number }> = [
+  { value: 'sedentary', icon: Armchair, multiplier: 1.2 },
+  { value: 'light', icon: Footprints, multiplier: 1.375 },
+  { value: 'moderate', icon: Activity, multiplier: 1.55 },
+  { value: 'active', icon: Dumbbell, multiplier: 1.725 },
+  { value: 'extra_active', icon: Zap, multiplier: 1.9 },
+];
 
 export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLevelStepProps>) {
   const { t } = useTranslation();
@@ -43,9 +43,7 @@ export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLev
                 field.field.value === level.value ? 'border-primary bg-primary-subtle' : 'border-border',
               )}
             >
-              <span className="text-2xl" aria-hidden="true">
-                {level.emoji}
-              </span>
+              <level.icon className="text-primary h-6 w-6 shrink-0" aria-hidden="true" />
               <div className="flex-1">
                 <p
                   className={cn(
@@ -57,7 +55,6 @@ export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLev
                 </p>
                 <p className="text-muted-foreground text-xs">{t(`onboarding.health.activity_${level.value}_desc`)}</p>
               </div>
-              <span className="text-muted-foreground shrink-0 font-mono text-xs">×{level.multiplier}</span>
             </button>
           ))}
         </fieldset>

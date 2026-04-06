@@ -50,7 +50,8 @@
     "closeDialog": "Đóng hộp thoại",
     "next": "Tiếp theo",
     "sugar": "Đường",
-    "sodium": "Natri"
+    "sodium": "Natri",
+    "requiredField": "Bắt buộc"
   },
   "meal": {
     "breakfast": "Sáng",
@@ -125,6 +126,7 @@
     "tapToPlan": "Nhấn lần nữa để lên kế hoạch",
     "selectDay": "Chọn ngày",
     "swipeHint": "Vuốt ngang hoặc dùng mũi tên để chuyển tuần",
+    "mealsPlanned": "bữa",
     "weekdays": {
       "mon": "T2",
       "tue": "T3",
@@ -457,7 +459,13 @@
     "notFound": "Không tìm thấy {{entity}}",
     "noItems": "Chưa có {{entity}} nào",
     "searchHint": "Thử tìm kiếm với từ khóa khác.",
-    "createHint": "Bắt đầu tạo {{entity}} đầu tiên của bạn!"
+    "createHint": "Bắt đầu tạo {{entity}} đầu tiên của bạn!",
+    "chartNoData": "Thêm bữa ăn để xem biểu đồ dinh dưỡng",
+    "donutNoData": "Chưa có dữ liệu",
+    "exerciseSearchNoResults": "Không tìm thấy \"{{query}}\"",
+    "exerciseFilterNoResults": "Không tìm thấy bài tập phù hợp",
+    "exerciseNoResultsHint": "Thử tìm với từ khóa khác hoặc thay đổi bộ lọc.",
+    "mealProgress": "{{filled}}/{{total}} bữa đã lên kế hoạch"
   },
   "notification": {
     "saveSuccess": "Lưu thành công!",
@@ -949,7 +957,7 @@
       "insights": "Phân tích",
       "dismiss": "Bỏ qua",
       "weight": "Cân nặng",
-      "missedSessions": "Bỏ lỡ {{count}} buổi tập tuần này",
+      "missedSessions": "Còn {{count}} buổi tập chưa hoàn thành — cố gắng bù lại nhé! 💪",
       "volumeUp": "Khối lượng tăng {{percent}}%",
       "volumeDown": "Khối lượng giảm {{percent}}%",
       "weightChange": "Cân nặng thay đổi {{delta}} kg",
@@ -961,7 +969,7 @@
       "duration": "Thời lượng (phút)",
       "distance": "Khoảng cách (km)",
       "heartRate": "Nhịp tim",
-      "calories": "Calories đốt",
+      "calories": "Calo đốt",
       "intensity": "Cường độ",
       "start": "Bắt đầu",
       "stop": "Dừng",
@@ -1020,12 +1028,21 @@
       "title": "Gợi ý buổi tập"
     },
     "insight": {
-      "deficitTitle": "Thiếu hụt năng lượng ngày tập",
-      "deficitMessage": "Bạn mới nạp {{consumed}} kcal — dưới 75% ngân sách {{budget}} kcal. Hãy nạp thêm năng lượng!",
-      "proteinTitle": "Protein đang thấp",
-      "proteinMessage": "Đã nạp {{consumed}}g / mục tiêu {{target}}g. Ưu tiên thực phẩm giàu protein.",
-      "recoveryTitle": "Ngày nghỉ phục hồi",
-      "recoveryMessage": "{{count}} buổi tập tuần này — hãy nghỉ ngơi và ăn đủ dinh dưỡng."
+      "deficitTitle": "Nạp thêm năng lượng nhé!",
+      "deficitMessage": "Bạn mới nạp {{consumed}} kcal — dưới 75% ngân sách {{budget}} kcal. Hãy bổ sung thêm để tập hiệu quả hơn!",
+      "proteinTitle": "Bổ sung thêm protein nào!",
+      "proteinMessage": "Bạn đang ở {{consumed}}g / {{target}}g protein. Thêm một nguồn protein nạc vào bữa tiếp theo nhé!",
+      "recoveryTitle": "Nghỉ ngơi để phục hồi!",
+      "recoveryMessage": "{{count}} buổi tập tuần này — bạn đã nỗ lực rất tốt! Nghỉ ngơi và ăn đủ dinh dưỡng nhé."
+    },
+    "coaching": {
+      "plateau": {
+        "strength": "Tạ đang chững lại — thử thay đổi số rep hoặc tăng volume nhé!",
+        "volume": "Volume chưa tăng so với tuần trước — thử thêm 1 set phụ nhé!",
+        "both": "Cả tạ và volume đều chững — đổi bài tập hoặc deload 1 tuần nhé!",
+        "none": "",
+        "insufficientData": ""
+      }
     },
     "scheduleEditor": {
       "weeklyCalendar": "Lịch tuần",
@@ -1153,7 +1170,15 @@
         "good": "Tốt",
         "needsWork": "Cần cải thiện"
       },
-      "a11yLabel": "Điểm số hôm nay: {{score}} - {{label}}"
+      "a11yLabel": "Điểm số hôm nay: {{score}} - {{label}}",
+      "contextual": {
+        "restDayWithMeals": "Ngày nghỉ phục hồi — bạn đã ăn uống đầy đủ, tuyệt vời!",
+        "trainingDayNeedsWorkout": "Hôm nay là ngày tập — sẵn sàng vào phòng gym chưa?",
+        "workoutDoneNeedsFuel": "Buổi tập tuyệt vời! Nhớ bổ sung dinh dưỡng nhé!",
+        "balancedDay": "Ngày hôm nay rất cân bằng — tiếp tục phát huy nhé!",
+        "emptyDay": "Bắt đầu ngày mới nào — lên kế hoạch bữa ăn hoặc tập luyện nhé!",
+        "restDayEmpty": "Ngày nghỉ — thư giãn và nạp năng lượng cho ngày mai nhé!"
+      }
     },
     "error": {
       "hero": "Không thể tải tổng quan",
@@ -1301,27 +1326,27 @@
     "noData": "Chưa có điều chỉnh nào"
   },
   "goal": {
-    "aggressive": "Nhanh",
+    "aggressive": "Tích cực",
     "bulk": "Tăng cân",
-    "calorieOffset": "Chênh lệch calories",
+    "calorieOffset": "Chênh lệch calo",
     "calorieOffsetAuto": "Tự động",
     "calorieOffsetCustom": "Tùy chỉnh",
-    "conservative": "Chậm",
+    "conservative": "Nhẹ nhàng",
     "cut": "Giảm cân",
     "maintain": "Duy trì",
     "moderate": "Vừa phải",
     "rate": "Tốc độ thay đổi",
     "rateOfChange": "Tốc độ thay đổi",
-    "rate_aggressive": "Mạnh",
-    "rate_conservative": "Nhẹ",
-    "rate_moderate": "Vừa",
+    "rate_aggressive": "Tích cực",
+    "rate_conservative": "Nhẹ nhàng",
+    "rate_moderate": "Vừa phải",
     "save": "Lưu",
     "saved": "Đã lưu",
     "subtitle": "Chọn hướng đi phù hợp với bạn",
     "targetWeight": "Cân nặng mục tiêu",
     "targetWeightOptional": "Cân nặng mục tiêu (tùy chọn)",
     "title": "Mục tiêu",
-    "type_bulk": "Tăng cơ",
+    "type_bulk": "Tăng cân",
     "type_bulk_desc": "Tăng cân, xây cơ",
     "type_cut": "Giảm cân",
     "type_cut_desc": "Giảm mỡ, giữ cơ",
@@ -1362,6 +1387,16 @@
   },
   "insightCard": {
     "dismiss": "Bỏ qua",
+    "type": {
+      "alert": "Cảnh báo",
+      "action": "Hành động",
+      "remind": "Nhắc nhở",
+      "motivate": "Động lực",
+      "celebrate": "Chúc mừng",
+      "praise": "Khen ngợi",
+      "progress": "Tiến trình",
+      "tip": "Mẹo"
+    },
     "tip": {
       "0": {
         "title": "Nước",
@@ -1446,8 +1481,8 @@
     },
     "autoAdjust": {
       "title": "Điều chỉnh tự động",
-      "message": "Calories điều chỉnh: {{oldCal}} → {{newCal}} kcal. Lý do: {{reason}}",
-      "messageDefault": "Hệ thống đã tự động điều chỉnh calories dựa trên dữ liệu 14 ngày",
+      "message": "Calo điều chỉnh: {{oldCal}} → {{newCal}} kcal. Lý do: {{reason}}",
+      "messageDefault": "Hệ thống đã tự động điều chỉnh calo dựa trên dữ liệu 14 ngày",
       "actionLabel": "Xem chi tiết"
     },
     "lowProtein": {
@@ -1517,7 +1552,8 @@
       "section4": "Tùy chỉnh tập",
       "section5": "Chiến lược",
       "section6": "Lên kế hoạch",
-      "section7": "Xem trước"
+      "section7": "Xem trước",
+      "stepCounter": "Bước {{current}}/{{total}}"
     },
     "health": {
       "basicTitle": "Giới thiệu bản thân",
@@ -1614,7 +1650,10 @@
       "moreDetail": "Xem chi tiết",
       "lessDetail": "Ẩn chi tiết",
       "activityLevel": "Mức hoạt động",
-      "trainingTitle": "Xác nhận thông tin tập luyện"
+      "trainingTitle": "Xác nhận thông tin tập luyện",
+      "bmrExplain": "Năng lượng cơ thể tiêu hao khi nghỉ ngơi",
+      "tdeeExplain": "Tổng năng lượng tiêu hao hàng ngày",
+      "targetExplain": "Mục tiêu calo dựa trên mục đích của bạn"
     },
     "strategy": {
       "title": "{{name}}, sẵn sàng chưa?",

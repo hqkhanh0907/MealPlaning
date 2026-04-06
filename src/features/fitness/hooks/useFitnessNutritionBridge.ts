@@ -111,8 +111,8 @@ export function useFitnessNutritionBridge(): FitnessNutritionBridgeResult {
     }
 
     const todayCalorieBudget = targetCalories + Math.round(todayBurned);
-    const todayCaloriesConsumed = eaten;
-    const todayProteinConsumed = protein;
+    const todayCaloriesConsumed = eaten ?? 0;
+    const todayProteinConsumed = protein ?? 0;
 
     const insight = deriveInsight(
       isTrainingDay,
