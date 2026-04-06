@@ -163,8 +163,7 @@ const REMINDER = `
 // ─── STATE ───
 let fullRules = "";
 let loaded = false;
-let idleReminderCount = 0;
-let lastPromptTime = 0;
+let visibleBlockSent = false;
 
 // ─── JOIN SESSION ───
 const session = await joinSession({
@@ -205,21 +204,15 @@ const session = await joinSession({
         }
       }
 
-      lastPromptTime = Date.now();
-      idleReminderCount = 0;
+      // Show visible block ONCE per session (first user message)
+      if (!visibleBlockSent) {
+        visibleBlockSent = true;
+        session.send({ prompt: buildVisibleReminder() });
+      }
 
       return {
         additionalContext: REMINDER,
       };
     },
   },
-});
-
-// ─── IDLE EVENT: Show visible reminder block (like Memory Guardian) ───
-session.on("session.idle", () => {
-  if (idleReminderCount >= 1) return;
-  if (Date.now() - lastPromptTime < 3000) return;
-
-  idleReminderCount++;
-  session.send({ prompt: buildVisibleReminder() });
 });
