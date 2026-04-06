@@ -38,7 +38,7 @@ export function CustomExerciseModal({
     formState: { errors },
   } = useForm<CustomExerciseFormData>({
     resolver: zodResolver(customExerciseSchema) as unknown as Resolver<CustomExerciseFormData>,
-    mode: 'onBlur',
+    mode: 'onTouched',
     defaultValues: customExerciseDefaults,
   });
 
@@ -57,7 +57,7 @@ export function CustomExerciseModal({
     <ModalBackdrop onClose={onClose}>
       <div className="bg-card w-full max-w-sm rounded-2xl p-6" data-testid="custom-exercise-modal">
         <h3 className="text-foreground text-lg font-semibold">{t('fitness.exerciseSelector.addCustom')}</h3>
-        <form onSubmit={handleSubmit(onFormSubmit)} className="mt-4 space-y-3">
+        <form noValidate onSubmit={handleSubmit(onFormSubmit)} className="mt-4 space-y-3">
           <div>
             <label htmlFor="custom-exercise-name" className="text-foreground mb-1 block text-sm font-medium">
               {t('fitness.exerciseSelector.customName')}
@@ -69,7 +69,7 @@ export function CustomExerciseModal({
               data-testid="custom-exercise-name"
               aria-required={true}
               aria-invalid={!!errors.name}
-              className={`w-full ${errors.name ? 'border-destructive' : ''}`}
+              className={`w-full ${errors.name ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : ''}`}
             />
             {errors.name && (
               <p className="text-destructive mt-1 text-xs" role="alert">

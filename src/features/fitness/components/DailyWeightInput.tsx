@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { DisabledReason } from '@/components/shared/DisabledReason';
 import { Input } from '@/components/ui/input';
 import { generateUUID } from '@/utils/helpers';
+import { blockNegativeKeys } from '@/utils/numericInputHandlers';
 
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useFitnessStore } from '../../../store/fitnessStore';
@@ -250,6 +251,8 @@ function DailyWeightInputInner(): React.JSX.Element {
             min={MIN_WEIGHT}
             max={MAX_WEIGHT}
             step={STEP}
+            inputMode="decimal"
+            onKeyDown={blockNegativeKeys}
             value={displayValue}
             onChange={handleInputChange}
             onBlur={handleInputBlur}

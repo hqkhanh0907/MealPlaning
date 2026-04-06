@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { type Control, type FieldValues, type Path, useController } from 'react-hook-form';
 
 import { Input } from '@/components/ui/input';
+import { blockNegativeKeys } from '@/utils/numericInputHandlers';
 
 import { parseNumericInput } from '../../features/fitness/utils/parseNumericInput';
 
@@ -119,8 +120,10 @@ function StringNumberControllerInner<T extends FieldValues>({
         value={localValue}
         onChange={handleChange}
         onBlur={handleBlur}
+        onKeyDown={blockNegativeKeys}
         placeholder={placeholder}
         step={step}
+        min={min}
         disabled={disabled}
         aria-label={ariaLabel ?? label}
         aria-required={ariaRequired}

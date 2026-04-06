@@ -152,7 +152,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
 
   const { getValues, setValue, watch } = useForm<WorkoutLoggerFormData>({
     resolver: zodResolver(workoutLoggerSchema) as unknown as Resolver<WorkoutLoggerFormData>,
-    mode: 'onBlur',
+    mode: 'onTouched',
     defaultValues: { setInputs: {} },
   });
 

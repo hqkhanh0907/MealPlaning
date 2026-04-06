@@ -56,7 +56,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
     formState: { errors, isDirty },
   } = useForm<HealthProfileFormData>({
     resolver: zodResolver(healthProfileSchema) as unknown as Resolver<HealthProfileFormData>,
-    mode: 'onBlur',
+    mode: 'onTouched',
     defaultValues:
       blankDefaults || !profile
         ? {
@@ -110,6 +110,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
   }, [profile, blankDefaults, reset]);
 
   const [
+    watchedName,
     watchedGender,
     watchedDateOfBirth,
     watchedHeightCm,
@@ -122,6 +123,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
   ] = useWatch({
     control,
     name: [
+      'name',
       'gender',
       'dateOfBirth',
       'heightCm',
@@ -257,6 +259,9 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
             />
           )}
         />
+        <div className="text-muted-foreground mt-1 text-right text-xs" data-testid="hp-name-counter">
+          {watchedName.length}/50
+        </div>
       </FormField>
 
       {/* Gender Toggle */}

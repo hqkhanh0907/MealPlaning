@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { getActiveSteps } from '@/components/onboarding/trainingStepConfig';
 import { generateUUID } from '@/utils/helpers';
+import { blockNegativeKeys } from '@/utils/numericInputHandlers';
 
 import { ChipSelect } from '../../../components/form/ChipSelect';
 import { FormField } from '../../../components/form/FormField';
@@ -67,7 +68,7 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
     formState: { errors },
   } = useForm<TrainingProfileFormData>({
     resolver: zodResolver(trainingProfileSchema),
-    mode: 'onBlur',
+    mode: 'onTouched',
     defaultValues: trainingProfile
       ? {
           trainingGoal: trainingProfile.trainingGoal,
@@ -266,6 +267,8 @@ export function TrainingProfileForm({ embedded, saveRef }: Readonly<TrainingProf
             min={3}
             max={12}
             step={0.5}
+            inputMode="decimal"
+            onKeyDown={blockNegativeKeys}
             className="bg-card focus:border-primary focus:ring-ring border-border text-foreground w-full rounded-xl border px-4 py-3 text-sm transition-colors outline-none focus:ring-1"
             data-testid="sleep-hours-input"
             {...register('avgSleepHours', { valueAsNumber: true })}

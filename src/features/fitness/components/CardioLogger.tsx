@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { generateUUID } from '@/utils/helpers';
 import { logger } from '@/utils/logger';
+import { blockNegativeKeys } from '@/utils/numericInputHandlers';
 
 import { useNotification } from '../../../contexts/NotificationContext';
 import {
@@ -39,7 +40,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
 
   const { control, handleSubmit, setValue } = useForm<CardioLoggerFormData>({
     resolver: zodResolver(cardioLoggerSchema) as unknown as Resolver<CardioLoggerFormData>,
-    mode: 'onBlur',
+    mode: 'onTouched',
     defaultValues: cardioLoggerDefaults,
   });
 
@@ -257,6 +258,8 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                         field.onChange(val === '' ? undefined : parseNumericInput(val));
                       }}
                       onBlur={field.onBlur}
+                      onKeyDown={blockNegativeKeys}
+                      inputMode="numeric"
                       className="text-foreground w-full text-center text-lg font-semibold"
                       data-testid="manual-duration-input"
                       min={0}
@@ -290,6 +293,8 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                       field.onChange(val === '' ? undefined : parseNumericInput(val));
                     }}
                     onBlur={field.onBlur}
+                    onKeyDown={blockNegativeKeys}
+                    inputMode="decimal"
                     className="text-foreground w-full text-center text-lg font-semibold"
                     data-testid="distance-input"
                     min={0}
@@ -322,6 +327,8 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                     field.onChange(val === '' ? undefined : parseNumericInput(val));
                   }}
                   onBlur={field.onBlur}
+                  onKeyDown={blockNegativeKeys}
+                  inputMode="numeric"
                   className="text-foreground w-full text-center text-lg font-semibold"
                   data-testid="heart-rate-input"
                   min={0}

@@ -75,7 +75,7 @@ export const DishEditModal = ({
     formState: { errors, isDirty },
   } = useForm<DishEditFormData>({
     resolver: zodResolver(dishEditSchema) as unknown as Resolver<DishEditFormData>,
-    mode: 'onBlur',
+    mode: 'onTouched',
     defaultValues: {
       name: editingItem ? getLocalizedField(editingItem.name, lang) : '',
       /* v8 ignore start -- defensive: tags is always array from store */
@@ -357,7 +357,10 @@ export const DishEditModal = ({
           <div className="flex-1 space-y-6 overflow-y-auto overscroll-contain p-6">
             <div>
               <label htmlFor="dish-name" className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">
-                {t('dish.dishName')}
+                {t('dish.dishName')}{' '}
+                <span className="text-destructive" aria-hidden="true">
+                  *
+                </span>
               </label>
               <div className="flex items-center gap-2">
                 <Input
@@ -371,7 +374,7 @@ export const DishEditModal = ({
                     }
                     setAiSuggestError('');
                   }}
-                  className={`flex-1 ${errors.name ? 'border-destructive' : ''}`}
+                  className={`flex-1 ${errors.name ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : ''}`}
                   placeholder={t('dish.namePlaceholder')}
                   data-testid="input-dish-name"
                   aria-invalid={!!errors.name}
@@ -419,7 +422,10 @@ export const DishEditModal = ({
               <p
                 className={`mb-1.5 block text-xs font-semibold uppercase ${errors.tags ? 'text-destructive' : 'text-muted-foreground'}`}
               >
-                {t('dish.suitableFor')} <span className="text-destructive">*</span>
+                {t('dish.suitableFor')}{' '}
+                <span className="text-destructive" aria-hidden="true">
+                  *
+                </span>
               </p>
               <div className="flex flex-wrap gap-2">
                 {getMealTagOptions(t).map(({ type, label, icon: TagIcon }) => {
@@ -615,7 +621,7 @@ export const DishEditModal = ({
                               testId={`input-dish-amount-${field.ingredientId}`}
                               ariaLabel={getLocalizedField(ing.name, lang)}
                               aria-required={true}
-                              className={`w-16 rounded-lg border px-2 py-1 text-center text-sm ${errors.ingredients?.[index]?.amount ? 'border-destructive' : 'border-border'} focus:border-primary bg-card transition-all outline-none`}
+                              className={`w-16 rounded-lg border px-2 py-1 text-center text-sm ${errors.ingredients?.[index]?.amount ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : 'border-border focus:border-primary'} bg-card transition-all outline-none`}
                             />
                             <button
                               type="button"
@@ -726,6 +732,12 @@ export const DishEditModal = ({
               );
             })()}
           <div className="border-border-subtle border-t p-6">
+            <p className="text-muted-foreground mb-3 text-xs">
+              <span className="text-destructive" aria-hidden="true">
+                *
+              </span>{' '}
+              {t('common.requiredField')}
+            </p>
             <button
               type="button"
               onClick={handleFormSubmit}

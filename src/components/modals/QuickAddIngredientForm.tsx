@@ -53,7 +53,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
     formState: { errors },
   } = useForm<QuickAddIngredientData>({
     resolver: zodResolver(quickAddIngredientSchema) as unknown as Resolver<QuickAddIngredientData>,
-    mode: 'onBlur',
+    mode: 'onTouched',
     defaultValues: quickAddIngredientDefaults,
   });
 
@@ -148,7 +148,10 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
         </div>
         <div>
           <label htmlFor="qa-name" className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">
-            {t('dish.quickAddName')} <span className="text-destructive">*</span>
+            {t('dish.quickAddName')}{' '}
+            <span className="text-destructive" aria-hidden="true">
+              *
+            </span>
           </label>
           <Controller
             name="qaName"
@@ -166,7 +169,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
                 }}
                 onBlur={() => triggerAIFill(field.value, qaUnit.vi)}
                 placeholder={t('dish.quickAddNamePlaceholder')}
-                className={`w-full ${errors.qaName ? 'border-destructive' : ''}`}
+                className={`w-full ${errors.qaName ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : ''}`}
                 aria-invalid={!!errors.qaName}
                 aria-describedby={errors.qaName ? 'qa-name-error' : undefined}
                 aria-required={true}
@@ -181,7 +184,10 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
         </div>
         <div>
           <label htmlFor="qa-unit" className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">
-            {t('dish.quickAddUnit')}
+            {t('dish.quickAddUnit')}{' '}
+            <span className="text-destructive" aria-hidden="true">
+              *
+            </span>
           </label>
           <Controller
             name="qaUnit"
@@ -252,6 +258,12 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
             ))}
           </div>
         </div>
+        <p className="text-muted-foreground text-xs">
+          <span className="text-destructive" aria-hidden="true">
+            *
+          </span>{' '}
+          {t('common.requiredField')}
+        </p>
         <div className="flex gap-2 pt-1">
           <button
             type="button"

@@ -102,7 +102,7 @@ export function UnifiedOnboarding() {
 
   const form = useForm<OnboardingFormData>({
     resolver: zodResolver(onboardingSchema),
-    mode: 'onBlur',
+    mode: 'onTouched',
     defaultValues: {
       name: '',
       gender: 'male',

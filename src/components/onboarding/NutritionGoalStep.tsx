@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { type GoalType, validateTargetWeight } from '@/schemas/goalValidation';
+import { blockNegativeKeys } from '@/utils/numericInputHandlers';
 
 import type { OnboardingFormData } from './onboardingSchema';
 import { STEP_FIELDS } from './onboardingSchema';
@@ -166,6 +167,8 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                   value={targetField.field.value ?? ''}
                   onChange={e => handleTargetWeightChange(e.target.value)}
                   onBlur={targetField.field.onBlur}
+                  onKeyDown={blockNegativeKeys}
+                  min={0}
                 />
                 <span className="text-muted-foreground absolute top-1/2 right-4 -translate-y-1/2 text-sm">kg</span>
               </div>

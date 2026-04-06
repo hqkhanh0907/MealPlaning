@@ -3,6 +3,7 @@ import { useController, type UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { blockNegativeKeys } from '@/utils/numericInputHandlers';
 
 import type { OnboardingFormData } from './onboardingSchema';
 import { STEP_FIELDS } from './onboardingSchema';
@@ -45,6 +46,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               name="name"
               type="text"
               autoComplete="name"
+              maxLength={50}
               aria-invalid={!!nameField.fieldState.error}
               aria-describedby={nameField.fieldState.error ? 'ob-name-error' : undefined}
               className="bg-card focus-visible:ring-ring border-border text-foreground w-full rounded-xl border px-4 py-3 text-base focus-visible:ring-2 focus-visible:outline-none"
@@ -52,6 +54,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               onChange={nameField.field.onChange}
               onBlur={nameField.field.onBlur}
             />
+            <div className="text-muted-foreground mt-1 text-right text-xs">{nameField.field.value.length}/50</div>
             {nameField.fieldState.error && (
               <p id="ob-name-error" role="alert" className="text-destructive mt-1 text-xs">
                 {t('onboarding.validation.required')}
@@ -126,6 +129,8 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
                 value={heightField.field.value ?? ''}
                 onChange={e => heightField.field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                 onBlur={heightField.field.onBlur}
+                onKeyDown={blockNegativeKeys}
+                min={0}
               />
               <span className="text-muted-foreground absolute top-1/2 right-4 -translate-y-1/2 text-sm">cm</span>
             </div>
@@ -157,6 +162,8 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
                 value={weightField.field.value ?? ''}
                 onChange={e => weightField.field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                 onBlur={weightField.field.onBlur}
+                onKeyDown={blockNegativeKeys}
+                min={0}
               />
               <span className="text-muted-foreground absolute top-1/2 right-4 -translate-y-1/2 text-sm">kg</span>
             </div>

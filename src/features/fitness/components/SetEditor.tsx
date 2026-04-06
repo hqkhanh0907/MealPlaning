@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { blockNegativeKeys } from '@/utils/numericInputHandlers';
 
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
 import { MIN_REPS, MIN_WEIGHT_KG, REPS_INCREMENT, RPE_OPTIONS, WEIGHT_INCREMENT } from '../constants';
@@ -161,6 +162,8 @@ export const SetEditor = React.memo(function SetEditor({
               value={weightStr}
               onChange={handleWeightInput}
               onBlur={handleWeightBlur}
+              onKeyDown={blockNegativeKeys}
+              inputMode="decimal"
               min={MIN_WEIGHT_KG}
               step={WEIGHT_INCREMENT}
               className="text-foreground w-full text-center font-semibold tabular-nums"
@@ -221,6 +224,8 @@ export const SetEditor = React.memo(function SetEditor({
               value={repsStr}
               onChange={handleRepsInput}
               onBlur={handleRepsBlur}
+              onKeyDown={blockNegativeKeys}
+              inputMode="numeric"
               min={MIN_REPS}
               step={REPS_INCREMENT}
               className="text-foreground w-full text-center font-semibold tabular-nums"

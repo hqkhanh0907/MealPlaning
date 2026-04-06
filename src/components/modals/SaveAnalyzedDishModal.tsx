@@ -42,7 +42,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
 
   const { control, watch, getValues, setValue } = useForm<SaveAnalyzedDishFormData>({
     resolver: zodResolver(saveAnalyzedDishSchema) as unknown as Resolver<SaveAnalyzedDishFormData>,
-    mode: 'onBlur',
+    mode: 'onTouched',
     defaultValues: {
       name: result.name,
       description: result.description,

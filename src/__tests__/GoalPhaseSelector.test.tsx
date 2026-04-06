@@ -80,7 +80,7 @@ describe('GoalPhaseSelector', () => {
 
     expect(screen.getByText('Giảm cân')).toBeInTheDocument();
     expect(screen.getByText('Duy trì')).toBeInTheDocument();
-    expect(screen.getByText('Tăng cơ')).toBeInTheDocument();
+    expect(screen.getByText('Tăng cân')).toBeInTheDocument();
   });
 
   it('renders goal type descriptions (unified with onboarding)', () => {

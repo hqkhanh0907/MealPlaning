@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
 import { generateUUID } from '@/utils/helpers';
+import { blockNegativeKeys } from '@/utils/numericInputHandlers';
 
 import { useNotification } from '../../contexts/NotificationContext';
 import {
@@ -51,7 +52,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
     formState: { errors, isDirty },
   } = useForm<IngredientEditFormData>({
     resolver: zodResolver(ingredientEditSchema) as unknown as Resolver<IngredientEditFormData>,
-    mode: 'onBlur',
+    mode: 'onTouched',
     defaultValues: editingItem
       ? {
           name: { vi: editingItem.name.vi ?? '' },
@@ -166,16 +167,19 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
               <X className="h-5 w-5" />
             </button>
           </div>
-          <form onSubmit={rhfSubmit(onFormSubmit)} className="space-y-4 p-6">
+          <form noValidate onSubmit={rhfSubmit(onFormSubmit)} className="space-y-4 p-6">
             <div>
               <label htmlFor="ing-name" className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">
-                {t('ingredient.ingredientName')}
+                {t('ingredient.ingredientName')}{' '}
+                <span className="text-destructive" aria-hidden="true">
+                  *
+                </span>
               </label>
               <div className="flex gap-2">
                 <Input
                   id="ing-name"
                   {...register('name.vi')}
-                  className={`flex-1 ${errors.name?.vi ? 'border-destructive' : ''}`}
+                  className={`flex-1 ${errors.name?.vi ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : ''}`}
                   placeholder={t('ingredient.namePlaceholder')}
                   data-testid="input-ing-name"
                   aria-invalid={!!errors.name?.vi}
@@ -209,7 +213,10 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
 
             <div>
               <label htmlFor="ing-unit" className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">
-                {t('ingredient.unitLabel')}
+                {t('ingredient.unitLabel')}{' '}
+                <span className="text-destructive" aria-hidden="true">
+                  *
+                </span>
               </label>
               <UnitSelector
                 mode="bilingual"
@@ -246,10 +253,12 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                       id={`ing-${field}`}
                       type="number"
                       step="1"
-                      inputMode="numeric"
+                      min="0"
+                      inputMode="decimal"
+                      onKeyDown={blockNegativeKeys}
                       {...register(field, { valueAsNumber: true })}
                       data-testid={`input-ing-${field.replace('Per100', '')}`}
-                      className={`w-full ${errors[field] ? 'border-destructive' : ''}`}
+                      className={`w-full ${errors[field] ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : ''}`}
                       aria-invalid={!!errors[field]}
                     />
                     {errors[field] && (
@@ -265,6 +274,12 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                 );
               })}
             </div>
+            <p className="text-muted-foreground text-xs">
+              <span className="text-destructive" aria-hidden="true">
+                *
+              </span>{' '}
+              {t('common.requiredField')}
+            </p>
             <div className="pt-4">
               <button
                 type="submit"

@@ -38,7 +38,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
     formState: { errors, touchedFields, isSubmitted: formStateIsSubmitted },
   } = useForm<SaveTemplateFormData>({
     resolver: zodResolver(saveTemplateSchema) as unknown as Resolver<SaveTemplateFormData>,
-    mode: 'onBlur',
+    mode: 'onTouched',
     defaultValues: saveTemplateDefaults,
   });
 
@@ -184,7 +184,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
               maxLength={MAX_NAME_LENGTH}
               placeholder={t('template.namePlaceholder')}
               autoFocus
-              className={`text-foreground min-h-12 w-full border-2 ${showNameError ? 'border-destructive' : ''}`}
+              className={`text-foreground min-h-12 w-full border-2 ${showNameError ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : ''}`}
             />
             <div className="mt-1.5 flex items-center justify-between">
               {showNameError ? (
