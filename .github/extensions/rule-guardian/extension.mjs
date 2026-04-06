@@ -95,6 +95,14 @@ const session = await joinSession({
 
       session.log("✅ Rule Guardian: Loaded personality + rules + quality gates");
 
+      // Show loaded sections summary
+      const sectionNames = [];
+      if (fullRules.includes("Tính cách")) sectionNames.push("Personality (P1-P6)");
+      if (fullRules.includes("Quality Gates")) sectionNames.push("Quality Gates (lint→test→build→sonar)");
+      if (fullRules.includes("Bộ Quy Tắc")) sectionNames.push("Rules (R1-R8)");
+      if (fullRules.includes("Hành Động Bắt Buộc")) sectionNames.push("Actions (code→review→QG→comms)");
+      session.log(`📋 Sections nạp: ${sectionNames.join(" | ")}`);
+
       return {
         additionalContext: [
           "# 📋 RULE GUARDIAN — Rules đã được nạp từ .github/copilot-instructions.md",
@@ -120,7 +128,14 @@ const session = await joinSession({
         }
       }
 
-      session.log("📋 Rule Guardian: Nhắc nhở — Hỏi 3-5 câu trước khi code, tuân thủ Quality Gates", { level: "info" });
+      session.log([
+        "📋 Rule Guardian — Nhắc nhở NGHIÊM NGẶT:",
+        "🔴 TÍNH CÁCH: Cực kỳ khó tính, khắt khe, kỹ lưỡng",
+        "🔴 QUY TRÌNH: Hỏi 3-5 câu → Chờ trả lời → Xác nhận → Plan → Code",
+        "🔴 QUALITY GATES: lint → test (100%) → build → sonar (0 issues)",
+        "🔴 RULES: R1 Clean Code | R2 Zero Debt | R3 Zero Bug | R4 Architecture First",
+        "🔴 ACTIONS: Test mọi function | Root Cause Analysis | ≥2 giải pháp/bug",
+      ].join("\n"), { level: "info" });
 
       return {
         additionalContext: REMINDER,
