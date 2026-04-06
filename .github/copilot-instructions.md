@@ -103,6 +103,28 @@ Vui lòng trả lời để tôi tiếp tục.
 → Autopilot KHÔNG THỂ skip vì không có tool call nào để auto-approve
 ```
 
+**⚠️ Limitation thực tế của autopilot:**
+
+Trong autopilot, hệ thống có thể gửi reminder "task not complete" sau turn text-only, ép Copilot tiếp tục. Nếu điều này xảy ra:
+
+1. **KHÔNG gọi `task_complete`** — task chưa xong thật
+2. **Tiếp tục hỏi bằng text-only** — lặp lại pattern cho đến khi user trả lời
+3. **Nếu sau 2 lần hỏi vẫn không có phản hồi từ user** → chuyển sang chế độ defensive defaults:
+   - Chọn approach an toàn nhất (minimal scope, least risky, most reversible)
+   - Ghi rõ TẤT CẢ assumptions vào commit message
+   - Liệt kê assumptions cuối task để user review
+
+**Nguyên tắc defensive defaults (fallback cuối cùng):**
+
+| Tình huống                       | Default chọn                                         |
+| -------------------------------- | ---------------------------------------------------- |
+| Scope không rõ                   | Làm phạm vi nhỏ nhất (minimal scope)                 |
+| UX behavior không rõ             | Theo pattern đã có trong app (consistency)           |
+| Edge case không rõ               | Guard + fallback giá trị an toàn (0, empty, default) |
+| Có ảnh hưởng đến module khác?    | Giả sử CÓ → test rộng hơn, thay đổi ít hơn           |
+| Thêm feature mới hay sửa cái cũ? | Sửa cái cũ (ít risk hơn)                             |
+| Performance vs Readability?      | Readability first (trừ khi bottleneck rõ ràng)       |
+
 **Ngoại lệ — khi ĐƯỢC phép tự quyết (không cần hỏi):**
 
 - Bug rõ ràng 100% (crash, NaN, lint error) → fix ngay
