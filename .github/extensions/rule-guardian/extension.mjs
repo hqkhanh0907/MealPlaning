@@ -95,48 +95,57 @@ const REMINDER = `
 let fullRules = "";
 let loaded = false;
 let visibleBlockSent = false;
+let sessionCwd = "";
+
+// ─── ENSURE LOADED (reusable) ───
+function ensureLoaded(cwd) {
+  if (loaded && fullRules) return true;
+  const content = loadInstructions(cwd || sessionCwd);
+  if (!content) return false;
+  fullRules = extractKeySections(content);
+  loaded = true;
+  return true;
+}
+
+// ─── BUILD FULL CONTEXT (for agent injection) ───
+function buildFullContext() {
+  return [
+    "# 📋 RULE GUARDIAN — Rules đã được nạp từ .github/copilot-instructions.md",
+    "",
+    "Bạn PHẢI tuân thủ TOÀN BỘ nội dung dưới đây trong SUỐT session:",
+    "",
+    fullRules,
+    "",
+    "---",
+    "",
+    REMINDER,
+  ].join("\n");
+}
 
 // ─── JOIN SESSION ───
 const session = await joinSession({
   hooks: {
     onSessionStart: async (input) => {
-      const content = loadInstructions(input.cwd);
-      if (!content) {
+      sessionCwd = input.cwd;
+      if (!ensureLoaded(input.cwd)) {
         session.log("⚠️ Rule Guardian: .github/copilot-instructions.md not found");
         return;
       }
 
-      fullRules = extractKeySections(content);
-      loaded = true;
-
       session.log("✅ Rule Guardian: Loaded personality + rules + quality gates");
 
       return {
-        additionalContext: [
-          "# 📋 RULE GUARDIAN — Rules đã được nạp từ .github/copilot-instructions.md",
-          "",
-          "Bạn PHẢI tuân thủ TOÀN BỘ nội dung dưới đây trong SUỐT session:",
-          "",
-          fullRules,
-          "",
-          "---",
-          "",
-          REMINDER,
-        ].join("\n"),
+        additionalContext: buildFullContext(),
       };
     },
 
     onUserPromptSubmitted: async (input) => {
-      if (!loaded) {
-        const content = loadInstructions(input.cwd);
-        if (content) {
-          fullRules = extractKeySections(content);
-          loaded = true;
-        }
-      }
+      // Always ensure loaded (handles extensions_reload scenario)
+      ensureLoaded(input.cwd);
 
+      // Inject FULL rules every turn (not just compact REMINDER)
       return {
-        additionalContext: REMINDER,
+        additionalContext: loaded ? buildFullContext() : REMINDER,
       };
     },
   },
