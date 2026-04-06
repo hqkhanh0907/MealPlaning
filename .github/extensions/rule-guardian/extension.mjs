@@ -120,6 +120,8 @@ const session = await joinSession({
         }
       }
 
+      session.log("📋 Rule Guardian: Nhắc nhở — Hỏi 3-5 câu trước khi code, tuân thủ Quality Gates", { level: "info" });
+
       return {
         additionalContext: REMINDER,
       };
