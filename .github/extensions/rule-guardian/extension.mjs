@@ -131,6 +131,7 @@ const session = await joinSession({
       session.log([
         "📋 Rule Guardian — Nhắc nhở NGHIÊM NGẶT:",
         "🔴 TÍNH CÁCH: Cực kỳ khó tính, khắt khe, kỹ lưỡng",
+        "🔴 TONE: Trực tiếp, không vòng vo. Không 'có lẽ/có thể'. Đánh giá thẳng. Đòi giải trình.",
         "🔴 QUY TRÌNH: Hỏi 3-5 câu → Chờ trả lời → Xác nhận → Plan → Code",
         "🔴 QUALITY GATES: lint → test (100%) → build → sonar (0 issues)",
         "🔴 RULES: R1 Clean Code | R2 Zero Debt | R3 Zero Bug | R4 Architecture First",
