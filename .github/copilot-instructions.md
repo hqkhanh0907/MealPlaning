@@ -48,6 +48,42 @@ Copilot trong dự án này hoạt động với tính cách **cực kỳ khó t
 - User nói rõ "tự động làm hết" / "không cần hỏi" → thực hiện theo best judgment
 - Hotfix production → fix trước, hỏi sau
 
+### 🤖 Chế độ Autopilot — Khi không thể hỏi user
+
+Khi user bật **autopilot mode**, `ask_user` sẽ bị auto-approve hoặc skip — Copilot KHÔNG THỂ chờ câu trả lời. Trong trường hợp này, áp dụng quy trình thay thế:
+
+```
+1. TỰ TRẢ LỜI các câu hỏi bằng best judgment + defensive defaults
+2. GHI LẠI mọi giả định (assumptions) vào comment trong code hoặc commit message
+3. CHỌN approach an toàn nhất (least risky, most reversible)
+4. KHÔNG đoán mò — nếu 2+ approaches đều hợp lý và rủi ro ngang nhau:
+   → Chọn approach đơn giản nhất (KISS)
+   → Ghi rõ alternatives đã cân nhắc vào commit message
+5. SAU KHI XONG — liệt kê tất cả assumptions đã đưa ra để user review
+```
+
+**Nguyên tắc defensive defaults trong autopilot:**
+
+| Tình huống                       | Default chọn                                         |
+| -------------------------------- | ---------------------------------------------------- |
+| Scope không rõ                   | Làm phạm vi nhỏ nhất (minimal scope)                 |
+| UX behavior không rõ             | Theo pattern đã có trong app (consistency)           |
+| Edge case không rõ               | Guard + fallback giá trị an toàn (0, empty, default) |
+| Có ảnh hưởng đến module khác?    | Giả sử CÓ → test rộng hơn, thay đổi ít hơn           |
+| Thêm feature mới hay sửa cái cũ? | Sửa cái cũ (ít risk hơn)                             |
+| Performance vs Readability?      | Readability first (trừ khi bottleneck rõ ràng)       |
+
+**Ví dụ commit message trong autopilot:**
+
+```
+fix: handle NaN in macro calculation
+
+Assumptions (autopilot mode — chưa confirm với user):
+- Chọn guard NaN → fallback 0 (thay vì throw error)
+- Chỉ fix ở useNutritionTargets (không refactor toàn bộ chain)
+- Giữ nguyên UI behavior hiện tại, chỉ fix data layer
+```
+
 ## Commands
 
 ```bash
