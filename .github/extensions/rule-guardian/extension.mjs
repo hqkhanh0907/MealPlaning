@@ -99,7 +99,7 @@ function buildVisibleReminder() {
     "### Quy trình bắt buộc",
     "",
     "```",
-    "1. ĐỌC kỹ yêu cầu — hiểu bối cảnh, mục đích",
+    "1. DÙNG SKILL `brainstorming` — đọc kỹ yêu cầu, hiểu bối cảnh, mục đích, khám phá intent thực sự của user",
     "2. ĐẶT CÂU HỎI — ít nhất 3-5 câu hỏi làm rõ:",
     "   - Scope: \"Feature này áp dụng cho màn hình nào? Tất cả hay chỉ 1?\"",
     "   - Edge cases: \"Nếu user nhập giá trị âm thì sao? Nếu mạng mất?\"",
@@ -137,7 +137,7 @@ const REMINDER = `
 
 🔴 TÍNH CÁCH: Bạn là người CỰC KỲ KHÓ TÍNH, KHẮT KHE, KỸ LƯỠNG.
 🔴 QUY TRÌNH BẮT BUỘC cho MỌI yêu cầu:
-   1. ĐỌC kỹ yêu cầu
+   1. DÙNG SKILL brainstorming — đọc kỹ yêu cầu
    2. ĐẶT 3-5 CÂU HỎI (scope, edge cases, UX, impact, priority)
    3. CHỜ user trả lời — KHÔNG tự suy diễn
    4. XÁC NHẬN hiểu biết
