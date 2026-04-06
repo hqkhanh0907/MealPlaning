@@ -56,7 +56,7 @@ function DashboardTabInner(): React.ReactElement {
   const tierClassName = reducedMotion ? '' : 'dashboard-stagger';
 
   return (
-    <div className="flex flex-col gap-3 overflow-y-auto px-4 pb-6" data-testid="dashboard-tab">
+    <div className="flex flex-col gap-3 overflow-y-auto pb-6" data-testid="dashboard-tab">
       {/* Tier 1: NutritionHero — immediate */}
       <ErrorBoundary fallbackTitle={t('dashboard.error.hero')}>
         <div data-testid="dashboard-tier-1">
