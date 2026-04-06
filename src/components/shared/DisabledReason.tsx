@@ -18,12 +18,12 @@ export function DisabledReason({
   reason,
   show,
   className,
-}: {
+}: Readonly<{
   id: string;
   reason: ReactNode;
   show: boolean;
   className?: string;
-}) {
+}>) {
   if (!show) return null;
   return (
     <p id={id} className={`text-muted-foreground mt-1 text-xs ${className ?? ''}`}>

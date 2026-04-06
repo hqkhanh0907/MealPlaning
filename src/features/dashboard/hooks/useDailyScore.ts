@@ -66,6 +66,21 @@ function isDefaultProfile(profile: HealthProfile | null): boolean {
   );
 }
 
+function determineHeroContext(
+  isFirstTimeUser: boolean,
+  isRestDay: boolean,
+  hasMealsToday: boolean,
+  workoutCompleted: boolean,
+): HeroContext {
+  if (isFirstTimeUser) return 'first-time';
+  if (isRestDay && hasMealsToday) return 'rest-day-with-meals';
+  if (isRestDay) return 'rest-day-empty';
+  if (!workoutCompleted && hasMealsToday) return 'training-day-needs-workout';
+  if (workoutCompleted && !hasMealsToday) return 'workout-done-needs-fuel';
+  if (workoutCompleted && hasMealsToday) return 'balanced-day';
+  return 'empty-day';
+}
+
 export function useDailyScore(): DailyScoreData {
   const { t } = useTranslation();
   const profile = useHealthProfileStore(s => s.profile);
@@ -146,22 +161,7 @@ export function useDailyScore(): DailyScoreData {
         todayPlan.lunchDishIds.length > 0 ||
         todayPlan.dinnerDishIds.length > 0);
 
-    let heroContext: HeroContext;
-    if (isFirstTimeUser) {
-      heroContext = 'first-time';
-    } else if (isRestDay && hasMealsToday) {
-      heroContext = 'rest-day-with-meals';
-    } else if (isRestDay && !hasMealsToday) {
-      heroContext = 'rest-day-empty';
-    } else if (!isRestDay && !workoutCompleted && hasMealsToday) {
-      heroContext = 'training-day-needs-workout';
-    } else if (workoutCompleted && !hasMealsToday) {
-      heroContext = 'workout-done-needs-fuel';
-    } else if (workoutCompleted && hasMealsToday) {
-      heroContext = 'balanced-day';
-    } else {
-      heroContext = 'empty-day';
-    }
+    const heroContext = determineHeroContext(isFirstTimeUser, isRestDay, hasMealsToday, workoutCompleted);
 
     return {
       totalScore: scoreResult.totalScore,

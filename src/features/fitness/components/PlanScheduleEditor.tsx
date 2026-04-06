@@ -269,7 +269,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
           type="button"
           data-testid="save-button"
           disabled={!hasChanges}
-          aria-describedby={!hasChanges ? 'schedule-save-disabled-reason' : undefined}
+          aria-describedby={hasChanges ? undefined : 'schedule-save-disabled-reason'}
           onClick={handleSave}
           className={[
             'flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold shadow-md',

@@ -406,7 +406,7 @@ export const AISuggestionPreviewModal = ({
                 <button
                   onClick={() => onApply(selectedMeals)}
                   disabled={!hasAnySelected}
-                  aria-describedby={!hasAnySelected ? 'ai-apply-disabled-reason' : undefined}
+                  aria-describedby={hasAnySelected ? undefined : 'ai-apply-disabled-reason'}
                   className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary flex items-center gap-2 rounded-xl px-6 py-2.5 font-semibold shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <CheckCircle2 className="h-4 w-4" aria-hidden="true" />

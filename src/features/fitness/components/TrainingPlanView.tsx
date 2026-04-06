@@ -78,6 +78,70 @@ function isPlanExpired(endDate?: string): boolean {
   return today > end;
 }
 
+function useContextMenuDismiss(
+  contextMenu: { dayNum: number; x: number; y: number } | null,
+  ref: React.RefObject<HTMLDivElement | null>,
+  setContextMenu: React.Dispatch<React.SetStateAction<{ dayNum: number; x: number; y: number } | null>>,
+): void {
+  useEffect(() => {
+    if (!contextMenu) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setContextMenu(null);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [contextMenu, ref, setContextMenu]);
+
+  useEffect(() => {
+    if (!contextMenu) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setContextMenu(null);
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [contextMenu, setContextMenu]);
+
+  useEffect(() => {
+    if (contextMenu && ref.current) {
+      ref.current.focus();
+    }
+  }, [contextMenu, ref]);
+}
+
+function WorkoutStatsContent({
+  workoutType,
+  exerciseCount,
+  minutes,
+}: Readonly<{
+  workoutType: string;
+  exerciseCount: number;
+  minutes: number;
+}>): React.JSX.Element {
+  const { t } = useTranslation();
+  const normalizedType = workoutType.toLowerCase();
+
+  if (normalizedType.includes('cardio')) {
+    return <span className="text-muted-foreground">{t('fitness.plan.cardioDay')}</span>;
+  }
+  if (normalizedType === 'rest') {
+    return <span className="text-muted-foreground">{t('fitness.plan.restDay')}</span>;
+  }
+  return (
+    <>
+      <span>
+        {exerciseCount} {t('fitness.plan.exercises')}
+      </span>
+      <span>
+        ~{minutes} {t('fitness.plan.minutes')}
+      </span>
+    </>
+  );
+}
+
 function TrainingPlanViewInner({
   onGeneratePlan,
   onCreateManualPlan,
@@ -239,33 +303,7 @@ function TrainingPlanViewInner({
     setShowAddSessionModal(true);
   }, [viewedDay]);
 
-  useEffect(() => {
-    if (!dayContextMenu) return;
-    function handleClickOutside(e: MouseEvent) {
-      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node)) {
-        setDayContextMenu(null);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [dayContextMenu]);
-
-  useEffect(() => {
-    if (!dayContextMenu) return;
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        setDayContextMenu(null);
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [dayContextMenu]);
-
-  useEffect(() => {
-    if (dayContextMenu && contextMenuRef.current) {
-      contextMenuRef.current.focus();
-    }
-  }, [dayContextMenu]);
+  useContextMenuDismiss(dayContextMenu, contextMenuRef, setDayContextMenu);
 
   if (activePlan && planExpired) {
     return (
@@ -589,20 +627,11 @@ function TrainingPlanViewInner({
             </p>
           )}
           <div data-testid="workout-stats" className="text-foreground-secondary mt-2 flex items-center gap-3 text-sm">
-            {viewedPlanDay.workoutType.toLowerCase().includes('cardio') ? (
-              <span className="text-muted-foreground">{t('fitness.plan.cardioDay')}</span>
-            ) : viewedPlanDay.workoutType.toLowerCase() === 'rest' ? (
-              <span className="text-muted-foreground">{t('fitness.plan.restDay')}</span>
-            ) : (
-              <>
-                <span>
-                  {viewedExercises.length} {t('fitness.plan.exercises')}
-                </span>
-                <span>
-                  ~{estimatedMinutes} {t('fitness.plan.minutes')}
-                </span>
-              </>
-            )}
+            <WorkoutStatsContent
+              workoutType={viewedPlanDay.workoutType}
+              exerciseCount={viewedExercises.length}
+              minutes={estimatedMinutes}
+            />
           </div>
 
           {viewedExercises.length > 0 &&

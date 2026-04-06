@@ -120,7 +120,7 @@ function SessionTabsInner({
                   <Check className="h-4 w-4" aria-hidden="true" />
                 ) : (
                   <Icon
-                    className={`h-4 w-4 ${!isActive ? (SESSION_ICON_COLORS[index] ?? '') : ''}`}
+                    className={`h-4 w-4 ${isActive ? '' : (SESSION_ICON_COLORS[index] ?? '')}`}
                     aria-hidden="true"
                   />
                 )}

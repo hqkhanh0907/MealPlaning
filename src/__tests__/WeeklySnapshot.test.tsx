@@ -333,13 +333,12 @@ describe('WeeklySnapshot', () => {
 
       const bar = screen.getByTestId('weekly-adherence-bar');
       expect(bar).toBeInTheDocument();
-      expect(bar).toHaveAttribute('role', 'progressbar');
-      expect(bar).toHaveAttribute('aria-valuenow', '50');
-      expect(bar).toHaveAttribute('aria-valuemin', '0');
-      expect(bar).toHaveAttribute('aria-valuemax', '100');
+      expect(bar.tagName).toBe('PROGRESS');
+      expect(bar).toHaveAttribute('value', '50');
+      expect(bar).toHaveAttribute('max', '100');
     });
 
-    it('progress bar width matches adherence percentage', () => {
+    it('progress bar value matches adherence percentage', () => {
       setupStore({
         workouts: [makeWorkout('2024-01-08')],
         trainingPlans: [makePlan()],
@@ -348,8 +347,7 @@ describe('WeeklySnapshot', () => {
       render(<WeeklySnapshot />);
 
       const bar = screen.getByTestId('weekly-adherence-bar');
-      const fill = bar.firstChild as HTMLElement;
-      expect(fill.style.width).toBe('50%');
+      expect(bar).toHaveAttribute('value', '50');
     });
 
     it('ignores paused plan (shows dash)', () => {

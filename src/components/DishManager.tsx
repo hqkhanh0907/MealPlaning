@@ -249,7 +249,7 @@ export const DishManager = ({
                 className={`focus-visible:ring-ring inline-flex min-h-11 items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:outline-none ${filterTag === type ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
               >
                 <TagIcon
-                  className={`size-3.5 ${filterTag !== type ? MEAL_TYPE_ICON_COLORS[type] : ''}`}
+                  className={`size-3.5 ${filterTag === type ? '' : MEAL_TYPE_ICON_COLORS[type]}`}
                   aria-hidden="true"
                 />{' '}
                 {label} ({count})

@@ -106,7 +106,7 @@ const GRADIENT_CLASS = 'bg-gradient-to-br from-slate-900 via-indigo-950 to-slate
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
 
-function ProgressRing({ pct }: { pct: number }) {
+function ProgressRing({ pct }: Readonly<{ pct: number }>) {
   /* v8 ignore start -- defensive: pct is always finite from caller */
   const safePct = Number.isFinite(pct) ? pct : 0;
   /* v8 ignore stop */
@@ -151,23 +151,23 @@ interface MacroBarProps {
   testId: string;
 }
 
-function MacroBar({ label, current, target, colorClass, testId }: MacroBarProps) {
+function MacroBar({ label, current, target, colorClass, testId }: Readonly<MacroBarProps>) {
   const displayCurrent = safeRound(current);
   const displayTarget = safePositive(target);
   const safeTarget = displayTarget > 0 ? displayTarget : 1;
   const pct =
-    displayCurrent !== null
-      ? Math.min(100, Math.max(0, Math.round((Math.max(0, displayCurrent) / safeTarget) * 100)))
-      : 0;
+    displayCurrent === null
+      ? 0
+      : Math.min(100, Math.max(0, Math.round((Math.max(0, displayCurrent) / safeTarget) * 100)));
 
   return (
     <div className="flex-1 space-y-1" data-testid={testId}>
       <div className="flex items-baseline justify-between">
         <span className="text-[10px] font-medium text-white/60">{label}</span>
         <span className="text-xs font-semibold text-white/90 tabular-nums">
-          {displayCurrent !== null
-            ? `${displayCurrent}/${Math.round(displayTarget)}g`
-            : `—/${Math.round(displayTarget)}g`}
+          {displayCurrent === null
+            ? `—/${Math.round(displayTarget)}g`
+            : `${displayCurrent}/${Math.round(displayTarget)}g`}
         </span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
@@ -213,31 +213,48 @@ export interface NutritionHeroProps {
   isLoading?: boolean;
 }
 
-function NutritionHeroInner({ isLoading = false }: NutritionHeroProps): React.ReactElement {
+interface CalorieSummary {
+  displayEaten: number | null;
+  displayTarget: number;
+  caloriePct: number;
+  isOverTarget: boolean;
+  hasNutritionData: boolean;
+  remaining: number | null;
+}
+
+function computeCalorieSummary(eaten: number | null, target: number, hasDishes: boolean): CalorieSummary {
+  const displayEaten = safeRound(eaten);
+  const displayTarget = safePositive(target);
+  const safeTarget = displayTarget > 0 ? displayTarget : 1;
+  const remaining = displayEaten === null ? null : Math.round(displayTarget) - displayEaten;
+  const caloriePct =
+    displayEaten === null ? 0 : Math.min(100, Math.max(0, Math.round((displayEaten / safeTarget) * 100)));
+  const isOverTarget = remaining !== null && remaining < 0;
+  const hasNutritionData = hasDishes && displayEaten !== null;
+  return { displayEaten, displayTarget, caloriePct, isOverTarget, hasNutritionData, remaining };
+}
+
+function NutritionHeroInner({ isLoading = false }: Readonly<NutritionHeroProps>): React.ReactElement {
   const { t } = useTranslation();
   const { totalScore, color, greeting, isFirstTimeUser, heroContext } = useDailyScore();
   const { targetCalories, targetProtein, targetFat, targetCarbs } = useNutritionTargets();
   const profileName = useHealthProfileStore(s => s.profile?.name ?? '');
   const todayMacros = useTodayFullNutrition();
 
-  const displayEaten = safeRound(todayMacros.eaten);
-  const displayTarget = safePositive(targetCalories);
-  const safeTarget = displayTarget > 0 ? displayTarget : 1;
-  const remaining = displayEaten !== null ? Math.round(displayTarget) - displayEaten : null;
-  const caloriePct =
-    displayEaten !== null ? Math.min(100, Math.max(0, Math.round((displayEaten / safeTarget) * 100))) : 0;
-  const isOverTarget = remaining !== null && remaining < 0;
-  const hasNutritionData = todayMacros.hasDishes && displayEaten !== null;
+  const { displayEaten, displayTarget, caloriePct, isOverTarget, hasNutritionData, remaining } = computeCalorieSummary(
+    todayMacros.eaten,
+    targetCalories,
+    todayMacros.hasDishes,
+  );
 
   /* v8 ignore next -- defensive: displayEaten is non-null when hasNutritionData */
   const eatenText = String(displayEaten ?? '—');
   /* v8 ignore next -- defensive: remaining is non-null when hasNutritionData */
-  const remainingText =
-    remaining !== null
-      ? isOverTarget
-        ? t('dashboard.nutritionHero.over', { value: Math.abs(remaining) })
-        : t('dashboard.nutritionHero.remaining', { value: remaining })
-      : '—';
+  const overOrRemainingLabel =
+    remaining !== null && remaining < 0
+      ? t('dashboard.nutritionHero.over', { value: Math.abs(remaining) })
+      : t('dashboard.nutritionHero.remaining', { value: remaining ?? 0 });
+  const remainingText = remaining === null ? '—' : overOrRemainingLabel;
 
   const displayGreeting = profileName ? t('dashboard.nutritionHero.greetingName', { name: profileName }) : greeting;
 

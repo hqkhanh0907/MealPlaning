@@ -166,7 +166,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 )}
                 data-testid={`cardio-type-${type}`}
               >
-                <Icon className={`h-4 w-4 ${selectedType !== type ? color : ''}`} aria-hidden="true" />
+                <Icon className={`h-4 w-4 ${selectedType === type ? '' : color}`} aria-hidden="true" />
                 <span>{t(i18nKey)}</span>
               </Button>
             ))}

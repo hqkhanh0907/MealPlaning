@@ -89,7 +89,7 @@ export function SettingsDetailLayout({
               onClick={onSave}
               data-testid="settings-detail-save"
               disabled={!hasChanges || isSaving}
-              aria-describedby={!hasChanges ? 'settings-save-disabled-reason' : undefined}
+              aria-describedby={hasChanges ? undefined : 'settings-save-disabled-reason'}
               className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition-all ${
                 hasChanges && !isSaving
                   ? 'bg-primary hover:bg-primary active:scale-[0.98]'

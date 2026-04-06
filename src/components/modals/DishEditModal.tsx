@@ -463,10 +463,7 @@ export const DishEditModal = ({
                       data-testid={`tag-${type}`}
                       className={`inline-flex min-h-11 items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${isActive ? 'bg-primary text-primary-foreground shadow-sm' : 'text-foreground-secondary bg-muted hover:bg-accent active:bg-accent'}`}
                     >
-                      <TagIcon
-                        className={`size-4 ${!isActive ? MEAL_TYPE_ICON_COLORS[type] : ''}`}
-                        aria-hidden="true"
-                      />{' '}
+                      <TagIcon className={`size-4 ${isActive ? '' : MEAL_TYPE_ICON_COLORS[type]}`} aria-hidden="true" />{' '}
                       {label}
                     </button>
                   );

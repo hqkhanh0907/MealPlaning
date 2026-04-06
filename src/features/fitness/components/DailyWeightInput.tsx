@@ -274,7 +274,7 @@ function DailyWeightInputInner(): React.JSX.Element {
             type="button"
             data-testid="save-weight-btn"
             aria-label={isSaved ? t('fitness.weight.saved') : t('common.save')}
-            aria-describedby={!isValid ? 'weight-save-disabled-reason' : undefined}
+            aria-describedby={isValid ? undefined : 'weight-save-disabled-reason'}
             disabled={!isValid}
             onClick={handleSave}
             className={`ml-1 flex h-11 w-11 items-center justify-center rounded-lg transition-colors active:scale-95 disabled:opacity-50 ${

@@ -226,7 +226,7 @@ export const MealPlannerModal = ({
                   }`}
                 >
                   <span>
-                    <tab.icon className={`inline-block size-4 ${!isActive ? tab.color : ''}`} aria-hidden="true" />
+                    <tab.icon className={`inline-block size-4 ${isActive ? '' : tab.color}`} aria-hidden="true" />
                   </span>
                   <span>{t(tab.labelKey)}</span>
                   {count > 0 && (

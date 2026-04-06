@@ -276,12 +276,13 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             const hasLunch = (plan?.lunchDishIds?.length ?? 0) > 0;
             const hasDinner = (plan?.dinnerDishIds?.length ?? 0) > 0;
             const mealCount = getMealCount(hasBreakfast, hasLunch, hasDinner);
+            const mealSuffix = mealCount > 0 ? `, ${mealCount} ${t('calendar.mealsPlanned')}` : '';
 
             return (
               <button
                 key={dateStr}
                 data-selected={isSelected}
-                aria-label={`${dayLabel} ${date.getDate()}${mealCount > 0 ? `, ${mealCount} ${t('calendar.mealsPlanned')}` : ''}`}
+                aria-label={`${dayLabel} ${date.getDate()}${mealSuffix}`}
                 onClick={() => {
                   if (isSelected && onPlanClick) {
                     onPlanClick();
@@ -350,6 +351,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
               const hasDinner = (plan?.dinnerDishIds?.length ?? 0) > 0;
               const isSunday = parseLocalDate(dateStr).getDay() === 0;
               const mealCount = getMealCount(hasBreakfast, hasLunch, hasDinner);
+              const mealSuffix = mealCount > 0 ? `, ${mealCount} ${t('calendar.mealsPlanned')}` : '';
 
               return (
                 <button
@@ -367,7 +369,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
                     if (onPlanClick) onPlanClick();
                   }}
                   title={isSelected ? t('calendar.tapToPlan') : t('calendar.selectDay')}
-                  aria-label={`${day}${mealCount > 0 ? `, ${mealCount} ${t('calendar.mealsPlanned')}` : ''}`}
+                  aria-label={`${day}${mealSuffix}`}
                   className={`relative flex aspect-square flex-col items-center justify-center rounded-2xl transition-all ${getDayButtonClass(isSelected, isToday, 'calendar', isSunday)} ${isToday && !isSelected ? 'animate-pulse-subtle' : ''}`}
                 >
                   <span className="text-sm font-semibold">{day}</span>

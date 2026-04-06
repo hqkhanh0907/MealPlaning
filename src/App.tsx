@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react';
+import { Bot, ChevronLeft, Loader2, SlidersHorizontal, Utensils } from 'lucide-react';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -56,7 +56,6 @@ const TemplateManager = React.lazy(() =>
 const SaveTemplateModal = React.lazy(() =>
   import('./components/modals/SaveTemplateModal').then(m => ({ default: m.SaveTemplateModal })),
 );
-import { Bot, ChevronLeft, SlidersHorizontal, Utensils } from 'lucide-react';
 
 import { ErrorBoundary } from './components/ErrorBoundary';
 import type { MainTab } from './components/navigation';

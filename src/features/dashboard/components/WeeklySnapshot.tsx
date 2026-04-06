@@ -117,13 +117,18 @@ function WeeklySnapshotInner(): React.ReactElement {
       aria-label={t('dashboard.weekly.a11y', {
         weight: latestWeight ?? '—',
         streak: streakInfo.currentStreak,
-        adherence: adherence != null ? `${adherence}%` : '—',
+        adherence: adherence == null ? '—' : `${adherence}%`,
       })}
       className="bg-card border-border divide-border grid grid-cols-3 divide-x rounded-xl border p-4"
     >
       {/* Column 1 — Weight */}
       <div className="flex flex-col items-center justify-center gap-0.5 pr-3" data-testid="weekly-weight">
-        {latestWeight != null ? (
+        {latestWeight == null ? (
+          <>
+            <span className="text-muted-foreground text-base font-semibold">{t('dashboard.weekly.noWeight')}</span>
+            <span className="text-muted-foreground text-xs">{t('dashboard.weekly.logWeight')}</span>
+          </>
+        ) : (
           <>
             <span className="text-foreground text-base font-semibold tabular-nums">
               {latestWeight} {t('dashboard.weekly.weightUnit')}
@@ -136,11 +141,6 @@ function WeeklySnapshotInner(): React.ReactElement {
                 {weightChangeDisplay.text}
               </span>
             )}
-          </>
-        ) : (
-          <>
-            <span className="text-muted-foreground text-base font-semibold">{t('dashboard.weekly.noWeight')}</span>
-            <span className="text-muted-foreground text-xs">{t('dashboard.weekly.logWeight')}</span>
           </>
         )}
       </div>
@@ -167,28 +167,21 @@ function WeeklySnapshotInner(): React.ReactElement {
 
       {/* Column 3 — Adherence */}
       <div className="flex flex-col items-center justify-center gap-0.5 pl-3" data-testid="weekly-adherence">
-        {adherence != null ? (
-          <>
-            <span className="text-foreground text-base font-semibold tabular-nums">{adherence}%</span>
-            <span className="text-muted-foreground text-xs">{t('dashboard.weekly.adherenceLabel')}</span>
-            <div
-              className="bg-muted mt-0.5 h-1.5 w-full overflow-hidden rounded-full"
-              data-testid="weekly-adherence-bar"
-              role="progressbar"
-              aria-valuenow={adherence}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            >
-              <div
-                className="bg-primary h-full rounded-full transition-all"
-                style={{ width: `${Math.min(adherence, 100)}%` }}
-              />
-            </div>
-          </>
-        ) : (
+        {adherence == null ? (
           <>
             <span className="text-muted-foreground text-base font-semibold">{t('dashboard.weekly.noAdherence')}</span>
             <span className="text-muted-foreground text-xs">{t('dashboard.weekly.adherenceLabel')}</span>
+          </>
+        ) : (
+          <>
+            <span className="text-foreground text-base font-semibold tabular-nums">{adherence}%</span>
+            <span className="text-muted-foreground text-xs">{t('dashboard.weekly.adherenceLabel')}</span>
+            <progress
+              className="bg-muted [&::-moz-progress-bar]:bg-primary [&::-webkit-progress-value]:bg-primary mt-0.5 h-1.5 w-full appearance-none overflow-hidden rounded-full [&::-moz-progress-bar]:rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all"
+              data-testid="weekly-adherence-bar"
+              value={Math.min(adherence, 100)}
+              max={100}
+            />
           </>
         )}
       </div>

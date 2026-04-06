@@ -247,7 +247,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
                               }`}
                             >
                               <opt.icon
-                                className={`inline-block size-4 ${!isActive ? MEAL_TYPE_ICON_COLORS[opt.type] : ''}`}
+                                className={`inline-block size-4 ${isActive ? '' : MEAL_TYPE_ICON_COLORS[opt.type]}`}
                                 aria-hidden="true"
                               />{' '}
                               {opt.label}
