@@ -65,6 +65,7 @@ export function CustomExerciseModal({
             <Input
               {...register('name')}
               id="custom-exercise-name"
+              maxLength={80}
               placeholder={t('fitness.exerciseSelector.customName')}
               data-testid="custom-exercise-name"
               aria-required={true}

@@ -828,6 +828,7 @@
       "startWorkout": "Bắt đầu tập",
       "moreExercises": "+{{remaining}} bài tập nữa",
       "showLess": "Thu gọn",
+      "cardioDay": "Cardio",
       "restDay": "Ngày nghỉ",
       "restDayTip1": "Ngủ đủ 7-9 giờ để phục hồi cơ bắp",
       "restDayTip2": "Uống đủ nước và ăn giàu protein",
@@ -861,11 +862,11 @@
       "undo": "Hoàn tác",
       "sessionTab": "Buổi {{order}}",
       "addSession": "Thêm buổi tập",
-      "strengthOption": "Sức mạnh (Strength)",
+      "strengthOption": "Sức mạnh",
       "strengthDesc": "Chọn nhóm cơ → auto-gợi ý bài tập",
       "cardioOption": "Cardio",
       "cardioDesc": "HIIT, chạy bộ, đạp xe, bơi...",
-      "freestyleOption": "Tập tự do (Freestyle)",
+      "freestyleOption": "Tập tự do",
       "freestyleDesc": "Tự chọn bài tập, không theo template",
       "maxSessions": "Tối đa 3 buổi/ngày",
       "selectMuscleGroups": "Chọn nhóm cơ",
@@ -960,7 +961,7 @@
       "missedSessions": "Còn {{count}} buổi tập chưa hoàn thành — cố gắng bù lại nhé! 💪",
       "volumeUp": "Khối lượng tăng {{percent}}%",
       "volumeDown": "Khối lượng giảm {{percent}}%",
-      "weightChange": "Cân nặng thay đổi {{delta}} kg",
+      "weightChange": "Cân nặng thay đổi {{delta}} kg (7 ngày qua)",
       "weekOf": "Tuần {{current}}/{{total}}"
     },
     "cardio": {
@@ -1806,7 +1807,9 @@
       "nameRequired": "Vui lòng nhập tên nguyên liệu",
       "unitRequired": "Vui lòng nhập đơn vị tính",
       "valueRequired": "Vui lòng nhập giá trị",
-      "valueNonNegative": "Giá trị không được âm"
+      "valueNonNegative": "Giá trị không được âm",
+      "caloriesMax": "Calories tối đa 999 kcal/100g",
+      "macroMax": "Giá trị tối đa 100g/100g"
     },
     "trainingProfile": {
       "daysPerWeek": "Số ngày tập phải là 2, 3, 4, 5 hoặc 6",

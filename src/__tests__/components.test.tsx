@@ -304,9 +304,10 @@ describe('AppNavigation', () => {
     expect(onTabChange).toHaveBeenCalledWith('fitness');
   });
 
-  it('TabLoadingFallback renders loading state', () => {
-    render(<TabLoadingFallback />);
-    expect(screen.getByText('Đang tải...')).toBeInTheDocument();
+  it('TabLoadingFallback renders skeleton loading state', () => {
+    const { container } = render(<TabLoadingFallback />);
+    const skeletons = container.querySelectorAll('[data-slot="skeleton"]');
+    expect(skeletons.length).toBe(4);
   });
 
   it('getTabLabels returns correct labels', () => {

@@ -303,7 +303,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                       </p>
                     </button>
 
-                    <div className="flex shrink-0 items-center gap-1">
+                    <div className="flex shrink-0 items-center gap-2">
                       <button
                         type="button"
                         onClick={() => handleOpenSwap(index)}
@@ -335,7 +335,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                         type="button"
                         onClick={() => handleRemove(index)}
                         aria-label={`Remove ${item.exercise.nameVi}`}
-                        className="text-destructive active:bg-destructive/10 focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center justify-center rounded transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                        className="border-border text-destructive active:bg-destructive/10 focus-visible:ring-ring ml-2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded border-l pl-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
                       >
                         <X className="h-4 w-4" />
                       </button>

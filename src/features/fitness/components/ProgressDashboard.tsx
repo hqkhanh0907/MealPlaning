@@ -88,6 +88,8 @@ function ProgressDashboardInner() {
   const volumeChangePercent =
     lastWeekVolume > 0 ? Math.round(((thisWeekVolume - lastWeekVolume) / lastWeekVolume) * 100) : 0;
 
+  const hasLastWeekData = lastWeekVolume > 0;
+
   const sortedWeights = useMemo(() => [...weightEntries].sort((a, b) => b.date.localeCompare(a.date)), [weightEntries]);
 
   const latestWeight = sortedWeights.length > 0 ? sortedWeights[0] : undefined;
@@ -316,13 +318,21 @@ function ProgressDashboardInner() {
       >
         <p className="text-sm font-medium opacity-80">{t('fitness.progress.volumeThisWeek')}</p>
         <div className="mt-1 flex items-baseline gap-2">
-          <span data-testid="volume-change" className="text-3xl font-bold">
-            {volumeChangePercent >= 0 ? '+' : ''}
-            {volumeChangePercent}%
-          </span>
-          {volumeChangePercent > 0 && <TrendingUp className="h-5 w-5" aria-hidden="true" />}
-          {volumeChangePercent < 0 && <TrendingDown className="h-5 w-5" aria-hidden="true" />}
-          {volumeChangePercent === 0 && <Minus className="h-5 w-5" aria-hidden="true" />}
+          {hasLastWeekData ? (
+            <>
+              <span data-testid="volume-change" className="text-3xl font-bold">
+                {volumeChangePercent >= 0 ? '+' : ''}
+                {volumeChangePercent}%
+              </span>
+              {volumeChangePercent > 0 && <TrendingUp className="h-5 w-5" aria-hidden="true" />}
+              {volumeChangePercent < 0 && <TrendingDown className="h-5 w-5" aria-hidden="true" />}
+              {volumeChangePercent === 0 && <Minus className="h-5 w-5" aria-hidden="true" />}
+            </>
+          ) : (
+            <span data-testid="volume-change" className="text-muted-foreground text-3xl font-bold">
+              —
+            </span>
+          )}
         </div>
         <div data-testid="sparkline" className="mt-3 flex h-8 items-end gap-1">
           {sparklineData.map((val, idx) => (

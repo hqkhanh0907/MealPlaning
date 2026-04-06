@@ -67,4 +67,54 @@ describe('ingredientEditSchema', () => {
     const result = ingredientEditSchema.safeParse(data);
     expect(result.success).toBe(false);
   });
+
+  it('rejects calories exceeding max (999)', () => {
+    const data = { ...ingredientEditDefaults, name: { vi: 'Gà' }, unit: { vi: 'g' }, caloriesPer100: 1000 };
+    const result = ingredientEditSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts calories at max boundary (999)', () => {
+    const data = { ...ingredientEditDefaults, name: { vi: 'Dầu' }, unit: { vi: 'ml' }, caloriesPer100: 999 };
+    const result = ingredientEditSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects protein exceeding max (100)', () => {
+    const data = { ...ingredientEditDefaults, name: { vi: 'Gà' }, unit: { vi: 'g' }, proteinPer100: 101 };
+    const result = ingredientEditSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects carbs exceeding max (100)', () => {
+    const data = { ...ingredientEditDefaults, name: { vi: 'Gà' }, unit: { vi: 'g' }, carbsPer100: 101 };
+    const result = ingredientEditSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects fat exceeding max (100)', () => {
+    const data = { ...ingredientEditDefaults, name: { vi: 'Gà' }, unit: { vi: 'g' }, fatPer100: 101 };
+    const result = ingredientEditSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects fiber exceeding max (100)', () => {
+    const data = { ...ingredientEditDefaults, name: { vi: 'Gà' }, unit: { vi: 'g' }, fiberPer100: 101 };
+    const result = ingredientEditSchema.safeParse(data);
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts macros at max boundary (100)', () => {
+    const data = {
+      ...ingredientEditDefaults,
+      name: { vi: 'Test' },
+      unit: { vi: 'g' },
+      proteinPer100: 100,
+      carbsPer100: 100,
+      fatPer100: 100,
+      fiberPer100: 100,
+    };
+    const result = ingredientEditSchema.safeParse(data);
+    expect(result.success).toBe(true);
+  });
 });

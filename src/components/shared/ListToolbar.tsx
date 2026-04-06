@@ -60,6 +60,7 @@ export const ListToolbar = ({
             value={searchQuery}
             onChange={e => onSearchChange(e.target.value)}
             className="w-full pr-4 pl-10 shadow-sm"
+            maxLength={100}
             {...(searchTestId ? { 'data-testid': searchTestId } : {})}
           />
         </div>

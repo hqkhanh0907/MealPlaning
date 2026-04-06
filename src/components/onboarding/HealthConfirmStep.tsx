@@ -149,7 +149,7 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
         <div className="bg-primary-subtle mb-6 rounded-2xl p-6 text-center">
           <p className="text-primary mb-1 text-sm font-medium">{t('onboarding.confirm.dailyCaloriesLabel')}</p>
           <p className="text-primary-emphasis text-4xl font-bold">{estimatedTarget}</p>
-          <p className="text-primary/70 mt-1 text-xs">kcal / {t('onboarding.confirm.day')}</p>
+          <p className="text-primary mt-1 text-sm font-medium">kcal / {t('onboarding.confirm.day')}</p>
           <p className="text-primary/70 mt-2 text-xs leading-relaxed">{t('onboarding.confirm.dailyCaloriesDesc')}</p>
         </div>
 

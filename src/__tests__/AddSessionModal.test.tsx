@@ -9,11 +9,11 @@ vi.mock('react-i18next', () => ({
     t: (key: string) => {
       const map: Record<string, string> = {
         'fitness.plan.addSession': 'Thêm buổi tập',
-        'fitness.plan.strengthOption': 'Sức mạnh (Strength)',
+        'fitness.plan.strengthOption': 'Sức mạnh',
         'fitness.plan.strengthDesc': 'Chọn nhóm cơ → auto-gợi ý bài tập',
         'fitness.plan.cardioOption': 'Cardio',
         'fitness.plan.cardioDesc': 'HIIT, chạy bộ, đạp xe, bơi...',
-        'fitness.plan.freestyleOption': 'Tập tự do (Freestyle)',
+        'fitness.plan.freestyleOption': 'Tập tự do',
         'fitness.plan.freestyleDesc': 'Tự chọn bài tập, không theo template',
         'fitness.plan.maxSessions': 'Tối đa 3 buổi/ngày',
         'fitness.plan.selectMuscleGroups': 'Chọn nhóm cơ',
@@ -48,14 +48,14 @@ describe('AddSessionModal', () => {
 
   it('renders 3 options with correct labels', () => {
     render(<AddSessionModal {...defaultProps} />);
-    expect(screen.getByText('Sức mạnh (Strength)')).toBeInTheDocument();
+    expect(screen.getByText('Sức mạnh')).toBeInTheDocument();
     expect(screen.getByText('Cardio')).toBeInTheDocument();
-    expect(screen.getByText('Tập tự do (Freestyle)')).toBeInTheDocument();
+    expect(screen.getByText('Tập tự do')).toBeInTheDocument();
   });
 
   it('clicking Strength shows muscle group selector', () => {
     render(<AddSessionModal {...defaultProps} />);
-    fireEvent.click(screen.getByText('Sức mạnh (Strength)'));
+    fireEvent.click(screen.getByText('Sức mạnh'));
     expect(screen.getByText('Chọn nhóm cơ')).toBeInTheDocument();
     // 7 muscle groups should be visible as buttons
     expect(screen.getByRole('button', { name: 'chest' })).toBeInTheDocument();
@@ -65,7 +65,7 @@ describe('AddSessionModal', () => {
 
   it('selecting muscle groups and confirming calls onSelectStrength with groups', () => {
     render(<AddSessionModal {...defaultProps} />);
-    fireEvent.click(screen.getByText('Sức mạnh (Strength)'));
+    fireEvent.click(screen.getByText('Sức mạnh'));
     fireEvent.click(screen.getByRole('button', { name: 'chest' }));
     fireEvent.click(screen.getByRole('button', { name: 'shoulders' }));
     fireEvent.click(screen.getByTestId('create-strength-session'));
@@ -74,7 +74,7 @@ describe('AddSessionModal', () => {
 
   it('create button disabled when no muscle groups selected', () => {
     render(<AddSessionModal {...defaultProps} />);
-    fireEvent.click(screen.getByText('Sức mạnh (Strength)'));
+    fireEvent.click(screen.getByText('Sức mạnh'));
     expect(screen.getByTestId('create-strength-session')).toBeDisabled();
   });
 
@@ -86,7 +86,7 @@ describe('AddSessionModal', () => {
 
   it('Freestyle calls onSelectFreestyle immediately', () => {
     render(<AddSessionModal {...defaultProps} />);
-    fireEvent.click(screen.getByText('Tập tự do (Freestyle)'));
+    fireEvent.click(screen.getByText('Tập tự do'));
     expect(defaultProps.onSelectFreestyle).toHaveBeenCalled();
   });
 
@@ -102,9 +102,9 @@ describe('AddSessionModal', () => {
 
   it('back button returns to options from muscle group view', () => {
     render(<AddSessionModal {...defaultProps} />);
-    fireEvent.click(screen.getByText('Sức mạnh (Strength)'));
+    fireEvent.click(screen.getByText('Sức mạnh'));
     expect(screen.getByText('Chọn nhóm cơ')).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText('Quay lại'));
-    expect(screen.getByText('Sức mạnh (Strength)')).toBeInTheDocument();
+    expect(screen.getByText('Sức mạnh')).toBeInTheDocument();
   });
 });

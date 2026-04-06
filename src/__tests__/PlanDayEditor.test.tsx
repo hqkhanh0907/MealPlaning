@@ -655,4 +655,15 @@ describe('PlanDayEditor', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(screen.queryByText('Thay đổi chưa lưu')).not.toBeInTheDocument();
   });
+
+  it('button group uses gap-2 spacing and delete button has visual separator', () => {
+    render(<PlanDayEditor planDay={makePlanDay()} />);
+    const removeButton = screen.getAllByLabelText(/remove/i)[0];
+    expect(removeButton.className).toContain('ml-2');
+    expect(removeButton.className).toContain('border-l');
+    expect(removeButton.className).toContain('border-border');
+    expect(removeButton.className).toContain('pl-2');
+    const buttonGroup = removeButton.parentElement;
+    expect(buttonGroup?.className).toContain('gap-2');
+  });
 });

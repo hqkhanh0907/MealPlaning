@@ -589,12 +589,20 @@ function TrainingPlanViewInner({
             </p>
           )}
           <div data-testid="workout-stats" className="text-foreground-secondary mt-2 flex items-center gap-3 text-sm">
-            <span>
-              {viewedExercises.length} {t('fitness.plan.exercises')}
-            </span>
-            <span>
-              ~{estimatedMinutes} {t('fitness.plan.minutes')}
-            </span>
+            {viewedPlanDay.workoutType.toLowerCase().includes('cardio') ? (
+              <span className="text-muted-foreground">{t('fitness.plan.cardioDay')}</span>
+            ) : viewedPlanDay.workoutType.toLowerCase() === 'rest' ? (
+              <span className="text-muted-foreground">{t('fitness.plan.restDay')}</span>
+            ) : (
+              <>
+                <span>
+                  {viewedExercises.length} {t('fitness.plan.exercises')}
+                </span>
+                <span>
+                  ~{estimatedMinutes} {t('fitness.plan.minutes')}
+                </span>
+              </>
+            )}
           </div>
 
           {viewedExercises.length > 0 &&
@@ -611,10 +619,10 @@ function TrainingPlanViewInner({
                     {displayedExercises.map(ex => (
                       <li
                         key={ex.exercise.id}
-                        className="text-foreground-secondary flex items-center justify-between text-sm"
+                        className="text-foreground-secondary flex min-w-0 items-center justify-between text-sm"
                       >
-                        <span>{ex.exercise.nameVi}</span>
-                        <span className="text-muted-foreground text-xs">
+                        <span className="min-w-0 truncate">{ex.exercise.nameVi}</span>
+                        <span className="text-muted-foreground shrink-0 text-xs">
                           {ex.sets} {t('fitness.plan.setsLabel')} × {ex.repsMin}-{ex.repsMax}{' '}
                           {t('fitness.plan.repsLabel')}
                         </span>

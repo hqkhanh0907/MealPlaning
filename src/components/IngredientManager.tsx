@@ -216,7 +216,7 @@ export const IngredientManager = ({
                   data-testid={`btn-delete-ingredient-${ing.id}`}
                   onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
                   disabled={isUsed(ing.id)}
-                  className={`focus-visible:ring-ring flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'dark:text-muted-foreground text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
+                  className={`focus-visible:ring-ring flex flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'dark:text-muted-foreground text-muted-foreground opacity-40' : 'text-destructive/70 hover:bg-destructive/10 hover:text-destructive'}`}
                 >
                   <Trash2 className="h-4 w-4" /> {t('common.delete')}
                 </button>
@@ -310,7 +310,7 @@ export const IngredientManager = ({
                           onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
                           disabled={isUsed(ing.id)}
                           aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`}
-                          className={`focus-visible:ring-ring rounded-lg p-2 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
+                          className={`focus-visible:ring-ring rounded-lg p-2 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-destructive/70 hover:bg-destructive/10 hover:text-destructive'}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -359,7 +359,7 @@ export const IngredientManager = ({
                     onClick={() => handleDelete(ing.id, getLocalizedField(ing.name, lang))}
                     disabled={isUsed(ing.id)}
                     aria-label={`${t('common.delete')} ${getLocalizedField(ing.name, lang)}`}
-                    className={`focus-visible:ring-ring rounded-lg p-2.5 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
+                    className={`focus-visible:ring-ring rounded-lg p-2.5 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(ing.id) ? 'text-muted-foreground opacity-40' : 'text-destructive/70 hover:bg-destructive/10 hover:text-destructive'}`}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

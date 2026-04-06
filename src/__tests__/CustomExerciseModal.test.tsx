@@ -153,4 +153,11 @@ describe('CustomExerciseModal', () => {
       expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ category: 'compound' }));
     });
   });
+
+  // --- TODO-08: maxLength on name input ---
+
+  it('has maxLength=80 on exercise name input', () => {
+    render(<CustomExerciseModal isOpen onClose={vi.fn()} onSave={vi.fn()} />);
+    expect(screen.getByTestId('custom-exercise-name')).toHaveAttribute('maxLength', '80');
+  });
 });

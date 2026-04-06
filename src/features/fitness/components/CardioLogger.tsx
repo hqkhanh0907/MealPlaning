@@ -176,15 +176,15 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
         {/* Timer Mode Toggle */}
         <section className="bg-card rounded-xl p-4 shadow-sm">
           <h3 className="text-foreground-secondary mb-3 text-sm font-semibold">{t('fitness.cardio.duration')}</h3>
-          <div className="mb-3 flex gap-2">
+          <div className="bg-muted mb-3 flex gap-1 rounded-lg p-1" data-testid="mode-toggle-container">
             <Button
               variant={isStopwatchMode ? 'default' : 'outline'}
               onClick={() => setValue('isStopwatchMode', true)}
               className={cn(
-                'flex-1 rounded-lg py-2',
+                'flex-1 rounded-md py-2',
                 isStopwatchMode
                   ? 'bg-primary text-primary-foreground hover:bg-primary'
-                  : 'text-foreground-secondary bg-muted border-transparent',
+                  : 'text-foreground-secondary border-transparent bg-transparent',
               )}
               data-testid="stopwatch-mode-button"
             >
@@ -194,9 +194,9 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
               variant={isStopwatchMode ? 'outline' : 'default'}
               onClick={() => setValue('isStopwatchMode', false)}
               className={cn(
-                'flex-1 rounded-lg py-2',
+                'flex-1 rounded-md py-2',
                 isStopwatchMode
-                  ? 'text-foreground-secondary bg-muted border-transparent'
+                  ? 'text-foreground-secondary border-transparent bg-transparent'
                   : 'bg-primary text-primary-foreground hover:bg-primary',
               )}
               data-testid="manual-mode-button"
@@ -213,7 +213,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
               >
                 {formatElapsed(stopwatch.elapsed)}
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-4">
                 {stopwatch.isRunning ? (
                   <Button
                     variant="default"
@@ -236,7 +236,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 <Button
                   variant="destructive"
                   onClick={handleStopStopwatch}
-                  className="bg-destructive hover:bg-destructive/90 flex-1 py-2.5 text-white"
+                  className="bg-destructive hover:bg-destructive/90 w-1/3 py-2.5 text-white"
                   data-testid="stop-button"
                 >
                   {t('fitness.cardio.stop')}
@@ -251,7 +251,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 render={({ field, fieldState }) => (
                   <>
                     <Input
-                      type="number"
+                      type="text"
                       value={field.value ?? ''}
                       onChange={e => {
                         const val = e.target.value;
@@ -260,9 +260,9 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                       onBlur={field.onBlur}
                       onKeyDown={blockNegativeKeys}
                       inputMode="numeric"
+                      placeholder="0"
                       className="text-foreground w-full text-center text-lg font-semibold"
                       data-testid="manual-duration-input"
-                      min={0}
                     />
                     {fieldState.error?.message && (
                       <p className="text-destructive mt-1 text-xs" role="alert" aria-live="assertive">
@@ -286,7 +286,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
               render={({ field, fieldState }) => (
                 <>
                   <Input
-                    type="number"
+                    type="text"
                     value={field.value ?? ''}
                     onChange={e => {
                       const val = e.target.value;
@@ -295,10 +295,9 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                     onBlur={field.onBlur}
                     onKeyDown={blockNegativeKeys}
                     inputMode="decimal"
+                    placeholder="0.0"
                     className="text-foreground w-full text-center text-lg font-semibold"
                     data-testid="distance-input"
-                    min={0}
-                    step={0.1}
                   />
                   {fieldState.error?.message && (
                     <p className="text-destructive mt-1 text-xs" role="alert" aria-live="assertive">
@@ -320,7 +319,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
             render={({ field, fieldState }) => (
               <>
                 <Input
-                  type="number"
+                  type="text"
                   value={field.value ?? ''}
                   onChange={e => {
                     const val = e.target.value;
@@ -329,9 +328,9 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                   onBlur={field.onBlur}
                   onKeyDown={blockNegativeKeys}
                   inputMode="numeric"
+                  placeholder="0"
                   className="text-foreground w-full text-center text-lg font-semibold"
                   data-testid="heart-rate-input"
-                  min={0}
                 />
                 {fieldState.error?.message && (
                   <p className="text-destructive mt-1 text-xs" role="alert" aria-live="assertive">

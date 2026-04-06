@@ -529,14 +529,14 @@ describe('OnboardingProgress', () => {
     const activeSegment = progressBar.children[2] as HTMLElement;
     const futureSegment = progressBar.children[3] as HTMLElement;
 
-    expect(activeSegment.className).toContain('bg-primary/15');
+    expect(activeSegment.className).toContain('bg-primary/25');
     expect(activeSegment.className).not.toContain('bg-muted');
 
     expect(pastSegment.className).toContain('bg-muted');
-    expect(pastSegment.className).not.toContain('bg-primary/15');
+    expect(pastSegment.className).not.toContain('bg-primary/25');
 
     expect(futureSegment.className).toContain('bg-muted');
-    expect(futureSegment.className).not.toContain('bg-primary/15');
+    expect(futureSegment.className).not.toContain('bg-primary/25');
   });
 });
 

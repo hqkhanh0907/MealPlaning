@@ -179,6 +179,7 @@ export function ExerciseSelector({
               value={searchQuery}
               onChange={handleSearchChange}
               aria-label={t('fitness.exerciseSelector.search')}
+              maxLength={100}
               className="focus:ring-ring bg-muted text-foreground placeholder:text-muted-foreground w-full rounded-xl border-none py-2.5 pr-4 pl-10 text-sm outline-none focus:ring-2"
             />
           </div>

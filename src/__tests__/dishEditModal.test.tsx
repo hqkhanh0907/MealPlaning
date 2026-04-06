@@ -1568,4 +1568,65 @@ describe('DishEditModal', () => {
     expect(onSubmit).toHaveBeenCalled();
     vi.restoreAllMocks();
   });
+
+  // --- TODO-08: maxLength on inputs ---
+
+  it('has maxLength=80 on dish name input', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    expect(screen.getByTestId('input-dish-name')).toHaveAttribute('maxLength', '80');
+  });
+
+  it('has maxLength=100 on ingredient search input', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    expect(screen.getByTestId('input-dish-ingredient-search')).toHaveAttribute('maxLength', '100');
+  });
+
+  // --- TODO-22: character counter ---
+
+  it('does not show character counter when name is short', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: 'Short' } });
+    expect(screen.queryByTestId('dish-name-counter')).not.toBeInTheDocument();
+  });
+
+  it('shows character counter when name exceeds 80% of limit', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    const longName = 'A'.repeat(65);
+    fireEvent.change(screen.getByTestId('input-dish-name'), { target: { value: longName } });
+    expect(screen.getByTestId('dish-name-counter')).toHaveTextContent('65/80');
+  });
+
+  // --- TODO-23: form reset on editingItem change ---
+
+  it('resets form when editingItem changes via rerender', () => {
+    const dishA: Dish = {
+      id: 'dish-a',
+      name: { vi: 'Món A' },
+      ingredients: [{ ingredientId: 'i1', amount: 100 }],
+      tags: ['breakfast'],
+    };
+    const dishB: Dish = {
+      id: 'dish-b',
+      name: { vi: 'Món B' },
+      ingredients: [{ ingredientId: 'i2', amount: 200 }],
+      tags: ['lunch'],
+    };
+    const { rerender } = render(
+      <DishEditModal editingItem={dishA} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
+    expect(screen.getByTestId('input-dish-name')).toHaveValue('Món A');
+
+    rerender(<DishEditModal editingItem={dishB} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    expect(screen.getByTestId('input-dish-name')).toHaveValue('Món B');
+  });
+
+  it('resets form to defaults when editingItem becomes null', () => {
+    const { rerender } = render(
+      <DishEditModal editingItem={existingDish} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />,
+    );
+    expect(screen.getByTestId('input-dish-name')).toHaveValue('Cơm gà');
+
+    rerender(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    expect(screen.getByTestId('input-dish-name')).toHaveValue('');
+  });
 });

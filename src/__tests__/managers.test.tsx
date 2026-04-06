@@ -731,6 +731,13 @@ describe('DishManager', () => {
     fireEvent.click(compareBtn2);
     expect(screen.getByTestId('btn-open-compare')).toBeInTheDocument();
   });
+
+  it('delete button uses destructive color by default for unused dishes', () => {
+    render(<DishManager {...defaultProps} />);
+    const deleteButtons = screen.getAllByText('Xóa');
+    expect(deleteButtons[0].className).toContain('text-destructive/70');
+    expect(deleteButtons[0].className).toContain('hover:text-destructive');
+  });
 });
 
 // --- IngredientManager ---
@@ -1136,5 +1143,12 @@ describe('IngredientManager', () => {
     render(<IngredientManager {...defaultProps} ingredients={[]} />);
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
     expect(screen.getByText(/Chưa có nguyên liệu nào/)).toBeInTheDocument();
+  });
+
+  it('delete button uses destructive color by default for unused ingredients', () => {
+    render(<IngredientManager {...defaultProps} />);
+    const deleteButtons = screen.getAllByText('Xóa');
+    expect(deleteButtons[0].className).toContain('text-destructive/70');
+    expect(deleteButtons[0].className).toContain('hover:text-destructive');
   });
 });

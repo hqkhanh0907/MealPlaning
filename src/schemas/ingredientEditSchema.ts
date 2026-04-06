@@ -18,31 +18,36 @@ export const ingredientEditSchema = z.object({
     val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
     z
       .number({ error: i18n.t('validation.ingredient.valueRequired') })
-      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') }),
+      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') })
+      .max(999, { error: i18n.t('validation.ingredient.caloriesMax') }),
   ),
   proteinPer100: z.preprocess(
     val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
     z
       .number({ error: i18n.t('validation.ingredient.valueRequired') })
-      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') }),
+      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') })
+      .max(100, { error: i18n.t('validation.ingredient.macroMax') }),
   ),
   carbsPer100: z.preprocess(
     val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
     z
       .number({ error: i18n.t('validation.ingredient.valueRequired') })
-      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') }),
+      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') })
+      .max(100, { error: i18n.t('validation.ingredient.macroMax') }),
   ),
   fatPer100: z.preprocess(
     val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
     z
       .number({ error: i18n.t('validation.ingredient.valueRequired') })
-      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') }),
+      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') })
+      .max(100, { error: i18n.t('validation.ingredient.macroMax') }),
   ),
   fiberPer100: z.preprocess(
     val => (val === '' || val === undefined || val === null ? undefined : Number(val)),
     z
       .number({ error: i18n.t('validation.ingredient.valueRequired') })
-      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') }),
+      .min(0, { error: i18n.t('validation.ingredient.valueNonNegative') })
+      .max(100, { error: i18n.t('validation.ingredient.macroMax') }),
   ),
 });
 

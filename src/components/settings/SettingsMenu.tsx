@@ -129,6 +129,7 @@ export function SettingsMenu({ onNavigate, theme, setTheme }: Readonly<SettingsM
           placeholder={t('settings.searchPlaceholder')}
           aria-label={t('settings.searchPlaceholder')}
           className="text-foreground w-full pr-4 pl-10"
+          maxLength={100}
         />
       </div>
 

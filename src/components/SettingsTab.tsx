@@ -1,5 +1,6 @@
-import { Loader2 } from 'lucide-react';
 import { lazy, Suspense, useCallback, useState } from 'react';
+
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
 import { SettingsMenu } from './settings/SettingsMenu';
@@ -18,8 +19,12 @@ const TrainingProfileDetailPage = lazy(() => import('./settings/TrainingProfileD
 
 function DetailLoadingFallback() {
   return (
-    <div className="flex items-center justify-center py-20">
-      <Loader2 className="text-primary h-6 w-6 animate-spin" aria-hidden="true" />
+    <div className="space-y-3 p-4">
+      <Skeleton className="h-6 w-1/2" />
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-12 w-full" />
     </div>
   );
 }

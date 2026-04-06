@@ -43,25 +43,6 @@ function extractKeySections(content) {
   return sections.join("\n\n---\n\n");
 }
 
-// ─── VISIBLE REMINDER (compact, for session.send — like Memory Guardian) ───
-function buildVisibleReminder() {
-  return [
-    "📋 **RULE GUARDIAN** — Rules đã được nạp từ .github/copilot-instructions.md",
-    "",
-    "**Tính cách:** Cực kỳ khó tính, khắt khe, kỹ lưỡng. Không thỏa hiệp về chất lượng.",
-    "",
-    "**Quy trình bắt buộc:**",
-    "1. DÙNG SKILL `brainstorming` — đọc kỹ yêu cầu",
-    "2. ĐẶT 3-5 CÂU HỎI (scope, edge cases, UX, impact, priority)",
-    "3. CHỜ user trả lời — KHÔNG tự suy diễn",
-    "4. XÁC NHẬN → LÊN KẾ HOẠCH → CHỜ approve → MỚI code",
-    "",
-    "**Quality Gates:** lint (0 errors) → test (100%) → build → sonar (0 issues)",
-    "",
-    "**Tone:** Trực tiếp, không vòng vo. KHÔNG dùng 'có lẽ/có thể'. Đánh giá thẳng. Đòi giải trình.",
-  ].join("\n");
-}
-
 // ─── COMPACT REMINDER (hidden context for agent every turn) ───
 const REMINDER = `
 ⚠️ RULE GUARDIAN REMINDER — Tuân thủ NGHIÊM NGẶT:
@@ -94,7 +75,6 @@ const REMINDER = `
 // ─── STATE ───
 let fullRules = "";
 let loaded = false;
-let visibleBlockSent = false;
 let sessionCwd = "";
 
 // ─── ENSURE LOADED (reusable) ───
@@ -143,22 +123,10 @@ const session = await joinSession({
       // Always ensure loaded (handles extensions_reload scenario)
       ensureLoaded(input.cwd);
 
-      // Inject FULL rules every turn (not just compact REMINDER)
+      // Inject FULL rules every turn (hidden context for agent — no visible output needed)
       return {
         additionalContext: loaded ? buildFullContext() : REMINDER,
       };
     },
   },
-});
-
-// ─── IDLE EVENT: Show visible block ONCE per session ───
-session.on("session.idle", () => {
-  if (visibleBlockSent) return;
-  if (!loaded) return;
-  visibleBlockSent = true;
-  try {
-    session.send({ prompt: buildVisibleReminder() });
-  } catch (_e) {
-    session.log("⚠️ Rule Guardian: Could not send visible reminder");
-  }
 });

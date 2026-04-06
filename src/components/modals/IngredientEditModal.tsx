@@ -44,11 +44,14 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
   const lang = i18n.language as SupportedLang;
   const notify = useNotification();
 
+  const NAME_MAX_LENGTH = 80;
+
   const {
     register,
     handleSubmit: rhfSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors, isDirty },
   } = useForm<IngredientEditFormData>({
     resolver: zodResolver(ingredientEditSchema) as unknown as Resolver<IngredientEditFormData>,
@@ -65,6 +68,22 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
         }
       : ingredientEditDefaults,
   });
+
+  useEffect(() => {
+    if (editingItem) {
+      reset({
+        name: { vi: editingItem.name.vi ?? '' },
+        unit: { vi: editingItem.unit.vi ?? '' },
+        caloriesPer100: Math.round(editingItem.caloriesPer100),
+        proteinPer100: Math.round(editingItem.proteinPer100),
+        carbsPer100: Math.round(editingItem.carbsPer100),
+        fatPer100: Math.round(editingItem.fatPer100),
+        fiberPer100: Math.round(editingItem.fiberPer100),
+      });
+    } else {
+      reset(ingredientEditDefaults);
+    }
+  }, [editingItem, reset]);
 
   const [isSearchingAI, setIsSearchingAI] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
@@ -179,6 +198,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                 <Input
                   id="ing-name"
                   {...register('name.vi')}
+                  maxLength={NAME_MAX_LENGTH}
                   className={`flex-1 ${errors.name?.vi ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : ''}`}
                   placeholder={t('ingredient.namePlaceholder')}
                   data-testid="input-ing-name"
@@ -207,6 +227,11 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
               {errors.name?.vi && (
                 <p data-testid="error-ing-name" className="text-destructive mt-1 text-xs" role="alert">
                   {errors.name.vi.message}
+                </p>
+              )}
+              {watchName.length > NAME_MAX_LENGTH * 0.8 && (
+                <p className="text-muted-foreground mt-1 text-right text-xs" data-testid="ing-name-counter">
+                  {watchName.length}/{NAME_MAX_LENGTH}
                 </p>
               )}
             </div>

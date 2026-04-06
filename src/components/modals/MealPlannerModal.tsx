@@ -263,6 +263,7 @@ export const MealPlannerModal = ({
                 onChange={e => setSearchQuery(e.target.value)}
                 data-testid="input-search-plan"
                 className="w-full pr-4 pl-10 shadow-sm"
+                maxLength={100}
               />
             </div>
             <button
@@ -377,8 +378,8 @@ export const MealPlannerModal = ({
                   className={`font-medium ${remainingBudget.protein >= 0 ? 'text-primary' : 'text-destructive'}`}
                 >
                   {remainingBudget.protein >= 0
-                    ? t('summary.remaining', { value: remainingBudget.protein, unit: 'g' })
-                    : t('summary.over', { value: Math.abs(remainingBudget.protein), unit: 'g' })}
+                    ? t('summary.remaining', { value: remainingBudget.protein, unit: 'g Pro' })
+                    : t('summary.over', { value: Math.abs(remainingBudget.protein), unit: 'g Pro' })}
                 </span>
               )}
             </div>

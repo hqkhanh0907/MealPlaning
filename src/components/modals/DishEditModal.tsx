@@ -65,6 +65,18 @@ export const DishEditModal = ({
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
 
+  const defaultFormValues: DishEditFormData = {
+    name: editingItem ? getLocalizedField(editingItem.name, lang) : '',
+    /* v8 ignore start -- defensive: tags is always array from store */
+    tags: editingItem ? ([...(editingItem.tags || [])] as DishEditFormData['tags']) : [],
+    /* v8 ignore stop */
+    rating: editingItem?.rating ?? 0,
+    notes: editingItem?.notes ?? '',
+    ingredients: editingItem
+      ? editingItem.ingredients.map(i => ({ ingredientId: i.ingredientId, amount: Math.round(i.amount) }))
+      : [],
+  };
+
   const {
     control,
     getValues,
@@ -72,11 +84,16 @@ export const DishEditModal = ({
     setError,
     clearErrors,
     watch,
+    reset,
     formState: { errors, isDirty },
   } = useForm<DishEditFormData>({
     resolver: zodResolver(dishEditSchema) as unknown as Resolver<DishEditFormData>,
     mode: 'onTouched',
-    defaultValues: {
+    defaultValues: defaultFormValues,
+  });
+
+  useEffect(() => {
+    reset({
       name: editingItem ? getLocalizedField(editingItem.name, lang) : '',
       /* v8 ignore start -- defensive: tags is always array from store */
       tags: editingItem ? ([...(editingItem.tags || [])] as DishEditFormData['tags']) : [],
@@ -86,10 +103,12 @@ export const DishEditModal = ({
       ingredients: editingItem
         ? editingItem.ingredients.map(i => ({ ingredientId: i.ingredientId, amount: Math.round(i.amount) }))
         : [],
-    },
-  });
+    });
+  }, [editingItem, lang, reset]);
 
   const { fields, append, remove } = useFieldArray({ control, name: 'ingredients' });
+
+  const NAME_MAX_LENGTH = 80;
 
   const [ingredientSearch, setIngredientSearch] = useState('');
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
@@ -367,6 +386,7 @@ export const DishEditModal = ({
                   id="dish-name"
                   autoComplete="off"
                   value={watchedName}
+                  maxLength={NAME_MAX_LENGTH}
                   onChange={e => {
                     setValue('name', e.target.value, { shouldDirty: true });
                     if (errors.name) {
@@ -417,6 +437,11 @@ export const DishEditModal = ({
                 </p>
               )}
               {aiSuggestLoading && <p className="text-ai mt-1 text-xs">{t('dish.aiSuggestLoading')}</p>}
+              {watchedName.length > NAME_MAX_LENGTH * 0.8 && (
+                <p className="text-muted-foreground mt-1 text-right text-xs" data-testid="dish-name-counter">
+                  {watchedName.length}/{NAME_MAX_LENGTH}
+                </p>
+              )}
             </div>
             <div>
               <p
@@ -508,6 +533,7 @@ export const DishEditModal = ({
                       onChange={e => setIngredientSearch(e.target.value)}
                       className="w-full pr-4 pl-9"
                       placeholder={t('dish.searchIngredients')}
+                      maxLength={100}
                     />
                   </div>
                   <button

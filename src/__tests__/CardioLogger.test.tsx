@@ -134,7 +134,7 @@ describe('CardioLogger', () => {
     fireEvent.change(screen.getByTestId('manual-duration-input'), {
       target: { value: '30' },
     });
-    expect(screen.getByTestId('manual-duration-input')).toHaveValue(30);
+    expect(screen.getByTestId('manual-duration-input')).toHaveValue('30');
   });
 
   it('distance field shown for running/cycling/swimming', () => {
@@ -242,10 +242,10 @@ describe('CardioLogger', () => {
     const hrInput = screen.getByTestId('heart-rate-input');
 
     fireEvent.change(hrInput, { target: { value: '145' } });
-    expect(hrInput).toHaveValue(145);
+    expect(hrInput).toHaveValue('145');
 
     fireEvent.change(hrInput, { target: { value: '' } });
-    expect(hrInput).toHaveValue(null);
+    expect(hrInput).toHaveValue('');
   });
 
   it('save via finish button in header also works', async () => {
@@ -262,10 +262,10 @@ describe('CardioLogger', () => {
     render(<CardioLogger {...defaultProps} />);
     const distInput = screen.getByTestId('distance-input');
     fireEvent.change(distInput, { target: { value: '5.2' } });
-    expect(distInput).toHaveValue(5.2);
+    expect(distInput).toHaveValue('5.2');
 
     fireEvent.change(distInput, { target: { value: '' } });
-    expect(distInput).toHaveValue(null);
+    expect(distInput).toHaveValue('');
   });
 
   it('stopwatch mode button toggles correctly', () => {
@@ -317,7 +317,7 @@ describe('CardioLogger', () => {
     fireEvent.change(screen.getByTestId('manual-duration-input'), {
       target: { value: '-5' },
     });
-    expect(screen.getByTestId('manual-duration-input')).toHaveValue(0);
+    expect(screen.getByTestId('manual-duration-input')).toHaveValue('0');
   });
 
   it('clearing manual duration shows empty not zero', () => {
@@ -326,13 +326,12 @@ describe('CardioLogger', () => {
     fireEvent.change(screen.getByTestId('manual-duration-input'), {
       target: { value: '30' },
     });
-    expect(screen.getByTestId('manual-duration-input')).toHaveValue(30);
+    expect(screen.getByTestId('manual-duration-input')).toHaveValue('30');
 
     fireEvent.change(screen.getByTestId('manual-duration-input'), {
       target: { value: '' },
     });
-    expect(screen.getByTestId('manual-duration-input')).not.toHaveValue(0);
-    expect(screen.getByTestId('manual-duration-input')).toHaveValue(null);
+    expect(screen.getByTestId('manual-duration-input')).toHaveValue('');
   });
 
   it('distance hidden for elliptical and rowing', () => {
@@ -428,5 +427,65 @@ describe('CardioLogger', () => {
 
     const [, sets] = mockSaveWorkoutAtomic.mock.calls[0];
     expect(sets[0].exerciseId).toBe('rowing-machine');
+  });
+
+  it('TODO-18: mode toggle has segmented control container', () => {
+    render(<CardioLogger {...defaultProps} />);
+    const container = screen.getByTestId('mode-toggle-container');
+    expect(container).toBeInTheDocument();
+    expect(container).toHaveClass('bg-muted', 'rounded-lg', 'p-1', 'gap-1');
+  });
+
+  it('TODO-18: inactive toggle button has bg-transparent', () => {
+    render(<CardioLogger {...defaultProps} />);
+    // Stopwatch is active by default → manual is inactive
+    expect(screen.getByTestId('manual-mode-button')).toHaveClass('bg-transparent');
+    expect(screen.getByTestId('stopwatch-mode-button')).not.toHaveClass('bg-transparent');
+
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+    expect(screen.getByTestId('stopwatch-mode-button')).toHaveClass('bg-transparent');
+    expect(screen.getByTestId('manual-mode-button')).not.toHaveClass('bg-transparent');
+  });
+
+  it('TODO-05: stop button is narrower (w-1/3) than start/pause (flex-1)', () => {
+    render(<CardioLogger {...defaultProps} />);
+    expect(screen.getByTestId('stop-button')).toHaveClass('w-1/3');
+    expect(screen.getByTestId('stop-button')).not.toHaveClass('flex-1');
+    expect(screen.getByTestId('start-button')).toHaveClass('flex-1');
+    expect(screen.getByTestId('start-button')).not.toHaveClass('w-1/3');
+  });
+
+  it('TODO-05: timer buttons have gap-4 spacing', () => {
+    render(<CardioLogger {...defaultProps} />);
+    const startBtn = screen.getByTestId('start-button');
+    const buttonContainer = startBtn.parentElement;
+    expect(buttonContainer).toHaveClass('gap-4');
+  });
+
+  it('TODO-07: inputs use type="text" instead of type="number"', () => {
+    render(<CardioLogger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+
+    expect(screen.getByTestId('manual-duration-input')).toHaveAttribute('type', 'text');
+    expect(screen.getByTestId('distance-input')).toHaveAttribute('type', 'text');
+    expect(screen.getByTestId('heart-rate-input')).toHaveAttribute('type', 'text');
+  });
+
+  it('TODO-07: inputs have correct inputMode attributes', () => {
+    render(<CardioLogger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+
+    expect(screen.getByTestId('manual-duration-input')).toHaveAttribute('inputMode', 'numeric');
+    expect(screen.getByTestId('distance-input')).toHaveAttribute('inputMode', 'decimal');
+    expect(screen.getByTestId('heart-rate-input')).toHaveAttribute('inputMode', 'numeric');
+  });
+
+  it('TODO-17: inputs have placeholder text', () => {
+    render(<CardioLogger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('manual-mode-button'));
+
+    expect(screen.getByTestId('manual-duration-input')).toHaveAttribute('placeholder', '0');
+    expect(screen.getByTestId('distance-input')).toHaveAttribute('placeholder', '0.0');
+    expect(screen.getByTestId('heart-rate-input')).toHaveAttribute('placeholder', '0');
   });
 });

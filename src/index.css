@@ -237,17 +237,17 @@ input[type='number'] {
 .dark {
   --background: oklch(0.208 0.026 264.69); /* Slate-900 #0F172A */
   --foreground: oklch(0.929 0.013 255.51); /* Slate-200 #E2E8F0 */
-  --card: oklch(0.279 0.029 260.03); /* Slate-800 #1E293B */
+  --card: oklch(0.295 0.029 260.03); /* Slate-800 elevated — 0.087 diff from bg */
   --card-foreground: oklch(0.929 0.013 255.51);
-  --popover: oklch(0.279 0.029 260.03);
+  --popover: oklch(0.295 0.029 260.03);
   --popover-foreground: oklch(0.929 0.013 255.51);
   --primary: oklch(0.765 0.177 163.22); /* Emerald-400 #34D399 */
   --primary-foreground: oklch(0.208 0.026 264.69);
-  --secondary: oklch(0.279 0.029 260.03); /* Slate-800 */
+  --secondary: oklch(0.295 0.029 260.03); /* Slate-800 elevated */
   --secondary-foreground: oklch(0.929 0.013 255.51);
-  --muted: oklch(0.279 0.029 260.03);
+  --muted: oklch(0.295 0.029 260.03);
   --muted-foreground: oklch(0.704 0.04 256.79); /* Slate-400 #94A3B8 */
-  --accent: oklch(0.279 0.029 260.03);
+  --accent: oklch(0.295 0.029 260.03);
   --accent-foreground: oklch(0.929 0.013 255.51);
   --destructive: oklch(0.704 0.191 22.216); /* Red-400 */
   --border: oklch(1 0 0 / 10%);
@@ -256,7 +256,7 @@ input[type='number'] {
 
   --primary-subtle: oklch(0.321 0.067 165.39 / 20%); /* Emerald-900/20 */
   --primary-emphasis: oklch(0.765 0.177 163.22); /* Emerald-400 #34D399 */
-  --foreground-secondary: oklch(0.704 0.04 256.79); /* Slate-400 #94A3B8 */
+  --foreground-secondary: oklch(0.75 0.04 256.79); /* Slate-400 lightened for dark mode readability */
   --border-subtle: oklch(1 0 0 / 8%); /* White 8% — subtle but visible on dark cards */
 
   --macro-protein: oklch(0.765 0.177 163.22); /* Emerald-400 */

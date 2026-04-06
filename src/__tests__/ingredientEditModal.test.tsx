@@ -569,4 +569,68 @@ describe('IngredientEditModal', () => {
       expect(mockSuggestIngredientInfo).toHaveBeenCalledTimes(1);
     });
   });
+
+  // --- TODO-08: maxLength on inputs ---
+
+  it('has maxLength=80 on ingredient name input', () => {
+    render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
+    expect(screen.getByTestId('input-ing-name')).toHaveAttribute('maxLength', '80');
+  });
+
+  // --- TODO-22: character counter ---
+
+  it('does not show character counter when name is short', () => {
+    render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.change(screen.getByTestId('input-ing-name'), { target: { value: 'Short' } });
+    expect(screen.queryByTestId('ing-name-counter')).not.toBeInTheDocument();
+  });
+
+  it('shows character counter when name exceeds 80% of limit', () => {
+    render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
+    const longName = 'A'.repeat(65);
+    fireEvent.change(screen.getByTestId('input-ing-name'), { target: { value: longName } });
+    expect(screen.getByTestId('ing-name-counter')).toHaveTextContent('65/80');
+  });
+
+  // --- TODO-23: form reset on editingItem change ---
+
+  it('resets form when editingItem changes via rerender', () => {
+    const ingredientA: Ingredient = {
+      id: 'ing-a',
+      name: { vi: 'Nguyên liệu A' },
+      caloriesPer100: 100,
+      proteinPer100: 10,
+      carbsPer100: 20,
+      fatPer100: 5,
+      fiberPer100: 2,
+      unit: { vi: 'g' },
+    };
+    const ingredientB: Ingredient = {
+      id: 'ing-b',
+      name: { vi: 'Nguyên liệu B' },
+      caloriesPer100: 200,
+      proteinPer100: 20,
+      carbsPer100: 30,
+      fatPer100: 10,
+      fiberPer100: 3,
+      unit: { vi: 'ml' },
+    };
+    const { rerender } = render(
+      <IngredientEditModal editingItem={ingredientA} onSubmit={onSubmit} onClose={onClose} />,
+    );
+    expect(screen.getByTestId('input-ing-name')).toHaveValue('Nguyên liệu A');
+
+    rerender(<IngredientEditModal editingItem={ingredientB} onSubmit={onSubmit} onClose={onClose} />);
+    expect(screen.getByTestId('input-ing-name')).toHaveValue('Nguyên liệu B');
+  });
+
+  it('resets form to defaults when editingItem becomes null', () => {
+    const { rerender } = render(
+      <IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />,
+    );
+    expect(screen.getByTestId('input-ing-name')).toHaveValue('Ức gà');
+
+    rerender(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
+    expect(screen.getByTestId('input-ing-name')).toHaveValue('');
+  });
 });

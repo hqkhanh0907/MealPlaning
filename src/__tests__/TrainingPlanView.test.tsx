@@ -50,6 +50,7 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.coachingHint': 'Nhấn giữ hoặc nhấp chuột phải vào ngày để xem tùy chọn',
         'fitness.plan.moreExercises': '+{{remaining}} bài tập nữa',
         'fitness.plan.showLess': 'Thu gọn',
+        'fitness.plan.cardioDay': 'Cardio',
         'common.dismiss': 'Bỏ qua',
         'fitness.workoutType.Upper Body A': 'Thân trên A',
       };
@@ -677,7 +678,7 @@ describe('TrainingPlanView', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
-    expect(screen.getByText('Cardio')).toBeInTheDocument();
+    expect(screen.getAllByText('Cardio').length).toBeGreaterThanOrEqual(1);
   });
 
   it('handles invalid exercises JSON gracefully', () => {
@@ -1225,7 +1226,7 @@ describe('TrainingPlanView', () => {
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
       expect(screen.getByText('Push')).toBeInTheDocument();
       fireEvent.click(screen.getByTestId('session-tab-1'));
-      expect(screen.getByText('Cardio')).toBeInTheDocument();
+      expect(screen.getAllByText('Cardio').length).toBeGreaterThanOrEqual(1);
     });
 
     it('onAddSession opens AddSessionModal', () => {
@@ -1629,6 +1630,53 @@ describe('TrainingPlanView', () => {
       });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
       expect(screen.getByText('SuperCustomWorkout')).toBeInTheDocument();
+    });
+  });
+
+  // --- TODO-24: Exercise name truncation ---
+  describe('exercise name truncation', () => {
+    it('exercise name span has truncate and min-w-0 classes', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      const exerciseList = screen.getByTestId('exercise-list');
+      const firstLi = exerciseList.querySelector('li');
+      expect(firstLi).not.toBeNull();
+      expect(firstLi!.className).toContain('min-w-0');
+      const nameSpan = firstLi!.querySelector('span');
+      expect(nameSpan).not.toBeNull();
+      expect(nameSpan!.className).toContain('truncate');
+      expect(nameSpan!.className).toContain('min-w-0');
+    });
+
+    it('sets info span has shrink-0 class', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      const exerciseList = screen.getByTestId('exercise-list');
+      const firstLi = exerciseList.querySelector('li');
+      const spans = firstLi!.querySelectorAll('span');
+      const setsSpan = spans[spans.length - 1];
+      expect(setsSpan.className).toContain('shrink-0');
+    });
+  });
+
+  // --- TODO-29: Cardio day shows "Cardio" instead of "0 bài tập" ---
+  describe('cardio day workout stats', () => {
+    it('cardio day shows "Cardio" text instead of exercise count', () => {
+      vi.setSystemTime(new Date('2025-01-11T12:00:00'));
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      const stats = screen.getByTestId('workout-stats');
+      expect(stats).toHaveTextContent('Cardio');
+      expect(stats).not.toHaveTextContent('0 bài tập');
+      expect(stats).not.toHaveTextContent('phút');
+    });
+
+    it('strength day still shows exercise count and duration', () => {
+      mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
+      render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
+      const stats = screen.getByTestId('workout-stats');
+      expect(stats).toHaveTextContent('3 bài tập');
+      expect(stats).toHaveTextContent('phút');
     });
   });
 });

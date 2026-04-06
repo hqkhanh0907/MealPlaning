@@ -1,3 +1,4 @@
+import { AlertCircle } from 'lucide-react';
 import React, { useId } from 'react';
 import type { FieldError } from 'react-hook-form';
 
@@ -43,7 +44,8 @@ export const FormField = React.memo(function FormField({
       {enhancedChildren}
 
       {error?.message && (
-        <p id={errorId} className="text-destructive mt-1 text-xs" role="alert">
+        <p id={errorId} className="text-destructive mt-1 flex items-center gap-1 text-xs" role="alert">
+          <AlertCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           {error.message}
         </p>
       )}

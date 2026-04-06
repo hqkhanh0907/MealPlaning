@@ -1,6 +1,8 @@
-import { Bot, Calendar, ClipboardList, Dumbbell, LayoutDashboard, Loader2 } from 'lucide-react';
+import { Bot, Calendar, ClipboardList, Dumbbell, LayoutDashboard } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { Skeleton } from '@/components/ui/skeleton';
 
 import type { MainTab } from './types';
 
@@ -111,13 +113,12 @@ export const DesktopNav = ({ activeTab, onTabChange }: { activeTab: MainTab; onT
 };
 
 export const TabLoadingFallback = () => {
-  const { t } = useTranslation();
   return (
-    <div className="flex items-center justify-center py-20">
-      <div className="text-muted-foreground flex flex-col items-center gap-3">
-        <Loader2 className="text-primary h-8 w-8 animate-spin" aria-hidden="true" />
-        <p className="text-sm font-medium">{t('common.loading')}</p>
-      </div>
+    <div className="space-y-4 p-4">
+      <Skeleton className="h-8 w-3/4" />
+      <Skeleton className="h-24 w-full" />
+      <Skeleton className="h-24 w-full" />
+      <Skeleton className="h-24 w-full" />
     </div>
   );
 };

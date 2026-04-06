@@ -39,7 +39,7 @@ vi.mock('react-i18next', () => ({
         return `Bạn bỏ lỡ ${params.count} buổi tập tuần này`;
       }
       if (key === 'fitness.progress.weightChange' && params) {
-        return `Cân nặng thay đổi ${params.delta}kg trong 7 ngày`;
+        return `Cân nặng thay đổi ${params.delta}kg (7 ngày qua)`;
       }
       return translations[key] ?? key;
     },
@@ -261,8 +261,9 @@ describe('ProgressDashboard', () => {
     expect(screen.getByText('Volume tăng 25% so với tuần trước')).toBeInTheDocument();
     // missed sessions insight (planned 4, completed 1 → missed 3)
     expect(screen.getByTestId('insight-missed-sessions')).toBeInTheDocument();
-    // weight change insight
+    // weight change insight shows timeframe context
     expect(screen.getByTestId('insight-weight-change')).toBeInTheDocument();
+    expect(screen.getByText(/7 ngày qua/)).toBeInTheDocument();
   });
 
   it('dismiss button removes insight', () => {
@@ -274,7 +275,7 @@ describe('ProgressDashboard', () => {
   });
 
   it('handles zero division (no previous week data)', () => {
-    // Only this week data → lastWeekVolume = 0 → volumeChange = 0
+    // Only this week data → lastWeekVolume = 0 → no comparison data → show "—"
     // Include a set with undefined reps to cover the ?? 0 branch
     const setNoReps = {
       id: 's3',
@@ -293,7 +294,8 @@ describe('ProgressDashboard', () => {
     });
     render(<ProgressDashboard />);
     const change = screen.getByTestId('volume-change');
-    expect(change.textContent).toContain('+0%');
+    expect(change.textContent).toContain('—');
+    expect(change.textContent).not.toContain('%');
   });
 
   // ── Additional branch-coverage tests ──
@@ -503,5 +505,19 @@ describe('ProgressDashboard', () => {
 
     expect(screen.getByTestId('insight-plateau-e2')).toBeInTheDocument();
     expect(screen.getByTestId('insight-plateau-e2').textContent).toContain('Tạ đang chững');
+  });
+
+  it('shows +0% when both weeks have equal volume (actual 0% change)', () => {
+    const sameSet = { ...lastWeekSet, weightKg: 100 };
+    setupStore({
+      workouts: [thisWeekWorkout, lastWeekWorkout],
+      workoutSets: [thisWeekSet, sameSet],
+      weightEntries: [],
+      trainingProfile: null,
+      getActivePlan: () => undefined,
+    });
+    render(<ProgressDashboard />);
+    const change = screen.getByTestId('volume-change');
+    expect(change.textContent).toContain('+0%');
   });
 });

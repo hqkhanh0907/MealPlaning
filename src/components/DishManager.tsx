@@ -354,7 +354,7 @@ export const DishManager = ({
                     data-testid={`btn-delete-dish-${dish.id}`}
                     onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
                     disabled={isUsed(dish.id)}
-                    className={`focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(dish.id) ? 'dark:text-muted-foreground text-muted-foreground' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
+                    className={`focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(dish.id) ? 'dark:text-muted-foreground text-muted-foreground' : 'text-destructive/70 hover:bg-destructive/10 hover:text-destructive'}`}
                   >
                     <Trash2 className="h-4 w-4" /> {t('common.delete')}
                   </button>
@@ -481,7 +481,7 @@ export const DishManager = ({
                             onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
                             disabled={isUsed(dish.id)}
                             aria-label={`${t('common.delete')} ${getLocalizedField(dish.name, lang)}`}
-                            className={`focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(dish.id) ? 'text-muted-foreground' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
+                            className={`focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(dish.id) ? 'text-muted-foreground' : 'text-destructive/70 hover:bg-destructive/10 hover:text-destructive'}`}
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -550,7 +550,7 @@ export const DishManager = ({
                       onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
                       disabled={isUsed(dish.id)}
                       aria-label={`${t('common.delete')} ${getLocalizedField(dish.name, lang)}`}
-                      className={`focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(dish.id) ? 'text-muted-foreground' : 'text-muted-foreground hover:bg-destructive/10 hover:text-destructive'}`}
+                      className={`focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2.5 transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(dish.id) ? 'text-muted-foreground' : 'text-destructive/70 hover:bg-destructive/10 hover:text-destructive'}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

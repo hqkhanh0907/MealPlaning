@@ -135,6 +135,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
               value={searchQuery}
               onChange={handleSearchChange}
               aria-label={t('fitness.swap.search')}
+              maxLength={100}
               className="focus-visible:ring-ring border-border bg-card text-foreground placeholder:text-muted-foreground w-full rounded-lg border px-3 py-2.5 pl-9 text-sm outline-none focus-visible:ring-2"
             />
           </div>

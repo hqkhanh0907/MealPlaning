@@ -491,6 +491,13 @@ describe('MealPlannerModal', () => {
       expect(screen.getByTestId('meal-planner-remaining-pro')).toBeInTheDocument();
     });
 
+    it('shows protein remaining with "g Pro" unit for clarity', () => {
+      render(<MealPlannerModal {...defaultProps} initialTab="lunch" targetCalories={2000} targetProtein={150} />);
+      fireEvent.click(screen.getByText('Gà nướng'));
+      const proRemaining = screen.getByTestId('meal-planner-remaining-pro');
+      expect(proRemaining.textContent).toContain('g Pro');
+    });
+
     it('does not show remaining budget when no targets provided', () => {
       render(<MealPlannerModal {...defaultProps} initialTab="lunch" />);
       fireEvent.click(screen.getByText('Gà nướng'));

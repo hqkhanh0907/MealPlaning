@@ -68,7 +68,7 @@ export const OnboardingProgress = React.memo(function OnboardingProgress({
         {segments.map(({ sectionIndex, fillPercent, isActive }, i) => (
           <div
             key={sectionIndex}
-            className={cn('flex-1 overflow-hidden', isActive ? 'bg-primary/15' : 'bg-muted')}
+            className={cn('flex-1 overflow-hidden', isActive ? 'bg-primary/25' : 'bg-muted')}
             style={getSegmentRadius(i, totalSections)}
           >
             <div

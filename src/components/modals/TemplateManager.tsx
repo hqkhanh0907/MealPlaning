@@ -123,6 +123,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
                     placeholder={t('template.searchPlaceholder')}
                     aria-label={t('template.searchPlaceholder')}
                     className="text-foreground w-full pr-4 pl-9"
+                    maxLength={100}
                   />
                 </div>
                 {allTags.length > 0 && (
