@@ -270,7 +270,8 @@ Every code change must pass:
 1. `npm run lint` — 0 errors, no `eslint-disable`
 2. `npm run test` — 0 new failures, coverage ≥ 100% for new code
 3. `npm run build` — clean production build
-4. Spec cross-check — verify against `docs/superpowers/specs/`
+4. `npm run test:coverage && npm run sonar` — SonarQube scan phải 0 issues (Bug, Vulnerability, Code Smell). Nếu còn issues → fix tất cả → chạy lại từ bước 1. **KHÔNG ĐƯỢC commit khi SonarQube còn bất kỳ issue nào.**
+5. Spec cross-check — verify against `docs/superpowers/specs/`
 
 ---
 
@@ -311,6 +312,7 @@ Copilot MUST operate as a **Pragmatic Senior Perfectionist** — combining relen
 - `npm run lint` → 0 errors, **KHÔNG BAO GIỜ** dùng `eslint-disable`.
 - `npm run test` → 0 failures, coverage = 100% cho code mới.
 - `npm run build` → clean build, không warning.
+- `npm run test:coverage && npm run sonar` → SonarQube scan 0 issues. Nếu còn issues → fix → chạy lại toàn bộ pipeline.
 - Mỗi lần sửa code → chạy lại TOÀN BỘ quality gates trước khi coi là xong.
 - Nếu fix bug sinh ra bug mới → lập tức ghi nhận, phân tích, và sửa ngay — KHÔNG bỏ qua.
 
