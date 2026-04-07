@@ -2,13 +2,22 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-function Card({ className, size = 'default', ...props }: React.ComponentProps<'div'> & { size?: 'default' | 'sm' }) {
+function Card({
+  className,
+  size = 'default',
+  variant = 'default',
+  ...props
+}: React.ComponentProps<'div'> & { size?: 'default' | 'sm'; variant?: 'default' | 'ghost' | 'elevated' }) {
   return (
     <div
       data-slot="card"
       data-size={size}
+      data-variant={variant}
       className={cn(
-        'group/card bg-card text-card-foreground ring-foreground/10 flex flex-col gap-4 overflow-hidden rounded-xl py-4 text-sm ring-1 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl',
+        'group/card bg-card text-card-foreground flex flex-col gap-4 overflow-hidden rounded-xl py-4 text-sm has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl',
+        variant === 'default' && 'ring-foreground/10 ring-1',
+        variant === 'ghost' && 'bg-muted/40',
+        variant === 'elevated' && 'shadow-md',
         className,
       )}
       {...props}

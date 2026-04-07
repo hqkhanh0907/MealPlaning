@@ -73,7 +73,7 @@ export const BottomNavBar = ({
               aria-label={label}
               data-testid={`nav-${tab}`}
               onClick={() => onTabChange(tab)}
-              className={`relative flex min-h-12 flex-col items-center justify-center rounded-xl px-1 py-2.5 transition-all ${activeTab === tab ? 'text-primary-emphasis' : 'active:text-foreground-secondary text-muted-foreground'}`}
+              className={`relative flex min-h-12 flex-col items-center justify-center rounded-xl px-1 py-2.5 transition-all active:scale-[0.97] ${activeTab === tab ? 'text-primary-emphasis' : 'active:text-foreground-secondary text-muted-foreground'}`}
             >
               <div className="relative">
                 {mobileIcon}

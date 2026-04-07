@@ -2,6 +2,8 @@ import { BookOpen } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { SubTabBar } from '@/components/shared/SubTabBar';
+
 import { Dish, Ingredient } from '../types';
 import { DishManager } from './DishManager';
 import { IngredientManager } from './IngredientManager';
@@ -39,9 +41,9 @@ export const ManagementTab = React.memo(function ManagementTab({
 }: ManagementTabProps) {
   const { t } = useTranslation();
 
-  const SUB_TABS: { key: SubTab; label: string }[] = [
-    { key: 'dishes', label: t('management.subTabDish') },
-    { key: 'ingredients', label: t('management.subTabIngredient') },
+  const SUB_TABS = [
+    { id: 'dishes', label: t('management.subTabDish') },
+    { id: 'ingredients', label: t('management.subTabIngredient') },
   ];
 
   return (
@@ -51,18 +53,12 @@ export const ManagementTab = React.memo(function ManagementTab({
           <BookOpen className="text-primary h-6 w-6 shrink-0" />
           <h2 className="text-foreground text-xl font-semibold sm:text-2xl">{t('management.title')}</h2>
         </div>
-        <div className="scrollbar-hide bg-muted flex w-full flex-nowrap overflow-x-auto rounded-xl p-1 sm:w-auto">
-          {SUB_TABS.map(tab => (
-            <button
-              key={tab.key}
-              data-testid={`tab-management-${tab.key}`}
-              onClick={() => onSubTabChange(tab.key)}
-              className={`min-h-11 flex-1 rounded-lg px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-all sm:min-h-0 sm:flex-initial sm:py-1.5 sm:text-xs ${activeSubTab === tab.key ? 'text-primary-emphasis bg-card shadow-sm' : 'text-muted-foreground active:bg-muted'}`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <SubTabBar
+          tabs={SUB_TABS}
+          activeTab={activeSubTab}
+          onTabChange={id => onSubTabChange(id as SubTab)}
+          className="w-full sm:w-auto"
+        />
       </div>
 
       {activeSubTab === 'dishes' && (
