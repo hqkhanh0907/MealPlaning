@@ -25,8 +25,8 @@
   --secondary-foreground: oklch(0.279 0.029 260.03);
   --muted: oklch(0.968 0.007 247.86); /* Slate-100 */
   --muted-foreground: oklch(0.446 0.043 257.28); /* Slate-600 #475569 — WCAG AA 6.4:1 on white */
-  --accent: oklch(0.968 0.007 247.86);
-  --accent-foreground: oklch(0.279 0.029 260.03);
+  --accent: oklch(0.943 0.029 294.57); /* Violet-100 — subtle purple tint for hover states */
+  --accent-foreground: oklch(0.38 0.189 293.75); /* Violet-900 — text on accent bg */
   --destructive: oklch(0.637 0.237 25.33); /* Red-500 #EF4444 */
   --border: oklch(0.929 0.013 255.51); /* Slate-200 #E2E8F0 */
   --input: oklch(0.929 0.013 255.51);
@@ -39,7 +39,7 @@
   --border-subtle: oklch(0.968 0.007 247.86); /* Slate-100 #F1F5F9 */
 
   /* ── Macro nutrition colors ── */
-  --macro-protein: oklch(0.527 0.154 163.45); /* Emerald-700 #047857 — WCAG AA 5.48:1 */
+  --macro-protein: oklch(0.588 0.158 241.97); /* Sky-600 #0284C7 — separated from primary hue */
   --macro-fat: oklch(0.555 0.163 48.99); /* Amber-700 #B45309 — WCAG AA 5.02:1 */
   --macro-carbs: oklch(0.546 0.245 262.88); /* Blue-600 */
   --macro-fiber: oklch(0.527 0.198 142.5); /* Green-700 #15803D — WCAG AA 4.8:1 */
@@ -78,6 +78,16 @@
   --destructive-subtle: oklch(0.971 0.013 17.38); /* Red-50 #FEF2F2 */
   --macro-carbs-emphasis: oklch(0.488 0.243 264.06); /* Blue-700 #1D4ED8 */
   --macro-carbs-subtle: oklch(0.97 0.014 254.6); /* Blue-50 #EFF6FF */
+
+  /* ── Accent highlight (strong accent for badges, chips, CTA phụ) ── */
+  --accent-highlight: oklch(0.606 0.25 292.72); /* Violet-500 #8B5CF6 */
+  --accent-highlight-foreground: oklch(1 0 0); /* White */
+  --accent-subtle: oklch(0.969 0.016 293.76); /* Violet-50 — light bg */
+  --accent-emphasis: oklch(0.491 0.27 292.58); /* Violet-700 — strong text */
+
+  /* ── Macro protein extended (Sky hue, separated from primary) ── */
+  --macro-protein-emphasis: oklch(0.443 0.11 240.8); /* Sky-800 */
+  --macro-protein-subtle: oklch(0.977 0.013 236.6); /* Sky-50 */
 
   /* ── Compare state colors (DishManager) ── */
   --compare-active: oklch(0.746 0.16 232.66); /* Blue-400 */
@@ -174,6 +184,10 @@ input[type='number'] {
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-highlight: var(--accent-highlight);
+  --color-accent-highlight-foreground: var(--accent-highlight-foreground);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-accent-emphasis: var(--accent-emphasis);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
@@ -187,6 +201,8 @@ input[type='number'] {
 
   /* ── Macro nutrition colors (Tailwind utilities: bg-macro-protein, text-macro-fat, etc.) ── */
   --color-macro-protein: var(--macro-protein);
+  --color-macro-protein-emphasis: var(--macro-protein-emphasis);
+  --color-macro-protein-subtle: var(--macro-protein-subtle);
   --color-macro-fat: var(--macro-fat);
   --color-macro-carbs: var(--macro-carbs);
   --color-macro-fiber: var(--macro-fiber);
@@ -247,8 +263,8 @@ input[type='number'] {
   --secondary-foreground: oklch(0.929 0.013 255.51);
   --muted: oklch(0.295 0.029 260.03);
   --muted-foreground: oklch(0.704 0.04 256.79); /* Slate-400 #94A3B8 */
-  --accent: oklch(0.295 0.029 260.03);
-  --accent-foreground: oklch(0.929 0.013 255.51);
+  --accent: oklch(0.371 0.07 293.5); /* Violet-900/dark — subtle purple on dark bg */
+  --accent-foreground: oklch(0.943 0.029 294.57); /* Violet-100 */
   --destructive: oklch(0.704 0.191 22.216); /* Red-400 */
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
@@ -259,10 +275,18 @@ input[type='number'] {
   --foreground-secondary: oklch(0.75 0.04 256.79); /* Slate-400 lightened for dark mode readability */
   --border-subtle: oklch(1 0 0 / 8%); /* White 8% — subtle but visible on dark cards */
 
-  --macro-protein: oklch(0.765 0.177 163.22); /* Emerald-400 */
+  --macro-protein: oklch(0.746 0.16 232.66); /* Sky-400 — dark mode */
   --macro-fat: oklch(0.752 0.183 55.93); /* Amber-400 */
   --macro-carbs: oklch(0.707 0.165 254.62); /* Blue-400 */
   --macro-fiber: oklch(0.845 0.143 164.9); /* Green-400 */
+
+  /* ── Accent highlight dark mode ── */
+  --accent-highlight: oklch(0.698 0.222 293.19); /* Violet-400 */
+  --accent-highlight-foreground: oklch(0.208 0.026 264.69); /* Slate-900 */
+  --accent-subtle: oklch(0.297 0.07 293); /* Violet-950 approx */
+  --accent-emphasis: oklch(0.811 0.111 293.57); /* Violet-300 */
+  --macro-protein-emphasis: oklch(0.746 0.16 232.66); /* Sky-400 */
+  --macro-protein-subtle: oklch(0.257 0.09 237 / 30%); /* Sky-900/30 */
 
   --color-ai: oklch(0.673 0.182 274.5); /* Indigo-400 */
   --color-ai-subtle: oklch(0.257 0.09 281.3); /* Indigo-950/30 approx */

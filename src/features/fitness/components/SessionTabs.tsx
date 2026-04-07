@@ -113,7 +113,9 @@ function SessionTabsInner({
                 onPointerLeave={handlePointerUpOrLeave}
                 onContextMenu={handleContextMenu}
                 className={`focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.97] motion-reduce:transform-none ${
-                  isActive ? 'bg-primary text-primary-foreground dark:bg-primary' : 'text-foreground-secondary bg-muted'
+                  isActive
+                    ? 'bg-accent-highlight text-accent-highlight-foreground dark:bg-accent-highlight'
+                    : 'text-foreground-secondary bg-muted'
                 }`}
               >
                 {isCompleted ? (
