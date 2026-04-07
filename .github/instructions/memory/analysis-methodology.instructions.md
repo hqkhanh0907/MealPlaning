@@ -1175,3 +1175,56 @@ If class doesn't appear in build CSS → it's invalid → Tailwind silently igno
 ### Bài học
 
 **LUÔN verify Tailwind class trong build output** trước khi commit. Quy tắc Tailwind v4: `--color-X` → `text-X` (strip `--color-` prefix). KHÔNG append extra prefixes. Sai naming = class bị ignore = UI mất màu hoàn toàn mà không có lỗi nào báo.
+
+---
+
+## 36. Multi-Source UI/UX Review → Unified Action Plan Pattern
+
+### Vấn đề
+
+6 bản đánh giá UI độc lập (internal + external) có nhiều điểm trùng lặp và mâu thuẫn. Tạo action plan trực tiếp từ mỗi source → duplicate work.
+
+### Giải pháp
+
+1. SQL tracking: `critique_points` table (source, category, status, todo_id)
+2. 7-pass cross-reference: mỗi pass dùng 3-5 parallel explore agents
+3. Classify mỗi điểm: valid TODO / already fixed / invalid / deferred / covered / out-of-scope
+4. Kết quả: 143 systemic points → 24 actionable TODOs (83% loại bỏ)
+
+### Bài học
+
+Deduplicate TRƯỚC khi plan. SQL tracking essential cho >100 critique points.
+
+## 37. Post-Commit SonarQube Surprise — Fix Pipeline Order
+
+### Vấn đề
+
+Committed 23 UI/UX fixes → SonarQube scan found 32 issues (7 new + 25 pre-existing). Phải fix tất cả theo QUY TẮC #2.
+
+### Nguyên nhân
+
+Chạy SonarQube SAU commit thay vì TRƯỚC. Pre-existing issues tích tụ từ nhiều session trước.
+
+### Giải pháp
+
+Dispatch 2 parallel agents (changed-files + pre-existing) → fix 31/32. 1 issue còn (NutritionHero complexity 16→15) → manual extract `computeCalorieSummary` helper.
+
+### Bài học
+
+LUÔN chạy SonarQube TRƯỚC commit. Nếu quên → 2 agents song song fix nhanh hơn sequential. Manual follow-up cho edge cases agents miss.
+
+## 38. SonarQube Top-15 Issue Types (React/TypeScript)
+
+| #   | Issue                        | Count | Fix                                      |
+| --- | ---------------------------- | ----- | ---------------------------------------- |
+| 1   | Unexpected negated condition | 15    | Flip if/else branches                    |
+| 2   | Mark props as read-only      | 4     | `Readonly<Props>` wrapper                |
+| 3   | Cognitive Complexity > 15    | 3     | Extract helper functions                 |
+| 4   | Nested ternary               | 2     | Extract to variable/component            |
+| 5   | Nested template literals     | 2     | Extract inner template to variable       |
+| 6   | Native `<progress>` element  | 1     | Replace `div[role=progressbar]`          |
+| 7   | Large imports (lucide-react) | 2     | Usually false positive with tree-shaking |
+
+### Bài học
+
+"Unexpected negated condition" chiếm 47% issues. Bulk-fixable bằng agent. Cognitive complexity cần human judgment cho helper extraction.
