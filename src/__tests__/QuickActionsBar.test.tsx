@@ -47,22 +47,21 @@ describe('QuickActionsBar', () => {
   /* Outline button styling */
   /* ------------------------------------------------------------ */
   describe('Outline button styling', () => {
-    it('both buttons use outline variant with card background', () => {
+    it('both buttons use muted background with soft styling', () => {
       render(<QuickActionsBar />);
       const buttons = screen.getAllByRole('button');
       for (const button of buttons) {
-        expect(button.className).toContain('bg-card');
-        expect(button.className).toContain('text-primary');
-        expect(button.className).toContain('border');
-        expect(button.className).toContain('border-border');
+        expect(button.className).toContain('bg-muted');
+        expect(button.className).toContain('text-foreground');
+        expect(button.className).toContain('shadow-sm');
       }
     });
 
-    it('both buttons have h-12 height', () => {
+    it('both buttons have h-10 height', () => {
       render(<QuickActionsBar />);
       const buttons = screen.getAllByRole('button');
       for (const button of buttons) {
-        expect(button.className).toContain('h-12');
+        expect(button.className).toContain('h-10');
       }
     });
 

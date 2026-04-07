@@ -16,10 +16,10 @@ const SCORE_COLOR_TO_LABEL: Record<ScoreColor, string> = {
 
 function WeeklyStatsRowFallback() {
   return (
-    <div className="text-primary-foreground/50 grid grid-cols-3 gap-4 text-center" data-testid="weekly-stats-fallback">
-      <div>—</div>
-      <div>—</div>
-      <div>—</div>
+    <div className="text-muted-foreground grid grid-cols-3 gap-2 text-center" data-testid="weekly-stats-fallback">
+      <div className="bg-card border-border-subtle rounded-xl border p-2.5">—</div>
+      <div className="bg-card border-border-subtle rounded-xl border p-2.5">—</div>
+      <div className="bg-card border-border-subtle rounded-xl border p-2.5">—</div>
     </div>
   );
 }
@@ -35,19 +35,20 @@ export const CombinedHero = memo(({ isLoading }: Readonly<CombinedHeroProps>) =>
 
   return (
     <section
-      className="from-primary to-primary/90 text-primary-foreground rounded-2xl bg-gradient-to-br p-4 shadow-sm"
+      className="space-y-3"
       aria-label={t('dashboard.hero.a11yLabel', { score: totalScore, label: scoreLabel })}
       aria-busy={isLoading || undefined}
     >
-      <NutritionSection
-        isLoading={isLoading}
-        isFirstTimeUser={isFirstTimeUser}
-        greeting={greeting}
-        heroContext={heroContext}
-        totalScore={totalScore}
-        scoreColor={color}
-      />
-      {!isFirstTimeUser && <div className="border-primary-foreground/10 my-3 border-t" />}
+      <div className="bg-primary-subtle rounded-2xl p-4 shadow-sm">
+        <NutritionSection
+          isLoading={isLoading}
+          isFirstTimeUser={isFirstTimeUser}
+          greeting={greeting}
+          heroContext={heroContext}
+          totalScore={totalScore}
+          scoreColor={color}
+        />
+      </div>
       {!isFirstTimeUser && (
         <ErrorBoundary fallback={<WeeklyStatsRowFallback />}>
           <WeeklyStatsRow />

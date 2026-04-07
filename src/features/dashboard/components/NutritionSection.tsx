@@ -94,8 +94,8 @@ const HERO_CONTEXT_I18N: Record<Exclude<HeroContext, 'first-time'>, string> = {
   'rest-day-empty': 'dashboard.hero.contextual.restDayEmpty',
 };
 
-const RING_SIZE = 48;
-const RING_STROKE = 4;
+const RING_SIZE = 80;
+const RING_STROKE = 5;
 const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
@@ -120,7 +120,7 @@ function ProgressRing({ pct }: Readonly<{ pct: number }>) {
           fill="none"
           stroke="currentColor"
           strokeWidth={RING_STROKE}
-          className="text-white/10"
+          className="text-muted-foreground/20"
         />
         <circle
           cx={RING_SIZE / 2}
@@ -135,7 +135,7 @@ function ProgressRing({ pct }: Readonly<{ pct: number }>) {
           className="text-success transition-all duration-500"
         />
       </svg>
-      <span className="text-[10px] font-bold text-white/80 tabular-nums">{clamped}%</span>
+      <span className="text-primary text-sm font-bold tabular-nums">{clamped}%</span>
     </div>
   );
 }
@@ -160,14 +160,14 @@ function MacroBar({ label, current, target, colorClass, testId }: Readonly<Macro
   return (
     <div className="flex-1 space-y-1" data-testid={testId}>
       <div className="flex items-baseline justify-between">
-        <span className="text-[10px] font-medium text-white/60">{label}</span>
-        <span className="text-xs font-semibold text-white/90 tabular-nums">
+        <span className="text-muted-foreground text-[10px] font-medium">{label}</span>
+        <span className="text-foreground text-xs font-semibold tabular-nums">
           {displayCurrent === null
             ? `—/${Math.round(displayTarget)}g`
             : `${displayCurrent}/${Math.round(displayTarget)}g`}
         </span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+      <div className="bg-muted h-1.5 overflow-hidden rounded-full">
         <div className={`h-full rounded-full transition-all ${colorClass}`} style={{ width: `${pct}%` }} />
       </div>
     </div>
@@ -182,17 +182,17 @@ function NutritionHeroSkeleton() {
   return (
     <div className="animate-pulse space-y-3" data-testid="nutrition-hero" aria-busy="true">
       <div className="flex items-start justify-between">
-        <div className="h-4 w-32 rounded bg-white/10" />
-        <div className="h-9 w-9 rounded-full bg-white/10" />
+        <div className="bg-muted-foreground/10 h-4 w-32 rounded" />
+        <div className="bg-muted-foreground/10 h-9 w-9 rounded-full" />
       </div>
-      <div className="rounded-xl bg-white/5 p-3">
-        <div className="h-6 w-40 rounded bg-white/10" />
-        <div className="mt-2 h-1.5 w-full rounded-full bg-white/10" />
+      <div className="bg-card rounded-xl p-3">
+        <div className="bg-muted-foreground/10 h-6 w-40 rounded" />
+        <div className="bg-muted-foreground/10 mt-2 h-1.5 w-full rounded-full" />
       </div>
       <div className="flex gap-3">
-        <div className="h-8 flex-1 rounded bg-white/10" />
-        <div className="h-8 flex-1 rounded bg-white/10" />
-        <div className="h-8 flex-1 rounded bg-white/10" />
+        <div className="bg-muted-foreground/10 h-8 flex-1 rounded" />
+        <div className="bg-muted-foreground/10 h-8 flex-1 rounded" />
+        <div className="bg-muted-foreground/10 h-8 flex-1 rounded" />
       </div>
     </div>
   );
@@ -269,11 +269,11 @@ function NutritionSectionInner({
   if (isFirstTimeUser) {
     return (
       <div data-testid="nutrition-hero" aria-label={t('dashboard.nutritionHero.a11y')}>
-        <p className="mb-1 text-sm text-white/80" data-testid="nutrition-hero-greeting">
+        <p className="text-muted-foreground mb-1 text-sm" data-testid="nutrition-hero-greeting">
           {greeting}
         </p>
-        <h2 className="mb-2 text-xl font-semibold text-white">{t('dashboard.nutritionHero.setupTitle')}</h2>
-        <p className="text-sm text-white/60">{t('dashboard.nutritionHero.setupDescription')}</p>
+        <h2 className="text-foreground mb-2 text-xl font-semibold">{t('dashboard.nutritionHero.setupTitle')}</h2>
+        <p className="text-muted-foreground text-sm">{t('dashboard.nutritionHero.setupDescription')}</p>
       </div>
     );
   }
@@ -288,11 +288,11 @@ function NutritionSectionInner({
       {/* Row 1: Greeting + Score badge */}
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1 pr-3">
-          <p className="truncate text-sm font-medium text-white/90" data-testid="nutrition-hero-greeting">
+          <p className="text-foreground truncate text-sm font-medium" data-testid="nutrition-hero-greeting">
             {displayGreeting}
           </p>
           {heroContext !== 'first-time' && HERO_CONTEXT_I18N[heroContext as Exclude<HeroContext, 'first-time'>] && (
-            <p className="mt-0.5 line-clamp-2 text-xs text-white/50">
+            <p className="text-muted-foreground mt-0.5 line-clamp-2 text-xs">
               {t(HERO_CONTEXT_I18N[heroContext as Exclude<HeroContext, 'first-time'>])}
             </p>
           )}
@@ -308,12 +308,12 @@ function NutritionSectionInner({
 
       {/* Row 2: Calorie summary */}
       {hasNutritionData ? (
-        <div className="rounded-xl bg-white/5 p-3" data-testid="nutrition-hero-calories">
+        <div className="bg-card/80 rounded-xl p-3 shadow-sm" data-testid="nutrition-hero-calories">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xl font-bold text-white tabular-nums">
+              <p className="text-stat-med text-foreground font-bold tabular-nums">
                 {eatenText}{' '}
-                <span className="text-sm font-normal text-white/50 tabular-nums">
+                <span className="text-muted-foreground text-sm font-normal tabular-nums">
                   / {Math.round(displayTarget)} kcal
                 </span>
               </p>
@@ -326,7 +326,7 @@ function NutritionSectionInner({
             </div>
             <ProgressRing pct={caloriePct} />
           </div>
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+          <div className="bg-muted mt-2 h-1.5 overflow-hidden rounded-full">
             <div
               className={`h-full rounded-full transition-all ${isOverTarget ? 'bg-rose' : 'bg-success'}`}
               style={{ width: `${caloriePct}%` }}
@@ -334,9 +334,9 @@ function NutritionSectionInner({
           </div>
         </div>
       ) : (
-        <div className="rounded-xl bg-white/5 p-4 text-center" data-testid="nutrition-hero-calories">
-          <p className="text-sm text-white/70">{t('dashboard.nutritionHero.addFirstMeal')}</p>
-          <p className="mt-1 text-xs text-white/40">
+        <div className="bg-card/80 rounded-xl p-4 text-center shadow-sm" data-testid="nutrition-hero-calories">
+          <p className="text-muted-foreground text-sm">{t('dashboard.nutritionHero.addFirstMeal')}</p>
+          <p className="text-muted-foreground/70 mt-1 text-xs">
             {t('dashboard.nutritionHero.targetInfo', { target: Math.round(displayTarget) })}
           </p>
         </div>

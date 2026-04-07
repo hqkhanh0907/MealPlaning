@@ -60,8 +60,8 @@ function computeAdherence(
 const DOT_COLORS: Record<string, string> = {
   completed: 'bg-success',
   rest: 'bg-info',
-  missed: 'border-2 border-primary-foreground/20 bg-transparent',
-  upcoming: 'border-2 border-primary-foreground/20 bg-transparent',
+  missed: 'border-2 border-border bg-transparent',
+  upcoming: 'border-2 border-border bg-transparent',
   today: 'border-2 border-success bg-success/30',
 };
 
@@ -107,7 +107,7 @@ function WeeklyStatsRowInner(): React.ReactElement {
     if (weeklyChange > 0.05) {
       return { text: t('dashboard.weekly.weightUp', { value: rounded }), color: 'text-energy' };
     }
-    return { text: t('dashboard.weekly.weightStable'), color: 'text-primary-foreground/60' };
+    return { text: t('dashboard.weekly.weightStable'), color: 'text-muted-foreground' };
   }, [weeklyChange, t]);
 
   return (
@@ -118,18 +118,21 @@ function WeeklyStatsRowInner(): React.ReactElement {
         streak: streakInfo.currentStreak,
         adherence: adherence == null ? '—' : `${adherence}%`,
       })}
-      className="divide-primary-foreground/10 grid grid-cols-3 divide-x"
+      className="grid grid-cols-3 gap-2"
     >
       {/* Column 1 — Weight */}
-      <div className="flex flex-col items-center justify-center gap-0.5 pr-3" data-testid="weekly-weight">
+      <div
+        className="bg-card flex flex-col items-center justify-center gap-0.5 rounded-xl p-2.5 shadow-sm"
+        data-testid="weekly-weight"
+      >
         {latestWeight == null ? (
           <>
-            <span className="text-primary-foreground/60 text-base font-semibold">{t('dashboard.weekly.noWeight')}</span>
-            <span className="text-primary-foreground/60 text-xs">{t('dashboard.weekly.logWeight')}</span>
+            <span className="text-muted-foreground text-base font-semibold">{t('dashboard.weekly.noWeight')}</span>
+            <span className="text-muted-foreground text-xs">{t('dashboard.weekly.logWeight')}</span>
           </>
         ) : (
           <>
-            <span className="text-primary-foreground text-base font-semibold tabular-nums">
+            <span className="text-foreground text-base font-semibold tabular-nums">
               {latestWeight} {t('dashboard.weekly.weightUnit')}
             </span>
             {weightChangeDisplay && (
@@ -145,13 +148,16 @@ function WeeklyStatsRowInner(): React.ReactElement {
       </div>
 
       {/* Column 2 — Streak */}
-      <div className="flex flex-col items-center justify-center gap-0.5 px-3" data-testid="weekly-streak">
-        <span className="text-primary-foreground text-base font-semibold tabular-nums">
+      <div
+        className="bg-card flex flex-col items-center justify-center gap-0.5 rounded-xl p-2.5 shadow-sm"
+        data-testid="weekly-streak"
+      >
+        <span className="text-foreground text-base font-semibold tabular-nums">
           {streakInfo.currentStreak > 0
             ? t('dashboard.weekly.streakDays', { count: streakInfo.currentStreak })
             : t('dashboard.weekly.noStreak')}
         </span>
-        <span className="text-primary-foreground/60 text-xs tracking-wider">{t('dashboard.weekly.streak')}</span>
+        <span className="text-muted-foreground text-xs tracking-wider">{t('dashboard.weekly.streak')}</span>
         <div className="mt-0.5 flex items-center gap-0.5" data-testid="weekly-streak-dots" aria-hidden="true">
           {streakInfo.weekDots.map(dot => (
             <span
@@ -165,24 +171,21 @@ function WeeklyStatsRowInner(): React.ReactElement {
       </div>
 
       {/* Column 3 — Adherence */}
-      <div className="flex flex-col items-center justify-center gap-0.5 pl-3" data-testid="weekly-adherence">
+      <div
+        className="bg-card flex flex-col items-center justify-center gap-0.5 rounded-xl p-2.5 shadow-sm"
+        data-testid="weekly-adherence"
+      >
         {adherence == null ? (
           <>
-            <span className="text-primary-foreground/60 text-base font-semibold">
-              {t('dashboard.weekly.noAdherence')}
-            </span>
-            <span className="text-primary-foreground/60 text-xs tracking-wider">
-              {t('dashboard.weekly.adherenceLabel')}
-            </span>
+            <span className="text-muted-foreground text-base font-semibold">{t('dashboard.weekly.noAdherence')}</span>
+            <span className="text-muted-foreground text-xs tracking-wider">{t('dashboard.weekly.adherenceLabel')}</span>
           </>
         ) : (
           <>
-            <span className="text-primary-foreground text-base font-semibold tabular-nums">{adherence}%</span>
-            <span className="text-primary-foreground/60 text-xs tracking-wider">
-              {t('dashboard.weekly.adherenceLabel')}
-            </span>
+            <span className="text-foreground text-base font-semibold tabular-nums">{adherence}%</span>
+            <span className="text-muted-foreground text-xs tracking-wider">{t('dashboard.weekly.adherenceLabel')}</span>
             <progress
-              className="[&::-moz-progress-bar]:bg-success [&::-webkit-progress-value]:bg-success mt-0.5 h-1.5 w-full appearance-none overflow-hidden rounded-full bg-white/10 [&::-moz-progress-bar]:rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all"
+              className="[&::-moz-progress-bar]:bg-success [&::-webkit-progress-value]:bg-success bg-muted mt-0.5 h-1.5 w-full appearance-none overflow-hidden rounded-full [&::-moz-progress-bar]:rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all"
               data-testid="weekly-adherence-bar"
               value={Math.min(adherence, 100)}
               max={100}

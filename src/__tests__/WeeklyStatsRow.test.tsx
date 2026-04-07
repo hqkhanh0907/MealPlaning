@@ -160,7 +160,7 @@ describe('WeeklyStatsRow', () => {
 
       const change = screen.getByTestId('weekly-weight-change');
       expect(change).toHaveTextContent('ổn định');
-      expect(change.className).toContain('text-primary-foreground/60');
+      expect(change.className).toContain('text-muted-foreground');
     });
 
     it('does not show change when only 1 entry', () => {
@@ -427,17 +427,17 @@ describe('WeeklyStatsRow', () => {
   // ===== Styling =====
 
   describe('Styling', () => {
-    it('container has inline row classes (no card wrapper)', () => {
+    it('container has grid layout with gap and children have card styling', () => {
       setupStore();
       render(<WeeklyStatsRow />);
 
       const container = screen.getByTestId('weekly-snapshot');
       expect(container.className).toContain('grid-cols-3');
-      expect(container.className).toContain('divide-primary-foreground/10');
-      // No card wrapper classes
-      expect(container.className).not.toContain('bg-card');
-      expect(container.className).not.toContain('rounded-xl');
-      expect(container.className).not.toContain('border-border');
+      expect(container.className).toContain('gap-2');
+      // Children have card styling
+      const weightCol = screen.getByTestId('weekly-weight');
+      expect(weightCol.className).toContain('bg-card');
+      expect(weightCol.className).toContain('rounded-xl');
     });
   });
 });

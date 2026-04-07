@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TODO-08: Dashboard Redesign — BEFORE / AFTER</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwindcss.config = {
+        theme: {
+          extend: {
+            colors: {
+              // Current tokens
+              primary: { DEFAULT: '#059669', foreground: '#ffffff' },
+              card: { DEFAULT: '#ffffff' },
+              muted: { DEFAULT: '#F0F8F6', foreground: '#64748B' },
+              border: { DEFAULT: '#E1F2ED', subtle: '#E1F2ED' },
+              background: '#ECFDF5',
+              foreground: '#0F172A',
+              destructive: '#DC2626',
+              success: '#10B981',
+              energy: '#F59E0B',
+              info: '#3B82F6',
+              rose: '#F43F5E',
+              'macro-protein': '#10B981',
+              'macro-fat': '#F59E0B',
+              'macro-carbs': '#3B82F6',
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background: #f8fafc;
+      }
+      .phone-frame {
+        width: 390px;
+        min-height: 844px;
+        border: 2px solid #e2e8f0;
+        border-radius: 40px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        position: relative;
+      }
+      .phone-screen {
+        height: 844px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .phone-screen::-webkit-scrollbar {
+        display: none;
+      }
+      .label-badge {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #0f172a;
+        color: white;
+        padding: 2px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+      }
+      .section-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #94a3b8;
+        margin-bottom: 6px;
+      }
+
+      /* Progress ring animation */
+      @keyframes ring-fill {
+        from {
+          stroke-dashoffset: 264;
+        }
+      }
+      .ring-animated {
+        animation: ring-fill 1s ease-out forwards;
+      }
+
+      /* Stat card hover */
+      .stat-card {
+        transition: transform 0.15s ease;
+      }
+      .stat-card:active {
+        transform: scale(0.97);
+      }
+    </style>
+  </head>
+  <body class="p-6">
+    <!-- Header -->
+    <div class="mx-auto mb-8 max-w-[900px]">
+      <h1 class="text-2xl font-bold text-slate-900">TODO-08: Dashboard (Tổng quan) Redesign</h1>
+      <p class="mt-1 text-slate-500">So sánh TRƯỚC và SAU — cuộn xuống để xem chi tiết thay đổi từng section</p>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SIDE BY SIDE COMPARISON -->
+    <!-- ============================================ -->
+    <div class="mx-auto mb-16 flex max-w-[900px] flex-wrap justify-center gap-8">
+      <!-- ===== BEFORE ===== -->
+      <div class="relative">
+        <div class="label-badge bg-red-600">TRƯỚC (Hiện tại)</div>
+        <div class="phone-frame mt-4 bg-white">
+          <div class="phone-screen bg-white">
+            <!-- Status bar -->
+            <div class="flex h-12 items-end justify-between bg-white px-6 pb-1">
+              <span class="text-xs font-semibold">9:41</span>
+              <div class="flex gap-1">
+                <div class="h-2 w-4 rounded-sm bg-slate-800"></div>
+                <div class="h-2 w-4 rounded-sm bg-slate-800"></div>
+                <div class="h-2 w-4 rounded-sm bg-slate-800"></div>
+              </div>
+            </div>
+
+            <div class="space-y-3 p-3">
+              <!-- BEFORE: Hero gradient card -->
+              <div class="rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-500 p-4 text-white shadow-sm">
+                <div class="mb-3 flex items-center justify-between">
+                  <div>
+                    <p class="text-xs opacity-80">Chào buổi tối 👋</p>
+                    <p class="text-sm font-semibold">Tester</p>
+                  </div>
+                  <div class="flex h-9 w-9 items-center justify-center rounded-full bg-amber-400">
+                    <span class="text-sm font-bold text-amber-900">72</span>
+                  </div>
+                </div>
+
+                <!-- Calorie section inside hero -->
+                <div class="mb-3 rounded-xl bg-white/5 p-3">
+                  <div class="flex items-center gap-3">
+                    <!-- Small ring -->
+                    <div class="relative h-12 w-12 shrink-0">
+                      <svg viewBox="0 0 48 48" class="h-12 w-12 -rotate-90">
+                        <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="4" />
+                        <circle
+                          cx="24"
+                          cy="24"
+                          r="20"
+                          fill="none"
+                          stroke="#fff"
+                          stroke-width="4"
+                          stroke-linecap="round"
+                          stroke-dasharray="126"
+                          stroke-dashoffset="42"
+                        />
+                      </svg>
+                      <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="text-[10px] font-bold">63%</span>
+                      </div>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-baseline gap-1">
+                        <span class="text-xl font-bold">1,327</span>
+                        <span class="text-xs opacity-70">/ 2,091 kcal</span>
+                      </div>
+                      <p class="text-xs opacity-60">Còn lại: 764 kcal</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Macro bars - cramped inside hero -->
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                  <div>
+                    <div class="mb-1 flex justify-between opacity-80"><span>Protein</span><span>170/146g</span></div>
+                    <div class="h-1.5 rounded-full bg-white/15">
+                      <div class="h-full rounded-full bg-emerald-300" style="width: 100%"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="mb-1 flex justify-between opacity-80"><span>Fat</span><span>30/58g</span></div>
+                    <div class="h-1.5 rounded-full bg-white/15">
+                      <div class="h-full rounded-full bg-amber-300" style="width: 52%"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="mb-1 flex justify-between opacity-80"><span>Carbs</span><span>98/241g</span></div>
+                    <div class="h-1.5 rounded-full bg-white/15">
+                      <div class="h-full rounded-full bg-blue-300" style="width: 41%"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="my-3 border-t border-white/10"></div>
+
+                <!-- Weekly stats row inside hero -->
+                <div class="grid grid-cols-3 divide-x divide-white/10 text-xs">
+                  <div class="pr-2">
+                    <p class="opacity-60">Cân nặng</p>
+                    <p class="font-bold">75.0 kg</p>
+                    <p class="text-[10px] text-emerald-300">↓ 0.5</p>
+                  </div>
+                  <div class="px-2 text-center">
+                    <p class="opacity-60">Streak</p>
+                    <p class="font-bold">5 ngày</p>
+                    <div class="mt-0.5 flex justify-center gap-0.5">
+                      <div class="h-1.5 w-1.5 rounded-full bg-emerald-300"></div>
+                      <div class="h-1.5 w-1.5 rounded-full bg-emerald-300"></div>
+                      <div class="h-1.5 w-1.5 rounded-full bg-emerald-300"></div>
+                      <div class="h-1.5 w-1.5 rounded-full bg-emerald-300"></div>
+                      <div class="h-1.5 w-1.5 rounded-full bg-emerald-300"></div>
+                      <div class="h-1.5 w-1.5 rounded-full bg-white/20"></div>
+                      <div class="h-1.5 w-1.5 rounded-full bg-white/20"></div>
+                    </div>
+                  </div>
+                  <div class="pl-2 text-right">
+                    <p class="opacity-60">Tuân thủ</p>
+                    <p class="font-bold">85%</p>
+                    <div class="mt-1 h-1 rounded-full bg-white/15">
+                      <div class="h-full rounded-full bg-sky-300" style="width: 85%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- BEFORE: Today's Plan Card -->
+              <div class="rounded-2xl border border-slate-200 bg-white p-3 shadow-md">
+                <div class="mb-2 flex items-center gap-2">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
+                    <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm font-semibold text-slate-900">Kế hoạch hôm nay</p>
+                    <p class="text-xs text-slate-500">Push Day • 5 bài tập</p>
+                  </div>
+                  <button class="ml-auto rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-medium text-white">
+                    Bắt đầu
+                  </button>
+                </div>
+                <div class="mt-2 border-t border-slate-100 pt-2">
+                  <div class="flex gap-2">
+                    <span
+                      class="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700"
+                      >✓ Sáng</span
+                    >
+                    <span
+                      class="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700"
+                      >✓ Trưa</span
+                    >
+                    <span class="rounded-full border border-dashed border-slate-300 px-2 py-0.5 text-xs text-slate-400"
+                      >+ Tối</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <!-- BEFORE: AI Insight -->
+              <div class="rounded-lg border-l-4 border-amber-400 bg-white p-4 shadow-sm">
+                <div class="flex gap-3">
+                  <span class="text-lg">💡</span>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-slate-900">Gợi ý dinh dưỡng</p>
+                    <p class="mt-0.5 text-xs text-slate-500">
+                      Bạn đang thiếu 764 kcal hôm nay. Hãy thêm bữa tối giàu carbs để đạt mục tiêu.
+                    </p>
+                  </div>
+                  <button class="self-start text-xs text-slate-400">✕</button>
+                </div>
+              </div>
+
+              <!-- BEFORE: Quick Actions Bar -->
+              <div class="flex gap-2">
+                <button
+                  class="flex h-12 flex-1 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white text-sm font-medium text-slate-700 shadow-sm"
+                >
+                  <svg class="h-4 w-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"
+                    />
+                  </svg>
+                  Cân nặng
+                </button>
+                <button
+                  class="flex h-12 flex-1 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white text-sm font-medium text-slate-700 shadow-sm"
+                >
+                  <svg class="h-4 w-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+                    />
+                  </svg>
+                  Cardio
+                </button>
+              </div>
+            </div>
+
+            <!-- Bottom nav -->
+            <div
+              class="absolute right-0 bottom-0 left-0 flex justify-around border-t border-slate-200 bg-white px-4 py-2"
+            >
+              <div class="flex flex-col items-center gap-0.5">
+                <div class="h-6 w-6 rounded-lg bg-emerald-500"></div>
+                <span class="text-[10px] font-medium text-emerald-600">Tổng quan</span>
+              </div>
+              <div class="flex flex-col items-center gap-0.5 opacity-50">
+                <div class="h-6 w-6 rounded-lg bg-slate-300"></div>
+                <span class="text-[10px] text-slate-500">Lịch trình</span>
+              </div>
+              <div class="flex flex-col items-center gap-0.5 opacity-50">
+                <div class="h-6 w-6 rounded-lg bg-slate-300"></div>
+                <span class="text-[10px] text-slate-500">Thư viện</span>
+              </div>
+              <div class="flex flex-col items-center gap-0.5 opacity-50">
+                <div class="h-6 w-6 rounded-lg bg-slate-300"></div>
+                <span class="text-[10px] text-slate-500">Tập luyện</span>
+              </div>
+              <div class="flex flex-col items-center gap-0.5 opacity-50">
+                <div class="h-6 w-6 rounded-lg bg-slate-300"></div>
+                <span class="text-[10px] text-slate-500">Phân tích</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Problem annotations -->
+        <div class="mt-4 max-w-[390px] space-y-2">
+          <div class="flex items-start gap-2 text-xs">
+            <span class="shrink-0 rounded bg-red-100 px-1.5 py-0.5 font-mono text-red-700">P1</span>
+            <span class="text-slate-600">Hero gradient quá loud — chiếm 60% viewport, cạnh tranh với nội dung</span>
+          </div>
+          <div class="flex items-start gap-2 text-xs">
+            <span class="shrink-0 rounded bg-red-100 px-1.5 py-0.5 font-mono text-red-700">P2</span>
+            <span class="text-slate-600">Calorie ring + macros + weekly stats NHỒI NHÉT vào 1 card — quá dense</span>
+          </div>
+          <div class="flex items-start gap-2 text-xs">
+            <span class="shrink-0 rounded bg-red-100 px-1.5 py-0.5 font-mono text-red-700">P3</span>
+            <span class="text-slate-600">Mọi thứ cùng 1 visual weight — không có focal point rõ ràng</span>
+          </div>
+          <div class="flex items-start gap-2 text-xs">
+            <span class="shrink-0 rounded bg-red-100 px-1.5 py-0.5 font-mono text-red-700">P4</span>
+            <span class="text-slate-600">Quick Actions chiếm full-width row nhưng chỉ có 2 nút — lãng phí</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== AFTER ===== -->
+      <div class="relative">
+        <div class="label-badge bg-emerald-600">SAU (Đề xuất)</div>
+        <div class="phone-frame mt-4" style="background: #ecfdf5">
+          <div class="phone-screen" style="background: #ecfdf5">
+            <!-- Status bar -->
+            <div class="flex h-12 items-end justify-between px-6 pb-1" style="background: #ecfdf5">
+              <span class="text-xs font-semibold text-slate-800">9:41</span>
+              <div class="flex gap-1">
+                <div class="h-2 w-4 rounded-sm bg-slate-800"></div>
+                <div class="h-2 w-4 rounded-sm bg-slate-800"></div>
+                <div class="h-2 w-4 rounded-sm bg-slate-800"></div>
+              </div>
+            </div>
+
+            <div class="space-y-5 px-4 pb-6">
+              <!-- AFTER: Greeting header (lightweight, no card) -->
+              <div class="flex items-center justify-between pt-1">
+                <div>
+                  <p class="text-xs font-medium text-emerald-700/70">Chào buổi tối 👋</p>
+                  <p class="-mt-0.5 text-xl font-bold text-slate-900">Tester</p>
+                </div>
+                <!-- Score badge: pill style -->
+                <div class="flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1">
+                  <div class="h-2 w-2 rounded-full bg-amber-400"></div>
+                  <span class="text-xs font-bold text-amber-700">72</span>
+                </div>
+              </div>
+
+              <!-- AFTER: Calorie Hero — FOCAL POINT -->
+              <div class="rounded-2xl border border-emerald-100/60 bg-white p-5 shadow-sm">
+                <div class="flex items-center gap-5">
+                  <!-- Large progress ring -->
+                  <div class="relative h-24 w-24 shrink-0">
+                    <svg viewBox="0 0 96 96" class="h-24 w-24 -rotate-90">
+                      <circle cx="48" cy="48" r="42" fill="none" stroke="#E1F2ED" stroke-width="6" />
+                      <circle
+                        cx="48"
+                        cy="48"
+                        r="42"
+                        fill="none"
+                        stroke="#059669"
+                        stroke-width="6"
+                        stroke-linecap="round"
+                        stroke-dasharray="264"
+                        stroke-dashoffset="98"
+                        class="ring-animated"
+                      />
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                      <span class="text-2xl font-bold text-slate-900" style="font-variant-numeric: tabular-nums"
+                        >1,327</span
+                      >
+                      <span class="-mt-0.5 text-[10px] text-slate-400">kcal</span>
+                    </div>
+                  </div>
+                  <!-- Calorie details -->
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-baseline gap-1.5">
+                      <span class="text-sm text-slate-500">Mục tiêu</span>
+                      <span class="text-lg font-bold text-slate-900" style="font-variant-numeric: tabular-nums"
+                        >2,091</span
+                      >
+                      <span class="text-xs text-slate-400">kcal</span>
+                    </div>
+                    <div class="mt-2 flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-1.5">
+                      <svg class="h-3.5 w-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M5 10l7-7m0 0l7 7m-7-7v18"
+                        />
+                      </svg>
+                      <span class="text-xs font-semibold text-emerald-700">Còn 764 kcal</span>
+                    </div>
+                    <p class="mt-1.5 text-[10px] text-slate-400">63% mục tiêu đạt được</p>
+                  </div>
+                </div>
+
+                <!-- Macro row — CLEAN, SEPARATED -->
+                <div class="mt-4 border-t border-slate-100 pt-3">
+                  <div class="grid grid-cols-3 gap-3">
+                    <!-- Protein -->
+                    <div>
+                      <div class="mb-1 flex items-center gap-1">
+                        <div class="h-2 w-2 rounded-full bg-emerald-500"></div>
+                        <span class="text-[10px] font-medium text-slate-500">Protein</span>
+                      </div>
+                      <p class="text-sm font-bold text-slate-900" style="font-variant-numeric: tabular-nums">
+                        170<span class="text-xs font-normal text-slate-400">/146g</span>
+                      </p>
+                      <div class="mt-1 h-1 rounded-full bg-slate-100">
+                        <div class="h-full rounded-full bg-emerald-500" style="width: 100%"></div>
+                      </div>
+                    </div>
+                    <!-- Fat -->
+                    <div>
+                      <div class="mb-1 flex items-center gap-1">
+                        <div class="h-2 w-2 rounded-full bg-amber-500"></div>
+                        <span class="text-[10px] font-medium text-slate-500">Fat</span>
+                      </div>
+                      <p class="text-sm font-bold text-slate-900" style="font-variant-numeric: tabular-nums">
+                        30<span class="text-xs font-normal text-slate-400">/58g</span>
+                      </p>
+                      <div class="mt-1 h-1 rounded-full bg-slate-100">
+                        <div class="h-full rounded-full bg-amber-500" style="width: 52%"></div>
+                      </div>
+                    </div>
+                    <!-- Carbs -->
+                    <div>
+                      <div class="mb-1 flex items-center gap-1">
+                        <div class="h-2 w-2 rounded-full bg-blue-500"></div>
+                        <span class="text-[10px] font-medium text-slate-500">Carbs</span>
+                      </div>
+                      <p class="text-sm font-bold text-slate-900" style="font-variant-numeric: tabular-nums">
+                        98<span class="text-xs font-normal text-slate-400">/241g</span>
+                      </p>
+                      <div class="mt-1 h-1 rounded-full bg-slate-100">
+                        <div class="h-full rounded-full bg-blue-500" style="width: 41%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- AFTER: Weekly Stats — SEPARATED from hero, minimal cards -->
+              <div class="grid grid-cols-3 gap-2.5">
+                <!-- Weight -->
+                <div class="stat-card rounded-xl border border-emerald-100/60 bg-white p-3 shadow-sm">
+                  <p class="text-[10px] font-medium tracking-wider text-slate-400 uppercase">Cân nặng</p>
+                  <p class="mt-0.5 text-lg font-bold text-slate-900" style="font-variant-numeric: tabular-nums">75.0</p>
+                  <div class="mt-0.5 flex items-center gap-1">
+                    <svg class="h-3 w-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                      />
+                    </svg>
+                    <span class="text-[10px] font-semibold text-emerald-600">−0.5 kg</span>
+                  </div>
+                </div>
+                <!-- Streak -->
+                <div class="stat-card rounded-xl border border-emerald-100/60 bg-white p-3 shadow-sm">
+                  <p class="text-[10px] font-medium tracking-wider text-slate-400 uppercase">Streak</p>
+                  <p class="mt-0.5 text-lg font-bold text-slate-900" style="font-variant-numeric: tabular-nums">5</p>
+                  <div class="mt-1 flex gap-[3px]">
+                    <div class="h-2 w-2 rounded-full bg-emerald-500"></div>
+                    <div class="h-2 w-2 rounded-full bg-emerald-500"></div>
+                    <div class="h-2 w-2 rounded-full bg-emerald-500"></div>
+                    <div class="h-2 w-2 rounded-full bg-emerald-500"></div>
+                    <div class="h-2 w-2 rounded-full bg-emerald-500"></div>
+                    <div class="h-2 w-2 rounded-full bg-slate-200"></div>
+                    <div class="h-2 w-2 rounded-full bg-slate-200"></div>
+                  </div>
+                </div>
+                <!-- Adherence -->
+                <div class="stat-card rounded-xl border border-emerald-100/60 bg-white p-3 shadow-sm">
+                  <p class="text-[10px] font-medium tracking-wider text-slate-400 uppercase">Tuân thủ</p>
+                  <p class="mt-0.5 text-lg font-bold text-slate-900" style="font-variant-numeric: tabular-nums">85%</p>
+                  <div class="mt-1.5 h-1.5 rounded-full bg-slate-100">
+                    <div class="h-full rounded-full bg-blue-500 transition-all" style="width: 85%"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- AFTER: Today's Plan — Cleaner, card-level hierarchy -->
+              <div>
+                <p class="section-label px-0.5">Kế hoạch hôm nay</p>
+                <div class="overflow-hidden rounded-2xl border border-emerald-100/60 bg-white shadow-sm">
+                  <!-- Workout section -->
+                  <div class="flex items-center gap-3 p-4">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
+                      <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M13 10V3L4 14h7v7l9-11h-7z"
+                        />
+                      </svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-semibold text-slate-900">Push Day</p>
+                      <p class="text-xs text-slate-500">5 bài tập • ~45 phút</p>
+                    </div>
+                    <button
+                      class="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-transform active:scale-[0.97]"
+                    >
+                      Bắt đầu
+                    </button>
+                  </div>
+                  <!-- Meal tracking -->
+                  <div class="border-t border-slate-100 bg-slate-50/80 px-4 py-3">
+                    <div class="mb-2 flex items-center justify-between">
+                      <p class="text-xs font-medium text-slate-500">Bữa ăn hôm nay</p>
+                      <p class="text-xs font-semibold text-emerald-600">2/3</p>
+                    </div>
+                    <div class="flex gap-2">
+                      <div
+                        class="flex h-9 flex-1 items-center justify-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50"
+                      >
+                        <svg class="h-3 w-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="text-xs font-medium text-emerald-700">Sáng</span>
+                      </div>
+                      <div
+                        class="flex h-9 flex-1 items-center justify-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50"
+                      >
+                        <svg class="h-3 w-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="text-xs font-medium text-emerald-700">Trưa</span>
+                      </div>
+                      <div
+                        class="flex h-9 flex-1 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white text-slate-400"
+                      >
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span class="text-xs font-medium">Tối</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- AFTER: AI Insight — subtle inline -->
+              <div class="flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50/80 px-4 py-3">
+                <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-100">
+                  <svg class="h-4 w-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                    />
+                  </svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-xs font-semibold text-amber-800">Gợi ý dinh dưỡng</p>
+                  <p class="mt-0.5 text-[11px] leading-relaxed text-amber-700/80">
+                    Thêm bữa tối giàu carbs để đạt mục tiêu 764 kcal còn lại.
+                  </p>
+                </div>
+                <button class="mt-0.5 text-amber-400 transition-colors hover:text-amber-600">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- AFTER: Quick Actions — compact pills, not full-width -->
+              <div class="flex gap-2">
+                <button
+                  class="stat-card flex items-center gap-2 rounded-xl border border-emerald-100/60 bg-white px-3.5 py-2.5 shadow-sm"
+                >
+                  <svg class="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"
+                    />
+                  </svg>
+                  <span class="text-xs font-semibold text-slate-700">Cân nặng</span>
+                </button>
+                <button
+                  class="stat-card flex items-center gap-2 rounded-xl border border-emerald-100/60 bg-white px-3.5 py-2.5 shadow-sm"
+                >
+                  <svg class="h-4 w-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+                    />
+                  </svg>
+                  <span class="text-xs font-semibold text-slate-700">Cardio</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Bottom nav -->
+            <div
+              class="absolute right-0 bottom-0 left-0 flex justify-around border-t border-emerald-100 bg-white/90 px-4 py-2 backdrop-blur-sm"
+            >
+              <div class="flex flex-col items-center gap-0.5">
+                <div class="h-6 w-6 rounded-lg bg-emerald-500"></div>
+                <span class="text-[10px] font-semibold text-emerald-600">Tổng quan</span>
+              </div>
+              <div class="flex flex-col items-center gap-0.5 opacity-40">
+                <div class="h-6 w-6 rounded-lg bg-slate-300"></div>
+                <span class="text-[10px] text-slate-500">Lịch trình</span>
+              </div>
+              <div class="flex flex-col items-center gap-0.5 opacity-40">
+                <div class="h-6 w-6 rounded-lg bg-slate-300"></div>
+                <span class="text-[10px] text-slate-500">Thư viện</span>
+              </div>
+              <div class="flex flex-col items-center gap-0.5 opacity-40">
+                <div class="h-6 w-6 rounded-lg bg-slate-300"></div>
+                <span class="text-[10px] text-slate-500">Tập luyện</span>
+              </div>
+              <div class="flex flex-col items-center gap-0.5 opacity-40">
+                <div class="h-6 w-6 rounded-lg bg-slate-300"></div>
+                <span class="text-[10px] text-slate-500">Phân tích</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Improvement annotations -->
+        <div class="mt-4 max-w-[390px] space-y-2">
+          <div class="flex items-start gap-2 text-xs">
+            <span class="shrink-0 rounded bg-emerald-100 px-1.5 py-0.5 font-mono text-emerald-700">✓1</span>
+            <span class="text-slate-600"
+              >Xóa gradient hero → greeting nhẹ nhàng, CALORIE RING lớn 96px là focal point</span
+            >
+          </div>
+          <div class="flex items-start gap-2 text-xs">
+            <span class="shrink-0 rounded bg-emerald-100 px-1.5 py-0.5 font-mono text-emerald-700">✓2</span>
+            <span class="text-slate-600">Weekly stats TÁCH ra 3 card nhỏ riêng — dễ đọc, không chen chúc</span>
+          </div>
+          <div class="flex items-start gap-2 text-xs">
+            <span class="shrink-0 rounded bg-emerald-100 px-1.5 py-0.5 font-mono text-emerald-700">✓3</span>
+            <span class="text-slate-600">Visual hierarchy rõ ràng: Calorie → Stats → Plan → Insight → Actions</span>
+          </div>
+          <div class="flex items-start gap-2 text-xs">
+            <span class="shrink-0 rounded bg-emerald-100 px-1.5 py-0.5 font-mono text-emerald-700">✓4</span>
+            <span class="text-slate-600">Quick Actions thu gọn thành pills nhỏ, không chiếm full-width</span>
+          </div>
+          <div class="flex items-start gap-2 text-xs">
+            <span class="shrink-0 rounded bg-emerald-100 px-1.5 py-0.5 font-mono text-emerald-700">✓5</span>
+            <span class="text-slate-600">Nền emerald-50 ấm (#ECFDF5) thay vì trắng lạnh — thống nhất brand</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- DETAILED SECTION BREAKDOWN -->
+    <!-- ============================================ -->
+    <div class="mx-auto mt-16 max-w-[900px] space-y-12">
+      <h2 class="border-b border-slate-200 pb-3 text-xl font-bold text-slate-900">Chi tiết thay đổi từng section</h2>
+
+      <!-- Section 1: Greeting -->
+      <div>
+        <h3 class="mb-4 text-base font-semibold text-slate-800">1. Greeting Header</h3>
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <p class="section-label text-red-400">TRƯỚC</p>
+            <div class="rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-500 p-4 text-white">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs opacity-80">Chào buổi tối 👋</p>
+                  <p class="text-sm font-semibold">Tester</p>
+                </div>
+                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-amber-400">
+                  <span class="text-sm font-bold text-amber-900">72</span>
+                </div>
+              </div>
+            </div>
+            <p class="mt-2 text-xs text-slate-400">
+              Gradient background + score circle. Greeting bị mờ (opacity 80%), score badge dễ nhầm với avatar.
+            </p>
+          </div>
+          <div>
+            <p class="section-label text-emerald-500">SAU</p>
+            <div class="rounded-xl p-4" style="background: #ecfdf5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs font-medium text-emerald-700/70">Chào buổi tối 👋</p>
+                  <p class="-mt-0.5 text-xl font-bold text-slate-900">Tester</p>
+                </div>
+                <div class="flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1">
+                  <div class="h-2 w-2 rounded-full bg-amber-400"></div>
+                  <span class="text-xs font-bold text-amber-700">72</span>
+                </div>
+              </div>
+            </div>
+            <p class="mt-2 text-xs text-slate-400">
+              Flat background. Tên user lớn hơn (xl). Score badge rõ ràng dạng pill với dot chỉ màu.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Calorie Ring -->
+      <div>
+        <h3 class="mb-4 text-base font-semibold text-slate-800">2. Calorie Ring (Focal Point)</h3>
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <p class="section-label text-red-400">TRƯỚC — 48×48px, nhồi trong gradient card</p>
+            <div class="flex items-center gap-3 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-500 p-4">
+              <div class="relative h-12 w-12 shrink-0">
+                <svg viewBox="0 0 48 48" class="h-12 w-12 -rotate-90">
+                  <circle cx="24" cy="24" r="20" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="4" />
+                  <circle
+                    cx="24"
+                    cy="24"
+                    r="20"
+                    fill="none"
+                    stroke="#fff"
+                    stroke-width="4"
+                    stroke-linecap="round"
+                    stroke-dasharray="126"
+                    stroke-dashoffset="42"
+                  />
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span class="text-[10px] font-bold text-white">63%</span>
+                </div>
+              </div>
+              <div>
+                <span class="text-xl font-bold text-white">1,327</span
+                ><span class="text-xs text-white/70"> / 2,091</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p class="section-label text-emerald-500">SAU — 96×96px, white card, command attention</p>
+            <div class="rounded-xl border border-emerald-100/60 bg-white p-5 shadow-sm">
+              <div class="flex items-center gap-5">
+                <div class="relative h-24 w-24 shrink-0">
+                  <svg viewBox="0 0 96 96" class="h-24 w-24 -rotate-90">
+                    <circle cx="48" cy="48" r="42" fill="none" stroke="#E1F2ED" stroke-width="6" />
+                    <circle
+                      cx="48"
+                      cy="48"
+                      r="42"
+                      fill="none"
+                      stroke="#059669"
+                      stroke-width="6"
+                      stroke-linecap="round"
+                      stroke-dasharray="264"
+                      stroke-dashoffset="98"
+                      class="ring-animated"
+                    />
+                  </svg>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span class="text-2xl font-bold text-slate-900">1,327</span
+                    ><span class="-mt-0.5 text-[10px] text-slate-400">kcal</span>
+                  </div>
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-baseline gap-1.5">
+                    <span class="text-sm text-slate-500">Mục tiêu</span
+                    ><span class="text-lg font-bold text-slate-900">2,091</span
+                    ><span class="text-xs text-slate-400">kcal</span>
+                  </div>
+                  <div class="mt-2 flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-1.5">
+                    <span class="text-xs font-semibold text-emerald-700">↑ Còn 764 kcal</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Weekly Stats -->
+      <div>
+        <h3 class="mb-4 text-base font-semibold text-slate-800">3. Weekly Stats</h3>
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <p class="section-label text-red-400">TRƯỚC — Nhồi vào hero, hard to scan</p>
+            <div class="rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-500 p-3 text-white">
+              <div class="grid grid-cols-3 divide-x divide-white/10 text-xs">
+                <div class="pr-2">
+                  <p class="opacity-60">Cân nặng</p>
+                  <p class="font-bold">75.0 kg</p>
+                  <p class="text-[10px] text-emerald-300">↓ 0.5</p>
+                </div>
+                <div class="px-2 text-center">
+                  <p class="opacity-60">Streak</p>
+                  <p class="font-bold">5 ngày</p>
+                </div>
+                <div class="pl-2 text-right">
+                  <p class="opacity-60">Tuân thủ</p>
+                  <p class="font-bold">85%</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p class="section-label text-emerald-500">SAU — 3 card tách biệt, dễ scan từng metric</p>
+            <div class="grid grid-cols-3 gap-2">
+              <div class="rounded-xl border border-emerald-100/60 bg-white p-3 shadow-sm">
+                <p class="text-[10px] font-medium tracking-wider text-slate-400 uppercase">Cân nặng</p>
+                <p class="mt-0.5 text-lg font-bold text-slate-900">75.0</p>
+                <div class="mt-0.5 flex items-center gap-1">
+                  <span class="text-[10px] font-semibold text-emerald-600">↓ −0.5 kg</span>
+                </div>
+              </div>
+              <div class="rounded-xl border border-emerald-100/60 bg-white p-3 shadow-sm">
+                <p class="text-[10px] font-medium tracking-wider text-slate-400 uppercase">Streak</p>
+                <p class="mt-0.5 text-lg font-bold text-slate-900">5</p>
+                <div class="mt-1 flex gap-[3px]">
+                  <div class="h-2 w-2 rounded-full bg-emerald-500"></div>
+                  <div class="h-2 w-2 rounded-full bg-emerald-500"></div>
+                  <div class="h-2 w-2 rounded-full bg-emerald-500"></div>
+                  <div class="h-2 w-2 rounded-full bg-emerald-500"></div>
+                  <div class="h-2 w-2 rounded-full bg-emerald-500"></div>
+                  <div class="h-2 w-2 rounded-full bg-slate-200"></div>
+                  <div class="h-2 w-2 rounded-full bg-slate-200"></div>
+                </div>
+              </div>
+              <div class="rounded-xl border border-emerald-100/60 bg-white p-3 shadow-sm">
+                <p class="text-[10px] font-medium tracking-wider text-slate-400 uppercase">Tuân thủ</p>
+                <p class="mt-0.5 text-lg font-bold text-slate-900">85%</p>
+                <div class="mt-1.5 h-1.5 rounded-full bg-slate-100">
+                  <div class="h-full rounded-full bg-blue-500" style="width: 85%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Today's Plan -->
+      <div>
+        <h3 class="mb-4 text-base font-semibold text-slate-800">4. Kế hoạch hôm nay</h3>
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <p class="section-label text-red-400">TRƯỚC — Flat card, meal badges lẫn lộn</p>
+            <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-md">
+              <div class="mb-2 flex items-center gap-2">
+                <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
+                  <span class="text-sm text-blue-500">📋</span>
+                </div>
+                <div>
+                  <p class="text-sm font-semibold">Kế hoạch hôm nay</p>
+                  <p class="text-xs text-slate-500">Push Day • 5 bài tập</p>
+                </div>
+                <button class="ml-auto rounded-lg bg-blue-500 px-3 py-1.5 text-xs text-white">Bắt đầu</button>
+              </div>
+              <div class="flex gap-2 border-t pt-2">
+                <span class="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700"
+                  >✓ Sáng</span
+                >
+                <span class="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700"
+                  >✓ Trưa</span
+                >
+                <span class="rounded-full border border-dashed border-slate-300 px-2 py-0.5 text-xs text-slate-400"
+                  >+ Tối</span
+                >
+              </div>
+            </div>
+          </div>
+          <div>
+            <p class="section-label text-emerald-500">SAU — 2 zones (workout + meals), cleaner badges</p>
+            <div class="overflow-hidden rounded-xl border border-emerald-100/60 bg-white shadow-sm">
+              <div class="flex items-center gap-3 p-4">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
+                  <span class="text-base text-blue-500">⚡</span>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-semibold">Push Day</p>
+                  <p class="text-xs text-slate-500">5 bài tập • ~45 phút</p>
+                </div>
+                <button class="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white">Bắt đầu</button>
+              </div>
+              <div class="border-t border-slate-100 bg-slate-50/80 px-4 py-3">
+                <div class="mb-2 flex items-center justify-between">
+                  <p class="text-xs font-medium text-slate-500">Bữa ăn hôm nay</p>
+                  <p class="text-xs font-semibold text-emerald-600">2/3</p>
+                </div>
+                <div class="flex gap-2">
+                  <div
+                    class="flex h-9 flex-1 items-center justify-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50"
+                  >
+                    <span class="text-xs font-medium text-emerald-700">✓ Sáng</span>
+                  </div>
+                  <div
+                    class="flex h-9 flex-1 items-center justify-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50"
+                  >
+                    <span class="text-xs font-medium text-emerald-700">✓ Trưa</span>
+                  </div>
+                  <div
+                    class="flex h-9 flex-1 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-white text-slate-400"
+                  >
+                    <span class="text-xs font-medium">+ Tối</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: AI Insight -->
+      <div>
+        <h3 class="mb-4 text-base font-semibold text-slate-800">5. AI Insight Banner</h3>
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <p class="section-label text-red-400">TRƯỚC — Card with left border, emoji icon</p>
+            <div class="rounded-lg border-l-4 border-amber-400 bg-white p-4 shadow-sm">
+              <div class="flex gap-3">
+                <span class="text-lg">💡</span>
+                <div class="flex-1">
+                  <p class="text-sm font-medium">Gợi ý dinh dưỡng</p>
+                  <p class="mt-0.5 text-xs text-slate-500">Bạn đang thiếu 764 kcal...</p>
+                </div>
+                <button class="text-xs text-slate-400">✕</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p class="section-label text-emerald-500">SAU — Subtle bg tint, SVG icon, rounded</p>
+            <div class="flex items-start gap-3 rounded-xl border border-amber-100 bg-amber-50/80 px-4 py-3">
+              <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-100">
+                <span class="text-sm text-amber-600">💡</span>
+              </div>
+              <div class="flex-1">
+                <p class="text-xs font-semibold text-amber-800">Gợi ý dinh dưỡng</p>
+                <p class="mt-0.5 text-[11px] text-amber-700/80">Thêm bữa tối giàu carbs để đạt mục tiêu.</p>
+              </div>
+              <button class="mt-0.5 text-amber-400"><span class="text-sm">✕</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary table -->
+      <div class="mt-12 overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <table class="w-full text-xs">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="px-4 py-3 text-left font-semibold text-slate-600">Thay đổi</th>
+              <th class="px-4 py-3 text-left font-semibold text-red-500">Trước</th>
+              <th class="px-4 py-3 text-left font-semibold text-emerald-600">Sau</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr>
+              <td class="px-4 py-2.5 font-medium text-slate-700">Hero background</td>
+              <td class="px-4 py-2.5 text-slate-500">Gradient emerald-600→500</td>
+              <td class="px-4 py-2.5 text-slate-500">Flat background (#ECFDF5)</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-medium text-slate-700">Calorie ring size</td>
+              <td class="px-4 py-2.5 text-slate-500">48×48px (tiny)</td>
+              <td class="px-4 py-2.5 text-slate-500">96×96px (focal point)</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-medium text-slate-700">Calorie number</td>
+              <td class="px-4 py-2.5 text-slate-500">White text on gradient</td>
+              <td class="px-4 py-2.5 text-slate-500">Dark text, tabular-nums, center ring</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-medium text-slate-700">Macro bars</td>
+              <td class="px-4 py-2.5 text-slate-500">Inside gradient, white-on-green</td>
+              <td class="px-4 py-2.5 text-slate-500">White card, color dots + dark text</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-medium text-slate-700">Weekly stats</td>
+              <td class="px-4 py-2.5 text-slate-500">3-col divider inside hero</td>
+              <td class="px-4 py-2.5 text-slate-500">3 separate mini cards</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-medium text-slate-700">Today's Plan</td>
+              <td class="px-4 py-2.5 text-slate-500">Single flat card, badges</td>
+              <td class="px-4 py-2.5 text-slate-500">2-zone card (workout + meals)</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-medium text-slate-700">AI Insight</td>
+              <td class="px-4 py-2.5 text-slate-500">White card, left-border accent</td>
+              <td class="px-4 py-2.5 text-slate-500">Tinted bg, rounded, inline feel</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-medium text-slate-700">Quick Actions</td>
+              <td class="px-4 py-2.5 text-slate-500">Full-width rounded-full buttons</td>
+              <td class="px-4 py-2.5 text-slate-500">Compact pill buttons (fit content)</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-medium text-slate-700">Score badge</td>
+              <td class="px-4 py-2.5 text-slate-500">Circle in hero (looks like avatar)</td>
+              <td class="px-4 py-2.5 text-slate-500">Pill badge with color dot</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2.5 font-medium text-slate-700">Section labels</td>
+              <td class="px-4 py-2.5 text-slate-500">None</td>
+              <td class="px-4 py-2.5 text-slate-500">Uppercase muted labels (e.g. "KẾ HOẠCH HÔM NAY")</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Design principles applied -->
+      <div class="rounded-xl border border-slate-200 bg-slate-50 p-6">
+        <h3 class="mb-3 text-sm font-bold text-slate-800">Nguyên tắc thiết kế áp dụng</h3>
+        <div class="grid grid-cols-2 gap-4 text-xs text-slate-600">
+          <div class="flex items-start gap-2">
+            <span class="mt-0.5 text-emerald-500">●</span>
+            <div>
+              <strong>Visual Hierarchy</strong>: Calorie ring 96px → Stats 3-card → Plan card → Insight inline → Quick
+              pills
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="mt-0.5 text-emerald-500">●</span>
+            <div><strong>Breathing Room</strong>: gap-5 giữa sections (thay vì gap-3), giúp mắt nghỉ</div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="mt-0.5 text-emerald-500">●</span>
+            <div><strong>Warm Palette</strong>: Nền #ECFDF5, border #E1F2ED — brand emerald xuyên suốt</div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="mt-0.5 text-emerald-500">●</span>
+            <div><strong>Tabular Nums</strong>: Tất cả số liệu dùng tabular-nums tránh layout shift</div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="mt-0.5 text-emerald-500">●</span>
+            <div><strong>Progressive Disclosure</strong>: Hero chỉ hiện calorie + macros, weekly stats tách riêng</div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="mt-0.5 text-emerald-500">●</span>
+            <div><strong>Press Feedback</strong>: Stat cards + quick actions có scale-[0.97] on active</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mx-auto mt-8 mb-12 max-w-[900px] text-center text-xs text-slate-400">
+      <p>
+        Mở file này trong browser để preview:
+        <code class="rounded bg-slate-100 px-2 py-0.5">open docs/mockup/TODO-08-dashboard.html</code>
+      </p>
+    </div>
+  </body>
+</html>
