@@ -280,6 +280,16 @@ input[type='number'] {
   --text-card-title: 1rem; /* 16px — card/item titles (font-semibold) */
   --text-card-title--line-height: 1.5;
 
+  /* ── Spacing rhythm tokens (8dp system) ──
+     6-level scale: inline-tight → inline-gap → card-padding → card-gap → section-gap → breathing
+     Generates Tailwind utilities: p-[--spacing-card-padding], gap-[--spacing-card-gap], etc. */
+  --spacing-inline-tight: 0.25rem; /* 4px — icon↔text, tight inline pairs */
+  --spacing-inline-gap: 0.5rem; /* 8px — badge↔badge, small element gaps */
+  --spacing-card-padding: 0.75rem; /* 12px — content padding inside cards */
+  --spacing-card-gap: 1rem; /* 16px — card↔card within same section */
+  --spacing-section-gap: 1.5rem; /* 24px — section↔section vertical rhythm */
+  --spacing-breathing: 2rem; /* 32px — major section dividers, page breathing room */
+
   /* ── Border radius scale ── */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
