@@ -209,4 +209,75 @@ Some empty states use only text ("Chưa có món"). Adding small illustrations o
 
 ---
 
-_Report generated from visual inspection of 464 emulator screenshots. No code changes were made during this review._
+## Appendix B: UI/UX Fixes Implemented (2026-04-07)
+
+Based on this review + 5 external critique documents, 23 fixes were implemented across 38 source files. Commits: `2ccadc2` (UI/UX) + `a4d6b3a` (SonarQube cleanup).
+
+### Wave 1 — WCAG Accessibility
+
+| TODO | Fix                                                         | Files           |
+| ---- | ----------------------------------------------------------- | --------------- |
+| 01   | Added AlertCircle icon before error text (color-blind safe) | `FormField.tsx` |
+| 14   | Fixed error+focus ring conflict with compound CSS state     | `input.tsx`     |
+
+### Wave 2 — Interaction Design (Fitts's Law / Hick's Law)
+
+| TODO | Fix                                                   | Files                                      |
+| ---- | ----------------------------------------------------- | ------------------------------------------ |
+| 04   | Delete buttons red by default (`text-destructive/70`) | `DishManager.tsx`, `IngredientManager.tsx` |
+| 05   | Cardio timer: increased gap, smaller stop button      | `CardioLogger.tsx`                         |
+| 18   | Cardio type toggle in segmented control container     | `CardioLogger.tsx`                         |
+| 19   | Exercise delete button separated with border divider  | `PlanDayEditor.tsx`                        |
+
+### Wave 3 — Form Enhancements
+
+| TODO | Fix                                                        | Files                                                                                      |
+| ---- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 07   | CardioLogger `type=number` → `type=text inputMode=numeric` | `CardioLogger.tsx`                                                                         |
+| 08   | maxLength on name inputs (80) and search inputs (100)      | `DishEditModal.tsx`, `IngredientEditModal.tsx`, `CustomExerciseModal.tsx`, 5 search inputs |
+| 17   | Placeholders on cardio numeric inputs                      | `CardioLogger.tsx`                                                                         |
+| 22   | Character counter for name inputs near limit (>80%)        | `DishEditModal.tsx`, `IngredientEditModal.tsx`                                             |
+| 23   | Form reset on modal reopen with different item             | `DishEditModal.tsx`, `IngredientEditModal.tsx`                                             |
+| 28   | Protein remaining label: `'g'` → `'g Pro'`                 | `MealPlannerModal.tsx`                                                                     |
+| 30   | Max validation: calories ≤999, macros ≤100 per 100g        | `ingredientEditSchema.ts`                                                                  |
+
+### Wave 4 — Visual Polish & Dark Mode
+
+| TODO | Fix                                                 | Files                                  |
+| ---- | --------------------------------------------------- | -------------------------------------- |
+| 02   | Dark mode foreground-secondary lightness 0.704→0.75 | `index.css`                            |
+| 09   | Progress bar active opacity 15%→25%                 | `OnboardingProgress.tsx`               |
+| 10   | Loading spinner → skeleton layout                   | `AppNavigation.tsx`, `SettingsTab.tsx` |
+| 11   | Dark mode card elevation 0.279→0.295                | `index.css`                            |
+| 16   | kcal/ngày text: removed opacity, increased size     | `HealthConfirmStep.tsx`                |
+
+### Wave 5 — i18n & Display Fixes
+
+| TODO | Fix                                                      | Files                   |
+| ---- | -------------------------------------------------------- | ----------------------- |
+| 20   | Removed English "(Strength)"/"(Freestyle)" from vi.json  | `vi.json`               |
+| 24   | Exercise name truncation with `min-w-0 truncate`         | `TrainingPlanView.tsx`  |
+| 25   | "+0%" → "—" when no previous week data                   | `ProgressDashboard.tsx` |
+| 26   | Weight change label includes "(7 ngày qua)" timeframe    | `vi.json`               |
+| 29   | Cardio day shows "Cardio" instead of "0 bài tập ~0 phút" | `TrainingPlanView.tsx`  |
+
+### SonarQube Cleanup (32 issues → 0)
+
+Commit `a4d6b3a` resolved 32 SonarQube issues across 18 files:
+
+- 3 CRITICAL: Cognitive complexity in `useDailyScore`, `TrainingPlanView`, `NutritionHero`
+- 4 MAJOR: Nested template literals, nested ternaries, `<progress>` element
+- 25 MINOR: Negated conditions, `Readonly<>` props, import consolidation
+
+### Quality Gates Final Status
+
+| Gate            | Result                                       |
+| --------------- | -------------------------------------------- |
+| `npm run lint`  | ✅ 0 errors                                  |
+| `npm run test`  | ✅ 4959 tests pass (191 files)               |
+| `npm run build` | ✅ Clean, main chunk 254kB                   |
+| SonarQube       | ✅ 0 issues (Bug, Vulnerability, Code Smell) |
+
+---
+
+_Report generated from visual inspection of 464 emulator screenshots. Appendix B added after implementing 23 UI/UX fixes + 32 SonarQube fixes._
