@@ -912,28 +912,11 @@ async def test_tier_composition(session):
 # ── Main runner ────────────────────────────────────────────────
 
 async def run():
-    # ── Phase A: First-time user tests (before onboarding) ─────
+    # ── Full onboarding then all dashboard tests ──────
     print(f"\n{'━' * 60}")
-    print(f"  Phase A: First-time user (no onboarding)")
+    print(f"  Dashboard Score Tests (post-onboarding)")
     print(f"{'━' * 60}")
-    session_fresh = await setup_fresh(full_onboard=False, scenario=SC)
-    await session_fresh.nav_dashboard()
-    await session_fresh.wait(WAIT_NAV_CLICK)
-
-    await test_first_time_user(session_fresh)
-    await test_onboarding_checklist(session_fresh)
-
-    # Close fresh session websocket
-    try:
-        await session_fresh.ws.close()
-    except Exception:
-        pass
-
-    # ── Phase B: Full onboarding then all dashboard tests ──────
-    print(f"\n{'━' * 60}")
-    print(f"  Phase B: Post-onboarding dashboard tests")
-    print(f"{'━' * 60}")
-    session = await setup_fresh(full_onboard=True, scenario=SC)
+    session = await setup_fresh(scenario=SC)
 
     # Navigate to dashboard
     await session.nav_dashboard()

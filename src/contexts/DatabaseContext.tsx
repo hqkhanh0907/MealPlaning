@@ -53,7 +53,10 @@ export function DatabaseProvider({ children }: Readonly<{ children: React.ReactN
           useDishStore.getState().loadAll(service),
           useDayPlanStore.getState().loadAll(service),
           useMealTemplateStore.getState().loadAll(service),
-          useHealthProfileStore.getState().loadProfile(service),
+          useHealthProfileStore
+            .getState()
+            .loadProfile(service)
+            .then(() => useHealthProfileStore.getState().loadActiveGoal(service)),
           useFitnessStore.getState().initializeFromSQLite(service),
         ]);
 

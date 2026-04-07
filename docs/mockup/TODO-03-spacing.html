@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>TODO-03: Spacing & Rhythm — TRƯỚC / SAU</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f1f5f9;
+        color: #1e293b;
+      }
+      .container {
+        max-width: 420px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      h1 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+      .subtitle {
+        font-size: 13px;
+        color: #64748b;
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      .section-label {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 24px 0 12px;
+        padding: 8px 12px;
+        border-radius: 8px;
+      }
+      .before-label {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .after-label {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .arrow {
+        text-align: center;
+        font-size: 24px;
+        margin: 16px 0;
+        color: #059669;
+      }
+      .divider {
+        height: 1px;
+        background: #e2e8f0;
+        margin: 20px 0;
+      }
+      .mock-text-xs {
+        font-size: 10px;
+      }
+
+      /* Spacing demo */
+      .spacing-demo {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        margin-bottom: 16px;
+      }
+      .spacing-section {
+        padding: 12px 16px;
+      }
+      .spacing-card {
+        background: white;
+        border-radius: 8px;
+        padding: 10px;
+        border: 1px solid #e2e8f0;
+      }
+      .spacing-indicator {
+        position: relative;
+      }
+      .spacing-ruler {
+        position: absolute;
+        right: -36px;
+        top: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .ruler-line {
+        width: 16px;
+        height: 1px;
+        background: #ef4444;
+      }
+      .ruler-text {
+        font-size: 8px;
+        color: #ef4444;
+        transform: rotate(-90deg);
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📏 TODO-03: Spacing & Rhythm</h1>
+      <p class="subtitle">
+        So sánh khoảng cách HIỆN TẠI vs ĐỀ XUẤT<br />Nguồn: ui-ux-pro-max "spacing-scale" 8dp system
+      </p>
+
+      <!-- ============ SPACING SCALE ============ -->
+      <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 12px">Spacing Scale — 8dp System</h2>
+
+      <div
+        style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; margin-bottom: 16px"
+      >
+        <!-- Visual scale -->
+        <div style="display: flex; flex-direction: column; gap: 6px">
+          <div style="display: flex; align-items: center; gap: 8px">
+            <div style="width: 4px; height: 12px; background: #059669; border-radius: 2px"></div>
+            <span style="font-size: 11px; font-family: monospace; color: #475569; width: 50px">4px</span>
+            <span style="font-size: 10px; color: #94a3b8">inline-tight (icon↔text)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <div style="width: 8px; height: 12px; background: #059669; border-radius: 2px"></div>
+            <span style="font-size: 11px; font-family: monospace; color: #475569; width: 50px">8px</span>
+            <span style="font-size: 10px; color: #94a3b8">inline-gap (badge↔badge)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <div style="width: 12px; height: 12px; background: #10b981; border-radius: 2px"></div>
+            <span style="font-size: 11px; font-family: monospace; color: #475569; width: 50px">12px</span>
+            <span style="font-size: 10px; color: #94a3b8">card-padding (content bên trong card)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <div style="width: 16px; height: 12px; background: #10b981; border-radius: 2px"></div>
+            <span style="font-size: 11px; font-family: monospace; color: #475569; width: 50px">16px</span>
+            <span style="font-size: 10px; color: #94a3b8">card-gap (card↔card cùng section)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <div style="width: 24px; height: 12px; background: #059669; border-radius: 2px"></div>
+            <span style="font-size: 11px; font-family: monospace; color: #475569; width: 50px">24px</span>
+            <span style="font-size: 10px; color: #94a3b8">section-gap (section↔section)</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <div style="width: 32px; height: 12px; background: #047857; border-radius: 2px"></div>
+            <span style="font-size: 11px; font-family: monospace; color: #475569; width: 50px">32px</span>
+            <span style="font-size: 10px; color: #94a3b8">breathing (major section dividers)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ BEFORE ============ -->
+      <div class="section-label before-label">❌ TRƯỚC — Uniform padding (mọi thứ 16px)</div>
+
+      <div class="spacing-demo" style="background: white">
+        <div style="padding: 16px">
+          <div style="font-size: 14px; font-weight: 600; margin-bottom: 16px">Kế hoạch hôm nay</div>
+
+          <!-- Card 1 -->
+          <div
+            style="
+              background: #f8fafc;
+              padding: 16px;
+              border-radius: 8px;
+              margin-bottom: 16px;
+              border: 1px solid #e2e8f0;
+            "
+          >
+            <div style="font-size: 14px; font-weight: 500">Bữa Sáng</div>
+            <div style="font-size: 12px; color: #64748b; margin-top: 16px">487 kcal • 38g protein</div>
+          </div>
+
+          <!-- Card 2 — same gap everywhere -->
+          <div
+            style="
+              background: #f8fafc;
+              padding: 16px;
+              border-radius: 8px;
+              margin-bottom: 16px;
+              border: 1px solid #e2e8f0;
+            "
+          >
+            <div style="font-size: 14px; font-weight: 500">Bữa Trưa</div>
+            <div style="font-size: 12px; color: #64748b; margin-top: 16px">510 kcal • 70g protein</div>
+          </div>
+
+          <!-- Section header — same gap as cards -->
+          <div style="font-size: 14px; font-weight: 600; margin-bottom: 16px">Mẹo dinh dưỡng</div>
+          <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0">
+            <div style="font-size: 12px; color: #64748b">Uống 2L nước mỗi ngày giúp tăng cường trao đổi chất.</div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style="background: white; border-radius: 10px; padding: 10px; margin-bottom: 12px; border: 1px solid #e2e8f0"
+      >
+        <p style="font-size: 11px; color: #dc2626">
+          ⚠️ <strong>Vấn đề</strong>:<br />
+          • Card↔Card = 16px, Section↔Section = 16px, Content↔Label = 16px → Tất cả bằng nhau<br />
+          • Không phân biệt được đâu là "nhóm liên quan" vs "phần mới"<br />
+          • Cảm giác "bẹp phẳng" — mọi thứ cùng mức quan trọng
+        </p>
+      </div>
+
+      <div class="arrow">⬇</div>
+
+      <!-- ============ AFTER ============ -->
+      <div class="section-label after-label">✅ SAU — Rhythmic spacing (4-8-12-16-24-32)</div>
+
+      <div class="spacing-demo" style="background: #ecfdf5">
+        <div style="padding: 16px">
+          <!-- Section 1: Kế hoạch — uses section header + tight card gap -->
+          <div style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #0f172a">Kế hoạch hôm nay</div>
+
+          <!-- Card 1 -->
+          <div
+            style="background: white; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #e1f2ed"
+          >
+            <div style="font-size: 16px; font-weight: 600; color: #0f172a">Bữa Sáng</div>
+            <div style="font-size: 12px; color: #64748b; margin-top: 4px">487 kcal • 38g protein</div>
+          </div>
+
+          <!-- Card 2 — tight gap (8px) within same section -->
+          <div style="background: white; padding: 12px; border-radius: 10px; border: 1px solid #e1f2ed">
+            <div style="font-size: 16px; font-weight: 600; color: #0f172a">Bữa Trưa</div>
+            <div style="font-size: 12px; color: #64748b; margin-top: 4px">510 kcal • 70g protein</div>
+          </div>
+
+          <!-- BREATHING SPACE between sections (32px) -->
+          <div style="height: 32px"></div>
+
+          <!-- Section 2: Tips — clearly separated -->
+          <div style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #0f172a">Mẹo dinh dưỡng</div>
+          <div style="background: white; padding: 12px; border-radius: 10px; border: 1px solid #e1f2ed">
+            <div style="font-size: 14px; color: #475569; line-height: 1.6">
+              Uống 2L nước mỗi ngày giúp tăng cường trao đổi chất.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style="background: white; border-radius: 10px; padding: 10px; margin-bottom: 12px; border: 1px solid #e2e8f0"
+      >
+        <p style="font-size: 11px; color: #059669">
+          ✅ <strong>Cải thiện</strong>:<br />
+          • Content nội bộ card: 4px (tight) — liên quan trực tiếp<br />
+          • Card↔Card cùng nhóm: 8px (close) — thuộc cùng section<br />
+          • Section header↔card: 12px (moderate)<br />
+          • Section↔Section: 32px (breathing) — phân biệt rõ ràng<br />
+          • Tạo "nhịp thở" — mắt biết khi nào hết 1 phần và bắt đầu phần mới
+        </p>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ============ VISUAL RHYTHM COMPARISON ============ -->
+      <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 12px">Visual Rhythm — Nhịp thở</h2>
+
+      <div style="display: flex; gap: 12px; margin-bottom: 16px">
+        <!-- BEFORE rhythm -->
+        <div style="flex: 1">
+          <p class="mock-text-xs" style="color: #991b1b; font-weight: 600; margin-bottom: 6px; text-align: center">
+            ❌ Uniform
+          </p>
+          <div style="display: flex; flex-direction: column; align-items: center">
+            <div style="width: 100%; height: 20px; background: #cbd5e1; border-radius: 4px"></div>
+            <div style="height: 16px; display: flex; align-items: center">
+              <span style="font-size: 8px; color: #ef4444">16px</span>
+            </div>
+            <div style="width: 100%; height: 20px; background: #cbd5e1; border-radius: 4px"></div>
+            <div style="height: 16px; display: flex; align-items: center">
+              <span style="font-size: 8px; color: #ef4444">16px</span>
+            </div>
+            <div style="width: 100%; height: 20px; background: #cbd5e1; border-radius: 4px"></div>
+            <div style="height: 16px; display: flex; align-items: center">
+              <span style="font-size: 8px; color: #ef4444">16px</span>
+            </div>
+            <div style="width: 100%; height: 12px; background: #94a3b8; border-radius: 4px"></div>
+            <div style="height: 16px; display: flex; align-items: center">
+              <span style="font-size: 8px; color: #ef4444">16px</span>
+            </div>
+            <div style="width: 100%; height: 20px; background: #cbd5e1; border-radius: 4px"></div>
+          </div>
+          <p style="font-size: 9px; color: #94a3b8; text-align: center; margin-top: 4px">Monotone — bẹt phẳng</p>
+        </div>
+
+        <!-- AFTER rhythm -->
+        <div style="flex: 1">
+          <p class="mock-text-xs" style="color: #065f46; font-weight: 600; margin-bottom: 6px; text-align: center">
+            ✅ Rhythmic
+          </p>
+          <div style="display: flex; flex-direction: column; align-items: center">
+            <div style="width: 100%; height: 20px; background: #6ee7b7; border-radius: 4px"></div>
+            <div style="height: 8px; display: flex; align-items: center">
+              <span style="font-size: 8px; color: #059669">8</span>
+            </div>
+            <div style="width: 100%; height: 20px; background: #6ee7b7; border-radius: 4px"></div>
+            <div style="height: 8px; display: flex; align-items: center">
+              <span style="font-size: 8px; color: #059669">8</span>
+            </div>
+            <div style="width: 100%; height: 20px; background: #6ee7b7; border-radius: 4px"></div>
+            <div style="height: 32px; display: flex; align-items: center">
+              <span style="font-size: 8px; color: #047857; font-weight: 700">32</span>
+            </div>
+            <div style="width: 100%; height: 12px; background: #047857; border-radius: 4px"></div>
+            <div style="height: 12px; display: flex; align-items: center">
+              <span style="font-size: 8px; color: #059669">12</span>
+            </div>
+            <div style="width: 100%; height: 20px; background: #6ee7b7; border-radius: 4px"></div>
+          </div>
+          <p style="font-size: 9px; color: #059669; text-align: center; margin-top: 4px">Có nhịp — dễ scan</p>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ============ PAGE PADDING ============ -->
+      <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 12px">Page Padding — Đề xuất</h2>
+
+      <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0">
+        <table style="width: 100%; font-size: 12px; border-collapse: collapse">
+          <thead>
+            <tr style="border-bottom: 1px solid #e2e8f0">
+              <th style="text-align: left; padding: 6px; color: #475569">Vùng</th>
+              <th style="text-align: center; padding: 6px; color: #991b1b">Hiện tại</th>
+              <th style="text-align: center; padding: 6px; color: #065f46">Đề xuất</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid #f1f5f9">
+              <td style="padding: 6px">Page horizontal padding</td>
+              <td style="text-align: center; padding: 6px; color: #991b1b">16px</td>
+              <td style="text-align: center; padding: 6px; color: #065f46">16px ✓</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9">
+              <td style="padding: 6px">Content bên trong card</td>
+              <td style="text-align: center; padding: 6px; color: #991b1b">16px</td>
+              <td style="text-align: center; padding: 6px; color: #065f46">12px (gọn hơn)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9">
+              <td style="padding: 6px">Card ↔ Card (cùng section)</td>
+              <td style="text-align: center; padding: 6px; color: #991b1b">16px</td>
+              <td style="text-align: center; padding: 6px; color: #065f46">8px (liên kết)</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9">
+              <td style="padding: 6px">Section header ↔ content</td>
+              <td style="text-align: center; padding: 6px; color: #991b1b">16px</td>
+              <td style="text-align: center; padding: 6px; color: #065f46">12px</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9">
+              <td style="padding: 6px">Section ↔ Section</td>
+              <td style="text-align: center; padding: 6px; color: #991b1b">16px</td>
+              <td style="text-align: center; padding: 6px; color: #065f46"><strong>24–32px</strong> (thở)</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px">Icon ↔ Text</td>
+              <td style="text-align: center; padding: 6px; color: #991b1b">8px</td>
+              <td style="text-align: center; padding: 6px; color: #065f46">4–6px (gắn chặt)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="font-size: 11px; color: #64748b; text-align: center; margin-top: 24px; padding-bottom: 24px">
+        Mockup tạo bởi ui-ux-pro-max skill "spacing-scale" 8dp guideline
+      </p>
+    </div>
+  </body>
+</html>

@@ -1588,7 +1588,7 @@ async def main():
     print("🚀 SC06: Ingredient CRUD E2E Test Suite")
     print("=" * 60)
 
-    s = await setup_fresh(full_onboard=False, scenario="SC06")
+    s = await setup_fresh(scenario="SC06")
     await sc06_ingredient_crud(s)
 
     # ── Final Report ─────────────────────────────────────────────────────

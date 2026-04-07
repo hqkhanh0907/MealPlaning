@@ -492,7 +492,7 @@ async def group_migration_needed_keys(s):
 
 async def run():
     sc = "SC40"
-    session = await setup_fresh(full_onboard=False, scenario=sc)
+    session = await setup_fresh(scenario=sc)
 
     await group_migration_state(session)
     await group_migration_data(session)

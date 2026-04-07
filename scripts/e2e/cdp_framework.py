@@ -466,7 +466,7 @@ async def create_session(ws_url: str) -> CDPSession:
     return CDPSession(ws)
 
 
-async def setup_fresh(full_onboard=False, scenario="SC00"):
+async def setup_fresh(full_onboard=True, scenario="SC00"):
     """Fresh install → launch → CDP connect. Returns CDPSession."""
     import websockets
 

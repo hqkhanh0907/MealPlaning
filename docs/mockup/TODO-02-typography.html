@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>TODO-02: Typography Scale — TRƯỚC / SAU</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f1f5f9;
+        color: #1e293b;
+      }
+      .container {
+        max-width: 420px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      h1 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+      .subtitle {
+        font-size: 13px;
+        color: #64748b;
+        text-align: center;
+        margin-bottom: 24px;
+      }
+      .section-label {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 24px 0 12px;
+        padding: 8px 12px;
+        border-radius: 8px;
+      }
+      .before-label {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .after-label {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .arrow {
+        text-align: center;
+        font-size: 24px;
+        margin: 16px 0;
+        color: #059669;
+      }
+      .divider {
+        height: 1px;
+        background: #e2e8f0;
+        margin: 20px 0;
+      }
+
+      /* Type specimen card */
+      .type-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+      }
+      .type-row {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        padding: 6px 0;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      .type-row:last-child {
+        border-bottom: none;
+      }
+      .type-label {
+        font-size: 10px;
+        color: #94a3b8;
+        width: 80px;
+        flex-shrink: 0;
+        font-family: monospace;
+      }
+      .type-sample {
+        flex: 1;
+      }
+
+      /* Mini app mockup */
+      .app-mockup {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        margin-bottom: 16px;
+        background: white;
+      }
+      .app-header {
+        padding: 12px 16px;
+        background: linear-gradient(135deg, #059669, #10b981);
+        color: white;
+      }
+      .app-body {
+        padding: 16px;
+      }
+
+      .mock-text-xs {
+        font-size: 10px;
+      }
+      .mock-text-muted {
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📝 TODO-02: Typography Scale</h1>
+      <p class="subtitle">
+        So sánh phân cấp chữ HIỆN TẠI vs ĐỀ XUẤT<br />Nguồn: ui-ux-pro-max "weight-hierarchy" + "font-scale" guidelines
+      </p>
+
+      <!-- ============ BEFORE ============ -->
+      <div class="section-label before-label">❌ TRƯỚC — Hiện tại (đơn điệu, ít phân cấp)</div>
+
+      <div class="type-card">
+        <div class="type-row">
+          <span class="type-label">Page title</span>
+          <span class="type-sample" style="font-size: 18px; font-weight: 600">Tổng quan</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Section</span>
+          <span class="type-sample" style="font-size: 14px; font-weight: 600">Kế hoạch hôm nay</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Card title</span>
+          <span class="type-sample" style="font-size: 14px; font-weight: 500">Ức gà áp chảo</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Body</span>
+          <span class="type-sample" style="font-size: 14px; font-weight: 400">330 kcal • 62g protein</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Caption</span>
+          <span class="type-sample" style="font-size: 12px; font-weight: 400; color: #64748b">Bữa Trưa / Bữa Tối</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Stat num</span>
+          <span class="type-sample" style="font-size: 18px; font-weight: 700; color: #059669">1327</span>
+        </div>
+      </div>
+
+      <p style="font-size: 11px; color: #dc2626; text-align: center">
+        ⚠️ Section header (14px) = Card title (14px) = Body (14px) → Không phân biệt được. Stat number quá nhỏ (18px),
+        không nổi bật.
+      </p>
+
+      <!-- BEFORE app mockup -->
+      <div class="app-mockup" style="margin-top: 12px">
+        <div class="app-header">
+          <span style="font-size: 14px; font-weight: 600">🌙 Chào buổi tối, Tester</span>
+        </div>
+        <div class="app-body">
+          <p style="font-size: 14px; font-weight: 600; margin-bottom: 8px">Kế hoạch hôm nay</p>
+          <div style="background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 8px">
+            <p style="font-size: 14px; font-weight: 500">Bữa Sáng</p>
+            <p style="font-size: 14px; color: #475569">Trứng ốp la • Yến mạch sữa chua</p>
+            <p style="font-size: 12px; color: #94a3b8">487 kcal • 38g protein</p>
+          </div>
+          <div style="display: flex; gap: 8px; text-align: center">
+            <div style="flex: 1; background: #f0fdf4; padding: 8px; border-radius: 8px">
+              <div style="font-size: 18px; font-weight: 700; color: #059669">1327</div>
+              <div style="font-size: 11px; color: #065f46">Đã nạp</div>
+            </div>
+            <div style="flex: 1; background: #fef3c7; padding: 8px; border-radius: 8px">
+              <div style="font-size: 18px; font-weight: 700; color: #d97706">0</div>
+              <div style="font-size: 11px; color: #92400e">Đã đốt</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow">⬇</div>
+
+      <!-- ============ AFTER ============ -->
+      <div class="section-label after-label">✅ SAU — Đề xuất (phân cấp rõ ràng, stat nổi bật)</div>
+
+      <div class="type-card">
+        <div class="type-row">
+          <span class="type-label">Page title<br />24px/700</span>
+          <span class="type-sample" style="font-size: 24px; font-weight: 700; line-height: 1.3">Tổng quan</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Section<br />18px/600</span>
+          <span class="type-sample" style="font-size: 18px; font-weight: 600; line-height: 1.4">Kế hoạch hôm nay</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Card title<br />16px/600</span>
+          <span class="type-sample" style="font-size: 16px; font-weight: 600; line-height: 1.5">Ức gà áp chảo</span>
+        </div>
+        <div class="type-row">
+          <span class="type-label">Body<br />14px/400</span>
+          <span class="type-sample" style="font-size: 14px; font-weight: 400; line-height: 1.6"
+            >330 kcal • 62g protein</span
+          >
+        </div>
+        <div class="type-row">
+          <span class="type-label">Caption<br />12px/400</span>
+          <span class="type-sample" style="font-size: 12px; font-weight: 400; color: #64748b; line-height: 1.5"
+            >Bữa Trưa / Bữa Tối</span
+          >
+        </div>
+        <div class="type-row">
+          <span class="type-label">Stat big<br />32px/700</span>
+          <span
+            class="type-sample"
+            style="
+              font-size: 32px;
+              font-weight: 700;
+              color: #059669;
+              line-height: 1.1;
+              font-variant-numeric: tabular-nums;
+            "
+            >1,327</span
+          >
+        </div>
+        <div class="type-row">
+          <span class="type-label">Stat med<br />24px/700</span>
+          <span
+            class="type-sample"
+            style="
+              font-size: 24px;
+              font-weight: 700;
+              color: #0f172a;
+              line-height: 1.2;
+              font-variant-numeric: tabular-nums;
+            "
+            >170g</span
+          >
+        </div>
+      </div>
+
+      <p style="font-size: 11px; color: #059669; text-align: center">
+        ✅ 7 cấp rõ ràng: 12 → 14 → 16 → 18 → 24 → 32px. Stat numbers lớn + tabular-nums.
+      </p>
+
+      <!-- AFTER app mockup -->
+      <div class="app-mockup" style="margin-top: 12px; background: #ecfdf5">
+        <div class="app-header">
+          <span style="font-size: 24px; font-weight: 700">Tổng quan</span>
+        </div>
+        <div class="app-body" style="background: #ecfdf5">
+          <p style="font-size: 18px; font-weight: 600; margin-bottom: 10px; color: #0f172a">Kế hoạch hôm nay</p>
+          <div
+            style="
+              background: white;
+              padding: 12px;
+              border-radius: 10px;
+              margin-bottom: 10px;
+              border: 1px solid #e1f2ed;
+            "
+          >
+            <p style="font-size: 16px; font-weight: 600; color: #0f172a">Bữa Sáng</p>
+            <p style="font-size: 14px; color: #475569; margin-top: 2px">Trứng ốp la • Yến mạch sữa chua</p>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 2px">487 kcal • 38g protein</p>
+          </div>
+          <div style="display: flex; gap: 8px; text-align: center">
+            <div style="flex: 1; background: white; padding: 12px; border-radius: 10px; border: 1px solid #e1f2ed">
+              <div
+                style="
+                  font-size: 32px;
+                  font-weight: 700;
+                  color: #059669;
+                  line-height: 1.1;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                1,327
+              </div>
+              <div style="font-size: 12px; color: #64748b; margin-top: 4px">kcal đã nạp</div>
+            </div>
+            <div style="flex: 1; background: white; padding: 12px; border-radius: 10px; border: 1px solid #e1f2ed">
+              <div
+                style="
+                  font-size: 32px;
+                  font-weight: 700;
+                  color: #ea580c;
+                  line-height: 1.1;
+                  font-variant-numeric: tabular-nums;
+                "
+              >
+                0
+              </div>
+              <div style="font-size: 12px; color: #64748b; margin-top: 4px">kcal đã đốt</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ============ TYPE SCALE VISUAL ============ -->
+      <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 12px">Type Scale — Visual</h2>
+
+      <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0">
+        <!-- Scale bars -->
+        <div style="margin-bottom: 8px">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px">
+            <div style="width: 100%; height: 8px; background: #059669; border-radius: 4px; opacity: 1"></div>
+            <span style="font-size: 10px; color: #94a3b8; white-space: nowrap; width: 40px">32px</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px">
+            <div style="width: 75%; height: 8px; background: #059669; border-radius: 4px; opacity: 0.85"></div>
+            <span style="font-size: 10px; color: #94a3b8; white-space: nowrap; width: 40px">24px</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px">
+            <div style="width: 56%; height: 8px; background: #059669; border-radius: 4px; opacity: 0.7"></div>
+            <span style="font-size: 10px; color: #94a3b8; white-space: nowrap; width: 40px">18px</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px">
+            <div style="width: 50%; height: 8px; background: #059669; border-radius: 4px; opacity: 0.6"></div>
+            <span style="font-size: 10px; color: #94a3b8; white-space: nowrap; width: 40px">16px</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px">
+            <div style="width: 43%; height: 8px; background: #059669; border-radius: 4px; opacity: 0.5"></div>
+            <span style="font-size: 10px; color: #94a3b8; white-space: nowrap; width: 40px">14px</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <div style="width: 37%; height: 8px; background: #059669; border-radius: 4px; opacity: 0.4"></div>
+            <span style="font-size: 10px; color: #94a3b8; white-space: nowrap; width: 40px">12px</span>
+          </div>
+        </div>
+
+        <p style="font-size: 10px; color: #64748b; margin-top: 12px; text-align: center">
+          Scale ratio ≈ 1.25 (Major Third) — mỗi cấp tăng ~25% so với cấp trước
+        </p>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ============ LINE HEIGHT ============ -->
+      <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 12px">Line Height — Vietnamese-optimized</h2>
+
+      <div style="display: flex; gap: 12px">
+        <div style="flex: 1; background: white; border-radius: 10px; padding: 12px; border: 1px solid #e2e8f0">
+          <p class="mock-text-xs" style="color: #991b1b; font-weight: 600; margin-bottom: 6px">❌ TRƯỚC</p>
+          <p style="font-size: 14px; line-height: 1.4; color: #1e293b">
+            Ức gà áp chảo với rau bông cải xanh luộc, khoai lang và nước sốt tỏi ớt đặc biệt
+          </p>
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 4px">line-height: 1.4</p>
+        </div>
+        <div style="flex: 1; background: white; border-radius: 10px; padding: 12px; border: 1px solid #e2e8f0">
+          <p class="mock-text-xs" style="color: #065f46; font-weight: 600; margin-bottom: 6px">✅ SAU</p>
+          <p style="font-size: 14px; line-height: 1.65; color: #1e293b">
+            Ức gà áp chảo với rau bông cải xanh luộc, khoai lang và nước sốt tỏi ớt đặc biệt
+          </p>
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 4px">line-height: 1.65</p>
+        </div>
+      </div>
+
+      <p style="font-size: 11px; color: #059669; text-align: center; margin-top: 8px">
+        ✅ Vietnamese diacritics (ồ, ứ, ớ) cần line-height cao hơn tiếng Anh.<br />
+        Body text: 1.6–1.65 | Heading: 1.2–1.3 | Caption: 1.4–1.5
+      </p>
+
+      <div class="divider"></div>
+
+      <!-- ============ TABULAR NUMS ============ -->
+      <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 12px">Tabular Nums — Căn chỉnh số liệu</h2>
+
+      <div style="display: flex; gap: 12px">
+        <div style="flex: 1; background: white; border-radius: 10px; padding: 12px; border: 1px solid #e2e8f0">
+          <p class="mock-text-xs" style="color: #991b1b; font-weight: 600; margin-bottom: 6px">❌ Proportional</p>
+          <div style="font-size: 20px; font-weight: 700">
+            <div>1,327 kcal</div>
+            <div>487 kcal</div>
+            <div>0 kcal</div>
+          </div>
+        </div>
+        <div style="flex: 1; background: white; border-radius: 10px; padding: 12px; border: 1px solid #e2e8f0">
+          <p class="mock-text-xs" style="color: #065f46; font-weight: 600; margin-bottom: 6px">✅ Tabular</p>
+          <div style="font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums">
+            <div>1,327 kcal</div>
+            <div style="margin-left: 0">487 kcal</div>
+            <div style="margin-left: 0">0 kcal</div>
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size: 11px; color: #64748b; text-align: center; margin-top: 8px">
+        <code style="font-size: 10px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px"
+          >font-variant-numeric: tabular-nums</code
+        >
+        giúp các số liệu căn thẳng hàng khi hiển thị dạng bảng
+      </p>
+
+      <p style="font-size: 11px; color: #64748b; text-align: center; margin-top: 24px; padding-bottom: 24px">
+        Mockup tạo bởi ui-ux-pro-max skill "weight-hierarchy" + "font-scale" guidelines
+      </p>
+    </div>
+  </body>
+</html>

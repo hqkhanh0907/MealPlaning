@@ -386,4 +386,34 @@ describe('DatabaseProvider', () => {
       await new Promise(r => setTimeout(r, 0));
     });
   });
+
+  it('calls loadActiveGoal after loadProfile during initialization', async () => {
+    const healthModule = await import('../features/health-profile/store/healthProfileStore');
+    const state = healthModule.useHealthProfileStore.getState();
+    const callOrder: string[] = [];
+    const loadProfileSpy = vi.spyOn(state, 'loadProfile').mockImplementation(async () => {
+      callOrder.push('loadProfile');
+    });
+    const loadActiveGoalSpy = vi.spyOn(state, 'loadActiveGoal').mockImplementation(async () => {
+      callOrder.push('loadActiveGoal');
+    });
+    mockInitialize.mockResolvedValue(undefined);
+
+    render(
+      <DatabaseProvider>
+        <div>Child</div>
+      </DatabaseProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Child')).toBeInTheDocument();
+    });
+
+    expect(loadProfileSpy).toHaveBeenCalledWith(mockService);
+    expect(loadActiveGoalSpy).toHaveBeenCalledWith(mockService);
+    expect(callOrder.indexOf('loadProfile')).toBeLessThan(callOrder.indexOf('loadActiveGoal'));
+
+    loadProfileSpy.mockRestore();
+    loadActiveGoalSpy.mockRestore();
+  });
 });

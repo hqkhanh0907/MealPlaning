@@ -1361,7 +1361,7 @@ async def main():
     print("=" * 60)
 
     # Fresh install + bypass onboarding
-    s = await setup_fresh(full_onboard=False, scenario=f"{SC}_SETUP")
+    s = await setup_fresh(scenario=f"{SC}_SETUP")
     reset_steps(SC)
 
     # Navigate to Library ▸ Dishes

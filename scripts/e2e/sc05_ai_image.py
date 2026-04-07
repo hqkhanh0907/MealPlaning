@@ -631,7 +631,7 @@ async def tc_aia_extra_card_container(s: CDPSession):
 # ─────────────────────────────────────────────────────────
 
 async def run_all():
-    s = await setup_fresh(full_onboard=False, scenario=SC)
+    s = await setup_fresh(scenario=SC)
     reset_steps(SC)
 
     print(f"\n{'='*60}")

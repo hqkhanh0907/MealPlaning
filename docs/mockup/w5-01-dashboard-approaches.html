@@ -1,0 +1,1674 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>W5-01 Dashboard Approaches — MealPlaning Mockup</title>
+    <style>
+      :root {
+        --emerald-500: #10b981;
+        --emerald-600: #059669;
+        --emerald-700: #047857;
+        --amber-500: #f59e0b;
+        --sky-500: #0ea5e9;
+        --blue-500: #3b82f6;
+        --rose-400: #fb7185;
+        --slate-50: #f8fafc;
+        --slate-100: #f1f5f9;
+        --slate-200: #e2e8f0;
+        --slate-300: #cbd5e1;
+        --slate-400: #94a3b8;
+        --slate-500: #64748b;
+        --slate-600: #475569;
+        --slate-700: #334155;
+        --slate-800: #1e293b;
+        --slate-900: #0f172a;
+        --card-bg: #ffffff;
+        --card-border: var(--slate-200);
+        --bg: var(--slate-50);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: var(--slate-100);
+        color: var(--slate-800);
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 24px;
+        text-align: center;
+        margin-bottom: 8px;
+        color: var(--slate-800);
+      }
+
+      .subtitle {
+        text-align: center;
+        color: var(--slate-500);
+        font-size: 14px;
+        margin-bottom: 24px;
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex;
+        gap: 4px;
+        background: var(--slate-200);
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 24px;
+        overflow-x: auto;
+      }
+
+      .tab {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 12px;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--slate-500);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+
+      .tab.active {
+        background: white;
+        color: var(--emerald-600);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .tab:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+
+      /* Phone frame */
+      .phone-frame {
+        width: 375px;
+        margin: 0 auto;
+        background: var(--bg);
+        border-radius: 24px;
+        border: 3px solid var(--slate-300);
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .status-bar {
+        background: var(--slate-900);
+        color: white;
+        padding: 8px 20px;
+        font-size: 12px;
+        display: flex;
+        justify-content: space-between;
+        font-weight: 600;
+      }
+
+      .phone-content {
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 720px;
+        overflow-y: auto;
+      }
+
+      /* Components */
+      .hero {
+        background: linear-gradient(135deg, var(--emerald-600), var(--emerald-700));
+        border-radius: 16px;
+        padding: 16px;
+        color: white;
+      }
+
+      .hero-row1 {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+      }
+
+      .hero-greeting {
+        font-size: 14px;
+        opacity: 0.9;
+        font-weight: 500;
+      }
+
+      .hero-context {
+        font-size: 11px;
+        opacity: 0.5;
+        margin-top: 2px;
+      }
+
+      .score-badge {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .calorie-box {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+
+      .calorie-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .cal-eaten {
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      .cal-target {
+        font-size: 13px;
+        opacity: 0.5;
+        font-weight: 400;
+      }
+
+      .cal-remaining {
+        font-size: 11px;
+        color: #6ee7b7;
+        font-weight: 500;
+        margin-top: 2px;
+      }
+
+      .progress-ring {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        position: relative;
+      }
+
+      .progress-ring::before {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        border: 3px solid #6ee7b7;
+        border-right-color: transparent;
+        border-bottom-color: transparent;
+      }
+
+      .progress-bar {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 8px;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: #6ee7b7;
+        border-radius: 3px;
+        width: 63%;
+      }
+
+      .macros {
+        display: flex;
+        gap: 10px;
+      }
+
+      .macro-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .macro-label {
+        font-size: 11px;
+        opacity: 0.6;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .macro-bar {
+        height: 4px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .macro-fill-p {
+        width: 55%;
+        background: var(--sky-500);
+        height: 100%;
+        border-radius: 2px;
+      }
+      .macro-fill-f {
+        width: 40%;
+        background: var(--amber-500);
+        height: 100%;
+        border-radius: 2px;
+      }
+      .macro-fill-c {
+        width: 70%;
+        background: var(--blue-500);
+        height: 100%;
+        border-radius: 2px;
+      }
+
+      /* Card */
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 14px;
+      }
+
+      .card-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--slate-700);
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .card-title .icon {
+        font-size: 16px;
+      }
+
+      /* Today plan */
+      .meal-slot {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--slate-100);
+      }
+
+      .meal-slot:last-child {
+        border-bottom: none;
+      }
+
+      .meal-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+
+      .meal-icon.breakfast {
+        background: #fef3c7;
+      }
+      .meal-icon.lunch {
+        background: #dbeafe;
+      }
+      .meal-icon.dinner {
+        background: #ede9fe;
+      }
+
+      .meal-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .meal-name {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--slate-700);
+      }
+      .meal-detail {
+        font-size: 11px;
+        color: var(--slate-400);
+        margin-top: 1px;
+      }
+      .meal-cal {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--slate-600);
+        white-space: nowrap;
+      }
+
+      /* AI insight */
+      .ai-card {
+        background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+        border: 1px solid #bbf7d0;
+      }
+
+      .ai-text {
+        font-size: 13px;
+        color: var(--slate-600);
+        line-height: 1.5;
+      }
+
+      .ai-badge {
+        background: var(--emerald-500);
+        color: white;
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+      }
+
+      /* Weekly snapshot */
+      .weekly-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0;
+      }
+
+      .weekly-col {
+        text-align: center;
+        padding: 8px 4px;
+        border-right: 1px solid var(--slate-100);
+      }
+
+      .weekly-col:last-child {
+        border-right: none;
+      }
+
+      .weekly-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--slate-800);
+      }
+
+      .weekly-label {
+        font-size: 11px;
+        color: var(--slate-400);
+        margin-top: 2px;
+      }
+
+      .weekly-change {
+        font-size: 10px;
+        font-weight: 500;
+        margin-top: 2px;
+      }
+
+      .weekly-change.down {
+        color: var(--emerald-500);
+      }
+      .weekly-change.up {
+        color: var(--amber-500);
+      }
+
+      /* Quick actions */
+      .quick-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .quick-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 12px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+      }
+
+      .quick-btn.primary {
+        background: var(--emerald-500);
+        color: white;
+      }
+
+      .quick-btn.secondary {
+        background: var(--slate-100);
+        color: var(--slate-600);
+        border: 1px solid var(--slate-200);
+      }
+
+      /* Bottom nav */
+      .bottom-nav {
+        display: flex;
+        justify-content: space-around;
+        padding: 10px 0 6px;
+        border-top: 1px solid var(--slate-200);
+        background: white;
+      }
+
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        font-size: 10px;
+        color: var(--slate-400);
+      }
+
+      .nav-item.active {
+        color: var(--emerald-600);
+      }
+      .nav-icon {
+        font-size: 20px;
+      }
+
+      /* Approach labels */
+      .approach-label {
+        text-align: center;
+        margin-bottom: 12px;
+      }
+
+      .approach-tag {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      .approach-tag.current {
+        background: var(--slate-200);
+        color: var(--slate-600);
+      }
+      .approach-tag.gp1 {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+      .approach-tag.gp2 {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .approach-tag.gp3 {
+        background: #ede9fe;
+        color: #6d28d9;
+      }
+
+      .approach-desc {
+        font-size: 12px;
+        color: var(--slate-500);
+        margin-top: 6px;
+        line-height: 1.5;
+      }
+
+      .highlight-box {
+        background: #fffbeb;
+        border: 1px solid #fcd34d;
+        border-radius: 10px;
+        padding: 10px 12px;
+        font-size: 12px;
+        color: #92400e;
+        margin-top: 8px;
+        line-height: 1.5;
+      }
+
+      .diff-marker {
+        display: inline-block;
+        background: #fef08a;
+        padding: 0 4px;
+        border-radius: 4px;
+        font-weight: 600;
+      }
+
+      /* Greeting variants */
+      .greeting-section {
+        margin-top: 20px;
+      }
+
+      .greeting-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 12px;
+      }
+
+      .greeting-option {
+        border: 2px solid var(--slate-200);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+
+      .greeting-option-label {
+        background: var(--slate-100);
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--slate-600);
+        text-align: center;
+      }
+
+      /* App header mock */
+      .app-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: white;
+      }
+
+      .app-header-greeting {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--slate-800);
+      }
+
+      .app-header-sub {
+        font-size: 11px;
+        color: var(--slate-400);
+        margin-top: 1px;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .header-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: var(--slate-100);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+
+      /* Combined card styles for GP1 */
+      .combined-stats-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .stats-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0;
+      }
+
+      .stat-cell {
+        text-align: center;
+        padding: 6px 4px;
+        border-right: 1px solid var(--slate-100);
+      }
+
+      .stat-cell:last-child {
+        border-right: none;
+      }
+
+      .actions-row {
+        display: flex;
+        gap: 8px;
+        padding-top: 4px;
+        border-top: 1px solid var(--slate-100);
+      }
+
+      /* Compact variant for GP3 */
+      .compact-weekly {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .compact-stat {
+        flex: 1;
+        background: var(--slate-50);
+        border-radius: 10px;
+        padding: 8px 6px;
+        text-align: center;
+      }
+
+      .compact-stat-value {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--slate-800);
+      }
+
+      .compact-stat-label {
+        font-size: 10px;
+        color: var(--slate-400);
+        margin-top: 1px;
+      }
+
+      /* Section counter */
+      .section-counter {
+        position: absolute;
+        left: -24px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--emerald-500);
+        color: white;
+        font-size: 10px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .section-wrapper {
+        position: relative;
+        margin-left: 28px;
+      }
+
+      .section-label {
+        font-size: 10px;
+        color: var(--slate-400);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🏠 W5-01: Dashboard Layout Approaches</h1>
+    <p class="subtitle">So sánh 3 approach để restructure Dashboard từ 5→4 sections</p>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('current')">📋 Hiện tại (5)</button>
+      <button class="tab" onclick="showTab('gp1')">🔵 GP1: Stats+Actions</button>
+      <button class="tab" onclick="showTab('gp2')">🟡 GP2: Hero+Weekly</button>
+      <button class="tab" onclick="showTab('gp3')">🟣 GP3: Compact 5</button>
+      <button class="tab" onclick="showTab('greeting')">👋 Greeting Options</button>
+    </div>
+
+    <!-- CURRENT -->
+    <div id="panel-current" class="tab-panel active">
+      <div class="approach-label">
+        <span class="approach-tag current">HIỆN TẠI — 5 SECTIONS</span>
+        <p class="approach-desc">Dashboard hiện tại với 5 sections riêng biệt + WeightQuickLog modal</p>
+      </div>
+
+      <div class="phone-frame">
+        <div class="status-bar">
+          <span>12:52</span>
+          <span>📶 🔋 95%</span>
+        </div>
+        <div class="phone-content">
+          <!-- Section 1: NutritionHero -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: var(--slate-400);
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ①
+            </div>
+            <div class="hero">
+              <div class="hero-row1">
+                <div>
+                  <div class="hero-greeting">Chào Khánh 👋</div>
+                  <div class="hero-context">Ngày tập — Vai + Tay sau</div>
+                </div>
+                <div class="score-badge">78</div>
+              </div>
+              <div class="calorie-box">
+                <div class="calorie-row">
+                  <div>
+                    <div class="cal-eaten">1,327 <span class="cal-target">/ 2,091 kcal</span></div>
+                    <div class="cal-remaining">Còn lại: 764 kcal</div>
+                  </div>
+                  <div class="progress-ring">63%</div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill"></div></div>
+              </div>
+              <div class="macros">
+                <div class="macro-item">
+                  <div class="macro-label"><span>Protein</span><span>94/170g</span></div>
+                  <div class="macro-bar"><div class="macro-fill-p"></div></div>
+                </div>
+                <div class="macro-item">
+                  <div class="macro-label"><span>Fat</span><span>23/58g</span></div>
+                  <div class="macro-bar"><div class="macro-fill-f"></div></div>
+                </div>
+                <div class="macro-item">
+                  <div class="macro-label"><span>Carbs</span><span>168/241g</span></div>
+                  <div class="macro-bar"><div class="macro-fill-c"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: TodaysPlanCard -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: var(--slate-400);
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ②
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">🍽️</span> Kế hoạch hôm nay</div>
+              <div class="meal-slot">
+                <div class="meal-icon breakfast">🌅</div>
+                <div class="meal-info">
+                  <div class="meal-name">Trứng ốp la + Yến mạch sữa chua</div>
+                  <div class="meal-detail">2 món • Bữa sáng</div>
+                </div>
+                <div class="meal-cal">487 kcal</div>
+              </div>
+              <div class="meal-slot">
+                <div class="meal-icon lunch">☀️</div>
+                <div class="meal-info">
+                  <div class="meal-name">Ức gà + Bông cải + Khoai lang</div>
+                  <div class="meal-detail">3 món • Bữa trưa</div>
+                </div>
+                <div class="meal-cal">510 kcal</div>
+              </div>
+              <div class="meal-slot">
+                <div class="meal-icon dinner">🌙</div>
+                <div class="meal-info">
+                  <div class="meal-name">Ức gà áp chảo</div>
+                  <div class="meal-detail">1 món • Bữa tối</div>
+                </div>
+                <div class="meal-cal">330 kcal</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: AiInsightCard -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: var(--slate-400);
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ③
+            </div>
+            <div class="card ai-card">
+              <div class="card-title"><span class="ai-badge">AI</span> Gợi ý cho bạn</div>
+              <div class="ai-text">
+                Hôm nay bạn nên ăn thêm 764 kcal nữa. Protein còn thiếu 76g — thử thêm 1 bữa phụ cá hồi?
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: WeeklySnapshot -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: var(--slate-400);
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ④
+            </div>
+            <div class="card">
+              <div class="weekly-grid">
+                <div class="weekly-col">
+                  <div class="weekly-value">75.2</div>
+                  <div class="weekly-label">Cân nặng (kg)</div>
+                  <div class="weekly-change down">↓ 0.3 tuần này</div>
+                </div>
+                <div class="weekly-col">
+                  <div class="weekly-value">🔥 5</div>
+                  <div class="weekly-label">Chuỗi tập</div>
+                  <div class="weekly-change" style="color: var(--slate-400)">ngày liên tiếp</div>
+                </div>
+                <div class="weekly-col">
+                  <div class="weekly-value">80%</div>
+                  <div class="weekly-label">Tuân thủ</div>
+                  <div class="weekly-change down">4/5 buổi</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 5: QuickActionsBar -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: var(--slate-400);
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ⑤
+            </div>
+            <div class="quick-actions">
+              <button class="quick-btn primary">⚖️ Cân nặng</button>
+              <button class="quick-btn secondary">🏃 Cardio</button>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-item"><span class="nav-icon">📅</span>Lịch</div>
+          <div class="nav-item"><span class="nav-icon">📚</span>Thư viện</div>
+          <div class="nav-item active"><span class="nav-icon">🏠</span>Tổng quan</div>
+          <div class="nav-item"><span class="nav-icon">💪</span>Tập luyện</div>
+          <div class="nav-item"><span class="nav-icon">🤖</span>AI</div>
+        </div>
+      </div>
+
+      <div class="highlight-box" style="margin-top: 16px">
+        <strong>Vấn đề hiện tại:</strong><br />
+        • 5 sections → scroll dài trên mobile<br />
+        • WeeklySnapshot (④) và QuickActionsBar (⑤) tách riêng nhưng liên quan đến cùng context fitness<br />
+        • QuickActionsBar chỉ có 2 nút → chiếm hẳn 1 row
+      </div>
+    </div>
+
+    <!-- GP1 -->
+    <div id="panel-gp1" class="tab-panel">
+      <div class="approach-label">
+        <span class="approach-tag gp1">GP1 — MERGE WEEKLY + ACTIONS</span>
+        <p class="approach-desc">
+          <strong>Khuyến nghị.</strong> Gom WeeklySnapshot + QuickActionsBar thành 1 card "Tuần này".<br />NutritionHero
+          giữ nguyên, mỗi component vẫn single responsibility.
+        </p>
+      </div>
+
+      <div class="phone-frame">
+        <div class="status-bar">
+          <span>12:52</span>
+          <span>📶 🔋 95%</span>
+        </div>
+        <div class="phone-content">
+          <!-- Section 1: NutritionHero (unchanged) -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: #1d4ed8;
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ①
+            </div>
+            <div class="hero">
+              <div class="hero-row1">
+                <div>
+                  <div class="hero-greeting">Chào Khánh 👋</div>
+                  <div class="hero-context">Ngày tập — Vai + Tay sau</div>
+                </div>
+                <div class="score-badge">78</div>
+              </div>
+              <div class="calorie-box">
+                <div class="calorie-row">
+                  <div>
+                    <div class="cal-eaten">1,327 <span class="cal-target">/ 2,091 kcal</span></div>
+                    <div class="cal-remaining">Còn lại: 764 kcal</div>
+                  </div>
+                  <div class="progress-ring">63%</div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill"></div></div>
+              </div>
+              <div class="macros">
+                <div class="macro-item">
+                  <div class="macro-label"><span>Protein</span><span>94/170g</span></div>
+                  <div class="macro-bar"><div class="macro-fill-p"></div></div>
+                </div>
+                <div class="macro-item">
+                  <div class="macro-label"><span>Fat</span><span>23/58g</span></div>
+                  <div class="macro-bar"><div class="macro-fill-f"></div></div>
+                </div>
+                <div class="macro-item">
+                  <div class="macro-label"><span>Carbs</span><span>168/241g</span></div>
+                  <div class="macro-bar"><div class="macro-fill-c"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: TodaysPlanCard (unchanged) -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: #1d4ed8;
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ②
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">🍽️</span> Kế hoạch hôm nay</div>
+              <div class="meal-slot">
+                <div class="meal-icon breakfast">🌅</div>
+                <div class="meal-info">
+                  <div class="meal-name">Trứng ốp la + Yến mạch sữa chua</div>
+                  <div class="meal-detail">2 món • Bữa sáng</div>
+                </div>
+                <div class="meal-cal">487 kcal</div>
+              </div>
+              <div class="meal-slot">
+                <div class="meal-icon lunch">☀️</div>
+                <div class="meal-info">
+                  <div class="meal-name">Ức gà + Bông cải + Khoai lang</div>
+                  <div class="meal-detail">3 món • Bữa trưa</div>
+                </div>
+                <div class="meal-cal">510 kcal</div>
+              </div>
+              <div class="meal-slot">
+                <div class="meal-icon dinner">🌙</div>
+                <div class="meal-info">
+                  <div class="meal-name">Ức gà áp chảo</div>
+                  <div class="meal-detail">1 món • Bữa tối</div>
+                </div>
+                <div class="meal-cal">330 kcal</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: AiInsightCard (unchanged) -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: #1d4ed8;
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ③
+            </div>
+            <div class="card ai-card">
+              <div class="card-title"><span class="ai-badge">AI</span> Gợi ý cho bạn</div>
+              <div class="ai-text">
+                Hôm nay bạn nên ăn thêm 764 kcal nữa. Protein còn thiếu 76g — thử thêm 1 bữa phụ cá hồi?
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: MERGED WeeklySnapshot + QuickActions -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: #1d4ed8;
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ④
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">📊</span> Tuần này</div>
+              <div class="combined-stats-actions">
+                <div class="stats-row">
+                  <div class="stat-cell">
+                    <div class="weekly-value" style="font-size: 16px">75.2</div>
+                    <div class="weekly-label">kg</div>
+                    <div class="weekly-change down">↓ 0.3</div>
+                  </div>
+                  <div class="stat-cell">
+                    <div class="weekly-value" style="font-size: 16px">🔥 5</div>
+                    <div class="weekly-label">Chuỗi tập</div>
+                  </div>
+                  <div class="stat-cell">
+                    <div class="weekly-value" style="font-size: 16px">80%</div>
+                    <div class="weekly-label">Tuân thủ</div>
+                  </div>
+                </div>
+                <div class="actions-row">
+                  <button class="quick-btn primary" style="font-size: 12px; padding: 10px">⚖️ Cân nặng</button>
+                  <button class="quick-btn secondary" style="font-size: 12px; padding: 10px">🏃 Cardio</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-item"><span class="nav-icon">📅</span>Lịch</div>
+          <div class="nav-item"><span class="nav-icon">📚</span>Thư viện</div>
+          <div class="nav-item active"><span class="nav-icon">🏠</span>Tổng quan</div>
+          <div class="nav-item"><span class="nav-icon">💪</span>Tập luyện</div>
+          <div class="nav-item"><span class="nav-icon">🤖</span>AI</div>
+        </div>
+      </div>
+
+      <div class="highlight-box" style="margin-top: 16px">
+        <strong>✅ Ưu điểm GP1:</strong><br />
+        • <span class="diff-marker">5→4 sections</span>: Giảm scroll, gom context fitness<br />
+        • NutritionHero giữ nguyên 370 LOC (không phình thêm)<br />
+        • Weekly stats + action buttons cùng 1 card = logical grouping<br />
+        • Refactor nhỏ: chỉ merge 2 components, tạo 1 wrapper mới<br />
+        <br />
+        <strong>⚠️ Nhược điểm:</strong><br />
+        • Card ④ "Tuần này" phức tạp hơn (stats + buttons)<br />
+        • Cần tạo component mới WeeklyStatsCard
+      </div>
+    </div>
+
+    <!-- GP2 -->
+    <div id="panel-gp2" class="tab-panel">
+      <div class="approach-label">
+        <span class="approach-tag gp2">GP2 — MERGE HERO + WEEKLY (Plan gốc)</span>
+        <p class="approach-desc">Theo plan ban đầu: gom NutritionHero + WeeklySnapshot vào 1 mega hero card</p>
+      </div>
+
+      <div class="phone-frame">
+        <div class="status-bar">
+          <span>12:52</span>
+          <span>📶 🔋 95%</span>
+        </div>
+        <div class="phone-content">
+          <!-- Section 1: MEGA Hero (Nutrition + Weekly) -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: #92400e;
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ①
+            </div>
+            <div class="hero">
+              <div class="hero-row1">
+                <div>
+                  <div class="hero-greeting">Chào Khánh 👋</div>
+                  <div class="hero-context">Ngày tập — Vai + Tay sau</div>
+                </div>
+                <div class="score-badge">78</div>
+              </div>
+              <div class="calorie-box">
+                <div class="calorie-row">
+                  <div>
+                    <div class="cal-eaten">1,327 <span class="cal-target">/ 2,091 kcal</span></div>
+                    <div class="cal-remaining">Còn lại: 764 kcal</div>
+                  </div>
+                  <div class="progress-ring">63%</div>
+                </div>
+                <div class="progress-bar"><div class="progress-fill"></div></div>
+              </div>
+              <div class="macros">
+                <div class="macro-item">
+                  <div class="macro-label"><span>Protein</span><span>94/170g</span></div>
+                  <div class="macro-bar"><div class="macro-fill-p"></div></div>
+                </div>
+                <div class="macro-item">
+                  <div class="macro-label"><span>Fat</span><span>23/58g</span></div>
+                  <div class="macro-bar"><div class="macro-fill-f"></div></div>
+                </div>
+                <div class="macro-item">
+                  <div class="macro-label"><span>Carbs</span><span>168/241g</span></div>
+                  <div class="macro-bar"><div class="macro-fill-c"></div></div>
+                </div>
+              </div>
+
+              <!-- MERGED: Weekly stats inside hero -->
+              <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.1)">
+                <div style="font-size: 11px; opacity: 0.5; margin-bottom: 8px; font-weight: 600">📊 TUẦN NÀY</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0">
+                  <div style="text-align: center; padding: 4px; border-right: 1px solid rgba(255, 255, 255, 0.1)">
+                    <div style="font-size: 16px; font-weight: 700">75.2</div>
+                    <div style="font-size: 10px; opacity: 0.5">kg ↓0.3</div>
+                  </div>
+                  <div style="text-align: center; padding: 4px; border-right: 1px solid rgba(255, 255, 255, 0.1)">
+                    <div style="font-size: 16px; font-weight: 700">🔥 5</div>
+                    <div style="font-size: 10px; opacity: 0.5">chuỗi tập</div>
+                  </div>
+                  <div style="text-align: center; padding: 4px">
+                    <div style="font-size: 16px; font-weight: 700">80%</div>
+                    <div style="font-size: 10px; opacity: 0.5">tuân thủ</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: TodaysPlanCard -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: #92400e;
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ②
+            </div>
+            <div class="card">
+              <div class="card-title"><span class="icon">🍽️</span> Kế hoạch hôm nay</div>
+              <div class="meal-slot">
+                <div class="meal-icon breakfast">🌅</div>
+                <div class="meal-info">
+                  <div class="meal-name">Trứng ốp la + Yến mạch sữa chua</div>
+                  <div class="meal-detail">2 món • Bữa sáng</div>
+                </div>
+                <div class="meal-cal">487 kcal</div>
+              </div>
+              <div class="meal-slot">
+                <div class="meal-icon lunch">☀️</div>
+                <div class="meal-info">
+                  <div class="meal-name">Ức gà + Bông cải + Khoai lang</div>
+                  <div class="meal-detail">3 món • Bữa trưa</div>
+                </div>
+                <div class="meal-cal">510 kcal</div>
+              </div>
+              <div class="meal-slot">
+                <div class="meal-icon dinner">🌙</div>
+                <div class="meal-info">
+                  <div class="meal-name">Ức gà áp chảo</div>
+                  <div class="meal-detail">1 món • Bữa tối</div>
+                </div>
+                <div class="meal-cal">330 kcal</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: AiInsightCard -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: #92400e;
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ③
+            </div>
+            <div class="card ai-card">
+              <div class="card-title"><span class="ai-badge">AI</span> Gợi ý cho bạn</div>
+              <div class="ai-text">
+                Hôm nay bạn nên ăn thêm 764 kcal nữa. Protein còn thiếu 76g — thử thêm 1 bữa phụ cá hồi?
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: QuickActionsBar (standalone) -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: #92400e;
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ④
+            </div>
+            <div class="quick-actions">
+              <button class="quick-btn primary">⚖️ Cân nặng</button>
+              <button class="quick-btn secondary">🏃 Cardio</button>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-item"><span class="nav-icon">📅</span>Lịch</div>
+          <div class="nav-item"><span class="nav-icon">📚</span>Thư viện</div>
+          <div class="nav-item active"><span class="nav-icon">🏠</span>Tổng quan</div>
+          <div class="nav-item"><span class="nav-icon">💪</span>Tập luyện</div>
+          <div class="nav-item"><span class="nav-icon">🤖</span>AI</div>
+        </div>
+      </div>
+
+      <div class="highlight-box" style="margin-top: 16px; background: #fef2f2; border-color: #fca5a5; color: #991b1b">
+        <strong>⚠️ Nhược điểm GP2 (plan gốc):</strong><br />
+        • <span class="diff-marker">NutritionHero 370→500+ LOC</span> — mega component, vi phạm SRP<br />
+        • Trộn daily nutrition + weekly fitness = confusing hierarchy<br />
+        • Hero card quá dài → chiếm gần hết viewport → user vẫn phải scroll<br />
+        • QuickActionsBar vẫn đứng riêng (chỉ 2 nút = lãng phí space)<br />
+        <br />
+        <strong>✅ Ưu điểm:</strong><br />
+        • Hero card "all-in-one" → thấy mọi thứ ngay khi mở app<br />
+        • Giảm đúng 1 card (WeeklySnapshot xóa)
+      </div>
+    </div>
+
+    <!-- GP3 -->
+    <div id="panel-gp3" class="tab-panel">
+      <div class="approach-label">
+        <span class="approach-tag gp3">GP3 — COMPACT 5 (Không merge)</span>
+        <p class="approach-desc">Giữ nguyên 5 sections nhưng thu gọn spacing + compact WeeklySnapshot</p>
+      </div>
+
+      <div class="phone-frame">
+        <div class="status-bar">
+          <span>12:52</span>
+          <span>📶 🔋 95%</span>
+        </div>
+        <div class="phone-content" style="gap: 8px">
+          <!-- Section 1: NutritionHero (unchanged) -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: #6d28d9;
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ①
+            </div>
+            <div class="hero" style="padding: 14px">
+              <div class="hero-row1" style="margin-bottom: 10px">
+                <div>
+                  <div class="hero-greeting">Chào Khánh 👋</div>
+                  <div class="hero-context">Ngày tập — Vai + Tay sau</div>
+                </div>
+                <div class="score-badge">78</div>
+              </div>
+              <div class="calorie-box" style="padding: 10px; margin-bottom: 10px">
+                <div class="calorie-row">
+                  <div>
+                    <div class="cal-eaten" style="font-size: 20px">
+                      1,327 <span class="cal-target" style="font-size: 12px">/ 2,091 kcal</span>
+                    </div>
+                    <div class="cal-remaining">Còn lại: 764 kcal</div>
+                  </div>
+                  <div class="progress-ring" style="width: 40px; height: 40px; font-size: 10px">63%</div>
+                </div>
+                <div class="progress-bar" style="margin-top: 6px; height: 5px"><div class="progress-fill"></div></div>
+              </div>
+              <div class="macros">
+                <div class="macro-item">
+                  <div class="macro-label"><span>P</span><span>94/170</span></div>
+                  <div class="macro-bar"><div class="macro-fill-p"></div></div>
+                </div>
+                <div class="macro-item">
+                  <div class="macro-label"><span>F</span><span>23/58</span></div>
+                  <div class="macro-bar"><div class="macro-fill-f"></div></div>
+                </div>
+                <div class="macro-item">
+                  <div class="macro-label"><span>C</span><span>168/241</span></div>
+                  <div class="macro-bar"><div class="macro-fill-c"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: TodaysPlanCard (compact) -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: #6d28d9;
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ②
+            </div>
+            <div class="card" style="padding: 12px">
+              <div class="card-title" style="margin-bottom: 6px; font-size: 13px">
+                <span class="icon">🍽️</span> Kế hoạch hôm nay
+              </div>
+              <div class="meal-slot" style="padding: 6px 0">
+                <div class="meal-icon breakfast" style="width: 28px; height: 28px; font-size: 14px; border-radius: 8px">
+                  🌅
+                </div>
+                <div class="meal-info">
+                  <div class="meal-name" style="font-size: 12px">Trứng ốp la + Yến mạch</div>
+                </div>
+                <div class="meal-cal" style="font-size: 11px">487</div>
+              </div>
+              <div class="meal-slot" style="padding: 6px 0">
+                <div class="meal-icon lunch" style="width: 28px; height: 28px; font-size: 14px; border-radius: 8px">
+                  ☀️
+                </div>
+                <div class="meal-info">
+                  <div class="meal-name" style="font-size: 12px">Ức gà + Bông cải + Khoai</div>
+                </div>
+                <div class="meal-cal" style="font-size: 11px">510</div>
+              </div>
+              <div class="meal-slot" style="padding: 6px 0; border-bottom: none">
+                <div class="meal-icon dinner" style="width: 28px; height: 28px; font-size: 14px; border-radius: 8px">
+                  🌙
+                </div>
+                <div class="meal-info">
+                  <div class="meal-name" style="font-size: 12px">Ức gà áp chảo</div>
+                </div>
+                <div class="meal-cal" style="font-size: 11px">330</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: AiInsightCard (compact) -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: #6d28d9;
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ③
+            </div>
+            <div class="card ai-card" style="padding: 12px">
+              <div class="card-title" style="margin-bottom: 4px; font-size: 13px">
+                <span class="ai-badge">AI</span> Gợi ý
+              </div>
+              <div class="ai-text" style="font-size: 12px">Protein còn thiếu 76g — thử thêm cá hồi?</div>
+            </div>
+          </div>
+
+          <!-- Section 4: WeeklySnapshot (compact horizontal) -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: #6d28d9;
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ④
+            </div>
+            <div class="compact-weekly">
+              <div class="compact-stat">
+                <div class="compact-stat-value">
+                  75.2<span style="font-size: 10px; color: var(--emerald-500)"> ↓</span>
+                </div>
+                <div class="compact-stat-label">kg</div>
+              </div>
+              <div class="compact-stat">
+                <div class="compact-stat-value">🔥 5</div>
+                <div class="compact-stat-label">chuỗi</div>
+              </div>
+              <div class="compact-stat">
+                <div class="compact-stat-value">80%</div>
+                <div class="compact-stat-label">tuân thủ</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 5: QuickActionsBar -->
+          <div style="position: relative">
+            <div
+              style="
+                position: absolute;
+                left: -4px;
+                top: 4px;
+                background: #6d28d9;
+                color: white;
+                font-size: 9px;
+                padding: 1px 6px;
+                border-radius: 4px;
+                font-weight: 700;
+              "
+            >
+              ⑤
+            </div>
+            <div class="quick-actions">
+              <button class="quick-btn primary" style="padding: 10px; font-size: 12px">⚖️ Cân nặng</button>
+              <button class="quick-btn secondary" style="padding: 10px; font-size: 12px">🏃 Cardio</button>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-nav">
+          <div class="nav-item"><span class="nav-icon">📅</span>Lịch</div>
+          <div class="nav-item"><span class="nav-icon">📚</span>Thư viện</div>
+          <div class="nav-item active"><span class="nav-icon">🏠</span>Tổng quan</div>
+          <div class="nav-item"><span class="nav-icon">💪</span>Tập luyện</div>
+          <div class="nav-item"><span class="nav-icon">🤖</span>AI</div>
+        </div>
+      </div>
+
+      <div class="highlight-box" style="margin-top: 16px; background: #f5f3ff; border-color: #c4b5fd; color: #4c1d95">
+        <strong>GP3 Trade-offs:</strong><br />
+        • ✅ Ít refactor nhất (chỉ CSS adjustments)<br />
+        • ✅ Không phá vỡ component structure<br />
+        • ⚠️ Vẫn 5 sections → scroll vẫn dài<br />
+        • ⚠️ Compact = text nhỏ hơn → readability giảm trên mobile<br />
+        • ⚠️ Không giải quyết critique "quá nhiều cards"
+      </div>
+    </div>
+
+    <!-- GREETING -->
+    <div id="panel-greeting" class="tab-panel">
+      <div class="approach-label">
+        <span class="approach-tag current">GREETING PLACEMENT OPTIONS</span>
+        <p class="approach-desc">Greeting "Chào Khánh" hiện ở trong NutritionHero. Có nên chuyển lên header?</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 780px; margin: 0 auto">
+        <!-- Option A: Keep in Hero -->
+        <div>
+          <div style="text-align: center; margin-bottom: 8px">
+            <span class="approach-tag gp1">Option A: Giữ trong Hero</span>
+            <p style="font-size: 11px; color: var(--slate-500); margin-top: 4px">
+              Hiện tại — greeting là phần đầu tiên trong hero card
+            </p>
+          </div>
+          <div class="phone-frame" style="width: 340px">
+            <div class="status-bar">
+              <span>12:52</span>
+              <span>📶 🔋</span>
+            </div>
+            <div class="phone-content" style="padding: 10px">
+              <div class="hero" style="padding: 14px">
+                <div class="hero-row1" style="margin-bottom: 10px">
+                  <div>
+                    <div class="hero-greeting" style="font-size: 13px">Chào Khánh 👋</div>
+                    <div class="hero-context" style="font-size: 10px">Ngày tập — Vai + Tay sau</div>
+                  </div>
+                  <div class="score-badge" style="width: 32px; height: 32px; font-size: 11px">78</div>
+                </div>
+                <div class="calorie-box" style="padding: 10px">
+                  <div class="calorie-row">
+                    <div>
+                      <div class="cal-eaten" style="font-size: 18px">
+                        1,327 <span class="cal-target" style="font-size: 11px">/ 2,091 kcal</span>
+                      </div>
+                      <div class="cal-remaining" style="font-size: 10px">Còn lại: 764 kcal</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card" style="padding: 10px">
+                <div style="font-size: 12px; font-weight: 600; color: var(--slate-600)">🍽️ Kế hoạch hôm nay</div>
+                <div style="font-size: 11px; color: var(--slate-400); margin-top: 6px">3 bữa • 1,327 kcal</div>
+              </div>
+            </div>
+          </div>
+          <div class="highlight-box" style="margin-top: 8px; width: 340px; font-size: 11px">
+            ✅ Không thay đổi code<br />
+            ✅ Greeting nằm trong context nutrition<br />
+            ⚠️ Chiếm 1 dòng trong hero card
+          </div>
+        </div>
+
+        <!-- Option B: Move to Header -->
+        <div>
+          <div style="text-align: center; margin-bottom: 8px">
+            <span class="approach-tag gp2">Option B: Chuyển lên App Header</span>
+            <p style="font-size: 11px; color: var(--slate-500); margin-top: 4px">
+              Greeting ở ngoài hero, hero chỉ focus nutrition data
+            </p>
+          </div>
+          <div class="phone-frame" style="width: 340px">
+            <div class="status-bar">
+              <span>12:52</span>
+              <span>📶 🔋</span>
+            </div>
+            <div class="phone-content" style="padding: 0">
+              <div class="app-header">
+                <div>
+                  <div class="app-header-greeting">Chào Khánh 👋</div>
+                  <div class="app-header-sub">Ngày tập — Vai + Tay sau</div>
+                </div>
+                <div class="header-actions">
+                  <div class="header-btn">🔔</div>
+                  <div class="header-btn">⚙️</div>
+                </div>
+              </div>
+              <div style="padding: 10px; display: flex; flex-direction: column; gap: 10px">
+                <div class="hero" style="padding: 14px">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px">
+                    <div>
+                      <div class="cal-eaten" style="font-size: 18px">
+                        1,327 <span class="cal-target" style="font-size: 11px">/ 2,091 kcal</span>
+                      </div>
+                      <div class="cal-remaining" style="font-size: 10px">Còn lại: 764 kcal</div>
+                    </div>
+                    <div class="score-badge" style="width: 32px; height: 32px; font-size: 11px">78</div>
+                  </div>
+                  <div class="calorie-box" style="padding: 0; background: none; margin-bottom: 8px">
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
+                  </div>
+                  <div class="macros">
+                    <div class="macro-item">
+                      <div class="macro-label" style="font-size: 10px"><span>P</span><span>94/170</span></div>
+                      <div class="macro-bar"><div class="macro-fill-p"></div></div>
+                    </div>
+                    <div class="macro-item">
+                      <div class="macro-label" style="font-size: 10px"><span>F</span><span>23/58</span></div>
+                      <div class="macro-bar"><div class="macro-fill-f"></div></div>
+                    </div>
+                    <div class="macro-item">
+                      <div class="macro-label" style="font-size: 10px"><span>C</span><span>168/241</span></div>
+                      <div class="macro-bar"><div class="macro-fill-c"></div></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card" style="padding: 10px">
+                  <div style="font-size: 12px; font-weight: 600; color: var(--slate-600)">🍽️ Kế hoạch hôm nay</div>
+                  <div style="font-size: 11px; color: var(--slate-400); margin-top: 6px">3 bữa • 1,327 kcal</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="highlight-box" style="margin-top: 8px; width: 340px; font-size: 11px">
+            ✅ Hero compact hơn (bỏ greeting row)<br />
+            ✅ Greeting prominent + persistent<br />
+            ⚠️ Cần refactor App.tsx layout<br />
+            ⚠️ Header chiếm thêm ~48px → giảm viewport
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function showTab(id) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('panel-' + id).classList.add('active');
+        event.target.classList.add('active');
+      }
+    </script>
+  </body>
+</html>

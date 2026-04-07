@@ -1228,3 +1228,160 @@ LUÔN chạy SonarQube TRƯỚC commit. Nếu quên → 2 agents song song fix n
 ### Bài học
 
 "Unexpected negated condition" chiếm 47% issues. Bulk-fixable bằng agent. Cognitive complexity cần human judgment cho helper extraction.
+
+---
+
+## 39. Agent "done" ≠ Task done — PHẢI verify bằng USAGE không phải EXISTENCE
+
+### Vấn đề
+
+Fleet agent tạo `CloseButton.tsx` component rồi đánh dấu W4-03 "done". Re-dispatch consolidated agent cũng ghi "CloseButton verified" trong commit message. Nhưng **0 modal nào import hoặc sử dụng component**. Component là dead code hoàn toàn.
+
+### Nguyên nhân
+
+1. Agent hiểu sai scope: "chuẩn hóa CloseButton" = tạo component (20% công việc). Apply vào 15 modals (80%) bị bỏ sót.
+2. Tôi tin agent report mà không verify independently — vi phạm Memory #34.
+3. Mega-commit từ 27 parallel agents → filesystem conflict → changes bị mất → re-dispatch cũng không redo từ đầu.
+
+### Giải pháp — Verification Pattern cho agent output
+
+```bash
+# SAI — chỉ check file tồn tại
+ls src/components/shared/CloseButton.tsx  # → exists = "done"? ❌
+
+# ĐÚNG — check USAGE (imports)
+grep -rn "import.*CloseButton" src/ --include="*.tsx" | grep -v "__tests__"
+# 0 results → component là dead code → task CHƯA done
+
+# ĐÚNG — check REPLACEMENT (old pattern should be gone)
+grep -rn "X className.*h-[56].*w-[56]" src/components/modals/ | wc -l
+# >0 results → old pattern vẫn còn → task CHƯA done
+```
+
+### Checklist verify agent "refactor/standardize" tasks
+
+- [ ] Component MỚI tồn tại? (existence)
+- [ ] Component MỚI được IMPORT ở đúng nơi? (usage)
+- [ ] Pattern CŨ đã bị XÓA/THAY THẾ? (replacement)
+- [ ] Tests PASS với component mới? (regression)
+- [ ] 0 dead code (component tạo ra nhưng không ai dùng)?
+
+### Bài học
+
+**"Existence ≠ Usage ≠ Completion"**. Khi agent nói "done" cho refactor task, LUÔN verify 3 điều: (1) component mới EXISTS, (2) component mới IMPORTED ở tất cả target files, (3) pattern cũ REMOVED. Thiếu bất kỳ 1/3 = task chưa done.
+
+---
+
+## 40. Sub-agents KHÔNG ĐƯỢC PHÉP commit — Chỉ orchestrator mới commit
+
+### Vấn đề
+
+27 fleet agents commit độc lập → filesystem conflict → changes bị mất → component tạo nhưng không apply → đánh dấu "done" sai. Re-dispatch consolidated agents cũng lặp lại pattern: agent commit sớm, không verify toàn bộ pipeline.
+
+### Nguyên nhân
+
+1. Sub-agents có quyền `git commit` → commit từng phần riêng lẻ → merge conflict
+2. Không ai verify tổng thể trước khi commit → partial work được coi là "done"
+3. Quality gates (lint/test/build/sonar) bị skip vì agent commit trước khi chạy
+
+### Giải pháp — Quy tắc commit tuyệt đối
+
+```
+QUY TẮC:
+1. Sub-agents KHÔNG ĐƯỢC chạy: git add, git commit, git push
+2. Sub-agents KHÔNG ĐƯỢC chạy: npm run build, npx cap sync, gradle
+3. Sub-agents CHỈ ĐƯỢC: sửa code, chạy lint, chạy test
+4. Orchestrator (main agent) là người DUY NHẤT commit
+5. Commit CHỈ xảy ra SAU KHI qua TOÀN BỘ quality gates
+6. 1 commit DUY NHẤT cho mỗi wave/batch
+
+TRONG PROMPT GỬI CHO MỖI SUB-AGENT, BẮT BUỘC GHI RÕ:
+"⛔ KHÔNG ĐƯỢC chạy git add, git commit, git push.
+ ⛔ KHÔNG ĐƯỢC chạy npm run build, npx cap sync, gradle.
+ ✅ CHỈ ĐƯỢC: sửa code, chạy lint, chạy test.
+ ✅ Sau khi xong: báo cáo danh sách files đã thay đổi."
+```
+
+### Quy trình đúng
+
+```
+1. Dispatch sub-agents (parallel) → sửa code only
+2. Agents báo cáo files đã thay đổi
+3. Orchestrator verify:
+   a. grep import/usage cho refactor tasks (Memory #39)
+   b. grep old pattern removed
+   c. 0 dead code
+4. npm run lint → test → build → sonar → 0 issues
+5. APK build → emulator verify → screenshot
+6. CHỈ LÚC NÀY: git add + git commit (1 commit duy nhất)
+```
+
+### Tại sao không cho agent commit?
+
+| Rủi ro              | Hậu quả                      | Ví dụ thực tế                           |
+| ------------------- | ---------------------------- | --------------------------------------- |
+| Filesystem conflict | Changes bị overwrite         | 27 agents → chỉ commit đầu tiên survive |
+| Partial commit      | "Done" nhưng thiếu 80% work  | CloseButton tạo nhưng 0 modal import    |
+| Skip quality gates  | Bug lọt vào main             | SonarQube issues phát sinh sau commit   |
+| Rollback phức tạp   | Nhiều commits nhỏ khó revert | Phải cherry-pick từng commit            |
+
+### Bài học
+
+**"1 wave = 1 commit = 1 quality gate pass"**. Sub-agents là workers, orchestrator là gatekeeper. Không ai được commit cho đến khi TOÀN BỘ pipeline xanh.
+
+---
+
+## 41. CombinedHero KHÔNG có data-testid riêng — verify bằng DOM structure
+
+### Vấn đề
+
+CDP test kiểm tra `[data-testid="combined-hero"]` → "none". Kết luận sai là CombinedHero không render.
+
+### Nguyên nhân
+
+CombinedHero dùng `<section>` wrapper KHÔNG có `data-testid`. Component con `NutritionSection` có `data-testid="nutrition-hero"`. Cách verify đúng: tìm `nutrition-hero` → check parent là `<section>` có gradient class + aria-label.
+
+### Giải pháp
+
+```javascript
+// ❌ SAI — component không có testid riêng
+document.querySelector('[data-testid="combined-hero"]');
+
+// ✅ ĐÚNG — verify qua DOM structure
+var nh = document.querySelector('[data-testid="nutrition-hero"]');
+var parent = nh.parentElement;
+var isCorrect = parent.tagName === 'SECTION' && parent.className.includes('bg-gradient-to-br');
+```
+
+### Bài học
+
+Khi component wrapper không có testid, verify bằng DOM hierarchy (parent tag + class + aria-label). Không kết luận "fail" khi testid không tồn tại — có thể component render đúng nhưng không đặt testid.
+
+---
+
+## 42. Wave-based TDD + Orchestrator-Only Commit — hiệu quả cao
+
+### Vấn đề
+
+W4-03 + W5-01 implementation (9 tasks, 32 files, 1921+ lines) cần parallel agents nhưng KHÔNG ĐƯỢC để agents commit.
+
+### Giải pháp: 5-wave pipeline
+
+```
+Wave 1: Task 0+1 (foundation) — orchestrator direct
+Wave 2: Task 2+3 (close buttons) — 2 parallel agents
+Wave 3: Task 4+5+6 (dashboard components) — 3 parallel agents
+Wave 4: Task 7 (rewire) — orchestrator direct
+Wave 5: Task 8 (quality gate + commit) — orchestrator only
+```
+
+### Kết quả
+
+- 5 agents total, 0 conflicts
+- 1 commit duy nhất sau full quality gate
+- Lint 0, Test 5133 pass, Build clean, SonarQube 0
+- Chỉ phát hiện 1 issue nhỏ (GRADIENT_CLASS unused const) → fix ngay
+
+### Bài học
+
+Wave structure + orchestrator-only commit = zero conflicts. Agents chỉ edit code + run test. Orchestrator verify usage (grep imports) trước khi commit. Pattern này hiệu quả nhất cho multi-file refactors.

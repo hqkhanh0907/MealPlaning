@@ -889,7 +889,7 @@ async def skip_remaining_tcs(s):
 
 
 async def run_all():
-    s = await setup_fresh(full_onboard=False, scenario=SC)
+    s = await setup_fresh(scenario=SC)
 
     try:
         print(f"\n{'='*60}")

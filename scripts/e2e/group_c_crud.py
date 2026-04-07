@@ -696,7 +696,7 @@ async def main():
     print("=" * 60)
 
     # Setup: fresh install, bypass onboarding
-    s = await setup_fresh(full_onboard=False, scenario="SC06")
+    s = await setup_fresh(scenario="SC06")
 
     # Run scenarios in sequence (single session, shared state)
     await sc06_ingredient_crud(s)

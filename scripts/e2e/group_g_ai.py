@@ -337,7 +337,7 @@ async def main():
     print("  SC21: AI Suggest Ingredients")
     print("═" * 60)
 
-    s = await setup_fresh(full_onboard=False, scenario="SC04")
+    s = await setup_fresh(scenario="SC04")
 
     try:
         await sc04_ai_meal_suggestion(s)
