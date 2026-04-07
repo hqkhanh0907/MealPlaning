@@ -46,7 +46,7 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
         <div className="space-y-1">
           <div className="text-foreground flex items-center gap-1.5">
             <Flame className="text-energy h-3.5 w-3.5" />
-            <span className="text-xs font-medium">
+            <span className="text-xs font-medium tabular-nums">
               {totalCal}/{displayCal} kcal
             </span>
           </div>
@@ -59,7 +59,7 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
           </div>
           <p
             data-testid="mini-remaining-cal"
-            className={`text-xs font-medium ${remainingCal >= 0 ? 'text-primary' : 'text-destructive'}`}
+            className={`text-xs font-medium tabular-nums ${remainingCal >= 0 ? 'text-primary' : 'text-destructive'}`}
           >
             {remainingCal >= 0
               ? t('summary.remaining', { value: remainingCal, unit: 'kcal' })
@@ -69,7 +69,7 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
         <div className="space-y-1">
           <div className="text-foreground flex items-center gap-1.5">
             <Beef className="text-macro-protein h-3.5 w-3.5" />
-            <span className="text-xs font-medium">
+            <span className="text-xs font-medium tabular-nums">
               {totalPro}/{displayPro}g Pro
             </span>
           </div>
@@ -82,7 +82,7 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
           </div>
           <p
             data-testid="mini-remaining-pro"
-            className={`text-xs font-medium ${remainingPro >= 0 ? 'text-primary' : 'text-destructive'}`}
+            className={`text-xs font-medium tabular-nums ${remainingPro >= 0 ? 'text-primary' : 'text-destructive'}`}
           >
             {remainingPro >= 0
               ? t('summary.remaining', { value: remainingPro, unit: 'g' })

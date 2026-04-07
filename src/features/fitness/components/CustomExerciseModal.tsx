@@ -56,10 +56,13 @@ export function CustomExerciseModal({
   return (
     <ModalBackdrop onClose={onClose}>
       <div className="bg-card w-full max-w-sm rounded-2xl p-6" data-testid="custom-exercise-modal">
-        <h3 className="text-foreground text-lg font-semibold">{t('fitness.exerciseSelector.addCustom')}</h3>
+        <h3 className="text-foreground text-xl font-semibold">{t('fitness.exerciseSelector.addCustom')}</h3>
         <form noValidate onSubmit={handleSubmit(onFormSubmit)} className="mt-4 space-y-3">
           <div>
-            <label htmlFor="custom-exercise-name" className="text-foreground mb-1 block text-sm font-medium">
+            <label
+              htmlFor="custom-exercise-name"
+              className="text-foreground mb-1 block text-sm leading-relaxed font-medium"
+            >
               {t('fitness.exerciseSelector.customName')}
             </label>
             <Input
@@ -79,7 +82,10 @@ export function CustomExerciseModal({
             )}
           </div>
           <div>
-            <label htmlFor="custom-exercise-muscle" className="text-foreground mb-1 block text-sm font-medium">
+            <label
+              htmlFor="custom-exercise-muscle"
+              className="text-foreground mb-1 block text-sm leading-relaxed font-medium"
+            >
               {t('fitness.exerciseSelector.selectMuscle')}
             </label>
             <select
@@ -97,7 +103,10 @@ export function CustomExerciseModal({
             </select>
           </div>
           <div>
-            <label htmlFor="custom-exercise-category" className="text-foreground mb-1 block text-sm font-medium">
+            <label
+              htmlFor="custom-exercise-category"
+              className="text-foreground mb-1 block text-sm leading-relaxed font-medium"
+            >
               {t('fitness.exerciseSelector.compoundCategory')}
             </label>
             <select
@@ -112,7 +121,10 @@ export function CustomExerciseModal({
             </select>
           </div>
           <div>
-            <label htmlFor="custom-exercise-equipment" className="text-foreground mb-1 block text-sm font-medium">
+            <label
+              htmlFor="custom-exercise-equipment"
+              className="text-foreground mb-1 block text-sm leading-relaxed font-medium"
+            >
               {t('fitness.exerciseSelector.equipment')}
             </label>
             <Input

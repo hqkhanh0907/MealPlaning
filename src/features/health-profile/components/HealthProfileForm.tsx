@@ -454,13 +454,13 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       <div className="bg-primary-subtle space-y-3 rounded-xl p-4">
         <div className="flex justify-between text-sm">
           <span className="text-foreground-secondary">{t('healthProfile.bmr')}</span>
-          <span className="text-foreground font-semibold" data-testid="bmr-value">
+          <span className="text-foreground font-semibold tabular-nums" data-testid="bmr-value">
             {bmr} kcal
           </span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-foreground-secondary">{t('healthProfile.tdee')}</span>
-          <span className="text-foreground font-semibold" data-testid="tdee-value">
+          <span className="text-foreground font-semibold tabular-nums" data-testid="tdee-value">
             {tdee} kcal
           </span>
         </div>
@@ -469,19 +469,19 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
           <div className="grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-3">
             <div className="bg-card rounded-lg p-4">
               <p className="text-muted-foreground">{t('common.protein')}</p>
-              <p className="text-primary font-semibold" data-testid="macro-protein">
+              <p className="text-primary font-semibold tabular-nums" data-testid="macro-protein">
                 {macros.proteinG}g
               </p>
             </div>
             <div className="bg-card rounded-lg p-4">
               <p className="text-muted-foreground">{t('common.fat')}</p>
-              <p className="text-macro-fat font-semibold" data-testid="macro-fat">
+              <p className="text-macro-fat font-semibold tabular-nums" data-testid="macro-fat">
                 {macros.fatG}g
               </p>
             </div>
             <div className="bg-card rounded-lg p-4">
               <p className="text-muted-foreground">{t('common.carbs')}</p>
-              <p className="text-macro-carbs font-semibold" data-testid="macro-carbs">
+              <p className="text-macro-carbs font-semibold tabular-nums" data-testid="macro-carbs">
                 {macros.carbsG}g
               </p>
             </div>

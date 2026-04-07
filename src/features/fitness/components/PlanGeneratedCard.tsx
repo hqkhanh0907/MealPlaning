@@ -32,7 +32,7 @@ export const PlanGeneratedCard = () => {
           <PartyPopper className="h-6 w-6" aria-hidden="true" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold">{t('fitness.celebration.title')}</h3>
+          <h3 className="text-xl font-semibold">{t('fitness.celebration.title')}</h3>
           <p className="text-sm text-white/90">{t('fitness.celebration.subtitle')}</p>
         </div>
       </div>

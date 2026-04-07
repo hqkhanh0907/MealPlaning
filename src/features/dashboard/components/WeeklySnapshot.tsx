@@ -152,7 +152,7 @@ function WeeklySnapshotInner(): React.ReactElement {
             ? t('dashboard.weekly.streakDays', { count: streakInfo.currentStreak })
             : t('dashboard.weekly.noStreak')}
         </span>
-        <span className="text-muted-foreground text-xs">{t('dashboard.weekly.streak')}</span>
+        <span className="text-muted-foreground text-xs tracking-wider">{t('dashboard.weekly.streak')}</span>
         <div className="mt-0.5 flex items-center gap-0.5" data-testid="weekly-streak-dots" aria-hidden="true">
           {streakInfo.weekDots.map(dot => (
             <span
@@ -170,12 +170,12 @@ function WeeklySnapshotInner(): React.ReactElement {
         {adherence == null ? (
           <>
             <span className="text-muted-foreground text-base font-semibold">{t('dashboard.weekly.noAdherence')}</span>
-            <span className="text-muted-foreground text-xs">{t('dashboard.weekly.adherenceLabel')}</span>
+            <span className="text-muted-foreground text-xs tracking-wider">{t('dashboard.weekly.adherenceLabel')}</span>
           </>
         ) : (
           <>
             <span className="text-foreground text-base font-semibold tabular-nums">{adherence}%</span>
-            <span className="text-muted-foreground text-xs">{t('dashboard.weekly.adherenceLabel')}</span>
+            <span className="text-muted-foreground text-xs tracking-wider">{t('dashboard.weekly.adherenceLabel')}</span>
             <progress
               className="bg-muted [&::-moz-progress-bar]:bg-primary [&::-webkit-progress-value]:bg-primary mt-0.5 h-1.5 w-full appearance-none overflow-hidden rounded-full [&::-moz-progress-bar]:rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all"
               data-testid="weekly-adherence-bar"

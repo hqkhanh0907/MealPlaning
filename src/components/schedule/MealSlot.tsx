@@ -148,10 +148,10 @@ export const MealSlot = React.memo(function MealSlot({
       </div>
 
       <div className="border-border flex flex-wrap gap-2 border-t pt-2">
-        <span className="bg-primary-subtle text-primary rounded px-2 py-0.5 text-xs font-semibold uppercase">
+        <span className="bg-primary-subtle text-primary rounded px-2 py-0.5 text-xs font-semibold uppercase tabular-nums">
           {Math.round(slot.calories)} kcal
         </span>
-        <span className="bg-info/10 text-info rounded px-2 py-0.5 text-xs font-semibold uppercase">
+        <span className="bg-info/10 text-info rounded px-2 py-0.5 text-xs font-semibold uppercase tabular-nums">
           {Math.round(slot.protein)}g Pro
         </span>
       </div>

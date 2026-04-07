@@ -161,7 +161,7 @@ export function ExerciseSelector({
         </div>
 
         {/* Title */}
-        <h2 className="text-foreground px-4 pb-2 text-center text-lg font-semibold">
+        <h2 className="text-foreground px-4 pb-2 text-center text-xl font-semibold">
           {t('fitness.exerciseSelector.title')}
         </h2>
 
@@ -193,7 +193,7 @@ export function ExerciseSelector({
               onClick={() => handleChipClick('all')}
               className={`focus-visible:ring-ring min-h-11 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 ${
                 selectedMuscleGroup === 'all'
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'bg-accent-highlight text-accent-highlight-foreground'
                   : 'text-foreground-secondary bg-muted'
               }`}
             >
@@ -206,7 +206,7 @@ export function ExerciseSelector({
                 onClick={() => handleChipClick(group)}
                 className={`focus-visible:ring-ring min-h-11 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 ${
                   selectedMuscleGroup === group
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-accent-highlight text-accent-highlight-foreground'
                     : 'text-foreground-secondary bg-muted'
                 }`}
               >

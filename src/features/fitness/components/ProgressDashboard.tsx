@@ -496,7 +496,9 @@ function ProgressDashboardInner() {
                   data-testid={`time-range-${range}`}
                   onClick={() => handleTimeRangeChange(range)}
                   className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    timeRange === range ? 'bg-primary text-primary-foreground' : 'text-foreground-secondary bg-muted'
+                    timeRange === range
+                      ? 'bg-accent-highlight text-accent-highlight-foreground'
+                      : 'text-foreground-secondary bg-muted'
                   }`}
                 >
                   {range}

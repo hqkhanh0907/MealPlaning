@@ -128,7 +128,7 @@ export const SetEditor = React.memo(function SetEditor({
         data-testid="set-editor"
       >
         <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-foreground text-lg font-semibold">{t('fitness.editor.title')}</h3>
+          <h3 className="text-foreground text-xl font-semibold">{t('fitness.editor.title')}</h3>
           <Button
             variant="ghost"
             size="icon"
@@ -143,7 +143,7 @@ export const SetEditor = React.memo(function SetEditor({
 
         {/* Weight section */}
         <div className="mb-4">
-          <label className="text-muted-foreground mb-2 block text-xs font-medium">
+          <label className="text-muted-foreground mb-2 block text-xs leading-relaxed font-medium">
             {t('fitness.editor.weight')} ({t('fitness.editor.kg')})
           </label>
           <div className="flex items-center gap-2">
@@ -185,7 +185,7 @@ export const SetEditor = React.memo(function SetEditor({
         {/* Recent weight chips */}
         {recentWeights.length > 0 && (
           <div className="mb-4" data-testid="recent-weights-section">
-            <span className="text-muted-foreground mb-2 block text-xs font-medium">
+            <span className="text-muted-foreground mb-2 block text-xs leading-relaxed font-medium">
               {t('fitness.editor.recentWeights')}
             </span>
             <div className="flex flex-wrap gap-2">

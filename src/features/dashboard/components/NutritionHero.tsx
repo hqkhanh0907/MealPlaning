@@ -270,7 +270,7 @@ function NutritionHeroInner({ isLoading = false }: Readonly<NutritionHeroProps>)
         <p className="mb-1 text-sm text-white/80" data-testid="nutrition-hero-greeting">
           {greeting}
         </p>
-        <h2 className="mb-2 text-lg font-semibold text-white">{t('dashboard.nutritionHero.setupTitle')}</h2>
+        <h2 className="mb-2 text-xl font-semibold text-white">{t('dashboard.nutritionHero.setupTitle')}</h2>
         <p className="text-sm text-white/60">{t('dashboard.nutritionHero.setupDescription')}</p>
       </section>
     );
@@ -308,7 +308,9 @@ function NutritionHeroInner({ isLoading = false }: Readonly<NutritionHeroProps>)
             <div>
               <p className="text-xl font-bold text-white tabular-nums">
                 {eatenText}{' '}
-                <span className="text-sm font-normal text-white/50">/ {Math.round(displayTarget)} kcal</span>
+                <span className="text-sm font-normal text-white/50 tabular-nums">
+                  / {Math.round(displayTarget)} kcal
+                </span>
               </p>
               <p
                 className={`mt-0.5 text-xs font-medium ${isOverTarget ? 'text-rose-400' : 'text-emerald-400'}`}

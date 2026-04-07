@@ -76,7 +76,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
 
         {/* Header */}
         <div className="px-4 pb-3 text-center">
-          <h2 data-testid="day-assignment-title" className="text-foreground text-lg font-semibold">
+          <h2 data-testid="day-assignment-title" className="text-foreground text-xl font-semibold">
             {t('fitness.scheduleEditor.selectDay')}
           </h2>
         </div>

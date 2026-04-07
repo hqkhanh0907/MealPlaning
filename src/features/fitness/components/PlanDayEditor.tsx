@@ -234,7 +234,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
         </button>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <h1 className="truncate text-lg font-semibold text-white" title={t('fitness.plan.editExercises')}>
+          <h1 className="truncate text-xl font-semibold text-white" title={t('fitness.plan.editExercises')}>
             {t('fitness.plan.editExercises')}
           </h1>
           {(isModified || hasChanges) && (

@@ -216,7 +216,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef, onValidityChange }: GoalP
 
   return (
     <div className="space-y-6" data-testid="goal-phase-selector">
-      {!embedded && <h3 className="text-foreground text-lg font-semibold">{t('goal.title')}</h3>}
+      {!embedded && <h3 className="text-foreground text-xl font-semibold">{t('goal.title')}</h3>}
 
       {/* Goal Type Buttons — unified with onboarding NutritionGoalStep */}
       <fieldset className="m-0 space-y-3 border-0 p-0" aria-label={t('goal.title')}>
@@ -249,7 +249,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef, onValidityChange }: GoalP
       {/* Rate of Change Selector */}
       {showRateSelector && (
         <div data-testid="rate-selector">
-          <label className="text-foreground mb-2 block text-sm font-medium">{t('goal.rate')}</label>
+          <label className="text-foreground mb-2 block text-sm leading-relaxed font-medium">{t('goal.rate')}</label>
           <fieldset className="m-0 flex gap-2 border-0 p-0" aria-label={t('goal.rate')}>
             {RATE_OPTIONS.map(({ rate, labelKey }) => (
               <button
@@ -275,7 +275,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef, onValidityChange }: GoalP
       {/* Target Weight — hidden for maintain */}
       {showTargetWeight && (
         <div>
-          <label htmlFor="target-weight" className="text-foreground mb-1 block text-sm font-medium">
+          <label htmlFor="target-weight" className="text-foreground mb-1 block text-sm leading-relaxed font-medium">
             {t('goal.targetWeight')}
           </label>
           <div className="relative">
@@ -305,7 +305,7 @@ export const GoalPhaseSelector = ({ embedded, saveRef, onValidityChange }: GoalP
       <div className="bg-muted space-y-3 rounded-xl p-4">
         <div className="flex items-center justify-between">
           <span className="text-foreground text-sm font-medium">{t('goal.calorieOffset')}</span>
-          <span data-testid="calorie-offset-display" className="text-foreground text-lg font-semibold">
+          <span data-testid="calorie-offset-display" className="text-foreground text-lg font-semibold tabular-nums">
             {formatOffset(effectiveOffset)}
           </span>
         </div>

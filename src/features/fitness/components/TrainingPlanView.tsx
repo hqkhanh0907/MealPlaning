@@ -527,14 +527,14 @@ function TrainingPlanViewInner({
       {!coachingDismissed && (
         <output
           data-testid="plan-coaching-hint"
-          className="bg-primary-subtle border-primary/20 block flex items-center gap-3 rounded-xl border p-3"
+          className="bg-accent-subtle border-accent-highlight/20 block flex items-center gap-3 rounded-xl border p-3"
         >
-          <span className="text-primary-emphasis flex-1 text-sm">{t('fitness.plan.coachingHint')}</span>
+          <span className="text-accent-emphasis flex-1 text-sm">{t('fitness.plan.coachingHint')}</span>
           <button
             type="button"
             onClick={handleDismissCoaching}
             aria-label={t('common.dismiss')}
-            className="text-primary focus-visible:ring-ring hover:bg-primary/10 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg focus-visible:ring-2 focus-visible:outline-none"
+            className="text-accent-emphasis focus-visible:ring-ring hover:bg-accent flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg focus-visible:ring-2 focus-visible:outline-none"
           >
             <X className="h-4 w-4" />
           </button>
@@ -575,7 +575,7 @@ function TrainingPlanViewInner({
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h3 className="text-foreground text-lg font-semibold">
+              <h3 className="text-foreground text-xl font-semibold">
                 {translateWorkoutType(t, viewedPlanDay.workoutType)}
               </h3>
               {viewedPlanDay.originalExercises != null &&

@@ -48,7 +48,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
         <div className="flex items-center gap-3">
           <span
             data-testid="net-calories"
-            className={`text-lg font-semibold ${remaining >= 0 ? 'text-primary' : 'text-destructive'}`}
+            className={`text-lg font-semibold tabular-nums ${remaining >= 0 ? 'text-primary' : 'text-destructive'}`}
           >
             {netCalories} {t('nutrition.kcal')}
           </span>
@@ -73,7 +73,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
 
       {/* Collapsed summary line */}
       {collapsed && (
-        <p data-testid="collapsed-summary" className="text-muted-foreground mt-1 text-xs">
+        <p data-testid="collapsed-summary" className="text-muted-foreground mt-1 text-xs tabular-nums">
           {Math.round(caloriesIn)} {t('nutrition.caloriesIn')} − {Math.round(caloriesOut)} {t('nutrition.caloriesOut')}{' '}
           = {netCalories} {t('nutrition.kcal')}
         </p>
@@ -83,7 +83,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
       {!collapsed && (
         <div className="mt-4 space-y-4">
           {/* Calorie in / out labels */}
-          <div className="text-foreground-secondary flex justify-between text-xs">
+          <div className="text-foreground-secondary flex justify-between text-xs tabular-nums">
             <span className="flex items-center gap-1">
               <Flame className="text-energy h-3.5 w-3.5" />
               {t('nutrition.caloriesIn')}: <strong data-testid="calories-in">{Math.round(caloriesIn)}</strong>
@@ -110,7 +110,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
                 style={{ width: `${outPct}%` }}
               />
             </div>
-            <div className="text-muted-foreground flex justify-between text-xs">
+            <div className="text-muted-foreground flex justify-between text-xs tabular-nums">
               <span>
                 {t('nutrition.target')}: {displayTarget} {t('nutrition.kcal')}
               </span>
@@ -127,7 +127,7 @@ export const EnergyBalanceCard = React.memo(function EnergyBalanceCard({
                 <Beef className="text-macro-protein h-3.5 w-3.5" aria-hidden="true" />
                 {t('nutrition.protein')}
               </span>
-              <span data-testid="protein-display">
+              <span data-testid="protein-display" className="tabular-nums">
                 {Math.round(proteinCurrent)}/{displayProTarget}
                 {t('nutrition.grams')}
               </span>

@@ -22,7 +22,7 @@ export const DetailModal = ({ title, editLabel, onClose, onEdit, children }: Det
       >
         {/* Header */}
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
-          <h4 className="text-foreground text-lg font-semibold">{title}</h4>
+          <h4 className="text-foreground text-xl font-semibold">{title}</h4>
           <div className="flex items-center gap-1">
             <button
               onClick={onEdit}

@@ -429,7 +429,9 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
       <>
         {isFreestyle && (
           <div className="px-4 py-3" data-testid="freestyle-name-section">
-            <label className="text-foreground text-sm font-medium">{t('fitness.plan.freestyleName')}</label>
+            <label className="text-foreground text-sm leading-relaxed font-medium">
+              {t('fitness.plan.freestyleName')}
+            </label>
             <input
               type="text"
               value={freestyleName}

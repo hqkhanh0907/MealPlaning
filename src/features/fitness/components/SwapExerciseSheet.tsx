@@ -108,7 +108,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
         <div className="px-4 pb-3 text-center">
           <div className="mb-1 flex items-center justify-center gap-2">
             <ArrowLeftRight className="text-primary h-5 w-5" />
-            <h2 className="text-foreground text-lg font-semibold">{t('fitness.swap.title')}</h2>
+            <h2 className="text-foreground text-xl font-semibold">{t('fitness.swap.title')}</h2>
           </div>
           <p className="text-muted-foreground text-sm">
             <span>{t('fitness.swap.current')}: </span>

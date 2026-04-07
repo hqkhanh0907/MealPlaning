@@ -228,7 +228,9 @@ function WorkoutHistoryInner(): React.JSX.Element {
             aria-pressed={filter === key}
             aria-label={label}
             className={`focus-visible:ring-ring min-h-11 rounded-full px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 ${
-              filter === key ? 'bg-primary text-primary-foreground' : 'text-foreground-secondary bg-muted'
+              filter === key
+                ? 'bg-accent-highlight text-accent-highlight-foreground'
+                : 'text-foreground-secondary bg-muted'
             }`}
           >
             {label}
@@ -241,7 +243,7 @@ function WorkoutHistoryInner(): React.JSX.Element {
           <div key={weekKey} data-testid={`week-group-${weekKey}`}>
             <h3
               data-testid={`week-header-${weekKey}`}
-              className="text-muted-foreground mb-2 px-1 text-xs font-semibold tracking-wide uppercase"
+              className="text-muted-foreground mb-2 px-1 text-xs font-semibold tracking-wider uppercase"
             >
               {t('fitness.history.weekOf', { date: weekLabel })}
             </h3>

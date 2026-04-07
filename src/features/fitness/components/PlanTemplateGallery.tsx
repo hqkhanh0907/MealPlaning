@@ -207,7 +207,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="truncate text-lg font-semibold text-white">{t('fitness.templateGallery.title')}</h1>
+          <h1 className="truncate text-xl font-semibold text-white">{t('fitness.templateGallery.title')}</h1>
         </div>
         <LoadingSkeleton />
       </div>
@@ -227,7 +227,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="truncate text-lg font-semibold text-white">{t('fitness.templateGallery.title')}</h1>
+          <h1 className="truncate text-xl font-semibold text-white">{t('fitness.templateGallery.title')}</h1>
         </div>
         <div
           data-testid="template-empty-state"
@@ -261,7 +261,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="truncate text-lg font-semibold text-white">{t('fitness.templateGallery.title')}</h1>
+        <h1 className="truncate text-xl font-semibold text-white">{t('fitness.templateGallery.title')}</h1>
       </div>
 
       {/* Scrollable Content */}
@@ -312,7 +312,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
             type="button"
             data-testid="save-as-template-btn"
             onClick={handleOpenSaveDialog}
-            className="focus-visible:ring-ring bg-primary-subtle text-primary-emphasis border-primary/30 hover:bg-primary/10 flex min-h-[44px] w-full touch-manipulation items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className="focus-visible:ring-ring bg-accent-subtle text-accent-emphasis border-accent-highlight/30 hover:bg-accent flex min-h-[44px] w-full touch-manipulation items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <Save className="h-4 w-4" aria-hidden="true" />
             {t('fitness.templateGallery.saveCurrent')}
@@ -340,7 +340,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
             className="bg-card relative w-full overflow-hidden rounded-t-2xl p-6 shadow-xl sm:mx-4 sm:max-w-sm sm:rounded-2xl"
             aria-label={t('fitness.templateGallery.saveNamePrompt')}
           >
-            <h3 className="text-foreground mb-4 text-lg font-semibold">
+            <h3 className="text-foreground mb-4 text-xl font-semibold">
               {t('fitness.templateGallery.saveNamePrompt')}
             </h3>
             <input

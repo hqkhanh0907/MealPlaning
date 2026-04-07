@@ -47,7 +47,7 @@ export function SettingsDetailLayout({
           </button>
           <div className="flex items-center gap-2.5">
             {icon}
-            <h3 className="text-foreground text-lg font-semibold">
+            <h3 className="text-foreground text-xl font-semibold">
               {isEditing ? `${t('settings.edit')} ${title}` : title}
             </h3>
           </div>

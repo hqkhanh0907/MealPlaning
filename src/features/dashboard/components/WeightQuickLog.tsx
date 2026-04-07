@@ -233,7 +233,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
               updatedAt: new Date().toISOString(),
             });
           } else if (savedEntryId) {
-          /* v8 ignore start -- defensive: savedEntryId is always set when wasUpdate is true */
+            /* v8 ignore start -- defensive: savedEntryId is always set when wasUpdate is true */
             removeWeightEntry(savedEntryId);
           }
           /* v8 ignore stop */
@@ -255,7 +255,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
         <div className="flex items-center justify-between px-6 pt-5 pb-3">
           <div className="flex items-center gap-2">
             <Scale className="text-primary h-5 w-5" aria-hidden="true" />
-            <h2 className="text-foreground text-lg font-semibold">{t('fitness.weight.quickLogTitle')}</h2>
+            <h2 className="text-foreground text-xl font-semibold">{t('fitness.weight.quickLogTitle')}</h2>
           </div>
           <button
             type="button"

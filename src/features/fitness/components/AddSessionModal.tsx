@@ -52,7 +52,7 @@ function AddSessionModalInner({
       <div className="bg-card relative w-full rounded-t-3xl p-6 sm:mx-auto sm:max-w-md sm:rounded-2xl">
         {step === 'options' && (
           <>
-            <h3 className="text-foreground mb-4 text-lg font-semibold">{t('fitness.plan.addSession')}</h3>
+            <h3 className="text-foreground mb-4 text-xl font-semibold">{t('fitness.plan.addSession')}</h3>
             {isMaxReached && <p className="text-warning mb-3 text-sm">{t('fitness.plan.maxSessions')}</p>}
             <div className="flex flex-col gap-3">
               <button
@@ -108,7 +108,7 @@ function AddSessionModalInner({
               >
                 <ChevronLeft className="text-foreground-secondary h-5 w-5" />
               </button>
-              <h3 className="text-foreground text-lg font-semibold">{t('fitness.plan.selectMuscleGroups')}</h3>
+              <h3 className="text-foreground text-xl font-semibold">{t('fitness.plan.selectMuscleGroups')}</h3>
             </div>
 
             <div className="mb-6 flex flex-wrap gap-2">

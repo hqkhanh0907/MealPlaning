@@ -160,7 +160,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-lg font-semibold">{t('fitness.scheduleEditor.title')}</h1>
+          <h1 className="text-xl font-semibold">{t('fitness.scheduleEditor.title')}</h1>
         </header>
 
         <div
@@ -194,7 +194,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="flex-1 text-lg font-semibold">{t('fitness.scheduleEditor.title')}</h1>
+        <h1 className="flex-1 text-xl font-semibold">{t('fitness.scheduleEditor.title')}</h1>
       </header>
 
       {/* Scrollable content */}

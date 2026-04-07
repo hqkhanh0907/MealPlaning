@@ -111,7 +111,7 @@ export function SplitChanger({ planId, currentSplit, onComplete }: Readonly<Spli
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="truncate text-lg font-semibold text-white">{t('fitness.splitChanger.title')}</h1>
+        <h1 className="truncate text-xl font-semibold text-white">{t('fitness.splitChanger.title')}</h1>
       </div>
 
       {/* Content */}
