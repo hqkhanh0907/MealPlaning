@@ -273,16 +273,16 @@ describe('dishStore', () => {
           .mockResolvedValueOnce([
             {
               id: 'db-dish-1',
-              name_vi: 'Phở',
-              name_en: 'Pho',
+              nameVi: 'Phở',
+              nameEn: 'Pho',
               tags: '["soup"]',
               rating: 5,
               notes: 'Delicious',
             },
           ])
           .mockResolvedValueOnce([
-            { ingredient_id: 'ing-1', amount: 200 },
-            { ingredient_id: 'ing-2', amount: 100 },
+            { ingredientId: 'ing-1', amount: 200 },
+            { ingredientId: 'ing-2', amount: 100 },
           ]),
       };
 
@@ -308,8 +308,8 @@ describe('dishStore', () => {
           .mockResolvedValueOnce([
             {
               id: 'db-dish-2',
-              name_vi: 'Bún bò',
-              name_en: null,
+              nameVi: 'Bún bò',
+              nameEn: null,
               tags: '["noodle"]',
               rating: null,
               notes: null,
@@ -345,10 +345,10 @@ describe('dishStore', () => {
         query: vi
           .fn()
           .mockResolvedValueOnce([
-            { id: 'd1', name_vi: 'A', name_en: null, tags: '[]', rating: null, notes: null },
-            { id: 'd2', name_vi: 'B', name_en: 'B-en', tags: '["tag"]', rating: 3, notes: 'note' },
+            { id: 'd1', nameVi: 'A', nameEn: null, tags: '[]', rating: null, notes: null },
+            { id: 'd2', nameVi: 'B', nameEn: 'B-en', tags: '["tag"]', rating: 3, notes: 'note' },
           ])
-          .mockResolvedValueOnce([{ ingredient_id: 'i1', amount: 50 }])
+          .mockResolvedValueOnce([{ ingredientId: 'i1', amount: 50 }])
           .mockResolvedValueOnce([]),
       };
 
@@ -365,7 +365,7 @@ describe('dishStore', () => {
         query: vi
           .fn()
           .mockResolvedValueOnce([
-            { id: 'd1', name_vi: 'Test', name_en: null, tags: 'not-json{{{', rating: null, notes: null },
+            { id: 'd1', nameVi: 'Test', nameEn: null, tags: 'not-json{{{', rating: null, notes: null },
           ])
           .mockResolvedValueOnce([]),
       };

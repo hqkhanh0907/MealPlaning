@@ -56,11 +56,12 @@ function syncAllPlansToDb(db: DatabaseService, plans: DayPlan[]): void {
   });
 }
 
+/* Row type after rowToType() conversion (camelCase) */
 interface DayPlanRow {
   date: string;
-  breakfast_dish_ids: string;
-  lunch_dish_ids: string;
-  dinner_dish_ids: string;
+  breakfastDishIds: string;
+  lunchDishIds: string;
+  dinnerDishIds: string;
   servings: string | null;
 }
 
@@ -120,9 +121,9 @@ export const useDayPlanStore = create<DayPlanState>((set, get) => ({
     if (rows.length === 0) return;
     const dayPlans: DayPlan[] = rows.map(r => ({
       date: r.date,
-      breakfastDishIds: safeJsonParse<string[]>(r.breakfast_dish_ids, [], `breakfast_dish_ids[${r.date}]`),
-      lunchDishIds: safeJsonParse<string[]>(r.lunch_dish_ids, [], `lunch_dish_ids[${r.date}]`),
-      dinnerDishIds: safeJsonParse<string[]>(r.dinner_dish_ids, [], `dinner_dish_ids[${r.date}]`),
+      breakfastDishIds: safeJsonParse<string[]>(r.breakfastDishIds, [], `breakfastDishIds[${r.date}]`),
+      lunchDishIds: safeJsonParse<string[]>(r.lunchDishIds, [], `lunchDishIds[${r.date}]`),
+      dinnerDishIds: safeJsonParse<string[]>(r.dinnerDishIds, [], `dinnerDishIds[${r.date}]`),
       ...(r.servings ? { servings: safeJsonParse<Record<string, number>>(r.servings, {}, `servings[${r.date}]`) } : {}),
     }));
     set({ dayPlans });

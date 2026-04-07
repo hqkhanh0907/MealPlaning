@@ -5,40 +5,42 @@ import { useFitnessStore } from '../../../store/fitnessStore';
 import type { Goal, HealthProfile } from '../types';
 
 /* ------------------------------------------------------------------ */
-/* SQLite row types (snake_case) */
+/* Row types after rowToType() conversion (camelCase)                  */
+/* db.query/queryOne already apply rowToType which converts            */
+/* snake_case column names → camelCase keys.                           */
 /* ------------------------------------------------------------------ */
 interface ProfileRow {
   id: string;
   name: string;
   gender: string;
   age: number;
-  date_of_birth: string | null;
-  height_cm: number;
-  weight_kg: number;
-  activity_level: string;
-  body_fat_pct: number | null;
-  bmr_override: number | null;
-  protein_ratio: number;
-  fat_pct: number;
-  target_calories: number;
-  updated_at: string;
+  dateOfBirth: string | null;
+  heightCm: number;
+  weightKg: number;
+  activityLevel: string;
+  bodyFatPct: number | null;
+  bmrOverride: number | null;
+  proteinRatio: number;
+  fatPct: number;
+  targetCalories: number;
+  updatedAt: string;
 }
 
 interface GoalRow {
   id: string;
   type: string;
-  rate_of_change: string;
-  target_weight_kg: number | null;
-  calorie_offset: number;
-  start_date: string;
-  end_date: string | null;
-  is_active: number;
-  created_at: string;
-  updated_at: string;
+  rateOfChange: string;
+  targetWeightKg: number | null;
+  calorieOffset: number;
+  startDate: string;
+  endDate: string | null;
+  isActive: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /* ------------------------------------------------------------------ */
-/* Row ↔ Type conversion helpers */
+/* Row → Domain type converters (null→undefined, type casts)           */
 /* ------------------------------------------------------------------ */
 function rowToProfile(row: ProfileRow): HealthProfile {
   return {
@@ -46,16 +48,16 @@ function rowToProfile(row: ProfileRow): HealthProfile {
     name: row.name ?? '',
     gender: row.gender as HealthProfile['gender'],
     age: row.age,
-    dateOfBirth: (row.date_of_birth as string) ?? null,
-    heightCm: row.height_cm,
-    weightKg: row.weight_kg,
-    activityLevel: row.activity_level as HealthProfile['activityLevel'],
-    bodyFatPct: row.body_fat_pct ?? undefined,
-    bmrOverride: row.bmr_override ?? undefined,
-    proteinRatio: row.protein_ratio,
-    fatPct: row.fat_pct,
-    targetCalories: row.target_calories ?? 1500,
-    updatedAt: row.updated_at,
+    dateOfBirth: (row.dateOfBirth as string) ?? null,
+    heightCm: row.heightCm,
+    weightKg: row.weightKg,
+    activityLevel: row.activityLevel as HealthProfile['activityLevel'],
+    bodyFatPct: row.bodyFatPct ?? undefined,
+    bmrOverride: row.bmrOverride ?? undefined,
+    proteinRatio: row.proteinRatio,
+    fatPct: row.fatPct,
+    targetCalories: row.targetCalories ?? 1500,
+    updatedAt: row.updatedAt,
   };
 }
 
@@ -63,14 +65,14 @@ function rowToGoal(row: GoalRow): Goal {
   return {
     id: row.id,
     type: row.type as Goal['type'],
-    rateOfChange: row.rate_of_change as Goal['rateOfChange'],
-    targetWeightKg: row.target_weight_kg ?? undefined,
-    calorieOffset: row.calorie_offset,
-    startDate: row.start_date,
-    endDate: row.end_date ?? undefined,
-    isActive: row.is_active === 1,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    rateOfChange: row.rateOfChange as Goal['rateOfChange'],
+    targetWeightKg: row.targetWeightKg ?? undefined,
+    calorieOffset: row.calorieOffset,
+    startDate: row.startDate,
+    endDate: row.endDate ?? undefined,
+    isActive: row.isActive === 1,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
   };
 }
 

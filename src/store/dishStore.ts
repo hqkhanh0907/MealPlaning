@@ -85,17 +85,18 @@ function syncAllDishesToDb(db: DatabaseService, dishes: Dish[]): void {
   });
 }
 
+/* Row types after rowToType() conversion (camelCase) */
 interface DishRow {
   id: string;
-  name_vi: string;
-  name_en: string | null;
+  nameVi: string;
+  nameEn: string | null;
   tags: string;
   rating: number | null;
   notes: string | null;
 }
 
 interface DishIngredientRow {
-  ingredient_id: string;
+  ingredientId: string;
   amount: number;
 }
 
@@ -161,8 +162,8 @@ export const useDishStore = create<DishState>((set, get) => ({
         );
         return {
           id: r.id,
-          name: { vi: r.name_vi, ...(r.name_en ? { en: r.name_en } : {}) },
-          ingredients: ings.map(i => ({ ingredientId: i.ingredient_id, amount: i.amount })),
+          name: { vi: r.nameVi, ...(r.nameEn ? { en: r.nameEn } : {}) },
+          ingredients: ings.map(i => ({ ingredientId: i.ingredientId, amount: i.amount })),
           tags: safeJsonParse<MealType[]>(r.tags, [], `tags[${r.id}]`),
           ...(r.rating == null ? {} : { rating: r.rating }),
           ...(r.notes == null ? {} : { notes: r.notes }),

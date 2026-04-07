@@ -53,17 +53,18 @@ function syncAllToDb(db: DatabaseService, ingredients: Ingredient[]): void {
   });
 }
 
+/* Row type after rowToType() conversion (camelCase) */
 interface IngredientRow {
   id: string;
-  name_vi: string;
-  name_en: string | null;
-  calories_per_100: number;
-  protein_per_100: number;
-  carbs_per_100: number;
-  fat_per_100: number;
-  fiber_per_100: number;
-  unit_vi: string;
-  unit_en: string | null;
+  nameVi: string;
+  nameEn: string | null;
+  caloriesPer100: number;
+  proteinPer100: number;
+  carbsPer100: number;
+  fatPer100: number;
+  fiberPer100: number;
+  unitVi: string;
+  unitEn: string | null;
 }
 
 interface IngredientState {
@@ -96,13 +97,13 @@ export const useIngredientStore = create<IngredientState>((set, get) => ({
     if (rows.length === 0) return;
     const ingredients: Ingredient[] = rows.map(r => ({
       id: r.id,
-      name: { vi: r.name_vi, ...(r.name_en ? { en: r.name_en } : {}) },
-      caloriesPer100: r.calories_per_100,
-      proteinPer100: r.protein_per_100,
-      carbsPer100: r.carbs_per_100,
-      fatPer100: r.fat_per_100,
-      fiberPer100: r.fiber_per_100,
-      unit: { vi: r.unit_vi, ...(r.unit_en ? { en: r.unit_en } : {}) },
+      name: { vi: r.nameVi, ...(r.nameEn ? { en: r.nameEn } : {}) },
+      caloriesPer100: r.caloriesPer100,
+      proteinPer100: r.proteinPer100,
+      carbsPer100: r.carbsPer100,
+      fatPer100: r.fatPer100,
+      fiberPer100: r.fiberPer100,
+      unit: { vi: r.unitVi, ...(r.unitEn ? { en: r.unitEn } : {}) },
     }));
     set({ ingredients });
   },

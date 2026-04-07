@@ -235,9 +235,9 @@ describe('dayPlanStore', () => {
         query: vi.fn().mockResolvedValue([
           {
             date: '2025-07-01',
-            breakfast_dish_ids: '["d1","d2"]',
-            lunch_dish_ids: '["d3"]',
-            dinner_dish_ids: '[]',
+            breakfastDishIds: '["d1","d2"]',
+            lunchDishIds: '["d3"]',
+            dinnerDishIds: '[]',
             servings: '{"d1":2}',
           },
         ]),
@@ -259,9 +259,9 @@ describe('dayPlanStore', () => {
         query: vi.fn().mockResolvedValue([
           {
             date: '2025-07-02',
-            breakfast_dish_ids: '[]',
-            lunch_dish_ids: '["d5"]',
-            dinner_dish_ids: '["d6"]',
+            breakfastDishIds: '[]',
+            lunchDishIds: '["d5"]',
+            dinnerDishIds: '["d6"]',
             servings: null,
           },
         ]),
@@ -291,9 +291,9 @@ describe('dayPlanStore', () => {
         query: vi.fn().mockResolvedValue([
           {
             date: '2025-03-01',
-            breakfast_dish_ids: 'not-valid-json{{{',
-            lunch_dish_ids: '["d1"]',
-            dinner_dish_ids: '[]',
+            breakfastDishIds: 'not-valid-json{{{',
+            lunchDishIds: '["d1"]',
+            dinnerDishIds: '[]',
             servings: null,
           },
         ]),
