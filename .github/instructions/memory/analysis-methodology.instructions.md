@@ -1385,3 +1385,64 @@ Wave 5: Task 8 (quality gate + commit) — orchestrator only
 ### Bài học
 
 Wave structure + orchestrator-only commit = zero conflicts. Agents chỉ edit code + run test. Orchestrator verify usage (grep imports) trước khi commit. Pattern này hiệu quả nhất cho multi-file refactors.
+
+---
+
+## 39. Double-Conversion Bug — rowToType() + Store Row Interfaces
+
+### Vấn đề
+
+Tất cả 4 stores (healthProfile, dish, ingredient, dayPlan) hydrate từ SQLite bị **undefined cho mọi field** sau app restart. Dashboard hiển thị "Mục tiêu 0 kcal" thay vì "Mục tiêu 2091 kcal".
+
+### Nguyên nhân gốc
+
+`databaseService.ts` có `rowToType<T>(row)` chuyển ALL keys từ `snake_case` → `camelCase` (line 29-35). Nhưng:
+
+- Row interfaces dùng `snake_case` keys: `name_vi`, `calories_per_100`, `breakfast_dish_ids`
+- Converter functions đọc `row.name_vi`, `row.calories_per_100` → **undefined** (vì key đã là `nameVi`, `caloriesPer100`)
+
+### Tại sao bug ẩn?
+
+1. **sql.js in-memory**: DB rỗng sau restart → `loadAll()` trả empty → bug không trigger
+2. **Same session**: Data từ onboarding/user action đi thẳng vào store, không qua `loadAll()`
+3. **Tests pass**: Mock `vi.fn().mockResolvedValue({...})` return objects **không qua** `rowToType()` → mock dùng snake_case → converter đọc snake_case → hoạt động
+4. **Native SQLite**: DB persist → `loadAll()` tìm data → `rowToType()` convert → converter đọc snake_case → undefined
+
+### Fix (Option C — minimal blast radius)
+
+```typescript
+// TRƯỚC: Row interface snake_case
+interface IngredientRow {
+  name_vi: string;
+  calories_per_100: number;
+}
+
+// SAU: Row interface camelCase (matching rowToType output)
+interface IngredientRow {
+  nameVi: string;
+  caloriesPer100: number;
+}
+```
+
+- Row interfaces → camelCase
+- Converter functions → đọc camelCase properties
+- Test mocks → return camelCase objects
+- SQL strings (INSERT/UPDATE/SELECT) → **GIỮ NGUYÊN** snake_case (real column names)
+
+### Files affected
+
+| Store              | Interfaces                 | Lines changed |
+| ------------------ | -------------------------- | ------------- |
+| healthProfileStore | ProfileRow, GoalRow        | ~30           |
+| dishStore          | DishRow, DishIngredientRow | ~15           |
+| ingredientStore    | IngredientRow              | ~20           |
+| dayPlanStore       | DayPlanRow                 | ~10           |
+| 4 test files       | Mock data                  | ~40           |
+
+### Bài học
+
+1. **`rowToType()` là invisible transformer** — dễ quên rằng mọi `db.query()` đều chạy qua nó
+2. **Tests mock SAI cũng pass** — mock bypass pipeline thật → false confidence
+3. **Bug chỉ hiện khi data persist** — sql.js in-memory che giấu bug hàng tháng
+4. **Kiểm tra pattern**: Khi thấy Row interface dùng snake_case + store dùng `db.query<XRow>()` → CHẮC CHẮN có bug double-conversion
+5. **Quick check**: `grep 'interface.*Row' src/store/*.ts src/features/*/store/*.ts` — nếu thấy snake_case keys → bug
