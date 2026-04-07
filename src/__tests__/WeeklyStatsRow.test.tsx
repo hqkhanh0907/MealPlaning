@@ -138,7 +138,7 @@ describe('WeeklyStatsRow', () => {
       const change = screen.getByTestId('weekly-weight-change');
       expect(change).toBeInTheDocument();
       expect(change).toHaveTextContent('↓');
-      expect(change.className).toContain('text-emerald-400');
+      expect(change.className).toContain('text-success');
     });
 
     it('shows up arrow (amber) when weight increased', () => {
@@ -150,7 +150,7 @@ describe('WeeklyStatsRow', () => {
       const change = screen.getByTestId('weekly-weight-change');
       expect(change).toBeInTheDocument();
       expect(change).toHaveTextContent('↑');
-      expect(change.className).toContain('text-amber-400');
+      expect(change.className).toContain('text-energy');
     });
 
     it('shows stable text when weight unchanged', () => {
@@ -223,7 +223,7 @@ describe('WeeklyStatsRow', () => {
 
       const dot = screen.getByTestId('weekly-dot-1');
       expect(dot).toHaveAttribute('data-status', 'completed');
-      expect(dot.className).toContain('bg-emerald-400');
+      expect(dot.className).toContain('bg-success');
     });
 
     it('today dot has special styling', () => {
@@ -258,7 +258,7 @@ describe('WeeklyStatsRow', () => {
 
       const dot2 = screen.getByTestId('weekly-dot-2');
       expect(dot2).toHaveAttribute('data-status', 'rest');
-      expect(dot2.className).toContain('bg-sky-400');
+      expect(dot2.className).toContain('bg-info');
     });
 
     it('all dots empty when no workouts (no plan)', () => {

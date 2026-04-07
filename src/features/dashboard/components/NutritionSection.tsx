@@ -80,9 +80,9 @@ function safePositive(value: number): number {
 /* ------------------------------------------------------------------ */
 
 const SCORE_BADGE_BG: Record<ScoreColor, string> = {
-  emerald: 'bg-emerald-500',
-  amber: 'bg-amber-500',
-  slate: 'bg-slate-500',
+  emerald: 'bg-macro-protein',
+  amber: 'bg-macro-fat',
+  slate: 'bg-macro-carbs',
 };
 
 const HERO_CONTEXT_I18N: Record<Exclude<HeroContext, 'first-time'>, string> = {
@@ -132,7 +132,7 @@ function ProgressRing({ pct }: Readonly<{ pct: number }>) {
           strokeDasharray={RING_CIRCUMFERENCE}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          className="text-emerald-400 transition-all duration-500"
+          className="text-success transition-all duration-500"
         />
       </svg>
       <span className="text-[10px] font-bold text-white/80 tabular-nums">{clamped}%</span>
@@ -318,7 +318,7 @@ function NutritionSectionInner({
                 </span>
               </p>
               <p
-                className={`mt-0.5 text-xs font-medium ${isOverTarget ? 'text-rose-400' : 'text-emerald-400'}`}
+                className={`mt-0.5 text-xs font-medium ${isOverTarget ? 'text-rose' : 'text-success'}`}
                 data-testid="nutrition-hero-remaining"
               >
                 {remainingText}
@@ -328,7 +328,7 @@ function NutritionSectionInner({
           </div>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
             <div
-              className={`h-full rounded-full transition-all ${isOverTarget ? 'bg-rose-500' : 'bg-emerald-500'}`}
+              className={`h-full rounded-full transition-all ${isOverTarget ? 'bg-rose' : 'bg-success'}`}
               style={{ width: `${caloriePct}%` }}
             />
           </div>

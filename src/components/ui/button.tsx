@@ -22,8 +22,8 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
         success: 'bg-primary text-white shadow-xs hover:bg-primary/90',
         warning:
-          'bg-amber-500 text-amber-950 shadow-xs hover:bg-amber-600 dark:bg-amber-400 dark:text-background dark:hover:bg-amber-500',
-        ai: 'bg-indigo-500 text-white shadow-xs hover:bg-indigo-600 dark:bg-indigo-400 dark:text-background dark:hover:bg-indigo-500',
+          'bg-energy text-white shadow-xs hover:bg-energy/90 dark:bg-energy dark:text-background dark:hover:bg-energy/90',
+        ai: 'bg-ai text-white shadow-xs hover:bg-ai/90 dark:bg-ai dark:text-background dark:hover:bg-ai/90',
         energy: 'bg-energy/20 text-energy hover:bg-energy/30 dark:bg-energy/30 dark:hover:bg-energy/40',
       },
       size: {

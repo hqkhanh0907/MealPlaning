@@ -104,12 +104,12 @@ function DishGridCard({
   const { t } = useTranslation();
   return (
     <div
-      className={`group bg-card relative flex w-full flex-col rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${isComparing ? 'border-blue-400 ring-2 ring-blue-100 dark:border-blue-500 dark:ring-blue-900/50' : 'border-border-subtle'}`}
+      className={`group bg-card relative flex w-full flex-col rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${isComparing ? 'border-compare-active ring-compare-active/20 dark:border-compare-default dark:ring-compare-default/20 ring-2' : 'border-border-subtle'}`}
     >
       <button
         data-testid={`btn-compare-${dish.id}`}
         onClick={onToggleCompare}
-        className={`focus-visible:ring-ring absolute top-3 right-3 z-10 flex h-7 min-h-11 w-7 min-w-11 items-center justify-center rounded-lg border-2 transition-all focus-visible:ring-2 focus-visible:outline-none ${isComparing ? 'border-blue-500 bg-blue-500 text-white' : 'border-border text-transparent hover:border-blue-400 hover:text-blue-400'}`}
+        className={`focus-visible:ring-ring absolute top-3 right-3 z-10 flex h-7 min-h-11 w-7 min-w-11 items-center justify-center rounded-lg border-2 transition-all focus-visible:ring-2 focus-visible:outline-none ${isComparing ? 'border-compare-default bg-compare-default text-white' : 'border-border hover:border-compare-active hover:text-compare-active text-transparent'}`}
         aria-label={t('dish.compare')}
       >
         <GitCompareArrows className="h-4 w-4" />
@@ -458,14 +458,14 @@ export const DishManager = ({
                   return (
                     <tr
                       key={dish.id}
-                      className={`transition-colors ${compareIds.has(dish.id) ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-accent'}`}
+                      className={`transition-colors ${compareIds.has(dish.id) ? 'bg-compare-active/10 dark:bg-compare-default/20' : 'hover:bg-accent'}`}
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <button
                             data-testid={`btn-compare-${dish.id}`}
                             onClick={() => toggleCompare(dish.id)}
-                            className={`focus-visible:ring-ring flex h-6 min-h-11 w-6 min-w-11 shrink-0 items-center justify-center rounded border-2 transition-all focus-visible:ring-2 focus-visible:outline-none ${compareIds.has(dish.id) ? 'border-blue-500 bg-blue-500 text-white' : 'border-border text-transparent hover:border-blue-400'}`}
+                            className={`focus-visible:ring-ring flex h-6 min-h-11 w-6 min-w-11 shrink-0 items-center justify-center rounded border-2 transition-all focus-visible:ring-2 focus-visible:outline-none ${compareIds.has(dish.id) ? 'border-compare-default bg-compare-default text-white' : 'border-border hover:border-compare-active text-transparent'}`}
                             aria-label={t('dish.compare')}
                           >
                             <GitCompareArrows className="h-4 w-4" />
@@ -553,13 +553,13 @@ export const DishManager = ({
               return (
                 <div
                   key={dish.id}
-                  className={`relative flex w-full items-center justify-between gap-3 p-4 text-left transition-colors ${compareIds.has(dish.id) ? 'bg-blue-50 dark:bg-blue-900/20' : 'active:bg-muted'}`}
+                  className={`relative flex w-full items-center justify-between gap-3 p-4 text-left transition-colors ${compareIds.has(dish.id) ? 'bg-compare-active/10 dark:bg-compare-default/20' : 'active:bg-muted'}`}
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     <button
                       data-testid={`btn-compare-${dish.id}`}
                       onClick={() => toggleCompare(dish.id)}
-                      className={`focus-visible:ring-ring relative z-10 flex h-7 min-h-11 w-7 min-w-11 shrink-0 items-center justify-center rounded-lg border-2 transition-all focus-visible:ring-2 focus-visible:outline-none ${compareIds.has(dish.id) ? 'border-blue-500 bg-blue-500 text-white' : 'border-border text-transparent hover:border-blue-400'}`}
+                      className={`focus-visible:ring-ring relative z-10 flex h-7 min-h-11 w-7 min-w-11 shrink-0 items-center justify-center rounded-lg border-2 transition-all focus-visible:ring-2 focus-visible:outline-none ${compareIds.has(dish.id) ? 'border-compare-default bg-compare-default text-white' : 'border-border hover:border-compare-active text-transparent'}`}
                       aria-label={t('dish.compare')}
                     >
                       <GitCompareArrows className="h-3.5 w-3.5" />
@@ -817,7 +817,7 @@ export const DishManager = ({
                             {values.map((v, i) => (
                               <td key={compareDishes[i].id} className="px-2 py-2.5 text-center">
                                 <span
-                                  className={`text-lg font-semibold ${NUTRITION_COLORS[key]} ${v === best ? 'underline decoration-blue-400 decoration-2' : ''}`}
+                                  className={`text-lg font-semibold ${NUTRITION_COLORS[key]} ${v === best ? 'decoration-compare-active underline decoration-2' : ''}`}
                                 >
                                   {v}
                                   {key === 'calories' ? '' : 'g'}

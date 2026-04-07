@@ -11,25 +11,25 @@
   --sab: env(safe-area-inset-bottom, 0px);
 
   /* ── shadcn semantic colors (Light — Emerald theme) ── */
-  --background: oklch(1 0 0); /* #FFFFFF */
-  --foreground: oklch(0.279 0.029 260.03); /* Slate-800 #1E293B */
-  --card: oklch(1 0 0); /* #FFFFFF */
-  --card-foreground: oklch(0.279 0.029 260.03); /* Slate-800 */
+  --background: oklch(0.985 0.015 163); /* Emerald-50 warm tint #ECFDF5 */
+  --foreground: oklch(0.208 0.026 264.69); /* Slate-900 #0F172A — deeper for better contrast */
+  --card: oklch(1 0 0); /* #FFFFFF — card surfaces stay pure white for contrast */
+  --card-foreground: oklch(0.208 0.026 264.69); /* Slate-900 */
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.279 0.029 260.03);
+  --popover-foreground: oklch(0.208 0.026 264.69);
   --primary: oklch(
     0.627 0.194 163.95
   ); /* Emerald-600 #059669 — 3.77:1 on white (AA large text only, NOT AA body text) */
   --primary-foreground: oklch(1 0 0); /* White */
-  --secondary: oklch(0.984 0.003 247.86); /* Slate-50 #F8FAFC */
-  --secondary-foreground: oklch(0.279 0.029 260.03);
-  --muted: oklch(0.968 0.007 247.86); /* Slate-100 */
+  --secondary: oklch(0.696 0.17 162.48); /* Emerald-500 #10B981 — lighter primary variant */
+  --secondary-foreground: oklch(1 0 0); /* White on emerald bg */
+  --muted: oklch(0.972 0.015 163); /* Emerald-tinted neutral #F0F8F6 */
   --muted-foreground: oklch(0.446 0.043 257.28); /* Slate-600 #475569 — WCAG AA 6.4:1 on white */
-  --accent: oklch(0.943 0.029 294.57); /* Violet-100 — subtle purple tint for hover states */
-  --accent-foreground: oklch(0.38 0.189 293.75); /* Violet-900 — text on accent bg */
+  --accent: oklch(0.972 0.015 163); /* Emerald-tinted (remove purple) */
+  --accent-foreground: oklch(0.208 0.026 264.69); /* Slate-900 */
   --destructive: oklch(0.637 0.237 25.33); /* Red-500 #EF4444 */
-  --border: oklch(0.929 0.013 255.51); /* Slate-200 #E2E8F0 */
-  --input: oklch(0.929 0.013 255.51);
+  --border: oklch(0.945 0.025 163); /* Green-tinted warm #E1F2ED */
+  --input: oklch(0.945 0.025 163);
   --ring: oklch(0.696 0.17 162.48); /* Emerald-500 (focus ring = primary) */
 
   /* ── Extended semantic colors ── */
@@ -37,6 +37,10 @@
   --primary-emphasis: oklch(0.527 0.154 163.45); /* Emerald-700 #047857 */
   --foreground-secondary: oklch(0.446 0.043 257.28); /* Slate-600 #475569 */
   --border-subtle: oklch(0.968 0.007 247.86); /* Slate-100 #F1F5F9 */
+
+  /* ── Warm accent (single orange accent for attention CTAs) ── */
+  --accent-warm: oklch(0.606 0.222 22); /* Orange #EA580C */
+  --accent-warm-foreground: oklch(1 0 0); /* White */
 
   /* ── Macro nutrition colors ── */
   --macro-protein: oklch(0.588 0.158 241.97); /* Sky-600 #0284C7 — separated from primary hue */
@@ -199,6 +203,8 @@ input[type='number'] {
   --color-accent-highlight-foreground: var(--accent-highlight-foreground);
   --color-accent-subtle: var(--accent-subtle);
   --color-accent-emphasis: var(--accent-emphasis);
+  --color-accent-warm: var(--accent-warm);
+  --color-accent-warm-foreground: var(--accent-warm-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-input: var(--input);
@@ -275,12 +281,12 @@ input[type='number'] {
   --popover-foreground: oklch(0.929 0.013 255.51);
   --primary: oklch(0.765 0.177 163.22); /* Emerald-400 #34D399 */
   --primary-foreground: oklch(0.208 0.026 264.69);
-  --secondary: oklch(0.295 0.029 260.03); /* Slate-800 elevated */
+  --secondary: oklch(0.527 0.154 163.45); /* Emerald-700 — dark mode secondary */
   --secondary-foreground: oklch(0.929 0.013 255.51);
   --muted: oklch(0.295 0.029 260.03);
   --muted-foreground: oklch(0.704 0.04 256.79); /* Slate-400 #94A3B8 */
-  --accent: oklch(0.371 0.07 293.5); /* Violet-900/dark — subtle purple on dark bg */
-  --accent-foreground: oklch(0.943 0.029 294.57); /* Violet-100 */
+  --accent: oklch(0.295 0.029 260.03); /* Dark neutral for hover states */
+  --accent-foreground: oklch(0.929 0.013 255.51);
   --destructive: oklch(0.704 0.191 22.216); /* Red-400 */
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);

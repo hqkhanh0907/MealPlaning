@@ -294,7 +294,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
               className="text-muted-foreground mt-1 flex items-center gap-1 text-xs"
               data-testid="smart-fill-indicator"
             >
-              <CheckCircle className="h-3 w-3 text-green-500" />
+              <CheckCircle className="text-success h-3 w-3" />
               <span>{t('ingredient.autoFilled')}</span>
               <span className="text-muted-foreground/70">— {t('ingredient.autoFillHint')}</span>
             </p>

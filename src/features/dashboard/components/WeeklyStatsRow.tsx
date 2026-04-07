@@ -58,11 +58,11 @@ function computeAdherence(
 // ===== Dot colors (gradient-card contrast) =====
 
 const DOT_COLORS: Record<string, string> = {
-  completed: 'bg-emerald-400',
-  rest: 'bg-sky-400',
+  completed: 'bg-success',
+  rest: 'bg-info',
   missed: 'border-2 border-primary-foreground/20 bg-transparent',
   upcoming: 'border-2 border-primary-foreground/20 bg-transparent',
-  today: 'border-2 border-emerald-400 bg-emerald-400/30',
+  today: 'border-2 border-success bg-success/30',
 };
 
 // ===== Component =====
@@ -102,10 +102,10 @@ function WeeklyStatsRowInner(): React.ReactElement {
     const abs = Math.abs(weeklyChange);
     const rounded = abs < 0.1 ? abs.toFixed(2) : abs.toFixed(1);
     if (weeklyChange < -0.05) {
-      return { text: t('dashboard.weekly.weightDown', { value: rounded }), color: 'text-emerald-400' };
+      return { text: t('dashboard.weekly.weightDown', { value: rounded }), color: 'text-success' };
     }
     if (weeklyChange > 0.05) {
-      return { text: t('dashboard.weekly.weightUp', { value: rounded }), color: 'text-amber-400' };
+      return { text: t('dashboard.weekly.weightUp', { value: rounded }), color: 'text-energy' };
     }
     return { text: t('dashboard.weekly.weightStable'), color: 'text-primary-foreground/60' };
   }, [weeklyChange, t]);
@@ -182,7 +182,7 @@ function WeeklyStatsRowInner(): React.ReactElement {
               {t('dashboard.weekly.adherenceLabel')}
             </span>
             <progress
-              className="mt-0.5 h-1.5 w-full appearance-none overflow-hidden rounded-full bg-white/10 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-emerald-400 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-emerald-400 [&::-webkit-progress-value]:transition-all"
+              className="[&::-moz-progress-bar]:bg-success [&::-webkit-progress-value]:bg-success mt-0.5 h-1.5 w-full appearance-none overflow-hidden rounded-full bg-white/10 [&::-moz-progress-bar]:rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all"
               data-testid="weekly-adherence-bar"
               value={Math.min(adherence, 100)}
               max={100}

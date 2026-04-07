@@ -356,7 +356,7 @@ describe('NutritionSection', () => {
       render(<NutritionSection {...defaultProps()} />);
       const remaining = screen.getByTestId('nutrition-hero-remaining');
       expect(remaining).toHaveTextContent('Còn 764 kcal');
-      expect(remaining.className).toContain('text-emerald-400');
+      expect(remaining.className).toContain('text-success');
     });
 
     it('shows over calories in rose when over target', () => {
@@ -366,7 +366,7 @@ describe('NutritionSection', () => {
       render(<NutritionSection {...defaultProps()} />);
       const remaining = screen.getByTestId('nutrition-hero-remaining');
       expect(remaining).toHaveTextContent('Vượt 409 kcal');
-      expect(remaining.className).toContain('text-rose-400');
+      expect(remaining.className).toContain('text-rose');
     });
 
     it('shows macro bars with current/target', () => {
@@ -398,7 +398,7 @@ describe('NutritionSection', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps({ totalScore: 90, scoreColor: 'emerald' })} />);
       const badge = screen.getByTestId('nutrition-hero-score');
-      expect(badge.className).toContain('bg-emerald-500');
+      expect(badge.className).toContain('bg-macro-protein');
       expect(badge).toHaveTextContent('90');
     });
 
@@ -406,14 +406,14 @@ describe('NutritionSection', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps({ totalScore: 63, scoreColor: 'amber' })} />);
       const badge = screen.getByTestId('nutrition-hero-score');
-      expect(badge.className).toContain('bg-amber-500');
+      expect(badge.className).toContain('bg-macro-fat');
     });
 
     it('renders slate badge for low score', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps({ totalScore: 30, scoreColor: 'slate' })} />);
       const badge = screen.getByTestId('nutrition-hero-score');
-      expect(badge.className).toContain('bg-slate-500');
+      expect(badge.className).toContain('bg-macro-carbs');
     });
   });
 
