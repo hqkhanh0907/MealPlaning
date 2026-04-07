@@ -94,6 +94,7 @@ export const DishManager = ({
 
   // --- Shared hooks ---
   const modal = useItemModalFlow<Dish>();
+  const [clonePrefill, setClonePrefill] = useState<Dish | null>(null);
 
   const searchFn = useCallback((d: Dish, q: string) => {
     const ql = q.toLowerCase();
@@ -153,12 +154,18 @@ export const DishManager = ({
     (dish: Dish) => {
       if (modal.editingItem) onUpdate(dish);
       else onAdd(dish);
+      if (clonePrefill) {
+        const displayName = getLocalizedField(dish.name, lang);
+        notify.success(t('dish.duplicated'), t('dish.duplicatedDesc', { name: displayName }));
+        setClonePrefill(null);
+      }
       modal.afterSubmit(dish);
     },
-    [modal, onAdd, onUpdate],
+    [modal, onAdd, onUpdate, clonePrefill, lang, notify, t],
   );
 
   const handleEditClose = useCallback(() => {
+    setClonePrefill(null);
     modal.closeEdit(false);
   }, [modal]);
 
@@ -193,19 +200,19 @@ export const DishManager = ({
 
   const handleClone = useCallback(
     (dish: Dish) => {
-      const suffix = t('dish.copySuffix');
-      const cloned: Dish = {
+      const cloneData: Dish = {
         ...dish,
         id: generateUUID(),
-        name: Object.fromEntries(Object.entries(dish.name).map(([k, v]) => [k, `${v} ${suffix}`])) as Dish['name'],
+        name: Object.fromEntries(
+          Object.entries(dish.name).map(([k, v]) => [k, t('dish.duplicateName', { name: v })]),
+        ) as Dish['name'],
         ingredients: dish.ingredients.map(si => ({ ...si })),
         tags: dish.tags ? [...dish.tags] : [],
       };
-      onAdd(cloned);
-      const displayName = getLocalizedField(dish.name, lang);
-      notify.success(t('dish.cloned'), t('dish.clonedDesc', { name: displayName }));
+      setClonePrefill(cloneData);
+      modal.openEdit();
     },
-    [t, onAdd, lang, notify],
+    [t, modal],
   );
 
   // --- Render helpers ---
@@ -341,7 +348,7 @@ export const DishManager = ({
                     onClick={() => handleClone(dish)}
                     className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none"
                   >
-                    <Copy className="h-4 w-4" /> {t('dish.clone')}
+                    <Copy className="h-4 w-4" /> {t('dish.duplicate')}
                   </button>
                   <button
                     data-testid={`btn-edit-dish-${dish.id}`}
@@ -675,7 +682,7 @@ export const DishManager = ({
       {/* Edit Modal */}
       {modal.isEditOpen && (
         <DishEditModal
-          editingItem={modal.editingItem}
+          editingItem={modal.editingItem ?? clonePrefill}
           ingredients={ingredients}
           allDishes={dishes}
           onSubmit={handleDishSubmit}

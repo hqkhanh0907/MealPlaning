@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { QuickAddIngredientForm } from '../components/modals/QuickAddIngredientForm';
+import { useIngredientStore } from '../store/ingredientStore';
 import type { Ingredient } from '../types';
 
 vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
@@ -10,6 +11,19 @@ vi.mock('../services/geminiService', () => ({
   suggestIngredientInfo: (...args: unknown[]) => mockSuggestIngredientInfo(...args),
 }));
 
+const storeIngredients: Ingredient[] = [
+  {
+    id: 'store-chicken',
+    name: { vi: 'Ức gà' },
+    caloriesPer100: 165,
+    proteinPer100: 31,
+    carbsPer100: 0,
+    fatPer100: 4,
+    fiberPer100: 0,
+    unit: { vi: 'g' },
+  },
+];
+
 describe('QuickAddIngredientForm', () => {
   const onAdd = vi.fn();
   const onCancel = vi.fn();
@@ -17,6 +31,7 @@ describe('QuickAddIngredientForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers({ shouldAdvanceTime: true });
+    useIngredientStore.setState({ ingredients: storeIngredients });
   });
 
   afterEach(() => {
@@ -290,7 +305,7 @@ describe('QuickAddIngredientForm', () => {
 
       renderForm();
       const nameInput = screen.getByTestId('input-qa-name');
-      fireEvent.change(nameInput, { target: { value: 'Ức gà' } });
+      fireEvent.change(nameInput, { target: { value: 'Đùi cừu' } });
       fireEvent.blur(nameInput);
 
       await act(async () => {
@@ -298,7 +313,7 @@ describe('QuickAddIngredientForm', () => {
       });
 
       await waitFor(() => {
-        expect(mockSuggestIngredientInfo).toHaveBeenCalledWith('Ức gà', 'g', expect.any(AbortSignal));
+        expect(mockSuggestIngredientInfo).toHaveBeenCalledWith('Đùi cừu', 'g', expect.any(AbortSignal));
       });
     });
 
@@ -312,7 +327,7 @@ describe('QuickAddIngredientForm', () => {
       });
 
       renderForm();
-      fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Ức gà' } });
+      fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Đùi cừu' } });
       fireEvent.blur(screen.getByTestId('input-qa-name'));
 
       await act(async () => {
@@ -332,7 +347,7 @@ describe('QuickAddIngredientForm', () => {
       mockSuggestIngredientInfo.mockRejectedValue(new Error('Network error'));
 
       renderForm();
-      fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Ức gà' } });
+      fireEvent.change(screen.getByTestId('input-qa-name'), { target: { value: 'Đùi cừu' } });
       fireEvent.blur(screen.getByTestId('input-qa-name'));
 
       await act(async () => {
@@ -378,6 +393,123 @@ describe('QuickAddIngredientForm', () => {
       });
 
       expect(mockSuggestIngredientInfo).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Smart-fill from store', () => {
+    it('auto-fills nutrition when name matches store ingredient on blur', async () => {
+      renderForm();
+      const nameInput = screen.getByTestId('input-qa-name');
+      fireEvent.change(nameInput, { target: { value: 'Ức gà' } });
+      fireEvent.blur(nameInput);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('qa-cal')).toHaveValue('165');
+        expect(screen.getByTestId('qa-protein')).toHaveValue('31');
+        expect(screen.getByTestId('qa-fat')).toHaveValue('4');
+      });
+      expect(mockSuggestIngredientInfo).not.toHaveBeenCalled();
+    });
+
+    it('shows auto-fill indicator after store match', async () => {
+      renderForm();
+      const nameInput = screen.getByTestId('input-qa-name');
+      fireEvent.change(nameInput, { target: { value: 'Ức gà' } });
+      fireEvent.blur(nameInput);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('smart-fill-indicator')).toBeInTheDocument();
+      });
+      expect(screen.getByText('Đã tự động điền từ dữ liệu có sẵn')).toBeInTheDocument();
+    });
+
+    it('clears auto-fill indicator when user changes name', async () => {
+      renderForm();
+      const nameInput = screen.getByTestId('input-qa-name');
+      fireEvent.change(nameInput, { target: { value: 'Ức gà' } });
+      fireEvent.blur(nameInput);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('smart-fill-indicator')).toBeInTheDocument();
+      });
+
+      fireEvent.change(nameInput, { target: { value: 'Ức gà mới' } });
+      await waitFor(() => {
+        expect(screen.queryByTestId('smart-fill-indicator')).not.toBeInTheDocument();
+      });
+    });
+
+    it('falls back to AI when name does not match store', async () => {
+      mockSuggestIngredientInfo.mockResolvedValue({
+        calories: 200,
+        protein: 25,
+        carbs: 10,
+        fat: 5,
+        fiber: 2,
+      });
+
+      renderForm();
+      const nameInput = screen.getByTestId('input-qa-name');
+      fireEvent.change(nameInput, { target: { value: 'Đùi cừu' } });
+      fireEvent.blur(nameInput);
+
+      await act(async () => {
+        vi.advanceTimersByTime(800);
+      });
+
+      await waitFor(() => {
+        expect(mockSuggestIngredientInfo).toHaveBeenCalledWith('Đùi cừu', 'g', expect.any(AbortSignal));
+      });
+      expect(screen.queryByTestId('smart-fill-indicator')).not.toBeInTheDocument();
+    });
+
+    it('matches store ingredient case-insensitively', async () => {
+      renderForm();
+      const nameInput = screen.getByTestId('input-qa-name');
+      fireEvent.change(nameInput, { target: { value: 'ức gà' } });
+      fireEvent.blur(nameInput);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('qa-cal')).toHaveValue('165');
+      });
+      expect(mockSuggestIngredientInfo).not.toHaveBeenCalled();
+    });
+
+    it('auto-fills unit from matched store ingredient', async () => {
+      renderForm();
+      const nameInput = screen.getByTestId('input-qa-name');
+      fireEvent.change(nameInput, { target: { value: 'Ức gà' } });
+      fireEvent.blur(nameInput);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('qa-cal')).toHaveValue('165');
+      });
+    });
+
+    it('does not show indicator when store is empty', async () => {
+      useIngredientStore.setState({ ingredients: [] });
+
+      mockSuggestIngredientInfo.mockResolvedValue({
+        calories: 100,
+        protein: 10,
+        carbs: 5,
+        fat: 2,
+        fiber: 1,
+      });
+
+      renderForm();
+      const nameInput = screen.getByTestId('input-qa-name');
+      fireEvent.change(nameInput, { target: { value: 'Ức gà' } });
+      fireEvent.blur(nameInput);
+
+      await act(async () => {
+        vi.advanceTimersByTime(800);
+      });
+
+      await waitFor(() => {
+        expect(mockSuggestIngredientInfo).toHaveBeenCalled();
+      });
+      expect(screen.queryByTestId('smart-fill-indicator')).not.toBeInTheDocument();
     });
   });
 });

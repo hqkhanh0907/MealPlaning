@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { IngredientEditModal } from '../components/modals/IngredientEditModal';
+import { useIngredientStore } from '../store/ingredientStore';
 import type { Ingredient } from '../types';
 
 vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
@@ -23,12 +24,27 @@ const existingIngredient: Ingredient = {
   unit: { vi: 'g' },
 };
 
+const storeIngredients: Ingredient[] = [
+  existingIngredient,
+  {
+    id: 'store-oat',
+    name: { vi: 'Yến mạch' },
+    caloriesPer100: 389,
+    proteinPer100: 17,
+    carbsPer100: 66,
+    fatPer100: 7,
+    fiberPer100: 11,
+    unit: { vi: 'g' },
+  },
+];
+
 describe('IngredientEditModal', () => {
   const onSubmit = vi.fn();
   const onClose = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    useIngredientStore.setState({ ingredients: storeIngredients });
   });
 
   // --- Render Tests ---
@@ -632,5 +648,71 @@ describe('IngredientEditModal', () => {
 
     rerender(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
     expect(screen.getByTestId('input-ing-name')).toHaveValue('');
+  });
+
+  // --- Smart-fill from store ---
+
+  describe('Smart-fill from store', () => {
+    it('auto-fills nutrition when name matches store ingredient on blur', async () => {
+      render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
+      const nameInput = screen.getByTestId('input-ing-name');
+      fireEvent.change(nameInput, { target: { value: 'Yến mạch' } });
+      fireEvent.blur(nameInput);
+
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('389')).toBeInTheDocument();
+        expect(screen.getByDisplayValue('17')).toBeInTheDocument();
+        expect(screen.getByDisplayValue('66')).toBeInTheDocument();
+      });
+    });
+
+    it('shows auto-fill indicator after store match', async () => {
+      render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
+      const nameInput = screen.getByTestId('input-ing-name');
+      fireEvent.change(nameInput, { target: { value: 'Yến mạch' } });
+      fireEvent.blur(nameInput);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('smart-fill-indicator')).toBeInTheDocument();
+      });
+      expect(screen.getByText('Đã tự động điền từ dữ liệu có sẵn')).toBeInTheDocument();
+    });
+
+    it('clears auto-fill indicator when user changes name', async () => {
+      render(<IngredientEditModal editingItem={null} onSubmit={onSubmit} onClose={onClose} />);
+      const nameInput = screen.getByTestId('input-ing-name');
+      fireEvent.change(nameInput, { target: { value: 'Yến mạch' } });
+      fireEvent.blur(nameInput);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('smart-fill-indicator')).toBeInTheDocument();
+      });
+
+      fireEvent.change(nameInput, { target: { value: 'Yến mạch mới' } });
+      await waitFor(() => {
+        expect(screen.queryByTestId('smart-fill-indicator')).not.toBeInTheDocument();
+      });
+    });
+
+    it('excludes self when editing — does not match own name', async () => {
+      render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
+      const nameInput = screen.getByTestId('input-ing-name');
+      // "Ức gà" is the same ingredient being edited — should NOT self-match
+      fireEvent.blur(nameInput);
+
+      expect(screen.queryByTestId('smart-fill-indicator')).not.toBeInTheDocument();
+    });
+
+    it('matches different store ingredient when editing', async () => {
+      render(<IngredientEditModal editingItem={existingIngredient} onSubmit={onSubmit} onClose={onClose} />);
+      const nameInput = screen.getByTestId('input-ing-name');
+      fireEvent.change(nameInput, { target: { value: 'Yến mạch' } });
+      fireEvent.blur(nameInput);
+
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('389')).toBeInTheDocument();
+        expect(screen.getByTestId('smart-fill-indicator')).toBeInTheDocument();
+      });
+    });
   });
 });

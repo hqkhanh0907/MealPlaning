@@ -571,32 +571,41 @@ describe('DishManager', () => {
     expect(defaultProps.onAdd).toHaveBeenCalled();
   });
 
-  it('clones a dish in grid view', () => {
+  it('opens edit modal with prefilled data when duplicate button is clicked (grid view)', () => {
     render(<DishManager {...defaultProps} />);
     const cloneBtn = screen.getByTestId('btn-clone-dish-d1');
     fireEvent.click(cloneBtn);
-    expect(defaultProps.onAdd).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ingredients: expect.any(Array),
-        tags: expect.any(Array),
-      }),
-    );
+    // Edit modal should open with the duplicated name
+    expect(screen.getByText(/Tạo món ăn mới|Sửa món ăn/)).toBeInTheDocument();
+    // onAdd is NOT called yet — only on save
+    expect(defaultProps.onAdd).not.toHaveBeenCalled();
   });
 
-  it('clones a dish in list view (desktop)', () => {
+  it('opens edit modal when duplicate button is clicked in list view (desktop)', () => {
     render(<DishManager {...defaultProps} />);
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
     const cloneBtns = screen.getAllByTestId('btn-clone-dish-d1');
     fireEvent.click(cloneBtns[0]);
-    expect(defaultProps.onAdd).toHaveBeenCalled();
+    expect(screen.getByText(/Tạo món ăn mới|Sửa món ăn/)).toBeInTheDocument();
   });
 
-  it('clones a dish in mobile list view', () => {
+  it('opens edit modal when duplicate button is clicked in mobile list view', () => {
     render(<DishManager {...defaultProps} />);
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
     const cloneBtns = screen.getAllByTestId('btn-clone-dish-d1');
     fireEvent.click(cloneBtns.at(-1)!);
+    expect(screen.getByText(/Tạo món ăn mới|Sửa món ăn/)).toBeInTheDocument();
+  });
+
+  it('calls onAdd (not onUpdate) when saving a duplicated dish', () => {
+    render(<DishManager {...defaultProps} />);
+    // Click duplicate on a dish
+    fireEvent.click(screen.getByTestId('btn-clone-dish-d1'));
+    // Modal opens — click save (which validates form)
+    fireEvent.click(screen.getByText('Lưu món ăn'));
+    // Since editingItem is null (create mode), onAdd should be called
     expect(defaultProps.onAdd).toHaveBeenCalled();
+    expect(defaultProps.onUpdate).not.toHaveBeenCalled();
   });
 
   it('renders compare buttons on each dish card', () => {

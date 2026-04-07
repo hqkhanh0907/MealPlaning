@@ -165,6 +165,73 @@ describe('dishStore', () => {
     });
   });
 
+  describe('duplicateDish', () => {
+    it('creates a new dish with a different ID', () => {
+      useDishStore.setState({ dishes: [SAMPLE_DISH] });
+
+      const result = useDishStore.getState().duplicateDish('dish-1');
+
+      expect(result).not.toBeNull();
+      expect(result!.id).not.toBe('dish-1');
+      expect(useDishStore.getState().dishes).toHaveLength(2);
+    });
+
+    it('appends " (bản sao)" suffix to both vi and en names', () => {
+      useDishStore.setState({ dishes: [SAMPLE_DISH] });
+
+      const result = useDishStore.getState().duplicateDish('dish-1');
+
+      expect(result!.name.vi).toBe('Cơm gà (bản sao)');
+      expect(result!.name.en).toBe('Chicken rice (bản sao)');
+    });
+
+    it('appends suffix to vi-only name', () => {
+      useDishStore.setState({ dishes: [DISH_VI_ONLY] });
+
+      const result = useDishStore.getState().duplicateDish('dish-2');
+
+      expect(result!.name.vi).toBe('Phở bò (bản sao)');
+      expect(result!.name.en).toBeUndefined();
+    });
+
+    it('deep-copies ingredients (not same reference)', () => {
+      useDishStore.setState({ dishes: [SAMPLE_DISH] });
+
+      const result = useDishStore.getState().duplicateDish('dish-1');
+
+      expect(result!.ingredients).toEqual(SAMPLE_DISH.ingredients);
+      expect(result!.ingredients).not.toBe(SAMPLE_DISH.ingredients);
+      expect(result!.ingredients[0]).not.toBe(SAMPLE_DISH.ingredients[0]);
+    });
+
+    it('copies tags as a new array', () => {
+      useDishStore.setState({ dishes: [SAMPLE_DISH] });
+
+      const result = useDishStore.getState().duplicateDish('dish-1');
+
+      expect(result!.tags).toEqual(['lunch', 'dinner']);
+      expect(result!.tags).not.toBe(SAMPLE_DISH.tags);
+    });
+
+    it('preserves rating and notes', () => {
+      useDishStore.setState({ dishes: [SAMPLE_DISH] });
+
+      const result = useDishStore.getState().duplicateDish('dish-1');
+
+      expect(result!.rating).toBe(4);
+      expect(result!.notes).toBe('Món ngon');
+    });
+
+    it('returns null for a non-existent dish ID', () => {
+      useDishStore.setState({ dishes: [SAMPLE_DISH] });
+
+      const result = useDishStore.getState().duplicateDish('non-existent');
+
+      expect(result).toBeNull();
+      expect(useDishStore.getState().dishes).toHaveLength(1);
+    });
+  });
+
   describe('LocalizedString handling', () => {
     it('preserves both vi and en fields', () => {
       useDishStore.getState().addDish(SAMPLE_DISH);
@@ -410,6 +477,30 @@ describe('dishStore', () => {
 
       await vi.waitFor(() => expect(mockDb.execute).toHaveBeenCalledWith('DELETE FROM dish_ingredients'));
       expect(mockDb.execute).toHaveBeenCalledWith('DELETE FROM dishes');
+    });
+
+    it('persists duplicateDish via transaction', async () => {
+      useDishStore.setState({ dishes: [SAMPLE_DISH] });
+      const result = useDishStore.getState().duplicateDish('dish-1');
+
+      expect(result).not.toBeNull();
+      await vi.waitFor(() =>
+        expect(mockDb.execute).toHaveBeenCalledWith(
+          expect.stringContaining('INSERT INTO dishes'),
+          expect.arrayContaining([result!.id, 'Cơm gà (bản sao)']),
+        ),
+      );
+    });
+
+    it('does not persist duplicateDish when _db is null', () => {
+      __resetDishDbForTesting();
+      mockDb.execute.mockClear();
+      mockDb.transaction.mockClear();
+      useDishStore.setState({ dishes: [SAMPLE_DISH] });
+
+      useDishStore.getState().duplicateDish('dish-1');
+
+      expect(mockDb.transaction).not.toHaveBeenCalled();
     });
   });
 });

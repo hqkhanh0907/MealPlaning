@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Plus, Sparkles, X } from 'lucide-react';
+import { CheckCircle, Loader2, Plus, Sparkles, X } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
+import { useIngredientSmartFill } from '@/hooks/useIngredientSmartFill';
 
 import {
   type QuickAddIngredientData,
@@ -61,6 +62,8 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
   const qaUnit = watch('qaUnit');
 
   const [qaAiLoading, setQaAiLoading] = useState(false);
+  const { findMatch, isAutoFilled, setAutoFilled, autoFillTimestamp } = useIngredientSmartFill();
+  const [highlightFields, setHighlightFields] = useState(false);
 
   const aiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const aiAbortRef = useRef<AbortController | null>(null);
@@ -71,6 +74,40 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
       aiAbortRef.current?.abort();
     };
   }, []);
+
+  useEffect(() => {
+    if (autoFillTimestamp > 0) {
+      setHighlightFields(true);
+      const timer = setTimeout(() => setHighlightFields(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [autoFillTimestamp]);
+
+  const applySmartFill = useCallback(
+    (match: Ingredient) => {
+      setValue('qaCal', Math.round(match.caloriesPer100));
+      setValue('qaProtein', Math.round(match.proteinPer100));
+      setValue('qaCarbs', Math.round(match.carbsPer100));
+      setValue('qaFat', Math.round(match.fatPer100));
+      setValue('qaFiber', Math.round(match.fiberPer100));
+      if (match.unit?.vi) {
+        setValue('qaUnit', { vi: match.unit.vi });
+      }
+    },
+    [setValue],
+  );
+
+  const handleNameBlur = useCallback(
+    (nameValue: string) => {
+      const match = findMatch(nameValue);
+      if (match) {
+        applySmartFill(match);
+        return;
+      }
+      triggerAIFill(nameValue, qaUnit.vi);
+    },
+    [findMatch, applySmartFill, qaUnit.vi],
+  );
 
   const triggerAIFill = useCallback(
     (name: string, unit: string) => {
@@ -166,8 +203,9 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
                 onChange={e => {
                   field.onChange(e.target.value);
                   if (errors.qaName) clearErrors('qaName');
+                  if (isAutoFilled) setAutoFilled(false);
                 }}
-                onBlur={() => triggerAIFill(field.value, qaUnit.vi)}
+                onBlur={() => handleNameBlur(field.value)}
                 placeholder={t('dish.quickAddNamePlaceholder')}
                 className={`w-full ${errors.qaName ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : ''}`}
                 aria-invalid={!!errors.qaName}
@@ -252,11 +290,21 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
                   min={0}
                   disabled={qaAiLoading}
                   placeholder="0"
-                  className="focus:border-primary border-border bg-card w-full rounded-lg border px-2 py-1.5 text-xs transition-all outline-none disabled:opacity-50"
+                  className={`focus:border-primary border-border bg-card w-full rounded-lg border px-2 py-1.5 text-xs transition-all outline-none disabled:opacity-50 ${highlightFields ? 'ring-2 ring-green-400/50' : ''}`}
                 />
               </div>
             ))}
           </div>
+          {isAutoFilled && (
+            <p
+              className="text-muted-foreground mt-1 flex items-center gap-1 text-xs"
+              data-testid="smart-fill-indicator"
+            >
+              <CheckCircle className="h-3 w-3 text-green-500" />
+              <span>{t('ingredient.autoFilled')}</span>
+              <span className="text-muted-foreground/70">— {t('ingredient.autoFillHint')}</span>
+            </p>
+          )}
         </div>
         <p className="text-muted-foreground text-xs">
           <span className="text-destructive" aria-hidden="true">

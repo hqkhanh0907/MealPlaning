@@ -1,0 +1,1129 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MealPlaning UI/UX Mockup — 7 Waves Preview</title>
+    <style>
+      :root {
+        /* Current colors */
+        --emerald-50: #ecfdf5;
+        --emerald-100: #d1fae5;
+        --emerald-400: #34d399;
+        --emerald-500: #10b981;
+        --emerald-600: #059669;
+        --emerald-700: #047857;
+        --slate-50: #f8fafc;
+        --slate-100: #f1f5f9;
+        --slate-200: #e2e8f0;
+        --slate-300: #cbd5e1;
+        --slate-400: #94a3b8;
+        --slate-500: #64748b;
+        --slate-600: #475569;
+        --slate-700: #334155;
+        --slate-800: #1e293b;
+        --slate-900: #0f172a;
+        --amber-400: #fbbf24;
+        --amber-500: #f59e0b;
+        --amber-600: #d97706;
+        --blue-500: #3b82f6;
+        --blue-600: #2563eb;
+        --rose-500: #f43f5e;
+        --red-500: #ef4444;
+        /* NEW accent */
+        --violet-400: #a78bfa;
+        --violet-500: #8b5cf6;
+        --violet-600: #7c3aed;
+        --violet-50: #f5f3ff;
+        --violet-100: #ede9fe;
+        /* NEW macro protein */
+        --sky-400: #38bdf8;
+        --sky-500: #0ea5e9;
+        --sky-600: #0284c7;
+        --sky-50: #f0f9ff;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f8fafc;
+        color: var(--slate-800);
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 24px 16px;
+      }
+
+      h1 {
+        font-size: 28px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 8px;
+      }
+      .subtitle {
+        text-align: center;
+        color: var(--slate-500);
+        margin-bottom: 40px;
+        font-size: 14px;
+      }
+
+      .wave-section {
+        margin-bottom: 48px;
+      }
+      .wave-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .wave-badge {
+        background: var(--emerald-600);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .wave-title {
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .compare {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .compare-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+      }
+      .before .compare-label {
+        color: var(--rose-500);
+      }
+      .after .compare-label {
+        color: var(--emerald-600);
+      }
+
+      .phone {
+        width: 100%;
+        max-width: 375px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 24px;
+        border: 2px solid var(--slate-200);
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      }
+      .phone-content {
+        padding: 16px;
+        min-height: 300px;
+      }
+
+      .note {
+        background: var(--violet-50);
+        border-left: 4px solid var(--violet-500);
+        padding: 12px 16px;
+        border-radius: 0 8px 8px 0;
+        margin-top: 12px;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .note strong {
+        color: var(--violet-600);
+      }
+
+      /* ===== WAVE 1: Color swatches ===== */
+      .color-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .swatch {
+        aspect-ratio: 1;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 600;
+        color: white;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+
+      .ratio-bar {
+        height: 32px;
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        margin-bottom: 8px;
+      }
+      .ratio-bar > div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: white;
+      }
+
+      .type-scale {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .type-row {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+      }
+      .type-size {
+        font-size: 11px;
+        color: var(--slate-400);
+        width: 60px;
+        text-align: right;
+      }
+
+      /* ===== WAVE 2: Cards ===== */
+      .card-flat {
+        border: 1px solid var(--slate-200);
+        border-radius: 12px;
+        padding: 12px;
+        background: white;
+      }
+      .card-raised {
+        border: 1px solid var(--slate-200);
+        border-radius: 12px;
+        padding: 12px;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .card-floating {
+        border: 1px solid var(--slate-100);
+        border-radius: 16px;
+        padding: 16px;
+        background: white;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      }
+
+      .meal-card-old {
+        border: 1px solid var(--slate-200);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 8px;
+      }
+      .meal-card-new {
+        border: 1px solid var(--slate-200);
+        border-left: 4px solid;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 8px;
+      }
+      .meal-card-ai {
+        border: 1px solid var(--violet-400);
+        border-left: 4px solid var(--violet-500);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 8px;
+        background: linear-gradient(135deg, var(--violet-50) 0%, white 50%);
+        position: relative;
+      }
+      .ai-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: var(--violet-500);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 700;
+      }
+
+      .meal-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 4px;
+      }
+      .meal-meta {
+        font-size: 12px;
+        color: var(--slate-500);
+      }
+      .meal-meta .kcal {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--slate-800);
+      }
+      .meal-meta-new .kcal {
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--slate-800);
+      }
+      .meal-meta-new .macro {
+        font-size: 11px;
+        color: var(--slate-400);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .macro-mini {
+        display: flex;
+        gap: 6px;
+        margin-top: 4px;
+      }
+      .macro-pill {
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+      }
+      .macro-p {
+        background: var(--sky-50);
+        color: var(--sky-600);
+      }
+      .macro-f {
+        background: #fffbeb;
+        color: var(--amber-600);
+      }
+      .macro-c {
+        background: #eff6ff;
+        color: var(--blue-600);
+      }
+
+      /* ===== WAVE 3: Empty States ===== */
+      .empty-old {
+        padding: 32px 16px;
+        text-align: center;
+        color: var(--slate-400);
+        font-size: 14px;
+      }
+      .empty-new {
+        padding: 32px 16px;
+        text-align: center;
+      }
+      .empty-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--emerald-50);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 12px;
+        font-size: 28px;
+      }
+      .empty-title {
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+      .empty-desc {
+        font-size: 13px;
+        color: var(--slate-500);
+        margin-bottom: 12px;
+      }
+      .empty-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--emerald-600);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+      }
+
+      /* ===== WAVE 4: Bottom sheet ===== */
+      .sheet-demo {
+        background: var(--slate-100);
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+      }
+      .sheet-overlay {
+        background: rgba(0, 0, 0, 0.3);
+        padding-top: 80px;
+      }
+      .sheet-body {
+        background: white;
+        border-radius: 16px 16px 0 0;
+        padding: 16px;
+      }
+      .grab-handle {
+        width: 40px;
+        height: 4px;
+        background: var(--slate-300);
+        border-radius: 999px;
+        margin: 0 auto 12px;
+      }
+
+      /* ===== WAVE 5: Dashboard ===== */
+      .dash-card {
+        background: white;
+        border: 1px solid var(--slate-200);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 8px;
+      }
+      .dash-hero {
+        background: linear-gradient(135deg, var(--slate-900) 0%, var(--slate-800) 100%);
+        color: white;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 8px;
+      }
+      .dash-greeting {
+        font-size: 12px;
+        opacity: 0.7;
+      }
+      .dash-name {
+        font-size: 18px;
+        font-weight: 700;
+      }
+      .dash-ring {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: 3px solid var(--emerald-400);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .dash-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .dash-stat {
+        text-align: center;
+        flex: 1;
+      }
+      .dash-stat-val {
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .dash-stat-label {
+        font-size: 10px;
+        color: var(--slate-400);
+        text-transform: uppercase;
+      }
+      .dash-macro-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .dash-macro-bar {
+        flex: 1;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--slate-100);
+        overflow: hidden;
+      }
+      .dash-macro-fill {
+        height: 100%;
+        border-radius: 3px;
+      }
+
+      /* ===== WAVE 6: Onboarding ===== */
+      .ob-flow {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .ob-step {
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .ob-active {
+        background: var(--emerald-600);
+        color: white;
+      }
+      .ob-done {
+        background: var(--emerald-100);
+        color: var(--emerald-700);
+      }
+      .ob-skip {
+        background: var(--slate-100);
+        color: var(--slate-400);
+        text-decoration: line-through;
+      }
+      .ob-arrow {
+        color: var(--slate-300);
+        font-size: 12px;
+      }
+      .ob-deferred {
+        background: var(--amber-400);
+        color: var(--slate-800);
+        opacity: 0.6;
+      }
+
+      .ob-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .ob-stat-card {
+        padding: 16px;
+        border-radius: 12px;
+        text-align: center;
+      }
+      .ob-stat-num {
+        font-size: 32px;
+        font-weight: 800;
+      }
+      .ob-stat-label {
+        font-size: 12px;
+        margin-top: 4px;
+      }
+
+      .divider {
+        height: 1px;
+        background: var(--slate-200);
+        margin: 24px 0;
+      }
+
+      /* responsive */
+      @media (max-width: 640px) {
+        .compare {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎨 MealPlaning UI/UX Mockup</h1>
+      <p class="subtitle">Preview 7 Waves — Before vs After</p>
+
+      <!-- ===== WAVE 1 ===== -->
+      <div class="wave-section">
+        <div class="wave-header">
+          <span class="wave-badge">WAVE 1</span>
+          <span class="wave-title">Design Foundation — Color + Typography</span>
+        </div>
+
+        <h3 style="font-size: 14px; color: var(--slate-600); margin-bottom: 12px">Color System: 60-30-10 Ratio</h3>
+
+        <div class="compare">
+          <div class="before">
+            <div class="compare-label">❌ HIỆN TẠI — ~60% Green, 0% Accent</div>
+            <div class="ratio-bar">
+              <div style="width: 60%; background: var(--emerald-600)">60% Green</div>
+              <div style="width: 27%; background: var(--blue-600)">27% Blue</div>
+              <div style="width: 13%; background: var(--slate-300); color: var(--slate-600)">13% Slate</div>
+            </div>
+            <div class="color-grid">
+              <div class="swatch" style="background: var(--emerald-600)">Primary</div>
+              <div class="swatch" style="background: var(--emerald-600)">Protein</div>
+              <div class="swatch" style="background: var(--emerald-600)">Success</div>
+              <div class="swatch" style="background: var(--emerald-500)">Focus</div>
+              <div class="swatch" style="background: var(--slate-100); color: var(--slate-500)">Accent?</div>
+            </div>
+            <div class="note">
+              ⚠️ Protein color = Primary color. Không phân biệt được.<br />⚠️ Accent = Slate-100, không có vai trò thị
+              giác.
+            </div>
+          </div>
+          <div class="after">
+            <div class="compare-label">✅ ĐỀ XUẤT — 60-30-10 với Accent mới</div>
+            <div class="ratio-bar">
+              <div style="width: 60%; background: var(--emerald-600)">60% Emerald</div>
+              <div style="width: 30%; background: var(--slate-500)">30% Neutral</div>
+              <div style="width: 10%; background: var(--violet-500)">10% Violet</div>
+            </div>
+            <div class="color-grid">
+              <div class="swatch" style="background: var(--emerald-600)">Primary</div>
+              <div class="swatch" style="background: var(--sky-500)">Protein</div>
+              <div class="swatch" style="background: var(--amber-500)">Fat</div>
+              <div class="swatch" style="background: var(--blue-500)">Carbs</div>
+              <div class="swatch" style="background: var(--violet-500)">Accent ✨</div>
+            </div>
+            <div class="note">
+              <strong>Thay đổi chính:</strong><br />
+              • Accent = Violet-500 (badges, highlights, AI features)<br />
+              • Protein = Sky-500 (tách hoàn toàn khỏi primary)<br />
+              • Mỗi macro có hue riêng biệt
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size: 14px; color: var(--slate-600); margin: 20px 0 12px">Typography Scale</h3>
+        <div class="compare">
+          <div class="before">
+            <div class="compare-label">❌ HIỆN TẠI</div>
+            <div class="type-scale">
+              <div class="type-row">
+                <span class="type-size">18px 700</span><span style="font-size: 18px; font-weight: 700">Heading</span>
+              </div>
+              <div class="type-row">
+                <span class="type-size">16px 400</span><span style="font-size: 16px">Body Text (gap=2px!)</span>
+              </div>
+              <div class="type-row">
+                <span class="type-size">14px 600</span><span style="font-size: 14px; font-weight: 600">Label</span>
+              </div>
+              <div class="type-row">
+                <span class="type-size">12px 400</span><span style="font-size: 12px">Caption</span>
+              </div>
+            </div>
+          </div>
+          <div class="after">
+            <div class="compare-label">✅ ĐỀ XUẤT</div>
+            <div class="type-scale">
+              <div class="type-row">
+                <span class="type-size">24px 700</span><span style="font-size: 24px; font-weight: 700">Heading</span>
+              </div>
+              <div class="type-row">
+                <span class="type-size">20px 600</span><span style="font-size: 20px; font-weight: 600">Subheading</span>
+              </div>
+              <div class="type-row">
+                <span class="type-size">16px 500</span
+                ><span style="font-size: 16px; font-weight: 500">Body (medium)</span>
+              </div>
+              <div class="type-row">
+                <span class="type-size">13px 400</span><span style="font-size: 13px">Caption</span>
+              </div>
+              <div class="type-row">
+                <span class="type-size">11px 500</span
+                ><span style="font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px"
+                  >MICRO LABEL</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ===== WAVE 2 ===== -->
+      <div class="wave-section">
+        <div class="wave-header">
+          <span class="wave-badge">WAVE 2</span>
+          <span class="wave-title">Card System + Visual Hierarchy</span>
+        </div>
+
+        <h3 style="font-size: 14px; color: var(--slate-600); margin-bottom: 12px">Card Elevation System</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px">
+          <div>
+            <div
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: var(--slate-400);
+                margin-bottom: 6px;
+              "
+            >
+              Flat
+            </div>
+            <div class="card-flat">
+              <div style="font-size: 13px; font-weight: 600">Ức gà áp chảo</div>
+              <div style="font-size: 11px; color: var(--slate-500)">330 kcal</div>
+            </div>
+          </div>
+          <div>
+            <div
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: var(--slate-400);
+                margin-bottom: 6px;
+              "
+            >
+              Raised
+            </div>
+            <div class="card-raised">
+              <div style="font-size: 13px; font-weight: 600">Today's Plan</div>
+              <div style="font-size: 11px; color: var(--slate-500)">3 exercises</div>
+            </div>
+          </div>
+          <div>
+            <div
+              style="
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: var(--slate-400);
+                margin-bottom: 6px;
+              "
+            >
+              Floating
+            </div>
+            <div class="card-floating">
+              <div style="font-size: 13px; font-weight: 600">Lên kế hoạch</div>
+              <div style="font-size: 11px; color: var(--slate-500)">Primary CTA</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size: 14px; color: var(--slate-600); margin-bottom: 12px">Meal Cards: Before vs After</h3>
+        <div class="compare">
+          <div class="before">
+            <div class="compare-label">❌ HIỆN TẠI — Cards đều giống nhau</div>
+            <div class="meal-card-old">
+              <div class="meal-title">Ức gà áp chảo</div>
+              <div class="meal-meta"><span class="kcal">330 kcal</span> · 62g protein</div>
+            </div>
+            <div class="meal-card-old">
+              <div class="meal-title">Yến mạch sữa chua</div>
+              <div class="meal-meta"><span class="kcal">332 kcal</span> · 25g protein</div>
+            </div>
+            <div class="meal-card-old" style="opacity: 0.6">
+              <div class="meal-title">AI: Cá hồi nướng</div>
+              <div class="meal-meta"><span class="kcal">280 kcal</span> · 35g protein</div>
+            </div>
+          </div>
+          <div class="after">
+            <div class="compare-label">✅ ĐỀ XUẤT — Phân biệt rõ ràng</div>
+            <div class="meal-card-new" style="border-left-color: var(--amber-500)">
+              <div class="meal-title">🍗 Ức gà áp chảo</div>
+              <div class="meal-meta-new"><span class="kcal">330</span> <span class="macro">kcal</span></div>
+              <div class="macro-mini">
+                <span class="macro-pill macro-p">P 62g</span>
+                <span class="macro-pill macro-f">F 4g</span>
+                <span class="macro-pill macro-c">C 0g</span>
+              </div>
+            </div>
+            <div class="meal-card-new" style="border-left-color: var(--emerald-400)">
+              <div class="meal-title">🥣 Yến mạch sữa chua</div>
+              <div class="meal-meta-new"><span class="kcal">332</span> <span class="macro">kcal</span></div>
+              <div class="macro-mini">
+                <span class="macro-pill macro-p">P 25g</span>
+                <span class="macro-pill macro-f">F 7g</span>
+                <span class="macro-pill macro-c">C 48g</span>
+              </div>
+            </div>
+            <div class="meal-card-ai">
+              <div class="ai-badge">✨ AI</div>
+              <div class="meal-title">🐟 Cá hồi nướng</div>
+              <div class="meal-meta-new"><span class="kcal">280</span> <span class="macro">kcal</span></div>
+              <div class="macro-mini">
+                <span class="macro-pill macro-p">P 35g</span>
+                <span class="macro-pill macro-f">F 13g</span>
+                <span class="macro-pill macro-c">C 0g</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ===== WAVE 3 ===== -->
+      <div class="wave-section">
+        <div class="wave-header">
+          <span class="wave-badge">WAVE 3</span>
+          <span class="wave-title">Empty States Overhaul</span>
+        </div>
+        <div class="compare">
+          <div class="before">
+            <div class="compare-label">❌ HIỆN TẠI — Dead end</div>
+            <div class="phone">
+              <div class="phone-content">
+                <div class="empty-old">Không có dữ liệu</div>
+              </div>
+            </div>
+          </div>
+          <div class="after">
+            <div class="compare-label">✅ ĐỀ XUẤT — Onramp with CTA</div>
+            <div class="phone">
+              <div class="phone-content">
+                <div class="empty-new">
+                  <div class="empty-icon">🍽️</div>
+                  <div class="empty-title">Chưa có món ăn nào</div>
+                  <div class="empty-desc">Thêm món ăn đầu tiên để bắt đầu<br />theo dõi dinh dưỡng hàng ngày</div>
+                  <button class="empty-cta">+ Thêm món ăn</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ===== WAVE 4 ===== -->
+      <div class="wave-section">
+        <div class="wave-header">
+          <span class="wave-badge">WAVE 4</span>
+          <span class="wave-title">Bottom Sheet + Modal UX</span>
+        </div>
+        <div class="compare">
+          <div class="before">
+            <div class="compare-label">❌ HIỆN TẠI — Không grab handle</div>
+            <div class="sheet-demo">
+              <div class="sheet-overlay">
+                <div class="sheet-body">
+                  <div style="font-weight: 600; margin-bottom: 8px">Thêm nguyên liệu</div>
+                  <div style="height: 40px; background: var(--slate-100); border-radius: 8px; margin-bottom: 8px"></div>
+                  <div style="height: 40px; background: var(--slate-100); border-radius: 8px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="after">
+            <div class="compare-label">✅ ĐỀ XUẤT — Grab handle + Drag to dismiss</div>
+            <div class="sheet-demo">
+              <div class="sheet-overlay">
+                <div class="sheet-body">
+                  <div class="grab-handle"></div>
+                  <div style="font-weight: 600; margin-bottom: 4px">Thêm nguyên liệu</div>
+                  <div style="font-size: 11px; color: var(--slate-400); margin-bottom: 12px">↕ Kéo xuống để đóng</div>
+                  <div style="height: 40px; background: var(--slate-100); border-radius: 8px; margin-bottom: 8px"></div>
+                  <div style="height: 40px; background: var(--slate-100); border-radius: 8px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ===== WAVE 5 ===== -->
+      <div class="wave-section">
+        <div class="wave-header">
+          <span class="wave-badge">WAVE 5</span>
+          <span class="wave-title">Dashboard Full Refactor</span>
+        </div>
+        <div class="compare">
+          <div class="before">
+            <div class="compare-label">❌ HIỆN TẠI — 6 sections, dense</div>
+            <div class="phone" style="max-width: 320px">
+              <div class="phone-content" style="padding: 8px">
+                <div class="dash-hero" style="padding: 10px; margin-bottom: 6px">
+                  <div class="dash-greeting">Chào buổi sáng</div>
+                  <div class="dash-name" style="font-size: 14px">Khanh</div>
+                  <div style="display: flex; gap: 8px; margin-top: 8px">
+                    <div class="dash-ring" style="width: 36px; height: 36px; font-size: 10px">75%</div>
+                    <div style="flex: 1; font-size: 11px">
+                      <div>1327 / 2091 kcal</div>
+                      <div style="opacity: 0.6">Còn 764 kcal</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="dash-card" style="padding: 8px; margin-bottom: 4px; font-size: 11px">
+                  <b>📊 Weekly Snapshot</b><br />
+                  <div class="dash-row" style="margin-top: 4px">
+                    <div class="dash-stat">
+                      <div class="dash-stat-val" style="font-size: 12px">75.2</div>
+                      <div class="dash-stat-label" style="font-size: 9px">kg</div>
+                    </div>
+                    <div class="dash-stat">
+                      <div class="dash-stat-val" style="font-size: 12px">5</div>
+                      <div class="dash-stat-label" style="font-size: 9px">streak</div>
+                    </div>
+                    <div class="dash-stat">
+                      <div class="dash-stat-val" style="font-size: 12px">80%</div>
+                      <div class="dash-stat-label" style="font-size: 9px">adhere</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="dash-card" style="padding: 8px; margin-bottom: 4px; font-size: 11px">
+                  <b>🏋️ Today's Plan</b><br />Leg Day · 4 exercises
+                </div>
+                <div class="dash-card" style="padding: 8px; margin-bottom: 4px; font-size: 11px">
+                  <b>💡 AI Insight</b><br />Protein thấp...
+                </div>
+                <div class="dash-card" style="padding: 8px; margin-bottom: 4px; font-size: 11px">
+                  <b>⚡ Quick Actions</b><br />Log Weight | Cardio
+                </div>
+                <div style="text-align: center; font-size: 10px; color: var(--slate-400); padding: 4px">
+                  ↓ Phải cuộn thêm ↓
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="after">
+            <div class="compare-label">✅ ĐỀ XUẤT — 4 sections, focused</div>
+            <div class="phone" style="max-width: 320px">
+              <div class="phone-content" style="padding: 8px">
+                <!-- Merged Hero -->
+                <div class="dash-hero" style="padding: 12px; margin-bottom: 6px">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px">
+                    <div>
+                      <div style="font-size: 11px; opacity: 0.6">Hôm nay</div>
+                      <div style="font-size: 20px; font-weight: 700">
+                        1327 <span style="font-size: 12px; opacity: 0.6">/ 2091 kcal</span>
+                      </div>
+                    </div>
+                    <div class="dash-ring">75%</div>
+                  </div>
+                  <div class="dash-macro-row">
+                    <div style="flex: 1">
+                      <div style="font-size: 9px; text-transform: uppercase; opacity: 0.5; margin-bottom: 2px">
+                        Protein
+                      </div>
+                      <div class="dash-macro-bar">
+                        <div class="dash-macro-fill" style="width: 70%; background: var(--sky-400)"></div>
+                      </div>
+                      <div style="font-size: 10px; margin-top: 2px">85/120g</div>
+                    </div>
+                    <div style="flex: 1">
+                      <div style="font-size: 9px; text-transform: uppercase; opacity: 0.5; margin-bottom: 2px">Fat</div>
+                      <div class="dash-macro-bar">
+                        <div class="dash-macro-fill" style="width: 85%; background: var(--amber-400)"></div>
+                      </div>
+                      <div style="font-size: 10px; margin-top: 2px">60/70g</div>
+                    </div>
+                    <div style="flex: 1">
+                      <div style="font-size: 9px; text-transform: uppercase; opacity: 0.5; margin-bottom: 2px">
+                        Carbs
+                      </div>
+                      <div class="dash-macro-bar">
+                        <div class="dash-macro-fill" style="width: 55%; background: var(--blue-500)"></div>
+                      </div>
+                      <div style="font-size: 10px; margin-top: 2px">140/250g</div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      gap: 8px;
+                      margin-top: 8px;
+                      padding-top: 8px;
+                      border-top: 1px solid rgba(255, 255, 255, 0.1);
+                    "
+                  >
+                    <div class="dash-stat">
+                      <div class="dash-stat-val" style="font-size: 12px; color: white">75.2</div>
+                      <div class="dash-stat-label" style="font-size: 9px; color: rgba(255, 255, 255, 0.5)">KG</div>
+                    </div>
+                    <div class="dash-stat">
+                      <div class="dash-stat-val" style="font-size: 12px; color: white">🔥 5</div>
+                      <div class="dash-stat-label" style="font-size: 9px; color: rgba(255, 255, 255, 0.5)">STREAK</div>
+                    </div>
+                    <div class="dash-stat">
+                      <div class="dash-stat-val" style="font-size: 12px; color: white">80%</div>
+                      <div class="dash-stat-label" style="font-size: 9px; color: rgba(255, 255, 255, 0.5)">
+                        TUÂN THỦ
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Today's Plan -->
+                <div class="dash-card" style="padding: 10px; margin-bottom: 6px">
+                  <div style="display: flex; justify-content: space-between; align-items: center">
+                    <div>
+                      <div style="font-size: 13px; font-weight: 700">🏋️ Leg Day</div>
+                      <div style="font-size: 11px; color: var(--slate-500)">4 bài tập · ~45 phút</div>
+                    </div>
+                    <button
+                      style="
+                        background: var(--emerald-600);
+                        color: white;
+                        border: none;
+                        padding: 6px 14px;
+                        border-radius: 999px;
+                        font-size: 12px;
+                        font-weight: 600;
+                      "
+                    >
+                      Bắt đầu
+                    </button>
+                  </div>
+                </div>
+                <!-- AI Insight -->
+                <div
+                  style="
+                    border-left: 3px solid var(--violet-500);
+                    background: var(--violet-50);
+                    padding: 10px;
+                    border-radius: 0 12px 12px 0;
+                    margin-bottom: 6px;
+                  "
+                >
+                  <div style="font-size: 12px; font-weight: 600; color: var(--violet-600)">💡 Protein thấp</div>
+                  <div style="font-size: 11px; color: var(--slate-600); margin-top: 2px">
+                    Bạn mới đạt 70% mục tiêu protein.
+                  </div>
+                </div>
+                <!-- Quick Actions -->
+                <div style="display: flex; gap: 8px">
+                  <button
+                    style="
+                      flex: 1;
+                      padding: 10px;
+                      background: var(--slate-100);
+                      border: none;
+                      border-radius: 12px;
+                      font-size: 12px;
+                      font-weight: 600;
+                      color: var(--slate-700);
+                    "
+                  >
+                    ⚖️ Cân nặng
+                  </button>
+                  <button
+                    style="
+                      flex: 1;
+                      padding: 10px;
+                      background: var(--slate-100);
+                      border: none;
+                      border-radius: 12px;
+                      font-size: 12px;
+                      font-weight: 600;
+                      color: var(--slate-700);
+                    "
+                  >
+                    🏃 Cardio
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="note">
+          <strong>Thay đổi chính:</strong> NutritionHero + WeeklySnapshot merge thành 1 hero card. Greeting tích hợp vào
+          header app. 6→4 sections = không cần scroll.
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ===== WAVE 6 ===== -->
+      <div class="wave-section">
+        <div class="wave-header">
+          <span class="wave-badge">WAVE 6</span>
+          <span class="wave-title">Onboarding Shortening</span>
+        </div>
+
+        <h3 style="font-size: 14px; color: var(--slate-600); margin-bottom: 12px">Flow Comparison</h3>
+
+        <div style="margin-bottom: 16px">
+          <div class="compare-label before" style="margin-bottom: 8px">
+            ❌ HIỆN TẠI — 7 sections, ~40 clicks, 10s wait
+          </div>
+          <div class="ob-flow">
+            <span class="ob-step ob-done">Welcome ×3</span><span class="ob-arrow">→</span>
+            <span class="ob-step ob-done">Health Basic</span><span class="ob-arrow">→</span>
+            <span class="ob-step ob-done">Activity</span><span class="ob-arrow">→</span>
+            <span class="ob-step ob-done">Goal</span><span class="ob-arrow">→</span>
+            <span class="ob-step ob-done">Confirm</span><span class="ob-arrow">→</span>
+            <span class="ob-step ob-done">Training ×5-9</span><span class="ob-arrow">→</span>
+            <span class="ob-step ob-done">Strategy</span><span class="ob-arrow">→</span>
+            <span class="ob-step ob-done">Computing 10s</span><span class="ob-arrow">→</span>
+            <span class="ob-step ob-done">Preview</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 16px">
+          <div class="compare-label after" style="margin-bottom: 8px">✅ ĐỀ XUẤT — 2 screens, ~14 clicks, 0s wait</div>
+          <div class="ob-flow">
+            <span class="ob-step ob-active">Hồ sơ sức khỏe</span><span class="ob-arrow">→</span>
+            <span class="ob-step ob-active">Mục tiêu dinh dưỡng</span><span class="ob-arrow">→</span>
+            <span class="ob-step" style="background: var(--emerald-600); color: white">✅ Xong!</span>
+          </div>
+          <div class="ob-flow" style="margin-top: 8px">
+            <span class="ob-step ob-skip">Welcome ×3</span>
+            <span class="ob-step ob-skip">Confirm riêng</span>
+            <span class="ob-step ob-skip">Computing 10s</span>
+            <span class="ob-step ob-skip">Preview riêng</span>
+            <span class="ob-step ob-deferred">Training → Hỏi sau khi mở Fitness</span>
+          </div>
+        </div>
+
+        <div class="ob-stats">
+          <div class="ob-stat-card" style="background: var(--rose-500); color: white">
+            <div class="ob-stat-num">~40</div>
+            <div class="ob-stat-label">clicks trước</div>
+          </div>
+          <div class="ob-stat-card" style="background: var(--emerald-600); color: white">
+            <div class="ob-stat-num">~14</div>
+            <div class="ob-stat-label">clicks sau (-65%)</div>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top: 16px">
+          <strong>Data Impact = 0%</strong><br />
+          • 8 data points bắt buộc (BMR/TDEE) giữ nguyên trong 2 screens<br />
+          • Training profile hoãn sang Fitness tab (smart defaults: Beginner, 3 days, all equipment)<br />
+          • User có thể customize bất cứ lúc nào trong Settings<br />
+          • "BMR" → "Calo cơ bản", "TDEE" → "Calo hàng ngày" (không jargon)
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ===== WAVE 7 ===== -->
+      <div class="wave-section">
+        <div class="wave-header">
+          <span class="wave-badge">WAVE 7</span>
+          <span class="wave-title">UX Polish + Tone</span>
+        </div>
+
+        <div class="compare">
+          <div class="before">
+            <div class="compare-label">❌ Judgmental Wording</div>
+            <div style="padding: 12px; background: var(--slate-100); border-radius: 12px">
+              <div style="font-size: 13px">
+                <div style="color: var(--red-500); font-weight: 600; margin-bottom: 4px">⚠️ "Cần cải thiện"</div>
+                <div style="color: var(--slate-500); font-size: 12px">Tone phán xét, tạo cảm giác tiêu cực</div>
+                <div style="margin-top: 12px">
+                  <div style="font-size: 12px; font-weight: 600; margin-bottom: 4px">4 hiệp × 10 lần</div>
+                  <div style="color: var(--slate-400); font-size: 11px">Không giải thích cho người mới</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="after">
+            <div class="compare-label">✅ Encouraging Tone</div>
+            <div style="padding: 12px; background: var(--slate-100); border-radius: 12px">
+              <div style="font-size: 13px">
+                <div style="color: var(--emerald-600); font-weight: 600; margin-bottom: 4px">
+                  💪 "Còn nhiều dư địa!"
+                </div>
+                <div style="color: var(--slate-500); font-size: 12px">Tone khích lệ, positive framing</div>
+                <div style="margin-top: 12px">
+                  <div style="font-size: 12px; font-weight: 600; margin-bottom: 4px">
+                    4 hiệp × 10 lần <span style="color: var(--violet-500); font-size: 10px; cursor: pointer">ⓘ</span>
+                  </div>
+                  <div
+                    style="
+                      color: var(--slate-400);
+                      font-size: 11px;
+                      background: var(--violet-50);
+                      padding: 4px 8px;
+                      border-radius: 6px;
+                      margin-top: 4px;
+                    "
+                  >
+                    Hiệp = nhóm lặp lại. Lần = số lần thực hiện 1 động tác.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; padding: 32px 0; color: var(--slate-400); font-size: 12px">
+        — End of Mockup Preview —<br />
+        7 Waves · 33 TODOs · 57 Critique Items
+      </div>
+    </div>
+  </body>
+</html>

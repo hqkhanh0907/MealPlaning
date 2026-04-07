@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { initialDishes } from '../data/initialData';
 import type { DatabaseService } from '../services/databaseService';
 import type { Dish, MealType } from '../types';
+import { generateUUID } from '../utils/helpers';
 import { logger } from '../utils/logger';
 import { persistToDb } from './helpers/dbWriteQueue';
 
@@ -104,6 +105,7 @@ interface DishState {
   addDish: (dish: Dish) => void;
   updateDish: (dish: Dish) => void;
   deleteDish: (id: string) => void;
+  duplicateDish: (dishId: string) => Dish | null;
   isIngredientUsed: (ingId: string) => boolean;
   loadAll: (db: DatabaseService) => Promise<void>;
 }
@@ -130,6 +132,21 @@ export const useDishStore = create<DishState>((set, get) => ({
       persistToDb(_db, 'DELETE FROM dish_ingredients WHERE dish_id = ?', [id], 'deleteDish.ingredients');
       persistToDb(_db, 'DELETE FROM dishes WHERE id = ?', [id], 'deleteDish');
     }
+  },
+  duplicateDish: dishId => {
+    const source = get().dishes.find(d => d.id === dishId);
+    if (!source) return null;
+    const SUFFIX = ' (bản sao)';
+    const newDish: Dish = {
+      ...source,
+      id: generateUUID(),
+      name: Object.fromEntries(Object.entries(source.name).map(([k, v]) => [k, `${v}${SUFFIX}`])) as Dish['name'],
+      ingredients: source.ingredients.map(si => ({ ...si })),
+      tags: [...source.tags],
+    };
+    set(state => ({ dishes: [...state.dishes, newDish] }));
+    if (_db) persistDish(_db, newDish, 'duplicateDish');
+    return newDish;
   },
   isIngredientUsed: ingId => get().dishes.some(d => d.ingredients.some(di => di.ingredientId === ingId)),
   loadAll: async (db: DatabaseService) => {

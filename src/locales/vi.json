@@ -230,6 +230,10 @@
     "cloned": "Đã nhân bản món",
     "clonedDesc": "\"{{name}}\" đã được nhân bản",
     "copySuffix": "(bản sao)",
+    "duplicate": "Nhân đôi",
+    "duplicated": "Đã nhân đôi món",
+    "duplicatedDesc": "\"{{name}}\" đã được nhân đôi",
+    "duplicateName": "{{name}} (bản sao)",
     "compare": "So sánh",
     "compareSelected": "So sánh ({{count}})",
     "maxCompare": "Tối đa 3 món",
@@ -273,7 +277,9 @@
     "deletedDesc": "\"{{name}}\" đã được xóa.",
     "restoredDesc": "\"{{name}}\" đã được khôi phục.",
     "confirmDelete": "Xóa nguyên liệu?",
-    "confirmDeleteMsg": "Bạn có chắc chắn muốn xóa"
+    "confirmDeleteMsg": "Bạn có chắc chắn muốn xóa",
+    "autoFilled": "Đã tự động điền từ dữ liệu có sẵn",
+    "autoFillHint": "Bạn có thể chỉnh sửa nếu cần"
   },
   "management": {
     "title": "Thư viện dữ liệu",
@@ -754,7 +760,8 @@
       "editSet": "Chỉnh sửa set",
       "deleteSet": "Xóa set",
       "deleteSetConfirm": "Bạn có chắc muốn xóa set này?",
-      "setDeleted": "Đã xóa set"
+      "setDeleted": "Đã xóa set",
+      "copyLastSet": "Sao chép set trước"
     },
     "summary": {
       "title": "Tổng kết buổi tập",
@@ -825,6 +832,7 @@
       "todayWorkout": "Buổi tập hôm nay",
       "tomorrow": "Ngày mai",
       "exercises": "bài tập",
+      "exerciseCount": "{{count}} bài tập",
       "startWorkout": "Bắt đầu tập",
       "moreExercises": "+{{remaining}} bài tập nữa",
       "showLess": "Thu gọn",

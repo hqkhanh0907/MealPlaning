@@ -604,7 +604,7 @@ describe('DishEditModal', () => {
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
     const nameInput = screen.getByTestId('input-qa-name');
-    fireEvent.change(nameInput, { target: { value: 'Ức gà' } });
+    fireEvent.change(nameInput, { target: { value: 'Đùi cừu' } });
     fireEvent.blur(nameInput);
 
     // triggerAIFill has 800ms debounce
@@ -612,7 +612,7 @@ describe('DishEditModal', () => {
       await vi.advanceTimersByTimeAsync(850);
     });
 
-    expect(mockSuggestIngredientInfo).toHaveBeenCalledWith('Ức gà', 'g', expect.any(AbortSignal));
+    expect(mockSuggestIngredientInfo).toHaveBeenCalledWith('Đùi cừu', 'g', expect.any(AbortSignal));
   });
 
   it('shows AI loading state in quick-add form', async () => {
@@ -626,7 +626,7 @@ describe('DishEditModal', () => {
     fireEvent.click(screen.getByTestId('btn-quick-add-ingredient'));
 
     const nameInput = screen.getByTestId('input-qa-name');
-    fireEvent.change(nameInput, { target: { value: 'Ức gà' } });
+    fireEvent.change(nameInput, { target: { value: 'Đùi cừu' } });
     fireEvent.blur(nameInput);
 
     await act(async () => {

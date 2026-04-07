@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertTriangle, ArrowLeft, Pencil, Plus, Trash2, TrendingUp, X } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Copy, Pencil, Plus, Trash2, TrendingUp, X } from 'lucide-react';
 import React, { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
@@ -256,6 +256,25 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
       setShowRestTimer(true);
     },
     [getInput],
+  );
+
+  const handleCopyLastSet = useCallback(
+    (exerciseId: string) => {
+      const exerciseSets = loggedSets.filter(s => s.exerciseId === exerciseId);
+      const lastSet = exerciseSets.at(-1);
+      if (!lastSet) return;
+      const key: `setInputs.${string}` = `setInputs.${exerciseId}`;
+      /* v8 ignore start -- defensive: getValues may return undefined before form registers field */
+      const current = getValues(key) ?? { ...setInputDefaults };
+      /* v8 ignore stop */
+      setValue(key, {
+        ...current,
+        weight: lastSet.weightKg,
+        reps: lastSet.reps ?? current.reps,
+        rpe: lastSet.rpe,
+      });
+    },
+    [loggedSets, getValues, setValue],
   );
 
   const handleDeleteSet = useCallback((setId: string) => {
@@ -553,6 +572,18 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                     className="border-border-subtle mt-3 space-y-3 border-t pt-3"
                     data-testid={`set-editor-${exercise.id}`}
                   >
+                    {exerciseSets.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCopyLastSet(exercise.id)}
+                        className="text-muted-foreground w-full gap-1.5"
+                        data-testid={`copy-last-set-${exercise.id}`}
+                      >
+                        <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                        {t('fitness.logger.copyLastSet')}
+                      </Button>
+                    )}
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground w-16 text-xs">{t('fitness.logger.weight')}</span>
                       <Button

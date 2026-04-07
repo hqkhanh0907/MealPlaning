@@ -1446,4 +1446,50 @@ describe('WorkoutLogger', () => {
     expect(screen.getByText(/60kg × 10/)).toBeInTheDocument();
     expect(screen.queryByText(/99kg/)).not.toBeInTheDocument();
   });
+
+  /* ================================================================
+   * TC_COPY: Copy Last Set
+   * ================================================================ */
+
+  it('TC_COPY_01: copy-last-set button is hidden when no sets are logged', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+
+    expect(screen.queryByTestId('copy-last-set-bench-press')).not.toBeInTheDocument();
+  });
+
+  it('TC_COPY_02: copy-last-set button appears after logging a set', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+
+    logSetAndDismissRest('bench-press', '60', '10');
+
+    expect(screen.getByTestId('copy-last-set-bench-press')).toBeInTheDocument();
+  });
+
+  it('TC_COPY_03: clicking copy-last-set prefills weight and reps from the latest set', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+
+    logSetAndDismissRest('bench-press', '60', '10');
+    logSetAndDismissRest('bench-press', '75', '8');
+
+    // Click copy last set
+    fireEvent.click(screen.getByTestId('copy-last-set-bench-press'));
+
+    // Weight and reps inputs should now be prefilled with last set values (75kg, 8 reps)
+    const weightInput = screen.getByTestId('weight-input-bench-press') as HTMLInputElement;
+    const repsInput = screen.getByTestId('reps-input-bench-press') as HTMLInputElement;
+    expect(weightInput.value).toBe('75');
+    expect(repsInput.value).toBe('8');
+  });
+
+  it('TC_COPY_04: copy-last-set does not appear for exercises with no logged sets', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+
+    // Log a set for bench-press only
+    logSetAndDismissRest('bench-press', '60', '10');
+
+    // bench-press should have the button
+    expect(screen.getByTestId('copy-last-set-bench-press')).toBeInTheDocument();
+    // squat should NOT
+    expect(screen.queryByTestId('copy-last-set-squat')).not.toBeInTheDocument();
+  });
 });

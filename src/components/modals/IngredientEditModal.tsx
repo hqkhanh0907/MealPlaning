@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Save, Sparkles, X } from 'lucide-react';
+import { CheckCircle, Loader2, Save, Sparkles, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
@@ -10,6 +10,7 @@ import { generateUUID } from '@/utils/helpers';
 import { blockNegativeKeys } from '@/utils/numericInputHandlers';
 
 import { useNotification } from '../../contexts/NotificationContext';
+import { useIngredientSmartFill } from '../../hooks/useIngredientSmartFill';
 import {
   ingredientEditDefaults,
   type IngredientEditFormData,
@@ -87,6 +88,8 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
 
   const [isSearchingAI, setIsSearchingAI] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const { findMatch, isAutoFilled, setAutoFilled, autoFillTimestamp } = useIngredientSmartFill(editingItem?.id);
+  const [highlightFields, setHighlightFields] = useState(false);
 
   const isMountedRef = useRef(true);
   useEffect(() => {
@@ -95,6 +98,14 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
       isMountedRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (autoFillTimestamp > 0) {
+      setHighlightFields(true);
+      const timer = setTimeout(() => setHighlightFields(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [autoFillTimestamp]);
 
   const hasSubmittedRef = useRef(false);
 
@@ -143,6 +154,35 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
       },
     )();
   }, [rhfSubmit, onSubmit, buildIngredient]);
+
+  const applySmartFill = useCallback(
+    (match: Ingredient) => {
+      setValue('caloriesPer100', Math.round(match.caloriesPer100), { shouldDirty: true });
+      setValue('proteinPer100', Math.round(match.proteinPer100), { shouldDirty: true });
+      setValue('carbsPer100', Math.round(match.carbsPer100), { shouldDirty: true });
+      setValue('fatPer100', Math.round(match.fatPer100), { shouldDirty: true });
+      setValue('fiberPer100', Math.round(match.fiberPer100), { shouldDirty: true });
+      if (match.unit?.vi) {
+        setValue('unit', { vi: match.unit.vi }, { shouldDirty: true });
+      }
+    },
+    [setValue],
+  );
+
+  const handleNameBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement>) => {
+      const nameValue = e.target.value;
+      const match = findMatch(nameValue);
+      if (match) {
+        applySmartFill(match);
+      }
+    },
+    [findMatch, applySmartFill],
+  );
+
+  const handleNameChange = useCallback(() => {
+    if (isAutoFilled) setAutoFilled(false);
+  }, [isAutoFilled, setAutoFilled]);
 
   const handleAISearch = async () => {
     const nameVi = watchName;
@@ -197,7 +237,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
               <div className="flex gap-2">
                 <Input
                   id="ing-name"
-                  {...register('name.vi')}
+                  {...register('name.vi', { onBlur: handleNameBlur, onChange: handleNameChange })}
                   maxLength={NAME_MAX_LENGTH}
                   className={`flex-1 ${errors.name?.vi ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : ''}`}
                   placeholder={t('ingredient.namePlaceholder')}
@@ -283,7 +323,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                       onKeyDown={blockNegativeKeys}
                       {...register(field, { valueAsNumber: true })}
                       data-testid={`input-ing-${field.replace('Per100', '')}`}
-                      className={`w-full ${errors[field] ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : ''}`}
+                      className={`w-full ${errors[field] ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : ''} ${highlightFields ? 'ring-2 ring-green-400/50' : ''}`}
                       aria-invalid={!!errors[field]}
                     />
                     {errors[field] && (
@@ -299,6 +339,16 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                 );
               })}
             </div>
+            {isAutoFilled && (
+              <p
+                className="text-muted-foreground mt-1 flex items-center gap-1 text-xs"
+                data-testid="smart-fill-indicator"
+              >
+                <CheckCircle className="h-3 w-3 text-green-500" />
+                <span>{t('ingredient.autoFilled')}</span>
+                <span className="text-muted-foreground/70">— {t('ingredient.autoFillHint')}</span>
+              </p>
+            )}
             <p className="text-muted-foreground text-xs">
               <span className="text-destructive" aria-hidden="true">
                 *
