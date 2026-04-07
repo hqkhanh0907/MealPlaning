@@ -47,7 +47,7 @@ export const SyncConflictModal = ({ localTime, remoteTime, onResolve, onClose }:
           <button
             data-testid="btn-keep-local"
             onClick={() => onResolve('local')}
-            className="bg-info hover:bg-info/90 w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-colors"
+            className="bg-info hover:bg-info/90 text-primary-foreground w-full rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors"
           >
             {t('syncConflict.keepLocal')}
           </button>

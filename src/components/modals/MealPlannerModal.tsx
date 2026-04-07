@@ -227,7 +227,7 @@ export const MealPlannerModal = ({
                   {count > 0 && (
                     <span
                       className={`min-w-5 rounded-full px-1.5 py-0.5 text-center text-xs ${
-                        isActive ? 'bg-card/20 text-white' : 'text-foreground-secondary bg-muted'
+                        isActive ? 'bg-card/20 text-primary-foreground' : 'text-foreground-secondary bg-muted'
                       }`}
                     >
                       {count}

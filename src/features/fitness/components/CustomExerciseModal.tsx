@@ -145,7 +145,7 @@ export function CustomExerciseModal({
             </button>
             <button
               type="submit"
-              className="focus-visible:ring-ring bg-primary hover:bg-primary/90 flex min-h-[44px] flex-1 items-center justify-center rounded-lg py-2 text-sm text-white transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
+              className="focus-visible:ring-ring bg-primary hover:bg-primary/90 text-primary-foreground flex min-h-[44px] flex-1 items-center justify-center rounded-lg py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
               data-testid="save-custom-exercise"
             >
               {t('common.save')}

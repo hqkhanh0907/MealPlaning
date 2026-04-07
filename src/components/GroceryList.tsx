@@ -319,7 +319,7 @@ export const GroceryList = React.memo(function GroceryList({
                     isChecked ? 'border-primary bg-primary' : 'border-border'
                   }`}
                 >
-                  {isChecked && <Check className="h-3.5 w-3.5 text-white" />}
+                  {isChecked && <Check className="text-primary-foreground h-3.5 w-3.5" />}
                 </div>
                 <span
                   className={`flex-1 text-left text-sm font-medium transition-all sm:text-base ${

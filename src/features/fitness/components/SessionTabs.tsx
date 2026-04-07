@@ -172,7 +172,7 @@ function SessionTabsInner({
             type="button"
             onClick={handleConfirmDelete}
             aria-label={t('fitness.plan.deleteSession')}
-            className="focus-visible:ring-ring bg-destructive hover:bg-destructive/90 ml-auto min-h-[44px] min-w-[44px] rounded-md px-3 py-1.5 text-sm font-medium text-white transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className="focus-visible:ring-ring bg-destructive hover:bg-destructive/90 text-destructive-foreground ml-auto min-h-[44px] min-w-[44px] rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <Trash2 className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />
             {t('fitness.plan.delete')}

@@ -129,7 +129,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                         isCurrent ? 'border-primary bg-primary' : 'border-border',
                       ].join(' ')}
                     >
-                      {isCurrent && <Check className="h-3 w-3 text-white" />}
+                      {isCurrent && <Check className="text-primary-foreground h-3 w-3" />}
                     </span>
 
                     {/* Day info */}

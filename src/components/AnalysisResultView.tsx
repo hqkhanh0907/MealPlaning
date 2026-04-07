@@ -205,7 +205,7 @@ export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: Ana
       {onOpenSaveModal && (
         <button
           onClick={onOpenSaveModal}
-          className="bg-ai hover:bg-ai/90 flex w-full items-center justify-center gap-2 rounded-xl py-3 font-semibold text-white transition-all"
+          className="bg-ai hover:bg-ai/90 text-primary-foreground flex w-full items-center justify-center gap-2 rounded-xl py-3 font-semibold transition-all"
         >
           <Save className="h-5 w-5" aria-hidden="true" />
           {t('ai.saveToLibrary')}

@@ -207,7 +207,9 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="truncate text-xl font-semibold text-white">{t('fitness.templateGallery.title')}</h1>
+          <h1 className="text-primary-foreground truncate text-xl font-semibold">
+            {t('fitness.templateGallery.title')}
+          </h1>
         </div>
         <LoadingSkeleton />
       </div>
@@ -227,7 +229,9 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="truncate text-xl font-semibold text-white">{t('fitness.templateGallery.title')}</h1>
+          <h1 className="text-primary-foreground truncate text-xl font-semibold">
+            {t('fitness.templateGallery.title')}
+          </h1>
         </div>
         <div
           data-testid="template-empty-state"
@@ -261,7 +265,7 @@ function PlanTemplateGalleryInner({ planId }: Readonly<PlanTemplateGalleryProps>
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="truncate text-xl font-semibold text-white">{t('fitness.templateGallery.title')}</h1>
+        <h1 className="text-primary-foreground truncate text-xl font-semibold">{t('fitness.templateGallery.title')}</h1>
       </div>
 
       {/* Scrollable Content */}

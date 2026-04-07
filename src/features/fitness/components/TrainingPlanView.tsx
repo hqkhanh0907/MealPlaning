@@ -745,13 +745,13 @@ function TrainingPlanViewInner({
                 </button>
                 <div
                   data-testid="rest-day-card"
-                  className="from-info/80 to-info rounded-2xl bg-gradient-to-br p-4 text-white"
+                  className="from-info/80 to-info text-primary-foreground rounded-2xl bg-gradient-to-br p-4"
                 >
                   <div className="mb-3 flex items-center gap-2">
                     <Moon className="h-5 w-5" aria-hidden="true" />
                     <h3 className="text-lg font-semibold">{t('fitness.plan.restDay')}</h3>
                   </div>
-                  <ul className="space-y-2 text-sm text-white/90">
+                  <ul className="text-primary-foreground/90 space-y-2 text-sm">
                     <li>{t('fitness.plan.restDayTip1')}</li>
                     <li>{t('fitness.plan.restDayTip2')}</li>
                     <li>{t('fitness.plan.restDayTip3')}</li>
@@ -761,14 +761,14 @@ function TrainingPlanViewInner({
                     data-testid="rest-add-workout-btn"
                     type="button"
                     onClick={() => handleAddWorkoutToDay(dayNum)}
-                    className="bg-card/20 hover:bg-card/30 mt-3 flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-white transition-colors focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+                    className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground focus-visible:ring-primary-foreground/60 mt-3 flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
                   >
                     <Plus className="h-4 w-4" aria-hidden="true" />
                     {t('fitness.plan.convertToWorkout')}
                   </button>
 
                   {tomorrowPlanDay && (
-                    <p data-testid="tomorrow-preview" className="mt-3 text-sm text-white/80">
+                    <p data-testid="tomorrow-preview" className="text-primary-foreground/80 mt-3 text-sm">
                       <ClipboardList className="inline-block size-4" aria-hidden="true" /> {t('fitness.plan.tomorrow')}:{' '}
                       {translateWorkoutType(t, tomorrowPlanDay.workoutType)} — {tomorrowExercises.length}{' '}
                       {t('fitness.plan.exercises')}
@@ -783,7 +783,7 @@ function TrainingPlanViewInner({
                         const el = document.querySelector('[data-testid="daily-weight-input"]');
                         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                       }}
-                      className="bg-card/20 hover:bg-card/30 min-h-[44px] rounded-full px-3 py-1.5 text-xs font-medium text-white transition-colors focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+                      className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground focus-visible:ring-primary-foreground/60 min-h-[44px] rounded-full px-3 py-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
                     >
                       {t('fitness.plan.logWeight')}
                     </button>
@@ -791,7 +791,7 @@ function TrainingPlanViewInner({
                       data-testid="quick-log-cardio"
                       type="button"
                       onClick={handleLogCardio}
-                      className="bg-card/20 hover:bg-card/30 min-h-[44px] rounded-full px-3 py-1.5 text-xs font-medium text-white transition-colors focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+                      className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground focus-visible:ring-primary-foreground/60 min-h-[44px] rounded-full px-3 py-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
                     >
                       {t('fitness.plan.logLightCardio')}
                     </button>
@@ -940,12 +940,12 @@ function TrainingPlanViewInner({
           // Expanded non-today rest day
           return (
             <div key={dayNum} data-testid={`day-row-${dayNum}`}>
-              <div className="from-info/80 to-info rounded-2xl bg-gradient-to-br p-4 text-white">
+              <div className="from-info/80 to-info text-primary-foreground rounded-2xl bg-gradient-to-br p-4">
                 <button
                   data-testid={`day-accordion-toggle-${dayNum}`}
                   type="button"
                   onClick={() => handleDaySelect(dayNum)}
-                  className="mb-1 flex min-h-[44px] w-full items-center gap-1.5 text-left text-xs font-medium tracking-wider text-white/80 uppercase"
+                  className="text-primary-foreground/80 mb-1 flex min-h-[44px] w-full items-center gap-1.5 text-left text-xs font-medium tracking-wider uppercase"
                 >
                   <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
                   <span>{DAY_LABELS[i]}</span>
@@ -955,7 +955,7 @@ function TrainingPlanViewInner({
                   <Moon className="h-5 w-5" aria-hidden="true" />
                   <h3 className="text-lg font-semibold">{t('fitness.plan.restDay')}</h3>
                 </div>
-                <ul className="space-y-2 text-sm text-white/90">
+                <ul className="text-primary-foreground/90 space-y-2 text-sm">
                   <li>{t('fitness.plan.restDayTip1')}</li>
                   <li>{t('fitness.plan.restDayTip2')}</li>
                   <li>{t('fitness.plan.restDayTip3')}</li>
@@ -963,7 +963,7 @@ function TrainingPlanViewInner({
                 <button
                   type="button"
                   onClick={() => handleAddWorkoutToDay(dayNum)}
-                  className="bg-card/20 hover:bg-card/30 mt-3 flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-white transition-colors focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:outline-none"
+                  className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground focus-visible:ring-primary-foreground/60 mt-3 flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
                 >
                   <Plus className="h-4 w-4" aria-hidden="true" />
                   {t('fitness.plan.convertToWorkout')}

@@ -236,7 +236,10 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
         </button>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <h1 className="truncate text-xl font-semibold text-white" title={t('fitness.plan.editExercises')}>
+          <h1
+            className="text-primary-foreground truncate text-xl font-semibold"
+            title={t('fitness.plan.editExercises')}
+          >
             {t('fitness.plan.editExercises')}
           </h1>
           {(isModified || hasChanges) && (
@@ -445,7 +448,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
       {pendingRemoval && (
         <output
           aria-live="polite"
-          className="bg-card fixed inset-x-4 bottom-20 z-50 flex items-center justify-between rounded-lg px-4 py-3 text-white shadow-lg"
+          className="bg-primary text-primary-foreground fixed inset-x-4 bottom-20 z-50 flex items-center justify-between rounded-lg px-4 py-3 shadow-lg"
         >
           <span className="text-sm">
             {pendingRemoval.exercise.exercise.nameVi} {t('fitness.plan.exerciseRemoved')}

@@ -50,7 +50,7 @@ export function QuickConfirmCard({
             type="button"
             onClick={() => onConfirm(suggestion)}
             aria-label={t('common.confirm')}
-            className="bg-info focus-visible:ring-ring/50 rounded-lg p-2 text-white focus-visible:ring-3"
+            className="bg-info focus-visible:ring-ring/50 text-primary-foreground rounded-lg p-2 focus-visible:ring-3"
             data-testid="quick-confirm-button"
           >
             <Check className="h-5 w-5" aria-hidden="true" />

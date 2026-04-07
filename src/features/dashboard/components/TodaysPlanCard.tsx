@@ -200,7 +200,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
               size="sm"
               onClick={handleStartWorkout}
               data-testid="start-workout-cta"
-              className="bg-info hover:bg-info/90 mt-2 gap-1 text-white"
+              className="bg-info hover:bg-info/90 text-primary-foreground mt-2 gap-1"
             >
               <Play className="h-3.5 w-3.5" aria-hidden="true" />
               {t('dashboard.todaysPlan.startCta')}
@@ -376,7 +376,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
           size="sm"
           onClick={handleCreatePlan}
           data-testid="create-plan-cta"
-          className="bg-info hover:bg-info/90 gap-1 text-white"
+          className="bg-info hover:bg-info/90 text-primary-foreground gap-1"
         >
           {t('dashboard.todaysPlan.createPlan')}
           <ChevronRight className="h-4 w-4" aria-hidden="true" />

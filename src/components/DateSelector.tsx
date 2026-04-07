@@ -61,7 +61,7 @@ const getDayButtonClass = (
 
 // Helper to get week day label color class
 const getWeekDayLabelClass = (isSelected: boolean, isSunday: boolean): string => {
-  if (isSelected) return 'text-white/80';
+  if (isSelected) return 'text-primary-foreground/80';
   if (isSunday) return 'text-rose';
   return 'text-muted-foreground';
 };

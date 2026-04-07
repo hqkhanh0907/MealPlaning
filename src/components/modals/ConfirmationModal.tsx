@@ -81,7 +81,7 @@ export const ConfirmationModal = ({
             <button
               data-testid="btn-confirm-action"
               onClick={onConfirm}
-              className={`flex-1 ${styles.btnBg} rounded-xl py-3 font-semibold text-white shadow-sm ${styles.btnShadow} ${styles.btnHover} min-h-12 transition-all active:scale-[0.98]`}
+              className={`flex-1 ${styles.btnBg} text-primary-foreground rounded-xl py-3 font-semibold shadow-sm ${styles.btnShadow} ${styles.btnHover} min-h-12 transition-all active:scale-[0.98]`}
             >
               {confirmLabel ?? t('common.confirm')}
             </button>

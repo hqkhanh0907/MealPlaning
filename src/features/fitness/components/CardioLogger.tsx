@@ -126,7 +126,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
           variant="ghost"
           size="sm"
           onClick={onBack}
-          className="hover:bg-card/20 gap-1 text-white hover:text-white"
+          className="hover:bg-primary-foreground/20 text-primary-foreground hover:text-primary-foreground gap-1"
           data-testid="back-button"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
@@ -139,7 +139,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
           variant="ghost"
           size="sm"
           onClick={handleSave}
-          className="hover:bg-card/20 gap-1 text-white hover:text-white"
+          className="hover:bg-primary-foreground/20 text-primary-foreground hover:text-primary-foreground gap-1"
           data-testid="finish-button"
         >
           <span>{t('fitness.logger.finish')}</span>
@@ -236,7 +236,7 @@ export function CardioLogger({ onComplete, onBack }: Readonly<CardioLoggerProps>
                 <Button
                   variant="destructive"
                   onClick={handleStopStopwatch}
-                  className="bg-destructive hover:bg-destructive/90 w-1/3 py-2.5 text-white"
+                  className="bg-destructive hover:bg-destructive/90 text-destructive-foreground w-1/3 py-2.5"
                   data-testid="stop-button"
                 >
                   {t('fitness.cardio.stop')}

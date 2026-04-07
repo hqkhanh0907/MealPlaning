@@ -70,7 +70,7 @@ export function WorkoutSummaryCard({
           type="button"
           onClick={onSave}
           disabled={isSaving}
-          className="bg-info mt-8 w-full max-w-sm rounded-xl py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-info text-primary-foreground mt-8 w-full max-w-sm rounded-xl py-3 font-semibold disabled:cursor-not-allowed disabled:opacity-50"
           data-testid="save-workout-button"
         >
           {isSaving ? (

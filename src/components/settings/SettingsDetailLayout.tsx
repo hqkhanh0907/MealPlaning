@@ -124,7 +124,7 @@ export function SettingsDetailLayout({
               data-testid="settings-detail-save"
               disabled={!hasChanges || isSaving}
               aria-describedby={hasChanges ? undefined : 'settings-save-disabled-reason'}
-              className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition-all ${
+              className={`text-primary-foreground flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all ${
                 hasChanges && !isSaving
                   ? 'bg-primary hover:bg-primary active:scale-[0.98]'
                   : 'bg-muted-foreground/30 cursor-not-allowed'

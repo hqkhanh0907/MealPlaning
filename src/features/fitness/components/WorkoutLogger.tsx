@@ -483,7 +483,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
           variant="ghost"
           size="sm"
           onClick={handleBack}
-          className="hover:bg-card/20 gap-1 text-white transition-colors hover:text-white"
+          className="hover:bg-primary-foreground/20 text-primary-foreground hover:text-primary-foreground gap-1 transition-colors"
           data-testid="back-button"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
@@ -494,7 +494,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
           variant="ghost"
           size="sm"
           onClick={handleFinish}
-          className="hover:bg-card/20 gap-1 text-white transition-colors hover:text-white"
+          className="hover:bg-primary-foreground/20 text-primary-foreground hover:text-primary-foreground gap-1 transition-colors"
           data-testid="finish-button"
         >
           <span>{t('fitness.logger.finish')}</span>

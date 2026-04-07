@@ -302,7 +302,7 @@ function NutritionSectionInner({
           data-testid="nutrition-hero-score"
           aria-label={t('dashboard.nutritionHero.scoreA11y', { score: totalScore })}
         >
-          <span className="text-xs font-bold text-white tabular-nums">{totalScore}</span>
+          <span className="text-primary-foreground text-xs font-bold tabular-nums">{totalScore}</span>
         </div>
       </div>
 

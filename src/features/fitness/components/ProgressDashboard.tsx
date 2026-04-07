@@ -314,7 +314,7 @@ function ProgressDashboardInner() {
     <div data-testid="progress-dashboard" className="space-y-4 pb-4">
       <div
         data-testid="hero-metric-card"
-        className="from-primary/90 to-primary rounded-2xl bg-gradient-to-br p-4 text-white shadow-lg"
+        className="from-primary/90 to-primary text-primary-foreground rounded-2xl bg-gradient-to-br p-4 shadow-lg"
       >
         <p className="text-sm font-medium opacity-80">{t('fitness.progress.volumeThisWeek')}</p>
         <div className="mt-1 flex items-baseline gap-2">
@@ -338,7 +338,7 @@ function ProgressDashboardInner() {
           {sparklineData.map((val, idx) => (
             <div
               key={`item-${String(idx)}`}
-              className="bg-card/30 flex-1 rounded-sm"
+              className="bg-primary-foreground/30 flex-1 rounded-sm"
               style={{
                 height: `${(val / maxSparkline) * 100}%`,
                 minHeight: '2px',
