@@ -337,6 +337,15 @@ describe('DateSelector', () => {
     expect(pulseEls.length).toBeGreaterThanOrEqual(0);
   });
 
+  it('adds aria-current="date" on today button in week view (W7-08)', () => {
+    Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });
+    const todayStr = new Date().toISOString().split('T')[0];
+    // Render with today as selected so today is guaranteed in the week view
+    const { container } = render(<DateSelector selectedDate={todayStr} onSelectDate={vi.fn()} />);
+    const todayButtons = container.querySelectorAll('[aria-current="date"]');
+    expect(todayButtons.length).toBeGreaterThanOrEqual(1);
+  });
+
   it('reads hint dismissed state from database on mount', async () => {
     mockDateHintDismissed = '1';
     Object.defineProperty(globalThis, 'innerWidth', { writable: true, value: 300 });

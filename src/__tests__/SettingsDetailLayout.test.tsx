@@ -173,4 +173,51 @@ describe('SettingsDetailLayout', () => {
     renderLayout({ icon: <span data-testid="custom-icon">🎯</span> });
     expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
   });
+
+  /* ---------------------------------------------------------------- */
+  /* Section quick-jump tabs (W7-04)                                   */
+  /* ---------------------------------------------------------------- */
+  describe('section tabs', () => {
+    const sections = [
+      { id: 'health', label: 'Sức khỏe' },
+      { id: 'goal', label: 'Mục tiêu' },
+      { id: 'training', label: 'Tập luyện' },
+    ];
+
+    it('renders section tabs when sections provided and not editing', () => {
+      renderLayout({ sections, activeSection: 'health' });
+      expect(screen.getByTestId('settings-section-tabs')).toBeInTheDocument();
+      expect(screen.getByTestId('section-tab-health')).toBeInTheDocument();
+      expect(screen.getByTestId('section-tab-goal')).toBeInTheDocument();
+      expect(screen.getByTestId('section-tab-training')).toBeInTheDocument();
+    });
+
+    it('hides section tabs during edit mode', () => {
+      renderLayout({ sections, activeSection: 'health', isEditing: true });
+      expect(screen.queryByTestId('settings-section-tabs')).not.toBeInTheDocument();
+    });
+
+    it('hides section tabs when no sections provided', () => {
+      renderLayout();
+      expect(screen.queryByTestId('settings-section-tabs')).not.toBeInTheDocument();
+    });
+
+    it('marks active tab with aria-selected=true', () => {
+      renderLayout({ sections, activeSection: 'goal' });
+      expect(screen.getByTestId('section-tab-goal')).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByTestId('section-tab-health')).toHaveAttribute('aria-selected', 'false');
+    });
+
+    it('calls onSectionChange when tab clicked', () => {
+      const onSectionChange = vi.fn();
+      renderLayout({ sections, activeSection: 'health', onSectionChange });
+      fireEvent.click(screen.getByTestId('section-tab-goal'));
+      expect(onSectionChange).toHaveBeenCalledWith('goal');
+    });
+
+    it('renders tabs with tablist role', () => {
+      renderLayout({ sections, activeSection: 'health' });
+      expect(screen.getByRole('tablist')).toBeInTheDocument();
+    });
+  });
 });

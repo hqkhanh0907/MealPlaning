@@ -39,6 +39,161 @@ interface DishManagerProps {
 
 const ZERO_NUTRITION: NutritionInfo = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
 
+function compareDishes(
+  a: Dish,
+  b: Dish,
+  s: DishSortOption,
+  nutritionMap: Map<string, NutritionInfo>,
+  lang: SupportedLang,
+): number {
+  const nA = nutritionMap.get(a.id) ?? ZERO_NUTRITION;
+  const nB = nutritionMap.get(b.id) ?? ZERO_NUTRITION;
+  switch (s) {
+    case 'name-asc':
+      return getLocalizedField(a.name, lang).localeCompare(getLocalizedField(b.name, lang));
+    case 'name-desc':
+      return getLocalizedField(b.name, lang).localeCompare(getLocalizedField(a.name, lang));
+    case 'cal-asc':
+      return nA.calories - nB.calories;
+    case 'cal-desc':
+      return nB.calories - nA.calories;
+    case 'pro-asc':
+      return nA.protein - nB.protein;
+    case 'pro-desc':
+      return nB.protein - nA.protein;
+    case 'ing-asc':
+      return a.ingredients.length - b.ingredients.length;
+    case 'ing-desc':
+      return b.ingredients.length - a.ingredients.length;
+    case 'rating-asc':
+      return (a.rating ?? 0) - (b.rating ?? 0);
+    case 'rating-desc':
+      return (b.rating ?? 0) - (a.rating ?? 0);
+  }
+}
+
+interface DishGridCardProps {
+  dish: Dish;
+  nutrition: NutritionInfo;
+  isComparing: boolean;
+  isUsedInPlan: boolean;
+  lang: SupportedLang;
+  tagLabels: Record<string, string>;
+  onToggleCompare: () => void;
+  onView: () => void;
+  onEdit: () => void;
+  onClone: () => void;
+  onDelete: () => void;
+}
+
+function DishGridCard({
+  dish,
+  nutrition,
+  isComparing,
+  isUsedInPlan,
+  lang,
+  tagLabels,
+  onToggleCompare,
+  onView,
+  onEdit,
+  onClone,
+  onDelete,
+}: Readonly<DishGridCardProps>) {
+  const { t } = useTranslation();
+  return (
+    <div
+      className={`group bg-card relative flex w-full flex-col rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${isComparing ? 'border-blue-400 ring-2 ring-blue-100 dark:border-blue-500 dark:ring-blue-900/50' : 'border-border-subtle'}`}
+    >
+      <button
+        data-testid={`btn-compare-${dish.id}`}
+        onClick={onToggleCompare}
+        className={`focus-visible:ring-ring absolute top-3 right-3 z-10 flex h-7 min-h-11 w-7 min-w-11 items-center justify-center rounded-lg border-2 transition-all focus-visible:ring-2 focus-visible:outline-none ${isComparing ? 'border-blue-500 bg-blue-500 text-white' : 'border-border text-transparent hover:border-blue-400 hover:text-blue-400'}`}
+        aria-label={t('dish.compare')}
+      >
+        <GitCompareArrows className="h-4 w-4" />
+      </button>
+      <div className="mb-4 flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div className="text-primary bg-primary-subtle flex h-10 w-10 items-center justify-center rounded-xl">
+            <ChefHat className="h-5 w-5" />
+          </div>
+          <div>
+            <button
+              type="button"
+              onClick={onView}
+              className="focus-visible:ring-ring text-foreground cursor-pointer rounded text-left text-lg font-semibold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            >
+              {getLocalizedField(dish.name, lang)}
+            </button>
+            <p className="text-muted-foreground text-xs font-medium">
+              {dish.ingredients.length} {t('dish.ingredients')}
+            </p>
+            {dish.tags && dish.tags.length > 0 && (
+              <div className="mt-1 flex flex-wrap gap-1">
+                {dish.tags.map(tag => {
+                  const TagIcon = MEAL_TYPE_ICONS[tag];
+                  return (
+                    <span
+                      key={tag}
+                      className="text-muted-foreground bg-muted inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-semibold"
+                    >
+                      {TagIcon && <TagIcon className={`size-3 ${MEAL_TYPE_ICON_COLORS[tag]}`} aria-hidden="true" />}
+                      {tagLabels[tag]}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      {dish.rating != null && dish.rating > 0 && (
+        <div className="mb-2 flex items-center gap-0.5" data-testid={`dish-rating-${dish.id}`}>
+          {[1, 2, 3, 4, 5].map(s => (
+            <span key={s} className={`text-sm ${s <= dish.rating! ? 'text-energy' : 'text-muted'}`}>
+              ★
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="mb-4 grid grid-cols-2 gap-2">
+        <div className="bg-primary-subtle flex items-center justify-between rounded-lg p-2">
+          <span className="text-primary text-xs font-semibold uppercase">{t('common.calories')}</span>
+          <span className="text-primary-emphasis text-sm font-semibold">{Math.round(nutrition.calories)}</span>
+        </div>
+        <div className="bg-macro-carbs-subtle flex items-center justify-between rounded-lg p-2">
+          <span className="text-macro-protein text-xs font-semibold uppercase">{t('common.protein')}</span>
+          <span className="text-macro-protein text-sm font-semibold">{Math.round(nutrition.protein)}g</span>
+        </div>
+      </div>
+      <div className="border-border relative z-10 mt-auto flex items-center gap-4 border-t pt-4">
+        <button
+          data-testid={`btn-clone-dish-${dish.id}`}
+          onClick={onClone}
+          className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none"
+        >
+          <Copy className="h-4 w-4" /> {t('dish.duplicate')}
+        </button>
+        <button
+          data-testid={`btn-edit-dish-${dish.id}`}
+          onClick={onEdit}
+          className="text-muted-foreground hover:bg-primary-subtle hover:text-primary focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none"
+        >
+          <Edit3 className="h-4 w-4" /> {t('common.edit')}
+        </button>
+        <button
+          data-testid={`btn-delete-dish-${dish.id}`}
+          onClick={onDelete}
+          disabled={isUsedInPlan}
+          className={`focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsedInPlan ? 'dark:text-muted-foreground text-muted-foreground' : 'text-destructive/70 hover:bg-destructive/10 hover:text-destructive'}`}
+        >
+          <Trash2 className="h-4 w-4" /> {t('common.delete')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export const DishManager = ({
   dishes,
   ingredients,
@@ -71,16 +226,16 @@ export const DishManager = ({
   const toggleCompare = useCallback(
     (id: string) => {
       setCompareIds(prev => {
-        const next = new Set(prev);
-        if (next.has(id)) {
+        if (prev.has(id)) {
+          const next = new Set(prev);
           next.delete(id);
-        } else if (next.size < MAX_COMPARE) {
-          next.add(id);
-        } else {
+          return next;
+        }
+        if (prev.size >= MAX_COMPARE) {
           notify.warning(t('dish.maxCompare'));
           return prev;
         }
-        return next;
+        return new Set(prev).add(id);
       });
     },
     [notify, t],
@@ -111,32 +266,7 @@ export const DishManager = ({
   }, [dishes, ingredients]);
 
   const sortFn = useCallback(
-    (a: Dish, b: Dish, s: DishSortOption) => {
-      const nA = nutritionMap.get(a.id) ?? ZERO_NUTRITION;
-      const nB = nutritionMap.get(b.id) ?? ZERO_NUTRITION;
-      switch (s) {
-        case 'name-asc':
-          return getLocalizedField(a.name, lang).localeCompare(getLocalizedField(b.name, lang));
-        case 'name-desc':
-          return getLocalizedField(b.name, lang).localeCompare(getLocalizedField(a.name, lang));
-        case 'cal-asc':
-          return nA.calories - nB.calories;
-        case 'cal-desc':
-          return nB.calories - nA.calories;
-        case 'pro-asc':
-          return nA.protein - nB.protein;
-        case 'pro-desc':
-          return nB.protein - nA.protein;
-        case 'ing-asc':
-          return a.ingredients.length - b.ingredients.length;
-        case 'ing-desc':
-          return b.ingredients.length - a.ingredients.length;
-        case 'rating-asc':
-          return (a.rating ?? 0) - (b.rating ?? 0);
-        case 'rating-desc':
-          return (b.rating ?? 0) - (a.rating ?? 0);
-      }
-    },
+    (a: Dish, b: Dish, s: DishSortOption) => compareDishes(a, b, s, nutritionMap, lang),
     [nutritionMap, lang],
   );
   const extraFilter = useCallback((d: Dish) => !filterTag || (d.tags?.includes(filterTag) ?? false), [filterTag]);
@@ -150,13 +280,13 @@ export const DishManager = ({
   });
 
   // --- Domain handlers ---
+  // --- Domain handlers ---
   const handleDishSubmit = useCallback(
     (dish: Dish) => {
       if (modal.editingItem) onUpdate(dish);
       else onAdd(dish);
       if (clonePrefill) {
-        const displayName = getLocalizedField(dish.name, lang);
-        notify.success(t('dish.duplicated'), t('dish.duplicatedDesc', { name: displayName }));
+        notify.success(t('dish.duplicated'), t('dish.duplicatedDesc', { name: getLocalizedField(dish.name, lang) }));
         setClonePrefill(null);
       }
       modal.afterSubmit(dish);
@@ -183,19 +313,18 @@ export const DishManager = ({
     const deleted = dishes.find(d => d.id === dishId);
     onDelete(dishId);
     setDeleteConfirmation({ ...deleteConfirmation, isOpen: false });
-    if (deleted) {
-      const displayName = getLocalizedField(deleted.name, lang);
-      notify.info(t('dish.deleted'), t('dish.deletedDesc', { name: displayName }), {
-        duration: UNDO_TOAST_DURATION_MS,
-        action: {
-          label: t('common.undo'),
-          onClick: () => {
-            onAdd(deleted);
-            notify.success(t('common.undone'), t('dish.restoredDesc', { name: displayName }));
-          },
+    if (!deleted) return;
+    const displayName = getLocalizedField(deleted.name, lang);
+    notify.info(t('dish.deleted'), t('dish.deletedDesc', { name: displayName }), {
+      duration: UNDO_TOAST_DURATION_MS,
+      action: {
+        label: t('common.undo'),
+        onClick: () => {
+          onAdd(deleted);
+          notify.success(t('common.undone'), t('dish.restoredDesc', { name: displayName }));
         },
-      });
-    }
+      },
+    });
   };
 
   const handleClone = useCallback(
@@ -216,7 +345,15 @@ export const DishManager = ({
   );
 
   // --- Render helpers ---
-  const emptyIcon = <ChefHat className="text-primary/40 h-6 w-6" />;
+  const isSearching = !!list.searchQuery;
+  const emptyStateProps = {
+    variant: isSearching ? ('compact' as const) : ('hero' as const),
+    icon: ChefHat,
+    title: isSearching ? t('emptyState.searchEmpty') : t('emptyState.dish.title'),
+    description: isSearching ? undefined : t('emptyState.dish.description'),
+    actionLabel: isSearching ? undefined : t('emptyState.dish.action'),
+    onAction: isSearching ? undefined : () => modal.openEdit(),
+  };
 
   return (
     <div data-testid="dish-manager" className="space-y-6">
@@ -269,116 +406,23 @@ export const DishManager = ({
       {/* Grid View */}
       {list.viewLayout === 'grid' && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {list.filteredItems.map(dish => {
-            const nutrition = nutritionMap.get(dish.id) ?? ZERO_NUTRITION;
-            return (
-              <div
-                key={dish.id}
-                className={`group bg-card relative flex w-full flex-col rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${compareIds.has(dish.id) ? 'border-blue-400 ring-2 ring-blue-100 dark:border-blue-500 dark:ring-blue-900/50' : 'border-border-subtle'}`}
-              >
-                <button
-                  data-testid={`btn-compare-${dish.id}`}
-                  onClick={() => toggleCompare(dish.id)}
-                  className={`focus-visible:ring-ring absolute top-3 right-3 z-10 flex h-7 min-h-11 w-7 min-w-11 items-center justify-center rounded-lg border-2 transition-all focus-visible:ring-2 focus-visible:outline-none ${compareIds.has(dish.id) ? 'border-blue-500 bg-blue-500 text-white' : 'border-border text-transparent hover:border-blue-400 hover:text-blue-400'}`}
-                  aria-label={t('dish.compare')}
-                >
-                  <GitCompareArrows className="h-4 w-4" />
-                </button>
-                <div className="mb-4 flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="text-primary bg-primary-subtle flex h-10 w-10 items-center justify-center rounded-xl">
-                      <ChefHat className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <button
-                        type="button"
-                        onClick={() => modal.openView(dish)}
-                        className="focus-visible:ring-ring text-foreground cursor-pointer rounded text-left text-lg font-semibold after:absolute after:inset-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                      >
-                        {getLocalizedField(dish.name, lang)}
-                      </button>
-                      <p className="text-muted-foreground text-xs font-medium">
-                        {dish.ingredients.length} {t('dish.ingredients')}
-                      </p>
-                      {dish.tags && dish.tags.length > 0 && (
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          {dish.tags.map(tag => {
-                            const TagIcon = MEAL_TYPE_ICONS[tag];
-                            return (
-                              <span
-                                key={tag}
-                                className="text-muted-foreground bg-muted inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-xs font-semibold"
-                              >
-                                {TagIcon && (
-                                  <TagIcon className={`size-3 ${MEAL_TYPE_ICON_COLORS[tag]}`} aria-hidden="true" />
-                                )}
-                                {tagLabels[tag]}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                {dish.rating && dish.rating > 0 && (
-                  <div className="mb-2 flex items-center gap-0.5" data-testid={`dish-rating-${dish.id}`}>
-                    {[1, 2, 3, 4, 5].map(s => (
-                      <span key={s} className={`text-sm ${s <= dish.rating! ? 'text-energy' : 'text-muted'}`}>
-                        ★
-                      </span>
-                    ))}
-                  </div>
-                )}
-                <div className="mb-4 grid grid-cols-2 gap-2">
-                  <div className="bg-primary-subtle flex items-center justify-between rounded-lg p-2">
-                    <span className="text-primary text-xs font-semibold uppercase">{t('common.calories')}</span>
-                    <span className="text-primary-emphasis text-sm font-semibold">
-                      {Math.round(nutrition.calories)}
-                    </span>
-                  </div>
-                  <div className="bg-macro-carbs-subtle flex items-center justify-between rounded-lg p-2">
-                    <span className="text-macro-protein text-xs font-semibold uppercase">{t('common.protein')}</span>
-                    <span className="text-macro-protein text-sm font-semibold">{Math.round(nutrition.protein)}g</span>
-                  </div>
-                </div>
-                <div className="border-border relative z-10 mt-auto flex items-center gap-4 border-t pt-4">
-                  <button
-                    data-testid={`btn-clone-dish-${dish.id}`}
-                    onClick={() => handleClone(dish)}
-                    className="text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    <Copy className="h-4 w-4" /> {t('dish.duplicate')}
-                  </button>
-                  <button
-                    data-testid={`btn-edit-dish-${dish.id}`}
-                    onClick={() => modal.openEdit(dish)}
-                    className="text-muted-foreground hover:bg-primary-subtle hover:text-primary focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    <Edit3 className="h-4 w-4" /> {t('common.edit')}
-                  </button>
-                  <button
-                    data-testid={`btn-delete-dish-${dish.id}`}
-                    onClick={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
-                    disabled={isUsed(dish.id)}
-                    className={`focus-visible:ring-ring flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold transition-all focus-visible:ring-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 ${isUsed(dish.id) ? 'dark:text-muted-foreground text-muted-foreground' : 'text-destructive/70 hover:bg-destructive/10 hover:text-destructive'}`}
-                  >
-                    <Trash2 className="h-4 w-4" /> {t('common.delete')}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-          {list.filteredItems.length === 0 && (
-            <EmptyState
-              icon={emptyIcon}
-              searchQuery={list.searchQuery}
-              entityName={t('dish.title').toLowerCase()}
-              actionLabel={t('dish.addNew')}
-              onAction={() => modal.openEdit()}
-              className="col-span-full"
+          {list.filteredItems.map(dish => (
+            <DishGridCard
+              key={dish.id}
+              dish={dish}
+              nutrition={nutritionMap.get(dish.id) ?? ZERO_NUTRITION}
+              isComparing={compareIds.has(dish.id)}
+              isUsedInPlan={isUsed(dish.id)}
+              lang={lang}
+              tagLabels={tagLabels}
+              onToggleCompare={() => toggleCompare(dish.id)}
+              onView={() => modal.openView(dish)}
+              onEdit={() => modal.openEdit(dish)}
+              onClone={() => handleClone(dish)}
+              onDelete={() => handleDelete(dish.id, getLocalizedField(dish.name, lang))}
             />
-          )}
+          ))}
+          {list.filteredItems.length === 0 && <EmptyState {...emptyStateProps} className="col-span-full" />}
         </div>
       )}
 
@@ -566,15 +610,7 @@ export const DishManager = ({
               );
             })}
           </div>
-          {list.filteredItems.length === 0 && (
-            <EmptyState
-              icon={emptyIcon}
-              searchQuery={list.searchQuery}
-              entityName={t('dish.title').toLowerCase()}
-              actionLabel={t('dish.addNew')}
-              onAction={() => modal.openEdit()}
-            />
-          )}
+          {list.filteredItems.length === 0 && <EmptyState {...emptyStateProps} />}
         </div>
       )}
 

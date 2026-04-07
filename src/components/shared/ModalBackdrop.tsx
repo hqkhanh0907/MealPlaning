@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ModalBackdropProps {
@@ -58,6 +58,39 @@ export const ModalBackdrop = ({ onClose, zIndex = 'z-50', children }: ModalBackd
   onCloseRef.current = onClose;
   const contentRef = React.useRef<HTMLDivElement>(null);
   const previousFocusRef = React.useRef<HTMLElement | null>(null);
+
+  const dragStartY = useRef(0);
+  const dragDeltaY = useRef(0);
+  const isDragging = useRef(false);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    dragStartY.current = e.touches[0].clientY;
+    isDragging.current = true;
+    if (contentRef.current) {
+      contentRef.current.style.transition = 'none';
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isDragging.current) return;
+    const delta = Math.max(0, e.touches[0].clientY - dragStartY.current);
+    dragDeltaY.current = delta;
+    if (contentRef.current) {
+      contentRef.current.style.transform = `translateY(${delta}px)`;
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    if (dragDeltaY.current > 100) {
+      onCloseRef.current();
+    } else if (contentRef.current) {
+      contentRef.current.style.transition = 'transform 0.2s ease-out';
+      contentRef.current.style.transform = '';
+    }
+    dragDeltaY.current = 0;
+  }, []);
 
   useEffect(() => {
     // Only apply the iOS-safe position:fixed lock when this is the first
@@ -134,7 +167,7 @@ export const ModalBackdrop = ({ onClose, zIndex = 'z-50', children }: ModalBackd
   return (
     <dialog
       open
-      className={`bg-background/50 fixed inset-0 flex h-full w-full items-end justify-center backdrop-blur-sm sm:items-center ${zIndex} pb-safe m-0 max-h-none max-w-none border-none px-0 pt-0 sm:p-0`}
+      className={`bg-background/50 fixed inset-0 flex flex-col items-center justify-end backdrop-blur-sm sm:justify-center ${zIndex} pb-safe m-0 max-h-none max-w-none border-none px-0 pt-0 sm:p-0`}
       aria-modal="true"
     >
       <button
@@ -144,8 +177,15 @@ export const ModalBackdrop = ({ onClose, zIndex = 'z-50', children }: ModalBackd
         onClick={onClose}
         tabIndex={-1}
       />
-      <div ref={contentRef} className="contents">
-        {children}
+      <div ref={contentRef} className="pointer-events-none relative flex w-full flex-col items-stretch sm:items-center">
+        <div
+          data-testid="modal-grab-handle"
+          className="bg-muted-foreground/30 pointer-events-auto mx-auto mt-2 mb-1 h-1 w-8 cursor-grab rounded-full active:cursor-grabbing sm:hidden"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        />
+        <div className="pointer-events-auto">{children}</div>
       </div>
     </dialog>
   );

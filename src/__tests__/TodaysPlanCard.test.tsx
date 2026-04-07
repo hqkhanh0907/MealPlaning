@@ -288,7 +288,9 @@ describe('TodaysPlanCard', () => {
       render(<TodaysPlanCard />);
 
       const tips = screen.getByTestId('recovery-tips');
-      expect(tips).toHaveTextContent('Ngủ đủ giấc và uống đủ nước');
+      expect(tips).toBeInTheDocument();
+      const svgs = tips.querySelectorAll('svg');
+      expect(svgs.length).toBeGreaterThanOrEqual(1);
     });
 
     it('renders tomorrow preview', () => {
@@ -350,6 +352,40 @@ describe('TodaysPlanCard', () => {
 
       expect(screen.queryByTestId('start-workout-cta')).not.toBeInTheDocument();
       expect(screen.queryByTestId('continue-session-cta')).not.toBeInTheDocument();
+    });
+
+    it('renders streak count when user has consecutive workout days', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [
+          makePlanDay({ dayOfWeek: 1 }),
+          makePlanDay({
+            id: 'day-thu',
+            dayOfWeek: 4,
+            workoutType: 'Lower Body A',
+            muscleGroups: 'quads, hamstrings',
+          }),
+        ],
+        workouts: [makeWorkout({ id: 'w-mon', date: '2025-01-13' }), makeWorkout({ id: 'w-tue', date: '2025-01-14' })],
+      });
+
+      render(<TodaysPlanCard />);
+
+      const streak = screen.getByTestId('streak-count');
+      expect(streak).toHaveTextContent('Chuỗi tập: 2 ngày');
+    });
+
+    it('does not render streak when no consecutive workout days', () => {
+      render(<TodaysPlanCard />);
+
+      expect(screen.queryByTestId('streak-count')).not.toBeInTheDocument();
+    });
+
+    it('uses bg-accent-subtle background for rest day card', () => {
+      render(<TodaysPlanCard />);
+
+      const card = screen.getByTestId('todays-plan-card');
+      expect(card.className).toContain('bg-accent-subtle');
     });
   });
 

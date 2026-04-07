@@ -42,6 +42,7 @@ export interface TodaysPlanData {
   completedSessions: number;
   todayPlanDays: TrainingPlanDay[];
   nextUncompletedSession?: TrainingPlanDay;
+  currentStreak: number;
 }
 
 export function determineTodayPlanState(
@@ -86,6 +87,19 @@ function estimateDurationMinutes(exercises: SelectedExercise[]): number {
 }
 
 const TOTAL_MEALS_PLANNED = 3;
+
+function computeCurrentStreak(workouts: Workout[], todayStr: string): number {
+  const workoutDates = new Set(workouts.map(w => w.date));
+  let streak = 0;
+  const date = new Date(todayStr + 'T00:00:00');
+  date.setDate(date.getDate() - 1);
+
+  while (workoutDates.has(formatDateToISO(date))) {
+    streak++;
+    date.setDate(date.getDate() - 1);
+  }
+  return streak;
+}
 
 interface DayPlanMeals {
   breakfastDishIds: string[];
@@ -154,6 +168,8 @@ export function useTodaysPlan(): TodaysPlanData {
   // useShallow + filter: only re-renders when today's workouts actually change
   const todayWorkouts = useFitnessStore(useShallow(s => s.workouts.filter(w => w.date === todayStr)));
 
+  const allWorkouts = useFitnessStore(s => s.workouts);
+
   const dayPlans = useDayPlanStore(s => s.dayPlans);
 
   const planDays = activePlan ? trainingPlanDays.filter(d => d.planId === activePlan.id) : [];
@@ -183,6 +199,8 @@ export function useTodaysPlan(): TodaysPlanData {
 
   const completedSessionCount = todayPlanDays.filter(d => todayWorkouts.some(w => w.planDayId === d.id)).length;
 
+  const currentStreak = computeCurrentStreak(allWorkouts, todayStr);
+
   return {
     state,
     workoutType: primaryPlanDay?.workoutType,
@@ -202,5 +220,6 @@ export function useTodaysPlan(): TodaysPlanData {
     completedSessions: completedSessionCount,
     todayPlanDays,
     nextUncompletedSession: todayPlanDays.find(d => !todayWorkouts.some(w => w.planDayId === d.id)),
+    currentStreak,
   };
 }

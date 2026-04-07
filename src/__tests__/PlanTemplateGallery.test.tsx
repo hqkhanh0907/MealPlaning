@@ -313,7 +313,7 @@ describe('PlanTemplateGallery', () => {
     fireEvent.click(screen.getByTestId('save-template-confirm'));
 
     await waitFor(() => {
-      expect(mockNotify.error).toHaveBeenCalledWith('Lưu template thất bại. Vui lòng thử lại.');
+      expect(mockNotify.error).toHaveBeenCalledWith('Chưa lưu template được. Thử lại nhé!');
     });
   });
 

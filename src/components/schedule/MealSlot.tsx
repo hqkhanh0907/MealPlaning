@@ -147,12 +147,16 @@ export const MealSlot = React.memo(function MealSlot({
         )}
       </div>
 
-      <div className="border-border flex flex-wrap gap-2 border-t pt-2">
-        <span className="bg-primary-subtle text-primary rounded px-2 py-0.5 text-xs font-semibold uppercase tabular-nums">
-          {Math.round(slot.calories)} kcal
+      <div className="border-border flex flex-wrap items-center gap-2 border-t pt-2">
+        <span className="text-energy-emphasis text-sm font-bold tabular-nums">{Math.round(slot.calories)} kcal</span>
+        <span className="bg-macro-protein/10 text-macro-protein rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums">
+          P {Math.round(slot.protein)}g
         </span>
-        <span className="bg-info/10 text-info rounded px-2 py-0.5 text-xs font-semibold uppercase tabular-nums">
-          {Math.round(slot.protein)}g Pro
+        <span className="bg-macro-fat/10 text-macro-fat rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums">
+          F {Math.round(slot.fat)}g
+        </span>
+        <span className="bg-macro-carbs/10 text-macro-carbs rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums">
+          C {Math.round(slot.carbs)}g
         </span>
       </div>
     </div>

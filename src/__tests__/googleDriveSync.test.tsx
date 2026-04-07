@@ -119,7 +119,7 @@ describe('GoogleDriveSync', () => {
       await act(async () => {
         fireEvent.click(screen.getByTestId('btn-google-sign-in'));
       });
-      expect(mockNotify.error).toHaveBeenCalledWith('Đăng nhập thất bại. Vui lòng thử lại.');
+      expect(mockNotify.error).toHaveBeenCalledWith('Chưa đăng nhập được. Thử lại nhé!');
     });
 
     it('disables sign-in button when auth is loading', () => {
@@ -234,7 +234,7 @@ describe('GoogleDriveSync', () => {
         fireEvent.click(screen.getByTestId('btn-upload-drive'));
       });
 
-      expect(mockNotify.error).toHaveBeenCalledWith('Tải lên thất bại. Vui lòng thử lại.');
+      expect(mockNotify.error).toHaveBeenCalledWith('Chưa tải lên được. Thử lại nhé!');
     });
 
     it('shows last sync time after successful upload', async () => {
@@ -347,7 +347,7 @@ describe('GoogleDriveSync', () => {
         fireEvent.click(screen.getByTestId('btn-download-drive'));
       });
 
-      expect(mockNotify.error).toHaveBeenCalledWith('Tải xuống thất bại. Vui lòng thử lại.');
+      expect(mockNotify.error).toHaveBeenCalledWith('Chưa tải xuống được. Thử lại nhé!');
     });
 
     it('does not download when accessToken is null', async () => {
@@ -521,7 +521,7 @@ describe('GoogleDriveSync', () => {
         fireEvent.click(screen.getByTestId('btn-use-cloud'));
       });
 
-      expect(mockNotify.error).toHaveBeenCalledWith('Tải xuống thất bại. Vui lòng thử lại.');
+      expect(mockNotify.error).toHaveBeenCalledWith('Chưa tải xuống được. Thử lại nhé!');
       expect(screen.queryByTestId('sync-conflict-modal')).not.toBeInTheDocument();
     });
   });

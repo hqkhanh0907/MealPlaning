@@ -1288,6 +1288,24 @@ describe('DishEditModal', () => {
     expect(screen.getByTestId('star-5')).toBeInTheDocument();
   });
 
+  it('renders rating label, hint, and ARIA roles (W7-05)', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    expect(screen.getByText('Đánh giá mức yêu thích')).toBeInTheDocument();
+    expect(screen.getByTestId('dish-rating-hint')).toHaveTextContent('1★ = Ít thích, 5★ = Rất thích');
+    const group = screen.getByTestId('dish-rating');
+    expect(group.tagName).toBe('FIELDSET');
+    expect(group).toHaveAttribute('aria-label', 'Đánh giá mức yêu thích');
+    const star3 = screen.getByTestId('star-3');
+    expect(star3).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('updates aria-pressed on star selection (W7-05)', () => {
+    render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
+    fireEvent.click(screen.getByTestId('star-3'));
+    expect(screen.getByTestId('star-3')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTestId('star-4')).toHaveAttribute('aria-pressed', 'false');
+  });
+
   it('sets and clears rating via star clicks', () => {
     render(<DishEditModal editingItem={null} ingredients={ingredients} onSubmit={onSubmit} onClose={onClose} />);
     fireEvent.click(screen.getByTestId('star-3'));

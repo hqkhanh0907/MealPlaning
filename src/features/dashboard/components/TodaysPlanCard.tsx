@@ -1,4 +1,5 @@
 import {
+  BatteryCharging,
   Check,
   CheckCircle,
   ChevronRight,
@@ -27,6 +28,21 @@ const MEAL_SLOT_I18N: Record<MealSlotInfo['type'], string> = {
 };
 
 const CARD_CLASS = 'bg-card rounded-2xl shadow-md border border-border-subtle p-3';
+
+const RECOVERY_TIP_KEYS = [
+  'dashboard.todaysPlan.recoveryTip1',
+  'dashboard.todaysPlan.recoveryTip2',
+  'dashboard.todaysPlan.recoveryTip3',
+  'dashboard.todaysPlan.recoveryTip4',
+  'dashboard.todaysPlan.recoveryTip5',
+] as const;
+
+function getDayOfYear(): number {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now.getTime() - start.getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
 
 function SessionInfo({
   totalSessions,
@@ -282,10 +298,14 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
   }
 
   if (data.state === 'rest-day') {
+    const tipKey = RECOVERY_TIP_KEYS[getDayOfYear() % RECOVERY_TIP_KEYS.length];
     return (
       <>
-        <div data-testid="todays-plan-card" className={CARD_CLASS}>
-          <h3 className="text-foreground mb-2 text-sm font-semibold">{t('dashboard.todaysPlan.restDayTitle')}</h3>
+        <div data-testid="todays-plan-card" className={`${CARD_CLASS} bg-accent-subtle`}>
+          <div className="mb-2 flex items-center gap-2">
+            <BatteryCharging className="text-primary h-5 w-5" aria-hidden="true" />
+            <h3 className="text-foreground text-sm font-semibold">{t('dashboard.todaysPlan.restDayTitle')}</h3>
+          </div>
           <div className="flex items-start gap-3">
             <div className="min-w-0 flex-1">
               <div data-testid="recovery-tips">
@@ -293,7 +313,7 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
                   <span aria-hidden="true">
                     <Footprints className="mr-1 inline-block size-4" />
                   </span>
-                  {t('dashboard.todaysPlan.recoveryTip1')}
+                  {t(tipKey)}
                 </p>
               </div>
               <div data-testid="tomorrow-preview" className="mt-1.5">
@@ -310,6 +330,11 @@ const TodaysPlanCard = React.memo(function TodaysPlanCard() {
                   <p className="text-muted-foreground text-sm">{t('dashboard.todaysPlan.tomorrowRest')}</p>
                 )}
               </div>
+              {data.currentStreak > 0 && (
+                <p data-testid="streak-count" className="text-primary mt-1 text-xs font-medium">
+                  {t('dashboard.todaysPlan.streak', { count: data.currentStreak })}
+                </p>
+              )}
             </div>
           </div>
           <div className="border-border-subtle mt-2 border-t pt-2">

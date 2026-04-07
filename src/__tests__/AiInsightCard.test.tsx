@@ -107,10 +107,10 @@ describe('AiInsightCard', () => {
     });
 
     it('aria-label includes type label for alert', () => {
-      mockInsight = makeInsight({ type: 'alert', color: 'dark-amber', title: 'Cảnh báo' });
+      mockInsight = makeInsight({ type: 'alert', color: 'dark-amber', title: 'Lưu ý' });
       render(<AiInsightCard />);
       const region = screen.getByRole('region');
-      expect(region).toHaveAttribute('aria-label', 'Cảnh báo: Cảnh báo');
+      expect(region).toHaveAttribute('aria-label', 'Lưu ý: Lưu ý');
     });
 
     it('dismiss button has aria-label', () => {
@@ -412,7 +412,7 @@ describe('AiInsightCard', () => {
   describe('Icon mapping', () => {
     const iconCases: Array<{ type: Insight['type']; typeLabel: string }> = [
       { type: 'adjust', typeLabel: 'Điều chỉnh' },
-      { type: 'alert', typeLabel: 'Cảnh báo' },
+      { type: 'alert', typeLabel: 'Lưu ý' },
       { type: 'action', typeLabel: 'Hành động' },
       { type: 'remind', typeLabel: 'Nhắc nhở' },
       { type: 'motivate', typeLabel: 'Động lực' },

@@ -122,7 +122,7 @@ describe('DataBackup', () => {
     fireEvent.click(screen.getByText('Xuất dữ liệu'));
 
     await waitFor(() => {
-      expect(mockNotify.error).toHaveBeenCalledWith('Xuất thất bại', expect.any(String));
+      expect(mockNotify.error).toHaveBeenCalledWith('Chưa xuất được. Thử lại nhé!', expect.any(String));
     });
   });
 
@@ -135,7 +135,7 @@ describe('DataBackup', () => {
       await new Promise(r => setTimeout(r, 50));
     });
 
-    expect(mockNotify.error).toHaveBeenCalledWith('Xuất thất bại', expect.any(String));
+    expect(mockNotify.error).toHaveBeenCalledWith('Chưa xuất được. Thử lại nhé!', expect.any(String));
   });
 
   it('imports valid SQLite file', async () => {

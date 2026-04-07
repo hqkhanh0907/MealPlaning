@@ -1357,7 +1357,7 @@ describe('WorkoutLogger', () => {
       fireEvent.click(screen.getByTestId('save-workout-button'));
     });
 
-    expect(mockNotify.error).toHaveBeenCalledWith('Lưu buổi tập thất bại. Vui lòng thử lại.');
+    expect(mockNotify.error).toHaveBeenCalledWith('Chưa lưu buổi tập được. Thử lại nhé!');
     // Should NOT have navigated away
     expect(onComplete).not.toHaveBeenCalled();
   });

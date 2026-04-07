@@ -133,7 +133,7 @@ describe('AIImageAnalyzer', () => {
     fireEvent.click(screen.getByText('Phân tích món ăn'));
 
     await waitFor(() => {
-      expect(mockNotify.error).toHaveBeenCalledWith('Phân tích thất bại', expect.any(String));
+      expect(mockNotify.error).toHaveBeenCalledWith('Chưa phân tích được. Thử lại nhé!', expect.any(String));
     });
   });
 

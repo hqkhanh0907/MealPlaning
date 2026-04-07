@@ -479,12 +479,19 @@ export const DishEditModal = ({
             {/* Rating & Notes */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <p className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">{t('dish.rating')}</p>
-                <div className="flex gap-1" data-testid="dish-rating">
+                <p className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">
+                  {t('dish.ratingLabel')}
+                </p>
+                <fieldset
+                  className="m-0 flex gap-1 border-0 p-0"
+                  data-testid="dish-rating"
+                  aria-label={t('dish.ratingLabel')}
+                >
                   {[1, 2, 3, 4, 5].map(star => (
                     <button
                       key={star}
                       type="button"
+                      aria-pressed={watchedRating === star}
                       data-testid={`star-${star}`}
                       onClick={() => setValue('rating', watchedRating === star ? 0 : star, { shouldDirty: true })}
                       className={`flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1 text-2xl transition-all ${star <= watchedRating ? 'text-energy' : 'text-muted-foreground hover:text-energy/70'}`}
@@ -493,7 +500,10 @@ export const DishEditModal = ({
                       ★
                     </button>
                   ))}
-                </div>
+                </fieldset>
+                <p className="text-muted-foreground mt-1 text-xs" data-testid="dish-rating-hint">
+                  {t('dish.ratingHint')}
+                </p>
               </div>
               <div>
                 <p className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">{t('dish.notes')}</p>

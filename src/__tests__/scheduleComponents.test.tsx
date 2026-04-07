@@ -75,7 +75,7 @@ describe('MealSlot', () => {
     render(<MealSlot type="breakfast" slot={makeSlot(['d1'], 400, 20)} dishes={dishes} onEdit={vi.fn()} />);
     expect(screen.getByText('Trứng chiên')).toBeInTheDocument();
     expect(screen.getByText('400 kcal')).toBeInTheDocument();
-    expect(screen.getByText('20g Pro')).toBeInTheDocument();
+    expect(screen.getByText(/P 20g/)).toBeInTheDocument();
   });
 
   it('renders "+N món nữa" when more than 2 dishes', () => {

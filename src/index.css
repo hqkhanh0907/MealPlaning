@@ -79,6 +79,11 @@
   --macro-carbs-emphasis: oklch(0.488 0.243 264.06); /* Blue-700 #1D4ED8 */
   --macro-carbs-subtle: oklch(0.97 0.014 254.6); /* Blue-50 #EFF6FF */
 
+  /* ── Meal type colors ── */
+  --meal-breakfast: oklch(0.795 0.184 86.047); /* amber-400 */
+  --meal-lunch: oklch(0.685 0.169 237.323); /* sky-500 */
+  --meal-dinner: oklch(0.585 0.233 277.117); /* indigo-500 */
+
   /* ── Accent highlight (strong accent for badges, chips, CTA phụ) ── */
   --accent-highlight: oklch(0.606 0.25 292.72); /* Violet-500 #8B5CF6 */
   --accent-highlight-foreground: oklch(1 0 0); /* White */
@@ -144,14 +149,20 @@ html {
 @keyframes pulse-subtle {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    box-shadow: 0 0 0 0 oklch(from var(--primary) l c h / 0.3);
   }
   50% {
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
+    box-shadow: 0 0 0 4px oklch(from var(--primary) l c h / 0);
   }
 }
 .animate-pulse-subtle {
   animation: pulse-subtle 2s ease-in-out 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-subtle {
+    animation: none;
+  }
 }
 
 /* Hide browser default number input spinners */
@@ -240,6 +251,11 @@ input[type='number'] {
   --color-compare-active: var(--compare-active);
   --color-compare-default: var(--compare-default);
 
+  /* ── Meal type color utilities ── */
+  --color-meal-breakfast: var(--meal-breakfast);
+  --color-meal-lunch: var(--meal-lunch);
+  --color-meal-dinner: var(--meal-dinner);
+
   /* ── Border radius scale ── */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -314,6 +330,11 @@ input[type='number'] {
   --color-rose-subtle: oklch(0.31 0.06 17); /* Rose-950 */
   --destructive-subtle: oklch(0.31 0.06 24); /* Red-950 */
   --macro-carbs-subtle: oklch(0.31 0.06 265); /* Blue-950 */
+
+  /* ── Meal type colors dark mode ── */
+  --meal-breakfast: oklch(0.666 0.179 58.318); /* amber-600 */
+  --meal-lunch: oklch(0.588 0.158 241.966); /* sky-600 */
+  --meal-dinner: oklch(0.511 0.262 276.966); /* indigo-600 */
 
   --shadow-glow: 0 2px 6px oklch(0.765 0.177 163.22 / 0.3);
 }

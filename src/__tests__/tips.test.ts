@@ -73,7 +73,7 @@ describe('getDynamicTips', () => {
     const warn = tips.find(t => t.icon === TrendingDown);
     expect(warn).toBeDefined();
     expect(warn?.type).toBe('warning');
-    expect(warn?.text).toContain('calo hôm nay thấp');
+    expect(warn?.text).toContain('calo hôm nay hơi thấp');
   });
 
   it('returns protein success when meeting target', () => {
@@ -141,7 +141,7 @@ describe('getDynamicTips', () => {
     const fatTip = tips.find(t => t.icon === Droplets);
     expect(fatTip).toBeDefined();
     expect(fatTip?.type).toBe('info');
-    expect(fatTip?.text).toContain('chất béo cao');
+    expect(fatTip?.text).toContain('chất béo hơi cao');
   });
 
   it('returns all-good success when complete with no issues', () => {

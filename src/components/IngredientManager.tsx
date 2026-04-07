@@ -140,7 +140,6 @@ export const IngredientManager = ({
   };
 
   // --- Render ---
-  const emptyIcon = <Apple className="text-primary/40 h-6 w-6" />;
 
   return (
     <div className="space-y-6">
@@ -225,11 +224,12 @@ export const IngredientManager = ({
           ))}
           {list.filteredItems.length === 0 && (
             <EmptyState
-              icon={emptyIcon}
-              searchQuery={list.searchQuery}
-              entityName={t('ingredient.title').toLowerCase()}
-              actionLabel={t('ingredient.addNew')}
-              onAction={() => modal.openEdit()}
+              variant={list.searchQuery ? 'compact' : 'hero'}
+              icon={Apple}
+              title={list.searchQuery ? t('emptyState.searchEmpty') : t('emptyState.ingredient.title')}
+              description={list.searchQuery ? undefined : t('emptyState.ingredient.description')}
+              actionLabel={list.searchQuery ? undefined : t('emptyState.ingredient.action')}
+              onAction={list.searchQuery ? undefined : () => modal.openEdit()}
               className="col-span-full"
             />
           )}
@@ -369,11 +369,12 @@ export const IngredientManager = ({
           </div>
           {list.filteredItems.length === 0 && (
             <EmptyState
-              icon={emptyIcon}
-              searchQuery={list.searchQuery}
-              entityName={t('ingredient.title').toLowerCase()}
-              actionLabel={t('ingredient.addNew')}
-              onAction={() => modal.openEdit()}
+              variant={list.searchQuery ? 'compact' : 'hero'}
+              icon={Apple}
+              title={list.searchQuery ? t('emptyState.searchEmpty') : t('emptyState.ingredient.title')}
+              description={list.searchQuery ? undefined : t('emptyState.ingredient.description')}
+              actionLabel={list.searchQuery ? undefined : t('emptyState.ingredient.action')}
+              onAction={list.searchQuery ? undefined : () => modal.openEdit()}
             />
           )}
         </div>

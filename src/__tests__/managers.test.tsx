@@ -180,7 +180,7 @@ describe('DishManager', () => {
 
   it('shows empty state when no dishes match filter', () => {
     render(<DishManager {...defaultProps} dishes={[]} />);
-    expect(screen.getByText(/Chưa có món ăn nào/)).toBeInTheDocument();
+    expect(screen.getByText(/Chưa có món ăn/)).toBeInTheDocument();
   });
 
   it('sorts dishes by calories ascending', () => {
@@ -852,7 +852,7 @@ describe('IngredientManager', () => {
 
   it('shows empty state when no ingredients', () => {
     render(<IngredientManager {...defaultProps} ingredients={[]} />);
-    expect(screen.getByText(/Chưa có nguyên liệu nào/)).toBeInTheDocument();
+    expect(screen.getByText(/Chưa có nguyên liệu/)).toBeInTheDocument();
   });
 
   it('sorts ingredients by calories ascending', () => {
@@ -1151,7 +1151,7 @@ describe('IngredientManager', () => {
   it('shows empty state in list view when no ingredients match', () => {
     render(<IngredientManager {...defaultProps} ingredients={[]} />);
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
-    expect(screen.getByText(/Chưa có nguyên liệu nào/)).toBeInTheDocument();
+    expect(screen.getByText(/Chưa có nguyên liệu/)).toBeInTheDocument();
   });
 
   it('delete button uses destructive color by default for unused ingredients', () => {

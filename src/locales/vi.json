@@ -37,7 +37,7 @@
     "selected": "Đã chọn",
     "item": "món",
     "copied": "Đã sao chép!",
-    "copyFailed": "Sao chép thất bại",
+    "copyFailed": "Chưa sao chép được. Thử lại nhé!",
     "change": "Thay đổi",
     "deleteNow": "Xóa ngay",
     "cannotUndo": "Hành động này không thể hoàn tác.",
@@ -241,7 +241,9 @@
     "rating": "Đánh giá",
     "notes": "Ghi chú",
     "notesPlaceholder": "Ghi chú cá nhân...",
-    "stars": "sao"
+    "stars": "sao",
+    "ratingLabel": "Đánh giá mức yêu thích",
+    "ratingHint": "1★ = Ít thích, 5★ = Rất thích"
   },
   "ingredient": {
     "title": "Nguyên liệu",
@@ -270,7 +272,7 @@
     "aiTooltipNoUnit": "Vui lòng nhập đơn vị tính trước",
     "aiTimeout": "Phản hồi quá lâu",
     "aiTimeoutDesc": "\"{{name}}\" — Hệ thống phản hồi quá lâu. Vui lòng thử lại sau.",
-    "aiLookupFailed": "Tra cứu thất bại",
+    "aiLookupFailed": "Chưa tra cứu được. Thử lại nhé!",
     "aiLookupFailedDesc": "\"{{name}}\" — Không thể tìm thấy thông tin. Vui lòng thử lại.",
     "quantity": "Định lượng",
     "usedInDish": "Nguyên liệu này đang được sử dụng trong món ăn.",
@@ -279,7 +281,8 @@
     "confirmDelete": "Xóa nguyên liệu?",
     "confirmDeleteMsg": "Bạn có chắc chắn muốn xóa",
     "autoFilled": "Đã tự động điền từ dữ liệu có sẵn",
-    "autoFillHint": "Bạn có thể chỉnh sửa nếu cần"
+    "autoFillHint": "Bạn có thể chỉnh sửa nếu cần",
+    "lookupFailed": "Chưa tra cứu được. Thử lại nhé!"
   },
   "management": {
     "title": "Thư viện dữ liệu",
@@ -319,7 +322,7 @@
     "title": "AI Phân tích hình ảnh",
     "analyzing": "Đang phân tích...",
     "analyzeDish": "Phân tích món ăn",
-    "analysisFailed": "Phân tích thất bại",
+    "analysisFailed": "Chưa phân tích được. Thử lại nhé!",
     "analysisError": "Có lỗi xảy ra khi phân tích ảnh. Vui lòng thử lại.",
     "loadingHint": "AI đang phân tích hình ảnh...",
     "emptyHint": "Tải ảnh lên và nhấn \"Phân tích món ăn\" để bắt đầu phân tích.",
@@ -369,10 +372,10 @@
     "export": "Xuất dữ liệu",
     "import": "Nhập dữ liệu",
     "exportSuccess": "Xuất dữ liệu thành công!",
-    "exportFailed": "Xuất thất bại",
+    "exportFailed": "Chưa xuất được. Thử lại nhé!",
     "invalidFile": "File không hợp lệ",
     "importSuccess": "Nhập dữ liệu thành công!",
-    "importFailed": "Nhập thất bại",
+    "importFailed": "Chưa nhập được. Thử lại nhé!",
     "importConfirmMsg": "Dữ liệu nhập sẽ ghi đè dữ liệu hiện tại ({{summary}}). Bạn có muốn tiếp tục?",
     "neverBackedUp": "Chưa từng sao lưu — hãy sao lưu dữ liệu ngay!",
     "lastBackupDays_zero": "Đã sao lưu hôm nay",
@@ -446,7 +449,7 @@
     "nutritionLabel": "Dinh dưỡng (cho 100g/ml hoặc 1 đơn vị)",
     "cancelSave": "Hủy bỏ",
     "confirmSave": "Xác nhận lưu",
-    "lookupFailed": "Tra cứu thất bại",
+    "lookupFailed": "Chưa tra cứu được. Thử lại nhé!",
     "lookupFailedDesc": "Không thể tìm thấy thông tin. Vui lòng thử lại."
   },
   "unsavedChanges": {
@@ -471,7 +474,22 @@
     "exerciseSearchNoResults": "Không tìm thấy \"{{query}}\"",
     "exerciseFilterNoResults": "Không tìm thấy bài tập phù hợp",
     "exerciseNoResultsHint": "Thử tìm với từ khóa khác hoặc thay đổi bộ lọc.",
-    "mealProgress": "{{filled}}/{{total}} bữa đã lên kế hoạch"
+    "mealProgress": "{{filled}}/{{total}} bữa đã lên kế hoạch",
+    "searchEmpty": "Không tìm thấy kết quả",
+    "dish": {
+      "title": "Chưa có món ăn",
+      "description": "Tạo món ăn đầu tiên để bắt đầu",
+      "action": "Tạo món ăn"
+    },
+    "ingredient": {
+      "title": "Chưa có nguyên liệu",
+      "description": "Thêm nguyên liệu để tạo món ăn",
+      "action": "Thêm nguyên liệu"
+    },
+    "analysis": {
+      "title": "Chưa có phân tích",
+      "description": "Phân tích bữa ăn bằng AI"
+    }
   },
   "notification": {
     "saveSuccess": "Lưu thành công!",
@@ -513,14 +531,14 @@
   },
   "tips": {
     "noPlan": "Bắt đầu lên kế hoạch ăn uống để theo dõi dinh dưỡng hàng ngày!",
-    "caloriesOver": "Bạn đang vượt {{amount}} kcal so với mục tiêu. Cân nhắc giảm bớt carbs hoặc chất béo.",
-    "caloriesLow": "Lượng calo hôm nay thấp ({{amount}} kcal). Thâm hụt quá nhiều có thể ảnh hưởng cơ bắp và trao đổi chất.",
+    "caloriesOver": "Hôm nay bạn vượt {{amount}} kcal so với mục tiêu. Giảm nhẹ carbs hoặc chất béo nhé!",
+    "caloriesLow": "Lượng calo hôm nay hơi thấp ({{amount}} kcal). Ăn thêm chút để cơ thể đủ năng lượng nhé!",
     "proteinMet": "Tuyệt vời! Đạt {{current}}g protein, đủ mục tiêu {{target}}g.",
-    "proteinLow": "Protein hôm nay mới đạt {{current}}g/{{target}}g. Thêm ức gà, cá, trứng hoặc sữa chua Hy Lạp để bổ sung.",
-    "fiberLow": "Lượng chất xơ thấp. Thêm rau xanh hoặc ngũ cốc nguyên hạt để cải thiện tiêu hóa.",
-    "fatHigh": "Tỷ lệ chất béo cao ({{percent}}% tổng calo). Cân nhắc thay thế bằng nguồn protein nạc.",
+    "proteinLow": "Protein mới đạt {{current}}g/{{target}}g. Thêm ức gà, cá, trứng hoặc sữa chua Hy Lạp nhé!",
+    "fiberLow": "Chất xơ hôm nay hơi thấp. Thêm rau xanh hoặc ngũ cốc nguyên hạt nhé!",
+    "fatHigh": "Tỷ lệ chất béo hơi cao ({{percent}}% tổng calo). Thử thay bằng nguồn protein nạc nhé!",
     "balanced": "Kế hoạch hôm nay cân đối! Tiếp tục duy trì nhé.",
-    "missingMeals": "Còn thiếu {{meals}}. Hoàn tất để xem đánh giá dinh dưỡng chính xác hơn.",
+    "missingMeals": "Còn {{meals}} đang chờ bạn. Hoàn tất để xem đánh giá dinh dưỡng chính xác hơn.",
     "mealBreakfast": "bữa sáng",
     "mealLunch": "bữa trưa",
     "mealDinner": "bữa tối"
@@ -554,7 +572,12 @@
     "back": "Quay lại",
     "goalNotSet": "Chưa thiết lập mục tiêu",
     "trainingProfileEditHint": "Để thay đổi hồ sơ tập luyện, vui lòng quay lại tab Tập luyện và chạy lại thiết lập ban đầu.",
-    "ariaLabel": "Cài đặt"
+    "ariaLabel": "Cài đặt",
+    "sections": {
+      "health": "Sức khỏe",
+      "goal": "Mục tiêu",
+      "training": "Tập luyện"
+    }
   },
   "filter": {
     "button": "Lọc",
@@ -636,15 +659,15 @@
     "description": "Đăng nhập Google để sao lưu và đồng bộ dữ liệu qua Google Drive",
     "signInWithGoogle": "Đăng nhập bằng Google",
     "signInSuccess": "Đăng nhập thành công",
-    "signInError": "Đăng nhập thất bại. Vui lòng thử lại.",
+    "signInError": "Chưa đăng nhập được. Thử lại nhé!",
     "signOutSuccess": "Đã đăng xuất",
     "signOut": "Đăng xuất",
     "uploadToDrive": "Tải lên Drive",
     "downloadFromDrive": "Tải xuống từ Drive",
     "uploadSuccess": "Dữ liệu đã tải lên Google Drive",
-    "uploadError": "Tải lên thất bại. Vui lòng thử lại.",
+    "uploadError": "Chưa tải lên được. Thử lại nhé!",
     "downloadSuccess": "Dữ liệu đã tải xuống từ Google Drive",
-    "downloadError": "Tải xuống thất bại. Vui lòng thử lại.",
+    "downloadError": "Chưa tải xuống được. Thử lại nhé!",
     "noBackupFound": "Không tìm thấy bản sao lưu trên Google Drive",
     "lastSync": "Đồng bộ lần cuối",
     "syncError": "Lỗi đồng bộ"
@@ -755,7 +778,7 @@
       "decreaseReps": "Giảm số lần",
       "increaseReps": "Tăng số lần",
       "saveSuccess": "Đã lưu buổi tập thành công!",
-      "saveFailed": "Lưu buổi tập thất bại. Vui lòng thử lại.",
+      "saveFailed": "Chưa lưu buổi tập được. Thử lại nhé!",
       "saving": "Đang lưu...",
       "editSet": "Chỉnh sửa set",
       "deleteSet": "Xóa set",
@@ -910,7 +933,13 @@
       "addWorkout": "Thêm buổi tập",
       "sessionTabs": "Danh sách buổi tập",
       "profileOutOfSync": "Hồ sơ tập luyện đã thay đổi. Kế hoạch hiện tại có thể không còn phù hợp.",
-      "regeneratePlan": "Tạo lại"
+      "regeneratePlan": "Tạo lại",
+      "exerciseFormat": {
+        "guide": "Hướng dẫn định dạng",
+        "setsExplain": "Hiệp (sets): Số lần lặp lại 1 nhóm lần tập.",
+        "repsExplain": "Lần (reps): Số lần thực hiện động tác trong 1 hiệp.",
+        "example": "Ví dụ: 3 hiệp × 8-12 lần = Làm 3 lượt, mỗi lượt 8-12 lần."
+      }
     },
     "profile": {
       "field": {
@@ -1010,7 +1039,7 @@
     "gamification": {
       "streak": "Chuỗi ngày tập",
       "longestStreak": "Chuỗi dài nhất",
-      "streakAtRisk": "Chuỗi sắp mất!",
+      "streakAtRisk": "Giữ chuỗi ngày tập nhé!",
       "milestones": "Cột mốc",
       "nextMilestone": "Cột mốc tiếp theo",
       "achieved": "Đã đạt",
@@ -1071,6 +1100,7 @@
       "sundayFull": "Chủ Nhật",
       "trainingDay": "Ngày tập",
       "restDay": "Ngày nghỉ",
+      "today": "Hôm nay",
       "selectDay": "Chọn ngày tập",
       "sessionsCount": "{{count}} buổi",
       "maxSessions": "Đã đầy (tối đa 3 buổi)",
@@ -1139,7 +1169,7 @@
       "retry": "Thử lại",
       "cancel": "Hủy",
       "confirm": "Xác nhận",
-      "saveError": "Lưu template thất bại. Vui lòng thử lại."
+      "saveError": "Chưa lưu template được. Thử lại nhé!"
     },
     "planActions": {
       "editSchedule": "Chỉnh lịch",
@@ -1177,7 +1207,7 @@
       "scoreLabel": {
         "excellent": "Xuất sắc",
         "good": "Tốt",
-        "needsWork": "Cần cải thiện"
+        "needsWork": "Còn nhiều dư địa!"
       },
       "a11yLabel": "Điểm số hôm nay: {{score}} - {{label}}",
       "contextual": {
@@ -1233,6 +1263,10 @@
       "restDayTitle": "Ngày nghỉ phục hồi",
       "recoveryTip1": "Ngủ đủ giấc và uống đủ nước",
       "recoveryTip2": "Ăn giàu protein để phục hồi cơ",
+      "recoveryTip3": "Có thể đi bộ nhẹ hoặc kéo giãn",
+      "recoveryTip4": "Tránh tập nặng để cơ được hồi phục",
+      "recoveryTip5": "Bổ sung vitamin và khoáng chất",
+      "streak": "Chuỗi tập: {{count}} ngày",
       "tomorrowRest": "Ngày mai nghỉ",
       "prHighlight": "Kỷ lục cá nhân mới!",
       "exercisesCount": "{{count}} bài tập",
@@ -1256,7 +1290,7 @@
       "onTrack": "Đúng tiến độ",
       "stable": "Ổn định",
       "gainingFast": "Tăng nhanh",
-      "needsAdjust": "Cần điều chỉnh",
+      "needsAdjust": "Theo dõi thêm",
       "a11yEmpty": "Chưa ghi cân nặng",
       "a11y": "Cân nặng {{weight}} kg, {{trend}}"
     },
@@ -1329,7 +1363,10 @@
     "proteinSuggestion2": "Gợi ý: thêm sữa, phô mai, hạt",
     "proteinSuggestion3": "Gợi ý: thêm thịt bò, trứng, đậu nành",
     "proteinSuggestion4": "Gợi ý: thêm cá hồi, ức gà, đậu xanh",
-    "proteinAriaLabel": "Protein: {{current}}g trên {{target}}g. {{suggestion}}"
+    "proteinAriaLabel": "Protein: {{current}}g trên {{target}}g. {{suggestion}}",
+    "proteinNudge": "Còn thiếu {{amount}}g protein — thêm {{suggestion}}?",
+    "proteinNudgeSuggestions": "ức gà, cá hồi hoặc trứng",
+    "calorieNudge": "Còn {{amount}} kcal — thêm bữa phụ nhẹ hoặc snack?"
   },
   "quickActions": {
     "ariaLabel": "Thao tác nhanh",
@@ -1430,7 +1467,7 @@
     "dismiss": "Bỏ qua",
     "type": {
       "adjust": "Điều chỉnh",
-      "alert": "Cảnh báo",
+      "alert": "Lưu ý",
       "action": "Hành động",
       "remind": "Nhắc nhở",
       "motivate": "Động lực",
@@ -1528,7 +1565,7 @@
       "actionLabel": "Xem chi tiết"
     },
     "lowProtein": {
-      "title": "Protein thấp",
+      "title": "Bổ sung protein nào!",
       "message": "Bạn mới đạt {{pct}}% mục tiêu protein. Hãy bổ sung thêm!",
       "actionLabel": "Gợi ý bữa tối"
     },

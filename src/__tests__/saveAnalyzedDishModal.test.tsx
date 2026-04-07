@@ -183,7 +183,7 @@ describe('SaveAnalyzedDishModal', () => {
     const researchBtns = screen.getAllByText(/AI Research/i);
     fireEvent.click(researchBtns[0]);
     await waitFor(() => {
-      expect(mockNotify.error).toHaveBeenCalledWith('Tra cứu thất bại', expect.any(String));
+      expect(mockNotify.error).toHaveBeenCalledWith('Chưa tra cứu được. Thử lại nhé!', expect.any(String));
     });
   });
 

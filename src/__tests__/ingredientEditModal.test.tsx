@@ -285,7 +285,10 @@ describe('IngredientEditModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Tự động điền thông tin bằng AI' }));
 
     await waitFor(() => {
-      expect(mockNotify.error).toHaveBeenCalledWith('Tra cứu thất bại', expect.stringContaining('Ức gà'));
+      expect(mockNotify.error).toHaveBeenCalledWith(
+        'Chưa tra cứu được. Thử lại nhé!',
+        expect.stringContaining('Ức gà'),
+      );
     });
   });
 
@@ -523,7 +526,10 @@ describe('IngredientEditModal', () => {
     fireEvent.click(aiButton);
 
     await waitFor(() => {
-      expect(mockNotify.error).toHaveBeenCalledWith('Tra cứu thất bại', expect.stringContaining('Ức gà'));
+      expect(mockNotify.error).toHaveBeenCalledWith(
+        'Chưa tra cứu được. Thử lại nhé!',
+        expect.stringContaining('Ức gà'),
+      );
     });
   });
 

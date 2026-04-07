@@ -220,6 +220,90 @@ describe('ModalBackdrop', () => {
    * Lock is applied only on the first mount (0→1) and released only
    * on the last unmount (1→0), so cleanup order no longer matters.
    */
+
+  describe('grab handle', () => {
+    it('renders grab handle with correct testid', () => {
+      render(
+        <ModalBackdrop onClose={onClose}>
+          <div>Content</div>
+        </ModalBackdrop>,
+      );
+      const handle = screen.getByTestId('modal-grab-handle');
+      expect(handle).toBeInTheDocument();
+      expect(handle.className).toContain('rounded-full');
+      expect(handle.className).toContain('bg-muted-foreground/30');
+    });
+
+    it('grab handle is hidden on desktop (sm:hidden)', () => {
+      render(
+        <ModalBackdrop onClose={onClose}>
+          <div>Content</div>
+        </ModalBackdrop>,
+      );
+      const handle = screen.getByTestId('modal-grab-handle');
+      expect(handle.className).toContain('sm:hidden');
+    });
+
+    it('drag down beyond 100px threshold calls onClose', () => {
+      render(
+        <ModalBackdrop onClose={onClose}>
+          <div>Content</div>
+        </ModalBackdrop>,
+      );
+      const handle = screen.getByTestId('modal-grab-handle');
+
+      fireEvent.touchStart(handle, { touches: [{ clientY: 100 }] });
+      fireEvent.touchMove(handle, { touches: [{ clientY: 250 }] });
+      fireEvent.touchEnd(handle);
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('drag down below threshold snaps back without closing', () => {
+      render(
+        <ModalBackdrop onClose={onClose}>
+          <div>Content</div>
+        </ModalBackdrop>,
+      );
+      const handle = screen.getByTestId('modal-grab-handle');
+
+      fireEvent.touchStart(handle, { touches: [{ clientY: 100 }] });
+      fireEvent.touchMove(handle, { touches: [{ clientY: 150 }] });
+      fireEvent.touchEnd(handle);
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('upward drag (negative delta) does not trigger close', () => {
+      render(
+        <ModalBackdrop onClose={onClose}>
+          <div>Content</div>
+        </ModalBackdrop>,
+      );
+      const handle = screen.getByTestId('modal-grab-handle');
+
+      fireEvent.touchStart(handle, { touches: [{ clientY: 200 }] });
+      fireEvent.touchMove(handle, { touches: [{ clientY: 50 }] });
+      fireEvent.touchEnd(handle);
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * BUG: scroll-lock-nested-modal
+   *
+   * When IngredientEditModal (ModalBackdrop A) and UnsavedChangesDialog
+   * (ModalBackdrop B) unmounted simultaneously, React could call A's
+   * cleanup first (unlocking body) then B's cleanup second (re-locking
+   * body with the captured prev values). The result: body stayed
+   * position:fixed / overflow:hidden permanently, breaking scroll on
+   * every page.
+   *
+   * Fix: module-level reference-counted lock (_scrollLockDepth).
+   * Lock is applied only on the first mount (0→1) and released only
+   * on the last unmount (1→0), so cleanup order no longer matters.
+   */
   describe('body scroll lock (reference-counted)', () => {
     beforeEach(() => {
       // Guard-reset body styles in case any previous test left them locked.

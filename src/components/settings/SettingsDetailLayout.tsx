@@ -4,12 +4,20 @@ import { useTranslation } from 'react-i18next';
 
 import { DisabledReason } from '@/components/shared/DisabledReason';
 
+interface SectionTab {
+  id: string;
+  label: string;
+}
+
 interface SettingsDetailLayoutProps {
   title: string;
   icon: React.ReactNode;
   isEditing: boolean;
   hasChanges: boolean;
   isSaving?: boolean;
+  activeSection?: string;
+  onSectionChange?: (section: string) => void;
+  sections?: SectionTab[];
   onBack: () => void;
   onEdit: () => void;
   onSave: () => void;
@@ -23,6 +31,9 @@ export function SettingsDetailLayout({
   isEditing,
   hasChanges,
   isSaving = false,
+  activeSection,
+  onSectionChange,
+  sections,
   onBack,
   onEdit,
   onSave,
@@ -33,6 +44,29 @@ export function SettingsDetailLayout({
 
   return (
     <div className="flex min-h-full flex-col" data-testid="settings-detail-layout">
+      {/* Section Quick-Jump Tabs */}
+      {sections && sections.length > 0 && !isEditing && (
+        <div className="border-border mb-4 flex gap-1 border-b pb-3" data-testid="settings-section-tabs" role="tablist">
+          {sections.map(section => (
+            <button
+              key={section.id}
+              type="button"
+              role="tab"
+              aria-selected={activeSection === section.id}
+              data-testid={`section-tab-${section.id}`}
+              onClick={() => onSectionChange?.(section.id)}
+              className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                activeSection === section.id
+                  ? 'bg-card text-primary shadow-sm'
+                  : 'text-muted-foreground hover:bg-accent'
+              }`}
+            >
+              {section.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Header */}
       <div className="border-border mb-6 flex items-center justify-between gap-3 border-b pb-4">
         <div className="flex items-center gap-3">

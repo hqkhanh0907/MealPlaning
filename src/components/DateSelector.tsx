@@ -282,6 +282,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
               <button
                 key={dateStr}
                 data-selected={isSelected}
+                aria-current={isToday ? 'date' : undefined}
                 aria-label={`${dayLabel} ${date.getDate()}${mealSuffix}`}
                 onClick={() => {
                   if (isSelected && onPlanClick) {
@@ -356,6 +357,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
               return (
                 <button
                   key={day}
+                  aria-current={isToday ? 'date' : undefined}
                   onClick={() => {
                     if (isSelected && onPlanClick) {
                       onPlanClick();

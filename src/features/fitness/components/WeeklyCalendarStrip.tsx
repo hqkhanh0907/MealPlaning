@@ -68,29 +68,38 @@ export const WeeklyCalendarStrip = React.memo(function WeeklyCalendarStrip({
         const statusLabel = isTraining ? t('fitness.scheduleEditor.trainingDay') : t('fitness.scheduleEditor.restDay');
 
         return (
-          <button
-            key={day}
-            type="button"
-            data-testid={`calendar-day-${day}`}
-            aria-label={`${fullLabel} — ${statusLabel}`}
-            aria-pressed={interactive ? isTraining : undefined}
-            onClick={() => handleDayClick(day)}
-            className={[
-              'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full',
-              'text-sm font-semibold',
-              'touch-manipulation',
-              'motion-reduce:transition-none',
-              'transition-colors duration-150',
-              'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
-              isTraining ? 'bg-primary text-primary-foreground dark:bg-primary' : 'text-foreground-secondary bg-muted',
-              isToday ? 'ring-status-info ring-2 ring-offset-1' : '',
-              isSelected ? 'border-border border-2 dark:border-white' : '',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-          >
-            {label}
-          </button>
+          <div key={day} className="flex flex-col items-center gap-0.5">
+            <button
+              type="button"
+              data-testid={`calendar-day-${day}`}
+              aria-label={`${fullLabel} — ${statusLabel}`}
+              aria-pressed={interactive ? isTraining : undefined}
+              aria-current={isToday ? 'date' : undefined}
+              onClick={() => handleDayClick(day)}
+              className={[
+                'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full',
+                'text-sm',
+                'touch-manipulation',
+                'motion-reduce:transition-none',
+                'transition-colors duration-150',
+                'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                isTraining
+                  ? 'bg-primary text-primary-foreground dark:bg-primary'
+                  : 'text-foreground-secondary bg-muted',
+                isToday ? 'ring-status-info font-bold ring-2 ring-offset-1' : 'font-semibold',
+                isSelected ? 'border-border border-2 dark:border-white' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
+              {label}
+            </button>
+            {isToday && (
+              <span data-testid="today-label" className="text-status-info text-[10px] leading-none font-medium">
+                {t('fitness.scheduleEditor.today')}
+              </span>
+            )}
+          </div>
         );
       })}
     </fieldset>

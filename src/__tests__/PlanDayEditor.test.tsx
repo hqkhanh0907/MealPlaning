@@ -24,6 +24,10 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.repsMaxLabel': 'Lần tối đa',
         'fitness.plan.restLabel': 'Nghỉ',
         'fitness.plan.editParams': 'Chỉnh thông số',
+        'fitness.plan.exerciseFormat.guide': 'Hướng dẫn định dạng',
+        'fitness.plan.exerciseFormat.setsExplain': 'Hiệp (sets): Số lần lặp lại 1 nhóm lần tập.',
+        'fitness.plan.exerciseFormat.repsExplain': 'Lần (reps): Số lần thực hiện động tác trong 1 hiệp.',
+        'fitness.plan.exerciseFormat.example': 'Ví dụ: 3 hiệp × 8-12 lần = Làm 3 lượt, mỗi lượt 8-12 lần.',
         'fitness.swap.title': 'Đổi bài tập',
         'unsavedChanges.title': 'Thay đổi chưa lưu',
         'unsavedChanges.description': 'Bạn có thay đổi chưa lưu. Bạn muốn làm gì?',
@@ -665,5 +669,45 @@ describe('PlanDayEditor', () => {
     expect(removeButton.className).toContain('pl-2');
     const buttonGroup = removeButton.parentElement;
     expect(buttonGroup?.className).toContain('gap-2');
+  });
+
+  /* ---------------------------------------------------------------- */
+  /* Exercise Format Guide (W7-06)                                     */
+  /* ---------------------------------------------------------------- */
+  describe('exercise format guide', () => {
+    it('shows format guide toggle when exercises exist', () => {
+      render(<PlanDayEditor planDay={makePlanDay()} />);
+      expect(screen.getByTestId('exercise-format-guide')).toBeInTheDocument();
+      expect(screen.getByTestId('exercise-format-guide-toggle')).toBeInTheDocument();
+    });
+
+    it('hides format guide when no exercises', () => {
+      render(<PlanDayEditor planDay={makePlanDay([])} />);
+      expect(screen.queryByTestId('exercise-format-guide')).not.toBeInTheDocument();
+    });
+
+    it('toggles guide content on click', () => {
+      render(<PlanDayEditor planDay={makePlanDay()} />);
+      const toggle = screen.getByTestId('exercise-format-guide-toggle');
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.queryByTestId('exercise-format-guide-content')).not.toBeInTheDocument();
+
+      fireEvent.click(toggle);
+      expect(toggle).toHaveAttribute('aria-expanded', 'true');
+      expect(screen.getByTestId('exercise-format-guide-content')).toBeInTheDocument();
+      expect(screen.getByTestId('exercise-format-guide-content')).toHaveAttribute('role', 'note');
+
+      fireEvent.click(toggle);
+      expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.queryByTestId('exercise-format-guide-content')).not.toBeInTheDocument();
+    });
+
+    it('displays sets, reps explanation and example', () => {
+      render(<PlanDayEditor planDay={makePlanDay()} />);
+      fireEvent.click(screen.getByTestId('exercise-format-guide-toggle'));
+      expect(screen.getByText('Hiệp (sets): Số lần lặp lại 1 nhóm lần tập.')).toBeInTheDocument();
+      expect(screen.getByText('Lần (reps): Số lần thực hiện động tác trong 1 hiệp.')).toBeInTheDocument();
+      expect(screen.getByText(/Ví dụ: 3 hiệp/)).toBeInTheDocument();
+    });
   });
 });

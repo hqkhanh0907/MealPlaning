@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { ChefHat, Search } from 'lucide-react';
 
 import { ConfirmationModal } from '../components/modals/ConfirmationModal';
 import { BottomNavBar, DesktopNav, getTabLabels, TabLoadingFallback } from '../components/navigation';
@@ -15,36 +16,32 @@ vi.mock('../hooks/useModalBackHandler', () => ({
 
 // --- EmptyState ---
 describe('EmptyState', () => {
-  const defaultIcon = <span data-testid="icon">🍽️</span>;
-
-  it('renders no-data message when no searchQuery', () => {
-    render(<EmptyState icon={defaultIcon} searchQuery="" entityName="món ăn" />);
-    expect(screen.getByText('Chưa có món ăn nào')).toBeInTheDocument();
-    expect(screen.getByText(/Bắt đầu tạo/)).toBeInTheDocument();
+  it('renders standard variant with title only by default', () => {
+    render(<EmptyState title="Chưa có dữ liệu" />);
+    expect(screen.getByText('Chưa có dữ liệu')).toBeInTheDocument();
   });
 
-  it('renders search-not-found message when searchQuery present', () => {
-    render(<EmptyState icon={defaultIcon} searchQuery="xyz" entityName="món ăn" />);
-    expect(screen.getByText('Không tìm thấy món ăn')).toBeInTheDocument();
-    expect(screen.getByText(/từ khóa khác/)).toBeInTheDocument();
-  });
-
-  it('renders action button when actionLabel and onAction provided and no search', () => {
+  it('renders hero variant with CTA', () => {
     const onAction = vi.fn();
     render(
-      <EmptyState icon={defaultIcon} searchQuery="" entityName="món ăn" actionLabel="Tạo món" onAction={onAction} />,
+      <EmptyState variant="hero" icon={ChefHat} title="Chưa có món ăn" actionLabel="Tạo món" onAction={onAction} />,
     );
-    const btn = screen.getByText('Tạo món');
-    expect(btn).toBeInTheDocument();
+    expect(screen.getByText('Chưa có món ăn')).toBeInTheDocument();
+    const btn = screen.getByRole('button', { name: 'Tạo món' });
     fireEvent.click(btn);
     expect(onAction).toHaveBeenCalledTimes(1);
   });
 
-  it('does not render action button when searching', () => {
-    render(
-      <EmptyState icon={defaultIcon} searchQuery="abc" entityName="món ăn" actionLabel="Tạo" onAction={vi.fn()} />,
-    );
-    expect(screen.queryByText('Tạo')).not.toBeInTheDocument();
+  it('renders compact variant for search results', () => {
+    render(<EmptyState variant="compact" title="Không tìm thấy kết quả" />);
+    expect(screen.getByText('Không tìm thấy kết quả')).toBeInTheDocument();
+  });
+
+  it('renders standard variant with icon and description', () => {
+    render(<EmptyState icon={Search} title="Trống" description="Mô tả" />);
+    expect(screen.getByText('Trống')).toBeInTheDocument();
+    expect(screen.getByText('Mô tả')).toBeInTheDocument();
+    expect(document.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
   });
 });
 

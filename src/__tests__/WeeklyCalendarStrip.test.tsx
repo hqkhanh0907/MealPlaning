@@ -24,6 +24,7 @@ vi.mock('react-i18next', () => ({
         'fitness.scheduleEditor.sundayFull': 'Chủ Nhật',
         'fitness.scheduleEditor.trainingDay': 'Ngày tập',
         'fitness.scheduleEditor.restDay': 'Ngày nghỉ',
+        'fitness.scheduleEditor.today': 'Hôm nay',
       };
       return map[key] ?? key;
     },
@@ -74,6 +75,33 @@ describe('WeeklyCalendarStrip', () => {
     expect(day3.className).toContain('ring-status-info');
     const day1 = screen.getByTestId('calendar-day-1');
     expect(day1.className).not.toContain('ring-status-info');
+  });
+
+  it('renders "Hôm nay" label below today button', () => {
+    render(<WeeklyCalendarStrip {...defaultProps} todayDow={3} />);
+    const label = screen.getByTestId('today-label');
+    expect(label).toHaveTextContent('Hôm nay');
+  });
+
+  it('does not render today label for non-today days', () => {
+    render(<WeeklyCalendarStrip {...defaultProps} />);
+    expect(screen.queryByTestId('today-label')).not.toBeInTheDocument();
+  });
+
+  it('sets aria-current="date" on today button', () => {
+    render(<WeeklyCalendarStrip {...defaultProps} todayDow={5} />);
+    const day5 = screen.getByTestId('calendar-day-5');
+    expect(day5).toHaveAttribute('aria-current', 'date');
+    const day1 = screen.getByTestId('calendar-day-1');
+    expect(day1).not.toHaveAttribute('aria-current');
+  });
+
+  it('applies font-bold to today and font-semibold to others', () => {
+    render(<WeeklyCalendarStrip {...defaultProps} todayDow={2} />);
+    const day2 = screen.getByTestId('calendar-day-2');
+    expect(day2.className).toContain('font-bold');
+    const day1 = screen.getByTestId('calendar-day-1');
+    expect(day1.className).toContain('font-semibold');
   });
 
   it('renders selected day with bold border', () => {

@@ -4,6 +4,7 @@ import {
   ChevronDown,
   ChevronUp,
   GripVertical,
+  Info,
   Minus,
   Plus,
   RotateCcw,
@@ -34,6 +35,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
   );
   const [showSelector, setShowSelector] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showFormatGuide, setShowFormatGuide] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [swapIndex, setSwapIndex] = useState<number | null>(null);
   const [pendingRemoval, setPendingRemoval] = useState<{
@@ -264,6 +266,33 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
 
       {/* Exercise list */}
       <div className="flex-1 overflow-y-auto px-4 py-3 pb-24">
+        {localExercises.length > 0 && (
+          <div className="mb-3" data-testid="exercise-format-guide">
+            <button
+              type="button"
+              onClick={() => setShowFormatGuide(prev => !prev)}
+              aria-expanded={showFormatGuide}
+              aria-controls="format-guide-content"
+              className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs transition-colors"
+              data-testid="exercise-format-guide-toggle"
+            >
+              <Info className="h-4 w-4" />
+              <span>{t('fitness.plan.exerciseFormat.guide')}</span>
+            </button>
+            {showFormatGuide && (
+              <div
+                id="format-guide-content"
+                role="note"
+                className="bg-muted mt-2 rounded-lg p-3 text-xs"
+                data-testid="exercise-format-guide-content"
+              >
+                <p className="text-foreground">{t('fitness.plan.exerciseFormat.setsExplain')}</p>
+                <p className="text-foreground mt-1">{t('fitness.plan.exerciseFormat.repsExplain')}</p>
+                <p className="text-muted-foreground mt-2 italic">{t('fitness.plan.exerciseFormat.example')}</p>
+              </div>
+            )}
+          </div>
+        )}
         {localExercises.length === 0 ? (
           <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
             <p className="text-sm">{t('fitness.plan.noExercises')}</p>
