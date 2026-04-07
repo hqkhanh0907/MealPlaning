@@ -2,6 +2,7 @@ import { Check, Minus, Plus, X } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { CloseButton } from '@/components/shared/CloseButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { blockNegativeKeys } from '@/utils/numericInputHandlers';
@@ -129,16 +130,7 @@ export const SetEditor = React.memo(function SetEditor({
       >
         <div className="mb-6 flex items-center justify-between">
           <h3 className="text-foreground text-xl font-semibold">{t('fitness.editor.title')}</h3>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onCancel}
-            className="h-8 w-8 rounded-full"
-            aria-label={t('common.close')}
-            data-testid="editor-close-button"
-          >
-            <X className="h-5 w-5" aria-hidden="true" />
-          </Button>
+          <CloseButton onClick={onCancel} data-testid="editor-close-button" ariaLabel={t('common.close')} />
         </div>
 
         {/* Weight section */}

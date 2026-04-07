@@ -3,10 +3,9 @@ import { useTranslation } from 'react-i18next';
 
 import { ErrorBoundary } from '../../../components/ErrorBoundary';
 import { AiInsightCard } from './AiInsightCard';
-import { NutritionHero } from './NutritionHero';
+import { CombinedHero } from './CombinedHero';
 import { QuickActionsBar } from './QuickActionsBar';
 import { TodaysPlanCard } from './TodaysPlanCard';
-import { WeeklySnapshot } from './WeeklySnapshot';
 import { WeightQuickLog } from './WeightQuickLog';
 
 function useReducedMotion(): boolean {
@@ -57,10 +56,10 @@ function DashboardTabInner(): React.ReactElement {
 
   return (
     <div className="flex flex-col gap-3 overflow-y-auto pb-6" data-testid="dashboard-tab">
-      {/* Tier 1: NutritionHero — immediate */}
+      {/* Tier 1: CombinedHero — immediate */}
       <ErrorBoundary fallbackTitle={t('dashboard.error.hero')}>
         <div data-testid="dashboard-tier-1">
-          <NutritionHero />
+          <CombinedHero />
         </div>
       </ErrorBoundary>
 
@@ -76,11 +75,10 @@ function DashboardTabInner(): React.ReactElement {
         </div>
       </ErrorBoundary>
 
-      {/* Tier 3: WeeklySnapshot + QuickActionsBar — lazy, RAF-gated */}
+      {/* Tier 3: QuickActionsBar — lazy, RAF-gated */}
       {lowerTiersVisible ? (
         <ErrorBoundary fallbackTitle={t('dashboard.error.quickActions')}>
           <div className="flex flex-col gap-3" data-testid="dashboard-tier-3">
-            <WeeklySnapshot />
             <QuickActionsBar onLogWeight={handleOpenWeightLog} />
           </div>
         </ErrorBoundary>

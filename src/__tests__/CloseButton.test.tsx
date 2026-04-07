@@ -1,65 +1,78 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { CloseButton } from '../components/shared/CloseButton';
 
 describe('CloseButton', () => {
-  const onClick = vi.fn();
-
-  beforeEach(() => {
-    vi.clearAllMocks();
+  it('renders with default aria-label "Đóng hộp thoại"', () => {
+    render(<CloseButton onClick={vi.fn()} />);
+    expect(screen.getByLabelText('Đóng hộp thoại')).toBeInTheDocument();
   });
 
-  it('renders a button with accessible close label', () => {
-    render(<CloseButton onClick={onClick} />);
+  it('renders with rounded-full shape', () => {
+    render(<CloseButton onClick={vi.fn()} />);
     const btn = screen.getByLabelText('Đóng hộp thoại');
-    expect(btn).toBeInTheDocument();
-    expect(btn.tagName).toBe('BUTTON');
-    expect(btn).toHaveAttribute('type', 'button');
+    expect(btn.className).toContain('rounded-full');
+    expect(btn.className).not.toContain('rounded-lg');
   });
 
-  it('calls onClick when clicked', () => {
-    render(<CloseButton onClick={onClick} />);
-    fireEvent.click(screen.getByLabelText('Đóng hộp thoại'));
-    expect(onClick).toHaveBeenCalledTimes(1);
+  it('calls onClick when clicked', async () => {
+    const user = userEvent.setup();
+    const handleClick = vi.fn();
+    render(<CloseButton onClick={handleClick} />);
+    await user.click(screen.getByLabelText('Đóng hộp thoại'));
+    expect(handleClick).toHaveBeenCalledOnce();
+  });
+
+  it('renders with custom data-testid', () => {
+    render(<CloseButton onClick={vi.fn()} data-testid="btn-close-dish" />);
+    expect(screen.getByTestId('btn-close-dish')).toBeInTheDocument();
+  });
+
+  it('does not render data-testid when not provided', () => {
+    render(<CloseButton onClick={vi.fn()} />);
+    const btn = screen.getByLabelText('Đóng hộp thoại');
+    expect(btn.getAttribute('data-testid')).toBeNull();
+  });
+
+  it('renders with custom ariaLabel override', () => {
+    render(<CloseButton onClick={vi.fn()} ariaLabel="Đóng" />);
+    expect(screen.getByLabelText('Đóng')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Đóng hộp thoại')).not.toBeInTheDocument();
+  });
+
+  it('renders default variant styling', () => {
+    render(<CloseButton onClick={vi.fn()} />);
+    const btn = screen.getByLabelText('Đóng hộp thoại');
+    expect(btn.className).toContain('text-muted-foreground');
+    expect(btn.className).not.toContain('backdrop-blur');
+  });
+
+  it('renders overlay variant styling', () => {
+    render(<CloseButton onClick={vi.fn()} variant="overlay" />);
+    const btn = screen.getByLabelText('Đóng hộp thoại');
+    expect(btn.className).toContain('text-white');
+    expect(btn.className).toContain('backdrop-blur');
   });
 
   it('renders X icon inside the button', () => {
-    render(<CloseButton onClick={onClick} />);
+    render(<CloseButton onClick={vi.fn()} />);
     const btn = screen.getByLabelText('Đóng hộp thoại');
     const svg = btn.querySelector('svg');
     expect(svg).toBeInTheDocument();
     expect(svg).toHaveClass('h-5', 'w-5');
   });
 
-  it('applies data-testid when provided', () => {
-    render(<CloseButton onClick={onClick} data-testid="btn-close-test" />);
-    expect(screen.getByTestId('btn-close-test')).toBeInTheDocument();
-  });
-
-  it('does not render data-testid when not provided', () => {
-    render(<CloseButton onClick={onClick} />);
+  it('has accessible focus ring', () => {
+    render(<CloseButton onClick={vi.fn()} />);
     const btn = screen.getByLabelText('Đóng hộp thoại');
-    expect(btn.getAttribute('data-testid')).toBeNull();
+    expect(btn.className).toContain('focus-visible:ring-2');
   });
 
-  it('has 44px minimum touch target', () => {
-    render(<CloseButton onClick={onClick} />);
+  it('has min 44px touch target', () => {
+    render(<CloseButton onClick={vi.fn()} />);
     const btn = screen.getByLabelText('Đóng hộp thoại');
     expect(btn.className).toContain('min-h-11');
     expect(btn.className).toContain('min-w-11');
-  });
-
-  it('has focus-visible ring styles for accessibility', () => {
-    render(<CloseButton onClick={onClick} />);
-    const btn = screen.getByLabelText('Đóng hộp thoại');
-    expect(btn.className).toContain('focus-visible:ring-2');
-    expect(btn.className).toContain('focus-visible:ring-ring');
-  });
-
-  it('has hover styles for visual feedback', () => {
-    render(<CloseButton onClick={onClick} />);
-    const btn = screen.getByLabelText('Đóng hộp thoại');
-    expect(btn.className).toContain('hover:text-foreground');
-    expect(btn.className).toContain('hover:bg-accent');
   });
 });

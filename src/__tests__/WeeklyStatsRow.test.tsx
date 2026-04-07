@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import type { Mock } from 'vitest';
 
-import { WeeklySnapshot } from '../features/dashboard/components/WeeklySnapshot';
+import { WeeklyStatsRow } from '../features/dashboard/components/WeeklyStatsRow';
 import type { TrainingPlan, TrainingPlanDay, WeightEntry, Workout } from '../features/fitness/types';
 import { useFitnessStore } from '../store/fitnessStore';
 
@@ -94,12 +94,12 @@ function setupStore(data: StoreData = {}) {
 
 // ===== Tests =====
 
-describe('WeeklySnapshot', () => {
+describe('WeeklyStatsRow', () => {
   // ===== Container =====
 
   it('renders container with correct testid and aria-label', () => {
     setupStore();
-    render(<WeeklySnapshot />);
+    render(<WeeklyStatsRow />);
 
     const container = screen.getByTestId('weekly-snapshot');
     expect(container).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe('WeeklySnapshot', () => {
   describe('Weight column', () => {
     it('shows dash and "Ghi cân nặng" when no weight data', () => {
       setupStore();
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const col = screen.getByTestId('weekly-weight');
       expect(col).toBeInTheDocument();
@@ -122,51 +122,51 @@ describe('WeeklySnapshot', () => {
     it('shows latest weight with unit', () => {
       const weightEntries = [makeWeightEntry('2024-01-09', 74.5), makeWeightEntry('2024-01-10', 74.5)];
       setupStore({ weightEntries });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const col = screen.getByTestId('weekly-weight');
       expect(col).toHaveTextContent('74.5');
       expect(col).toHaveTextContent('kg');
     });
 
-    it('shows down arrow (green) when weight decreased', () => {
+    it('shows down arrow (emerald) when weight decreased', () => {
       // 7 day span: 75→74 = -1 per week exactly
       const weightEntries = [makeWeightEntry('2024-01-03', 75), makeWeightEntry('2024-01-10', 74)];
       setupStore({ weightEntries });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const change = screen.getByTestId('weekly-weight-change');
       expect(change).toBeInTheDocument();
       expect(change).toHaveTextContent('↓');
-      expect(change.className).toContain('text-primary');
+      expect(change.className).toContain('text-emerald-400');
     });
 
     it('shows up arrow (amber) when weight increased', () => {
       // 7 day span: 74→75 = +1 per week
       const weightEntries = [makeWeightEntry('2024-01-03', 74), makeWeightEntry('2024-01-10', 75)];
       setupStore({ weightEntries });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const change = screen.getByTestId('weekly-weight-change');
       expect(change).toBeInTheDocument();
       expect(change).toHaveTextContent('↑');
-      expect(change.className).toContain('text-warning');
+      expect(change.className).toContain('text-amber-400');
     });
 
     it('shows stable text when weight unchanged', () => {
       const weightEntries = [makeWeightEntry('2024-01-03', 74.5), makeWeightEntry('2024-01-10', 74.5)];
       setupStore({ weightEntries });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const change = screen.getByTestId('weekly-weight-change');
       expect(change).toHaveTextContent('ổn định');
-      expect(change.className).toContain('text-muted-foreground');
+      expect(change.className).toContain('text-primary-foreground/60');
     });
 
     it('does not show change when only 1 entry', () => {
       const weightEntries = [makeWeightEntry('2024-01-10', 74.5)];
       setupStore({ weightEntries });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       expect(screen.queryByTestId('weekly-weight-change')).not.toBeInTheDocument();
       expect(screen.getByTestId('weekly-weight')).toHaveTextContent('74.5');
@@ -178,7 +178,7 @@ describe('WeeklySnapshot', () => {
   describe('Streak column', () => {
     it('shows 0 ngày when no workouts', () => {
       setupStore();
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const col = screen.getByTestId('weekly-streak');
       expect(col).toHaveTextContent('0 ngày');
@@ -188,7 +188,7 @@ describe('WeeklySnapshot', () => {
     it('shows active streak count', () => {
       const workouts = [makeWorkout('2024-01-08'), makeWorkout('2024-01-09'), makeWorkout('2024-01-10')];
       setupStore({ workouts });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const col = screen.getByTestId('weekly-streak');
       expect(col).toHaveTextContent('3 ngày');
@@ -197,7 +197,7 @@ describe('WeeklySnapshot', () => {
     it('shows 1 ngày for single workout today', () => {
       const workouts = [makeWorkout('2024-01-10')];
       setupStore({ workouts });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       expect(screen.getByTestId('weekly-streak')).toHaveTextContent('1 ngày');
     });
@@ -205,7 +205,7 @@ describe('WeeklySnapshot', () => {
     it('renders 7 dots', () => {
       const workouts = [makeWorkout('2024-01-08')];
       setupStore({ workouts });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const dots = screen.getByTestId('weekly-streak-dots');
       expect(dots).toBeInTheDocument();
@@ -215,22 +215,22 @@ describe('WeeklySnapshot', () => {
       }
     });
 
-    it('completed dot has primary color', () => {
+    it('completed dot has emerald color', () => {
       // Mon (day 1) has workout
       const workouts = [makeWorkout('2024-01-08')];
       setupStore({ workouts });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const dot = screen.getByTestId('weekly-dot-1');
       expect(dot).toHaveAttribute('data-status', 'completed');
-      expect(dot.className).toContain('bg-primary');
+      expect(dot.className).toContain('bg-emerald-400');
     });
 
     it('today dot has special styling', () => {
       // Wed (day 3) = today
       const workouts = [makeWorkout('2024-01-08')];
       setupStore({ workouts });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const dot = screen.getByTestId('weekly-dot-3');
       expect(dot).toHaveAttribute('data-status', 'today');
@@ -239,7 +239,7 @@ describe('WeeklySnapshot', () => {
     it('upcoming dots are empty', () => {
       const workouts = [makeWorkout('2024-01-08')];
       setupStore({ workouts });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       // Thu (day 4) is upcoming
       const dot = screen.getByTestId('weekly-dot-4');
@@ -254,16 +254,16 @@ describe('WeeklySnapshot', () => {
         trainingPlans: [makePlan()],
         trainingPlanDays: makePlanDays([1, 3, 5]),
       });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const dot2 = screen.getByTestId('weekly-dot-2');
       expect(dot2).toHaveAttribute('data-status', 'rest');
-      expect(dot2.className).toContain('bg-info');
+      expect(dot2.className).toContain('bg-sky-400');
     });
 
     it('all dots empty when no workouts (no plan)', () => {
       setupStore();
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       // Mon+Tue = missed, Wed = today, Thu-Sun = upcoming
       expect(screen.getByTestId('weekly-dot-1')).toHaveAttribute('data-status', 'missed');
@@ -278,7 +278,7 @@ describe('WeeklySnapshot', () => {
   describe('Adherence column', () => {
     it('shows dash when no plan', () => {
       setupStore({ workouts: [makeWorkout('2024-01-10')] });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const col = screen.getByTestId('weekly-adherence');
       expect(col).toHaveTextContent('—');
@@ -293,7 +293,7 @@ describe('WeeklySnapshot', () => {
         trainingPlans: [makePlan()],
         trainingPlanDays: makePlanDays([1, 3, 5]),
       });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       // Mon+Wed are planned so far (Wed is today so counted). No workouts = 0%
       expect(screen.getByTestId('weekly-adherence')).toHaveTextContent('0%');
@@ -306,7 +306,7 @@ describe('WeeklySnapshot', () => {
         trainingPlans: [makePlan()],
         trainingPlanDays: makePlanDays([1, 3, 5]),
       });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       expect(screen.getByTestId('weekly-adherence')).toHaveTextContent('100%');
     });
@@ -318,7 +318,7 @@ describe('WeeklySnapshot', () => {
         trainingPlans: [makePlan()],
         trainingPlanDays: makePlanDays([1, 3, 5]),
       });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       expect(screen.getByTestId('weekly-adherence')).toHaveTextContent('50%');
     });
@@ -329,7 +329,7 @@ describe('WeeklySnapshot', () => {
         trainingPlans: [makePlan()],
         trainingPlanDays: makePlanDays([1, 3, 5]),
       });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const bar = screen.getByTestId('weekly-adherence-bar');
       expect(bar).toBeInTheDocument();
@@ -344,7 +344,7 @@ describe('WeeklySnapshot', () => {
         trainingPlans: [makePlan()],
         trainingPlanDays: makePlanDays([1, 3, 5]),
       });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const bar = screen.getByTestId('weekly-adherence-bar');
       expect(bar).toHaveAttribute('value', '50');
@@ -357,7 +357,7 @@ describe('WeeklySnapshot', () => {
         trainingPlans: [pausedPlan],
         trainingPlanDays: makePlanDays([1, 3, 5]),
       });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       // No active plan → adherence = —
       expect(screen.getByTestId('weekly-adherence')).toHaveTextContent('—');
@@ -371,7 +371,7 @@ describe('WeeklySnapshot', () => {
         trainingPlans: [makePlan()],
         trainingPlanDays: makePlanDays([1, 3, 5]),
       });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       expect(screen.getByTestId('weekly-adherence')).toHaveTextContent('50%');
     });
@@ -384,7 +384,7 @@ describe('WeeklySnapshot', () => {
         trainingPlans: [makePlan()],
         trainingPlanDays: makePlanDays([5, 6, 7]),
       });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       expect(screen.getByTestId('weekly-adherence')).toHaveTextContent('—');
       expect(screen.queryByTestId('weekly-adherence-bar')).not.toBeInTheDocument();
@@ -401,7 +401,7 @@ describe('WeeklySnapshot', () => {
         trainingPlans: [makePlan()],
         trainingPlanDays: makePlanDays([1, 3, 5]),
       });
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       // Weight
       expect(screen.getByTestId('weekly-weight')).toHaveTextContent('74.5');
@@ -416,7 +416,7 @@ describe('WeeklySnapshot', () => {
 
     it('renders all 3 columns empty gracefully', () => {
       setupStore();
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       expect(screen.getByTestId('weekly-weight')).toHaveTextContent('—');
       expect(screen.getByTestId('weekly-streak')).toHaveTextContent('0 ngày');
@@ -427,15 +427,17 @@ describe('WeeklySnapshot', () => {
   // ===== Styling =====
 
   describe('Styling', () => {
-    it('container has card styling classes', () => {
+    it('container has inline row classes (no card wrapper)', () => {
       setupStore();
-      render(<WeeklySnapshot />);
+      render(<WeeklyStatsRow />);
 
       const container = screen.getByTestId('weekly-snapshot');
-      expect(container.className).toContain('bg-card');
-      expect(container.className).toContain('border');
-      expect(container.className).toContain('rounded-xl');
       expect(container.className).toContain('grid-cols-3');
+      expect(container.className).toContain('divide-primary-foreground/10');
+      // No card wrapper classes
+      expect(container.className).not.toContain('bg-card');
+      expect(container.className).not.toContain('rounded-xl');
+      expect(container.className).not.toContain('border-border');
     });
   });
 });

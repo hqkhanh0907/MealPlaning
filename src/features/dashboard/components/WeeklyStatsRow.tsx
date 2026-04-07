@@ -55,19 +55,19 @@ function computeAdherence(
   return Math.round((completedCount / plannedCount) * 100);
 }
 
-// ===== Dot colors =====
+// ===== Dot colors (gradient-card contrast) =====
 
 const DOT_COLORS: Record<string, string> = {
-  completed: 'bg-primary',
-  rest: 'bg-info',
-  missed: 'border-2 border-border bg-transparent',
-  upcoming: 'border-2 border-border bg-transparent',
-  today: 'border-2 border-primary bg-primary/30',
+  completed: 'bg-emerald-400',
+  rest: 'bg-sky-400',
+  missed: 'border-2 border-primary-foreground/20 bg-transparent',
+  upcoming: 'border-2 border-primary-foreground/20 bg-transparent',
+  today: 'border-2 border-emerald-400 bg-emerald-400/30',
 };
 
 // ===== Component =====
 
-function WeeklySnapshotInner(): React.ReactElement {
+function WeeklyStatsRowInner(): React.ReactElement {
   const { t } = useTranslation();
   const activePlan = useFitnessStore(selectActivePlan);
   const { workouts, weightEntries, trainingPlanDays } = useFitnessStore(
@@ -97,18 +97,17 @@ function WeeklySnapshotInner(): React.ReactElement {
     [workouts, planDays, mondayStr, todayStr],
   );
 
-  // Weight change display
   const weightChangeDisplay = useMemo(() => {
     if (weeklyChange === null) return null;
     const abs = Math.abs(weeklyChange);
     const rounded = abs < 0.1 ? abs.toFixed(2) : abs.toFixed(1);
     if (weeklyChange < -0.05) {
-      return { text: t('dashboard.weekly.weightDown', { value: rounded }), color: 'text-primary' };
+      return { text: t('dashboard.weekly.weightDown', { value: rounded }), color: 'text-emerald-400' };
     }
     if (weeklyChange > 0.05) {
-      return { text: t('dashboard.weekly.weightUp', { value: rounded }), color: 'text-warning' };
+      return { text: t('dashboard.weekly.weightUp', { value: rounded }), color: 'text-amber-400' };
     }
-    return { text: t('dashboard.weekly.weightStable'), color: 'text-muted-foreground' };
+    return { text: t('dashboard.weekly.weightStable'), color: 'text-primary-foreground/60' };
   }, [weeklyChange, t]);
 
   return (
@@ -119,18 +118,18 @@ function WeeklySnapshotInner(): React.ReactElement {
         streak: streakInfo.currentStreak,
         adherence: adherence == null ? '—' : `${adherence}%`,
       })}
-      className="bg-card border-border divide-border grid grid-cols-3 divide-x rounded-xl border p-4"
+      className="divide-primary-foreground/10 grid grid-cols-3 divide-x"
     >
       {/* Column 1 — Weight */}
       <div className="flex flex-col items-center justify-center gap-0.5 pr-3" data-testid="weekly-weight">
         {latestWeight == null ? (
           <>
-            <span className="text-muted-foreground text-base font-semibold">{t('dashboard.weekly.noWeight')}</span>
-            <span className="text-muted-foreground text-xs">{t('dashboard.weekly.logWeight')}</span>
+            <span className="text-primary-foreground/60 text-base font-semibold">{t('dashboard.weekly.noWeight')}</span>
+            <span className="text-primary-foreground/60 text-xs">{t('dashboard.weekly.logWeight')}</span>
           </>
         ) : (
           <>
-            <span className="text-foreground text-base font-semibold tabular-nums">
+            <span className="text-primary-foreground text-base font-semibold tabular-nums">
               {latestWeight} {t('dashboard.weekly.weightUnit')}
             </span>
             {weightChangeDisplay && (
@@ -147,12 +146,12 @@ function WeeklySnapshotInner(): React.ReactElement {
 
       {/* Column 2 — Streak */}
       <div className="flex flex-col items-center justify-center gap-0.5 px-3" data-testid="weekly-streak">
-        <span className="text-foreground text-base font-semibold tabular-nums">
+        <span className="text-primary-foreground text-base font-semibold tabular-nums">
           {streakInfo.currentStreak > 0
             ? t('dashboard.weekly.streakDays', { count: streakInfo.currentStreak })
             : t('dashboard.weekly.noStreak')}
         </span>
-        <span className="text-muted-foreground text-xs tracking-wider">{t('dashboard.weekly.streak')}</span>
+        <span className="text-primary-foreground/60 text-xs tracking-wider">{t('dashboard.weekly.streak')}</span>
         <div className="mt-0.5 flex items-center gap-0.5" data-testid="weekly-streak-dots" aria-hidden="true">
           {streakInfo.weekDots.map(dot => (
             <span
@@ -169,15 +168,21 @@ function WeeklySnapshotInner(): React.ReactElement {
       <div className="flex flex-col items-center justify-center gap-0.5 pl-3" data-testid="weekly-adherence">
         {adherence == null ? (
           <>
-            <span className="text-muted-foreground text-base font-semibold">{t('dashboard.weekly.noAdherence')}</span>
-            <span className="text-muted-foreground text-xs tracking-wider">{t('dashboard.weekly.adherenceLabel')}</span>
+            <span className="text-primary-foreground/60 text-base font-semibold">
+              {t('dashboard.weekly.noAdherence')}
+            </span>
+            <span className="text-primary-foreground/60 text-xs tracking-wider">
+              {t('dashboard.weekly.adherenceLabel')}
+            </span>
           </>
         ) : (
           <>
-            <span className="text-foreground text-base font-semibold tabular-nums">{adherence}%</span>
-            <span className="text-muted-foreground text-xs tracking-wider">{t('dashboard.weekly.adherenceLabel')}</span>
+            <span className="text-primary-foreground text-base font-semibold tabular-nums">{adherence}%</span>
+            <span className="text-primary-foreground/60 text-xs tracking-wider">
+              {t('dashboard.weekly.adherenceLabel')}
+            </span>
             <progress
-              className="bg-muted [&::-moz-progress-bar]:bg-primary [&::-webkit-progress-value]:bg-primary mt-0.5 h-1.5 w-full appearance-none overflow-hidden rounded-full [&::-moz-progress-bar]:rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all"
+              className="mt-0.5 h-1.5 w-full appearance-none overflow-hidden rounded-full bg-white/10 [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-emerald-400 [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-emerald-400 [&::-webkit-progress-value]:transition-all"
               data-testid="weekly-adherence-bar"
               value={Math.min(adherence, 100)}
               max={100}
@@ -189,4 +194,4 @@ function WeeklySnapshotInner(): React.ReactElement {
   );
 }
 
-export const WeeklySnapshot = React.memo(WeeklySnapshotInner);
+export const WeeklyStatsRow = React.memo(WeeklyStatsRowInner);

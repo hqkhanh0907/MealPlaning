@@ -1,9 +1,10 @@
-import { Minus, Plus, Scale, X } from 'lucide-react';
+import { Minus, Plus, Scale } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { generateUUID } from '@/utils/helpers';
 
+import { CloseButton } from '../../../components/shared/CloseButton';
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
@@ -257,15 +258,7 @@ function WeightQuickLogInner({ onClose }: Readonly<WeightQuickLogProps>): React.
             <Scale className="text-primary h-5 w-5" aria-hidden="true" />
             <h2 className="text-foreground text-xl font-semibold">{t('fitness.weight.quickLogTitle')}</h2>
           </div>
-          <button
-            type="button"
-            data-testid="close-btn"
-            aria-label={t('common.close')}
-            onClick={onClose}
-            className="text-muted-foreground hover:bg-accent flex h-11 w-11 items-center justify-center rounded-full transition-colors active:scale-95"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <CloseButton onClick={onClose} data-testid="close-btn" ariaLabel={t('common.close')} />
         </div>
 
         {/* Weight Display */}

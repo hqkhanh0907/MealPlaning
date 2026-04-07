@@ -12,7 +12,6 @@ import {
   Sparkles,
   Trash2,
   Wheat,
-  X,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
@@ -28,6 +27,7 @@ import { Dish, Ingredient, MealType, SuggestedDishIngredient, SupportedLang } fr
 import { generateUUID } from '../../utils/helpers';
 import { getLocalizedField } from '../../utils/localize';
 import { StringNumberController } from '../form/StringNumberController';
+import { CloseButton } from '../shared/CloseButton';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { UnsavedChangesDialog } from '../shared/UnsavedChangesDialog';
 import { AISuggestIngredientsPreview, ConfirmedSuggestion } from './AISuggestIngredientsPreview';
@@ -364,14 +364,7 @@ export const DishEditModal = ({
             <h4 className="text-foreground text-lg font-semibold">
               {editingItem ? t('dish.editExisting') : t('dish.createNew')}
             </h4>
-            <button
-              onClick={handleClose}
-              data-testid="btn-close-dish"
-              aria-label={t('common.closeDialog')}
-              className="dark:text-muted-foreground text-muted-foreground hover:bg-accent focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 focus-visible:ring-2 focus-visible:outline-none"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <CloseButton onClick={handleClose} data-testid="btn-close-dish" />
           </div>
           <div className="flex-1 space-y-6 overflow-y-auto overscroll-contain p-6">
             <div>

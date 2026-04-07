@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2, ChefHat, Edit3, RefreshCw, Sparkles, X } from 'lucide-react';
+import { AlertCircle, CheckCircle2, ChefHat, Edit3, RefreshCw, Sparkles } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +7,7 @@ import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { Dish, Ingredient, MealPlanSuggestion, MealType, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { calculateDishesNutrition } from '../../utils/nutrition';
+import { CloseButton } from '../shared/CloseButton';
 import { DisabledReason } from '../shared/DisabledReason';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 
@@ -148,13 +149,7 @@ export const AISuggestionPreviewModal = ({
               <p className="text-muted-foreground text-xs">{t('ai.suggestionDesc')}</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.closeDialog')}
-            className="dark:text-muted-foreground text-muted-foreground hover:bg-card/50 rounded-full p-2 transition-all"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <CloseButton onClick={onClose} data-testid="btn-close-ai-suggestion" />
         </div>
 
         {/* Content */}

@@ -16,6 +16,7 @@ import {
 } from '../../schemas/saveTemplateSchema';
 import { DayPlan, Dish, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
+import { CloseButton } from '../shared/CloseButton';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 
 interface SaveTemplateModalProps {
@@ -161,13 +162,7 @@ export const SaveTemplateModal = ({ currentPlan, dishes, onSave, onClose }: Save
             <h3 className="text-foreground text-xl font-semibold">{t('template.saveTitle')}</h3>
             <p className="text-muted-foreground text-sm">{t('template.saveSubtitle')}</p>
           </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.closeDialog')}
-            className="text-muted-foreground hover:bg-accent flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 transition-all"
-          >
-            <X className="h-6 w-6" />
-          </button>
+          <CloseButton onClick={onClose} data-testid="btn-close-save-template" />
         </div>
 
         <div className="space-y-5 overflow-y-auto p-6 sm:p-8">

@@ -1,10 +1,11 @@
-import { CalendarDays, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { DayPlan, MealType } from '../../types';
 import { getWeekRange, isDateInRange, parseLocalDate } from '../../utils/helpers';
+import { CloseButton } from '../shared/CloseButton';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 
 interface ClearPlanModalProps {
@@ -113,13 +114,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
             <h3 className="text-foreground text-xl font-semibold">{t('clearPlan.title')}</h3>
             <p className="text-muted-foreground text-sm">{t('clearPlan.subtitle')}</p>
           </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.closeDialog')}
-            className="text-muted-foreground hover:bg-accent rounded-full p-2 transition-all"
-          >
-            <X className="h-6 w-6" />
-          </button>
+          <CloseButton onClick={onClose} data-testid="btn-close-clear-plan" />
         </div>
         <div className="space-y-4 p-6 sm:p-8">
           {/* Meal selection */}

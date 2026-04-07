@@ -1,6 +1,8 @@
-import { Apple, ChefHat, Copy, Edit3, GitCompareArrows, Trash2, X } from 'lucide-react';
+import { Apple, ChefHat, Copy, Edit3, GitCompareArrows, Trash2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { CloseButton } from '@/components/shared/CloseButton';
 
 import { useNotification } from '../contexts/NotificationContext';
 import type { BaseSortOption } from '../data/constants';
@@ -780,13 +782,11 @@ export const DishManager = ({
                     <GitCompareArrows className="text-info h-5 w-5" />
                     {t('dish.compareNutrition')}
                   </h3>
-                  <button
+                  <CloseButton
                     onClick={() => setShowCompare(false)}
-                    className="hover:text-foreground-secondary text-muted-foreground focus-visible:ring-ring flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all focus-visible:ring-2 focus-visible:outline-none"
-                    aria-label={t('common.close')}
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
+                    data-testid="btn-close-compare"
+                    ariaLabel={t('common.close')}
+                  />
                 </div>
                 <div className="p-4">
                   <table className="w-full">

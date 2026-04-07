@@ -1,4 +1,4 @@
-import { Check, X } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 
 import { Ingredient, SuggestedDishIngredient } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
+import { CloseButton } from '../shared/CloseButton';
 import { DisabledReason } from '../shared/DisabledReason';
 
 let _keyCounter = 0;
@@ -89,15 +90,7 @@ export const AISuggestIngredientsPreview = ({
         <div className="bg-card relative w-full rounded-t-2xl p-6 shadow-xl sm:mx-4 sm:max-w-lg sm:rounded-2xl">
           <div className="mb-4 flex items-center justify-between">
             <p className="text-ai text-base font-semibold">✨ {t('dish.aiSuggestTitle', { name: dishName })}</p>
-            <button
-              type="button"
-              onClick={onClose}
-              data-testid="btn-ai-suggest-close"
-              aria-label={t('common.closeDialog')}
-              className="text-muted-foreground hover:bg-accent rounded-full p-2 transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <CloseButton onClick={onClose} data-testid="btn-ai-suggest-close" />
           </div>
           <p className="text-muted-foreground py-8 text-center text-sm" data-testid="ai-suggest-empty">
             {t('dish.aiSuggestEmpty')}
@@ -119,15 +112,7 @@ export const AISuggestIngredientsPreview = ({
       <div className="bg-card relative flex h-[85dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:h-auto sm:max-h-[85dvh] sm:max-w-lg sm:rounded-2xl">
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
           <p className="text-ai text-base font-semibold">✨ {t('dish.aiSuggestTitle', { name: dishName })}</p>
-          <button
-            type="button"
-            onClick={onClose}
-            data-testid="btn-ai-suggest-close"
-            aria-label={t('common.closeDialog')}
-            className="text-muted-foreground hover:bg-accent rounded-full p-2 transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <CloseButton onClick={onClose} data-testid="btn-ai-suggest-close" />
         </div>
         <div className="flex-1 space-y-2 overflow-y-auto overscroll-contain p-4">
           {items.map((item, index) => (

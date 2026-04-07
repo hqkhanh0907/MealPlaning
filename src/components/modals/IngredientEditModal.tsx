@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle, Loader2, Save, Sparkles, X } from 'lucide-react';
+import { CheckCircle, Loader2, Save, Sparkles } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
@@ -20,6 +20,7 @@ import { suggestIngredientInfo } from '../../services/geminiService';
 import { Ingredient, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { logger } from '../../utils/logger';
+import { CloseButton } from '../shared/CloseButton';
 import { DisabledReason } from '../shared/DisabledReason';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { UnitSelector } from '../shared/UnitSelector';
@@ -217,14 +218,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
             <h4 className="text-foreground text-lg font-semibold">
               {editingItem ? t('ingredient.editExisting') : t('ingredient.createNew')}
             </h4>
-            <button
-              onClick={handleClose}
-              data-testid="btn-close-ingredient"
-              aria-label={t('common.closeDialog')}
-              className="text-muted-foreground hover:bg-accent rounded-full p-2"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <CloseButton onClick={handleClose} data-testid="btn-close-ingredient" />
           </div>
           <form noValidate onSubmit={rhfSubmit(onFormSubmit)} className="space-y-4 p-6">
             <div>

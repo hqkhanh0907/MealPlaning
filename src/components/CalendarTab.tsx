@@ -1,6 +1,8 @@
-import { BarChart3, CalendarDays, UtensilsCrossed, X } from 'lucide-react';
+import { BarChart3, CalendarDays, UtensilsCrossed } from 'lucide-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { CloseButton } from '@/components/shared/CloseButton';
 
 import { useIsDesktop } from '../hooks/useIsDesktop';
 import { DayNutritionSummary, DayPlan, Dish, Ingredient, MealType } from '../types';
@@ -233,15 +235,7 @@ export const CalendarTab = React.memo(function CalendarTab({
           >
             <div className="border-border flex items-center justify-between border-b px-4 py-3">
               <h2 className="text-foreground text-lg font-semibold">{t('grocery.title')}</h2>
-              <button
-                type="button"
-                onClick={handleCloseGrocery}
-                data-testid="btn-close-grocery"
-                className="hover:text-foreground-secondary text-muted-foreground hover:bg-accent rounded-xl p-2 transition-all"
-                aria-label={t('common.close')}
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <CloseButton onClick={handleCloseGrocery} data-testid="btn-close-grocery" ariaLabel={t('common.close')} />
             </div>
             <div className="flex-1 overflow-y-auto">
               <GroceryList

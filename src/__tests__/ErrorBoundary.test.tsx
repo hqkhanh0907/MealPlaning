@@ -112,4 +112,31 @@ describe('ErrorBoundary', () => {
       configurable: true,
     });
   });
+
+  it('renders custom fallback ReactNode when provided', () => {
+    const customFallback = <div data-testid="custom-fallback">Custom Error UI</div>;
+
+    render(
+      <ErrorBoundary fallback={customFallback}>
+        <ThrowingChild shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    expect(screen.getByTestId('custom-fallback')).toBeInTheDocument();
+    expect(screen.getByText('Custom Error UI')).toBeInTheDocument();
+    expect(screen.queryByText('Thử lại')).not.toBeInTheDocument();
+  });
+
+  it('prioritizes fallback over fallbackTitle when both provided', () => {
+    const customFallback = <div data-testid="custom-fallback">Custom</div>;
+
+    render(
+      <ErrorBoundary fallback={customFallback} fallbackTitle="Ignored Title">
+        <ThrowingChild shouldThrow={true} />
+      </ErrorBoundary>,
+    );
+
+    expect(screen.getByTestId('custom-fallback')).toBeInTheDocument();
+    expect(screen.queryByText('Ignored Title')).not.toBeInTheDocument();
+  });
 });

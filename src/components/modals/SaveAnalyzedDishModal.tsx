@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Save, Sparkles, X } from 'lucide-react';
+import { Loader2, Save, Sparkles } from 'lucide-react';
 import { useRef, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
@@ -15,6 +15,7 @@ import { suggestIngredientInfo } from '../../services/geminiService';
 import { AnalyzedDishResult, MealType, SaveAnalyzedDishPayload } from '../../types';
 import { logger } from '../../utils/logger';
 import { StringNumberController } from '../form/StringNumberController';
+import { CloseButton } from '../shared/CloseButton';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 import { UnitSelector } from '../shared/UnitSelector';
 
@@ -144,13 +145,7 @@ export const SaveAnalyzedDishModal = ({ onClose, result, onSave }: SaveAnalyzedD
       <div className="bg-card relative flex max-h-[85dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-h-[90dvh] sm:max-w-4xl sm:rounded-2xl">
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-4">
           <h4 className="text-foreground text-lg font-semibold">{t('saveAnalyzed.title')}</h4>
-          <button
-            onClick={onClose}
-            aria-label={t('common.closeDialog')}
-            className="dark:text-muted-foreground text-muted-foreground hover:bg-accent rounded-full p-2 transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <CloseButton onClick={onClose} data-testid="btn-close-save-analyzed" />
         </div>
 
         <div className="flex-1 space-y-8 overflow-y-auto overscroll-contain p-6">

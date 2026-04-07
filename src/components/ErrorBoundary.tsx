@@ -7,6 +7,7 @@ import { logger } from '../utils/logger';
 interface ErrorBoundaryProps {
   children: React.ReactNode;
   fallbackTitle?: string;
+  fallback?: React.ReactNode;
 }
 
 interface ErrorBoundaryState {
@@ -41,6 +42,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
       return (
         <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
           <div className="bg-warning/10 mb-4 flex h-16 w-16 items-center justify-center rounded-full">

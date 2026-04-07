@@ -1,10 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle, Loader2, Plus, Sparkles, X } from 'lucide-react';
+import { CheckCircle, Loader2, Plus, Sparkles } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
+import { CloseButton } from '@/components/shared/CloseButton';
 import { Input } from '@/components/ui/input';
 import { useIngredientSmartFill } from '@/hooks/useIngredientSmartFill';
 
@@ -174,14 +175,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
       <div className="bg-card relative max-h-[80dvh] w-full space-y-4 overflow-y-auto overscroll-contain rounded-t-2xl p-6 shadow-xl sm:max-w-md sm:rounded-2xl">
         <div className="flex items-center justify-between">
           <p className="text-primary text-base font-semibold">{t('dish.quickAddTitle')}</p>
-          <button
-            type="button"
-            onClick={handleCancel}
-            aria-label={t('common.closeDialog')}
-            className="text-muted-foreground hover:bg-accent rounded-full p-2"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <CloseButton onClick={handleCancel} data-testid="btn-close-quick-add" />
         </div>
         <div>
           <label htmlFor="qa-name" className="text-muted-foreground mb-1.5 block text-xs font-semibold uppercase">

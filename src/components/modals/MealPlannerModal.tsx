@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Beef, CheckCircle2, ChefHat, Flame, Moon, Search, SlidersHorizontal, Sun, Sunrise, X } from 'lucide-react';
+import { Beef, CheckCircle2, ChefHat, Flame, Moon, Search, SlidersHorizontal, Sun, Sunrise } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,6 +9,7 @@ import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { DayPlan, Dish, FilterConfig, Ingredient, MealType, NutritionInfo, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
 import { calculateDishesNutrition, calculateDishNutrition } from '../../utils/nutrition';
+import { CloseButton } from '../shared/CloseButton';
 import { FilterBottomSheet } from '../shared/FilterBottomSheet';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 
@@ -199,13 +200,7 @@ export const MealPlannerModal = ({
             </h3>
             <p className="text-muted-foreground text-xs sm:text-sm">{t('planning.planSubtitle')}</p>
           </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.closeDialog')}
-            className="text-muted-foreground hover:bg-accent flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 transition-all"
-          >
-            <X className="h-6 w-6" />
-          </button>
+          <CloseButton onClick={onClose} data-testid="btn-close-meal-planner" />
         </div>
 
         {/* Tabs */}

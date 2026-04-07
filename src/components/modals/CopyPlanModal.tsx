@@ -1,4 +1,4 @@
-import { ChefHat, Copy, Plus, Trash2, X } from 'lucide-react';
+import { ChefHat, Copy, Plus, Trash2 } from 'lucide-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,6 +8,7 @@ import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { DayPlan, Dish, SupportedLang } from '../../types';
 import { parseLocalDate } from '../../utils/helpers';
 import { getLocalizedField } from '../../utils/localize';
+import { CloseButton } from '../shared/CloseButton';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 
 interface CopyPlanModalProps {
@@ -119,13 +120,7 @@ export const CopyPlanModal = ({ sourceDate, sourcePlan, dishes, onCopy, onClose 
               {formatDate(sourceDate, dateLocale)} — {t('copyPlan.subtitle')}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.closeDialog')}
-            className="text-muted-foreground hover:bg-accent flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 transition-all"
-          >
-            <X className="h-6 w-6" />
-          </button>
+          <CloseButton onClick={onClose} data-testid="btn-close-copy-plan" />
         </div>
 
         <div className="space-y-5 overflow-y-auto p-6 sm:p-8">

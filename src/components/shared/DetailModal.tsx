@@ -1,7 +1,8 @@
-import { Edit3, X } from 'lucide-react';
+import { Edit3 } from 'lucide-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { CloseButton } from './CloseButton';
 import { ModalBackdrop } from './ModalBackdrop';
 
 interface DetailModalProps {
@@ -33,14 +34,7 @@ export const DetailModal = ({ title, editLabel, onClose, onEdit, children }: Det
             >
               <Edit3 className="h-5 w-5" />
             </button>
-            <button
-              onClick={onClose}
-              data-testid="btn-detail-close"
-              aria-label={t('common.closeDialog')}
-              className="text-muted-foreground hover:bg-accent rounded-full p-2"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <CloseButton onClick={onClose} data-testid="btn-detail-close" />
           </div>
         </div>
 

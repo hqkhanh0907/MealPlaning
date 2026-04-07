@@ -122,11 +122,9 @@ describe('SaveTemplateModal', () => {
     expect(screen.getByText('5/100')).toBeInTheDocument();
   });
 
-  it('calls onClose when X button clicked', () => {
+  it('calls onClose when close button clicked', () => {
     render(<SaveTemplateModal {...defaultProps} />);
-    const closeButtons = screen.getAllByRole('button');
-    const xButton = closeButtons.find(b => !b.getAttribute('data-testid'));
-    if (xButton) fireEvent.click(xButton);
+    fireEvent.click(screen.getByTestId('btn-close-save-template'));
     expect(defaultProps.onClose).toHaveBeenCalled();
   });
 

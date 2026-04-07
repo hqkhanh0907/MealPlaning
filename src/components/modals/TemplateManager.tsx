@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
 import { Dish, MealTemplate, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
+import { CloseButton } from '../shared/CloseButton';
 import { ModalBackdrop } from '../shared/ModalBackdrop';
 
 interface TemplateManagerProps {
@@ -93,13 +94,7 @@ export const TemplateManager = ({ templates, dishes, onApply, onDelete, onRename
           <div>
             <h3 className="text-foreground text-xl font-semibold">{t('template.title')}</h3>
           </div>
-          <button
-            onClick={onClose}
-            aria-label={t('common.closeDialog')}
-            className="text-muted-foreground hover:bg-accent flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 transition-all"
-          >
-            <X className="h-6 w-6" />
-          </button>
+          <CloseButton onClick={onClose} data-testid="btn-close-template-manager" />
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 sm:p-8">

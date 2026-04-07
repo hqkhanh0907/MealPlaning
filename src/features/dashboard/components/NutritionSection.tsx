@@ -9,7 +9,6 @@ import { useIngredientStore } from '@/store/ingredientStore';
 import { calculateDishesNutrition } from '@/utils/nutrition';
 
 import type { HeroContext } from '../hooks/useDailyScore';
-import { useDailyScore } from '../hooks/useDailyScore';
 import type { ScoreColor } from '../types';
 
 /* ------------------------------------------------------------------ */
@@ -100,8 +99,6 @@ const RING_STROKE = 4;
 const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
-const GRADIENT_CLASS = 'bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900';
-
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
@@ -183,11 +180,7 @@ function MacroBar({ label, current, target, colorClass, testId }: Readonly<Macro
 
 function NutritionHeroSkeleton() {
   return (
-    <section
-      className={`w-full animate-pulse space-y-3 rounded-2xl ${GRADIENT_CLASS} p-5`}
-      data-testid="nutrition-hero"
-      aria-busy="true"
-    >
+    <div className="animate-pulse space-y-3" data-testid="nutrition-hero" aria-busy="true">
       <div className="flex items-start justify-between">
         <div className="h-4 w-32 rounded bg-white/10" />
         <div className="h-9 w-9 rounded-full bg-white/10" />
@@ -201,7 +194,7 @@ function NutritionHeroSkeleton() {
         <div className="h-8 flex-1 rounded bg-white/10" />
         <div className="h-8 flex-1 rounded bg-white/10" />
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -209,8 +202,13 @@ function NutritionHeroSkeleton() {
 /*  Main component                                                     */
 /* ------------------------------------------------------------------ */
 
-export interface NutritionHeroProps {
+export interface NutritionSectionProps {
   isLoading?: boolean;
+  isFirstTimeUser: boolean;
+  greeting: string;
+  heroContext: string;
+  totalScore: number;
+  scoreColor: string;
 }
 
 interface CalorieSummary {
@@ -234,12 +232,20 @@ function computeCalorieSummary(eaten: number | null, target: number, hasDishes: 
   return { displayEaten, displayTarget, caloriePct, isOverTarget, hasNutritionData, remaining };
 }
 
-function NutritionHeroInner({ isLoading = false }: Readonly<NutritionHeroProps>): React.ReactElement {
+function NutritionSectionInner({
+  isLoading = false,
+  isFirstTimeUser,
+  greeting,
+  heroContext,
+  totalScore,
+  scoreColor,
+}: Readonly<NutritionSectionProps>): React.ReactElement {
   const { t } = useTranslation();
-  const { totalScore, color, greeting, isFirstTimeUser, heroContext } = useDailyScore();
   const { targetCalories, targetProtein, targetFat, targetCarbs } = useNutritionTargets();
   const profileName = useHealthProfileStore(s => s.profile?.name ?? '');
   const todayMacros = useTodayFullNutrition();
+
+  const color = scoreColor as ScoreColor;
 
   const { displayEaten, displayTarget, caloriePct, isOverTarget, hasNutritionData, remaining } = computeCalorieSummary(
     todayMacros.eaten,
@@ -262,25 +268,22 @@ function NutritionHeroInner({ isLoading = false }: Readonly<NutritionHeroProps>)
 
   if (isFirstTimeUser) {
     return (
-      <section
-        className={`w-full rounded-2xl ${GRADIENT_CLASS} p-5`}
-        data-testid="nutrition-hero"
-        aria-label={t('dashboard.nutritionHero.a11y')}
-      >
+      <div data-testid="nutrition-hero" aria-label={t('dashboard.nutritionHero.a11y')}>
         <p className="mb-1 text-sm text-white/80" data-testid="nutrition-hero-greeting">
           {greeting}
         </p>
         <h2 className="mb-2 text-xl font-semibold text-white">{t('dashboard.nutritionHero.setupTitle')}</h2>
         <p className="text-sm text-white/60">{t('dashboard.nutritionHero.setupDescription')}</p>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section
-      className={`w-full space-y-3 rounded-2xl ${GRADIENT_CLASS} p-5`}
+    <div
+      className="space-y-3"
       data-testid="nutrition-hero"
       aria-label={t('dashboard.nutritionHero.a11y')}
+      aria-busy={isLoading || undefined}
     >
       {/* Row 1: Greeting + Score badge */}
       <div className="flex items-start justify-between">
@@ -288,8 +291,10 @@ function NutritionHeroInner({ isLoading = false }: Readonly<NutritionHeroProps>)
           <p className="truncate text-sm font-medium text-white/90" data-testid="nutrition-hero-greeting">
             {displayGreeting}
           </p>
-          {heroContext !== 'first-time' && HERO_CONTEXT_I18N[heroContext] && (
-            <p className="mt-0.5 line-clamp-2 text-xs text-white/50">{t(HERO_CONTEXT_I18N[heroContext])}</p>
+          {heroContext !== 'first-time' && HERO_CONTEXT_I18N[heroContext as Exclude<HeroContext, 'first-time'>] && (
+            <p className="mt-0.5 line-clamp-2 text-xs text-white/50">
+              {t(HERO_CONTEXT_I18N[heroContext as Exclude<HeroContext, 'first-time'>])}
+            </p>
           )}
         </div>
         <div
@@ -361,9 +366,9 @@ function NutritionHeroInner({ isLoading = false }: Readonly<NutritionHeroProps>)
           testId="nutrition-hero-carbs"
         />
       </div>
-    </section>
+    </div>
   );
 }
 
-export const NutritionHero = React.memo(NutritionHeroInner);
-NutritionHero.displayName = 'NutritionHero';
+export const NutritionSection = React.memo(NutritionSectionInner);
+NutritionSection.displayName = 'NutritionSection';

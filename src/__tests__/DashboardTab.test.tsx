@@ -11,8 +11,13 @@ vi.mock('react-i18next', () => ({
 }));
 
 /* ============ child component mocks ============ */
-vi.mock('../features/dashboard/components/NutritionHero', () => ({
-  NutritionHero: () => <div data-testid="nutrition-hero">NutritionHero</div>,
+vi.mock('../features/dashboard/components/CombinedHero', () => ({
+  CombinedHero: () => (
+    <div data-testid="combined-hero">
+      <div data-testid="nutrition-hero">NutritionSection</div>
+      <div data-testid="weekly-snapshot">WeeklyStatsRow</div>
+    </div>
+  ),
 }));
 
 vi.mock('../features/dashboard/components/TodaysPlanCard', () => ({
@@ -21,10 +26,6 @@ vi.mock('../features/dashboard/components/TodaysPlanCard', () => ({
 
 vi.mock('../features/dashboard/components/AiInsightCard', () => ({
   AiInsightCard: () => <div data-testid="ai-insight-card">AiInsightCard</div>,
-}));
-
-vi.mock('../features/dashboard/components/WeeklySnapshot', () => ({
-  WeeklySnapshot: () => <div data-testid="weekly-snapshot">WeeklySnapshot</div>,
 }));
 
 let capturedQuickActionsOnLogWeight: (() => void) | undefined;
@@ -130,10 +131,12 @@ describe('DashboardTab', () => {
       expect(screen.getByTestId('dashboard-tab')).toBeInTheDocument();
     });
 
-    it('renders Tier 1: NutritionHero', () => {
+    it('renders Tier 1: CombinedHero with NutritionSection and WeeklyStatsRow', () => {
       renderDashboard();
       expect(screen.getByTestId('dashboard-tier-1')).toBeInTheDocument();
+      expect(screen.getByTestId('combined-hero')).toBeInTheDocument();
       expect(screen.getByTestId('nutrition-hero')).toBeInTheDocument();
+      expect(screen.getByTestId('weekly-snapshot')).toBeInTheDocument();
     });
 
     it('renders Tier 2: TodaysPlanCard and AiInsightCard', () => {
@@ -143,10 +146,9 @@ describe('DashboardTab', () => {
       expect(screen.getByTestId('ai-insight-card')).toBeInTheDocument();
     });
 
-    it('renders Tier 3: WeeklySnapshot and QuickActionsBar after lazy load', () => {
+    it('renders Tier 3: QuickActionsBar after lazy load', () => {
       renderDashboard();
       expect(screen.getByTestId('dashboard-tier-3')).toBeInTheDocument();
-      expect(screen.getByTestId('weekly-snapshot')).toBeInTheDocument();
       expect(screen.getByTestId('quick-actions-bar')).toBeInTheDocument();
     });
 

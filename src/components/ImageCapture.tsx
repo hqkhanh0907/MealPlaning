@@ -2,6 +2,8 @@ import { Camera, RotateCcw, Upload, X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { CloseButton } from '@/components/shared/CloseButton';
+
 import { compressImage } from '../utils/imageCompression';
 import { logger } from '../utils/logger';
 
@@ -167,13 +169,12 @@ export const ImageCapture = ({ image, onImageReady, onClear }: ImageCaptureProps
               </video>
               <canvas ref={canvasRef} className="hidden" />
               <div className="absolute bottom-10 flex items-center gap-6">
-                <button
+                <CloseButton
                   onClick={stopCamera}
-                  aria-label={t('imageCapture.closeCamera')}
-                  className="focus-visible:ring-ring bg-card/20 hover:bg-card/30 flex min-h-12 min-w-12 items-center justify-center rounded-full p-3 text-white backdrop-blur transition-all focus-visible:ring-2 focus-visible:ring-offset-2"
-                >
-                  <X className="h-6 w-6" />
-                </button>
+                  data-testid="btn-close-camera"
+                  ariaLabel={t('imageCapture.closeCamera')}
+                  variant="overlay"
+                />
                 <button
                   onClick={capturePhoto}
                   aria-label={t('imageCapture.takePhoto')}
