@@ -280,4 +280,96 @@ Commit `a4d6b3a` resolved 32 SonarQube issues across 18 files:
 
 ---
 
-_Report generated from visual inspection of 464 emulator screenshots. Appendix B added after implementing 23 UI/UX fixes + 32 SonarQube fixes._
+---
+
+## Appendix C: Phase 2 — 57 Deferred Items Overhaul (2026-07-24)
+
+Phase 2 addressed 57 critique points deferred from Phase 1. Organized into 7 waves with 27 TODOs. Committed as `84c5079`.
+
+### Wave 1 — Design Foundation (Color + Typography)
+
+| TODO  | Change                                            | Files         |
+| ----- | ------------------------------------------------- | ------------- |
+| W1-01 | Accent color: Violet-500 (`--accent` token)       | `index.css`   |
+| W1-02 | 60-30-10 color ratio documentation                | Design tokens |
+| W1-03 | Protein color: Emerald → Sky/Cyan separation      | `index.css`   |
+| W1-04 | Typography scale: added Medium (500), size spread | `index.css`   |
+
+### Wave 2 — Card System + Visual Hierarchy
+
+| TODO  | Change                                           | Files                                          |
+| ----- | ------------------------------------------------ | ---------------------------------------------- |
+| W2-01 | 3-level card elevation (Flat/Raised/Floating)    | Component variants                             |
+| W2-02 | Meal type icons + colors (Sáng🌅/Trưa☀️/Tối🌙)   | `MealSlot.tsx`, cards                          |
+| W2-03 | AI shimmer border + badge distinction            | `MealSlot.tsx`, `MealPlannerModal.tsx`         |
+| W2-04 | Data hierarchy: primary/secondary/label sizing   | `MealSlot.tsx`, `NutritionHero.tsx`            |
+| W2-05 | Full macro display (Protein + Fat + Carbs pills) | `MiniNutritionBar.tsx`, `MealPlannerModal.tsx` |
+
+### Wave 3 — Empty States Overhaul
+
+| TODO  | Change                                       | Files                                  |
+| ----- | -------------------------------------------- | -------------------------------------- |
+| W3-01 | EmptyState component (compact/standard/hero) | `src/components/shared/EmptyState.tsx` |
+| W3-02 | EmptyState applied to 13 locations           | 13 component files                     |
+| W3-03 | Filter chips for Library search              | `ListToolbar.tsx`, `DishManager.tsx`   |
+
+### Wave 4 — Bottom Sheet + Modal UX
+
+| TODO  | Change                                     | Files               |
+| ----- | ------------------------------------------ | ------------------- |
+| W4-01 | Grab handle on ModalBackdrop (mobile only) | `ModalBackdrop.tsx` |
+| W4-02 | Drag-to-dismiss (swipe down > 100px)       | `ModalBackdrop.tsx` |
+| W4-03 | Standardized Close button component        | Modal components    |
+
+### Wave 5 — Dashboard + Fitness Enhancements
+
+| TODO  | Change                                            | Files                     |
+| ----- | ------------------------------------------------- | ------------------------- |
+| W5-02 | Today highlight in WeeklyCalendarStrip            | `WeeklyCalendarStrip.tsx` |
+| W5-03 | Rest day card enrichment (tips, tomorrow preview) | `TodaysPlanCard.tsx`      |
+| W5-04 | Workout plan info density reduction               | `TrainingPlanView.tsx`    |
+
+### Wave 7 — UX Enhancements + Polish
+
+| TODO  | Change                                             | Files                                       |
+| ----- | -------------------------------------------------- | ------------------------------------------- |
+| W7-01 | Ingredient auto-fill from database                 | `QuickAddIngredientForm.tsx`                |
+| W7-02 | Dish duplicate action ("Nhân đôi")                 | `DishManager.tsx`                           |
+| W7-03 | Tone/wording audit: 22 Vietnamese strings softened | `vi.json`                                   |
+| W7-04 | Settings section quick-jump tabs                   | `SettingsDetailLayout.tsx`                  |
+| W7-05 | Star rating with fieldset ARIA + context           | `DishEditModal.tsx`                         |
+| W7-06 | Exercise format guide toggle                       | `PlanDayEditor.tsx`, `vi.json`              |
+| W7-07 | Protein/calorie budget nudge hints                 | `AiInsightCard.tsx`, `MiniNutritionBar.tsx` |
+| W7-08 | Today circle subtle pulse animation                | `DateSelector.tsx`, `index.css`             |
+
+### SonarQube Cleanup (Phase 2: 3 issues → 0)
+
+| File                       | Issue                        | Fix                                          |
+| -------------------------- | ---------------------------- | -------------------------------------------- |
+| `DishManager.tsx`          | Cognitive Complexity 16 > 15 | Extracted `DishGridCard` + `compareDishes()` |
+| `DishEditModal.tsx`        | `role="radio"` on `<button>` | Changed to `<fieldset>` + `aria-pressed`     |
+| `SettingsDetailLayout.tsx` | `role="tablist"` on `<nav>`  | Changed `<nav>` → `<div>`                    |
+
+### Quality Gates Final Status (Phase 2)
+
+| Gate            | Result                           |
+| --------------- | -------------------------------- |
+| `npm run lint`  | ✅ 0 errors                      |
+| `npm run test`  | ✅ 5119 tests pass               |
+| `npm run build` | ✅ Clean, main chunk 258kB       |
+| SonarQube       | ✅ 0 issues                      |
+| Emulator        | ✅ APK verified on emulator-5556 |
+
+### Deferred Items (Not Addressed — Separate Sprint)
+
+| Category                | Items | Reason                                   |
+| ----------------------- | ----- | ---------------------------------------- |
+| Onboarding shortening   | 6     | User requested separate discussion       |
+| Dashboard 6→4 sections  | 1     | Major layout refactor, planned Sprint 2  |
+| 60-30-10 color overhaul | 1     | Brand-level decision, needs UX designer  |
+| Border-radius normalize | 1     | 100+ files, design system audit needed   |
+| Wizard form for profile | 1     | UX research needed for step optimization |
+
+---
+
+_Report generated from visual inspection of 464 emulator screenshots. Appendix B added after Phase 1 (23 UI/UX fixes + 32 SonarQube fixes). Appendix C added after Phase 2 (27 wave TODOs + 3 SonarQube fixes)._
