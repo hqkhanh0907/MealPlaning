@@ -1231,7 +1231,9 @@
       "over": "Vượt {{value}} kcal",
       "macroP": "P",
       "macroF": "F",
-      "macroC": "C"
+      "macroC": "C",
+      "targetLabel": "Mục tiêu",
+      "goalReached": "mục tiêu đạt được"
     },
     "error": {
       "hero": "Không thể tải tổng quan",

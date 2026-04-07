@@ -79,10 +79,15 @@ function safePositive(value: number): number {
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 
-const SCORE_BADGE_BG: Record<ScoreColor, string> = {
-  emerald: 'bg-macro-protein',
-  amber: 'bg-macro-fat',
-  slate: 'bg-macro-carbs',
+const SCORE_BADGE_CLASSES: Record<ScoreColor, { border: string; bg: string; dot: string; text: string }> = {
+  emerald: { border: 'border-success/30', bg: 'bg-success/10', dot: 'bg-success', text: 'text-success' },
+  amber: { border: 'border-energy/30', bg: 'bg-energy/10', dot: 'bg-energy', text: 'text-energy' },
+  slate: {
+    border: 'border-muted-foreground/30',
+    bg: 'bg-muted',
+    dot: 'bg-muted-foreground',
+    text: 'text-muted-foreground',
+  },
 };
 
 const HERO_CONTEXT_I18N: Record<Exclude<HeroContext, 'first-time'>, string> = {
@@ -94,8 +99,8 @@ const HERO_CONTEXT_I18N: Record<Exclude<HeroContext, 'first-time'>, string> = {
   'rest-day-empty': 'dashboard.hero.contextual.restDayEmpty',
 };
 
-const RING_SIZE = 80;
-const RING_STROKE = 5;
+const RING_SIZE = 96;
+const RING_STROKE = 6;
 const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
@@ -103,7 +108,12 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
 
-function ProgressRing({ pct }: Readonly<{ pct: number }>) {
+interface ProgressRingProps {
+  pct: number;
+  eatenText: string;
+}
+
+function ProgressRing({ pct, eatenText }: Readonly<ProgressRingProps>) {
   /* v8 ignore start -- defensive: pct is always finite from caller */
   const safePct = Number.isFinite(pct) ? pct : 0;
   /* v8 ignore stop */
@@ -135,7 +145,10 @@ function ProgressRing({ pct }: Readonly<{ pct: number }>) {
           className="text-success transition-all duration-500"
         />
       </svg>
-      <span className="text-primary text-sm font-bold tabular-nums">{clamped}%</span>
+      <div className="flex flex-col items-center justify-center">
+        <span className="text-foreground text-2xl font-bold tabular-nums">{eatenText}</span>
+        <span className="text-muted-foreground -mt-0.5 text-[10px]">kcal</span>
+      </div>
     </div>
   );
 }
@@ -181,18 +194,29 @@ function MacroBar({ label, current, target, colorClass, testId }: Readonly<Macro
 function NutritionHeroSkeleton() {
   return (
     <div className="animate-pulse space-y-3" data-testid="nutrition-hero" aria-busy="true">
-      <div className="flex items-start justify-between">
-        <div className="bg-muted-foreground/10 h-4 w-32 rounded" />
-        <div className="bg-muted-foreground/10 h-9 w-9 rounded-full" />
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="bg-muted-foreground/10 h-3 w-20 rounded" />
+          <div className="bg-muted-foreground/10 mt-1.5 h-6 w-28 rounded" />
+        </div>
+        <div className="bg-muted-foreground/10 h-7 w-14 rounded-full" />
       </div>
-      <div className="bg-card rounded-xl p-3">
-        <div className="bg-muted-foreground/10 h-6 w-40 rounded" />
-        <div className="bg-muted-foreground/10 mt-2 h-1.5 w-full rounded-full" />
-      </div>
-      <div className="flex gap-3">
-        <div className="bg-muted-foreground/10 h-8 flex-1 rounded" />
-        <div className="bg-muted-foreground/10 h-8 flex-1 rounded" />
-        <div className="bg-muted-foreground/10 h-8 flex-1 rounded" />
+      <div className="bg-card rounded-2xl border p-5 shadow-sm">
+        <div className="flex items-center gap-5">
+          <div className="bg-muted-foreground/10 h-24 w-24 shrink-0 rounded-full" />
+          <div className="flex-1 space-y-2">
+            <div className="bg-muted-foreground/10 h-5 w-32 rounded" />
+            <div className="bg-muted-foreground/10 h-8 w-28 rounded-lg" />
+            <div className="bg-muted-foreground/10 h-3 w-36 rounded" />
+          </div>
+        </div>
+        <div className="border-border/50 mt-4 border-t pt-3">
+          <div className="flex gap-3">
+            <div className="bg-muted-foreground/10 h-10 flex-1 rounded" />
+            <div className="bg-muted-foreground/10 h-10 flex-1 rounded" />
+            <div className="bg-muted-foreground/10 h-10 flex-1 rounded" />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -246,6 +270,7 @@ function NutritionSectionInner({
   const todayMacros = useTodayFullNutrition();
 
   const color = scoreColor as ScoreColor;
+  const badgeClasses = SCORE_BADGE_CLASSES[color];
 
   const { displayEaten, displayTarget, caloriePct, isOverTarget, hasNutritionData, remaining } = computeCalorieSummary(
     todayMacros.eaten,
@@ -261,8 +286,6 @@ function NutritionSectionInner({
       ? t('dashboard.nutritionHero.over', { value: Math.abs(remaining) })
       : t('dashboard.nutritionHero.remaining', { value: remaining ?? 0 });
   const remainingText = remaining === null ? '—' : overOrRemainingLabel;
-
-  const displayGreeting = profileName ? t('dashboard.nutritionHero.greetingName', { name: profileName }) : greeting;
 
   if (isLoading) return <NutritionHeroSkeleton />;
 
@@ -285,87 +308,114 @@ function NutritionSectionInner({
       aria-label={t('dashboard.nutritionHero.a11y')}
       aria-busy={isLoading || undefined}
     >
-      {/* Row 1: Greeting + Score badge */}
-      <div className="flex items-start justify-between">
+      {/* Row 1: Greeting (small) + Name (xl bold) + Score pill */}
+      <div className="flex items-center justify-between">
         <div className="min-w-0 flex-1 pr-3">
-          <p className="text-foreground truncate text-sm font-medium" data-testid="nutrition-hero-greeting">
-            {displayGreeting}
+          <p className="text-primary/70 text-xs font-medium" data-testid="nutrition-hero-greeting">
+            {greeting}
           </p>
-          {heroContext !== 'first-time' && HERO_CONTEXT_I18N[heroContext as Exclude<HeroContext, 'first-time'>] && (
-            <p className="text-muted-foreground mt-0.5 line-clamp-2 text-xs">
-              {t(HERO_CONTEXT_I18N[heroContext as Exclude<HeroContext, 'first-time'>])}
-            </p>
-          )}
+          {profileName && <p className="text-foreground -mt-0.5 truncate text-xl font-bold">{profileName}</p>}
+          {!profileName &&
+            heroContext !== 'first-time' &&
+            HERO_CONTEXT_I18N[heroContext as Exclude<HeroContext, 'first-time'>] && (
+              <p className="text-muted-foreground mt-0.5 line-clamp-2 text-xs">
+                {t(HERO_CONTEXT_I18N[heroContext as Exclude<HeroContext, 'first-time'>])}
+              </p>
+            )}
         </div>
         <div
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${SCORE_BADGE_BG[color]}`}
+          className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 ${badgeClasses.border} ${badgeClasses.bg}`}
           data-testid="nutrition-hero-score"
           aria-label={t('dashboard.nutritionHero.scoreA11y', { score: totalScore })}
         >
-          <span className="text-primary-foreground text-xs font-bold tabular-nums">{totalScore}</span>
+          <div className={`h-2 w-2 rounded-full ${badgeClasses.dot}`} />
+          <span className={`text-xs font-bold tabular-nums ${badgeClasses.text}`}>{totalScore}</span>
         </div>
       </div>
 
-      {/* Row 2: Calorie summary */}
+      {/* Row 2: Calorie Hero Card — ring left + details right + macros inside */}
       {hasNutritionData ? (
-        <div className="bg-card/80 rounded-xl p-3 shadow-sm" data-testid="nutrition-hero-calories">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-stat-med text-foreground font-bold tabular-nums">
-                {eatenText}{' '}
-                <span className="text-muted-foreground text-sm font-normal tabular-nums">
-                  / {Math.round(displayTarget)} kcal
-                </span>
-              </p>
-              <p
-                className={`mt-0.5 text-xs font-medium ${isOverTarget ? 'text-rose' : 'text-success'}`}
+        <div
+          className="border-border/60 bg-card rounded-2xl border p-5 shadow-sm"
+          data-testid="nutrition-hero-calories"
+        >
+          <div className="flex items-center gap-5">
+            {/* Large progress ring — LEFT side, focal point */}
+            <ProgressRing pct={caloriePct} eatenText={eatenText} />
+
+            {/* Calorie details — RIGHT side */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-muted-foreground text-sm">{t('dashboard.nutritionHero.targetLabel')}</span>
+                <span className="text-foreground text-lg font-bold tabular-nums">{Math.round(displayTarget)}</span>
+                <span className="text-muted-foreground text-xs">kcal</span>
+              </div>
+              <div
+                className={`mt-2 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 ${isOverTarget ? 'bg-rose/10' : 'bg-success/10'}`}
                 data-testid="nutrition-hero-remaining"
               >
-                {remainingText}
+                <svg
+                  className={`h-3.5 w-3.5 ${isOverTarget ? 'text-rose' : 'text-success'}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d={isOverTarget ? 'M19 14l-7 7m0 0l-7-7m7 7V3' : 'M5 10l7-7m0 0l7 7m-7-7v18'}
+                  />
+                </svg>
+                <span className={`text-xs font-semibold ${isOverTarget ? 'text-rose' : 'text-success'}`}>
+                  {remainingText}
+                </span>
+              </div>
+              <p className="text-muted-foreground mt-1.5 text-[10px]">
+                {caloriePct}% {t('dashboard.nutritionHero.goalReached')}
               </p>
             </div>
-            <ProgressRing pct={caloriePct} />
           </div>
-          <div className="bg-muted mt-2 h-1.5 overflow-hidden rounded-full">
-            <div
-              className={`h-full rounded-full transition-all ${isOverTarget ? 'bg-rose' : 'bg-success'}`}
-              style={{ width: `${caloriePct}%` }}
-            />
+
+          {/* Macro bars — INSIDE card, below border-t */}
+          <div className="border-border/50 mt-4 border-t pt-3">
+            <div className="grid grid-cols-3 gap-3">
+              <MacroBar
+                label={t('dashboard.nutritionHero.macroP')}
+                current={todayMacros.protein}
+                target={targetProtein}
+                colorClass="bg-macro-protein"
+                testId="nutrition-hero-protein"
+              />
+              <MacroBar
+                label={t('dashboard.nutritionHero.macroF')}
+                current={todayMacros.fat}
+                target={targetFat}
+                colorClass="bg-macro-fat"
+                testId="nutrition-hero-fat"
+              />
+              <MacroBar
+                label={t('dashboard.nutritionHero.macroC')}
+                current={todayMacros.carbs}
+                target={targetCarbs}
+                colorClass="bg-macro-carbs"
+                testId="nutrition-hero-carbs"
+              />
+            </div>
           </div>
         </div>
       ) : (
-        <div className="bg-card/80 rounded-xl p-4 text-center shadow-sm" data-testid="nutrition-hero-calories">
+        <div
+          className="border-border/60 bg-card rounded-2xl border p-5 text-center shadow-sm"
+          data-testid="nutrition-hero-calories"
+        >
           <p className="text-muted-foreground text-sm">{t('dashboard.nutritionHero.addFirstMeal')}</p>
           <p className="text-muted-foreground/70 mt-1 text-xs">
             {t('dashboard.nutritionHero.targetInfo', { target: Math.round(displayTarget) })}
           </p>
         </div>
       )}
-
-      {/* Row 3: Macro bars */}
-      <div className="flex gap-3">
-        <MacroBar
-          label={t('dashboard.nutritionHero.macroP')}
-          current={todayMacros.protein}
-          target={targetProtein}
-          colorClass="bg-macro-protein"
-          testId="nutrition-hero-protein"
-        />
-        <MacroBar
-          label={t('dashboard.nutritionHero.macroF')}
-          current={todayMacros.fat}
-          target={targetFat}
-          colorClass="bg-macro-fat"
-          testId="nutrition-hero-fat"
-        />
-        <MacroBar
-          label={t('dashboard.nutritionHero.macroC')}
-          current={todayMacros.carbs}
-          target={targetCarbs}
-          colorClass="bg-macro-carbs"
-          testId="nutrition-hero-carbs"
-        />
-      </div>
     </div>
   );
 }

@@ -23,6 +23,8 @@ const I18N_MAP: Record<string, string> = {
   'dashboard.nutritionHero.macroP': 'P',
   'dashboard.nutritionHero.macroF': 'F',
   'dashboard.nutritionHero.macroC': 'C',
+  'dashboard.nutritionHero.targetLabel': 'Mục tiêu',
+  'dashboard.nutritionHero.goalReached': 'mục tiêu đạt được',
   'dashboard.hero.contextual.balancedDay': 'Ngày hôm nay rất cân bằng',
   'dashboard.hero.contextual.emptyDay': 'Bắt đầu ngày mới nào',
   'dashboard.hero.contextual.restDayEmpty': 'Ngày nghỉ — thư giãn',
@@ -300,18 +302,16 @@ describe('NutritionSection', () => {
       expect(screen.getByTestId('nutrition-hero-score')).toBeInTheDocument();
     });
 
-    it('shows macro bars with dash for current', () => {
+    it('does not show macro bars when no plan', () => {
       setupNoPlan();
       render(<NutritionSection {...defaultProps({ heroContext: 'empty-day' })} />);
-      expect(screen.getByTestId('nutrition-hero-protein')).toHaveTextContent('—/170g');
-      expect(screen.getByTestId('nutrition-hero-fat')).toHaveTextContent('—/58g');
-      expect(screen.getByTestId('nutrition-hero-carbs')).toHaveTextContent('—/241g');
+      expect(screen.queryByTestId('nutrition-hero-protein')).not.toBeInTheDocument();
     });
 
-    it('shows greeting with name', () => {
+    it('shows greeting with name as prominent text', () => {
       setupNoPlan({ profileName: 'Khánh' });
       render(<NutritionSection {...defaultProps({ heroContext: 'empty-day' })} />);
-      expect(screen.getByTestId('nutrition-hero-greeting')).toHaveTextContent('Chào Khánh!');
+      expect(screen.getByText('Khánh')).toBeInTheDocument();
     });
 
     it('falls back to time-based greeting when profile is null', () => {
@@ -331,24 +331,23 @@ describe('NutritionSection', () => {
       expect(screen.getByText('Thêm bữa ăn đầu tiên cho hôm nay')).toBeInTheDocument();
     });
 
-    it('shows macro bars with zero for current', () => {
+    it('does not show macro bars when plan has no dishes', () => {
       setupEmptyPlan();
       render(<NutritionSection {...defaultProps({ heroContext: 'empty-day' })} />);
-      expect(screen.getByTestId('nutrition-hero-protein')).toHaveTextContent('0/170g');
-      expect(screen.getByTestId('nutrition-hero-fat')).toHaveTextContent('0/58g');
-      expect(screen.getByTestId('nutrition-hero-carbs')).toHaveTextContent('0/241g');
+      expect(screen.queryByTestId('nutrition-hero-protein')).not.toBeInTheDocument();
     });
   });
 
   /* --- Has data state --- */
 
   describe('has nutrition data', () => {
-    it('shows eaten / target kcal', () => {
+    it('shows eaten in progress ring and target in details', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps()} />);
       const calorieCard = screen.getByTestId('nutrition-hero-calories');
       expect(calorieCard).toHaveTextContent('1327');
-      expect(calorieCard).toHaveTextContent('/ 2091 kcal');
+      expect(calorieCard).toHaveTextContent('2091');
+      expect(calorieCard).toHaveTextContent('Mục tiêu');
     });
 
     it('shows remaining calories in emerald when under target', () => {
@@ -356,7 +355,7 @@ describe('NutritionSection', () => {
       render(<NutritionSection {...defaultProps()} />);
       const remaining = screen.getByTestId('nutrition-hero-remaining');
       expect(remaining).toHaveTextContent('Còn 764 kcal');
-      expect(remaining.className).toContain('text-success');
+      expect(remaining.className).toContain('bg-success/10');
     });
 
     it('shows over calories in rose when over target', () => {
@@ -366,7 +365,7 @@ describe('NutritionSection', () => {
       render(<NutritionSection {...defaultProps()} />);
       const remaining = screen.getByTestId('nutrition-hero-remaining');
       expect(remaining).toHaveTextContent('Vượt 409 kcal');
-      expect(remaining.className).toContain('text-rose');
+      expect(remaining.className).toContain('bg-rose/10');
     });
 
     it('shows macro bars with current/target', () => {
@@ -377,11 +376,13 @@ describe('NutritionSection', () => {
       expect(screen.getByTestId('nutrition-hero-carbs')).toHaveTextContent('125/241g');
     });
 
-    it('shows progress ring with percentage', () => {
+    it('shows progress ring with calorie number', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps()} />);
-      // 1327/2091 ≈ 63%
-      expect(screen.getByText('63%')).toBeInTheDocument();
+      // Ring shows eaten calories (1327) + "kcal" text
+      expect(screen.getByText('1327')).toBeInTheDocument();
+      // "kcal" appears in both ring and target details — verify at least one exists
+      expect(screen.getAllByText('kcal').length).toBeGreaterThanOrEqual(1);
     });
 
     it('does not show encouragement message', () => {
@@ -398,7 +399,8 @@ describe('NutritionSection', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps({ totalScore: 90, scoreColor: 'emerald' })} />);
       const badge = screen.getByTestId('nutrition-hero-score');
-      expect(badge.className).toContain('bg-macro-protein');
+      expect(badge.className).toContain('border-success/30');
+      expect(badge.className).toContain('bg-success/10');
       expect(badge).toHaveTextContent('90');
     });
 
@@ -406,24 +408,28 @@ describe('NutritionSection', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps({ totalScore: 63, scoreColor: 'amber' })} />);
       const badge = screen.getByTestId('nutrition-hero-score');
-      expect(badge.className).toContain('bg-macro-fat');
+      expect(badge.className).toContain('border-energy/30');
+      expect(badge.className).toContain('bg-energy/10');
     });
 
     it('renders slate badge for low score', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps({ totalScore: 30, scoreColor: 'slate' })} />);
       const badge = screen.getByTestId('nutrition-hero-score');
-      expect(badge.className).toContain('bg-macro-carbs');
+      expect(badge.className).toContain('border-muted-foreground/30');
+      expect(badge.className).toContain('bg-muted');
     });
   });
 
   /* --- Greeting and contextual message --- */
 
   describe('greeting and context', () => {
-    it('shows name in greeting when available', () => {
+    it('shows name prominently below greeting when available', () => {
       setupWithMeals({ profileName: 'Minh' });
       render(<NutritionSection {...defaultProps()} />);
-      expect(screen.getByTestId('nutrition-hero-greeting')).toHaveTextContent('Chào Minh!');
+      // Greeting is time-based, name is separate bold text
+      expect(screen.getByTestId('nutrition-hero-greeting')).toHaveTextContent('Chào buổi sáng!');
+      expect(screen.getByText('Minh')).toBeInTheDocument();
     });
 
     it('falls back to time-based greeting when name is empty', () => {
@@ -432,63 +438,68 @@ describe('NutritionSection', () => {
       expect(screen.getByTestId('nutrition-hero-greeting')).toHaveTextContent('Chào buổi sáng!');
     });
 
-    it('shows contextual message for balanced day', () => {
-      setupWithMeals();
+    it('shows contextual message when no profile name for balanced day', () => {
+      setupWithMeals({ profileName: '' });
       render(<NutritionSection {...defaultProps({ heroContext: 'balanced-day' })} />);
       expect(screen.getByText('Ngày hôm nay rất cân bằng')).toBeInTheDocument();
     });
 
-    it('shows contextual message for empty day', () => {
-      setupNoPlan();
+    it('shows contextual message when no profile name for empty day', () => {
+      setupNoPlan({ profileName: '' });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockUseHealthProfileStore.mockImplementation((selector: any) => selector({ profile: { name: '' } }));
       render(<NutritionSection {...defaultProps({ heroContext: 'empty-day' })} />);
       expect(screen.getByText('Bắt đầu ngày mới nào')).toBeInTheDocument();
     });
 
-    it('shows contextual message for rest day', () => {
-      setupWithMeals();
+    it('shows contextual message when no profile name for rest day', () => {
+      setupWithMeals({ profileName: '' });
       render(<NutritionSection {...defaultProps({ heroContext: 'rest-day-with-meals' })} />);
       expect(screen.getByText('Ngày nghỉ phục hồi')).toBeInTheDocument();
     });
 
-    it('shows contextual message for training day', () => {
-      setupWithMeals();
+    it('shows contextual message when no profile name for training day', () => {
+      setupWithMeals({ profileName: '' });
       render(<NutritionSection {...defaultProps({ heroContext: 'training-day-needs-workout' })} />);
       expect(screen.getByText('Hôm nay là ngày tập')).toBeInTheDocument();
     });
 
-    it('shows contextual message for workout done', () => {
-      setupWithMeals();
+    it('shows contextual message when no profile name for workout done', () => {
+      setupWithMeals({ profileName: '' });
       render(<NutritionSection {...defaultProps({ heroContext: 'workout-done-needs-fuel' })} />);
       expect(screen.getByText('Buổi tập tuyệt vời!')).toBeInTheDocument();
     });
 
-    it('shows contextual message for rest day empty', () => {
-      setupNoPlan();
+    it('shows contextual message when no profile name for rest day empty', () => {
+      setupNoPlan({ profileName: '' });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      mockUseHealthProfileStore.mockImplementation((selector: any) => selector({ profile: { name: '' } }));
       render(<NutritionSection {...defaultProps({ heroContext: 'rest-day-empty' })} />);
       expect(screen.getByText('Ngày nghỉ — thư giãn')).toBeInTheDocument();
+    });
+
+    it('hides contextual message when profile name is present', () => {
+      setupWithMeals({ profileName: 'Khánh' });
+      render(<NutritionSection {...defaultProps({ heroContext: 'balanced-day' })} />);
+      expect(screen.queryByText('Ngày hôm nay rất cân bằng')).not.toBeInTheDocument();
     });
   });
 
   /* --- Null vs zero display --- */
 
   describe('null vs zero display', () => {
-    it('shows dash for null protein (no plan)', () => {
+    it('does not show macros when no plan (macros inside card)', () => {
       setupNoPlan();
       render(<NutritionSection {...defaultProps({ heroContext: 'empty-day' })} />);
-      expect(screen.getByTestId('nutrition-hero-protein')).toHaveTextContent('—/170g');
+      expect(screen.queryByTestId('nutrition-hero-protein')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nutrition-hero-fat')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nutrition-hero-carbs')).not.toBeInTheDocument();
     });
 
-    it('shows 0 for zero protein (empty plan)', () => {
+    it('does not show macros when empty plan (macros inside card)', () => {
       setupEmptyPlan();
       render(<NutritionSection {...defaultProps({ heroContext: 'empty-day' })} />);
-      expect(screen.getByTestId('nutrition-hero-protein')).toHaveTextContent('0/170g');
-    });
-
-    it('shows dash for null fat and carbs (no plan)', () => {
-      setupNoPlan();
-      render(<NutritionSection {...defaultProps({ heroContext: 'empty-day' })} />);
-      expect(screen.getByTestId('nutrition-hero-fat')).toHaveTextContent('—/58g');
-      expect(screen.getByTestId('nutrition-hero-carbs')).toHaveTextContent('—/241g');
+      expect(screen.queryByTestId('nutrition-hero-protein')).not.toBeInTheDocument();
     });
   });
 
@@ -508,20 +519,23 @@ describe('NutritionSection', () => {
       expect(screen.getByTestId('nutrition-hero-protein')).toHaveTextContent('170/0g');
     });
 
-    it('clamps progress ring at 100%', () => {
+    it('shows full progress and goal text when at or over target', () => {
       setupWithMeals({
         nutrition: { calories: 5000, protein: 300, fat: 100, carbs: 500, fiber: 20 },
       });
       render(<NutritionSection {...defaultProps()} />);
-      expect(screen.getByText('100%')).toBeInTheDocument();
+      // Ring shows eaten calorie number
+      expect(screen.getByText('5000')).toBeInTheDocument();
+      // Percentage shows clamped at 100%
+      expect(screen.getByText(/100%/)).toBeInTheDocument();
     });
 
-    it('clamps progress ring at 0% for zero eaten', () => {
+    it('shows zero eaten in ring for zero calories', () => {
       setupWithMeals({
         nutrition: { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
       });
       render(<NutritionSection {...defaultProps()} />);
-      expect(screen.getByTestId('nutrition-hero-calories')).toBeInTheDocument();
+      expect(screen.getByText('0')).toBeInTheDocument();
     });
 
     it('does not render gradient on wrapper (gradient is on parent)', () => {
