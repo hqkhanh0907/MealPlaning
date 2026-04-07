@@ -540,7 +540,9 @@ export default function App() {
         {activeMainTab === 'fitness' && (
           <ErrorBoundary fallbackTitle={t('nav.fitness')}>
             <Suspense fallback={<TabLoadingFallback />}>
-              <FitnessTab />
+              <div className="animate-fade-in">
+                <FitnessTab />
+              </div>
             </Suspense>
           </ErrorBoundary>
         )}
@@ -575,7 +577,7 @@ export default function App() {
         {activeMainTab === 'ai-analysis' && (
           <ErrorBoundary fallbackTitle={t('errorBoundary.aiTab')}>
             <Suspense fallback={<TabLoadingFallback />}>
-              <div className="space-y-8">
+              <div className="animate-fade-in space-y-8">
                 <div className="border-border flex items-center justify-between border-b pb-4">
                   <div className="flex items-center gap-3">
                     <Bot className="text-primary h-6 w-6" />
@@ -591,7 +593,9 @@ export default function App() {
         {activeMainTab === 'dashboard' && (
           <ErrorBoundary fallbackTitle={t('nav.dashboard')}>
             <Suspense fallback={<TabLoadingFallback />}>
-              <DashboardTab />
+              <div className="animate-fade-in">
+                <DashboardTab />
+              </div>
             </Suspense>
           </ErrorBoundary>
         )}

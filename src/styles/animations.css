@@ -71,12 +71,19 @@
   animation-delay: 150ms;
 }
 
+/* ── Dashboard Stagger (slideUp for tiered sections) ── */
+
+.dashboard-stagger {
+  animation: slideUp 300ms ease-out both;
+}
+
 /* ── Reduced Motion ── */
 
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in,
   .animate-slide-up,
-  .animate-scale-in {
+  .animate-scale-in,
+  .dashboard-stagger {
     animation: none;
     opacity: 1;
     transform: none;

@@ -22,7 +22,7 @@ export const EmptyState = ({
 }: EmptyStateProps) => {
   if (variant === 'compact') {
     return (
-      <div className={`px-4 py-6 text-center ${className}`}>
+      <div className={`animate-fade-in px-4 py-6 text-center ${className}`}>
         <p className="text-muted-foreground text-sm font-medium">{title}</p>
         {description && <p className="text-muted-foreground mt-1 text-xs">{description}</p>}
         {actionLabel && onAction && (
@@ -37,7 +37,7 @@ export const EmptyState = ({
   if (variant === 'hero') {
     return (
       <div
-        className={`bg-card border-border rounded-2xl border border-dashed px-8 py-16 text-center sm:px-12 ${className}`}
+        className={`animate-slide-up bg-card border-border rounded-2xl border border-dashed px-8 py-16 text-center sm:px-12 ${className}`}
       >
         {Icon && (
           <div className="bg-primary-subtle mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
@@ -60,7 +60,7 @@ export const EmptyState = ({
   }
 
   return (
-    <div className={`px-6 py-12 text-center ${className}`}>
+    <div className={`animate-fade-in px-6 py-12 text-center ${className}`}>
       {Icon && (
         <div className="bg-muted mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full">
           <Icon className="text-muted-foreground h-6 w-6" aria-hidden="true" />

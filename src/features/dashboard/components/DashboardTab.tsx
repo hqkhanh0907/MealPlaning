@@ -58,7 +58,7 @@ function DashboardTabInner(): React.ReactElement {
     <div className="flex flex-col gap-3 overflow-y-auto pb-6" data-testid="dashboard-tab">
       {/* Tier 1: CombinedHero — immediate */}
       <ErrorBoundary fallbackTitle={t('dashboard.error.hero')}>
-        <div data-testid="dashboard-tier-1">
+        <div className={reducedMotion ? '' : 'animate-slide-up'} data-testid="dashboard-tier-1">
           <CombinedHero />
         </div>
       </ErrorBoundary>
@@ -78,7 +78,10 @@ function DashboardTabInner(): React.ReactElement {
       {/* Tier 3: QuickActionsBar — lazy, RAF-gated */}
       {lowerTiersVisible ? (
         <ErrorBoundary fallbackTitle={t('dashboard.error.quickActions')}>
-          <div className="flex flex-col gap-3" data-testid="dashboard-tier-3">
+          <div
+            className={`flex flex-col gap-3 ${reducedMotion ? '' : 'animate-scale-in'}`}
+            data-testid="dashboard-tier-3"
+          >
             <QuickActionsBar onLogWeight={handleOpenWeightLog} />
           </div>
         </ErrorBoundary>
