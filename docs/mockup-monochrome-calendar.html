@@ -1,0 +1,1617 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monochrome Calendar — MealPlaning Mockup</title>
+    <style>
+      /* ─── RESET ─── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* ─── DESIGN TOKENS (Monochrome) ─── */
+      :root {
+        /* Light Mode */
+        --bg-page: #ffffff;
+        --bg-card: #ffffff;
+        --bg-muted: #f5f5f5;
+        --bg-hover: #ebebeb;
+        --bg-active: #e0e0e0;
+        --bg-subtle: #fafafa;
+        --bg-input: #ffffff;
+
+        --text-primary: #0a0a0a;
+        --text-secondary: #525252;
+        --text-muted: #8a8a8a;
+        --text-disabled: #b5b5b5;
+        --text-inverse: #ffffff;
+
+        --border-default: #e5e5e5;
+        --border-strong: #d4d4d4;
+        --border-subtle: #f0f0f0;
+
+        --btn-primary-bg: #0a0a0a;
+        --btn-primary-text: #ffffff;
+        --btn-primary-hover: #262626;
+        --btn-secondary-bg: transparent;
+        --btn-secondary-border: #d4d4d4;
+        --btn-secondary-text: #0a0a0a;
+        --btn-ghost-text: #525252;
+
+        --progress-bg: #e5e5e5;
+        --progress-fill: #0a0a0a;
+        --progress-fill-low: #8a8a8a;
+
+        --tag-bg: #f5f5f5;
+        --tag-text: #525252;
+        --tag-border: #e5e5e5;
+
+        --validation-error: #dc2626;
+        --validation-error-bg: #fef2f2;
+
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+        --radius-full: 9999px;
+      }
+
+      /* ─── DARK MODE ─── */
+      [data-theme='dark'] {
+        --bg-page: #0a0a0a;
+        --bg-card: #141414;
+        --bg-muted: #1c1c1c;
+        --bg-hover: #262626;
+        --bg-active: #333333;
+        --bg-subtle: #111111;
+        --bg-input: #1c1c1c;
+
+        --text-primary: #fafafa;
+        --text-secondary: #a3a3a3;
+        --text-muted: #737373;
+        --text-disabled: #525252;
+        --text-inverse: #0a0a0a;
+
+        --border-default: #262626;
+        --border-strong: #404040;
+        --border-subtle: #1c1c1c;
+
+        --btn-primary-bg: #fafafa;
+        --btn-primary-text: #0a0a0a;
+        --btn-primary-hover: #e5e5e5;
+        --btn-secondary-bg: transparent;
+        --btn-secondary-border: #404040;
+        --btn-secondary-text: #fafafa;
+        --btn-ghost-text: #a3a3a3;
+
+        --progress-bg: #262626;
+        --progress-fill: #fafafa;
+        --progress-fill-low: #737373;
+
+        --tag-bg: #1c1c1c;
+        --tag-text: #a3a3a3;
+        --tag-border: #262626;
+
+        --validation-error: #f87171;
+        --validation-error-bg: #1c1111;
+
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+        --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      /* ─── BASE ─── */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+        background: var(--bg-page);
+        color: var(--text-primary);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        transition:
+          background 0.3s,
+          color 0.3s;
+      }
+
+      /* ─── LAYOUT ─── */
+      .mockup-container {
+        display: flex;
+        gap: 40px;
+        padding: 40px;
+        justify-content: center;
+        flex-wrap: wrap;
+        min-height: 100vh;
+        align-items: flex-start;
+      }
+
+      .phone-frame {
+        width: 390px;
+        min-height: 844px;
+        background: var(--bg-page);
+        border-radius: 44px;
+        border: 3px solid var(--border-strong);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .phone-frame .notch {
+        width: 120px;
+        height: 28px;
+        background: var(--text-primary);
+        border-radius: 0 0 16px 16px;
+        margin: 0 auto;
+        opacity: 0.15;
+      }
+
+      .screen {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 0 80px 0;
+      }
+
+      /* ─── HEADER ─── */
+      .header {
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .header-title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+      .header-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        cursor: pointer;
+      }
+      .header-icon:hover {
+        background: var(--bg-hover);
+      }
+
+      /* ─── DATE SELECTOR ─── */
+      .date-selector {
+        padding: 16px 20px 12px;
+      }
+      .date-row {
+        display: flex;
+        gap: 6px;
+        justify-content: space-between;
+      }
+      .date-cell {
+        flex: 1;
+        text-align: center;
+        padding: 8px 4px;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .date-cell:hover {
+        background: var(--bg-hover);
+      }
+      .date-cell.active {
+        background: var(--btn-primary-bg);
+        color: var(--btn-primary-text);
+      }
+      .date-cell .day-name {
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+      }
+      .date-cell.active .day-name {
+        color: var(--btn-primary-text);
+        opacity: 0.7;
+      }
+      .date-cell .day-num {
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .date-cell .dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--text-muted);
+        margin: 4px auto 0;
+      }
+      .date-cell.active .dot {
+        background: var(--btn-primary-text);
+        opacity: 0.5;
+      }
+
+      /* ─── SUBTABS ─── */
+      .subtabs {
+        display: flex;
+        margin: 0 20px;
+        background: var(--bg-muted);
+        border-radius: var(--radius-full);
+        padding: 3px;
+        gap: 2px;
+      }
+      .subtab {
+        flex: 1;
+        padding: 8px 16px;
+        border-radius: var(--radius-full);
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+        cursor: pointer;
+        color: var(--text-muted);
+        transition: all 0.2s;
+        border: none;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+      .subtab:hover {
+        color: var(--text-secondary);
+      }
+      .subtab.active {
+        background: var(--bg-card);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-sm);
+      }
+      .subtab svg {
+        width: 15px;
+        height: 15px;
+      }
+
+      /* ─── ACTION BAR ─── */
+      .action-bar {
+        padding: 16px 20px 8px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: var(--radius-full);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+        border: none;
+        white-space: nowrap;
+      }
+      .btn svg {
+        width: 15px;
+        height: 15px;
+      }
+      .btn-primary {
+        background: var(--btn-primary-bg);
+        color: var(--btn-primary-text);
+      }
+      .btn-primary:hover {
+        background: var(--btn-primary-hover);
+      }
+      .btn-secondary {
+        background: transparent;
+        color: var(--btn-secondary-text);
+        border: 1px solid var(--btn-secondary-border);
+      }
+      .btn-secondary:hover {
+        background: var(--bg-hover);
+      }
+      .btn-ghost {
+        background: var(--bg-muted);
+        color: var(--btn-ghost-text);
+        border: none;
+      }
+      .btn-ghost:hover {
+        background: var(--bg-hover);
+      }
+
+      /* ─── MEAL PROGRESS ─── */
+      .meal-progress {
+        padding: 12px 20px;
+      }
+      .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .progress-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .progress-value {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+      .progress-bar {
+        height: 4px;
+        background: var(--progress-bg);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        background: var(--progress-fill);
+        border-radius: var(--radius-full);
+        transition: width 0.3s;
+      }
+      .progress-fill.low {
+        background: var(--progress-fill-low);
+      }
+
+      /* ─── MEAL SLOTS ─── */
+      .meals-section {
+        padding: 8px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .meal-slot {
+        background: var(--bg-card);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        transition: all 0.15s;
+      }
+      .meal-slot:hover {
+        border-color: var(--border-strong);
+      }
+
+      .meal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .meal-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .meal-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-sm);
+        background: var(--bg-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+      .meal-name {
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: -0.2px;
+      }
+      .meal-time {
+        font-size: 11px;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+      .meal-kcal {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+      .meal-kcal-unit {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-left: 2px;
+      }
+
+      /* ─── DISH ITEM ─── */
+      .dish-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-top: 1px solid var(--border-subtle);
+      }
+      .dish-item:first-child {
+        border-top: none;
+      }
+      .dish-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .dish-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .dish-serving {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+      .dish-macros {
+        display: flex;
+        gap: 6px;
+        margin-top: 6px;
+        flex-wrap: wrap;
+      }
+
+      /* ─── MACRO TAGS (Monochrome — text labels, no color) ─── */
+      .macro-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 3px 8px;
+        border-radius: var(--radius-full);
+        font-size: 11px;
+        font-weight: 600;
+        background: var(--tag-bg);
+        color: var(--tag-text);
+        border: 1px solid var(--tag-border);
+      }
+      .macro-tag .macro-label {
+        font-weight: 500;
+        opacity: 0.7;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+      .macro-tag .macro-value {
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      /* ─── SERVING CONTROL ─── */
+      .serving-ctrl {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        margin-left: 12px;
+      }
+      .serving-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: var(--radius-full);
+        border: 1px solid var(--border-default);
+        background: transparent;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .serving-btn:hover {
+        background: var(--bg-hover);
+      }
+      .serving-count {
+        width: 32px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      /* ─── EMPTY MEAL SLOT ─── */
+      .meal-slot.empty {
+        background: var(--bg-subtle);
+        border-style: dashed;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 80px;
+        cursor: pointer;
+      }
+      .meal-slot.empty:hover {
+        background: var(--bg-hover);
+        border-color: var(--border-strong);
+      }
+      .empty-label {
+        font-size: 13px;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+      .empty-plus {
+        font-size: 20px;
+        color: var(--text-disabled);
+        margin-bottom: 4px;
+      }
+
+      /* ─── MINI NUTRITION BAR ─── */
+      .mini-nutrition {
+        margin: 12px 20px;
+        padding: 16px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-lg);
+      }
+      .mini-nutrition-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+      }
+      .mini-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .mini-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        min-width: 60px;
+      }
+      .mini-bar-wrap {
+        flex: 1;
+        margin: 0 12px;
+      }
+      .mini-bar {
+        height: 6px;
+        background: var(--progress-bg);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+      }
+      .mini-bar-fill {
+        height: 100%;
+        background: var(--progress-fill);
+        border-radius: var(--radius-full);
+        transition: width 0.3s;
+      }
+      .mini-value {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-primary);
+        min-width: 80px;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .mini-remaining {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-align: right;
+        margin-top: 2px;
+      }
+      .mini-macros {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border-subtle);
+      }
+      .mini-macro-item {
+        flex: 1;
+        text-align: center;
+      }
+      .mini-macro-name {
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .mini-macro-val {
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-top: 2px;
+      }
+      .mini-macro-unit {
+        font-size: 10px;
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+
+      /* ─── BOTTOM NAV ─── */
+      .bottom-nav {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--bg-card);
+        border-top: 1px solid var(--border-default);
+        display: flex;
+        padding: 8px 0 20px;
+      }
+      .nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        cursor: pointer;
+        padding: 4px;
+      }
+      .nav-icon {
+        width: 24px;
+        height: 24px;
+        color: var(--text-muted);
+      }
+      .nav-item.active .nav-icon {
+        color: var(--text-primary);
+      }
+      .nav-label {
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--text-muted);
+      }
+      .nav-item.active .nav-label {
+        color: var(--text-primary);
+        font-weight: 700;
+      }
+
+      /* ─── VALIDATION (kept as red) ─── */
+      .input-error {
+        border-color: var(--validation-error) !important;
+      }
+      .error-text {
+        color: var(--validation-error);
+        font-size: 12px;
+        font-weight: 500;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      /* ─── THEME TOGGLE ─── */
+      .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 100;
+        display: flex;
+        background: var(--bg-card);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+      }
+      .theme-btn {
+        padding: 10px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        transition: all 0.2s;
+      }
+      .theme-btn.active {
+        background: var(--btn-primary-bg);
+        color: var(--btn-primary-text);
+      }
+
+      /* ─── ANNOTATIONS ─── */
+      .mockup-title {
+        text-align: center;
+        padding: 20px 20px 0;
+        color: var(--text-primary);
+      }
+      .mockup-title h1 {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -1px;
+      }
+      .mockup-title p {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-top: 8px;
+      }
+
+      .design-notes {
+        max-width: 390px;
+        margin: 20px auto;
+        padding: 20px;
+        background: var(--bg-muted);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-default);
+      }
+      .design-notes h3 {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .design-notes ul {
+        list-style: none;
+        padding: 0;
+      }
+      .design-notes li {
+        font-size: 13px;
+        color: var(--text-secondary);
+        padding: 4px 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .design-notes li::before {
+        content: '→';
+        color: var(--text-muted);
+        flex-shrink: 0;
+      }
+
+      /* ─── SCROLLBAR ─── */
+      .screen::-webkit-scrollbar {
+        width: 0;
+      }
+
+      /* ─── COMPARISON LABEL ─── */
+      .frame-label {
+        text-align: center;
+        padding: 16px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--border-subtle);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+      <button class="theme-btn active" onclick="setTheme('light')">☀ Light</button>
+      <button class="theme-btn" onclick="setTheme('dark')">☾ Dark</button>
+    </div>
+
+    <div class="mockup-title">
+      <h1>Monochrome Calendar</h1>
+      <p>MealPlaning — Pure Grayscale Design System</p>
+    </div>
+
+    <div class="mockup-container">
+      <!-- ═══════════════ PHONE 1: MEALS SUBTAB ═══════════════ -->
+      <div>
+        <div class="phone-frame">
+          <div class="notch"></div>
+          <div class="frame-label">Meals Subtab</div>
+          <div class="screen">
+            <!-- Header -->
+            <div class="header">
+              <div class="header-title">Lịch trình</div>
+              <div class="header-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </div>
+            </div>
+
+            <!-- Date Selector -->
+            <div class="date-selector">
+              <div class="date-row">
+                <div class="date-cell">
+                  <div class="day-name">T2</div>
+                  <div class="day-num">5</div>
+                </div>
+                <div class="date-cell">
+                  <div class="day-name">T3</div>
+                  <div class="day-num">6</div>
+                </div>
+                <div class="date-cell active">
+                  <div class="day-name">T4</div>
+                  <div class="day-num">7</div>
+                  <div class="dot"></div>
+                </div>
+                <div class="date-cell">
+                  <div class="day-name">T5</div>
+                  <div class="day-num">8</div>
+                </div>
+                <div class="date-cell">
+                  <div class="day-name">T6</div>
+                  <div class="day-num">9</div>
+                  <div class="dot"></div>
+                </div>
+                <div class="date-cell">
+                  <div class="day-name">T7</div>
+                  <div class="day-num">10</div>
+                </div>
+                <div class="date-cell">
+                  <div class="day-name">CN</div>
+                  <div class="day-num">11</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subtabs -->
+            <div class="subtabs">
+              <button class="subtab active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2" />
+                  <path d="M7 2v20" />
+                  <path d="M21 15V2v0a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+                </svg>
+                Bữa ăn
+              </button>
+              <button class="subtab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="20" x2="12" y2="10" />
+                  <line x1="18" y1="20" x2="18" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="16" />
+                </svg>
+                Dinh dưỡng
+              </button>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="action-bar">
+              <button class="btn btn-primary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Lên kế hoạch
+              </button>
+              <button class="btn btn-secondary">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2a4 4 0 014 4c0 1.95-2 5-4 5s-4-3.05-4-5a4 4 0 014-4z" />
+                  <path d="M12 18l-2-2h4l-2 2z" />
+                  <circle cx="12" cy="20" r="2" />
+                </svg>
+                AI gợi ý
+              </button>
+              <button class="btn btn-ghost">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                </svg>
+                Đi chợ
+              </button>
+              <button class="btn btn-ghost" style="padding: 8px 10px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="19" cy="12" r="1" />
+                  <circle cx="5" cy="12" r="1" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Meal Progress -->
+            <div class="meal-progress">
+              <div class="progress-header">
+                <span class="progress-label">Tiến độ bữa ăn</span>
+                <span class="progress-value">2/3 bữa</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 66%"></div>
+              </div>
+            </div>
+
+            <!-- Meal Slots -->
+            <div class="meals-section">
+              <!-- Breakfast (filled) -->
+              <div class="meal-slot">
+                <div class="meal-header">
+                  <div class="meal-label">
+                    <div class="meal-icon">☀</div>
+                    <div>
+                      <div class="meal-name">Bữa sáng</div>
+                      <div class="meal-time">6:00 – 9:00</div>
+                    </div>
+                  </div>
+                  <div>
+                    <span class="meal-kcal">487</span>
+                    <span class="meal-kcal-unit">kcal</span>
+                  </div>
+                </div>
+
+                <!-- Dish 1 -->
+                <div class="dish-item">
+                  <div class="dish-info">
+                    <div class="dish-name">Trứng ốp la</div>
+                    <div class="dish-serving">1 phần · 155 kcal</div>
+                    <div class="dish-macros">
+                      <span class="macro-tag"
+                        ><span class="macro-label">Pro</span> <span class="macro-value">13g</span></span
+                      >
+                      <span class="macro-tag"
+                        ><span class="macro-label">Fat</span> <span class="macro-value">11g</span></span
+                      >
+                      <span class="macro-tag"
+                        ><span class="macro-label">Carb</span> <span class="macro-value">1g</span></span
+                      >
+                    </div>
+                  </div>
+                  <div class="serving-ctrl">
+                    <button class="serving-btn">−</button>
+                    <span class="serving-count">1x</span>
+                    <button class="serving-btn">+</button>
+                  </div>
+                </div>
+
+                <!-- Dish 2 -->
+                <div class="dish-item">
+                  <div class="dish-info">
+                    <div class="dish-name">Yến mạch sữa chua</div>
+                    <div class="dish-serving">1 phần · 332 kcal</div>
+                    <div class="dish-macros">
+                      <span class="macro-tag"
+                        ><span class="macro-label">Pro</span> <span class="macro-value">25g</span></span
+                      >
+                      <span class="macro-tag"
+                        ><span class="macro-label">Fat</span> <span class="macro-value">7g</span></span
+                      >
+                      <span class="macro-tag"
+                        ><span class="macro-label">Carb</span> <span class="macro-value">52g</span></span
+                      >
+                    </div>
+                  </div>
+                  <div class="serving-ctrl">
+                    <button class="serving-btn">−</button>
+                    <span class="serving-count">1x</span>
+                    <button class="serving-btn">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Lunch (filled) -->
+              <div class="meal-slot">
+                <div class="meal-header">
+                  <div class="meal-label">
+                    <div class="meal-icon">◑</div>
+                    <div>
+                      <div class="meal-name">Bữa trưa</div>
+                      <div class="meal-time">11:00 – 14:00</div>
+                    </div>
+                  </div>
+                  <div>
+                    <span class="meal-kcal">510</span>
+                    <span class="meal-kcal-unit">kcal</span>
+                  </div>
+                </div>
+
+                <div class="dish-item">
+                  <div class="dish-info">
+                    <div class="dish-name">Ức gà áp chảo</div>
+                    <div class="dish-serving">1 phần · 330 kcal</div>
+                    <div class="dish-macros">
+                      <span class="macro-tag"
+                        ><span class="macro-label">Pro</span> <span class="macro-value">62g</span></span
+                      >
+                      <span class="macro-tag"
+                        ><span class="macro-label">Fat</span> <span class="macro-value">8g</span></span
+                      >
+                      <span class="macro-tag"
+                        ><span class="macro-label">Carb</span> <span class="macro-value">0g</span></span
+                      >
+                    </div>
+                  </div>
+                  <div class="serving-ctrl">
+                    <button class="serving-btn">−</button>
+                    <span class="serving-count">1x</span>
+                    <button class="serving-btn">+</button>
+                  </div>
+                </div>
+
+                <div class="dish-item">
+                  <div class="dish-info">
+                    <div class="dish-name">Bông cải xanh luộc + Khoai lang</div>
+                    <div class="dish-serving">2 món · 180 kcal</div>
+                    <div class="dish-macros">
+                      <span class="macro-tag"
+                        ><span class="macro-label">Pro</span> <span class="macro-value">8g</span></span
+                      >
+                      <span class="macro-tag"
+                        ><span class="macro-label">Fat</span> <span class="macro-value">0g</span></span
+                      >
+                      <span class="macro-tag"
+                        ><span class="macro-label">Carb</span> <span class="macro-value">27g</span></span
+                      >
+                      <span class="macro-tag"
+                        ><span class="macro-label">Fiber</span> <span class="macro-value">5g</span></span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dinner (empty) -->
+              <div class="meal-slot empty">
+                <div class="empty-plus">+</div>
+                <div class="empty-label">Thêm bữa tối</div>
+              </div>
+            </div>
+
+            <!-- Mini Nutrition Bar -->
+            <div class="mini-nutrition">
+              <div class="mini-nutrition-title">Tổng kết dinh dưỡng</div>
+
+              <!-- Calories -->
+              <div class="mini-row">
+                <span class="mini-label">Calories</span>
+                <div class="mini-bar-wrap">
+                  <div class="mini-bar">
+                    <div class="mini-bar-fill" style="width: 47%"></div>
+                  </div>
+                </div>
+                <span class="mini-value">997 / 2091</span>
+              </div>
+              <div class="mini-remaining">Còn lại: 1094 kcal</div>
+
+              <!-- Protein -->
+              <div class="mini-row" style="margin-top: 12px">
+                <span class="mini-label">Protein</span>
+                <div class="mini-bar-wrap">
+                  <div class="mini-bar">
+                    <div class="mini-bar-fill" style="width: 65%"></div>
+                  </div>
+                </div>
+                <span class="mini-value">108 / 165g</span>
+              </div>
+              <div class="mini-remaining">Còn lại: 57g</div>
+
+              <!-- Macro Breakdown -->
+              <div class="mini-macros">
+                <div class="mini-macro-item">
+                  <div class="mini-macro-name">Protein</div>
+                  <div class="mini-macro-val">108<span class="mini-macro-unit">g</span></div>
+                </div>
+                <div class="mini-macro-item">
+                  <div class="mini-macro-name">Fat</div>
+                  <div class="mini-macro-val">26<span class="mini-macro-unit">g</span></div>
+                </div>
+                <div class="mini-macro-item">
+                  <div class="mini-macro-name">Carb</div>
+                  <div class="mini-macro-val">80<span class="mini-macro-unit">g</span></div>
+                </div>
+                <div class="mini-macro-item">
+                  <div class="mini-macro-name">Fiber</div>
+                  <div class="mini-macro-val">5<span class="mini-macro-unit">g</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Nav -->
+          <div class="bottom-nav">
+            <div class="nav-item active">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              <span class="nav-label">Lịch trình</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+              </svg>
+              <span class="nav-label">Thư viện</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a4 4 0 014 4c0 1.95-2 5-4 5s-4-3.05-4-5a4 4 0 014-4z" />
+                <circle cx="12" cy="20" r="2" />
+              </svg>
+              <span class="nav-label">AI</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 20V10" />
+                <path d="M12 20V4" />
+                <path d="M6 20v-6" />
+              </svg>
+              <span class="nav-label">Fitness</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+              </svg>
+              <span class="nav-label">Tổng quan</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Design Notes for Phone 1 -->
+        <div class="design-notes">
+          <h3>Design Notes — Meals</h3>
+          <ul>
+            <li>Pure grayscale: #0A0A0A → #FAFAFA spectrum</li>
+            <li>Macro tags dùng text label (Pro, Fat, Carb, Fiber) thay vì màu</li>
+            <li>Progress bar đen trên xám — không cần màu để truyền đạt %</li>
+            <li>CTA "Lên kế hoạch" = filled black, secondary = outlined</li>
+            <li>Date selector: active = inverted (đen nền trắng chữ)</li>
+            <li>Empty slot: dashed border + gray, dễ nhận biết chưa điền</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ═══════════════ PHONE 2: NUTRITION SUBTAB ═══════════════ -->
+      <div>
+        <div class="phone-frame">
+          <div class="notch"></div>
+          <div class="frame-label">Nutrition Subtab</div>
+          <div class="screen">
+            <div class="header">
+              <div class="header-title">Lịch trình</div>
+              <div class="header-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </div>
+            </div>
+
+            <div class="date-selector">
+              <div class="date-row">
+                <div class="date-cell">
+                  <div class="day-name">T2</div>
+                  <div class="day-num">5</div>
+                </div>
+                <div class="date-cell">
+                  <div class="day-name">T3</div>
+                  <div class="day-num">6</div>
+                </div>
+                <div class="date-cell active">
+                  <div class="day-name">T4</div>
+                  <div class="day-num">7</div>
+                  <div class="dot"></div>
+                </div>
+                <div class="date-cell">
+                  <div class="day-name">T5</div>
+                  <div class="day-num">8</div>
+                </div>
+                <div class="date-cell">
+                  <div class="day-name">T6</div>
+                  <div class="day-num">9</div>
+                  <div class="dot"></div>
+                </div>
+                <div class="date-cell">
+                  <div class="day-name">T7</div>
+                  <div class="day-num">10</div>
+                </div>
+                <div class="date-cell">
+                  <div class="day-name">CN</div>
+                  <div class="day-num">11</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="subtabs">
+              <button class="subtab">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2" />
+                  <path d="M7 2v20" />
+                  <path d="M21 15V2v0a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
+                </svg>
+                Bữa ăn
+              </button>
+              <button class="subtab active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="20" x2="12" y2="10" />
+                  <line x1="18" y1="20" x2="18" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="16" />
+                </svg>
+                Dinh dưỡng
+              </button>
+            </div>
+
+            <!-- Energy Balance Card -->
+            <div style="padding: 16px 20px">
+              <div class="meal-slot" style="padding: 20px">
+                <div
+                  style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px"
+                >
+                  <div>
+                    <div
+                      style="
+                        font-size: 12px;
+                        font-weight: 700;
+                        color: var(--text-muted);
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                      "
+                    >
+                      Mục tiêu hôm nay
+                    </div>
+                    <div style="font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-top: 4px">
+                      2091<span style="font-size: 14px; color: var(--text-muted); font-weight: 500"> kcal</span>
+                    </div>
+                  </div>
+                  <button class="btn btn-ghost" style="font-size: 12px; padding: 6px 12px">Chỉnh sửa</button>
+                </div>
+
+                <!-- Calorie Bar -->
+                <div style="margin-bottom: 16px">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 6px">
+                    <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary)">Đã nạp</span>
+                    <span style="font-size: 12px; font-weight: 700">997 kcal</span>
+                  </div>
+                  <div class="progress-bar" style="height: 8px">
+                    <div class="progress-fill" style="width: 47%"></div>
+                  </div>
+                  <div style="text-align: right; margin-top: 4px">
+                    <span style="font-size: 11px; color: var(--text-muted)">Còn lại: 1094 kcal</span>
+                  </div>
+                </div>
+
+                <!-- Protein Bar -->
+                <div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 6px">
+                    <span style="font-size: 12px; font-weight: 600; color: var(--text-secondary)">Protein</span>
+                    <span style="font-size: 12px; font-weight: 700">108 / 165g</span>
+                  </div>
+                  <div class="progress-bar" style="height: 8px">
+                    <div class="progress-fill" style="width: 65%"></div>
+                  </div>
+                  <div style="text-align: right; margin-top: 4px">
+                    <span style="font-size: 11px; color: var(--text-muted)">Còn lại: 57g</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Macro Breakdown Card -->
+            <div style="padding: 0 20px">
+              <div class="meal-slot" style="padding: 20px">
+                <div
+                  style="
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: var(--text-muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-bottom: 16px;
+                  "
+                >
+                  Phân bổ Macros
+                </div>
+
+                <!-- Donut Chart (monochrome) -->
+                <div style="display: flex; justify-content: center; margin-bottom: 20px">
+                  <svg width="160" height="160" viewBox="0 0 160 160">
+                    <!-- Background ring -->
+                    <circle cx="80" cy="80" r="60" fill="none" stroke="var(--progress-bg)" stroke-width="20" />
+                    <!-- Protein (dark) -->
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="60"
+                      fill="none"
+                      stroke="var(--text-primary)"
+                      stroke-width="20"
+                      stroke-dasharray="164 213"
+                      stroke-dashoffset="0"
+                      transform="rotate(-90 80 80)"
+                      opacity="1"
+                    />
+                    <!-- Fat (medium) -->
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="60"
+                      fill="none"
+                      stroke="var(--text-primary)"
+                      stroke-width="20"
+                      stroke-dasharray="62 315"
+                      stroke-dashoffset="-164"
+                      transform="rotate(-90 80 80)"
+                      opacity="0.5"
+                    />
+                    <!-- Carb (light) -->
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="60"
+                      fill="none"
+                      stroke="var(--text-primary)"
+                      stroke-width="20"
+                      stroke-dasharray="151 226"
+                      stroke-dashoffset="-226"
+                      transform="rotate(-90 80 80)"
+                      opacity="0.2"
+                    />
+                    <!-- Center text -->
+                    <text
+                      x="80"
+                      y="74"
+                      text-anchor="middle"
+                      fill="var(--text-primary)"
+                      font-size="22"
+                      font-weight="800"
+                    >
+                      997
+                    </text>
+                    <text x="80" y="94" text-anchor="middle" fill="var(--text-muted)" font-size="11" font-weight="500">
+                      kcal
+                    </text>
+                  </svg>
+                </div>
+
+                <!-- Macro List -->
+                <div style="display: flex; flex-direction: column; gap: 12px">
+                  <!-- Protein -->
+                  <div style="display: flex; align-items: center; gap: 12px">
+                    <div
+                      style="width: 12px; height: 12px; border-radius: 3px; background: var(--text-primary); opacity: 1"
+                    ></div>
+                    <div style="flex: 1">
+                      <div style="display: flex; justify-content: space-between">
+                        <span style="font-size: 13px; font-weight: 600">Protein</span>
+                        <span style="font-size: 13px; font-weight: 700">108g</span>
+                      </div>
+                      <div class="progress-bar" style="height: 4px; margin-top: 4px">
+                        <div class="progress-fill" style="width: 65%"></div>
+                      </div>
+                    </div>
+                    <span style="font-size: 12px; color: var(--text-muted); min-width: 32px; text-align: right"
+                      >43%</span
+                    >
+                  </div>
+
+                  <!-- Fat -->
+                  <div style="display: flex; align-items: center; gap: 12px">
+                    <div
+                      style="
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 3px;
+                        background: var(--text-primary);
+                        opacity: 0.5;
+                      "
+                    ></div>
+                    <div style="flex: 1">
+                      <div style="display: flex; justify-content: space-between">
+                        <span style="font-size: 13px; font-weight: 600">Fat</span>
+                        <span style="font-size: 13px; font-weight: 700">26g</span>
+                      </div>
+                      <div class="progress-bar" style="height: 4px; margin-top: 4px">
+                        <div class="progress-fill low" style="width: 40%"></div>
+                      </div>
+                    </div>
+                    <span style="font-size: 12px; color: var(--text-muted); min-width: 32px; text-align: right"
+                      >24%</span
+                    >
+                  </div>
+
+                  <!-- Carbs -->
+                  <div style="display: flex; align-items: center; gap: 12px">
+                    <div
+                      style="
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 3px;
+                        background: var(--text-primary);
+                        opacity: 0.2;
+                      "
+                    ></div>
+                    <div style="flex: 1">
+                      <div style="display: flex; justify-content: space-between">
+                        <span style="font-size: 13px; font-weight: 600">Carb</span>
+                        <span style="font-size: 13px; font-weight: 700">80g</span>
+                      </div>
+                      <div class="progress-bar" style="height: 4px; margin-top: 4px">
+                        <div class="progress-fill low" style="width: 30%"></div>
+                      </div>
+                    </div>
+                    <span style="font-size: 12px; color: var(--text-muted); min-width: 32px; text-align: right"
+                      >33%</span
+                    >
+                  </div>
+
+                  <!-- Fiber -->
+                  <div style="display: flex; align-items: center; gap: 12px">
+                    <div
+                      style="
+                        width: 12px;
+                        height: 12px;
+                        border-radius: 3px;
+                        border: 2px solid var(--text-primary);
+                        opacity: 0.4;
+                        background: transparent;
+                      "
+                    ></div>
+                    <div style="flex: 1">
+                      <div style="display: flex; justify-content: space-between">
+                        <span style="font-size: 13px; font-weight: 600">Fiber</span>
+                        <span style="font-size: 13px; font-weight: 700">5g</span>
+                      </div>
+                      <div class="progress-bar" style="height: 4px; margin-top: 4px">
+                        <div class="progress-fill low" style="width: 20%"></div>
+                      </div>
+                    </div>
+                    <span style="font-size: 12px; color: var(--text-muted); min-width: 32px; text-align: right">—</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recommendation Card -->
+            <div style="padding: 16px 20px">
+              <div class="meal-slot" style="padding: 16px">
+                <div style="display: flex; gap: 10px; align-items: flex-start">
+                  <div
+                    style="
+                      width: 28px;
+                      height: 28px;
+                      border-radius: var(--radius-sm);
+                      background: var(--bg-muted);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      flex-shrink: 0;
+                      font-size: 14px;
+                    "
+                  >
+                    💡
+                  </div>
+                  <div>
+                    <div style="font-size: 13px; font-weight: 700; margin-bottom: 4px">Gợi ý</div>
+                    <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.6">
+                      Bạn chưa thêm bữa tối. Còn thiếu <strong>1094 kcal</strong> và <strong>57g protein</strong>. Thêm
+                      một bữa giàu protein như cá hồi hoặc ức gà để cân bằng.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- BMR/TDEE Info -->
+            <div style="padding: 0 20px 20px">
+              <div style="display: flex; gap: 8px">
+                <div class="meal-slot" style="flex: 1; padding: 12px; text-align: center">
+                  <div
+                    style="
+                      font-size: 10px;
+                      font-weight: 600;
+                      color: var(--text-muted);
+                      text-transform: uppercase;
+                      letter-spacing: 0.5px;
+                    "
+                  >
+                    BMR
+                  </div>
+                  <div style="font-size: 18px; font-weight: 800; margin-top: 2px">1704</div>
+                </div>
+                <div class="meal-slot" style="flex: 1; padding: 12px; text-align: center">
+                  <div
+                    style="
+                      font-size: 10px;
+                      font-weight: 600;
+                      color: var(--text-muted);
+                      text-transform: uppercase;
+                      letter-spacing: 0.5px;
+                    "
+                  >
+                    TDEE
+                  </div>
+                  <div style="font-size: 18px; font-weight: 800; margin-top: 2px">2641</div>
+                </div>
+                <div class="meal-slot" style="flex: 1; padding: 12px; text-align: center">
+                  <div
+                    style="
+                      font-size: 10px;
+                      font-weight: 600;
+                      color: var(--text-muted);
+                      text-transform: uppercase;
+                      letter-spacing: 0.5px;
+                    "
+                  >
+                    Mục tiêu
+                  </div>
+                  <div style="font-size: 18px; font-weight: 800; margin-top: 2px">2091</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bottom-nav">
+            <div class="nav-item active">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              <span class="nav-label">Lịch trình</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+              </svg>
+              <span class="nav-label">Thư viện</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a4 4 0 014 4c0 1.95-2 5-4 5s-4-3.05-4-5a4 4 0 014-4z" />
+                <circle cx="12" cy="20" r="2" />
+              </svg>
+              <span class="nav-label">AI</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 20V10" />
+                <path d="M12 20V4" />
+                <path d="M6 20v-6" />
+              </svg>
+              <span class="nav-label">Fitness</span>
+            </div>
+            <div class="nav-item">
+              <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+              </svg>
+              <span class="nav-label">Tổng quan</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Design Notes for Phone 2 -->
+        <div class="design-notes">
+          <h3>Design Notes — Nutrition</h3>
+          <ul>
+            <li>Donut chart dùng opacity (100% / 50% / 20%) thay vì màu sắc</li>
+            <li>Fiber dùng bordered swatch (outline) để phân biệt nhóm khác</li>
+            <li>Mỗi macro có text label rõ ràng: "Protein", "Fat", "Carb", "Fiber"</li>
+            <li>Progress bars đen trên xám — đồng nhất toàn hệ thống</li>
+            <li>BMR/TDEE/Target = 3 cards ngang — editorial typography style</li>
+            <li>Recommendation card = neutral gray, không dùng semantic color</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function setTheme(theme) {
+        if (theme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+        }
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Also update mockup page background
+        document.body.style.background = theme === 'dark' ? '#000' : '#f0f0f0';
+        document.querySelectorAll('.phone-frame').forEach(f => {
+          f.style.borderColor = theme === 'dark' ? '#333' : '#d4d4d4';
+        });
+      }
+
+      // Default: light
+      document.body.style.background = '#f0f0f0';
+    </script>
+  </body>
+</html>

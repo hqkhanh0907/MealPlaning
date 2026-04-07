@@ -370,6 +370,17 @@ input[type='number'] {
   --meal-lunch: oklch(0.588 0.158 241.966); /* sky-600 */
   --meal-dinner: oklch(0.511 0.262 276.966); /* indigo-600 */
 
+  /* ── Missing Phase 1 dark mode pairs ── */
+  --accent-warm: oklch(0.828 0.189 35); /* Orange-400 */
+  --accent-warm-foreground: oklch(0.208 0.026 264.69); /* Slate-900 */
+  --compare-active: oklch(0.707 0.165 254.62); /* Blue-400 */
+  --compare-default: oklch(0.546 0.245 262.88); /* Blue-500 */
+  --destructive-emphasis: oklch(0.704 0.191 22.216); /* Red-400 */
+  --macro-carbs-emphasis: oklch(0.707 0.165 254.62); /* Blue-400 */
+  --color-ai-emphasis: oklch(0.673 0.182 274.5); /* Indigo-400 */
+  --color-energy-emphasis: oklch(0.828 0.189 84.4); /* Amber-300 */
+  --color-rose-emphasis: oklch(0.712 0.194 13.4); /* Rose-400 */
+
   --shadow-glow: 0 2px 6px oklch(0.765 0.177 163.22 / 0.3);
 }
 
