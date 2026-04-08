@@ -108,7 +108,7 @@ export default function ExerciseWorkoutCard({
       {/* Set Table */}
       <div className="mb-3">
         {/* Table Header */}
-        <div className="border-border-subtle text-muted-foreground grid grid-cols-[2rem_1fr_1fr_3rem_4rem] items-center gap-x-2 border-b pb-1 text-xs font-medium">
+        <div className="border-border-subtle text-muted-foreground grid grid-cols-[2rem_minmax(0,1fr)_minmax(0,1fr)_3rem_4rem] items-center gap-x-2 border-b pb-1 text-xs font-medium">
           <span className="w-8 text-center">{t('fitness.logger.set')}</span>
           <span className="text-center">{t('fitness.logger.weight')}</span>
           <span className="text-center">{t('fitness.logger.reps')}</span>
@@ -120,7 +120,7 @@ export default function ExerciseWorkoutCard({
         {loggedSets.map(set => (
           <div
             key={set.id}
-            className="border-border-subtle grid grid-cols-[2rem_1fr_1fr_3rem_4rem] items-center gap-x-2 border-b py-1.5"
+            className="border-border-subtle grid grid-cols-[2rem_minmax(0,1fr)_minmax(0,1fr)_3rem_4rem] items-center gap-x-2 border-b py-1.5"
             data-testid={`logged-set-${set.id}`}
           >
             <span className="border-primary text-foreground w-8 border-l-2 pl-2 text-center text-sm font-medium">
@@ -155,11 +155,11 @@ export default function ExerciseWorkoutCard({
         ))}
 
         {/* Active Input Row */}
-        <div className="bg-muted/50 grid grid-cols-[2rem_1fr_1fr_3rem_4rem] items-center gap-x-2 rounded-b-lg py-2">
+        <div className="bg-muted/50 grid grid-cols-[2rem_minmax(0,1fr)_minmax(0,1fr)_3rem_4rem] items-center gap-x-2 rounded-b-lg py-2">
           <span className="text-muted-foreground w-8 text-center text-sm font-medium">{nextSetNumber}</span>
 
           {/* Weight input with +/- */}
-          <div className="flex items-center justify-center gap-0.5">
+          <div className="flex min-w-0 items-center justify-center gap-0.5">
             <Button
               variant="ghost"
               size="icon"
@@ -175,7 +175,7 @@ export default function ExerciseWorkoutCard({
               inputMode="decimal"
               value={Number.isNaN(currentInput.weight) ? '' : String(currentInput.weight)}
               onChange={e => onWeightInput(e.target.value)}
-              className="border-border bg-background h-8 w-14 rounded border text-center text-sm"
+              className="border-border bg-background h-8 w-12 rounded border text-center text-sm"
               data-testid="weight-input"
             />
             <Button
@@ -191,7 +191,7 @@ export default function ExerciseWorkoutCard({
           </div>
 
           {/* Reps input with +/- */}
-          <div className="flex items-center justify-center gap-0.5">
+          <div className="flex min-w-0 items-center justify-center gap-0.5">
             <Button
               variant="ghost"
               size="icon"
@@ -207,7 +207,7 @@ export default function ExerciseWorkoutCard({
               inputMode="numeric"
               value={Number.isNaN(currentInput.reps) ? '' : String(currentInput.reps)}
               onChange={e => onRepsInput(e.target.value)}
-              className="border-border bg-background h-8 w-14 rounded border text-center text-sm"
+              className="border-border bg-background h-8 w-12 rounded border text-center text-sm"
               data-testid="reps-input"
             />
             <Button
