@@ -108,7 +108,7 @@ export default function ExerciseWorkoutCard({
       {/* Set Table */}
       <div className="mb-3">
         {/* Table Header */}
-        <div className="border-border-subtle text-muted-foreground grid grid-cols-[auto_1fr_1fr_auto_auto] items-center gap-x-2 border-b pb-1 text-xs font-medium">
+        <div className="border-border-subtle text-muted-foreground grid grid-cols-[2rem_1fr_1fr_3rem_4rem] items-center gap-x-2 border-b pb-1 text-xs font-medium">
           <span className="w-8 text-center">{t('fitness.logger.set')}</span>
           <span className="text-center">{t('fitness.logger.weight')}</span>
           <span className="text-center">{t('fitness.logger.reps')}</span>
@@ -120,7 +120,7 @@ export default function ExerciseWorkoutCard({
         {loggedSets.map(set => (
           <div
             key={set.id}
-            className="border-border-subtle grid grid-cols-[auto_1fr_1fr_auto_auto] items-center gap-x-2 border-b py-1.5"
+            className="border-border-subtle grid grid-cols-[2rem_1fr_1fr_3rem_4rem] items-center gap-x-2 border-b py-1.5"
             data-testid={`logged-set-${set.id}`}
           >
             <span className="border-primary text-foreground w-8 border-l-2 pl-2 text-center text-sm font-medium">
@@ -155,7 +155,7 @@ export default function ExerciseWorkoutCard({
         ))}
 
         {/* Active Input Row */}
-        <div className="bg-muted/50 grid grid-cols-[auto_1fr_1fr_auto_auto] items-center gap-x-2 rounded-b-lg py-2">
+        <div className="bg-muted/50 grid grid-cols-[2rem_1fr_1fr_3rem_4rem] items-center gap-x-2 rounded-b-lg py-2">
           <span className="text-muted-foreground w-8 text-center text-sm font-medium">{nextSetNumber}</span>
 
           {/* Weight input with +/- */}
