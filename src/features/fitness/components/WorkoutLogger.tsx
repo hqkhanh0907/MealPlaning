@@ -614,6 +614,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                 onCopyLastSet={() => handleCopyLastSet(currentMeta.exercise.id)}
                 onApplyOverload={s => handleApplySuggestion(currentMeta.exercise.id, s)}
                 onSwapExercise={() => setShowSwapSheet(true)}
+                onLogSet={() => handleLogSet(currentMeta.exercise.id)}
               />
 
               {nextMeta && <NextExercisePreview meta={nextMeta} onNavigate={handleNavigateNext} />}
@@ -626,20 +627,10 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
         className="pb-safe border-border-subtle bg-card/95 sticky bottom-0 flex gap-2 border-t p-4 backdrop-blur-sm"
         data-testid="bottom-bar"
       >
-        {currentMeta && (
-          <button
-            type="button"
-            onClick={() => handleLogSet(currentMeta.exercise.id)}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1 rounded-xl py-3 text-sm font-semibold"
-            data-testid="log-set-bottom-btn"
-          >
-            {t('fitness.logger.logSet')}
-          </button>
-        )}
         <button
           type="button"
           onClick={() => setShowExerciseSelector(true)}
-          className="text-muted-foreground hover:border-primary hover:text-primary border-border inline-flex items-center gap-2 rounded-xl border-2 border-dashed px-4 py-3 text-sm"
+          className="text-muted-foreground hover:border-primary hover:text-primary border-border inline-flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-3 text-sm"
           data-testid="add-exercise-bottom-btn"
         >
           <Plus className="h-5 w-5" aria-hidden="true" />

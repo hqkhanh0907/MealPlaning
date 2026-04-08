@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRightLeft, Copy, Dumbbell, Pencil, Trash2, TrendingUp } from 'lucide-react';
+import { AlertTriangle, ArrowRightLeft, Check, Copy, Pencil, Trash2, TrendingUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,7 @@ interface ExerciseWorkoutCardProps {
   onCopyLastSet: () => void;
   onApplyOverload: (suggestion: OverloadSuggestion) => void;
   onSwapExercise: () => void;
+  onLogSet: () => void;
 }
 
 export default function ExerciseWorkoutCard({
@@ -55,6 +56,7 @@ export default function ExerciseWorkoutCard({
   onCopyLastSet,
   onApplyOverload,
   onSwapExercise,
+  onLogSet,
 }: Readonly<ExerciseWorkoutCardProps>): React.JSX.Element {
   const { t } = useTranslation();
 
@@ -68,19 +70,24 @@ export default function ExerciseWorkoutCard({
   return (
     <div className="bg-card rounded-xl p-4 shadow-sm" data-testid="exercise-workout-card">
       {/* Header */}
-      <div className="mb-3 flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <Dumbbell className="text-foreground h-5 w-5" aria-hidden="true" />
-          <div>
-            <h3 className="text-foreground text-base font-semibold">{meta.exercise.nameVi}</h3>
-            <p className="text-muted-foreground text-xs" data-testid="muscle-groups">
-              {muscleGroups}
-            </p>
-          </div>
+      <div className="mb-4 flex items-start justify-between">
+        <div>
+          <span
+            className="text-muted-foreground mb-1 block text-xs font-bold tracking-wide uppercase"
+            data-testid="exercise-progress"
+          >
+            {t('fitness.logger.exerciseProgress', { current: exerciseIndex + 1, total: totalExercises })}
+          </span>
+          <h3 className="text-foreground text-xl font-extrabold tracking-tight">{meta.exercise.nameVi}</h3>
         </div>
-        <span className="text-muted-foreground text-sm" data-testid="exercise-progress">
-          {t('fitness.logger.exerciseProgress', { current: exerciseIndex + 1, total: totalExercises })}
-        </span>
+        <div className="text-right">
+          <p className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
+            {t('fitness.logger.muscleGroupLabel')}
+          </p>
+          <p className="text-muted-foreground text-sm font-medium" data-testid="muscle-groups">
+            {muscleGroups}
+          </p>
+        </div>
       </div>
 
       {/* Progressive Overload Chip */}
@@ -105,142 +112,183 @@ export default function ExerciseWorkoutCard({
         </Button>
       )}
 
-      {/* Set Table */}
+      {/* Completed Sets */}
       <div className="mb-3">
-        {/* Table Header */}
-        <div className="border-border-subtle text-muted-foreground grid grid-cols-[2rem_minmax(0,1fr)_minmax(0,1fr)_3rem_4rem] items-center gap-x-2 border-b pb-1 text-xs font-medium">
-          <span className="w-8 text-center">{t('fitness.logger.set')}</span>
-          <span className="text-center">{t('fitness.logger.weight')}</span>
-          <span className="text-center">{t('fitness.logger.reps')}</span>
-          <span className="w-12 text-center">{t('fitness.logger.rpe')}</span>
-          <span className="w-16" />
-        </div>
-
-        {/* Completed Sets */}
         {loggedSets.map(set => (
           <div
             key={set.id}
-            className="border-border-subtle grid grid-cols-[2rem_minmax(0,1fr)_minmax(0,1fr)_3rem_4rem] items-center gap-x-2 border-b py-1.5"
+            className="border-border-subtle flex items-center border-b py-3"
             data-testid={`logged-set-${set.id}`}
           >
-            <span className="border-primary text-foreground w-8 border-l-2 pl-2 text-center text-sm font-medium">
+            <span className="bg-muted text-foreground flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-sm font-bold">
               {set.setNumber}
             </span>
-            <span className="text-foreground text-center text-sm">{set.weightKg}</span>
-            <span className="text-foreground text-center text-sm">{set.reps ?? 0}</span>
-            <span className="text-muted-foreground w-12 text-center text-sm">{set.rpe ?? '—'}</span>
-            <div className="flex w-16 justify-end gap-0.5">
+            <div className="ml-3 flex flex-1 items-baseline gap-1.5">
+              <span className="text-foreground text-xl font-bold">{set.weightKg}</span>
+              <span className="text-muted-foreground text-xs font-medium uppercase">
+                {t('fitness.logger.weightUnit')}
+              </span>
+              <span className="text-muted-foreground mx-1 text-sm">×</span>
+              <span className="text-foreground text-xl font-bold">{set.reps ?? 0}</span>
+              <span className="text-muted-foreground text-xs font-medium uppercase">
+                {t('fitness.logger.repsUnit')}
+              </span>
+              {set.rpe != null && (
+                <span className="bg-muted text-muted-foreground ml-2 rounded px-1.5 py-0.5 text-[10px] font-medium">
+                  RPE {set.rpe}
+                </span>
+              )}
+            </div>
+            <div className="flex shrink-0 gap-0.5">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                className="h-8 w-8"
                 onClick={() => onEditSet(set)}
                 data-testid={`edit-set-${set.id}`}
                 aria-label={t('fitness.logger.editSet')}
               >
-                <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                <Pencil className="h-4 w-4" aria-hidden="true" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-destructive h-7 w-7"
+                className="text-destructive h-8 w-8"
                 onClick={() => onDeleteSet(set.id)}
                 data-testid={`delete-set-${set.id}`}
                 aria-label={t('fitness.logger.deleteSet')}
               >
-                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
           </div>
         ))}
+      </div>
 
-        {/* Active Input Row */}
-        <div className="bg-muted/50 grid grid-cols-[2rem_minmax(0,1fr)_minmax(0,1fr)_3rem_4rem] items-center gap-x-2 rounded-b-lg py-2">
-          <span className="text-muted-foreground w-8 text-center text-sm font-medium">{nextSetNumber}</span>
+      {/* Active Set Card */}
+      <div className="bg-foreground text-background mb-3 rounded-xl p-4" data-testid="active-set-card">
+        {/* Active header */}
+        <div className="mb-4 flex items-center gap-2">
+          <span className="border-muted-foreground flex h-7 w-7 items-center justify-center rounded-md border text-sm font-bold">
+            {nextSetNumber}
+          </span>
+          <span className="border-muted-foreground rounded border px-2.5 py-1 text-[11px] font-bold tracking-wider uppercase">
+            {t('fitness.logger.activeSet')}
+          </span>
+        </div>
 
+        {/* Stepper groups */}
+        <div className="mb-3 grid grid-cols-2 gap-3">
           {/* Weight stepper */}
-          <div className="border-border flex min-w-0 items-center overflow-hidden rounded border">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-7 shrink-0 rounded-none"
-              onClick={() => onWeightChange(-WEIGHT_INCREMENT)}
-              data-testid="weight-minus"
-              aria-label={t('fitness.logger.decreaseWeight')}
-            >
-              −
-            </Button>
-            <input
-              type="text"
-              inputMode="decimal"
-              value={Number.isNaN(currentInput.weight) ? '' : String(currentInput.weight)}
-              onChange={e => onWeightInput(e.target.value)}
-              className="border-border bg-background h-8 min-w-0 flex-1 border-x text-center text-sm"
-              data-testid="weight-input"
-            />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-7 shrink-0 rounded-none"
-              onClick={() => onWeightChange(WEIGHT_INCREMENT)}
-              data-testid="weight-plus"
-              aria-label={t('fitness.logger.increaseWeight')}
-            >
-              +
-            </Button>
+          <div>
+            <p className="text-muted-foreground mb-2 text-[11px] font-semibold tracking-wide uppercase">
+              {t('fitness.logger.weight')} ({t('fitness.logger.weightUnit')})
+            </p>
+            <div className="border-muted-foreground/30 flex items-center overflow-hidden rounded-lg border">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-background h-[52px] w-11 shrink-0 rounded-none text-xl hover:bg-[rgba(255,255,255,0.1)]"
+                onClick={() => onWeightChange(-WEIGHT_INCREMENT)}
+                data-testid="weight-minus"
+                aria-label={t('fitness.logger.decreaseWeight')}
+              >
+                −
+              </Button>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={Number.isNaN(currentInput.weight) ? '' : String(currentInput.weight)}
+                onChange={e => onWeightInput(e.target.value)}
+                className="border-muted-foreground/30 text-background h-[52px] min-w-0 flex-1 border-x bg-transparent text-center text-2xl font-bold outline-none"
+                data-testid="weight-input"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-background h-[52px] w-11 shrink-0 rounded-none text-xl hover:bg-[rgba(255,255,255,0.1)]"
+                onClick={() => onWeightChange(WEIGHT_INCREMENT)}
+                data-testid="weight-plus"
+                aria-label={t('fitness.logger.increaseWeight')}
+              >
+                +
+              </Button>
+            </div>
           </div>
 
           {/* Reps stepper */}
-          <div className="border-border flex min-w-0 items-center overflow-hidden rounded border">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-7 shrink-0 rounded-none"
-              onClick={() => onRepsChange(-REPS_INCREMENT)}
-              data-testid="reps-minus"
-              aria-label={t('fitness.logger.decreaseReps')}
-            >
-              −
-            </Button>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={Number.isNaN(currentInput.reps) ? '' : String(currentInput.reps)}
-              onChange={e => onRepsInput(e.target.value)}
-              className="border-border bg-background h-8 min-w-0 flex-1 border-x text-center text-sm"
-              data-testid="reps-input"
-            />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-7 shrink-0 rounded-none"
-              onClick={() => onRepsChange(REPS_INCREMENT)}
-              data-testid="reps-plus"
-              aria-label={t('fitness.logger.increaseReps')}
-            >
-              +
-            </Button>
+          <div>
+            <p className="text-muted-foreground mb-2 text-[11px] font-semibold tracking-wide uppercase">
+              {t('fitness.logger.reps')}
+            </p>
+            <div className="border-muted-foreground/30 flex items-center overflow-hidden rounded-lg border">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-background h-[52px] w-11 shrink-0 rounded-none text-xl hover:bg-[rgba(255,255,255,0.1)]"
+                onClick={() => onRepsChange(-REPS_INCREMENT)}
+                data-testid="reps-minus"
+                aria-label={t('fitness.logger.decreaseReps')}
+              >
+                −
+              </Button>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={Number.isNaN(currentInput.reps) ? '' : String(currentInput.reps)}
+                onChange={e => onRepsInput(e.target.value)}
+                className="border-muted-foreground/30 text-background h-[52px] min-w-0 flex-1 border-x bg-transparent text-center text-2xl font-bold outline-none"
+                data-testid="reps-input"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-background h-[52px] w-11 shrink-0 rounded-none text-xl hover:bg-[rgba(255,255,255,0.1)]"
+                onClick={() => onRepsChange(REPS_INCREMENT)}
+                data-testid="reps-plus"
+                aria-label={t('fitness.logger.increaseReps')}
+              >
+                +
+              </Button>
+            </div>
           </div>
+        </div>
 
-          {/* RPE select */}
-          <select
-            value={currentInput.rpe ?? ''}
-            onChange={e => {
-              const val = e.target.value;
-              if (val) onRpeSelect(Number(val));
-            }}
-            className="border-border bg-background h-8 w-12 rounded border px-1 text-center text-sm"
-            data-testid="rpe-select"
+        {/* Bottom: RPE + Confirm */}
+        <div className="flex items-center gap-3">
+          <div className="border-muted-foreground/30 flex flex-1 items-center rounded-lg border px-3 py-2.5">
+            <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">RPE</span>
+            <div className="ml-auto">
+              <select
+                value={currentInput.rpe ?? ''}
+                onChange={e => {
+                  const val = e.target.value;
+                  if (val) onRpeSelect(Number(val));
+                }}
+                className="text-background bg-transparent text-lg font-bold outline-none"
+                data-testid="rpe-select"
+              >
+                <option value="" className="bg-background text-foreground">
+                  —
+                </option>
+                {RPE_OPTIONS.map(rpe => (
+                  <option key={rpe} value={rpe} className="bg-background text-foreground">
+                    {rpe}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <Button
+            variant="secondary"
+            size="icon"
+            className="bg-background text-foreground hover:bg-background/90 h-12 w-14 shrink-0 rounded-lg"
+            onClick={onLogSet}
+            data-testid="confirm-set-btn"
+            aria-label={t('fitness.logger.logSet')}
           >
-            <option value="">—</option>
-            {RPE_OPTIONS.map(rpe => (
-              <option key={rpe} value={rpe}>
-                {rpe}
-              </option>
-            ))}
-          </select>
-
-          <span className="w-16" />
+            <Check className="h-6 w-6" aria-hidden="true" />
+          </Button>
         </div>
       </div>
 

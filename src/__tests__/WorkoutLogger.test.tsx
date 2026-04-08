@@ -281,7 +281,7 @@ describe('WorkoutLogger', () => {
         target: { value: String(rpe) },
       });
     }
-    fireEvent.click(screen.getByTestId('log-set-bottom-btn'));
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
     fireEvent.click(screen.getByText('Skip'));
   }
 
@@ -378,7 +378,7 @@ describe('WorkoutLogger', () => {
     fireEvent.change(within(card).getByTestId('reps-input'), {
       target: { value: '10' },
     });
-    fireEvent.click(screen.getByTestId('log-set-bottom-btn'));
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
 
     const sets = getLoggedSets();
     expect(sets).toHaveLength(1);
@@ -388,13 +388,13 @@ describe('WorkoutLogger', () => {
 
   it('shows rest timer after logging a set', () => {
     render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
-    fireEvent.click(screen.getByTestId('log-set-bottom-btn'));
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
     expect(screen.getByTestId('rest-timer')).toBeInTheDocument();
   });
 
   it('hides rest timer on skip', () => {
     render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
-    fireEvent.click(screen.getByTestId('log-set-bottom-btn'));
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
     expect(screen.getByTestId('rest-timer')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Skip'));
@@ -403,7 +403,7 @@ describe('WorkoutLogger', () => {
 
   it('hides rest timer on complete', () => {
     render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
-    fireEvent.click(screen.getByTestId('log-set-bottom-btn'));
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
     expect(screen.getByTestId('rest-timer')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Done'));
@@ -523,7 +523,7 @@ describe('WorkoutLogger', () => {
     fireEvent.change(within(card).getByTestId('rpe-select'), {
       target: { value: '9' },
     });
-    fireEvent.click(screen.getByTestId('log-set-bottom-btn'));
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
 
     const sets = getLoggedSets();
     expect(sets).toHaveLength(1);
@@ -830,7 +830,7 @@ describe('WorkoutLogger', () => {
   it('clears draft on save', async () => {
     render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
-    fireEvent.click(screen.getByTestId('log-set-bottom-btn'));
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
     fireEvent.click(screen.getByText('Skip'));
     fireEvent.click(screen.getByTestId('finish-button'));
     await act(async () => {
@@ -1188,7 +1188,7 @@ describe('WorkoutLogger', () => {
     fireEvent.change(within(card).getByTestId('reps-input'), {
       target: { value: '' },
     });
-    fireEvent.click(screen.getByTestId('log-set-bottom-btn'));
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
 
     const sets = getLoggedSets();
     expect(sets).toHaveLength(1);
@@ -1682,7 +1682,7 @@ describe('WorkoutLogger', () => {
       ]),
     };
     render(<WorkoutLogger {...defaultProps} planDay={planWithCustomRest} />);
-    fireEvent.click(screen.getByTestId('log-set-bottom-btn'));
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
     expect(screen.getByTestId('rest-timer')).toBeInTheDocument();
   });
 });

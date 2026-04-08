@@ -71,6 +71,7 @@ const defaultProps = {
   onCopyLastSet: vi.fn(),
   onApplyOverload: vi.fn(),
   onSwapExercise: vi.fn(),
+  onLogSet: vi.fn(),
 };
 
 describe('ExerciseWorkoutCard', () => {
@@ -192,5 +193,19 @@ describe('ExerciseWorkoutCard', () => {
     render(<ExerciseWorkoutCard {...defaultProps} onSwapExercise={onSwapExercise} />);
     fireEvent.click(screen.getByTestId('swap-exercise'));
     expect(onSwapExercise).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onLogSet when confirm button clicked', () => {
+    const onLogSet = vi.fn();
+    render(<ExerciseWorkoutCard {...defaultProps} onLogSet={onLogSet} />);
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
+    expect(onLogSet).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders active set card with correct set number', () => {
+    render(<ExerciseWorkoutCard {...defaultProps} loggedSets={[mockSet1, mockSet2]} />);
+    const activeCard = screen.getByTestId('active-set-card');
+    expect(activeCard).toBeInTheDocument();
+    expect(activeCard).toHaveTextContent('3');
   });
 });

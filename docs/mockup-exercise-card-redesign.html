@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ExerciseWorkoutCard Redesign Mockup</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+        background: #f5f5f5;
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+        gap: 40px;
+        flex-wrap: wrap;
+      }
+      .phone-frame {
+        width: 390px;
+        background: #fff;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      }
+      .phone-frame h2 {
+        text-align: center;
+        padding: 12px;
+        background: #0a0a0a;
+        color: #fff;
+        font-size: 13px;
+        letter-spacing: 1px;
+      }
+      .content {
+        padding: 16px;
+      }
+
+      /* ============ CARD ============ */
+      .card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
+
+      /* Header */
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+      }
+      .exercise-badge {
+        font-size: 11px;
+        font-weight: 700;
+        color: #737373;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+      }
+      .exercise-name {
+        font-size: 20px;
+        font-weight: 800;
+        color: #0a0a0a;
+        letter-spacing: -0.3px;
+      }
+      .muscle-info {
+        text-align: right;
+      }
+      .muscle-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #a0a0a0;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+      }
+      .muscle-names {
+        font-size: 13px;
+        color: #555;
+        font-weight: 500;
+      }
+
+      /* Overload chip */
+      .overload-chip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.05);
+        font-size: 12px;
+        color: #555;
+        margin-bottom: 16px;
+        cursor: pointer;
+      }
+      .overload-chip:hover {
+        background: rgba(0, 0, 0, 0.08);
+      }
+
+      /* Divider */
+      .divider {
+        height: 1px;
+        background: #e5e5e5;
+        margin: 0 -16px;
+      }
+
+      /* ============ COMPLETED SET ============ */
+      .completed-set {
+        display: flex;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      .completed-set:last-of-type {
+        border-bottom: none;
+      }
+      .set-num {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+        color: #0a0a0a;
+        background: #f5f5f5;
+        border-radius: 6px;
+        flex-shrink: 0;
+      }
+      .set-data {
+        flex: 1;
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        margin-left: 12px;
+      }
+      .set-weight {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0a0a0a;
+      }
+      .set-unit {
+        font-size: 12px;
+        font-weight: 500;
+        color: #999;
+        text-transform: uppercase;
+      }
+      .set-x {
+        font-size: 14px;
+        color: #bbb;
+        margin: 0 2px;
+      }
+      .set-reps {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0a0a0a;
+      }
+      .set-rpe-badge {
+        font-size: 11px;
+        color: #999;
+        background: #f5f5f5;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 4px;
+      }
+      .set-actions {
+        display: flex;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .icon-btn {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        color: #999;
+        font-size: 14px;
+      }
+      .icon-btn:hover {
+        background: #f5f5f5;
+      }
+      .icon-btn.danger {
+        color: #b91c1c;
+      }
+      .icon-btn.danger:hover {
+        background: #fef2f2;
+      }
+
+      /* ============ ACTIVE SET CARD ============ */
+      .active-set-card {
+        background: #0a0a0a;
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 12px;
+        color: #fff;
+      }
+
+      /* Active header */
+      .active-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .active-set-num {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+        color: #fff;
+        border: 1.5px solid #555;
+        border-radius: 6px;
+      }
+      .active-badge {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: #fff;
+        border: 1.5px solid #555;
+        padding: 4px 10px;
+        border-radius: 4px;
+        text-transform: uppercase;
+      }
+
+      /* Stepper groups */
+      .steppers-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .stepper-group {
+      }
+      .stepper-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #888;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+      .stepper-control {
+        display: flex;
+        align-items: center;
+        border: 1.5px solid #333;
+        border-radius: 8px;
+        overflow: hidden;
+        height: 52px;
+      }
+      .stepper-btn {
+        width: 44px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 300;
+        color: #fff;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      .stepper-btn:hover {
+        background: #222;
+      }
+      .stepper-btn:active {
+        background: #333;
+      }
+      .stepper-input {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        text-align: center;
+        font-size: 24px;
+        font-weight: 700;
+        color: #fff;
+        background: transparent;
+        border: none;
+        border-left: 1.5px solid #333;
+        border-right: 1.5px solid #333;
+        outline: none;
+      }
+
+      /* Bottom row: RPE + confirm */
+      .active-bottom {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .rpe-group {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        border: 1.5px solid #333;
+        border-radius: 8px;
+        height: 48px;
+        padding: 0 12px;
+      }
+      .rpe-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #888;
+        letter-spacing: 0.5px;
+        margin-right: auto;
+      }
+      .rpe-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #fff;
+        margin-right: 4px;
+      }
+      .rpe-arrow {
+        color: #666;
+        font-size: 12px;
+      }
+      .confirm-btn {
+        width: 56px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      .confirm-btn:hover {
+        background: #f0f0f0;
+      }
+      .confirm-btn svg {
+        width: 24px;
+        height: 24px;
+        color: #0a0a0a;
+      }
+
+      /* ============ BOTTOM ACTIONS ============ */
+      .bottom-actions {
+        margin-top: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .ghost-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #888;
+        cursor: pointer;
+        width: 100%;
+      }
+      .ghost-btn:hover {
+        background: #f5f5f5;
+      }
+      .outline-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px;
+        border: 1px solid #e5e5e5;
+        background: transparent;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #555;
+        cursor: pointer;
+        width: 100%;
+      }
+      .outline-btn:hover {
+        background: #fafafa;
+      }
+
+      /* ============ ANNOTATIONS ============ */
+      .annotation {
+        margin-top: 20px;
+        padding: 12px;
+        background: #fffde7;
+        border-left: 3px solid #f9a825;
+        border-radius: 0 8px 8px 0;
+        font-size: 12px;
+        color: #555;
+        line-height: 1.5;
+      }
+      .annotation strong {
+        color: #333;
+      }
+      .vs-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #0a0a0a;
+        color: #fff;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ===== MOCKUP: REDESIGNED ===== -->
+    <div class="phone-frame">
+      <h2>REDESIGN — EXERCISE WORKOUT CARD</h2>
+      <div class="content">
+        <div class="card">
+          <!-- Header -->
+          <div class="card-header">
+            <div>
+              <div class="exercise-badge">BÀI 1 / 4</div>
+              <div class="exercise-name">Hít xà đơn</div>
+            </div>
+            <div class="muscle-info">
+              <div class="muscle-label">Nhóm cơ</div>
+              <div class="muscle-names">Lưng · Vai</div>
+            </div>
+          </div>
+
+          <!-- Overload chip -->
+          <div class="overload-chip">📈 Gợi ý: 67.5kg × 9 reps</div>
+
+          <div class="divider"></div>
+
+          <!-- Completed Set 1 -->
+          <div class="completed-set">
+            <div class="set-num">1</div>
+            <div class="set-data">
+              <span class="set-weight">65</span>
+              <span class="set-unit">kg</span>
+              <span class="set-x">×</span>
+              <span class="set-reps">8</span>
+              <span class="set-unit">reps</span>
+              <span class="set-rpe-badge">RPE 7</span>
+            </div>
+            <div class="set-actions">
+              <button class="icon-btn" title="Chỉnh sửa">✏️</button>
+              <button class="icon-btn danger" title="Xóa">🗑️</button>
+            </div>
+          </div>
+
+          <!-- Completed Set 2 -->
+          <div class="completed-set">
+            <div class="set-num">2</div>
+            <div class="set-data">
+              <span class="set-weight">65</span>
+              <span class="set-unit">kg</span>
+              <span class="set-x">×</span>
+              <span class="set-reps">8</span>
+              <span class="set-unit">reps</span>
+              <span class="set-rpe-badge">RPE 8</span>
+            </div>
+            <div class="set-actions">
+              <button class="icon-btn" title="Chỉnh sửa">✏️</button>
+              <button class="icon-btn danger" title="Xóa">🗑️</button>
+            </div>
+          </div>
+
+          <!-- Active Set Card (DARK) -->
+          <div class="active-set-card">
+            <div class="active-header">
+              <div class="active-set-num">3</div>
+              <div class="active-badge">Đang tập</div>
+            </div>
+
+            <div class="steppers-row">
+              <div class="stepper-group">
+                <div class="stepper-label">Cân nặng (kg)</div>
+                <div class="stepper-control">
+                  <button class="stepper-btn">−</button>
+                  <input class="stepper-input" value="65" />
+                  <button class="stepper-btn">+</button>
+                </div>
+              </div>
+              <div class="stepper-group">
+                <div class="stepper-label">Số lần</div>
+                <div class="stepper-control">
+                  <button class="stepper-btn">−</button>
+                  <input class="stepper-input" value="8" />
+                  <button class="stepper-btn">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="active-bottom">
+              <div class="rpe-group">
+                <span class="rpe-label">RPE</span>
+                <span class="rpe-value">8</span>
+                <span class="rpe-arrow">▾</span>
+              </div>
+              <button class="confirm-btn" title="Ghi nhận set">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom actions -->
+          <div class="bottom-actions">
+            <button class="ghost-btn">📋 Sao chép set trước</button>
+            <button class="outline-btn">🔄 Thay bài tập</button>
+          </div>
+        </div>
+
+        <!-- Annotations -->
+        <div class="annotation">
+          <strong>Thay đổi so với hiện tại:</strong><br />
+          1. Header: badge "BÀI X/Y" + tên lớn + nhóm cơ bên phải<br />
+          2. Completed set: inline <code>65kg × 8 reps</code> (không còn grid table)<br />
+          3. Active set: dark card nổi bật, stepper LỚN, dễ tap<br />
+          4. Nút ✓ <strong>thay thế</strong> "Ghi nhận set" ở footer<br />
+          5. RPE cùng hàng với nút ✓<br />
+          6. Copy + Swap giữ nguyên bên dưới
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MOCKUP: EMPTY STATE (0 completed sets) ===== -->
+    <div class="phone-frame">
+      <h2>TRẠNG THÁI ĐẦU — SET 1</h2>
+      <div class="content">
+        <div class="card">
+          <!-- Header -->
+          <div class="card-header">
+            <div>
+              <div class="exercise-badge">BÀI 2 / 4</div>
+              <div class="exercise-name">Bench Press</div>
+            </div>
+            <div class="muscle-info">
+              <div class="muscle-label">Nhóm cơ</div>
+              <div class="muscle-names">Ngực · Vai</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- No completed sets → active card immediately -->
+          <div class="active-set-card" style="margin-top: 12px">
+            <div class="active-header">
+              <div class="active-set-num">1</div>
+              <div class="active-badge">Đang tập</div>
+            </div>
+
+            <div class="steppers-row">
+              <div class="stepper-group">
+                <div class="stepper-label">Cân nặng (kg)</div>
+                <div class="stepper-control">
+                  <button class="stepper-btn">−</button>
+                  <input class="stepper-input" value="0" />
+                  <button class="stepper-btn">+</button>
+                </div>
+              </div>
+              <div class="stepper-group">
+                <div class="stepper-label">Số lần</div>
+                <div class="stepper-control">
+                  <button class="stepper-btn">−</button>
+                  <input class="stepper-input" value="0" />
+                  <button class="stepper-btn">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="active-bottom">
+              <div class="rpe-group">
+                <span class="rpe-label">RPE</span>
+                <span class="rpe-value">—</span>
+                <span class="rpe-arrow">▾</span>
+              </div>
+              <button class="confirm-btn" title="Ghi nhận set">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom actions (no copy yet since 0 sets) -->
+          <div class="bottom-actions">
+            <button class="outline-btn">🔄 Thay bài tập</button>
+          </div>
+        </div>
+
+        <div class="annotation">
+          <strong>Empty state:</strong><br />
+          • Không có completed set → active card hiện ngay sau divider<br />
+          • "Sao chép set trước" ẩn vì chưa có set nào<br />
+          • Giá trị mặc định: 0 kg, 0 reps, RPE —
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MOCKUP: MANY SETS ===== -->
+    <div class="phone-frame">
+      <h2>NHIỀU SET — ĐÃ LOG 4 SETS</h2>
+      <div class="content">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="exercise-badge">BÀI 3 / 4</div>
+              <div class="exercise-name">Squat</div>
+            </div>
+            <div class="muscle-info">
+              <div class="muscle-label">Nhóm cơ</div>
+              <div class="muscle-names">Chân · Mông</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="completed-set">
+            <div class="set-num">1</div>
+            <div class="set-data">
+              <span class="set-weight">80</span>
+              <span class="set-unit">kg</span>
+              <span class="set-x">×</span>
+              <span class="set-reps">10</span>
+              <span class="set-unit">reps</span>
+            </div>
+            <div class="set-actions">
+              <button class="icon-btn">✏️</button>
+              <button class="icon-btn danger">🗑️</button>
+            </div>
+          </div>
+          <div class="completed-set">
+            <div class="set-num">2</div>
+            <div class="set-data">
+              <span class="set-weight">80</span>
+              <span class="set-unit">kg</span>
+              <span class="set-x">×</span>
+              <span class="set-reps">8</span>
+              <span class="set-unit">reps</span>
+              <span class="set-rpe-badge">RPE 8</span>
+            </div>
+            <div class="set-actions">
+              <button class="icon-btn">✏️</button>
+              <button class="icon-btn danger">🗑️</button>
+            </div>
+          </div>
+          <div class="completed-set">
+            <div class="set-num">3</div>
+            <div class="set-data">
+              <span class="set-weight">80</span>
+              <span class="set-unit">kg</span>
+              <span class="set-x">×</span>
+              <span class="set-reps">7</span>
+              <span class="set-unit">reps</span>
+              <span class="set-rpe-badge">RPE 9</span>
+            </div>
+            <div class="set-actions">
+              <button class="icon-btn">✏️</button>
+              <button class="icon-btn danger">🗑️</button>
+            </div>
+          </div>
+          <div class="completed-set">
+            <div class="set-num">4</div>
+            <div class="set-data">
+              <span class="set-weight">75</span>
+              <span class="set-unit">kg</span>
+              <span class="set-x">×</span>
+              <span class="set-reps">8</span>
+              <span class="set-unit">reps</span>
+              <span class="set-rpe-badge">RPE 9</span>
+            </div>
+            <div class="set-actions">
+              <button class="icon-btn">✏️</button>
+              <button class="icon-btn danger">🗑️</button>
+            </div>
+          </div>
+
+          <div class="active-set-card">
+            <div class="active-header">
+              <div class="active-set-num">5</div>
+              <div class="active-badge">Đang tập</div>
+            </div>
+            <div class="steppers-row">
+              <div class="stepper-group">
+                <div class="stepper-label">Cân nặng (kg)</div>
+                <div class="stepper-control">
+                  <button class="stepper-btn">−</button>
+                  <input class="stepper-input" value="75" />
+                  <button class="stepper-btn">+</button>
+                </div>
+              </div>
+              <div class="stepper-group">
+                <div class="stepper-label">Số lần</div>
+                <div class="stepper-control">
+                  <button class="stepper-btn">−</button>
+                  <input class="stepper-input" value="8" />
+                  <button class="stepper-btn">+</button>
+                </div>
+              </div>
+            </div>
+            <div class="active-bottom">
+              <div class="rpe-group">
+                <span class="rpe-label">RPE</span>
+                <span class="rpe-value">—</span>
+                <span class="rpe-arrow">▾</span>
+              </div>
+              <button class="confirm-btn">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="bottom-actions">
+            <button class="ghost-btn">📋 Sao chép set trước</button>
+            <button class="outline-btn">🔄 Thay bài tập</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
