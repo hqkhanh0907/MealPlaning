@@ -1,0 +1,1384 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Workout Logger — MealPlaning Mockup (Monochrome)</title>
+    <style>
+      /* ─── RESET ─── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* ─── DESIGN TOKENS (Monochrome) ─── */
+      :root {
+        --bg-page: #f5f5f5;
+        --bg-card: #ffffff;
+        --bg-muted: #f5f5f5;
+        --bg-hover: #ebebeb;
+        --bg-active: #e0e0e0;
+        --bg-input: #ffffff;
+
+        --text-primary: #0a0a0a;
+        --text-secondary: #525252;
+        --text-muted: #8a8a8a;
+        --text-inverse: #ffffff;
+
+        --border-default: #e5e5e5;
+        --border-strong: #d4d4d4;
+        --border-subtle: #f0f0f0;
+
+        --btn-primary-bg: #0a0a0a;
+        --btn-primary-text: #ffffff;
+        --btn-primary-hover: #262626;
+
+        --tag-bg: #f5f5f5;
+        --tag-text: #525252;
+
+        --destructive: #ef4444;
+
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-full: 9999px;
+
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+        --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+
+      .dark {
+        --bg-page: #0a0a0a;
+        --bg-card: #171717;
+        --bg-muted: #1c1c1c;
+        --bg-hover: #262626;
+        --bg-active: #333333;
+        --bg-input: #1c1c1c;
+
+        --text-primary: #fafafa;
+        --text-secondary: #a3a3a3;
+        --text-muted: #737373;
+        --text-inverse: #0a0a0a;
+
+        --border-default: #262626;
+        --border-strong: #404040;
+        --border-subtle: #1f1f1f;
+
+        --btn-primary-bg: #fafafa;
+        --btn-primary-text: #0a0a0a;
+        --btn-primary-hover: #e5e5e5;
+
+        --tag-bg: #262626;
+        --tag-text: #a3a3a3;
+
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+      }
+
+      body {
+        font-family: var(--font-sans);
+        background: var(--bg-page);
+        color: var(--text-primary);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ─── PHONE FRAME ─── */
+      .phone-frame {
+        width: 390px;
+        height: 844px;
+        border: 2px solid var(--border-default);
+        border-radius: 40px;
+        overflow: hidden;
+        position: relative;
+        background: var(--bg-page);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .demo-container {
+        display: flex;
+        gap: 32px;
+        padding: 32px;
+        justify-content: center;
+        flex-wrap: wrap;
+        background: #f0f0f0;
+        min-height: 100vh;
+      }
+
+      .demo-label {
+        text-align: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+
+      /* ─── HEADER ─── */
+      .wl-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        padding-top: 48px; /* safe area */
+        background: var(--bg-card);
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .wl-header-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .wl-header-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: transparent;
+        border-radius: var(--radius-full);
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: background 0.15s;
+      }
+      .wl-header-btn:hover {
+        background: var(--bg-hover);
+      }
+
+      .wl-timer-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--bg-muted);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-full);
+        padding: 6px 14px;
+        font-size: 14px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        font-family: 'SF Mono', 'Menlo', monospace;
+        color: var(--text-primary);
+      }
+
+      .wl-finish-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--btn-primary-bg);
+        color: var(--btn-primary-text);
+        border: none;
+        border-radius: var(--radius-md);
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .wl-finish-btn:hover {
+        background: var(--btn-primary-hover);
+      }
+
+      /* ─── MAIN CONTENT ─── */
+      .wl-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      /* ─── EXERCISE HEADER (Icon + Name + Muscles + Menu) ─── */
+      .exercise-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 0 12px 0;
+      }
+
+      .exercise-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-md);
+        background: var(--bg-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .exercise-icon svg {
+        width: 24px;
+        height: 24px;
+        color: var(--text-secondary);
+      }
+
+      .exercise-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .exercise-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1.3;
+      }
+
+      .exercise-muscles {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      .exercise-menu-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        border-radius: var(--radius-full);
+        cursor: pointer;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .exercise-menu-btn:hover {
+        background: var(--bg-hover);
+      }
+
+      /* ─── SET TABLE ─── */
+      .set-table {
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-default);
+        overflow: hidden;
+      }
+
+      .set-table-header {
+        display: grid;
+        grid-template-columns: 48px 1fr 1fr 80px 44px;
+        padding: 8px 12px;
+        background: var(--bg-muted);
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .set-table-header span {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        text-align: center;
+      }
+      .set-table-header span:first-child {
+        text-align: left;
+      }
+
+      .set-row {
+        display: grid;
+        grid-template-columns: 48px 1fr 1fr 80px 44px;
+        padding: 10px 12px;
+        align-items: center;
+        border-bottom: 1px solid var(--border-subtle);
+        transition: background 0.1s;
+      }
+      .set-row:last-child {
+        border-bottom: none;
+      }
+      .set-row:hover {
+        background: var(--bg-muted);
+      }
+
+      .set-row.completed {
+        background: var(--bg-card);
+      }
+
+      .set-row.current {
+        background: var(--bg-muted);
+      }
+
+      .set-num {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .set-num .completed-bar {
+        width: 3px;
+        height: 20px;
+        background: var(--btn-primary-bg);
+        border-radius: 2px;
+      }
+
+      .set-value {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .set-value.placeholder {
+        color: var(--text-muted);
+        font-weight: 400;
+      }
+
+      .set-value input {
+        width: 64px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-primary);
+        background: var(--bg-input);
+        border: 1.5px solid var(--border-strong);
+        border-radius: var(--radius-sm);
+        padding: 6px 4px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      .set-value input:focus {
+        border-color: var(--btn-primary-bg);
+      }
+
+      .rpe-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 10px;
+        border-radius: var(--radius-full);
+        font-size: 12px;
+        font-weight: 600;
+        background: var(--tag-bg);
+        color: var(--tag-text);
+        border: 1px solid var(--border-default);
+      }
+
+      .rpe-select {
+        appearance: none;
+        background: var(--bg-input);
+        border: 1.5px solid var(--border-strong);
+        border-radius: var(--radius-sm);
+        padding: 6px 24px 6px 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        cursor: pointer;
+        outline: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+      }
+
+      .set-action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.15s;
+        margin: 0 auto;
+      }
+
+      .set-action-btn.check {
+        background: var(--btn-primary-bg);
+        color: var(--btn-primary-text);
+      }
+
+      .set-action-btn.remove {
+        background: transparent;
+        color: var(--text-muted);
+        border: 1.5px solid var(--border-default);
+      }
+      .set-action-btn.remove:hover {
+        border-color: var(--destructive);
+        color: var(--destructive);
+      }
+
+      /* ─── ADD SET BUTTON ─── */
+      .add-set-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+        padding: 12px;
+        border: 2px dashed var(--border-default);
+        border-radius: var(--radius-md);
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .add-set-btn:hover {
+        border-color: var(--border-strong);
+        color: var(--text-secondary);
+        background: var(--bg-muted);
+      }
+
+      /* ─── ACTION BUTTONS ROW ─── */
+      .action-row {
+        display: flex;
+        gap: 10px;
+      }
+
+      .action-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 16px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .action-btn:hover {
+        background: var(--bg-hover);
+        border-color: var(--border-strong);
+      }
+
+      .action-btn svg {
+        width: 16px;
+        height: 16px;
+        color: var(--text-secondary);
+      }
+
+      /* ─── NEXT EXERCISE PREVIEW ─── */
+      .next-exercise-section {
+        margin-top: 4px;
+      }
+
+      .next-exercise-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+      }
+
+      .next-exercise-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .next-exercise-card:hover {
+        background: var(--bg-hover);
+      }
+
+      .next-exercise-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-sm);
+        background: var(--bg-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .next-exercise-icon svg {
+        width: 20px;
+        height: 20px;
+        color: var(--text-muted);
+      }
+
+      .next-exercise-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .next-exercise-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .next-exercise-detail {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 1px;
+      }
+
+      .next-exercise-arrow {
+        color: var(--text-muted);
+        flex-shrink: 0;
+      }
+
+      /* ─── OVERLOAD SUGGESTION ─── */
+      .overload-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: var(--tag-bg);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-full);
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        cursor: pointer;
+        margin-bottom: 12px;
+        transition: all 0.15s;
+      }
+      .overload-chip:hover {
+        background: var(--bg-hover);
+      }
+
+      .overload-chip svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      /* ─── BOTTOM BAR ─── */
+      .wl-bottom-bar {
+        padding: 12px 16px;
+        padding-bottom: 32px; /* safe area */
+        background: var(--bg-card);
+        border-top: 1px solid var(--border-subtle);
+      }
+
+      .log-set-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--btn-primary-bg);
+        color: var(--btn-primary-text);
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .log-set-btn:hover {
+        background: var(--btn-primary-hover);
+      }
+
+      /* ─── FLOW DIAGRAM ─── */
+      .flow-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        max-width: 600px;
+      }
+
+      .flow-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+      }
+
+      .flow-step {
+        display: flex;
+        gap: 12px;
+        padding: 8px 0;
+      }
+
+      .flow-dot {
+        width: 24px;
+        height: 24px;
+        border-radius: var(--radius-full);
+        background: var(--btn-primary-bg);
+        color: var(--btn-primary-text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        flex-shrink: 0;
+        position: relative;
+      }
+
+      .flow-step:not(:last-child) .flow-dot::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 16px;
+        background: var(--border-default);
+      }
+
+      .flow-text {
+        padding-top: 2px;
+      }
+
+      .flow-text strong {
+        display: block;
+        font-size: 14px;
+        color: var(--text-primary);
+      }
+
+      .flow-text span {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      /* ─── COMPARISON ─── */
+      .comparison-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .comparison-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+      }
+
+      .comparison-card h3 {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .comparison-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .comparison-list li {
+        font-size: 13px;
+        color: var(--text-secondary);
+        padding-left: 16px;
+        position: relative;
+      }
+
+      .comparison-list li::before {
+        content: '→';
+        position: absolute;
+        left: 0;
+        color: var(--text-muted);
+      }
+
+      /* SVG Icons inline */
+      .icon-sm {
+        width: 16px;
+        height: 16px;
+      }
+      .icon-md {
+        width: 20px;
+        height: 20px;
+      }
+      .icon-lg {
+        width: 24px;
+        height: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="demo-container">
+      <!-- ════════════════════════════════════════ -->
+      <!-- SCREEN 1: ACTIVE WORKOUT (Light Mode)    -->
+      <!-- ════════════════════════════════════════ -->
+      <div>
+        <div class="demo-label">Light — Đang tập (Exercise 3/6)</div>
+        <div class="phone-frame">
+          <!-- Header -->
+          <div class="wl-header">
+            <button class="wl-header-btn" aria-label="Quay lại">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            </button>
+
+            <div class="wl-timer-pill">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              00:45:30
+            </div>
+
+            <button class="wl-finish-btn">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              Hoàn thành
+            </button>
+          </div>
+
+          <!-- Main Content -->
+          <div class="wl-content">
+            <!-- Exercise Header -->
+            <div class="exercise-header">
+              <div class="exercise-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M14.4 14.4 9.6 9.6" />
+                  <path
+                    d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"
+                  />
+                  <path d="m21.5 21.5-1.4-1.4" />
+                  <path d="M3.9 3.9 2.5 2.5" />
+                  <path
+                    d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"
+                  />
+                </svg>
+              </div>
+              <div class="exercise-info">
+                <div class="exercise-name">Bench Press</div>
+                <div class="exercise-muscles">Ngực, Vai, Tay sau</div>
+              </div>
+              <button class="exercise-menu-btn" aria-label="Menu">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Overload Suggestion -->
+            <div class="overload-chip">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                <polyline points="16 7 22 7 22 13" />
+              </svg>
+              Đề xuất: 82.5kg × 8 reps
+            </div>
+
+            <!-- Set Table -->
+            <div class="set-table">
+              <div class="set-table-header">
+                <span>SET</span>
+                <span>KG</span>
+                <span>REPS</span>
+                <span>RPE</span>
+                <span></span>
+              </div>
+
+              <!-- Completed Set 1 -->
+              <div class="set-row completed">
+                <div class="set-num">
+                  <span class="completed-bar"></span>
+                  1
+                </div>
+                <div class="set-value">80</div>
+                <div class="set-value">10</div>
+                <div class="set-value">
+                  <span class="rpe-badge">RPE 8</span>
+                </div>
+                <div>
+                  <button class="set-action-btn check" aria-label="Hoàn thành">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Completed Set 2 -->
+              <div class="set-row completed">
+                <div class="set-num">
+                  <span class="completed-bar"></span>
+                  2
+                </div>
+                <div class="set-value">80</div>
+                <div class="set-value">8</div>
+                <div class="set-value">
+                  <span class="rpe-badge">RPE 9</span>
+                </div>
+                <div>
+                  <button class="set-action-btn check" aria-label="Hoàn thành">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Current Set (editable) -->
+              <div class="set-row current">
+                <div class="set-num">3</div>
+                <div class="set-value">
+                  <input type="text" value="80" />
+                </div>
+                <div class="set-value">
+                  <input type="text" value="--" />
+                </div>
+                <div class="set-value" style="display: flex; justify-content: center">
+                  <select class="rpe-select">
+                    <option value="">RPE</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                  </select>
+                </div>
+                <div>
+                  <button class="set-action-btn remove" aria-label="Xóa set">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M5 12h14" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add Set -->
+            <button class="add-set-btn">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
+              </svg>
+              Thêm set
+            </button>
+
+            <!-- Action Buttons -->
+            <div class="action-row">
+              <button class="action-btn">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="m16 3 4 4-4 4" />
+                  <path d="M20 7H4" />
+                  <path d="m8 21-4-4 4-4" />
+                  <path d="M4 17h16" />
+                </svg>
+                Thay bài tập
+              </button>
+              <button class="action-btn">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 20h9" />
+                  <path
+                    d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"
+                  />
+                </svg>
+                Ghi chú
+              </button>
+            </div>
+
+            <!-- Next Exercise Preview -->
+            <div class="next-exercise-section">
+              <div class="next-exercise-label">Bài tập tiếp theo</div>
+              <div class="next-exercise-card">
+                <div class="next-exercise-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M14.4 14.4 9.6 9.6" />
+                    <path
+                      d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"
+                    />
+                    <path d="m21.5 21.5-1.4-1.4" />
+                    <path d="M3.9 3.9 2.5 2.5" />
+                    <path
+                      d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"
+                    />
+                  </svg>
+                </div>
+                <div class="next-exercise-info">
+                  <div class="next-exercise-name">Incline Dumbbell Press</div>
+                  <div class="next-exercise-detail">3 sets • 10-12 reps</div>
+                </div>
+                <div class="next-exercise-arrow">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Bar: Log Set -->
+          <div class="wl-bottom-bar">
+            <button class="log-set-btn">Ghi nhận Set</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════ -->
+      <!-- SCREEN 2: ACTIVE WORKOUT (Dark Mode)     -->
+      <!-- ════════════════════════════════════════ -->
+      <div>
+        <div class="demo-label">Dark — Đang tập (Set đầu tiên)</div>
+        <div class="phone-frame dark">
+          <!-- Header -->
+          <div class="wl-header">
+            <button class="wl-header-btn" aria-label="Quay lại">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            </button>
+
+            <div class="wl-timer-pill">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              00:02:15
+            </div>
+
+            <button class="wl-finish-btn">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              Hoàn thành
+            </button>
+          </div>
+
+          <!-- Main Content -->
+          <div class="wl-content">
+            <!-- Exercise Header -->
+            <div class="exercise-header">
+              <div class="exercise-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M14.4 14.4 9.6 9.6" />
+                  <path
+                    d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"
+                  />
+                  <path d="m21.5 21.5-1.4-1.4" />
+                  <path d="M3.9 3.9 2.5 2.5" />
+                  <path
+                    d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"
+                  />
+                </svg>
+              </div>
+              <div class="exercise-info">
+                <div class="exercise-name">Squat</div>
+                <div class="exercise-muscles">Đùi trước, Mông, Core</div>
+              </div>
+              <button class="exercise-menu-btn" aria-label="Menu">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Set Table - Empty (first set) -->
+            <div class="set-table">
+              <div class="set-table-header">
+                <span>SET</span>
+                <span>KG</span>
+                <span>REPS</span>
+                <span>RPE</span>
+                <span></span>
+              </div>
+
+              <!-- Current Set (first, editable) -->
+              <div class="set-row current">
+                <div class="set-num">1</div>
+                <div class="set-value">
+                  <input type="text" value="100" />
+                </div>
+                <div class="set-value">
+                  <input type="text" value="" placeholder="--" />
+                </div>
+                <div class="set-value" style="display: flex; justify-content: center">
+                  <select class="rpe-select">
+                    <option value="">RPE</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                  </select>
+                </div>
+                <div>
+                  <button class="set-action-btn remove" aria-label="Xóa set">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M5 12h14" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add Set -->
+            <button class="add-set-btn">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
+              </svg>
+              Thêm set
+            </button>
+
+            <!-- Action Buttons -->
+            <div class="action-row">
+              <button class="action-btn">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="m16 3 4 4-4 4" />
+                  <path d="M20 7H4" />
+                  <path d="m8 21-4-4 4-4" />
+                  <path d="M4 17h16" />
+                </svg>
+                Thay bài tập
+              </button>
+              <button class="action-btn">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 20h9" />
+                  <path
+                    d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"
+                  />
+                </svg>
+                Ghi chú
+              </button>
+            </div>
+
+            <!-- Next Exercise Preview -->
+            <div class="next-exercise-section">
+              <div class="next-exercise-label">Bài tập tiếp theo</div>
+              <div class="next-exercise-card">
+                <div class="next-exercise-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M14.4 14.4 9.6 9.6" />
+                    <path
+                      d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829z"
+                    />
+                    <path d="m21.5 21.5-1.4-1.4" />
+                    <path d="M3.9 3.9 2.5 2.5" />
+                    <path
+                      d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"
+                    />
+                  </svg>
+                </div>
+                <div class="next-exercise-info">
+                  <div class="next-exercise-name">Leg Press</div>
+                  <div class="next-exercise-detail">4 sets • 8-10 reps</div>
+                </div>
+                <div class="next-exercise-arrow">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Bar: Log Set -->
+          <div class="wl-bottom-bar">
+            <button class="log-set-btn">Ghi nhận Set</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- FLOW DIAGRAM & CHANGE SUMMARY           -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="demo-container" style="flex-direction: column; align-items: center">
+      <div class="flow-section">
+        <div class="flow-title">🔄 Flow mới — Focus 1 bài tập</div>
+
+        <div class="flow-step">
+          <div class="flow-dot">1</div>
+          <div class="flow-text">
+            <strong>Hiển thị bài tập hiện tại</strong>
+            <span>Chỉ 1 exercise header + set table tại 1 thời điểm. Không scroll qua các exercise khác.</span>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-dot">2</div>
+          <div class="flow-text">
+            <strong>Ghi nhận sets</strong>
+            <span>Nhập KG + Reps + RPE trực tiếp trong table row → nhấn "Ghi nhận Set" hoặc ✓ button.</span>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-dot">3</div>
+          <div class="flow-text">
+            <strong>Rest Timer hiện lên (sau mỗi set)</strong>
+            <span>Countdown 90s (giữ nguyên behavior hiện tại).</span>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-dot">4</div>
+          <div class="flow-text">
+            <strong>Xong exercise → "Bài tập tiếp theo" card</strong>
+            <span>Tap card hoặc tự động chuyển. Exercise cũ ẩn đi, exercise mới hiện ra.</span>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-dot">5</div>
+          <div class="flow-text">
+            <strong>Hoàn thành workout</strong>
+            <span>Giữ nguyên WorkoutSummaryCard (PR detection, volume, duration).</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="comparison-grid" style="margin-top: 24px">
+        <div class="comparison-card">
+          <h3>❌ Hiện tại (Bỏ)</h3>
+          <ul class="comparison-list">
+            <li>Load TẤT CẢ exercise cards cùng lúc</li>
+            <li>Scroll dài, lạc vị trí bài tập</li>
+            <li>Weight/Reps/RPE nhập bằng ± buttons + input riêng biệt</li>
+            <li>RPE dạng toggle buttons (6-10) chiếm diện tích</li>
+            <li>Transition card "Next Up" nằm giữa 2 exercise cards</li>
+            <li>Header dùng bg-primary (emerald → giờ dark)</li>
+          </ul>
+        </div>
+        <div class="comparison-card">
+          <h3>✅ Mới (Theo reference)</h3>
+          <ul class="comparison-list">
+            <li>Chỉ hiện 1 exercise tại 1 thời điểm</li>
+            <li>Exercise header: icon + tên + muscles + menu</li>
+            <li>Set table dạng grid (SET | KG | REPS | RPE | ✓)</li>
+            <li>RPE dạng dropdown select (nhỏ gọn hơn)</li>
+            <li>"Bài tập tiếp theo" card ở cuối trang</li>
+            <li>Nút "Thay bài tập" + "Ghi chú" tách riêng</li>
+            <li>Header monochrome (white bg, border bottom)</li>
+            <li>Nút "Ghi nhận Set" sticky ở bottom bar</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
