@@ -317,7 +317,7 @@ export const IngredientEditModal = ({ editingItem, onSubmit, onClose }: Ingredie
                       onKeyDown={blockNegativeKeys}
                       {...register(field, { valueAsNumber: true })}
                       data-testid={`input-ing-${field.replace('Per100', '')}`}
-                      className={`w-full ${errors[field] ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : ''} ${highlightFields ? 'ring-2 ring-green-400/50' : ''}`}
+                      className={`w-full ${errors[field] ? 'border-destructive focus:ring-destructive/50 focus:border-destructive' : ''} ${highlightFields ? 'ring-ring/50 ring-2' : ''}`}
                       aria-invalid={!!errors[field]}
                     />
                     {errors[field] && (

@@ -284,7 +284,7 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
                   min={0}
                   disabled={qaAiLoading}
                   placeholder="0"
-                  className={`focus:border-primary border-border bg-card w-full rounded-lg border px-2 py-1.5 text-xs transition-all outline-none disabled:opacity-50 ${highlightFields ? 'ring-2 ring-green-400/50' : ''}`}
+                  className={`focus:border-primary border-border bg-card w-full rounded-lg border px-2 py-1.5 text-xs transition-all outline-none disabled:opacity-50 ${highlightFields ? 'ring-ring/50 ring-2' : ''}`}
                 />
               </div>
             ))}
