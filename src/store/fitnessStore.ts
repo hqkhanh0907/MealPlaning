@@ -9,6 +9,7 @@ import { EXERCISES } from '../features/fitness/data/exerciseDatabase';
 import type {
   CardioIntensity,
   Exercise,
+  ExerciseSessionMeta,
   MuscleGroup,
   PlanTemplate,
   SelectedExercise,
@@ -109,6 +110,7 @@ export interface FitnessState {
   workoutMode: 'strength' | 'cardio';
   workoutDraft: {
     exercises: Exercise[];
+    exerciseMetas?: ExerciseSessionMeta[];
     sets: WorkoutSet[];
     elapsedSeconds: number;
     planDayId?: string;
@@ -714,7 +716,7 @@ export const useFitnessStore = create<FitnessState>()(
             `INSERT OR REPLACE INTO workout_drafts (id, exercises_json, sets_json, start_time, plan_day_id, updated_at)
                VALUES ('current', ?, ?, ?, ?, ?)`,
             [
-              JSON.stringify(draft.exercises),
+              JSON.stringify(draft.exerciseMetas ?? draft.exercises),
               JSON.stringify(draft.sets),
               new Date().toISOString(),
               draft.planDayId ?? null,
@@ -738,9 +740,21 @@ export const useFitnessStore = create<FitnessState>()(
           const rows = await _db.query<Record<string, unknown>>(`SELECT * FROM workout_drafts WHERE id = 'current'`);
           if (rows.length > 0) {
             const row = rows[0];
+            const parsed = JSON.parse(row.exercisesJson as string) as unknown[];
+            const isMetaFormat =
+              Array.isArray(parsed) &&
+              parsed.length > 0 &&
+              typeof parsed[0] === 'object' &&
+              parsed[0] !== null &&
+              'exercise' in parsed[0];
+            const exerciseMetas = isMetaFormat ? (parsed as ExerciseSessionMeta[]) : undefined;
+            const exercises = isMetaFormat
+              ? (parsed as ExerciseSessionMeta[]).map(m => m.exercise)
+              : (parsed as Exercise[]);
             set({
               workoutDraft: {
-                exercises: JSON.parse(row.exercisesJson as string) as Exercise[],
+                exercises,
+                exerciseMetas,
                 sets: JSON.parse(row.setsJson as string) as WorkoutSet[],
                 elapsedSeconds: 0,
                 planDayId: (row.planDayId as string | null) ?? undefined,

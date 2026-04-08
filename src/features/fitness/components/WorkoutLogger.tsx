@@ -1,13 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertTriangle, ArrowLeft, Copy, Pencil, Plus, Trash2, TrendingUp, X } from 'lucide-react';
+import { ArrowLeft, Check, ChevronLeft, Clock, Plus } from 'lucide-react';
 import React, { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import { generateUUID } from '@/utils/helpers';
 import { logger } from '@/utils/logger';
 
@@ -19,18 +16,29 @@ import {
   workoutLoggerSchema,
 } from '../../../schemas/workoutLoggerSchema';
 import { useFitnessStore } from '../../../store/fitnessStore';
-import { DEFAULT_REST_SECONDS, MIN_REPS, REPS_INCREMENT, RPE_OPTIONS, WEIGHT_INCREMENT } from '../constants';
+import { DEFAULT_REST_SECONDS, MIN_REPS } from '../constants';
 import type { ExerciseSeed } from '../data/exerciseDatabase';
 import { EXERCISES } from '../data/exerciseDatabase';
 import type { OverloadSuggestion } from '../hooks/useProgressiveOverload';
 import { useProgressiveOverload } from '../hooks/useProgressiveOverload';
-import type { EquipmentType, Exercise, MuscleGroup, SelectedExercise, Workout, WorkoutSet } from '../types';
+import type {
+  EquipmentType,
+  Exercise,
+  ExerciseSessionMeta,
+  MuscleGroup,
+  SelectedExercise,
+  Workout,
+  WorkoutSet,
+} from '../types';
 import { safeParseJsonArray } from '../types';
 import { detectPRs } from '../utils/gamification';
 import { formatElapsed } from '../utils/timeFormat';
 import { ExerciseSelector } from './ExerciseSelector';
+import ExerciseWorkoutCard from './ExerciseWorkoutCard';
+import { NextExercisePreview } from './NextExercisePreview';
 import { RestTimer } from './RestTimer';
 import { SetEditor } from './SetEditor';
+import { SwapExerciseSheet } from './SwapExerciseSheet';
 import { WorkoutSummaryCard } from './WorkoutSummaryCard';
 
 interface WorkoutLoggerProps {
@@ -95,49 +103,26 @@ function seedToExercise(seed: ExerciseSeed): Exercise {
   };
 }
 
-function parseExercisesFromPlan(exercisesJson?: string): Exercise[] {
+function parseExercisesFromPlan(exercisesJson?: string): ExerciseSessionMeta[] {
   const selected = safeParseJsonArray<SelectedExercise>(exercisesJson);
   if (selected.length === 0) return [];
   return selected
     .map(se => {
-      const exerciseId = se.exercise?.id;
-      if (!exerciseId) return null;
-      const seed = EXERCISES.find(e => e.id === exerciseId);
-      return seed ? seedToExercise(seed) : null;
+      const exerciseData = se.exercise;
+      if (!exerciseData?.id) return null;
+      // Prefer seed for i18n; fallback to plan's embedded data for custom exercises
+      const seed = EXERCISES.find(e => e.id === exerciseData.id);
+      const exercise = seed ? seedToExercise(seed) : (exerciseData as unknown as Exercise);
+      if (!exercise) return null;
+      return {
+        exercise,
+        plannedSets: se.sets ?? 3,
+        repsMin: se.repsMin ?? exercise.defaultRepsMin ?? 8,
+        repsMax: se.repsMax ?? exercise.defaultRepsMax ?? 12,
+        restSeconds: se.restSeconds ?? DEFAULT_REST_SECONDS,
+      } satisfies ExerciseSessionMeta;
     })
-    .filter((e): e is Exercise => e !== null);
-}
-
-function ProgressiveOverloadChip({
-  suggestion,
-  onApply,
-}: Readonly<{
-  suggestion: OverloadSuggestion | null;
-  onApply: (s: OverloadSuggestion) => void;
-}>): React.JSX.Element | null {
-  const { t } = useTranslation();
-  if (!suggestion) return null;
-  const isPlateaued = suggestion.isPlateaued ?? false;
-  return (
-    <Button
-      variant="ghost"
-      size="sm"
-      onClick={() => onApply(suggestion)}
-      className={cn(
-        'rounded-full px-3 py-1.5 text-xs',
-        isPlateaued ? 'bg-warning/10 text-warning hover:bg-warning/15' : 'bg-info/10 text-info hover:bg-info/15',
-      )}
-      data-testid="overload-chip"
-    >
-      {isPlateaued ? (
-        <AlertTriangle className="mr-1 inline h-3 w-3" aria-hidden="true" />
-      ) : (
-        <TrendingUp className="mr-1 inline h-3 w-3" aria-hidden="true" />
-      )}{' '}
-      {t('fitness.setFormat', { weight: suggestion.weight, reps: suggestion.reps })}
-      {isPlateaued && suggestion.plateauWeeks != null && ` (plateau ${suggestion.plateauWeeks}w)`}
-    </Button>
-  );
+    .filter((e): e is ExerciseSessionMeta => e !== null);
 }
 
 export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutLoggerProps>): React.JSX.Element {
@@ -156,10 +141,22 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
     defaultValues: { setInputs: {} },
   });
 
-  const [currentExercises, setCurrentExercises] = useState<Exercise[]>(() => {
+  const [currentExercises, setCurrentExercises] = useState<ExerciseSessionMeta[]>(() => {
     const draft = useFitnessStore.getState().workoutDraft;
     const draftMatchesPlan = draft && (!planDay?.id || draft.planDayId === planDay.id);
-    return draftMatchesPlan ? draft.exercises : parseExercisesFromPlan(planDay?.exercises);
+    if (draftMatchesPlan && draft.exerciseMetas) {
+      return draft.exerciseMetas;
+    }
+    if (draftMatchesPlan && draft.exercises) {
+      return draft.exercises.map(ex => ({
+        exercise: ex,
+        plannedSets: 3,
+        repsMin: ex.defaultRepsMin ?? 8,
+        repsMax: ex.defaultRepsMax ?? 12,
+        restSeconds: DEFAULT_REST_SECONDS,
+      }));
+    }
+    return parseExercisesFromPlan(planDay?.exercises);
   });
   const [loggedSets, setLoggedSets] = useState<WorkoutSet[]>(() => {
     const draft = useFitnessStore.getState().workoutDraft;
@@ -186,16 +183,29 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
       : parseExercisesFromPlan(planDay?.exercises).length > 0;
     return hasExercises || initialElapsed > 0;
   });
+  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+  const [showSwapSheet, setShowSwapSheet] = useState(false);
 
   useEffect(() => {
     loadWorkoutDraft();
   }, [loadWorkoutDraft]);
 
   useEffect(() => {
+    if (currentExercises.length > 0 && currentExerciseIndex >= currentExercises.length) {
+      setCurrentExerciseIndex(currentExercises.length - 1);
+    }
+  }, [currentExercises.length, currentExerciseIndex]);
+
+  const currentMeta = currentExercises[currentExerciseIndex] as ExerciseSessionMeta | undefined;
+  const nextMeta = currentExercises[currentExerciseIndex + 1] as ExerciseSessionMeta | undefined;
+  const isFirstExercise = currentExerciseIndex === 0;
+
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (currentExercises.length > 0 || loggedSets.length > 0) {
         setWorkoutDraft({
-          exercises: currentExercises,
+          exercises: currentExercises.map(m => m.exercise),
+          exerciseMetas: currentExercises,
           sets: loggedSets,
           elapsedSeconds: elapsedRef.current,
           planDayId: planDay?.id,
@@ -372,7 +382,18 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
 
   const handleSelectExercise = useCallback(
     (exercise: Exercise) => {
-      setCurrentExercises(prev => [...prev, exercise]);
+      const newMeta: ExerciseSessionMeta = {
+        exercise,
+        plannedSets: 3,
+        repsMin: exercise.defaultRepsMin ?? 8,
+        repsMax: exercise.defaultRepsMax ?? 12,
+        restSeconds: DEFAULT_REST_SECONDS,
+      };
+      setCurrentExercises(prev => {
+        const next = [...prev, newMeta];
+        setCurrentExerciseIndex(next.length - 1);
+        return next;
+      });
       setShowExerciseSelector(false);
       if (!timerRunning) setTimerRunning(true);
     },
@@ -382,6 +403,34 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
   const handleCloseSelector = useCallback(() => {
     setShowExerciseSelector(false);
   }, []);
+
+  const handleNavigateNext = useCallback(() => {
+    setCurrentExerciseIndex(i => Math.min(i + 1, currentExercises.length - 1));
+  }, [currentExercises.length]);
+
+  const handleNavigatePrev = useCallback(() => {
+    setCurrentExerciseIndex(i => Math.max(i - 1, 0));
+  }, []);
+
+  const handleSwapExercise = useCallback(
+    (newExercise: Exercise) => {
+      if (!currentMeta) return;
+      const oldId = currentMeta.exercise.id;
+      const newMeta: ExerciseSessionMeta = {
+        exercise: newExercise,
+        plannedSets: currentMeta.plannedSets,
+        repsMin: newExercise.defaultRepsMin ?? currentMeta.repsMin,
+        repsMax: newExercise.defaultRepsMax ?? currentMeta.repsMax,
+        restSeconds: currentMeta.restSeconds,
+      };
+      setCurrentExercises(prev => prev.map((m, i) => (i === currentExerciseIndex ? newMeta : m)));
+      setLoggedSets(prev => prev.filter(s => s.exerciseId !== oldId));
+      setValue(`setInputs.${oldId}` as const, { ...setInputDefaults });
+      ensureInput(newExercise.id);
+      setShowSwapSheet(false);
+    },
+    [currentMeta, currentExerciseIndex, setValue, ensureInput],
+  );
 
   const handleFinish = useCallback(() => {
     setShowSummary(true);
@@ -436,7 +485,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
   const detectedPRs = useMemo(() => {
     if (!showSummary) return [];
     const previousSets = useFitnessStore.getState().workoutSets ?? [];
-    const exerciseMap = new Map<string, string>(currentExercises.map(ex => [ex.id, ex.nameVi]));
+    const exerciseMap = new Map<string, string>(currentExercises.map(m => [m.exercise.id, m.exercise.nameVi]));
     return detectPRs(loggedSets, previousSets, exerciseMap).map(pr => ({
       exerciseName: pr.exerciseName,
       weight: pr.newWeight,
@@ -479,268 +528,144 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
         className="pt-safe bg-primary text-primary-foreground sticky top-0 z-10 flex items-center justify-between px-4 py-3"
         data-testid="workout-header"
       >
-        <Button
-          variant="ghost"
-          size="sm"
+        <button
+          type="button"
           onClick={handleBack}
-          className="hover:bg-primary-foreground/20 text-primary-foreground hover:text-primary-foreground gap-1 transition-colors"
+          className="hover:bg-primary-foreground/20 text-primary-foreground inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm transition-colors"
           data-testid="back-button"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-          <span>{t('fitness.logger.back')}</span>
-        </Button>
-        <TimerDisplay startSeconds={initialElapsed} elapsedRef={elapsedRef} isRunning={timerRunning} />
-        <Button
-          variant="ghost"
-          size="sm"
+        </button>
+        <div className="inline-flex items-center gap-1.5" data-testid="elapsed-timer-pill">
+          <Clock className="h-4 w-4" aria-hidden="true" />
+          <TimerDisplay startSeconds={initialElapsed} elapsedRef={elapsedRef} isRunning={timerRunning} />
+        </div>
+        <button
+          type="button"
           onClick={handleFinish}
-          className="hover:bg-primary-foreground/20 text-primary-foreground hover:text-primary-foreground gap-1 transition-colors"
+          className="hover:bg-primary-foreground/20 text-primary-foreground inline-flex items-center gap-1 rounded-md px-2 py-1 text-sm transition-colors"
           data-testid="finish-button"
         >
-          <span>{t('fitness.logger.finish')}</span>
-          <X className="h-5 w-5" aria-hidden="true" />
-        </Button>
+          <Check className="h-5 w-5" aria-hidden="true" />
+        </button>
       </header>
 
-      <div className="flex-1 space-y-6 overflow-y-auto p-4">
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {currentExercises.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center" data-testid="empty-state">
             <p className="text-muted-foreground">{t('fitness.logger.noExercises')}</p>
           </div>
         ) : (
-          currentExercises.map((exercise, exerciseIndex) => {
-            const exerciseSets = loggedSets.filter(s => s.exerciseId === exercise.id);
-            ensureInput(exercise.id);
-            const formInput = watch(`setInputs.${exercise.id}` as const);
-            const input: SetInputData = formInput ?? setInputDefaults;
-            const suggestion = getOverloadSuggestion(
-              exercise.id,
-              exercise.defaultRepsMin ?? 8,
-              exercise.defaultRepsMax ?? 12,
-            );
-            const overloadSuggestion = suggestion.weight > 0 ? suggestion : null;
-            const nextExercise = currentExercises[exerciseIndex + 1];
-            return (
-              <React.Fragment key={exercise.id}>
-                <section className="bg-card rounded-xl p-4 shadow-sm" data-testid={`exercise-section-${exercise.id}`}>
-                  <h3 className="text-foreground mb-3 truncate text-base font-semibold">{exercise.nameVi}</h3>
+          currentMeta && (
+            <>
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  disabled={isFirstExercise}
+                  onClick={handleNavigatePrev}
+                  className="text-primary disabled:text-muted-foreground inline-flex items-center gap-1 text-sm disabled:opacity-50"
+                  data-testid="prev-exercise-btn"
+                >
+                  <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                  {t('fitness.logger.prevExercise')}
+                </button>
+              </div>
 
-                  {exerciseSets.map(set => (
-                    <div
-                      key={set.id}
-                      className="text-foreground-secondary flex items-center gap-3 py-2 text-sm"
-                      data-testid={`logged-set-${set.id}`}
-                    >
-                      <span className="font-medium">
-                        {t('fitness.logger.set')} {set.setNumber}
-                      </span>
-                      <span>
-                        {/* v8 ignore start */}
-                        {t('fitness.setFormat', { weight: set.weightKg, reps: set.reps ?? 0 })}
-                        {/* v8 ignore stop */}
-                      </span>
-                      {set.rpe !== undefined && <span className="text-primary text-xs">RPE {set.rpe}</span>}
-                      <span className="ml-auto flex gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setEditingSet(set)}
-                          className="focus-visible:ring-ring hover:text-foreground-secondary text-muted-foreground hover:bg-accent inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                          aria-label={t('fitness.logger.editSet')}
-                          data-testid={`edit-set-${set.id}`}
-                        >
-                          <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteSet(set.id)}
-                          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive focus-visible:ring-destructive/50 inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                          aria-label={t('fitness.logger.deleteSet')}
-                          data-testid={`delete-set-${set.id}`}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                        </button>
-                      </span>
-                    </div>
-                  ))}
+              <ExerciseWorkoutCard
+                meta={currentMeta}
+                exerciseIndex={currentExerciseIndex}
+                totalExercises={currentExercises.length}
+                loggedSets={loggedSets.filter(s => s.exerciseId === currentMeta.exercise.id)}
+                currentInput={(() => {
+                  ensureInput(currentMeta.exercise.id);
+                  const formInput = watch(`setInputs.${currentMeta.exercise.id}` as const);
+                  return formInput ?? setInputDefaults;
+                })()}
+                overloadSuggestion={(() => {
+                  const s = getOverloadSuggestion(
+                    currentMeta.exercise.id,
+                    currentMeta.exercise.defaultRepsMin ?? 8,
+                    currentMeta.exercise.defaultRepsMax ?? 12,
+                  );
+                  return s.weight > 0 ? s : null;
+                })()}
+                onWeightChange={delta => handleWeightChange(currentMeta.exercise.id, delta)}
+                onRepsChange={delta => handleRepsChange(currentMeta.exercise.id, delta)}
+                onRpeSelect={rpe => handleRpeSelect(currentMeta.exercise.id, rpe)}
+                onWeightInput={raw => {
+                  const key: `setInputs.${string}` = `setInputs.${currentMeta.exercise.id}`;
+                  /* v8 ignore start */
+                  const cur = getValues(key) ?? { ...setInputDefaults };
+                  /* v8 ignore stop */
+                  setValue(key, {
+                    ...cur,
+                    weight: raw === '' ? Number.NaN : Math.max(0, Number(raw)),
+                  });
+                }}
+                onRepsInput={raw => {
+                  const key: `setInputs.${string}` = `setInputs.${currentMeta.exercise.id}`;
+                  /* v8 ignore start */
+                  const cur = getValues(key) ?? { ...setInputDefaults };
+                  /* v8 ignore stop */
+                  setValue(key, { ...cur, reps: raw === '' ? Number.NaN : Math.max(0, Number(raw)) });
+                }}
+                onDeleteSet={handleDeleteSet}
+                onEditSet={setEditingSet}
+                onCopyLastSet={() => handleCopyLastSet(currentMeta.exercise.id)}
+                onApplyOverload={s => handleApplySuggestion(currentMeta.exercise.id, s)}
+                onSwapExercise={() => setShowSwapSheet(true)}
+              />
 
-                  <ProgressiveOverloadChip
-                    suggestion={overloadSuggestion}
-                    onApply={s => handleApplySuggestion(exercise.id, s)}
-                  />
-
-                  <div
-                    className="border-border-subtle mt-3 space-y-3 border-t pt-3"
-                    data-testid={`set-editor-${exercise.id}`}
-                  >
-                    {exerciseSets.length > 0 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleCopyLastSet(exercise.id)}
-                        className="text-muted-foreground w-full gap-1.5"
-                        data-testid={`copy-last-set-${exercise.id}`}
-                      >
-                        <Copy className="h-3.5 w-3.5" aria-hidden="true" />
-                        {t('fitness.logger.copyLastSet')}
-                      </Button>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground w-16 text-xs">{t('fitness.logger.weight')}</span>
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        onClick={() => handleWeightChange(exercise.id, -WEIGHT_INCREMENT)}
-                        className="bg-muted text-foreground h-10 w-10"
-                        data-testid={`weight-minus-${exercise.id}`}
-                        aria-label={t('fitness.logger.decreaseWeight')}
-                      >
-                        −
-                      </Button>
-                      <Input
-                        type="number"
-                        autoComplete="off"
-                        value={Number.isNaN(input.weight) ? '' : input.weight}
-                        onChange={e => {
-                          const raw = e.target.value;
-                          const key: `setInputs.${string}` = `setInputs.${exercise.id}`;
-                          /* v8 ignore start */
-                          const cur = getValues(key) ?? { ...setInputDefaults };
-                          /* v8 ignore stop */
-                          setValue(key, {
-                            ...cur,
-                            weight: raw === '' ? Number.NaN : Math.max(0, Number(raw)),
-                          });
-                        }}
-                        className="text-foreground w-20 text-center font-semibold"
-                        data-testid={`weight-input-${exercise.id}`}
-                      />
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        onClick={() => handleWeightChange(exercise.id, WEIGHT_INCREMENT)}
-                        className="bg-muted text-foreground h-10 w-10"
-                        data-testid={`weight-plus-${exercise.id}`}
-                        aria-label={t('fitness.logger.increaseWeight')}
-                      >
-                        +
-                      </Button>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground w-16 text-xs">{t('fitness.logger.reps')}</span>
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        onClick={() => handleRepsChange(exercise.id, -REPS_INCREMENT)}
-                        className="bg-muted text-foreground h-10 w-10"
-                        data-testid={`reps-minus-${exercise.id}`}
-                        aria-label={t('fitness.logger.decreaseReps')}
-                      >
-                        −
-                      </Button>
-                      <Input
-                        type="number"
-                        autoComplete="off"
-                        value={
-                          Number.isNaN(input.reps) ? '' : (input.reps /* v8 ignore start */ ?? '') /* v8 ignore stop */
-                        }
-                        onChange={e => {
-                          const raw = e.target.value;
-                          const key: `setInputs.${string}` = `setInputs.${exercise.id}`;
-                          /* v8 ignore start */
-                          const cur = getValues(key) ?? { ...setInputDefaults };
-                          /* v8 ignore stop */
-                          setValue(key, { ...cur, reps: raw === '' ? Number.NaN : Math.max(0, Number(raw)) });
-                        }}
-                        className="text-foreground w-20 text-center font-semibold"
-                        data-testid={`reps-input-${exercise.id}`}
-                      />
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        onClick={() => handleRepsChange(exercise.id, REPS_INCREMENT)}
-                        className="bg-muted text-foreground h-10 w-10"
-                        data-testid={`reps-plus-${exercise.id}`}
-                        aria-label={t('fitness.logger.increaseReps')}
-                      >
-                        +
-                      </Button>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground w-16 text-xs">{t('fitness.logger.rpe')}</span>
-                      <div className="flex gap-1" data-testid={`rpe-selector-${exercise.id}`}>
-                        {RPE_OPTIONS.map(rpe => (
-                          <Button
-                            key={rpe}
-                            variant={input.rpe === rpe ? 'default' : 'outline'}
-                            size="icon"
-                            onClick={() => handleRpeSelect(exercise.id, rpe)}
-                            className={cn(
-                              'h-9 w-9 rounded-full text-xs',
-                              input.rpe === rpe
-                                ? 'bg-primary text-primary-foreground hover:bg-primary'
-                                : 'text-foreground-secondary bg-muted border-transparent',
-                            )}
-                            data-testid={`rpe-${rpe}-${exercise.id}`}
-                          >
-                            {rpe}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <Button
-                      variant="default"
-                      onClick={() => handleLogSet(exercise.id)}
-                      className="bg-primary text-primary-foreground hover:bg-primary w-full py-2.5"
-                      data-testid={`log-set-${exercise.id}`}
-                    >
-                      {t('fitness.logger.logSet')}
-                    </Button>
-                  </div>
-                </section>
-
-                {nextExercise && (
-                  <div
-                    data-testid={`transition-card-${exercise.id}`}
-                    className="bg-muted flex items-center gap-3 rounded-lg px-4 py-2.5"
-                  >
-                    <div className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
-                      {exerciseIndex + 2}
-                    </div>
-                    <span className="text-muted-foreground text-sm">
-                      {t('fitness.logger.nextUp')}:{' '}
-                      <span className="text-foreground font-medium">{nextExercise.nameVi}</span>
-                    </span>
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })
+              {nextMeta && <NextExercisePreview meta={nextMeta} onNavigate={handleNavigateNext} />}
+            </>
+          )
         )}
       </div>
 
       <div
-        className="pb-safe border-border-subtle bg-card/95 sticky bottom-0 border-t p-4 backdrop-blur-sm"
-        data-testid="add-exercise-container"
+        className="pb-safe border-border-subtle bg-card/95 sticky bottom-0 flex gap-2 border-t p-4 backdrop-blur-sm"
+        data-testid="bottom-bar"
       >
-        <Button
-          variant="outline"
+        {currentMeta && (
+          <button
+            type="button"
+            onClick={() => handleLogSet(currentMeta.exercise.id)}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1 rounded-xl py-3 text-sm font-semibold"
+            data-testid="log-set-bottom-btn"
+          >
+            {t('fitness.logger.logSet')}
+          </button>
+        )}
+        <button
+          type="button"
           onClick={() => setShowExerciseSelector(true)}
-          className="text-muted-foreground hover:border-primary hover:text-primary border-border w-full gap-2 rounded-xl border-2 border-dashed py-3"
-          data-testid="add-exercise-button"
+          className="text-muted-foreground hover:border-primary hover:text-primary border-border inline-flex items-center gap-2 rounded-xl border-2 border-dashed px-4 py-3 text-sm"
+          data-testid="add-exercise-bottom-btn"
         >
           <Plus className="h-5 w-5" aria-hidden="true" />
           {t('fitness.logger.addExercise')}
-        </Button>
+        </button>
       </div>
 
-      {showRestTimer && (
-        <RestTimer durationSeconds={DEFAULT_REST_SECONDS} onComplete={handleRestComplete} onSkip={handleRestSkip} />
+      {showRestTimer && currentMeta && (
+        <RestTimer
+          durationSeconds={currentMeta.restSeconds ?? DEFAULT_REST_SECONDS}
+          onComplete={handleRestComplete}
+          onSkip={handleRestSkip}
+        />
       )}
 
       <ExerciseSelector isOpen={showExerciseSelector} onClose={handleCloseSelector} onSelect={handleSelectExercise} />
+
+      {showSwapSheet && currentMeta && (
+        <SwapExerciseSheet
+          isOpen={showSwapSheet}
+          currentExercise={currentMeta.exercise}
+          excludeIds={currentExercises.map(m => m.exercise.id)}
+          onSelect={handleSwapExercise}
+          onClose={() => setShowSwapSheet(false)}
+        />
+      )}
 
       {editingSet && (
         <SetEditor

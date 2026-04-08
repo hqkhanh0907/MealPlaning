@@ -167,7 +167,7 @@ export const ModalBackdrop = ({ onClose, zIndex = 'z-50', children }: ModalBackd
   return (
     <dialog
       open
-      className={`bg-background/50 fixed inset-0 flex flex-col items-center justify-end backdrop-blur-sm sm:justify-center ${zIndex} pb-safe m-0 max-h-none max-w-none border-none px-0 pt-0 sm:p-0`}
+      className={`bg-background/50 fixed inset-0 flex h-full w-full flex-col items-center justify-end backdrop-blur-sm sm:justify-center ${zIndex} pb-safe m-0 max-h-none max-w-none border-none px-0 pt-0 sm:p-0`}
       aria-modal="true"
     >
       <button

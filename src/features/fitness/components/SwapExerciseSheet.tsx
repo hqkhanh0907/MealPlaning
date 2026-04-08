@@ -11,6 +11,7 @@ import type { EquipmentType, Exercise, ExerciseCategory, MuscleGroup } from '../
 interface SwapExerciseSheetProps {
   isOpen: boolean;
   currentExercise: Exercise;
+  excludeIds?: string[];
   onSelect: (exercise: Exercise) => void;
   onClose: () => void;
 }
@@ -54,6 +55,7 @@ const allExercises: Exercise[] = EXERCISES.map(toExercise);
 export const SwapExerciseSheet = memo(function SwapExerciseSheet({
   isOpen,
   currentExercise,
+  excludeIds,
   onSelect,
   onClose,
 }: SwapExerciseSheetProps): React.JSX.Element | null {
@@ -67,6 +69,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
 
     return allExercises.filter(exercise => {
       if (exercise.id === currentExercise.id) return false;
+      if (excludeIds?.includes(exercise.id)) return false;
       if (exercise.muscleGroup !== currentExercise.muscleGroup) return false;
 
       if (query) {
@@ -77,7 +80,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
 
       return true;
     });
-  }, [searchQuery, currentExercise.id, currentExercise.muscleGroup]);
+  }, [searchQuery, currentExercise.id, currentExercise.muscleGroup, excludeIds]);
 
   const handleSelect = useCallback(
     (exercise: Exercise) => {

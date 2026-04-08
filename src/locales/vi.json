@@ -784,7 +784,13 @@
       "deleteSet": "Xóa set",
       "deleteSetConfirm": "Bạn có chắc muốn xóa set này?",
       "setDeleted": "Đã xóa set",
-      "copyLastSet": "Sao chép set trước"
+      "copyLastSet": "Sao chép set trước",
+      "swapExercise": "Thay bài tập",
+      "nextExercise": "Bài tập tiếp theo",
+      "exerciseProgress": "Bài tập {{current}}/{{total}}",
+      "addSet": "Thêm set",
+      "nextExerciseDetail": "{{sets}} hiệp • {{repsMin}}-{{repsMax}} lần",
+      "prevExercise": "Bài tập trước"
     },
     "summary": {
       "title": "Tổng kết buổi tập",

@@ -222,5 +222,14 @@ export interface SelectedExercise {
   restSeconds: number;
 }
 
+// Wraps Exercise + plan metadata for the workout logger session
+export interface ExerciseSessionMeta {
+  exercise: Exercise;
+  plannedSets: number;
+  repsMin: number;
+  repsMax: number;
+  restSeconds: number;
+}
+
 // Today's plan state for multi-session support
 export type TodayPlanState = 'training-pending' | 'training-partial' | 'training-completed' | 'rest-day' | 'no-plan';
