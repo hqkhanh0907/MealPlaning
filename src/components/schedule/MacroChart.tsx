@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MACRO_COLORS } from '@/constant/colors';
+import { useDarkMode } from '@/hooks/useDarkMode';
 
 import { DayNutritionSummary } from '../../types';
 
@@ -30,6 +31,7 @@ const CENTER = 50;
 
 export const MacroChart = React.memo(function MacroChart({ dayNutrition }: MacroChartProps) {
   const { t } = useTranslation();
+  const { isDark } = useDarkMode();
 
   const segments: MacroSegment[] = useMemo(() => {
     const totalProtein = dayNutrition.breakfast.protein + dayNutrition.lunch.protein + dayNutrition.dinner.protein;
@@ -108,7 +110,7 @@ export const MacroChart = React.memo(function MacroChart({ dayNutrition }: Macro
               r={RADIUS}
               fill="none"
               className="transition-all duration-300"
-              stroke={arc.color}
+              stroke={isDark ? arc.darkColor : arc.color}
               strokeWidth={STROKE_WIDTH}
               strokeDasharray={`${arc.dash} ${arc.gap}`}
               strokeDashoffset={-arc.offset}
@@ -119,7 +121,10 @@ export const MacroChart = React.memo(function MacroChart({ dayNutrition }: Macro
         <div className="flex-1 space-y-2">
           {segments.map(seg => (
             <div key={seg.label} className="flex items-center gap-2 text-sm">
-              <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: seg.color }} />
+              <span
+                className="h-3 w-3 shrink-0 rounded-full"
+                style={{ backgroundColor: isDark ? seg.darkColor : seg.color }}
+              />
               <span className="text-foreground font-medium">{seg.label}</span>
               <span className="text-muted-foreground ml-auto" data-testid={`macro-percent-${seg.label}`}>
                 {seg.percent}%

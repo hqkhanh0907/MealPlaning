@@ -2,6 +2,10 @@ import { render, screen } from '@testing-library/react';
 
 import { MacroDonutChart } from '../components/nutrition/MacroDonutChart';
 
+vi.mock('@/hooks/useDarkMode', () => ({
+  useDarkMode: () => ({ isDark: false, theme: 'light', cycleTheme: vi.fn(), setTheme: vi.fn() }),
+}));
+
 describe('MacroDonutChart', () => {
   const baseProps = {
     proteinG: 100,

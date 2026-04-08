@@ -1,19 +1,19 @@
-/** Design token hex values — keep in sync with CSS custom properties in index.css */
+/** Design token hex values — monochrome grayscale palette */
 export const COLORS = {
-  emerald400: '#34d399',
-  emerald500: '#10b981',
-  emerald600: '#059669',
-  emerald700: '#047857',
-  amber400: '#fbbf24',
-  amber500: '#f59e0b',
-  amber600: '#d97706',
-  blue400: '#60a5fa',
-  blue500: '#3b82f6',
-  red500: '#ef4444',
+  gray950: '#0a0a0a',
+  gray800: '#262626',
+  gray700: '#404040',
+  gray600: '#525252',
+  gray500: '#737373',
+  gray400: '#a3a3a3',
+  gray300: '#d4d4d4',
+  gray200: '#e5e5e5',
+  gray50: '#fafafa',
+  red600: '#dc2626',
 } as const;
 
 export const MACRO_COLORS = {
-  protein: { light: COLORS.emerald500, dark: COLORS.emerald400 },
-  fat: { light: COLORS.amber500, dark: COLORS.amber400 },
-  carbs: { light: COLORS.blue500, dark: COLORS.blue400 },
+  protein: { light: COLORS.gray950, dark: COLORS.gray50 },
+  fat: { light: COLORS.gray600, dark: COLORS.gray400 },
+  carbs: { light: COLORS.gray500, dark: COLORS.gray300 },
 } as const;

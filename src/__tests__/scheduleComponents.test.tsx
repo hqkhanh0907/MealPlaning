@@ -8,6 +8,10 @@ import { MiniNutritionBar } from '../components/schedule/MiniNutritionBar';
 import { NutritionSubTab } from '../components/schedule/NutritionSubTab';
 import type { DayNutritionSummary, Dish, SlotInfo } from '../types';
 
+vi.mock('@/hooks/useDarkMode', () => ({
+  useDarkMode: () => ({ isDark: false, theme: 'light', cycleTheme: vi.fn(), setTheme: vi.fn() }),
+}));
+
 vi.mock('@/components/nutrition/EnergyBalanceCard', () => ({
   EnergyBalanceCard: (props: Record<string, unknown>) => (
     <div

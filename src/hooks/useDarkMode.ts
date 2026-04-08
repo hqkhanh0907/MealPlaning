@@ -26,7 +26,7 @@ function applyTheme(theme: Theme) {
   const isDark = resolveIsDark(theme);
   document.documentElement.classList.toggle('dark', isDark);
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', isDark ? '#0f172a' : '#10b981');
+  if (meta) meta.setAttribute('content', isDark ? '#0a0a0a' : '#ffffff');
 }
 
 export function useDarkMode() {
