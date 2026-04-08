@@ -44,12 +44,12 @@ const TOAST_STYLES: Record<
   { border: string; iconBg: string; title: string; message: string; icon: React.ReactNode; progressBar: string }
 > = {
   success: {
-    border: 'border-primary/20',
-    iconBg: 'bg-primary-subtle text-primary',
-    title: 'text-primary',
-    message: 'text-primary',
+    border: 'border-border',
+    iconBg: 'bg-muted text-foreground',
+    title: 'text-foreground',
+    message: 'text-muted-foreground',
     icon: <CheckCircle2 className="h-5 w-5" />,
-    progressBar: 'bg-primary',
+    progressBar: 'bg-foreground',
   },
   error: {
     border: 'border-toast-error/20',
@@ -60,20 +60,20 @@ const TOAST_STYLES: Record<
     progressBar: 'bg-toast-error',
   },
   warning: {
-    border: 'border-toast-warning/20',
-    iconBg: 'bg-toast-warning-subtle text-toast-warning',
-    title: 'text-toast-warning-emphasis',
-    message: 'text-toast-warning',
+    border: 'border-border',
+    iconBg: 'bg-muted text-foreground',
+    title: 'text-foreground',
+    message: 'text-muted-foreground',
     icon: <AlertTriangle className="h-5 w-5" />,
-    progressBar: 'bg-toast-warning',
+    progressBar: 'bg-muted-foreground',
   },
   info: {
-    border: 'border-toast-info/20',
-    iconBg: 'bg-toast-info-subtle text-toast-info',
-    title: 'text-toast-info-emphasis',
-    message: 'text-toast-info',
+    border: 'border-border',
+    iconBg: 'bg-muted text-foreground',
+    title: 'text-foreground',
+    message: 'text-muted-foreground',
     icon: <Info className="h-5 w-5" />,
-    progressBar: 'bg-toast-info',
+    progressBar: 'bg-muted-foreground',
   },
 };
 
