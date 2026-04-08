@@ -1,5 +1,14 @@
 # Monochrome Color System Refactor — Implementation Plan
 
+> **Status: ✅ COMPLETE** (Waves 1-4 implemented and committed)
+>
+> | Wave                    | Commit    | Summary                                                                    |
+> | ----------------------- | --------- | -------------------------------------------------------------------------- |
+> | W1: Token Foundation    | `17946de` | 115 OKLCH tokens → grayscale, colors.ts rewrite, chart dark mode fix       |
+> | W2: Component Variants  | `ff78917` | Badge 6 variants → monochrome, Button warning → secondary, Toast grayscale |
+> | W3: Gradients + Cleanup | `72fc86a` | 5 gradient files → from-muted, delete orphaned tokens.css                  |
+> | W4: Sweep               | `4f6d368` | ring-green-400/50 → ring-ring/50 (last non-token colors)                   |
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace the entire Emerald-based multi-color theme with a pure Monochrome (grayscale) design across the full MealPlaning app.
