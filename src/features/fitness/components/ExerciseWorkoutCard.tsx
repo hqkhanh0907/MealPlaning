@@ -158,12 +158,12 @@ export default function ExerciseWorkoutCard({
         <div className="bg-muted/50 grid grid-cols-[2rem_minmax(0,1fr)_minmax(0,1fr)_3rem_4rem] items-center gap-x-2 rounded-b-lg py-2">
           <span className="text-muted-foreground w-8 text-center text-sm font-medium">{nextSetNumber}</span>
 
-          {/* Weight input with +/- */}
-          <div className="flex min-w-0 items-center justify-center gap-0.5">
+          {/* Weight stepper */}
+          <div className="border-border flex min-w-0 items-center overflow-hidden rounded border">
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
+              className="h-8 w-7 shrink-0 rounded-none"
               onClick={() => onWeightChange(-WEIGHT_INCREMENT)}
               data-testid="weight-minus"
               aria-label={t('fitness.logger.decreaseWeight')}
@@ -175,13 +175,13 @@ export default function ExerciseWorkoutCard({
               inputMode="decimal"
               value={Number.isNaN(currentInput.weight) ? '' : String(currentInput.weight)}
               onChange={e => onWeightInput(e.target.value)}
-              className="border-border bg-background h-8 w-12 rounded border text-center text-sm"
+              className="border-border bg-background h-8 min-w-0 flex-1 border-x text-center text-sm"
               data-testid="weight-input"
             />
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
+              className="h-8 w-7 shrink-0 rounded-none"
               onClick={() => onWeightChange(WEIGHT_INCREMENT)}
               data-testid="weight-plus"
               aria-label={t('fitness.logger.increaseWeight')}
@@ -190,12 +190,12 @@ export default function ExerciseWorkoutCard({
             </Button>
           </div>
 
-          {/* Reps input with +/- */}
-          <div className="flex min-w-0 items-center justify-center gap-0.5">
+          {/* Reps stepper */}
+          <div className="border-border flex min-w-0 items-center overflow-hidden rounded border">
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
+              className="h-8 w-7 shrink-0 rounded-none"
               onClick={() => onRepsChange(-REPS_INCREMENT)}
               data-testid="reps-minus"
               aria-label={t('fitness.logger.decreaseReps')}
@@ -207,13 +207,13 @@ export default function ExerciseWorkoutCard({
               inputMode="numeric"
               value={Number.isNaN(currentInput.reps) ? '' : String(currentInput.reps)}
               onChange={e => onRepsInput(e.target.value)}
-              className="border-border bg-background h-8 w-12 rounded border text-center text-sm"
+              className="border-border bg-background h-8 min-w-0 flex-1 border-x text-center text-sm"
               data-testid="reps-input"
             />
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
+              className="h-8 w-7 shrink-0 rounded-none"
               onClick={() => onRepsChange(REPS_INCREMENT)}
               data-testid="reps-plus"
               aria-label={t('fitness.logger.increaseReps')}
