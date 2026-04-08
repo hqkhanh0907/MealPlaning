@@ -52,8 +52,8 @@ const EmptyState = () => {
   const { t } = useTranslation();
   return (
     <div className="flex h-full flex-col items-center justify-center space-y-5 py-8 text-center">
-      <div className="from-primary/10 to-color-ai-subtle flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br">
-        <ImageIcon className="dark:text-primary/40 text-primary/40 h-12 w-12" />
+      <div className="from-muted to-muted/50 flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br">
+        <ImageIcon className="text-muted-foreground h-12 w-12" />
       </div>
       <div className="space-y-2">
         <h4 className="text-foreground text-lg font-semibold">{t('ai.title')}</h4>

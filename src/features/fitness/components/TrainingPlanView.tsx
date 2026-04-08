@@ -745,7 +745,7 @@ function TrainingPlanViewInner({
                 </button>
                 <div
                   data-testid="rest-day-card"
-                  className="from-info/80 to-info text-primary-foreground rounded-2xl bg-gradient-to-br p-4"
+                  className="from-muted to-muted/80 text-foreground rounded-2xl bg-gradient-to-br p-4"
                 >
                   <div className="mb-3 flex items-center gap-2">
                     <Moon className="h-5 w-5" aria-hidden="true" />
@@ -940,12 +940,12 @@ function TrainingPlanViewInner({
           // Expanded non-today rest day
           return (
             <div key={dayNum} data-testid={`day-row-${dayNum}`}>
-              <div className="from-info/80 to-info text-primary-foreground rounded-2xl bg-gradient-to-br p-4">
+              <div className="from-muted to-muted/80 text-foreground rounded-2xl bg-gradient-to-br p-4">
                 <button
                   data-testid={`day-accordion-toggle-${dayNum}`}
                   type="button"
                   onClick={() => handleDaySelect(dayNum)}
-                  className="text-primary-foreground/80 mb-1 flex min-h-[44px] w-full items-center gap-1.5 text-left text-xs font-medium tracking-wider uppercase"
+                  className="text-muted-foreground mb-1 flex min-h-[44px] w-full items-center gap-1.5 text-left text-xs font-medium tracking-wider uppercase"
                 >
                   <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
                   <span>{DAY_LABELS[i]}</span>

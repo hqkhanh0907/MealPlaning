@@ -34,7 +34,7 @@ export function WorkoutSummaryCard({
       <div className="flex flex-1 flex-col items-center justify-center p-6">
         {hasPR && (
           <div
-            className="from-color-energy to-color-energy/80 text-foreground mb-4 rounded-xl bg-gradient-to-r px-6 py-3 shadow-lg"
+            className="from-muted to-muted/80 text-foreground mb-4 rounded-xl bg-gradient-to-r px-6 py-3 shadow-lg"
             data-testid="pr-celebration"
           >
             <Trophy className="mx-auto mb-1 h-6 w-6" aria-hidden="true" />
