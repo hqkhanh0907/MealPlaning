@@ -28,7 +28,7 @@ interface ExerciseWorkoutCardProps {
   overloadSuggestion: OverloadSuggestion | null;
   onWeightChange: (delta: number) => void;
   onRepsChange: (delta: number) => void;
-  onRpeSelect: (rpe: number) => void;
+  onRpeSelect: (rpe: number | undefined) => void;
   onWeightInput: (value: string) => void;
   onRepsInput: (value: string) => void;
   onDeleteSet: (setId: string) => void;
@@ -263,7 +263,7 @@ export default function ExerciseWorkoutCard({
                 value={currentInput.rpe ?? ''}
                 onChange={e => {
                   const val = e.target.value;
-                  if (val) onRpeSelect(Number(val));
+                  onRpeSelect(val ? Number(val) : undefined);
                 }}
                 className="text-background bg-transparent text-lg font-bold outline-none"
                 data-testid="rpe-select"
