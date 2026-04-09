@@ -200,6 +200,7 @@ export default function ExerciseWorkoutCard({
               <input
                 type="text"
                 inputMode="decimal"
+                aria-label={t('fitness.logger.weight')}
                 value={Number.isNaN(currentInput.weight) ? '' : String(currentInput.weight)}
                 onChange={e => onWeightInput(e.target.value)}
                 className="border-muted-foreground/30 text-background h-[52px] min-w-0 flex-1 border-x bg-transparent text-center text-2xl font-bold outline-none"
@@ -237,6 +238,7 @@ export default function ExerciseWorkoutCard({
               <input
                 type="text"
                 inputMode="numeric"
+                aria-label={t('fitness.logger.reps')}
                 value={Number.isNaN(currentInput.reps) ? '' : String(currentInput.reps)}
                 onChange={e => onRepsInput(e.target.value)}
                 className="border-muted-foreground/30 text-background h-[52px] min-w-0 flex-1 border-x bg-transparent text-center text-2xl font-bold outline-none"
