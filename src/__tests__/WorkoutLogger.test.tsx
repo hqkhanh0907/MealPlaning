@@ -1082,7 +1082,7 @@ describe('WorkoutLogger', () => {
     render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     const chip = screen.getByTestId('overload-chip');
     expect(chip).toHaveTextContent('60kg × 5');
-    expect(chip).toHaveTextContent('plateau 3w');
+    expect(chip).toHaveTextContent('(bế tắc 3 tuần)');
   });
 
   it('does not show overload chip when no suggestion data', () => {

@@ -235,6 +235,11 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
     [getValues, setValue],
   );
 
+  // Ensure form inputs exist for all initially loaded exercises (from plan/draft)
+  useEffect(() => {
+    currentExercises.forEach(meta => ensureInput(meta.exercise.id));
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleApplySuggestion = useCallback(
     (exerciseId: string, s: OverloadSuggestion) => {
       const key: `setInputs.${string}` = `setInputs.${exerciseId}`;
@@ -389,6 +394,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
         repsMax: exercise.defaultRepsMax ?? 12,
         restSeconds: DEFAULT_REST_SECONDS,
       };
+      ensureInput(exercise.id);
       setCurrentExercises(prev => {
         const next = [...prev, newMeta];
         setCurrentExerciseIndex(next.length - 1);
@@ -397,7 +403,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
       setShowExerciseSelector(false);
       if (!timerRunning) setTimerRunning(true);
     },
-    [timerRunning],
+    [timerRunning, ensureInput],
   );
 
   const handleCloseSelector = useCallback(() => {
@@ -405,12 +411,18 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
   }, []);
 
   const handleNavigateNext = useCallback(() => {
-    setCurrentExerciseIndex(i => Math.min(i + 1, currentExercises.length - 1));
-  }, [currentExercises.length]);
+    const nextIdx = Math.min(currentExerciseIndex + 1, currentExercises.length - 1);
+    const nextEx = currentExercises[nextIdx];
+    if (nextEx) ensureInput(nextEx.exercise.id);
+    setCurrentExerciseIndex(nextIdx);
+  }, [currentExercises, currentExerciseIndex, ensureInput]);
 
   const handleNavigatePrev = useCallback(() => {
-    setCurrentExerciseIndex(i => Math.max(i - 1, 0));
-  }, []);
+    const prevIdx = Math.max(currentExerciseIndex - 1, 0);
+    const prevEx = currentExercises[prevIdx];
+    if (prevEx) ensureInput(prevEx.exercise.id);
+    setCurrentExerciseIndex(prevIdx);
+  }, [currentExercises, currentExerciseIndex, ensureInput]);
 
   const handleSwapExercise = useCallback(
     (newExercise: Exercise) => {
@@ -576,11 +588,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                 exerciseIndex={currentExerciseIndex}
                 totalExercises={currentExercises.length}
                 loggedSets={loggedSets.filter(s => s.exerciseId === currentMeta.exercise.id)}
-                currentInput={(() => {
-                  ensureInput(currentMeta.exercise.id);
-                  const formInput = watch(`setInputs.${currentMeta.exercise.id}` as const);
-                  return formInput ?? setInputDefaults;
-                })()}
+                currentInput={watch(`setInputs.${currentMeta.exercise.id}` as const) ?? setInputDefaults}
                 overloadSuggestion={(() => {
                   const s = getOverloadSuggestion(
                     currentMeta.exercise.id,
