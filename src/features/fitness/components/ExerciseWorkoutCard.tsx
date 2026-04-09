@@ -108,7 +108,9 @@ export default function ExerciseWorkoutCard({
             <TrendingUp className="mr-1 inline h-3 w-3" aria-hidden="true" />
           )}{' '}
           {t('fitness.setFormat', { weight: overloadSuggestion.weight, reps: overloadSuggestion.reps })}
-          {isPlateaued && overloadSuggestion.plateauWeeks != null && ` (plateau ${overloadSuggestion.plateauWeeks}w)`}
+          {isPlateaued &&
+            overloadSuggestion.plateauWeeks != null &&
+            ` ${t('fitness.logger.plateauIndicator', { weeks: overloadSuggestion.plateauWeeks })}`}
         </Button>
       )}
 
