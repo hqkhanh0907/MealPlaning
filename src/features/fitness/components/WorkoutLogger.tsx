@@ -613,7 +613,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                   /* v8 ignore start */
                   const cur = getValues(key) ?? { ...setInputDefaults };
                   /* v8 ignore stop */
-                  setValue(key, { ...cur, reps: raw === '' ? Number.NaN : Math.max(0, Number(raw)) });
+                  setValue(key, { ...cur, reps: raw === '' ? Number.NaN : Math.max(1, Number(raw)) });
                 }}
                 onDeleteSet={handleDeleteSet}
                 onEditSet={setEditingSet}
