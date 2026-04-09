@@ -2,7 +2,6 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MACRO_COLORS } from '@/constant/colors';
-import { useDarkMode } from '@/hooks/useDarkMode';
 
 export interface MacroDonutChartProps {
   proteinG: number;
@@ -36,7 +35,6 @@ export const MacroDonutChart = React.memo(function MacroDonutChart({
   size = 120,
 }: MacroDonutChartProps) {
   const { t } = useTranslation();
-  const { isDark } = useDarkMode();
 
   const proteinCal = proteinG * PROTEIN_CAL_PER_G;
   const fatCal = fatG * FAT_CAL_PER_G;
@@ -49,9 +47,9 @@ export const MacroDonutChart = React.memo(function MacroDonutChart({
   const strokeWidth = 10;
 
   const segments: { cal: number; color: string; testId: string }[] = [
-    { cal: proteinCal, color: isDark ? MACRO_COLORS.protein.dark : MACRO_COLORS.protein.light, testId: 'arc-protein' },
-    { cal: fatCal, color: isDark ? MACRO_COLORS.fat.dark : MACRO_COLORS.fat.light, testId: 'arc-fat' },
-    { cal: carbsCal, color: isDark ? MACRO_COLORS.carbs.dark : MACRO_COLORS.carbs.light, testId: 'arc-carbs' },
+    { cal: proteinCal, color: MACRO_COLORS.protein, testId: 'arc-protein' },
+    { cal: fatCal, color: MACRO_COLORS.fat, testId: 'arc-fat' },
+    { cal: carbsCal, color: MACRO_COLORS.carbs, testId: 'arc-carbs' },
   ];
 
   let currentAngle = 0;

@@ -3,7 +3,6 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MACRO_COLORS } from '@/constant/colors';
-import { useDarkMode } from '@/hooks/useDarkMode';
 
 import { DayNutritionSummary } from '../../types';
 
@@ -17,7 +16,6 @@ interface MacroSegment {
   calories: number;
   percent: number;
   color: string;
-  darkColor: string;
 }
 
 const PROTEIN_CAL_PER_GRAM = 4;
@@ -31,7 +29,6 @@ const CENTER = 50;
 
 export const MacroChart = React.memo(function MacroChart({ dayNutrition }: MacroChartProps) {
   const { t } = useTranslation();
-  const { isDark } = useDarkMode();
 
   const segments: MacroSegment[] = useMemo(() => {
     const totalProtein = dayNutrition.breakfast.protein + dayNutrition.lunch.protein + dayNutrition.dinner.protein;
@@ -51,24 +48,21 @@ export const MacroChart = React.memo(function MacroChart({ dayNutrition }: Macro
         grams: totalProtein,
         calories: proteinCal,
         percent: Math.round((proteinCal / totalCal) * 100),
-        color: MACRO_COLORS.protein.light,
-        darkColor: MACRO_COLORS.protein.dark,
+        color: MACRO_COLORS.protein,
       },
       {
         label: t('macro.carbs'),
         grams: totalCarbs,
         calories: carbsCal,
         percent: Math.round((carbsCal / totalCal) * 100),
-        color: MACRO_COLORS.carbs.light,
-        darkColor: MACRO_COLORS.carbs.dark,
+        color: MACRO_COLORS.carbs,
       },
       {
         label: t('macro.fat'),
         grams: totalFat,
         calories: fatCal,
         percent: Math.round((fatCal / totalCal) * 100),
-        color: MACRO_COLORS.fat.light,
-        darkColor: MACRO_COLORS.fat.dark,
+        color: MACRO_COLORS.fat,
       },
     ];
   }, [dayNutrition, t]);
@@ -110,7 +104,7 @@ export const MacroChart = React.memo(function MacroChart({ dayNutrition }: Macro
               r={RADIUS}
               fill="none"
               className="transition-all duration-300"
-              stroke={isDark ? arc.darkColor : arc.color}
+              stroke={arc.color}
               strokeWidth={STROKE_WIDTH}
               strokeDasharray={`${arc.dash} ${arc.gap}`}
               strokeDashoffset={-arc.offset}
@@ -121,10 +115,7 @@ export const MacroChart = React.memo(function MacroChart({ dayNutrition }: Macro
         <div className="flex-1 space-y-2">
           {segments.map(seg => (
             <div key={seg.label} className="flex items-center gap-2 text-sm">
-              <span
-                className="h-3 w-3 shrink-0 rounded-full"
-                style={{ backgroundColor: isDark ? seg.darkColor : seg.color }}
-              />
+              <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: seg.color }} />
               <span className="text-foreground font-medium">{seg.label}</span>
               <span className="text-muted-foreground ml-auto" data-testid={`macro-percent-${seg.label}`}>
                 {seg.percent}%

@@ -34,9 +34,9 @@ export const MEAL_TYPE_ICONS: Record<MealType, LucideIcon> = {
 
 /** Semantic colors for meal type icons. */
 export const MEAL_TYPE_ICON_COLORS: Record<MealType, string> = {
-  breakfast: 'text-energy',
-  lunch: 'text-energy',
-  dinner: 'text-info',
+  breakfast: 'text-meal-breakfast',
+  lunch: 'text-meal-lunch',
+  dinner: 'text-meal-dinner',
 };
 
 // --- Sort options shared by DishManager & IngredientManager ---
