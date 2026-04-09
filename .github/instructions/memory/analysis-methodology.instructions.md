@@ -1446,3 +1446,91 @@ interface IngredientRow {
 3. **Bug chỉ hiện khi data persist** — sql.js in-memory che giấu bug hàng tháng
 4. **Kiểm tra pattern**: Khi thấy Row interface dùng snake_case + store dùng `db.query<XRow>()` → CHẮC CHẮN có bug double-conversion
 5. **Quick check**: `grep 'interface.*Row' src/store/*.ts src/features/*/store/*.ts` — nếu thấy snake_case keys → bug
+
+---
+
+## 43. Team SOP Pipeline — BẮT BUỘC đợi Tech Leader hoàn thành trước khi dispatch Dev
+
+### Vấn đề
+
+Dispatch Dev agent NGAY SAU KHI Tech Leader commit plan, trong khi Tech Leader vẫn đang validate/iterate. Dev bắt đầu implement dựa trên plan có thể chưa final → rủi ro rework.
+
+### Nguyên nhân
+
+1. Thấy Tech Leader đã commit IMPLEMENTATION-PLAN.md → giả sử "xong rồi"
+2. Nóng vội dispatch Dev để tăng tốc pipeline
+3. Không tuân thủ nguyên tắc "Tech Leader HOÀN THÀNH → tạo tasks → giao cho nhiều Dev"
+
+### Giải pháp — Quy tắc pipeline tuyệt đối
+
+```
+PIPELINE ORDER BẮT BUỘC:
+CEO → BM → Designer → Tech Leader → [WAIT FULL COMPLETION] → Multiple Devs → QA
+
+QUY TẮC:
+1. Tech Leader PHẢI hoàn thành 100% (agent status = "completed") trước khi dispatch bất kỳ Dev nào
+2. "Commit plan" ≠ "Hoàn thành" — agent có thể đang validate, iterate, hoặc fix findings
+3. Tech Leader tạo TASK BREAKDOWN → mỗi task = 1 Dev agent riêng biệt
+4. Nhiều Dev agents chạy SONG SONG theo wave dependency graph từ Tech Leader
+5. KHÔNG BAO GIỜ dispatch 1 Dev duy nhất cho toàn bộ plan — chia nhỏ tối đa
+
+PATTERN ĐÚNG:
+  Tech Leader completes → read_agent → extract task list
+  → Wave 1: dispatch Dev-task01 (blocking tasks)
+  → Wait Wave 1 complete
+  → Wave 2: dispatch Dev-task02, Dev-task03, Dev-task04 (parallel)
+  → Wait Wave 2 complete
+  → Wave 3: dispatch Dev-task05, Dev-task06 (parallel)
+  → ...
+  → All Devs complete → Orchestrator verify + commit → QA
+```
+
+### Tại sao quan trọng?
+
+| Dispatch sớm (SAI)              | Đợi Tech Leader xong (ĐÚNG)                        |
+| ------------------------------- | -------------------------------------------------- |
+| Dev implement plan chưa final   | Dev implement plan đã validated                    |
+| 1 Dev agent → bottleneck        | Nhiều Dev agents → parallel = nhanh hơn            |
+| Rủi ro rework nếu plan thay đổi | Zero rework — plan đã chốt                         |
+| Không tận dụng wave parallelism | Tối đa throughput theo dependency graph            |
+| Tech Leader findings bị ignore  | Tất cả findings incorporated trước khi Dev bắt đầu |
+
+### Bài học
+
+**"Committed ≠ Completed"**. Luôn kiểm tra `agent status = "completed"` trước khi dispatch phase tiếp theo. Tech Leader là architect — phải hoàn thành 100% trước khi builders bắt đầu. Chia task cho nhiều Dev song song luôn hiệu quả hơn 1 Dev làm hết.
+
+---
+
+## 44. Rubber-duck Agent Spam — Cap critique rounds cho sub-agents
+
+### Vấn đề
+
+Tech Leader agent spawn **24+ rubber-duck critique agents** trong 1 session. Nhiều agents chạy 30-60 phút mà output vô nghĩa (stuck trên 900+ line spec). Tổng ~43 agents tồn tại → resource waste.
+
+### Nguyên nhân
+
+1. Tech Leader prompt không giới hạn số lần critique
+2. Mỗi lần nhận findings → fix → spawn NEW critique agent (thay vì `write_agent` cho agent cũ)
+3. Rubber-duck (Haiku model) chậm trên input lớn (900+ lines)
+
+### Giải pháp
+
+```
+QUY TẮC CHO ORCHESTRATOR KHI DISPATCH SUB-AGENTS:
+
+1. Giới hạn critique rounds: "Tối đa 2-3 rubber-duck reviews. Sau đó chốt."
+2. Scope critique: "Review PHẦN X (§3-§4 only), KHÔNG review toàn bộ 900 lines"
+3. Reuse agent: Dùng write_agent cho agent cũ thay vì spawn mới
+4. Monitor: Nếu agent chạy > 15 phút → gửi STOP message
+5. Ghi rõ trong prompt: "⛔ Tối đa 3 rubber-duck critique rounds. Sau round 3 → chốt plan."
+
+TRONG PROMPT GỬI CHO TECH LEADER / DESIGNER:
+"⛔ Tối đa 3 rubber-duck critique rounds.
+ ⛔ Scope mỗi critique ≤ 200 lines (chia section nếu cần).
+ ⛔ Dùng write_agent để follow-up, KHÔNG spawn agent mới.
+ ⛔ Sau round 3 → chốt deliverable, KHÔNG iterate thêm."
+```
+
+### Bài học
+
+Rubber-duck là công cụ tốt nhưng phải **giới hạn**. 2-3 rounds đủ để bắt 90% issues. Rounds 4+ có diminishing returns gần 0. Spawn agent mới cho mỗi round = resource waste — reuse bằng `write_agent`.
