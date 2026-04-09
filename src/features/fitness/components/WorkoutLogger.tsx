@@ -313,9 +313,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
   const handleEditSetSave = useCallback(
     (data: { weight: number; reps: number; rpe?: number }) => {
       /* v8 ignore start */
-      /* v8 ignore start */
       if (!editingSet) return;
-      /* v8 ignore stop */
       /* v8 ignore stop */
       setLoggedSets(prev =>
         prev.map(s =>
