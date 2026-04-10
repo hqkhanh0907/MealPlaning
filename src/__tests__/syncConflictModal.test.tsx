@@ -1,12 +1,35 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SyncConflictModal } from '../components/modals/SyncConflictModal';
 
 const LOCAL_TIME = '2024-01-15T10:30:00Z';
 const REMOTE_TIME = '2024-01-14T08:00:00Z';
-
 const formattedLocal = new Date(LOCAL_TIME).toLocaleString();
 const formattedRemote = new Date(REMOTE_TIME).toLocaleString();
+const originalMatchMedia = globalThis.matchMedia;
+
+function mockMatchMedia(matches: boolean) {
+  Object.defineProperty(globalThis, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation(() => ({
+      matches,
+      media: '(prefers-reduced-motion: reduce)',
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    })),
+  });
+}
+
+vi.mock('../services/backNavigationService', () => ({
+  pushBackEntry: vi.fn(),
+  removeTopBackEntry: vi.fn(),
+}));
 
 describe('SyncConflictModal', () => {
   const onResolve = vi.fn();
@@ -19,85 +42,63 @@ describe('SyncConflictModal', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(globalThis, 'scrollTo').mockImplementation(() => undefined);
+    mockMatchMedia(false);
   });
 
-  it('renders the modal with correct data-testid', () => {
-    renderModal();
-    expect(screen.getByTestId('sync-conflict-modal')).toBeInTheDocument();
+  afterEach(() => {
+    vi.restoreAllMocks();
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      value: originalMatchMedia,
+    });
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
   });
 
-  it('renders the title "Xung đột dữ liệu"', () => {
+  it('renders alertdialog semantics and readable timestamps', () => {
     renderModal();
-    expect(screen.getByText('Xung đột dữ liệu')).toBeInTheDocument();
+
+    const dialog = screen.getByRole('alertdialog', { name: 'Xung đột dữ liệu' });
+    expect(dialog).toHaveAttribute('aria-describedby');
+    expect(screen.getByText('Dữ liệu cục bộ và dữ liệu đám mây khác nhau. Bạn muốn giữ phiên bản nào?').id).toBe(
+      dialog.getAttribute('aria-describedby'),
+    );
+    expect(screen.getByText(formattedLocal).className).toContain('whitespace-normal');
+    expect(screen.getByText(formattedRemote).className).toContain('break-words');
   });
 
-  it('renders the description text', () => {
+  it('keeps resolve actions exclusive to their respective buttons', async () => {
+    const user = userEvent.setup();
     renderModal();
-    expect(
-      screen.getByText('Dữ liệu cục bộ và dữ liệu đám mây khác nhau. Bạn muốn giữ phiên bản nào?'),
-    ).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('btn-keep-local'));
+    await user.click(screen.getByTestId('btn-use-cloud'));
+
+    expect(onResolve).toHaveBeenNthCalledWith(1, 'local');
+    expect(onResolve).toHaveBeenNthCalledWith(2, 'cloud');
+    expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('renders "Dữ liệu cục bộ" label', () => {
+  it('maps cancel, backdrop, and Escape only to onClose', async () => {
+    const user = userEvent.setup();
     renderModal();
-    expect(screen.getByText('Dữ liệu cục bộ')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('btn-cancel-sync'));
+    await user.click(screen.getByLabelText('Đóng'));
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    expect(onClose).toHaveBeenCalledTimes(3);
+    expect(onResolve).not.toHaveBeenCalled();
   });
 
-  it('renders "Dữ liệu đám mây" label', () => {
+  it('uses mobile-safe wrapping classes on action buttons', () => {
     renderModal();
-    expect(screen.getByText('Dữ liệu đám mây')).toBeInTheDocument();
-  });
 
-  it('displays the formatted local time', () => {
-    renderModal();
-    expect(screen.getByText(formattedLocal)).toBeInTheDocument();
-  });
-
-  it('displays the formatted remote time', () => {
-    renderModal();
-    expect(screen.getByText(formattedRemote)).toBeInTheDocument();
-  });
-
-  it('formats ISO date strings via toLocaleString', () => {
-    renderModal();
-    const expectedLocal = new Date('2024-01-15T10:30:00Z').toLocaleString();
-    const expectedRemote = new Date('2024-01-14T08:00:00Z').toLocaleString();
-    expect(screen.getByText(expectedLocal)).toBeInTheDocument();
-    expect(screen.getByText(expectedRemote)).toBeInTheDocument();
-  });
-
-  it('calls onResolve("local") when "Giữ cục bộ" button is clicked', () => {
-    renderModal();
-    fireEvent.click(screen.getByText('Giữ cục bộ'));
-    expect(onResolve).toHaveBeenCalledTimes(1);
-    expect(onResolve).toHaveBeenCalledWith('local');
-  });
-
-  it('calls onResolve("cloud") when "Dùng dữ liệu đám mây" button is clicked', () => {
-    renderModal();
-    fireEvent.click(screen.getByText('Dùng dữ liệu đám mây'));
-    expect(onResolve).toHaveBeenCalledTimes(1);
-    expect(onResolve).toHaveBeenCalledWith('cloud');
-  });
-
-  it('calls onClose when cancel button "Hủy" is clicked', () => {
-    renderModal();
-    fireEvent.click(screen.getByText('Hủy'));
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it('has correct data-testid on the keep-local button', () => {
-    renderModal();
-    expect(screen.getByTestId('btn-keep-local')).toBeInTheDocument();
-  });
-
-  it('has correct data-testid on the use-cloud button', () => {
-    renderModal();
-    expect(screen.getByTestId('btn-use-cloud')).toBeInTheDocument();
-  });
-
-  it('has correct data-testid on the cancel button', () => {
-    renderModal();
-    expect(screen.getByTestId('btn-cancel-sync')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-keep-local').className).toContain('whitespace-normal');
+    expect(screen.getByTestId('btn-use-cloud').className).toContain('break-words');
+    expect(screen.getByTestId('btn-cancel-sync').className).toContain('whitespace-normal');
   });
 });

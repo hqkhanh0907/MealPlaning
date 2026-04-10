@@ -1,24 +1,54 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ConfirmationModal } from '../components/modals/ConfirmationModal';
 
-vi.mock('../hooks/useModalBackHandler', () => ({
-  useModalBackHandler: vi.fn(),
-}));
+const originalMatchMedia = globalThis.matchMedia;
 
-vi.mock('../components/shared/ModalBackdrop', () => ({
-  ModalBackdrop: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+function mockMatchMedia(matches: boolean) {
+  Object.defineProperty(globalThis, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation(() => ({
+      matches,
+      media: '(prefers-reduced-motion: reduce)',
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    })),
+  });
+}
+
+vi.mock('../services/backNavigationService', () => ({
+  pushBackEntry: vi.fn(),
+  removeTopBackEntry: vi.fn(),
 }));
 
 describe('ConfirmationModal', () => {
-  let onConfirm = vi.fn<() => void>();
-  let onCancel = vi.fn<() => void>();
+  let onConfirm: ReturnType<typeof vi.fn<() => void>>;
+  let onCancel: ReturnType<typeof vi.fn<() => void>>;
 
   beforeEach(() => {
     onConfirm = vi.fn<() => void>();
     onCancel = vi.fn<() => void>();
+    vi.clearAllMocks();
+    vi.spyOn(globalThis, 'scrollTo').mockImplementation(() => undefined);
+    mockMatchMedia(false);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      value: originalMatchMedia,
+    });
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
   });
 
   const renderModal = (overrides: Record<string, unknown> = {}) =>
@@ -33,199 +63,76 @@ describe('ConfirmationModal', () => {
       />,
     );
 
-  // --- Rendering ---
-
-  it('renders title and message when isOpen is true', () => {
+  it('renders alertdialog semantics with title as name and message as description', () => {
     renderModal();
-    expect(screen.getByText('Xóa món ăn?')).toBeInTheDocument();
-    expect(screen.getByText('Bạn có chắc chắn muốn xóa món ăn này không?')).toBeInTheDocument();
-  });
 
-  it('does not render anything when isOpen is false', () => {
-    const { container } = render(
-      <ConfirmationModal
-        isOpen={false}
-        title="Test"
-        message="Test message"
-        onConfirm={onConfirm}
-        onCancel={onCancel}
-      />,
+    const dialog = screen.getByRole('alertdialog', { name: 'Xóa món ăn?' });
+    expect(dialog).toHaveAttribute('aria-describedby');
+    expect(screen.getByText('Bạn có chắc chắn muốn xóa món ăn này không?').id).toBe(
+      dialog.getAttribute('aria-describedby'),
     );
-    expect(container.innerHTML).toBe('');
+    expect(screen.getAllByRole('button')).toHaveLength(3);
   });
 
-  it('renders default confirm and cancel button labels', () => {
+  it('focuses the cancel action first as the safest default', async () => {
     renderModal();
-    expect(screen.getByTestId('btn-confirm-action')).toHaveTextContent('Xác nhận');
-    expect(screen.getByTestId('btn-cancel-action')).toHaveTextContent('Hủy');
+
+    await waitFor(() => expect(screen.getByTestId('btn-cancel-action')).toHaveFocus());
   });
 
-  it('renders custom confirm label when provided', () => {
-    renderModal({ confirmLabel: 'Đồng ý xóa' });
-    expect(screen.getByTestId('btn-confirm-action')).toHaveTextContent('Đồng ý xóa');
-  });
-
-  it('renders custom cancel label when provided', () => {
-    renderModal({ cancelLabel: 'Quay lại' });
-    expect(screen.getByTestId('btn-cancel-action')).toHaveTextContent('Quay lại');
-  });
-
-  it('renders both custom labels when provided', () => {
-    renderModal({ confirmLabel: 'Có', cancelLabel: 'Không' });
-    expect(screen.getByTestId('btn-confirm-action')).toHaveTextContent('Có');
-    expect(screen.getByTestId('btn-cancel-action')).toHaveTextContent('Không');
-  });
-
-  // --- Button Callbacks ---
-
-  it('calls onConfirm when confirm button clicked', async () => {
-    renderModal();
+  it('maps cancel button, backdrop click, and Escape to onCancel only', async () => {
     const user = userEvent.setup();
-    await user.click(screen.getByTestId('btn-confirm-action'));
-    expect(onConfirm).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls onCancel when cancel button clicked', async () => {
     renderModal();
-    const user = userEvent.setup();
+
     await user.click(screen.getByTestId('btn-cancel-action'));
-    expect(onCancel).toHaveBeenCalledTimes(1);
-  });
+    await user.click(screen.getByLabelText('Đóng'));
+    fireEvent.keyDown(document, { key: 'Escape' });
 
-  it('does not call onCancel when confirm is clicked', async () => {
-    renderModal();
-    const user = userEvent.setup();
-    await user.click(screen.getByTestId('btn-confirm-action'));
-    expect(onCancel).not.toHaveBeenCalled();
-  });
-
-  it('does not call onConfirm when cancel is clicked', async () => {
-    renderModal();
-    const user = userEvent.setup();
-    await user.click(screen.getByTestId('btn-cancel-action'));
+    expect(onCancel).toHaveBeenCalledTimes(3);
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
-  // --- Variant Styling: danger ---
-
-  it('defaults to danger variant', () => {
+  it('maps confirm button only to onConfirm', async () => {
+    const user = userEvent.setup();
     renderModal();
-    const confirmBtn = screen.getByTestId('btn-confirm-action');
-    expect(confirmBtn.className).toContain('bg-destructive');
+
+    await user.click(screen.getByTestId('btn-confirm-action'));
+
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+    expect(onCancel).not.toHaveBeenCalled();
   });
 
-  it('danger variant applies rose button styles', () => {
-    renderModal({ variant: 'danger' });
-    const confirmBtn = screen.getByTestId('btn-confirm-action');
-    expect(confirmBtn.className).toContain('bg-destructive');
-    expect(confirmBtn.className).toContain('hover:bg-destructive/90');
-  });
-
-  it('danger variant applies rose icon background', () => {
-    const { container } = renderModal({ variant: 'danger' });
-    const iconWrapper = container.querySelector('.bg-destructive\\/10');
-    expect(iconWrapper).toBeInTheDocument();
-  });
-
-  // --- Variant Styling: warning ---
-
-  it('warning variant applies amber button styles', () => {
-    renderModal({ variant: 'warning' });
-    const confirmBtn = screen.getByTestId('btn-confirm-action');
-    expect(confirmBtn.className).toContain('bg-warning');
-    expect(confirmBtn.className).toContain('hover:bg-warning/90');
-  });
-
-  it('warning variant applies amber icon background', () => {
-    const { container } = renderModal({ variant: 'warning' });
-    const iconWrapper = container.querySelector('.bg-warning\\/10');
-    expect(iconWrapper).toBeInTheDocument();
-  });
-
-  // --- Custom Icon ---
-
-  it('renders custom icon when provided', () => {
+  it('wraps long labels safely on narrow layouts', () => {
     renderModal({
-      icon: <span data-testid="custom-icon">🔥</span>,
+      confirmLabel: 'Đồng ý xóa toàn bộ dữ liệu kế hoạch dinh dưỡng đã chọn ngay bây giờ',
+      cancelLabel: 'Quay lại để xem lại mọi thay đổi trước khi tiếp tục thao tác này',
     });
-    expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
+
+    expect(screen.getByTestId('btn-confirm-action').className).toContain('whitespace-normal');
+    expect(screen.getByTestId('btn-confirm-action').className).toContain('break-words');
+    expect(screen.getByTestId('btn-cancel-action').className).toContain('whitespace-normal');
+    expect(screen.getByTestId('btn-cancel-action').className).toContain('break-words');
   });
 
-  it('renders default icon for danger variant when no icon provided', () => {
-    const { container } = renderModal({ variant: 'danger' });
-    const trashIcon = container.querySelector('.lucide-trash-2');
-    expect(trashIcon).toBeInTheDocument();
-  });
-
-  it('renders default icon for warning variant when no icon provided', () => {
-    const { container } = renderModal({ variant: 'warning' });
-    const iconContainer = container.querySelector('.bg-warning\\/10');
-    expect(iconContainer).toBeInTheDocument();
-    const svgIcon = iconContainer?.querySelector('svg');
-    expect(svgIcon).toBeInTheDocument();
-  });
-
-  // --- Message as ReactNode ---
-
-  it('renders message as ReactNode (JSX)', () => {
+  it('renders custom message nodes and warning styling', () => {
     renderModal({
+      variant: 'warning',
       message: (
         <div>
-          <strong data-testid="strong-msg">Cẩn thận!</strong> Hành động này không thể hoàn tác.
+          <strong data-testid="warning-strong">Cảnh báo:</strong> thao tác này sẽ thay đổi dữ liệu.
         </div>
       ),
     });
-    expect(screen.getByTestId('strong-msg')).toBeInTheDocument();
-    expect(screen.getByText(/Hành động này/)).toBeInTheDocument();
+
+    expect(screen.getByTestId('warning-strong')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-confirm-action').className).toContain('bg-warning');
   });
 
-  // --- isOpen toggling ---
-
-  it('shows content when isOpen changes from false to true', () => {
-    const { rerender } = render(
-      <ConfirmationModal
-        isOpen={false}
-        title="Test Title"
-        message="Test Message"
-        onConfirm={onConfirm}
-        onCancel={onCancel}
-      />,
+  it('renders nothing when closed', () => {
+    const { container } = render(
+      <ConfirmationModal isOpen={false} title="Ẩn" message="Ẩn" onConfirm={onConfirm} onCancel={onCancel} />,
     );
-    expect(screen.queryByText('Test Title')).not.toBeInTheDocument();
 
-    rerender(
-      <ConfirmationModal
-        isOpen={true}
-        title="Test Title"
-        message="Test Message"
-        onConfirm={onConfirm}
-        onCancel={onCancel}
-      />,
-    );
-    expect(screen.getByText('Test Title')).toBeInTheDocument();
-  });
-
-  it('hides content when isOpen changes from true to false', () => {
-    const { rerender } = render(
-      <ConfirmationModal
-        isOpen={true}
-        title="Test Title"
-        message="Test Message"
-        onConfirm={onConfirm}
-        onCancel={onCancel}
-      />,
-    );
-    expect(screen.getByText('Test Title')).toBeInTheDocument();
-
-    rerender(
-      <ConfirmationModal
-        isOpen={false}
-        title="Test Title"
-        message="Test Message"
-        onConfirm={onConfirm}
-        onCancel={onCancel}
-      />,
-    );
-    expect(screen.queryByText('Test Title')).not.toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 });

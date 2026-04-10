@@ -1,5 +1,5 @@
 import { CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useModalBackHandler } from '../../hooks/useModalBackHandler';
@@ -18,8 +18,10 @@ interface ClearPlanModalProps {
 const hasPlan = (p: DayPlan): boolean =>
   p.breakfastDishIds.length > 0 || p.lunchDishIds.length > 0 || p.dinnerDishIds.length > 0;
 
-export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: ClearPlanModalProps) => {
+export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Readonly<ClearPlanModalProps>) => {
   const { t, i18n } = useTranslation();
+  const titleId = useId();
+  const descriptionId = useId();
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
   useModalBackHandler(true, onClose);
   const [expandedScope, setExpandedScope] = useState<string | null>(null);
@@ -107,17 +109,28 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
   ];
 
   return (
-    <ModalBackdrop onClose={onClose}>
-      <div className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl">
+    <ModalBackdrop
+      onClose={onClose}
+      role="alertdialog"
+      ariaLabelledBy={titleId}
+      ariaDescribedBy={descriptionId}
+      closeOnBackdropClick={true}
+      closeOnEscape={true}
+      allowSwipeToDismiss={true}
+    >
+      <section className="bg-card relative flex max-h-[90dvh] w-full flex-col overflow-hidden rounded-t-2xl shadow-xl sm:mx-4 sm:max-w-md sm:rounded-2xl">
         <div className="border-border-subtle flex items-center justify-between border-b px-6 py-5 sm:px-8 sm:py-6">
           <div>
-            <h3 className="text-foreground text-xl font-semibold">{t('clearPlan.title')}</h3>
-            <p className="text-muted-foreground text-sm">{t('clearPlan.subtitle')}</p>
+            <h3 id={titleId} className="text-foreground text-xl font-semibold break-words">
+              {t('clearPlan.title')}
+            </h3>
+            <p id={descriptionId} className="text-muted-foreground text-sm break-words">
+              {t('clearPlan.subtitle')}
+            </p>
           </div>
           <CloseButton onClick={onClose} data-testid="btn-close-clear-plan" />
         </div>
-        <div className="space-y-4 p-6 sm:p-8">
-          {/* Meal selection */}
+        <div className="space-y-4 overflow-y-auto p-6 sm:p-8">
           <div className="flex gap-2" data-testid="meal-filter">
             {MEAL_LABELS.map(({ type, labelKey }) => (
               <button
@@ -125,7 +138,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 type="button"
                 data-testid={`meal-toggle-${type}`}
                 onClick={() => toggleMeal(type)}
-                className={`flex-1 rounded-xl border-2 px-3 py-2 text-sm font-semibold transition-all ${
+                className={`flex-1 rounded-xl border-2 px-3 py-2 text-sm font-semibold break-words whitespace-normal transition-all ${
                   selectedMeals.has(type)
                     ? 'border-rose bg-rose-subtle text-rose-emphasis'
                     : 'border-border text-muted-foreground'
@@ -139,10 +152,12 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
           {SCOPE_OPTIONS.map(({ scope, label, desc, count, mealCount, dates }) => (
             <div key={scope}>
               <button
+                type="button"
                 data-testid={`btn-clear-scope-${scope}`}
                 onClick={() => onClear(scope, selectedMeals.size === 3 ? undefined : Array.from(selectedMeals))}
                 disabled={count === 0}
-                className={`group flex min-h-16 w-full items-center gap-4 rounded-2xl border-2 p-4 transition-all ${
+                aria-disabled={count === 0}
+                className={`group flex min-h-16 w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
                   count === 0
                     ? 'border-border bg-muted cursor-not-allowed opacity-50'
                     : 'border-border-subtle hover:border-rose hover:bg-rose-subtle active:scale-[0.98]'
@@ -157,26 +172,29 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                 </div>
                 <div className="flex-1 text-left">
                   <p
-                    className={`text-lg font-semibold ${count > 0 ? 'text-foreground group-hover:text-rose-emphasis' : 'text-muted-foreground'}`}
+                    className={`text-lg font-semibold break-words ${count > 0 ? 'text-foreground group-hover:text-rose-emphasis' : 'text-muted-foreground'}`}
                   >
                     {label}
                   </p>
-                  <p className="text-muted-foreground text-sm">{desc}</p>
+                  <p className="text-muted-foreground text-sm break-words">{desc}</p>
                   {count > 0 && mealCount > 0 && (
-                    <p className="text-rose mt-0.5 text-xs">{t('clearPlan.totalMeals', { count: mealCount })}</p>
+                    <p className="text-rose mt-0.5 text-xs break-words">
+                      {t('clearPlan.totalMeals', { count: mealCount })}
+                    </p>
                   )}
                 </div>
                 {count > 0 && (
-                  <span className="bg-rose/10 text-rose shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold">
+                  <span className="bg-rose/10 text-rose shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold break-words whitespace-normal">
                     {t('clearPlan.dayCount', { count })}
                   </span>
                 )}
               </button>
               {count > 1 && (
                 <button
+                  type="button"
                   data-testid={`btn-expand-${scope}`}
                   onClick={() => setExpandedScope(prev => (prev === scope ? null : scope))}
-                  className="hover:text-foreground-secondary text-muted-foreground mt-1.5 ml-4 flex items-center gap-1 text-xs transition-colors"
+                  className="hover:text-foreground-secondary text-muted-foreground mt-1.5 ml-4 flex items-center gap-1 text-left text-xs break-words whitespace-normal transition-colors"
                 >
                   {expandedScope === scope ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                   {t('clearPlan.affectedDates')}
@@ -187,7 +205,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
                   {[...dates]
                     .sort((a, b) => a.localeCompare(b))
                     .map(d => (
-                      <span key={d} className="bg-rose/10 text-rose rounded-full px-2 py-0.5 text-xs">
+                      <span key={d} className="bg-rose/10 text-rose rounded-full px-2 py-0.5 text-xs break-words">
                         {formatShortDate(d)}
                       </span>
                     ))}
@@ -196,7 +214,7 @@ export const ClearPlanModal = ({ dayPlans, selectedDate, onClear, onClose }: Cle
             </div>
           ))}
         </div>
-      </div>
+      </section>
     </ModalBackdrop>
   );
 };
