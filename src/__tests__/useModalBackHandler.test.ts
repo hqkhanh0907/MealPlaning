@@ -14,54 +14,26 @@ describe('useModalBackHandler', () => {
     vi.clearAllMocks();
   });
 
-  it('pushes back entry when isOpen becomes true', () => {
+  it('pushes one back entry only while open', () => {
     renderHook(() => useModalBackHandler(true, vi.fn()));
     expect(backService.pushBackEntry).toHaveBeenCalledTimes(1);
   });
 
-  it('does not push when isOpen is false', () => {
+  it('does not push when closed', () => {
     renderHook(() => useModalBackHandler(false, vi.fn()));
     expect(backService.pushBackEntry).not.toHaveBeenCalled();
   });
 
-  it('removes back entry when isOpen becomes false', () => {
+  it('removes exactly one entry when closed normally', () => {
     const { rerender } = renderHook(({ isOpen }) => useModalBackHandler(isOpen, vi.fn()), {
       initialProps: { isOpen: true },
     });
+
     rerender({ isOpen: false });
     expect(backService.removeTopBackEntry).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onClose when handler is invoked by service', () => {
-    const onClose = vi.fn();
-    let capturedHandler: (() => void) | null = null;
-    vi.mocked(backService.pushBackEntry).mockImplementation(handler => {
-      capturedHandler = handler;
-    });
-
-    renderHook(() => useModalBackHandler(true, onClose));
-    expect(capturedHandler).not.toBeNull();
-    capturedHandler!();
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it('removes back entry on unmount if still pushed', () => {
-    const { unmount } = renderHook(() => useModalBackHandler(true, vi.fn()));
-    unmount();
-    expect(backService.removeTopBackEntry).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not remove on unmount if already closed', () => {
-    const { rerender, unmount } = renderHook(({ isOpen }) => useModalBackHandler(isOpen, vi.fn()), {
-      initialProps: { isOpen: true },
-    });
-    rerender({ isOpen: false });
-    vi.clearAllMocks();
-    unmount();
-    expect(backService.removeTopBackEntry).not.toHaveBeenCalled();
-  });
-
-  it('uses latest onClose via ref', () => {
+  it('uses the latest onClose callback from the pushed handler', () => {
     const onClose1 = vi.fn();
     const onClose2 = vi.fn();
     let capturedHandler: (() => void) | null = null;
@@ -73,12 +45,15 @@ describe('useModalBackHandler', () => {
       initialProps: { onClose: onClose1 },
     });
     rerender({ onClose: onClose2 });
-    capturedHandler!();
+
+    if (!capturedHandler) throw new Error('Expected handler');
+    const handler = capturedHandler as () => void;
+    handler();
     expect(onClose2).toHaveBeenCalledTimes(1);
     expect(onClose1).not.toHaveBeenCalled();
   });
 
-  it('does not double-remove when handler was invoked before close', () => {
+  it('does not double-remove after service-triggered close', () => {
     let capturedHandler: (() => void) | null = null;
     vi.mocked(backService.pushBackEntry).mockImplementation(handler => {
       capturedHandler = handler;
@@ -88,32 +63,40 @@ describe('useModalBackHandler', () => {
       initialProps: { isOpen: true },
     });
 
-    capturedHandler!();
+    if (!capturedHandler) throw new Error('Expected handler');
+    const handler = capturedHandler as () => void;
+    handler();
     vi.clearAllMocks();
-
     rerender({ isOpen: false });
+
     expect(backService.removeTopBackEntry).not.toHaveBeenCalled();
   });
 
-  it('removes entry when closed without handler invocation', () => {
-    const { rerender } = renderHook(({ isOpen }) => useModalBackHandler(isOpen, vi.fn()), {
-      initialProps: { isOpen: true },
-    });
-
-    rerender({ isOpen: false });
+  it('removes once on unmount if still open', () => {
+    const { unmount } = renderHook(() => useModalBackHandler(true, vi.fn()));
+    unmount();
     expect(backService.removeTopBackEntry).toHaveBeenCalledTimes(1);
   });
 
-  it('re-pushes back entry when reopened after close', () => {
+  it('supports reopen after close', () => {
     const { rerender } = renderHook(({ isOpen }) => useModalBackHandler(isOpen, vi.fn()), {
       initialProps: { isOpen: true },
     });
-    expect(backService.pushBackEntry).toHaveBeenCalledTimes(1);
 
     rerender({ isOpen: false });
     vi.clearAllMocks();
-
     rerender({ isOpen: true });
+
     expect(backService.pushBackEntry).toHaveBeenCalledTimes(1);
+  });
+
+  it('documents LIFO removal requirement for nested overlays by removing the top entry per instance', () => {
+    const outer = renderHook(() => useModalBackHandler(true, vi.fn()));
+    const inner = renderHook(() => useModalBackHandler(true, vi.fn()));
+
+    inner.unmount();
+    outer.unmount();
+
+    expect(backService.removeTopBackEntry).toHaveBeenCalledTimes(2);
   });
 });

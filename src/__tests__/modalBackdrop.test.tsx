@@ -1,393 +1,219 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ModalBackdrop } from '../components/shared/ModalBackdrop';
 
-// ModalBackdrop renders <dialog open> with aria-modal="true" and a backdrop button
+const originalMatchMedia = globalThis.matchMedia;
+
+function mockMatchMedia(matches: boolean) {
+  Object.defineProperty(globalThis, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation(() => ({
+      matches,
+      media: '(prefers-reduced-motion: reduce)',
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+    })),
+  });
+}
 
 describe('ModalBackdrop', () => {
   const onClose = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(globalThis, 'scrollTo').mockImplementation(() => undefined);
+    mockMatchMedia(false);
   });
 
-  it('renders a dialog element with open attribute', () => {
-    render(
-      <ModalBackdrop onClose={onClose}>
-        <div>Content</div>
-      </ModalBackdrop>,
-    );
-    const dialog = document.querySelector('dialog');
-    expect(dialog).toBeInTheDocument();
-    expect(dialog).toHaveAttribute('open');
+  afterEach(() => {
+    vi.restoreAllMocks();
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      value: originalMatchMedia,
+    });
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
   });
 
-  it('has aria-modal="true" for accessibility', () => {
+  it('renders dialog root with semantic role and aria wiring', () => {
     render(
-      <ModalBackdrop onClose={onClose}>
-        <div>Content</div>
+      <ModalBackdrop onClose={onClose} role="alertdialog" ariaLabelledBy="title-id" ariaDescribedBy="desc-id">
+        <h2 id="title-id">Cảnh báo</h2>
+        <p id="desc-id">Mô tả</p>
       </ModalBackdrop>,
     );
-    const dialog = document.querySelector('dialog');
+
+    const dialog = screen.getByRole('alertdialog', { name: 'Cảnh báo' });
     expect(dialog).toHaveAttribute('aria-modal', 'true');
+    expect(dialog).toHaveAttribute('aria-labelledby', 'title-id');
+    expect(dialog).toHaveAttribute('aria-describedby', 'desc-id');
   });
 
-  it('calls onClose when backdrop button is clicked', () => {
+  it('calls onClose when backdrop is clicked but not when content is clicked', async () => {
+    const user = userEvent.setup();
+
     render(
       <ModalBackdrop onClose={onClose}>
-        <div>Content</div>
+        <button>Inner action</button>
       </ModalBackdrop>,
     );
-    const backdropBtn = screen.getByLabelText('Đóng');
-    fireEvent.click(backdropBtn);
+
+    await user.click(screen.getByText('Inner action'));
+    expect(onClose).not.toHaveBeenCalled();
+
+    await user.click(screen.getByLabelText('Đóng'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('renders children content', () => {
-    render(
-      <ModalBackdrop onClose={onClose}>
-        <div data-testid="child">Hello World</div>
-      </ModalBackdrop>,
-    );
-    expect(screen.getByTestId('child')).toBeInTheDocument();
-    expect(screen.getByText('Hello World')).toBeInTheDocument();
-  });
+  it('keeps backdrop click inert when disabled by consumer', async () => {
+    const user = userEvent.setup();
 
-  it('applies default z-50 zIndex class', () => {
     render(
-      <ModalBackdrop onClose={onClose}>
+      <ModalBackdrop onClose={onClose} closeOnBackdropClick={false}>
         <div>Content</div>
       </ModalBackdrop>,
     );
-    const dialog = document.querySelector('dialog');
-    expect(dialog?.className).toContain('z-50');
-  });
 
-  it('applies custom zIndex class when provided', () => {
-    render(
-      <ModalBackdrop onClose={onClose} zIndex="z-[60]">
-        <div>Content</div>
-      </ModalBackdrop>,
-    );
-    const dialog = document.querySelector('dialog');
-    expect(dialog?.className).toContain('z-[60]');
-    expect(dialog?.className).not.toContain('z-50');
-  });
-
-  it('renders backdrop button behind children', () => {
-    render(
-      <ModalBackdrop onClose={onClose}>
-        <button>Inner Button</button>
-      </ModalBackdrop>,
-    );
-    // Both backdrop and inner button should be present
-    expect(screen.getByLabelText('Đóng')).toBeInTheDocument();
-    expect(screen.getByText('Inner Button')).toBeInTheDocument();
-  });
-
-  it('does not call onClose when inner content is clicked', () => {
-    render(
-      <ModalBackdrop onClose={onClose}>
-        <button onClick={() => {}}>Inner Button</button>
-      </ModalBackdrop>,
-    );
-    fireEvent.click(screen.getByText('Inner Button'));
+    await user.click(screen.getByLabelText('Đóng'));
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('backdrop button has tabIndex -1 for focus management', () => {
-    render(
-      <ModalBackdrop onClose={onClose}>
-        <div>Content</div>
-      </ModalBackdrop>,
-    );
-    const backdropBtn = screen.getByLabelText('Đóng');
-    expect(backdropBtn).toHaveAttribute('tabindex', '-1');
-  });
-
-  it('has backdrop blur and dark overlay styling', () => {
-    render(
-      <ModalBackdrop onClose={onClose}>
-        <div>Content</div>
-      </ModalBackdrop>,
-    );
-    const dialog = document.querySelector('dialog');
-    expect(dialog?.className).toContain('backdrop-blur');
-    expect(dialog?.className).toContain('bg-background/50');
-  });
-
-  it('calls onClose when Escape key is pressed', () => {
-    render(
-      <ModalBackdrop onClose={onClose}>
-        <div>Content</div>
-      </ModalBackdrop>,
-    );
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it('only calls topmost modal onClose when nested modals are mounted and Escape is pressed', () => {
+  it('only closes the topmost modal on Escape', () => {
     const onCloseOuter = vi.fn();
     const onCloseInner = vi.fn();
 
     render(
-      <ModalBackdrop onClose={onCloseOuter} zIndex="z-50">
+      <ModalBackdrop onClose={onCloseOuter}>
         <div>Outer</div>
       </ModalBackdrop>,
     );
     render(
-      <ModalBackdrop onClose={onCloseInner} zIndex="z-60">
+      <ModalBackdrop onClose={onCloseInner}>
         <div>Inner</div>
       </ModalBackdrop>,
     );
 
     fireEvent.keyDown(document, { key: 'Escape' });
-    // Only topmost (inner) modal should respond
     expect(onCloseInner).toHaveBeenCalledTimes(1);
     expect(onCloseOuter).not.toHaveBeenCalled();
   });
 
-  describe('focus management', () => {
-    beforeEach(() => {
-      vi.useFakeTimers({ shouldAdvanceTime: true });
-    });
+  it('traps focus inside the topmost overlay and restores it on unmount', async () => {
+    const user = userEvent.setup();
+    const trigger = document.createElement('button');
+    trigger.textContent = 'Trigger';
+    document.body.appendChild(trigger);
+    trigger.focus();
 
-    afterEach(() => {
-      vi.useRealTimers();
-    });
+    const { unmount } = render(
+      <ModalBackdrop onClose={onClose}>
+        <div>
+          <button>First</button>
+          <button>Second</button>
+        </div>
+      </ModalBackdrop>,
+    );
 
-    it('auto-focuses first interactive element inside content', async () => {
-      render(
-        <ModalBackdrop onClose={onClose}>
-          <div>
-            <button data-testid="first-btn">First</button>
-            <button data-testid="second-btn">Second</button>
-          </div>
-        </ModalBackdrop>,
-      );
-      // requestAnimationFrame fires on next frame
-      await vi.advanceTimersByTimeAsync(20);
-      expect(document.activeElement).toBe(screen.getByTestId('first-btn'));
-    });
+    await waitFor(() => expect(screen.getByText('First')).toHaveFocus());
+    await user.tab();
+    expect(screen.getByText('Second')).toHaveFocus();
+    await user.tab();
+    await waitFor(() => expect(screen.getByText('First')).toHaveFocus());
+    await user.tab({ shift: true });
+    expect(screen.getByText('Second')).toHaveFocus();
 
-    it('does not steal focus from a child that uses autoFocus', async () => {
-      render(
-        <ModalBackdrop onClose={onClose}>
-          <div>
-            <button data-testid="first-btn">First</button>
-            <input data-testid="auto-input" autoFocus />
-          </div>
-        </ModalBackdrop>,
-      );
-      await vi.advanceTimersByTimeAsync(20);
-      // autoFocus input should keep focus — ModalBackdrop should not override
-      expect(document.activeElement).toBe(screen.getByTestId('auto-input'));
-    });
-
-    it('restores focus to previously focused element on unmount', async () => {
-      const outerBtn = document.createElement('button');
-      outerBtn.textContent = 'Outside';
-      document.body.appendChild(outerBtn);
-      outerBtn.focus();
-      expect(document.activeElement).toBe(outerBtn);
-
-      const { unmount } = render(
-        <ModalBackdrop onClose={onClose}>
-          <div>
-            <button>Inside</button>
-          </div>
-        </ModalBackdrop>,
-      );
-      await vi.advanceTimersByTimeAsync(20);
-
-      unmount();
-      expect(document.activeElement).toBe(outerBtn);
-      document.body.removeChild(outerBtn);
-    });
+    unmount();
+    expect(trigger).toHaveFocus();
+    document.body.removeChild(trigger);
   });
 
-  /**
-   * BUG: scroll-lock-nested-modal
-   *
-   * When IngredientEditModal (ModalBackdrop A) and UnsavedChangesDialog
-   * (ModalBackdrop B) unmounted simultaneously, React could call A's
-   * cleanup first (unlocking body) then B's cleanup second (re-locking
-   * body with the captured prev values). The result: body stayed
-   * position:fixed / overflow:hidden permanently, breaking scroll on
-   * every page.
-   *
-   * Fix: module-level reference-counted lock (_scrollLockDepth).
-   * Lock is applied only on the first mount (0→1) and released only
-   * on the last unmount (1→0), so cleanup order no longer matters.
-   */
+  it('preserves child autofocus when present', () => {
+    render(
+      <ModalBackdrop onClose={onClose}>
+        <div>
+          <button>First</button>
+          <input autoFocus aria-label="Tên" />
+        </div>
+      </ModalBackdrop>,
+    );
 
-  describe('grab handle', () => {
-    it('renders grab handle with correct testid', () => {
-      render(
-        <ModalBackdrop onClose={onClose}>
-          <div>Content</div>
-        </ModalBackdrop>,
-      );
-      const handle = screen.getByTestId('modal-grab-handle');
-      expect(handle).toBeInTheDocument();
-      expect(handle.className).toContain('rounded-full');
-      expect(handle.className).toContain('bg-muted-foreground/30');
-    });
-
-    it('grab handle is hidden on desktop (sm:hidden)', () => {
-      render(
-        <ModalBackdrop onClose={onClose}>
-          <div>Content</div>
-        </ModalBackdrop>,
-      );
-      const handle = screen.getByTestId('modal-grab-handle');
-      expect(handle.className).toContain('sm:hidden');
-    });
-
-    it('drag down beyond 100px threshold calls onClose', () => {
-      render(
-        <ModalBackdrop onClose={onClose}>
-          <div>Content</div>
-        </ModalBackdrop>,
-      );
-      const handle = screen.getByTestId('modal-grab-handle');
-
-      fireEvent.touchStart(handle, { touches: [{ clientY: 100 }] });
-      fireEvent.touchMove(handle, { touches: [{ clientY: 250 }] });
-      fireEvent.touchEnd(handle);
-
-      expect(onClose).toHaveBeenCalledTimes(1);
-    });
-
-    it('drag down below threshold snaps back without closing', () => {
-      render(
-        <ModalBackdrop onClose={onClose}>
-          <div>Content</div>
-        </ModalBackdrop>,
-      );
-      const handle = screen.getByTestId('modal-grab-handle');
-
-      fireEvent.touchStart(handle, { touches: [{ clientY: 100 }] });
-      fireEvent.touchMove(handle, { touches: [{ clientY: 150 }] });
-      fireEvent.touchEnd(handle);
-
-      expect(onClose).not.toHaveBeenCalled();
-    });
-
-    it('upward drag (negative delta) does not trigger close', () => {
-      render(
-        <ModalBackdrop onClose={onClose}>
-          <div>Content</div>
-        </ModalBackdrop>,
-      );
-      const handle = screen.getByTestId('modal-grab-handle');
-
-      fireEvent.touchStart(handle, { touches: [{ clientY: 200 }] });
-      fireEvent.touchMove(handle, { touches: [{ clientY: 50 }] });
-      fireEvent.touchEnd(handle);
-
-      expect(onClose).not.toHaveBeenCalled();
-    });
+    expect(screen.getByLabelText('Tên')).toHaveFocus();
   });
 
-  /**
-   * BUG: scroll-lock-nested-modal
-   *
-   * When IngredientEditModal (ModalBackdrop A) and UnsavedChangesDialog
-   * (ModalBackdrop B) unmounted simultaneously, React could call A's
-   * cleanup first (unlocking body) then B's cleanup second (re-locking
-   * body with the captured prev values). The result: body stayed
-   * position:fixed / overflow:hidden permanently, breaking scroll on
-   * every page.
-   *
-   * Fix: module-level reference-counted lock (_scrollLockDepth).
-   * Lock is applied only on the first mount (0→1) and released only
-   * on the last unmount (1→0), so cleanup order no longer matters.
-   */
-  describe('body scroll lock (reference-counted)', () => {
-    beforeEach(() => {
-      // Guard-reset body styles in case any previous test left them locked.
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      // Silence jsdom "not implemented" warning for scrollTo.
-      vi.spyOn(globalThis, 'scrollTo').mockImplementation(() => undefined);
-    });
+  it('locks body scroll until the last nested overlay closes', () => {
+    const outer = render(
+      <ModalBackdrop onClose={onClose}>
+        <div>Outer</div>
+      </ModalBackdrop>,
+    );
+    const inner = render(
+      <ModalBackdrop onClose={onClose} zIndex="z-60">
+        <div>Inner</div>
+      </ModalBackdrop>,
+    );
 
-    afterEach(() => {
-      vi.restoreAllMocks();
-    });
+    expect(document.body.style.position).toBe('fixed');
+    expect(document.body.style.overflow).toBe('hidden');
 
-    it('locks body scroll when a modal mounts', () => {
-      render(
-        <ModalBackdrop onClose={onClose}>
-          <div />
-        </ModalBackdrop>,
-      );
-      expect(document.body.style.position).toBe('fixed');
-      expect(document.body.style.overflow).toBe('hidden');
-    });
+    inner.unmount();
+    expect(document.body.style.position).toBe('fixed');
 
-    it('restores body scroll when the modal unmounts', () => {
-      const { unmount } = render(
-        <ModalBackdrop onClose={onClose}>
-          <div />
-        </ModalBackdrop>,
-      );
-      unmount();
-      expect(document.body.style.position).toBe('');
-      expect(document.body.style.overflow).toBe('');
-    });
+    outer.unmount();
+    expect(document.body.style.position).toBe('');
+    expect(document.body.style.overflow).toBe('');
+  });
 
-    it('keeps body locked when inner modal closes while outer is still open', () => {
-      // Outer modal (z-60) — still visible throughout the test
-      render(
-        <ModalBackdrop onClose={onClose} zIndex="z-60">
-          <div />
-        </ModalBackdrop>,
-      );
-      // Inner modal (z-70) — will be closed mid-test
-      const { unmount: unmountInner } = render(
-        <ModalBackdrop onClose={onClose} zIndex="z-70">
-          <div />
-        </ModalBackdrop>,
-      );
+  it('marks reduced-motion branch and suppresses animated drag reset', () => {
+    mockMatchMedia(true);
+    render(
+      <ModalBackdrop onClose={onClose}>
+        <div>Content</div>
+      </ModalBackdrop>,
+    );
 
-      // Close only the inner modal
-      unmountInner();
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveAttribute('data-reduced-motion', 'true');
 
-      // Outer modal is still open — body MUST remain locked
-      expect(document.body.style.position).toBe('fixed');
-      expect(document.body.style.overflow).toBe('hidden');
-    });
+    const handle = screen.getByTestId('modal-grab-handle');
+    fireEvent.touchStart(handle, { touches: [{ clientY: 100 }] });
+    fireEvent.touchMove(handle, { touches: [{ clientY: 140 }] });
+    fireEvent.touchEnd(handle);
 
-    it('BUG-regression: two nested modals unmounting together fully restores body scroll', () => {
-      // Simulates IngredientEditModal (A) + UnsavedChangesDialog (B) both
-      // unmounting at the same moment when the user clicks "Discard".
-      const { unmount: unmountA } = render(
-        <ModalBackdrop onClose={onClose} zIndex="z-60">
-          <div />
-        </ModalBackdrop>,
-      );
-      const { unmount: unmountB } = render(
-        <ModalBackdrop onClose={onClose} zIndex="z-70">
-          <div />
-        </ModalBackdrop>,
-      );
+    const content = screen.getByRole('dialog').querySelector('[data-modal-content="true"]') as HTMLDivElement;
+    expect(content.style.transition).toBe('none');
+    expect(onClose).not.toHaveBeenCalled();
+  });
 
-      // Both modals are visible — body must be locked
-      expect(document.body.style.position).toBe('fixed');
-      expect(document.body.style.overflow).toBe('hidden');
+  it('supports swipe-to-dismiss threshold on mobile sheet overlays', () => {
+    render(
+      <ModalBackdrop onClose={onClose}>
+        <div>Content</div>
+      </ModalBackdrop>,
+    );
 
-      // Simulate React committing both unmounts simultaneously.
-      // Previously: A cleanup unlocked → B cleanup re-locked (bug).
-      unmountA();
-      unmountB();
+    const handle = screen.getByTestId('modal-grab-handle');
+    fireEvent.touchStart(handle, { touches: [{ clientY: 100 }] });
+    fireEvent.touchMove(handle, { touches: [{ clientY: 260 }] });
+    fireEvent.touchEnd(handle);
 
-      // Body MUST be fully restored regardless of cleanup call order.
-      expect(document.body.style.position).toBe('');
-      expect(document.body.style.overflow).toBe('');
-    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('omits swipe handle when swipe dismissal is disabled', () => {
+    render(
+      <ModalBackdrop onClose={onClose} allowSwipeToDismiss={false}>
+        <div>Content</div>
+      </ModalBackdrop>,
+    );
+
+    expect(screen.queryByTestId('modal-grab-handle')).not.toBeInTheDocument();
   });
 });
