@@ -5,6 +5,12 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+const CLOSE_LABEL = 'Đóng';
+const OVERLAY_CLASS_NAME =
+  'fixed inset-0 isolate z-50 bg-black/10 transition-opacity duration-150 data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 motion-reduce:transition-none supports-backdrop-filter:backdrop-blur-xs';
+const SHEET_CONTENT_CLASS_NAME =
+  'bg-popover text-popover-foreground fixed z-50 flex flex-col gap-4 bg-clip-padding text-sm shadow-lg transition-[opacity,transform] duration-200 ease-in-out data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 motion-reduce:transition-none data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=bottom]:data-[starting-style]:translate-y-[2.5rem] data-[side=bottom]:data-[ending-style]:translate-y-[2.5rem] data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:w-3/4 data-[side=left]:border-r data-[side=left]:data-[starting-style]:translate-x-[-2.5rem] data-[side=left]:data-[ending-style]:translate-x-[-2.5rem] data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:w-3/4 data-[side=right]:border-l data-[side=right]:data-[starting-style]:translate-x-[2.5rem] data-[side=right]:data-[ending-style]:translate-x-[2.5rem] data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b data-[side=top]:data-[starting-style]:translate-y-[-2.5rem] data-[side=top]:data-[ending-style]:translate-y-[-2.5rem] data-[side=left]:sm:max-w-sm data-[side=right]:sm:max-w-sm';
+
 function Sheet({ ...props }: Readonly<SheetPrimitive.Root.Props>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />;
 }
@@ -22,16 +28,7 @@ function SheetPortal({ ...props }: Readonly<SheetPrimitive.Portal.Props>) {
 }
 
 function SheetOverlay({ className, ...props }: Readonly<SheetPrimitive.Backdrop.Props>) {
-  return (
-    <SheetPrimitive.Backdrop
-      data-slot="sheet-overlay"
-      className={cn(
-        'fixed inset-0 z-50 bg-black/10 transition-opacity duration-150 data-ending-style:opacity-0 data-starting-style:opacity-0 supports-backdrop-filter:backdrop-blur-xs',
-        className,
-      )}
-      {...props}
-    />
-  );
+  return <SheetPrimitive.Backdrop data-slot="sheet-overlay" className={cn(OVERLAY_CLASS_NAME, className)} {...props} />;
 }
 
 function SheetContent({
@@ -50,20 +47,18 @@ function SheetContent({
       <SheetPrimitive.Popup
         data-slot="sheet-content"
         data-side={side}
-        className={cn(
-          'bg-popover text-popover-foreground fixed z-50 flex flex-col gap-4 bg-clip-padding text-sm shadow-lg transition duration-200 ease-in-out data-ending-style:opacity-0 data-starting-style:opacity-0 data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=bottom]:data-ending-style:translate-y-[2.5rem] data-[side=bottom]:data-starting-style:translate-y-[2.5rem] data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:w-3/4 data-[side=left]:border-r data-[side=left]:data-ending-style:translate-x-[-2.5rem] data-[side=left]:data-starting-style:translate-x-[-2.5rem] data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:w-3/4 data-[side=right]:border-l data-[side=right]:data-ending-style:translate-x-[2.5rem] data-[side=right]:data-starting-style:translate-x-[2.5rem] data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b data-[side=top]:data-ending-style:translate-y-[-2.5rem] data-[side=top]:data-starting-style:translate-y-[-2.5rem] data-[side=left]:sm:max-w-sm data-[side=right]:sm:max-w-sm',
-          className,
-        )}
+        className={cn(SHEET_CONTENT_CLASS_NAME, className)}
         {...props}
       >
         {children}
         {showCloseButton && (
           <SheetPrimitive.Close
             data-slot="sheet-close"
+            aria-label={CLOSE_LABEL}
             render={<Button variant="ghost" className="absolute top-3 right-3" size="icon-sm" />}
           >
             <XIcon />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{CLOSE_LABEL}</span>
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Popup>
@@ -99,4 +94,15 @@ function SheetDescription({ className, ...props }: Readonly<SheetPrimitive.Descr
   );
 }
 
-export { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger };
+export {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetOverlay,
+  SheetPortal,
+  SheetTitle,
+  SheetTrigger,
+};

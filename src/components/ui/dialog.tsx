@@ -7,6 +7,12 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+const CLOSE_LABEL = 'Đóng';
+const OVERLAY_CLASS_NAME =
+  'fixed inset-0 isolate z-50 bg-black/10 transition-opacity duration-150 data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 motion-reduce:transition-none supports-backdrop-filter:backdrop-blur-xs';
+const DIALOG_CONTENT_CLASS_NAME =
+  'bg-popover text-popover-foreground ring-foreground/10 fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl p-4 text-sm ring-1 outline-none transition-[opacity,transform] duration-150 data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 motion-reduce:transition-none sm:max-w-md';
+
 function Dialog({ ...props }: Readonly<DialogPrimitive.Root.Props>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
@@ -25,14 +31,7 @@ function DialogClose({ ...props }: Readonly<DialogPrimitive.Close.Props>) {
 
 function DialogOverlay({ className, ...props }: Readonly<DialogPrimitive.Backdrop.Props>) {
   return (
-    <DialogPrimitive.Backdrop
-      data-slot="dialog-overlay"
-      className={cn(
-        'data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0 fixed inset-0 isolate z-50 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs',
-        className,
-      )}
-      {...props}
-    />
+    <DialogPrimitive.Backdrop data-slot="dialog-overlay" className={cn(OVERLAY_CLASS_NAME, className)} {...props} />
   );
 }
 
@@ -49,22 +48,16 @@ function DialogContent({
   return (
     <DialogPortal>
       <DialogOverlay />
-      <DialogPrimitive.Popup
-        data-slot="dialog-content"
-        className={cn(
-          'bg-popover text-popover-foreground ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl p-4 text-sm ring-1 duration-100 outline-none sm:max-w-md',
-          className,
-        )}
-        {...props}
-      >
+      <DialogPrimitive.Popup data-slot="dialog-content" className={cn(DIALOG_CONTENT_CLASS_NAME, className)} {...props}>
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
+            aria-label={CLOSE_LABEL}
             render={<Button variant="ghost" className="absolute top-2 right-2" size="icon-sm" />}
           >
             <XIcon />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{CLOSE_LABEL}</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Popup>
@@ -94,7 +87,9 @@ function DialogFooter({
       {...props}
     >
       {children}
-      {showCloseButton && <DialogPrimitive.Close render={<Button variant="outline" />}>Close</DialogPrimitive.Close>}
+      {showCloseButton && (
+        <DialogPrimitive.Close render={<Button variant="outline" />}>{CLOSE_LABEL}</DialogPrimitive.Close>
+      )}
     </div>
   );
 }

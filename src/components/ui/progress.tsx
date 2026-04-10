@@ -7,7 +7,7 @@ function Progress({ className, children, value, ...props }: Readonly<ProgressPri
     <ProgressPrimitive.Root
       value={value}
       data-slot="progress"
-      className={cn('flex flex-wrap gap-3', className)}
+      className={cn('flex flex-wrap items-center gap-3', className)}
       {...props}
     >
       {children}
@@ -21,7 +21,7 @@ function Progress({ className, children, value, ...props }: Readonly<ProgressPri
 function ProgressTrack({ className, ...props }: Readonly<ProgressPrimitive.Track.Props>) {
   return (
     <ProgressPrimitive.Track
-      className={cn('bg-muted relative flex h-1 w-full items-center overflow-x-hidden rounded-full', className)}
+      className={cn('bg-muted relative flex h-2 w-full items-center overflow-hidden rounded-full', className)}
       data-slot="progress-track"
       {...props}
     />
@@ -32,7 +32,10 @@ function ProgressIndicator({ className, ...props }: Readonly<ProgressPrimitive.I
   return (
     <ProgressPrimitive.Indicator
       data-slot="progress-indicator"
-      className={cn('bg-primary h-full transition-all', className)}
+      className={cn(
+        'bg-primary h-full rounded-full transition-[width,transform] motion-reduce:transition-none',
+        className,
+      )}
       {...props}
     />
   );
@@ -40,14 +43,18 @@ function ProgressIndicator({ className, ...props }: Readonly<ProgressPrimitive.I
 
 function ProgressLabel({ className, ...props }: Readonly<ProgressPrimitive.Label.Props>) {
   return (
-    <ProgressPrimitive.Label className={cn('text-sm font-medium', className)} data-slot="progress-label" {...props} />
+    <ProgressPrimitive.Label
+      className={cn('text-sm leading-none font-medium', className)}
+      data-slot="progress-label"
+      {...props}
+    />
   );
 }
 
 function ProgressValue({ className, ...props }: Readonly<ProgressPrimitive.Value.Props>) {
   return (
     <ProgressPrimitive.Value
-      className={cn('text-muted-foreground ml-auto text-sm tabular-nums', className)}
+      className={cn('text-muted-foreground inline-flex items-center text-sm leading-none tabular-nums', className)}
       data-slot="progress-value"
       {...props}
     />
