@@ -38,15 +38,15 @@
 /* ── Utility Classes ── */
 
 .animate-fade-in {
-  animation: fadeIn 200ms ease-out both;
+  animation: fadeIn 200ms var(--ease-enter) both;
 }
 
 .animate-slide-up {
-  animation: slideUp 300ms ease-out both;
+  animation: slideUp 200ms var(--ease-enter) both;
 }
 
 .animate-scale-in {
-  animation: scaleIn 150ms ease-out both;
+  animation: scaleIn 200ms var(--ease-enter) both;
 }
 
 /* ── Stagger Delay Tiers (30ms per tier) ── */
@@ -74,7 +74,7 @@
 /* ── Dashboard Stagger (slideUp for tiered sections) ── */
 
 .dashboard-stagger {
-  animation: slideUp 300ms ease-out both;
+  animation: slideUp 200ms var(--ease-enter) both;
 }
 
 /* ── Reduced Motion ── */

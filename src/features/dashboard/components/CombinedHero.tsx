@@ -54,7 +54,7 @@ function NextActionStrip({ orchestration }: Readonly<{ orchestration: DashboardO
         <button
           type="button"
           onClick={action.onAction}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex min-h-11 items-center rounded-xl px-4 py-2 text-sm font-semibold"
+          className="interactive bg-primary text-primary-foreground hover:bg-primary/90 inline-flex min-h-11 items-center rounded-xl px-4 py-2 text-sm font-semibold"
           data-testid="dashboard-primary-action"
         >
           {action.label}

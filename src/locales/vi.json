@@ -1452,6 +1452,9 @@
       "targetLabel": "Mục tiêu",
       "goalReached": "mục tiêu đạt được"
     },
+    "a11y": {
+      "container": "Tổng quan hôm nay"
+    },
     "error": {
       "hero": "Không thể tải tổng quan",
       "energy": "Không thể tải năng lượng",

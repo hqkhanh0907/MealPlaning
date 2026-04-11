@@ -2,10 +2,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ErrorBoundary } from '../../../components/ErrorBoundary';
+import { useDashboardOrchestration } from '../hooks/useDashboardOrchestration';
 import { AiInsightCard } from './AiInsightCard';
+import { AiInsightCardSkeleton } from './AiInsightCardSkeleton';
 import { CombinedHero } from './CombinedHero';
 import { QuickActionsBar } from './QuickActionsBar';
 import { TodaysPlanCard } from './TodaysPlanCard';
+import { TodaysPlanCardSkeleton } from './TodaysPlanCardSkeleton';
 import { WeightQuickLog } from './WeightQuickLog';
 
 function useReducedMotion(): boolean {
@@ -32,10 +35,13 @@ function DashboardTabInner(): React.ReactElement {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
   const [weightQuickLogOpen, setWeightQuickLogOpen] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [lowerTiersVisible, setLowerTiersVisible] = useState(false);
+  const orchestration = useDashboardOrchestration();
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
+      setInitialLoading(false);
       setLowerTiersVisible(true);
     });
     return () => cancelAnimationFrame(id);
@@ -55,11 +61,15 @@ function DashboardTabInner(): React.ReactElement {
   const tierClassName = reducedMotion ? '' : 'dashboard-stagger';
 
   return (
-    <div className="flex flex-col gap-3 overflow-y-auto pb-6" data-testid="dashboard-tab">
+    <div
+      className="flex flex-col gap-3 overflow-y-auto pb-6"
+      data-testid="dashboard-tab"
+      aria-label={t('dashboard.a11y.container')}
+    >
       {/* Tier 1: CombinedHero — immediate */}
       <ErrorBoundary fallbackTitle={t('dashboard.error.hero')}>
         <div className={reducedMotion ? '' : 'animate-slide-up'} data-testid="dashboard-tier-1">
-          <CombinedHero />
+          <CombinedHero orchestration={orchestration} />
         </div>
       </ErrorBoundary>
 
@@ -70,8 +80,20 @@ function DashboardTabInner(): React.ReactElement {
           data-testid="dashboard-tier-2"
           style={staggerStyle(STAGGER_DELAY_TIER2)}
         >
-          <TodaysPlanCard />
-          <AiInsightCard />
+          {initialLoading ? (
+            <>
+              <TodaysPlanCardSkeleton isLoading={true} />
+              {orchestration.showInsights && <AiInsightCardSkeleton isLoading={true} />}
+            </>
+          ) : (
+            <>
+              <TodaysPlanCard
+                suppressPrimaryCtas={orchestration.suppressPlanPrimaryActions}
+                allowMealSlotActions={orchestration.allowMealSlotActions}
+              />
+              {orchestration.showInsights && <AiInsightCard suppressAction={orchestration.suppressInsightAction} />}
+            </>
+          )}
         </div>
       </ErrorBoundary>
 
@@ -79,10 +101,15 @@ function DashboardTabInner(): React.ReactElement {
       {lowerTiersVisible ? (
         <ErrorBoundary fallbackTitle={t('dashboard.error.quickActions')}>
           <div
-            className={`flex flex-col gap-3 ${reducedMotion ? '' : 'animate-scale-in'}`}
+            className={`flex flex-col gap-3 ${tierClassName}`}
             data-testid="dashboard-tier-3"
+            style={staggerStyle(STAGGER_DELAY_TIER2 * 2)}
           >
-            <QuickActionsBar onLogWeight={handleOpenWeightLog} />
+            {orchestration.showQuickActions ? (
+              <QuickActionsBar onLogWeight={handleOpenWeightLog} />
+            ) : (
+              <div className="min-h-[56px]" data-testid="dashboard-tier-3-empty" aria-hidden="true" />
+            )}
           </div>
         </ErrorBoundary>
       ) : (

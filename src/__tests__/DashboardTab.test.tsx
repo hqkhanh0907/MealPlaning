@@ -12,8 +12,9 @@ vi.mock('react-i18next', () => ({
 
 /* ============ child component mocks ============ */
 vi.mock('../features/dashboard/components/CombinedHero', () => ({
-  CombinedHero: () => (
+  CombinedHero: ({ orchestration }: { orchestration?: { heroMode?: string } }) => (
     <div data-testid="combined-hero">
+      <div data-testid="combined-hero-mode">{orchestration?.heroMode ?? 'none'}</div>
       <div data-testid="nutrition-hero">NutritionSection</div>
       <div data-testid="weekly-snapshot">WeeklyStatsRow</div>
     </div>
@@ -21,14 +22,58 @@ vi.mock('../features/dashboard/components/CombinedHero', () => ({
 }));
 
 vi.mock('../features/dashboard/components/TodaysPlanCard', () => ({
-  TodaysPlanCard: () => <div data-testid="todays-plan-card">TodaysPlanCard</div>,
+  TodaysPlanCard: ({
+    suppressPrimaryCtas,
+    allowMealSlotActions,
+  }: {
+    suppressPrimaryCtas?: boolean;
+    allowMealSlotActions?: boolean;
+  }) => (
+    <div
+      data-testid="todays-plan-card"
+      data-suppress-primary={String(Boolean(suppressPrimaryCtas))}
+      data-allow-meal-actions={String(allowMealSlotActions ?? true)}
+    >
+      TodaysPlanCard
+    </div>
+  ),
 }));
 
 vi.mock('../features/dashboard/components/AiInsightCard', () => ({
-  AiInsightCard: () => <div data-testid="ai-insight-card">AiInsightCard</div>,
+  AiInsightCard: ({ suppressAction }: { suppressAction?: boolean }) => (
+    <div data-testid="ai-insight-card" data-suppress-action={String(Boolean(suppressAction))}>
+      AiInsightCard
+    </div>
+  ),
+}));
+
+vi.mock('../features/dashboard/components/TodaysPlanCardSkeleton', () => ({
+  TodaysPlanCardSkeleton: ({ isLoading }: { isLoading: boolean }) => (
+    <div data-testid="todays-plan-card-skeleton" data-loading={String(isLoading)}>
+      PlanSkeleton
+    </div>
+  ),
+}));
+
+vi.mock('../features/dashboard/components/AiInsightCardSkeleton', () => ({
+  AiInsightCardSkeleton: ({ isLoading }: { isLoading: boolean }) => (
+    <div data-testid="ai-insight-card-skeleton" data-loading={String(isLoading)}>
+      InsightSkeleton
+    </div>
+  ),
 }));
 
 let capturedQuickActionsOnLogWeight: (() => void) | undefined;
+let orchestrationState = {
+  heroMode: 'passive',
+  heroContract: { copy: { title: 'review' } },
+  showInsights: true,
+  suppressInsightAction: false,
+  showQuickActions: true,
+  suppressPlanPrimaryActions: false,
+  allowMealSlotActions: true,
+};
+
 vi.mock('../features/dashboard/components/QuickActionsBar', () => ({
   QuickActionsBar: ({ onLogWeight }: { onLogWeight?: () => void }) => {
     capturedQuickActionsOnLogWeight = onLogWeight;
@@ -65,6 +110,10 @@ vi.mock('../components/ErrorBoundary', () => ({
   },
 }));
 
+vi.mock('../features/dashboard/hooks/useDashboardOrchestration', () => ({
+  useDashboardOrchestration: () => orchestrationState,
+}));
+
 /* ============ import component under test ============ */
 import { DashboardTab } from '../features/dashboard/components/DashboardTab';
 
@@ -99,6 +148,15 @@ beforeEach(() => {
   vi.clearAllMocks();
   capturedQuickActionsOnLogWeight = undefined;
   capturedWeightQuickLogOnClose = undefined;
+  orchestrationState = {
+    heroMode: 'passive',
+    heroContract: { copy: { title: 'review' } },
+    showInsights: true,
+    suppressInsightAction: false,
+    showQuickActions: true,
+    suppressPlanPrimaryActions: false,
+    allowMealSlotActions: true,
+  };
   Object.defineProperty(globalThis, 'matchMedia', {
     writable: true,
     value: createMatchMediaMock(false),
@@ -135,6 +193,7 @@ describe('DashboardTab', () => {
       renderDashboard();
       expect(screen.getByTestId('dashboard-tier-1')).toBeInTheDocument();
       expect(screen.getByTestId('combined-hero')).toBeInTheDocument();
+      expect(screen.getByTestId('combined-hero-mode')).toHaveTextContent('passive');
       expect(screen.getByTestId('nutrition-hero')).toBeInTheDocument();
       expect(screen.getByTestId('weekly-snapshot')).toBeInTheDocument();
     });
@@ -143,7 +202,9 @@ describe('DashboardTab', () => {
       renderDashboard();
       expect(screen.getByTestId('dashboard-tier-2')).toBeInTheDocument();
       expect(screen.getByTestId('todays-plan-card')).toBeInTheDocument();
+      expect(screen.getByTestId('todays-plan-card')).toHaveAttribute('data-suppress-primary', 'false');
       expect(screen.getByTestId('ai-insight-card')).toBeInTheDocument();
+      expect(screen.getByTestId('ai-insight-card')).toHaveAttribute('data-suppress-action', 'false');
     });
 
     it('renders Tier 3: QuickActionsBar after lazy load', () => {
@@ -321,6 +382,129 @@ describe('DashboardTab', () => {
         writable: true,
         value: createMatchMediaMock(false),
       });
+    });
+  });
+
+  describe('orchestration behavior', () => {
+    it('suppresses lower-priority actions when orchestration blocks the dashboard', () => {
+      orchestrationState = {
+        heroMode: 'blocking',
+        heroContract: { copy: { title: 'setup' } },
+        showInsights: false,
+        suppressInsightAction: true,
+        showQuickActions: false,
+        suppressPlanPrimaryActions: true,
+        allowMealSlotActions: false,
+      };
+
+      renderDashboard();
+
+      expect(screen.getByTestId('combined-hero-mode')).toHaveTextContent('blocking');
+      expect(screen.getByTestId('todays-plan-card')).toHaveAttribute('data-suppress-primary', 'true');
+      expect(screen.getByTestId('todays-plan-card')).toHaveAttribute('data-allow-meal-actions', 'false');
+      expect(screen.queryByTestId('ai-insight-card')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('quick-actions-bar')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dashboard-tier-3')).toBeInTheDocument();
+      expect(screen.getByTestId('dashboard-tier-3-empty')).toBeInTheDocument();
+    });
+  });
+
+  describe('skeleton → content transition (AC3)', () => {
+    it('shows skeletons before RAF and content after', () => {
+      let result!: ReturnType<typeof render>;
+      act(() => {
+        result = render(<DashboardTab />);
+      });
+
+      // Before RAF: skeletons visible
+      expect(result.container.querySelector('[data-testid="todays-plan-card-skeleton"]')).toBeInTheDocument();
+      expect(screen.queryByTestId('todays-plan-card')).not.toBeInTheDocument();
+
+      // After RAF: content replaces skeletons
+      flushRaf();
+      expect(screen.queryByTestId('todays-plan-card-skeleton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('todays-plan-card')).toBeInTheDocument();
+    });
+
+    it('shows AiInsightCardSkeleton when insights enabled', () => {
+      orchestrationState = { ...orchestrationState, showInsights: true };
+      let result!: ReturnType<typeof render>;
+      act(() => {
+        result = render(<DashboardTab />);
+      });
+
+      expect(result.container.querySelector('[data-testid="ai-insight-card-skeleton"]')).toBeInTheDocument();
+
+      flushRaf();
+      expect(screen.queryByTestId('ai-insight-card-skeleton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ai-insight-card')).toBeInTheDocument();
+    });
+
+    it('hides AiInsightCardSkeleton when insights disabled', () => {
+      orchestrationState = { ...orchestrationState, showInsights: false };
+      let result!: ReturnType<typeof render>;
+      act(() => {
+        result = render(<DashboardTab />);
+      });
+
+      expect(result.container.querySelector('[data-testid="ai-insight-card-skeleton"]')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('tier animation classes', () => {
+    it('Tier 1 uses animate-slide-up', () => {
+      renderDashboard();
+      const tier1 = screen.getByTestId('dashboard-tier-1');
+      expect(tier1.className).toContain('animate-slide-up');
+    });
+
+    it('Tier 2 uses dashboard-stagger', () => {
+      renderDashboard();
+      const tier2 = screen.getByTestId('dashboard-tier-2');
+      expect(tier2.className).toContain('dashboard-stagger');
+    });
+
+    it('Tier 3 uses dashboard-stagger with 60ms delay', () => {
+      renderDashboard();
+      const tier3 = screen.getByTestId('dashboard-tier-3');
+      expect(tier3.className).toContain('dashboard-stagger');
+      expect(tier3.style.animationDelay).toBe('60ms');
+    });
+  });
+
+  describe('reduced motion removes all animation classes', () => {
+    it('no animation classes on any tier when reduced motion enabled', () => {
+      Object.defineProperty(globalThis, 'matchMedia', {
+        writable: true,
+        value: createMatchMediaMock(true),
+      });
+
+      renderDashboard();
+      const tier1 = screen.getByTestId('dashboard-tier-1');
+      const tier2 = screen.getByTestId('dashboard-tier-2');
+      const tier3 = screen.getByTestId('dashboard-tier-3');
+
+      expect(tier1.className).not.toContain('animate-slide-up');
+      expect(tier2.className).not.toContain('dashboard-stagger');
+      expect(tier3.className).not.toContain('dashboard-stagger');
+      expect(tier3.style.animationDelay).toBe('');
+    });
+  });
+
+  describe('accessibility (AC6, AC11)', () => {
+    it('dashboard container has aria-label', () => {
+      renderDashboard();
+      expect(screen.getByTestId('dashboard-tab')).toHaveAttribute('aria-label', 'dashboard.a11y.container');
+    });
+
+    it('focus order follows DOM: hero → plan → insight → quickActions', () => {
+      renderDashboard();
+      const tab = screen.getByTestId('dashboard-tab');
+      const tiers = tab.querySelectorAll('[data-testid^="dashboard-tier-"]');
+      expect(tiers.length).toBe(3);
+      expect(tiers[0].getAttribute('data-testid')).toBe('dashboard-tier-1');
+      expect(tiers[1].getAttribute('data-testid')).toBe('dashboard-tier-2');
+      expect(tiers[2].getAttribute('data-testid')).toBe('dashboard-tier-3');
     });
   });
 });

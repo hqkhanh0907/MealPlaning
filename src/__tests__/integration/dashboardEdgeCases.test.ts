@@ -886,3 +886,87 @@ describe('Edge Case 6: Midnight rollover', () => {
     consoleSpy.mockRestore();
   });
 });
+
+/* ================================================================== */
+/* P3-08: Skeleton→Content Transition + Animation + Hero Modes        */
+/* ================================================================== */
+describe('P3-08: Dashboard Orchestration Integration', () => {
+  it('shows skeletons before RAF then transitions to real content after', () => {
+    const { container } = render(React.createElement(DashboardTab));
+
+    // Before RAF: skeleton visible in Tier 2
+    expect(container.querySelector('[data-testid="todays-plan-card-skeleton"]')).toBeInTheDocument();
+
+    // After RAF: skeleton gone, real card visible
+    flushRaf();
+    expect(container.querySelector('[data-testid="todays-plan-card-skeleton"]')).not.toBeInTheDocument();
+    expect(screen.getByTestId('todays-plan-card')).toBeInTheDocument();
+  });
+
+  it('Tier 1 has animate-slide-up, Tier 2 and Tier 3 have dashboard-stagger', () => {
+    render(React.createElement(DashboardTab));
+    flushRaf();
+
+    const tier1 = screen.getByTestId('dashboard-tier-1');
+    const tier2 = screen.getByTestId('dashboard-tier-2');
+    const tier3 = screen.getByTestId('dashboard-tier-3');
+
+    expect(tier1.className).toContain('animate-slide-up');
+    expect(tier2.className).toContain('dashboard-stagger');
+    expect(tier3.className).toContain('dashboard-stagger');
+  });
+
+  it('Tier 2 stagger delay is 30ms, Tier 3 stagger delay is 60ms', () => {
+    render(React.createElement(DashboardTab));
+    flushRaf();
+
+    const tier2 = screen.getByTestId('dashboard-tier-2');
+    const tier3 = screen.getByTestId('dashboard-tier-3');
+
+    expect(tier2.style.animationDelay).toBe('30ms');
+    expect(tier3.style.animationDelay).toBe('60ms');
+  });
+
+  it('reduced motion disables all animation classes and delays', () => {
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      value: createMatchMediaMock(true),
+    });
+
+    render(React.createElement(DashboardTab));
+    flushRaf();
+
+    const tier1 = screen.getByTestId('dashboard-tier-1');
+    const tier2 = screen.getByTestId('dashboard-tier-2');
+    const tier3 = screen.getByTestId('dashboard-tier-3');
+
+    expect(tier1.className).not.toContain('animate-slide-up');
+    expect(tier2.className).not.toContain('dashboard-stagger');
+    expect(tier3.className).not.toContain('dashboard-stagger');
+    expect(tier2.style.animationDelay).toBe('');
+    expect(tier3.style.animationDelay).toBe('');
+  });
+
+  it('dashboard container has aria-label for accessibility', () => {
+    render(React.createElement(DashboardTab));
+    flushRaf();
+
+    expect(screen.getByTestId('dashboard-tab')).toHaveAttribute('aria-label');
+  });
+
+  it('DOM order is tier-1 then tier-2 then tier-3 for correct focus order', () => {
+    render(React.createElement(DashboardTab));
+    flushRaf();
+
+    const tier1 = screen.getByTestId('dashboard-tier-1');
+    const tier2 = screen.getByTestId('dashboard-tier-2');
+    const tier3 = screen.getByTestId('dashboard-tier-3');
+
+    const nodes = [tier1, tier2, tier3];
+    for (let i = 0; i < nodes.length - 1; i++) {
+      const position = nodes[i].compareDocumentPosition(nodes[i + 1]);
+      // Node.DOCUMENT_POSITION_FOLLOWING = 4
+      expect(position & 4).toBe(4);
+    }
+  });
+});
