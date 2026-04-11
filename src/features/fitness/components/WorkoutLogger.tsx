@@ -39,7 +39,7 @@ import { NextExercisePreview } from './NextExercisePreview';
 import { RestTimer } from './RestTimer';
 import { SetEditor } from './SetEditor';
 import { SwapExerciseSheet } from './SwapExerciseSheet';
-import { WorkoutSummaryCard } from './WorkoutSummaryCard';
+import { WorkoutCompletionCard } from './WorkoutCompletionCard';
 
 interface WorkoutLoggerProps {
   planDay?: {
@@ -452,6 +452,11 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
     onBack();
   }, [clearWorkoutDraft, onBack]);
 
+  const handleDiscard = () => {
+    clearWorkoutDraft();
+    onBack();
+  };
+
   const totalVolume = useMemo(
     /* v8 ignore start */
     () => loggedSets.reduce((sum, set) => sum + set.weightKg * (set.reps ?? 0), 0),
@@ -497,10 +502,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
     if (!showSummary) return [];
     const previousSets = useFitnessStore.getState().workoutSets ?? [];
     const exerciseMap = new Map<string, string>(currentExercises.map(m => [m.exercise.id, m.exercise.nameVi]));
-    return detectPRs(loggedSets, previousSets, exerciseMap).map(pr => ({
-      exerciseName: pr.exerciseName,
-      weight: pr.newWeight,
-    }));
+    return detectPRs(loggedSets, previousSets, exerciseMap);
   }, [showSummary, loggedSets, currentExercises]);
 
   if (showSummary) {
@@ -521,13 +523,16 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
             />
           </div>
         )}
-        <WorkoutSummaryCard
-          durationSeconds={elapsedRef.current}
-          totalVolume={totalVolume}
-          setsCompleted={loggedSets.length}
+        <WorkoutCompletionCard
+          stats={{
+            duration: Math.floor(elapsedRef.current / 60),
+            totalVolume,
+            totalSets: loggedSets.length,
+            exerciseCount: new Set(loggedSets.map(s => s.exerciseId)).size,
+          }}
           personalRecords={detectedPRs}
           onSave={handleSave}
-          isSaving={isSaving}
+          onDiscard={handleDiscard}
         />
       </>
     );

@@ -57,16 +57,79 @@ vi.mock('../store/fitnessStore', () => ({
 }));
 
 vi.mock('../features/fitness/components/RestTimer', () => ({
-  RestTimer: vi.fn((props: { onComplete: () => void; onSkip: () => void }) => (
-    <div data-testid="rest-timer">
-      <button type="button" onClick={props.onSkip}>
-        Skip
-      </button>
-      <button type="button" onClick={props.onComplete}>
-        Done
-      </button>
-    </div>
-  )),
+  RestTimer: vi.fn(
+    (props: {
+      durationSeconds: number;
+      onComplete: () => void;
+      onSkip: () => void;
+      onAddTime?: (seconds: number) => void;
+      isVisible?: boolean;
+    }) =>
+      props.isVisible === false ? null : (
+        <div data-testid="rest-timer" role="alertdialog">
+          <span data-testid="timer-display">{props.durationSeconds}</span>
+          <button type="button" data-testid="pause-button" onClick={() => {}}>
+            Pause
+          </button>
+          <button type="button" data-testid="add-time-button" onClick={() => props.onAddTime?.(30)}>
+            +30s
+          </button>
+          <button type="button" data-testid="skip-button" onClick={props.onSkip}>
+            Skip
+          </button>
+          <button type="button" onClick={props.onComplete}>
+            Done
+          </button>
+        </div>
+      ),
+  ),
+}));
+
+vi.mock('../features/fitness/components/WorkoutCompletionCard', () => ({
+  WorkoutCompletionCard: vi.fn(
+    (
+      props: Readonly<{
+        stats: { duration: number; totalVolume: number; totalSets: number; exerciseCount: number };
+        personalRecords?: ReadonlyArray<{
+          exerciseId: string;
+          exerciseName: string;
+          newWeight: number;
+          previousWeight: number;
+          reps: number;
+          improvement: number;
+        }>;
+        streakMilestone?: number;
+        sessionMilestone?: number;
+        isFirstWorkout?: boolean;
+        onSave: () => void;
+        onDiscard: () => void;
+      }>,
+    ) => (
+      <div data-testid="workout-completion-card">
+        <span data-testid="stat-duration">{props.stats.duration}m</span>
+        <span data-testid="stat-volume">{props.stats.totalVolume}kg</span>
+        <span data-testid="stat-sets">{props.stats.totalSets}</span>
+        <span data-testid="stat-exercises">{props.stats.exerciseCount}</span>
+        {props.personalRecords?.map(pr => (
+          <span key={`${pr.exerciseId}-${pr.reps}`} data-testid="pr-item">
+            {pr.exerciseName} +{pr.improvement}kg
+          </span>
+        ))}
+        {props.streakMilestone != null && props.streakMilestone > 0 && (
+          <span data-testid="streak-milestone">{props.streakMilestone}</span>
+        )}
+        {props.sessionMilestone != null && props.sessionMilestone > 0 && (
+          <span data-testid="session-milestone">{props.sessionMilestone}</span>
+        )}
+        <button type="button" data-testid="btn-save-workout" onClick={props.onSave}>
+          Save
+        </button>
+        <button type="button" data-testid="btn-discard-workout" onClick={props.onDiscard}>
+          Discard
+        </button>
+      </div>
+    ),
+  ),
 }));
 
 vi.mock('../features/fitness/components/ExerciseSelector', () => ({
@@ -282,7 +345,7 @@ describe('WorkoutLogger', () => {
       });
     }
     fireEvent.click(screen.getByTestId('confirm-set-btn'));
-    fireEvent.click(screen.getByText('Skip'));
+    fireEvent.click(screen.getByTestId('skip-button'));
   }
 
   /** Navigate to the next exercise using the next-exercise-card. */
@@ -397,7 +460,7 @@ describe('WorkoutLogger', () => {
     fireEvent.click(screen.getByTestId('confirm-set-btn'));
     expect(screen.getByTestId('rest-timer')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Skip'));
+    fireEvent.click(screen.getByTestId('skip-button'));
     expect(screen.queryByTestId('rest-timer')).not.toBeInTheDocument();
   });
 
@@ -446,8 +509,7 @@ describe('WorkoutLogger', () => {
   it('shows summary on finish', () => {
     render(<WorkoutLogger {...defaultProps} />);
     fireEvent.click(screen.getByTestId('finish-button'));
-    expect(screen.getByTestId('workout-summary-card')).toBeInTheDocument();
-    expect(screen.getByText('Tổng kết buổi tập')).toBeInTheDocument();
+    expect(screen.getByTestId('workout-completion-card')).toBeInTheDocument();
   });
 
   it('shows correct duration and volume in summary', () => {
@@ -462,11 +524,9 @@ describe('WorkoutLogger', () => {
 
     fireEvent.click(screen.getByTestId('finish-button'));
 
-    const summary = screen.getByTestId('workout-summary-card');
-    expect(summary).toBeInTheDocument();
-    expect(summary).toHaveTextContent('1,000 kg');
-    expect(summary).toHaveTextContent('2');
-    expect(summary).toHaveTextContent('01:05');
+    expect(screen.getByTestId('stat-duration')).toHaveTextContent('1m');
+    expect(screen.getByTestId('stat-volume')).toHaveTextContent('1000kg');
+    expect(screen.getByTestId('stat-sets')).toHaveTextContent('2');
   });
 
   it('calls onComplete and stores workout on save', async () => {
@@ -476,7 +536,7 @@ describe('WorkoutLogger', () => {
     logSetAndDismissRest('80', '5');
     fireEvent.click(screen.getByTestId('finish-button'));
     await act(async () => {
-      fireEvent.click(screen.getByTestId('save-workout-button'));
+      fireEvent.click(screen.getByTestId('btn-save-workout'));
     });
 
     expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
@@ -606,7 +666,7 @@ describe('WorkoutLogger', () => {
 
     fireEvent.click(screen.getByTestId('finish-button'));
     await act(async () => {
-      fireEvent.click(screen.getByTestId('save-workout-button'));
+      fireEvent.click(screen.getByTestId('btn-save-workout'));
     });
 
     expect(onComplete).toHaveBeenCalledWith();
@@ -636,7 +696,7 @@ describe('WorkoutLogger', () => {
       target: { value: 'Leg Day Custom' },
     });
     await act(async () => {
-      fireEvent.click(screen.getByTestId('save-workout-button'));
+      fireEvent.click(screen.getByTestId('btn-save-workout'));
     });
 
     expect(onComplete).toHaveBeenCalledWith();
@@ -710,7 +770,7 @@ describe('WorkoutLogger', () => {
 
     fireEvent.click(screen.getByTestId('finish-button'));
     await act(async () => {
-      fireEvent.click(screen.getByTestId('save-workout-button'));
+      fireEvent.click(screen.getByTestId('btn-save-workout'));
     });
 
     expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
@@ -831,10 +891,10 @@ describe('WorkoutLogger', () => {
     render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
 
     fireEvent.click(screen.getByTestId('confirm-set-btn'));
-    fireEvent.click(screen.getByText('Skip'));
+    fireEvent.click(screen.getByTestId('skip-button'));
     fireEvent.click(screen.getByTestId('finish-button'));
     await act(async () => {
-      fireEvent.click(screen.getByTestId('save-workout-button'));
+      fireEvent.click(screen.getByTestId('btn-save-workout'));
     });
 
     expect(mockClearWorkoutDraft).toHaveBeenCalledTimes(1);
@@ -852,7 +912,7 @@ describe('WorkoutLogger', () => {
 
     fireEvent.click(screen.getByTestId('finish-button'));
     await act(async () => {
-      fireEvent.click(screen.getByTestId('save-workout-button'));
+      fireEvent.click(screen.getByTestId('btn-save-workout'));
     });
 
     expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
@@ -1114,7 +1174,7 @@ describe('WorkoutLogger', () => {
     logSetAndDismissRest('80', '5');
     fireEvent.click(screen.getByTestId('finish-button'));
     await act(async () => {
-      fireEvent.click(screen.getByTestId('save-workout-button'));
+      fireEvent.click(screen.getByTestId('btn-save-workout'));
     });
 
     expect(mockSaveWorkoutAtomic).toHaveBeenCalledWith(
@@ -1133,7 +1193,7 @@ describe('WorkoutLogger', () => {
 
     fireEvent.click(screen.getByTestId('finish-button'));
     await act(async () => {
-      fireEvent.click(screen.getByTestId('save-workout-button'));
+      fireEvent.click(screen.getByTestId('btn-save-workout'));
     });
 
     const savedWorkout = mockSaveWorkoutAtomic.mock.calls[0][0] as Record<string, unknown>;
@@ -1599,14 +1659,14 @@ describe('WorkoutLogger', () => {
     fireEvent.click(screen.getByTestId('finish-button'));
 
     await act(async () => {
-      fireEvent.click(screen.getByTestId('save-workout-button'));
+      fireEvent.click(screen.getByTestId('btn-save-workout'));
     });
 
     expect(mockNotify.error).toHaveBeenCalledWith('Chưa lưu buổi tập được. Thử lại nhé!');
     expect(onComplete).not.toHaveBeenCalled();
   });
 
-  it('disables save button while saving', async () => {
+  it('prevents multiple save calls on rapid clicks', async () => {
     let resolvePromise: () => void;
     const savePromise = new Promise<void>(resolve => {
       resolvePromise = resolve;
@@ -1618,14 +1678,16 @@ describe('WorkoutLogger', () => {
     logSetAndDismissRest('60', '10');
     fireEvent.click(screen.getByTestId('finish-button'));
 
-    const saveButton = screen.getByTestId('save-workout-button');
-    expect(saveButton).not.toBeDisabled();
+    const saveButton = screen.getByTestId('btn-save-workout');
 
-    act(() => {
+    await act(async () => {
+      fireEvent.click(saveButton);
+    });
+    await act(async () => {
       fireEvent.click(saveButton);
     });
 
-    expect(screen.getByTestId('save-workout-button')).toBeDisabled();
+    expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
 
     await act(async () => {
       resolvePromise!();
@@ -1684,6 +1746,300 @@ describe('WorkoutLogger', () => {
       ]),
     };
     render(<WorkoutLogger {...defaultProps} planDay={planWithCustomRest} />);
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
+    expect(screen.getByTestId('rest-timer')).toBeInTheDocument();
+  });
+
+  /* ================================================================
+   * TC_COMP: WorkoutCompletionCard Integration
+   * ================================================================ */
+
+  it('TC_COMP_01: renders completion card with stat testids', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    logSetAndDismissRest('80', '10');
+    act(() => {
+      vi.advanceTimersByTime(120000);
+    });
+    fireEvent.click(screen.getByTestId('finish-button'));
+
+    expect(screen.getByTestId('workout-completion-card')).toBeInTheDocument();
+    expect(screen.getByTestId('stat-duration')).toHaveTextContent('2m');
+    expect(screen.getByTestId('stat-volume')).toHaveTextContent('800kg');
+    expect(screen.getByTestId('stat-sets')).toHaveTextContent('1');
+    expect(screen.getByTestId('stat-exercises')).toHaveTextContent('1');
+  });
+
+  it('TC_COMP_02: duration is computed in minutes (floor)', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    logSetAndDismissRest('50', '5');
+    act(() => {
+      vi.advanceTimersByTime(90000);
+    });
+    fireEvent.click(screen.getByTestId('finish-button'));
+    expect(screen.getByTestId('stat-duration')).toHaveTextContent('1m');
+  });
+
+  it('TC_COMP_03: exerciseCount counts unique exercises', () => {
+    const multiPlan = {
+      dayOfWeek: 1,
+      workoutType: 'Full Body',
+      exercises: makeExercisesJson('bench-press', 'squat'),
+    };
+    render(<WorkoutLogger {...defaultProps} planDay={multiPlan} />);
+    logSetAndDismissRest('80', '5');
+    navigateToNext();
+    logSetAndDismissRest('100', '5');
+    fireEvent.click(screen.getByTestId('finish-button'));
+    expect(screen.getByTestId('stat-exercises')).toHaveTextContent('2');
+  });
+
+  it('TC_COMP_04: zero duration when elapsed < 60s', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    logSetAndDismissRest('50', '5');
+    act(() => {
+      vi.advanceTimersByTime(30000);
+    });
+    fireEvent.click(screen.getByTestId('finish-button'));
+    expect(screen.getByTestId('stat-duration')).toHaveTextContent('0m');
+  });
+
+  it('TC_COMP_05: onDiscard calls clearWorkoutDraft and onBack', () => {
+    const onBack = vi.fn();
+    render(<WorkoutLogger {...defaultProps} onBack={onBack} planDay={planDayWithExercises} />);
+    logSetAndDismissRest('50', '5');
+    fireEvent.click(screen.getByTestId('finish-button'));
+    fireEvent.click(screen.getByTestId('btn-discard-workout'));
+
+    expect(mockClearWorkoutDraft).toHaveBeenCalled();
+    expect(onBack).toHaveBeenCalled();
+  });
+
+  it('TC_COMP_06: displays personal records when detected', () => {
+    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(() => ({
+      workoutDraft: null,
+      workoutSets: [{ exerciseId: 'bench-press', weightKg: 60, reps: 10, setNumber: 1, workoutId: 'old' }],
+    }));
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    logSetAndDismissRest('80', '10');
+    fireEvent.click(screen.getByTestId('finish-button'));
+
+    const prItems = screen.queryAllByTestId('pr-item');
+    expect(prItems.length).toBeGreaterThanOrEqual(1);
+    expect(prItems[0]).toHaveTextContent('Đẩy tạ nằm');
+  });
+
+  it('TC_COMP_07: no pr-item when no records beaten', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    logSetAndDismissRest('50', '5');
+    fireEvent.click(screen.getByTestId('finish-button'));
+    expect(screen.queryAllByTestId('pr-item')).toHaveLength(0);
+  });
+
+  it('TC_COMP_08: save button triggers handleSave', async () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    logSetAndDismissRest('60', '8');
+    fireEvent.click(screen.getByTestId('finish-button'));
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-save-workout'));
+    });
+    expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
+  });
+
+  it('TC_COMP_09: totalSets counts across multiple exercises', () => {
+    const multiPlan = {
+      dayOfWeek: 1,
+      workoutType: 'Full Body',
+      exercises: makeExercisesJson('bench-press', 'squat'),
+    };
+    render(<WorkoutLogger {...defaultProps} planDay={multiPlan} />);
+    logSetAndDismissRest('80', '5');
+    logSetAndDismissRest('80', '5');
+    navigateToNext();
+    logSetAndDismissRest('100', '6');
+    fireEvent.click(screen.getByTestId('finish-button'));
+    expect(screen.getByTestId('stat-sets')).toHaveTextContent('3');
+  });
+
+  /* ================================================================
+   * TC_REST: RestTimer Enhanced
+   * ================================================================ */
+
+  it('TC_REST_01: rest timer shows alertdialog role', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+  });
+
+  it('TC_REST_02: rest timer shows timer-display with duration', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
+    expect(screen.getByTestId('timer-display')).toBeInTheDocument();
+  });
+
+  it('TC_REST_03: skip-button dismisses rest timer', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
+    expect(screen.getByTestId('rest-timer')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('skip-button'));
+    expect(screen.queryByTestId('rest-timer')).not.toBeInTheDocument();
+  });
+
+  it('TC_REST_04: add-time-button is rendered', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
+    expect(screen.getByTestId('add-time-button')).toBeInTheDocument();
+  });
+
+  it('TC_REST_05: pause-button is rendered', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
+    expect(screen.getByTestId('pause-button')).toBeInTheDocument();
+  });
+
+  it('TC_REST_06: Done button completes rest timer', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    fireEvent.click(screen.getByTestId('confirm-set-btn'));
+    fireEvent.click(screen.getByText('Done'));
+    expect(screen.queryByTestId('rest-timer')).not.toBeInTheDocument();
+  });
+
+  /* ================================================================
+   * TC_FLOW: Full Workflow
+   * ================================================================ */
+
+  it('TC_FLOW_01: full flow - log sets, finish, save', async () => {
+    const onComplete = vi.fn();
+    render(<WorkoutLogger {...defaultProps} onComplete={onComplete} planDay={planDayWithExercises} />);
+    logSetAndDismissRest('80', '8');
+    logSetAndDismissRest('80', '8');
+    act(() => {
+      vi.advanceTimersByTime(300000);
+    });
+    fireEvent.click(screen.getByTestId('finish-button'));
+    expect(screen.getByTestId('stat-duration')).toHaveTextContent('5m');
+    expect(screen.getByTestId('stat-sets')).toHaveTextContent('2');
+    expect(screen.getByTestId('stat-volume')).toHaveTextContent('1280kg');
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-save-workout'));
+    });
+    expect(mockSaveWorkoutAtomic).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalled();
+  });
+
+  it('TC_FLOW_02: full flow - log, finish, discard', () => {
+    const onBack = vi.fn();
+    render(<WorkoutLogger {...defaultProps} onBack={onBack} planDay={planDayWithExercises} />);
+    logSetAndDismissRest('60', '10');
+    fireEvent.click(screen.getByTestId('finish-button'));
+    fireEvent.click(screen.getByTestId('btn-discard-workout'));
+    expect(mockClearWorkoutDraft).toHaveBeenCalled();
+    expect(onBack).toHaveBeenCalled();
+  });
+
+  it('TC_FLOW_03: multi-exercise flow with navigation', async () => {
+    const multiPlan = {
+      dayOfWeek: 1,
+      workoutType: 'Full Body',
+      exercises: makeExercisesJson('bench-press', 'squat'),
+    };
+    const onComplete = vi.fn();
+    render(<WorkoutLogger {...defaultProps} onComplete={onComplete} planDay={multiPlan} />);
+
+    logSetAndDismissRest('80', '8');
+    navigateToNext();
+    expect(screen.getByText('Gánh tạ')).toBeInTheDocument();
+
+    logSetAndDismissRest('120', '6');
+    fireEvent.click(screen.getByTestId('finish-button'));
+
+    expect(screen.getByTestId('stat-exercises')).toHaveTextContent('2');
+    expect(screen.getByTestId('stat-sets')).toHaveTextContent('2');
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('btn-save-workout'));
+    });
+    expect(onComplete).toHaveBeenCalled();
+  });
+
+  /* ================================================================
+   * TC_DRAFT_COMP: Draft Recovery with CompletionCard
+   * ================================================================ */
+
+  it('TC_DRAFT_COMP_01: restored draft shows correct stats on finish', () => {
+    (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(() => ({
+      workoutDraft: {
+        planDayId: undefined,
+        exercises: [
+          {
+            id: 'bench-press',
+            nameVi: 'Đẩy tạ nằm',
+            nameEn: 'Bench Press',
+            muscleGroup: 'chest',
+            secondaryMuscles: ['shoulders', 'arms'],
+            category: 'compound',
+            equipment: ['barbell'],
+            contraindicated: [],
+            exerciseType: 'strength',
+            defaultRepsMin: 8,
+            defaultRepsMax: 12,
+            isCustom: false,
+            updatedAt: '',
+          },
+        ],
+        sets: [
+          { exerciseId: 'bench-press', setNumber: 1, weightKg: 70, reps: 10 },
+          { exerciseId: 'bench-press', setNumber: 2, weightKg: 70, reps: 8 },
+        ],
+        elapsedSeconds: 180,
+      },
+    }));
+
+    render(<WorkoutLogger {...defaultProps} />);
+    fireEvent.click(screen.getByTestId('finish-button'));
+
+    expect(screen.getByTestId('stat-sets')).toHaveTextContent('2');
+    expect(screen.getByTestId('stat-volume')).toHaveTextContent('1260kg');
+  });
+
+  /* ================================================================
+   * TC_BACK: Back Button Behavior
+   * ================================================================ */
+
+  it('TC_BACK_01: back button calls onBack and clears draft', () => {
+    const onBack = vi.fn();
+    render(<WorkoutLogger {...defaultProps} onBack={onBack} planDay={planDayWithExercises} />);
+    fireEvent.click(screen.getByTestId('back-button'));
+    expect(mockClearWorkoutDraft).toHaveBeenCalled();
+    expect(onBack).toHaveBeenCalled();
+  });
+
+  it('TC_BACK_02: discard from completion also calls onBack', () => {
+    const onBack = vi.fn();
+    render(<WorkoutLogger {...defaultProps} onBack={onBack} planDay={planDayWithExercises} />);
+    logSetAndDismissRest('50', '5');
+    fireEvent.click(screen.getByTestId('finish-button'));
+    fireEvent.click(screen.getByTestId('btn-discard-workout'));
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  /* ================================================================
+   * TC_EWC: ExerciseWorkoutCard Regression
+   * ================================================================ */
+
+  it('TC_EWC_01: exercise-workout-card renders on mount', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    expect(screen.getByTestId('exercise-workout-card')).toBeInTheDocument();
+  });
+
+  it('TC_EWC_02: weight and reps inputs are present', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
+    const card = screen.getByTestId('exercise-workout-card');
+    expect(within(card).getByTestId('weight-input')).toBeInTheDocument();
+    expect(within(card).getByTestId('reps-input')).toBeInTheDocument();
+  });
+
+  it('TC_EWC_03: confirm-set-btn triggers rest timer', () => {
+    render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     fireEvent.click(screen.getByTestId('confirm-set-btn'));
     expect(screen.getByTestId('rest-timer')).toBeInTheDocument();
   });
