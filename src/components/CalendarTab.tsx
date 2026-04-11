@@ -1,17 +1,21 @@
-import { BarChart3, CalendarDays, UtensilsCrossed } from 'lucide-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { BarChart3, CalendarDays, Undo2, UtensilsCrossed } from 'lucide-react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { CloseButton } from '@/components/shared/CloseButton';
 
+import { MEAL_TYPE_ICONS } from '../data/constants';
 import { useIsDesktop } from '../hooks/useIsDesktop';
 import { CalendarSubTab, useUIStore } from '../store/uiStore';
 import { DayNutritionSummary, DayPlan, Dish, Ingredient, MealType } from '../types';
 import { parseLocalDate } from '../utils/helpers';
+import { getLocalizedField } from '../utils/localize';
 import { DateSelector } from './DateSelector';
 import { GroceryList } from './GroceryList';
 import { MealsSubTab } from './schedule/MealsSubTab';
 import { NutritionSubTab } from './schedule/NutritionSubTab';
+import { UNDO_TOAST_DURATION_MS, UndoToast } from './schedule/UndoToast';
 import { ModalBackdrop } from './shared/ModalBackdrop';
 
 export interface CalendarTabProps {
@@ -35,7 +39,9 @@ export interface CalendarTabProps {
   onSaveTemplate?: () => void;
   onOpenTemplateManager?: () => void;
   onQuickAdd?: (type: MealType, dishId: string) => void;
+  onClearSlot?: (type: MealType) => void;
   onUpdateServings?: (dishId: string, servings: number) => void;
+  restoreDayPlans?: (snapshot: DayPlan[]) => void;
   caloriesOut?: number;
 }
 
@@ -60,15 +66,91 @@ export const CalendarTab = React.memo(function CalendarTab({
   onSaveTemplate,
   onOpenTemplateManager,
   onQuickAdd,
+  onClearSlot,
   onUpdateServings,
+  restoreDayPlans,
   caloriesOut,
 }: CalendarTabProps) {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
+  const lang = i18n.language as 'vi' | 'en';
   const activeSubTab = useUIStore(s => s.activeCalendarSubTab);
   const setActiveSubTab = useUIStore(s => s.setCalendarSubTab);
   const [showGrocery, setShowGrocery] = useState(false);
   const isDesktop = useIsDesktop();
+
+  // --- Undo mechanism ---
+  const undoSnapshot = useRef<{ date: string; plan: DayPlan | null } | null>(null);
+  const [undoToast, setUndoToast] = useState<{ message: string; icon: LucideIcon } | null>(null);
+
+  const captureSnapshot = useCallback(
+    (date: string) => {
+      const plan = dayPlans.find(p => p.date === date) ?? null;
+      undoSnapshot.current = { date, plan: plan ? { ...plan } : null };
+    },
+    [dayPlans],
+  );
+
+  const handleUndo = useCallback(() => {
+    if (!undoSnapshot.current || !restoreDayPlans) return;
+    const { date, plan } = undoSnapshot.current;
+    if (plan) {
+      restoreDayPlans([plan]);
+    } else {
+      restoreDayPlans([{ date, breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] }]);
+    }
+    undoSnapshot.current = null;
+    setUndoToast(null);
+  }, [restoreDayPlans]);
+
+  const handleUndoDismiss = useCallback(() => {
+    undoSnapshot.current = null;
+    setUndoToast(null);
+  }, []);
+
+  const mealTypeLabels: Record<MealType, string> = useMemo(
+    () => ({
+      breakfast: t('calendar.morning'),
+      lunch: t('calendar.afternoon'),
+      dinner: t('calendar.evening'),
+    }),
+    [t],
+  );
+
+  const wrappedQuickAdd = useCallback(
+    (type: MealType, dishId: string) => {
+      captureSnapshot(selectedDate);
+      const dish = dishes.find(d => d.id === dishId);
+      const dishName = dish ? getLocalizedField(dish.name, lang) : dishId;
+      setUndoToast({
+        message: t('calendar.undoQuickAdd', { dishName, mealType: mealTypeLabels[type] }),
+        icon: MEAL_TYPE_ICONS[type],
+      });
+      onQuickAdd?.(type, dishId);
+    },
+    [captureSnapshot, selectedDate, dishes, lang, t, mealTypeLabels, onQuickAdd],
+  );
+
+  const wrappedClearSlot = useCallback(
+    (type: MealType) => {
+      captureSnapshot(selectedDate);
+      setUndoToast({
+        message: t('calendar.undoSwipeClear', { mealType: mealTypeLabels[type] }),
+        icon: Undo2,
+      });
+      onClearSlot?.(type);
+    },
+    [captureSnapshot, selectedDate, t, mealTypeLabels, onClearSlot],
+  );
+
+  const wrappedClearPlan = useCallback(() => {
+    captureSnapshot(selectedDate);
+    setUndoToast({
+      message: t('calendar.undoClearPlan'),
+      icon: Undo2,
+    });
+    onOpenClearPlan();
+  }, [captureSnapshot, selectedDate, t, onOpenClearPlan]);
 
   const handleOpenGrocery = useCallback(() => setShowGrocery(true), []);
   const handleCloseGrocery = useCallback(() => setShowGrocery(false), []);
@@ -162,15 +244,16 @@ export const CalendarTab = React.memo(function CalendarTab({
               onPlanMeal={onPlanMeal}
               onOpenTypeSelection={onOpenTypeSelection}
               onSuggestMealPlan={onSuggestMealPlan}
-              onOpenClearPlan={onOpenClearPlan}
+              onOpenClearPlan={wrappedClearPlan}
               onCopyPlan={onCopyPlan}
               onSaveTemplate={onSaveTemplate}
               onOpenTemplateManager={onOpenTemplateManager}
               onSwitchToNutrition={() => setActiveSubTab('nutrition')}
               recentDishIds={recentDishIds}
-              onQuickAdd={onQuickAdd}
+              onQuickAdd={onQuickAdd ? wrappedQuickAdd : undefined}
               onUpdateServings={onUpdateServings}
               onOpenGrocery={handleOpenGrocery}
+              onClearSlot={onClearSlot ? wrappedClearSlot : undefined}
             />
           )}
           {activeSubTab === 'nutrition' && (
@@ -200,15 +283,16 @@ export const CalendarTab = React.memo(function CalendarTab({
               onPlanMeal={onPlanMeal}
               onOpenTypeSelection={onOpenTypeSelection}
               onSuggestMealPlan={onSuggestMealPlan}
-              onOpenClearPlan={onOpenClearPlan}
+              onOpenClearPlan={wrappedClearPlan}
               onCopyPlan={onCopyPlan}
               onSaveTemplate={onSaveTemplate}
               onOpenTemplateManager={onOpenTemplateManager}
               onSwitchToNutrition={() => setActiveSubTab('nutrition')}
               recentDishIds={recentDishIds}
-              onQuickAdd={onQuickAdd}
+              onQuickAdd={onQuickAdd ? wrappedQuickAdd : undefined}
               onUpdateServings={onUpdateServings}
               onOpenGrocery={handleOpenGrocery}
+              onClearSlot={onClearSlot ? wrappedClearSlot : undefined}
             />
           </div>
           <div>
@@ -244,6 +328,16 @@ export const CalendarTab = React.memo(function CalendarTab({
             </div>
           </div>
         </ModalBackdrop>
+      )}
+
+      {undoToast && (
+        <UndoToast
+          message={undoToast.message}
+          icon={undoToast.icon}
+          onUndo={handleUndo}
+          onDismiss={handleUndoDismiss}
+          duration={UNDO_TOAST_DURATION_MS}
+        />
       )}
     </div>
   );
