@@ -92,6 +92,7 @@
   "header": {
     "appName": "Smart Meal Planner",
     "subtitle": "Dinh dưỡng chính xác cho {{weight}}kg",
+    "subtitleSetup": "Thiết lập hồ sơ sức khỏe để mở đủ ngữ cảnh dinh dưỡng",
     "themeLight": "Sáng",
     "themeDark": "Tối",
     "themeSystem": "Hệ thống",
@@ -127,6 +128,26 @@
     "selectDay": "Chọn ngày",
     "swipeHint": "Vuốt ngang hoặc dùng mũi tên để chuyển tuần",
     "mealsPlanned": "bữa",
+    "emptyDayTitle": "Ngày này chưa có kế hoạch ăn",
+    "emptyDayMissing": "bữa sáng, bữa trưa và bữa tối cho ngày đang chọn",
+    "emptyDayReason": "bạn chưa thêm món nào nên chưa có dữ liệu để theo dõi trong ngày này",
+    "emptyDayNextStep": "bắt đầu bằng một bữa hoặc dùng gợi ý AI để lấp đầy cả ngày",
+    "emptyDayAction": "Lên kế hoạch ngày này",
+    "partialDayTitle": "Ngày này vẫn còn bữa chưa lên kế hoạch",
+    "partialDayReason": "mới có {{filled}}/{{total}} bữa được điền",
+    "partialDayNextStep": "thêm các bữa còn thiếu để xem dinh dưỡng cả ngày chính xác hơn",
+    "partialDayAction": "Hoàn thiện bữa ăn",
+    "completeDayTitle": "Kế hoạch ăn trong ngày đã đủ",
+    "completeDayMissing": "không còn bữa nào bị bỏ trống",
+    "completeDayReason": "cả 3 bữa đã có món nên bạn có thể xem tổng dinh dưỡng trong ngày",
+    "completeDayNextStep": "mở tab Dinh dưỡng để kiểm tra calo, protein và cân bằng năng lượng",
+    "completeDayAction": "Xem dinh dưỡng",
+    "nutritionEmptyTitle": "Chưa có dữ liệu dinh dưỡng cho ngày này",
+    "nutritionEmptyMissing": "món ăn đã được thêm vào ít nhất một bữa",
+    "nutritionEmptyReason": "không có món nào trong ngày đang chọn nên chưa thể tổng hợp calo và protein",
+    "nutritionEmptyNextStep": "chuyển sang tab Bữa ăn và thêm ít nhất một món để bắt đầu theo dõi",
+    "nutritionEmptyAction": "Chuyển sang tab Bữa ăn",
+    "nutritionEmptyActionDisabled": "Mở tab Bữa ăn",
     "weekdays": {
       "mon": "T2",
       "tue": "T3",
@@ -146,6 +167,47 @@
     "goal": "Mục tiêu:",
     "planComplete": "Kế hoạch ngày hôm nay đã hoàn tất!",
     "missing": "Bạn còn thiếu..."
+  },
+  "shell": {
+    "currentLocation": "Bạn đang ở · {{surface}}",
+    "orientation": {
+      "calendar": {
+        "title": "Lịch trình hôm nay",
+        "description": "Theo dõi ngày đang chọn, xem kế hoạch hiện tại và chỉ mở bước tiếp theo khi bạn thật sự cần thêm món.",
+        "nextStep": "Chọn bữa cần lên kế hoạch hoặc bổ sung món cho ngày hiện tại",
+        "action": "Lên kế hoạch ngay"
+      },
+      "library": {
+        "title": "Thư viện món và nguyên liệu",
+        "description": "Quản lý dữ liệu nấu ăn tại một nơi để các kế hoạch và phân tích AI luôn dùng đúng nguồn tham chiếu.",
+        "nextStep": "Mở nhóm món ăn hoặc nguyên liệu bạn cần cập nhật tiếp theo",
+        "action": "Tập trung vào thư viện"
+      },
+      "ai": {
+        "title": "Phân tích món ăn bằng AI",
+        "description": "AI giúp nhận diện món, ước tính dinh dưỡng và rút ngắn thời gian nhập liệu trước khi bạn quyết định lưu.",
+        "nextStep": "Chụp hoặc tải ảnh món ăn để bắt đầu một lần phân tích mới",
+        "action": "Bắt đầu phân tích"
+      },
+      "fitness": {
+        "title": "Kế hoạch tập và ghi log",
+        "description": "Theo dõi kế hoạch tập, lịch sử và tiến độ trong cùng một shell để bạn biết đang ở đâu trước khi chỉnh sâu.",
+        "nextStep": "Mở phần kế hoạch hoặc lịch sử cần xử lý tiếp theo",
+        "action": "Đi tới điểm cần xử lý"
+      },
+      "dashboard": {
+        "title": "Tổng quan trạng thái hôm nay",
+        "description": "Xem nhanh các tín hiệu chính trước khi quyết định quay lại lịch ăn, tập luyện hay mục tiêu cần chỉnh.",
+        "nextStep": "Mở thẻ quan trọng nhất để kiểm tra hoặc xử lý tiếp",
+        "action": "Tập trung vào thẻ chính"
+      },
+      "settings": {
+        "title": "Cài đặt nền tảng",
+        "description": "Bạn đang tạm rời {{surface}} để cập nhật cấu hình ảnh hưởng tới nhiều bề mặt khác của ứng dụng.",
+        "nextStep": "Lưu thay đổi hoặc đóng cài đặt để quay lại {{surface}} với ngữ cảnh mới nhất",
+        "action": "Quay lại {{surface}}"
+      }
+    }
   },
   "macro": {
     "title": "Tỉ lệ dinh dưỡng",
@@ -326,6 +388,17 @@
     "analysisError": "Có lỗi xảy ra khi phân tích ảnh. Vui lòng thử lại.",
     "loadingHint": "AI đang phân tích hình ảnh...",
     "emptyHint": "Tải ảnh lên và nhấn \"Phân tích món ăn\" để bắt đầu phân tích.",
+    "emptyTitle": "Chưa có ảnh để AI phân tích",
+    "emptyMissing": "ảnh món ăn rõ nét",
+    "emptyReason": "AI chỉ tạo kết quả sau khi bạn chọn ảnh và bắt đầu phân tích",
+    "emptyNextStep": "chụp hoặc tải ảnh món ăn rồi nhấn \"Phân tích món ăn\"",
+    "exampleTitle": "Phù hợp nhất cho",
+    "exampleDescription": "Các món như phở, cơm, salad hoặc phần ăn có đủ nguyên liệu trong khung hình.",
+    "valueTitle": "Ước tính nhanh calo và protein trước khi lưu vào thư viện",
+    "valueDescription": "AI đọc ảnh món ăn để gợi ý thành phần, dinh dưỡng và giúp bạn quyết định có nên lưu món này hay không.",
+    "valueBadgeCalories": "Ước tính kcal",
+    "valueBadgeProtein": "Xem protein",
+    "valueBadgeExamples": "Phở · Cơm · Salad",
     "step1": "Chụp ảnh",
     "step2": "AI phân tích",
     "step3": "Lưu món",
@@ -571,6 +644,36 @@
     "saving": "Đang lưu...",
     "back": "Quay lại",
     "goalNotSet": "Chưa thiết lập mục tiêu",
+    "readiness": {
+      "configured": "Đã sẵn sàng",
+      "incomplete": "Chưa hoàn tất",
+      "needsAttention": "Cần chú ý"
+    },
+    "healthMissingAllSummary": "Thiếu hồ sơ cơ bản nên chưa thể tính BMR, TDEE và macro.",
+    "healthMissingAllNextStep": "Mở Hồ sơ sức khỏe và điền tên, ngày sinh, chiều cao, cân nặng cùng mức vận động.",
+    "healthIncompleteSummary": "Thiếu {{field}} nên bản xem trước dinh dưỡng chưa đáng tin cậy.",
+    "healthMissingDobReason": "Thêm ngày sinh để ứng dụng ước tính tuổi và BMR chính xác.",
+    "healthMissingMeasurementsReason": "Thêm số đo để ứng dụng tính BMR, TDEE và mục tiêu calo.",
+    "healthMissingActivityReason": "Chọn mức vận động để chuyển BMR thành tổng năng lượng tiêu hao mỗi ngày.",
+    "healthMissingIdentityReason": "Hoàn tất thông tin cơ bản để hồ sơ dễ nhận diện và kiểm tra lại sau này.",
+    "healthNeedsAttentionSummary": "{{field}} đang có giá trị chưa hợp lệ nên ứng dụng chưa thể tính đúng nhu cầu năng lượng.",
+    "healthNeedsAttentionNextStep": "Kiểm tra lại số liệu trong Hồ sơ sức khỏe trước khi dùng mục tiêu dinh dưỡng.",
+    "healthGoalConflictSummary": "Cân nặng hiện tại và mục tiêu đang mâu thuẫn nhau.",
+    "healthGoalConflictNextStep": "Mở Hồ sơ sức khỏe hoặc Mục tiêu cân nặng để cập nhật lại số liệu mới nhất.",
+    "healthConfiguredSummary": "Hồ sơ đã đủ dữ liệu để tính BMR, TDEE và gợi ý macro hằng ngày.",
+    "healthConfiguredNextStep": "Cập nhật lại khi cân nặng, chiều cao hoặc mức vận động thay đổi.",
+    "healthOptionalBodyFatNote": "Tỉ lệ mỡ là tùy chọn. Thêm sau nếu bạn muốn tinh chỉnh macro sát hơn.",
+    "goalMissingSummary": "Chưa có mục tiêu cân nặng nên app chỉ giữ mức duy trì mặc định.",
+    "goalMissingNextStep": "Mở Mục tiêu cân nặng để chọn giảm cân, duy trì hoặc tăng cân.",
+    "goalNeedsAttentionSummary": "Mục tiêu hiện tại không còn khớp với cân nặng đang lưu.",
+    "goalNeedsAttentionNextStep": "Kiểm tra lại cân nặng hiện tại hoặc cân nặng mục tiêu để tránh lệch hướng theo dõi.",
+    "goalConfiguredSummary": "Đang theo mục tiêu {{goal}} với tóm tắt sẵn sàng cho tính toán calo.",
+    "goalConfiguredNextStep": "Chỉnh lại khi bạn đổi giai đoạn hoặc muốn cập nhật tốc độ thay đổi.",
+    "trainingMissingSummary": "Chưa có hồ sơ tập luyện nên kế hoạch tập chưa thể cá nhân hóa.",
+    "trainingMissingNextStep": "Mở tab Tập luyện và hoàn tất thiết lập ban đầu.",
+    "trainingNeedsAttentionSummary": "Hồ sơ tập luyện còn thiếu dữ liệu cốt lõi như số buổi hoặc thời lượng.",
+    "trainingConfiguredSummary": "{{days}} ngày/tuần • {{minutes}} phút/buổi đã sẵn sàng để cá nhân hóa kế hoạch tập.",
+    "trainingConfiguredNextStep": "Quay lại tab Tập luyện nếu bạn muốn đổi lịch hoặc mức độ tải.",
     "trainingProfileEditHint": "Để thay đổi hồ sơ tập luyện, vui lòng quay lại tab Tập luyện và chạy lại thiết lập ban đầu.",
     "ariaLabel": "Cài đặt",
     "sections": {
@@ -582,7 +685,12 @@
   "filter": {
     "button": "Lọc",
     "sortTitle": "Sắp xếp",
+    "sheetTitle": "Sắp xếp & lọc danh sách này",
+    "sheetMissing": "một thứ tự hiển thị rõ ràng hoặc bộ lọc nhanh phù hợp",
+    "sheetReason": "các lựa chọn bên dưới chỉ áp dụng cho danh sách bạn đang xem",
+    "sheetNextStep": "chọn bộ lọc cần dùng rồi nhấn Áp dụng, hoặc Đặt lại để quay về mặc định",
     "filterTitle": "Bộ lọc nhanh",
+    "quickFiltersTitle": "Bộ lọc nhanh",
     "lessThan300": "< 300 kcal",
     "lessThan500": "< 500 kcal",
     "highProtein": "Protein cao (≥20g)",
@@ -650,6 +758,33 @@
     "nutritionTab": "Dinh dưỡng",
     "quickNutrition": "Dinh dưỡng nhanh",
     "switchToMeals": "Chuyển sang tab Bữa ăn để bắt đầu"
+  },
+  "library": {
+    "dishes": {
+      "emptyTitle": "Thư viện món ăn đang trống",
+      "emptyMissing": "món ăn đã lưu",
+      "emptyReason": "bạn chưa tạo món nào để tái sử dụng trong lịch ăn",
+      "emptyNextStep": "tạo món đầu tiên để lên kế hoạch nhanh hơn cho các ngày sau",
+      "emptyAction": "Tạo món ăn",
+      "noResultsTitle": "Không có món khớp tìm kiếm hiện tại",
+      "noResultsMissingSearch": "món ăn khớp với \"{{query}}\"",
+      "noResultsMissingFilter": "món ăn khớp bộ lọc đang bật",
+      "noResultsReason": "từ khóa hoặc bộ lọc hiện tại đang thu hẹp kết quả quá mức",
+      "noResultsNextStep": "xóa tìm kiếm hoặc bỏ lọc để xem lại toàn bộ thư viện",
+      "noResultsAction": "Xóa tìm kiếm"
+    },
+    "ingredients": {
+      "emptyTitle": "Thư viện nguyên liệu đang trống",
+      "emptyMissing": "nguyên liệu đã lưu",
+      "emptyReason": "bạn chưa thêm nguyên liệu nền để tạo món ăn",
+      "emptyNextStep": "thêm nguyên liệu đầu tiên để món ăn mới có dữ liệu dinh dưỡng",
+      "emptyAction": "Thêm nguyên liệu đầu tiên",
+      "noResultsTitle": "Không có nguyên liệu khớp từ khóa này",
+      "noResultsMissing": "nguyên liệu khớp với \"{{query}}\"",
+      "noResultsReason": "từ khóa hiện tại không khớp với nguyên liệu nào trong thư viện",
+      "noResultsNextStep": "xóa tìm kiếm để xem lại toàn bộ nguyên liệu đã lưu",
+      "noResultsAction": "Xóa tìm kiếm"
+    }
   },
   "recentDishes": {
     "title": "Món gần đây"
@@ -862,6 +997,11 @@
     "plan": {
       "tab": "Kế hoạch",
       "noPlan": "Chưa có kế hoạch tập luyện",
+      "autoReadyTitle": "Chưa có lịch tập cho tuần này",
+      "autoReadyMissing": "kế hoạch tập luyện đang hoạt động",
+      "autoReadyReason": "không có plan nào để hệ thống gợi ý buổi tập, lịch nghỉ và tiến trình",
+      "autoReadyNextStep": "tạo kế hoạch để biết hôm nay nên tập gì và theo dõi tiến độ mỗi ngày",
+      "autoReadyValue": "Sau khi tạo plan, tab này sẽ hiển thị lịch tuần, năng lượng hôm nay và điểm bắt đầu cho từng buổi tập.",
       "createPlan": "Tạo kế hoạch",
       "todayWorkout": "Buổi tập hôm nay",
       "tomorrow": "Ngày mai",
@@ -883,9 +1023,15 @@
       "createNewCycle": "Tạo chu kỳ mới",
       "generating": "Đang tạo...",
       "planCreated": "Kế hoạch tập luyện đã được tạo thành công!",
+      "manualPlanName": "Kế hoạch thủ công",
       "planError": "Không thể tạo kế hoạch. Vui lòng thử lại.",
       "manualEmpty": "Bạn đã chọn tự lên kế hoạch",
       "manualEmptyDesc": "Hãy bắt đầu bằng cách tạo buổi tập đầu tiên cho tuần này.",
+      "manualReadyTitle": "Sẵn sàng tự xếp lịch tập",
+      "manualReadyMissing": "buổi tập đầu tiên trong tuần",
+      "manualReadyReason": "bạn đã chọn chế độ thủ công nên hệ thống đang chờ bạn quyết định lịch tập",
+      "manualReadyNextStep": "tạo buổi đầu tiên để mở lịch tuần và tiếp tục thêm các ngày còn lại",
+      "manualReadyValue": "Khi có buổi đầu tiên, bạn sẽ quản lý được ngày tập, ngày nghỉ và lịch sử từng session ngay trong tab này.",
       "createFirstWorkout": "Tạo buổi tập đầu tiên",
       "setsLabel": "hiệp",
       "repsLabel": "lần",
@@ -897,6 +1043,11 @@
       "addExercise": "Thêm bài tập",
       "save": "Lưu",
       "restore": "Khôi phục gốc",
+      "decreaseField": "Giảm {{label}}",
+      "increaseField": "Tăng {{label}}",
+      "moveUpExercise": "Đưa {{name}} lên trên",
+      "moveDownExercise": "Đưa {{name}} xuống dưới",
+      "removeExercise": "Xóa {{name}}",
       "modified": "Đã chỉnh sửa",
       "noExercises": "Chưa có bài tập nào",
       "unsavedChanges": "Bạn có thay đổi chưa lưu. Bỏ thay đổi?",
@@ -1113,6 +1264,9 @@
       "restDay": "Ngày nghỉ",
       "today": "Hôm nay",
       "selectDay": "Chọn ngày tập",
+      "sheetMissing": "ngày còn chỗ cho buổi tập này",
+      "sheetReason": "buổi hiện đang ở {{currentDay}}; các ngày đã đủ 3 buổi sẽ bị khóa",
+      "sheetNextStep": "chọn một ngày khác để di chuyển, hoặc đóng sheet để giữ nguyên lịch hiện tại",
       "sessionsCount": "{{count}} buổi",
       "maxSessions": "Đã đầy (tối đa 3 buổi)",
       "noWorkouts": "Không có bài tập nào",
@@ -1230,6 +1384,58 @@
         "restDayEmpty": "Ngày nghỉ — thư giãn và nạp năng lượng cho ngày mai nhé!"
       }
     },
+    "orchestration": {
+      "a11yLabel": "Hành động ưu tiên trên trang tổng quan",
+      "label": "Việc cần làm tiếp theo",
+      "health": {
+        "title": "Hoàn tất hồ sơ sức khỏe trước",
+        "missing": "Dữ liệu sức khỏe nền tảng",
+        "cta": "Mở cài đặt sức khỏe"
+      },
+      "goal": {
+        "title": "Xác nhận mục tiêu trước khi theo dõi tiến độ",
+        "missing": "Mục tiêu dinh dưỡng đang hoạt động",
+        "cta": "Mở mục tiêu"
+      },
+      "training": {
+        "title": "Bổ sung hồ sơ tập luyện để tạo kế hoạch đúng",
+        "missing": "Hồ sơ tập luyện cá nhân",
+        "cta": "Mở hồ sơ tập luyện"
+      },
+      "plan": {
+        "title": "Tạo kế hoạch tập để dashboard có hướng dẫn đáng tin",
+        "missing": "Kế hoạch tập luyện đang hoạt động",
+        "reason": "Bạn đã có dữ liệu nền tảng nhưng chưa có lịch tập để điều phối hành động hôm nay.",
+        "nextStep": "Mở tab Thể lực và tạo kế hoạch đầu tiên để dashboard ưu tiên đúng việc cần làm.",
+        "cta": "Tạo kế hoạch tập"
+      },
+      "workoutStart": {
+        "title": "Bắt đầu buổi tập được lên lịch",
+        "missing": "Buổi tập hôm nay vẫn chưa bắt đầu",
+        "reason": "Hôm nay có {{count}} buổi đã lên kế hoạch và chưa có buổi nào được ghi nhận.",
+        "nextStep": "Bắt đầu buổi tập trước, rồi quay lại dashboard để theo dõi dinh dưỡng và tiến độ.",
+        "cta": "Bắt đầu buổi tập"
+      },
+      "workoutContinue": {
+        "title": "Hoàn tất buổi tập còn lại",
+        "missing": "Một phần lịch tập hôm nay vẫn chưa xong",
+        "reason": "Bạn đã hoàn thành {{completed}}/{{total}} buổi. Dashboard chỉ nên đẩy đúng một việc tiếp theo.",
+        "nextStep": "Tiếp tục buổi tập còn lại để tiến độ hôm nay trở nên đáng tin hơn.",
+        "cta": "Tiếp tục buổi tập"
+      },
+      "meal": {
+        "title": "Bổ sung bữa ăn còn thiếu",
+        "missing": "Thiếu {{meal}} trong kế hoạch hôm nay",
+        "reason": "Hiện mới ghi {{logged}}/{{total}} bữa nên các chỉ số dinh dưỡng chưa phản ánh đúng ngày hôm nay.",
+        "nextStep": "Mở lịch ăn và ghi bữa tiếp theo trước khi xem thêm insight khác.",
+        "cta": "Ghi bữa ăn"
+      },
+      "review": {
+        "title": "Hôm nay đã đủ dữ liệu để theo dõi tiến độ",
+        "reason": "Ưu tiên tiếp theo không còn bị chặn bởi thiết lập hay dữ liệu thiếu.",
+        "nextStep": "Dùng các mô-đun bên dưới để xem snapshot tiến độ và thao tác phụ nếu cần."
+      }
+    },
     "nutritionHero": {
       "greetingName": "Chào {{name}}!",
       "a11y": "Tổng quan dinh dưỡng hôm nay",
@@ -1291,6 +1497,8 @@
       "sessionsToday": "{{count}} buổi tập hôm nay",
       "completedAllSessions": "Hoàn thành {{completed}}/{{total}} buổi",
       "nextSession": "Tiếp theo: {{name}}",
+      "orchestrationHint": "CTA chính đang được ưu tiên ở đầu trang tổng quan.",
+      "planOrchestrationHint": "Tạo kế hoạch từ CTA chính ở đầu trang để tránh trùng hành động.",
       "mealSlotBreakfast": "Bữa sáng",
       "mealSlotLunch": "Bữa trưa",
       "mealSlotDinner": "Bữa tối",
@@ -1332,6 +1540,9 @@
     "greetingMorning": "Chào buổi sáng!",
     "greetingAfternoon": "Chào buổi chiều!",
     "greetingEvening": "Chào buổi tối!",
+    "score": {
+      "a11y": "Điểm hôm nay: {{score}} trên 100"
+    },
     "dailyTip": {
       "0": "Uống đủ 2-3 lít nước mỗi ngày để hỗ trợ trao đổi chất.",
       "1": "Ăn chậm, nhai kỹ giúp no lâu hơn và hấp thu tốt hơn.",
@@ -1466,13 +1677,22 @@
     "tdee": "TDEE",
     "proteinRatio": "Tỉ lệ protein (g/kg)",
     "macroPreview": "Xem trước macros",
+    "previewReady": "Bản xem trước này dùng để giải thích vì sao mục tiêu dinh dưỡng thay đổi khi số đo của bạn thay đổi.",
     "save": "Lưu",
     "saved": "Đã lưu",
     "other": "Khác",
     "goalWeightConflictCut": "Cân nặng hiện tại đã thấp hơn hoặc bằng mục tiêu giảm cân. Hãy cập nhật lại mục tiêu của bạn.",
     "goalWeightConflictBulk": "Cân nặng hiện tại đã cao hơn hoặc bằng mục tiêu tăng cân. Hãy cập nhật lại mục tiêu của bạn.",
     "name": "Tên",
+    "nameWhy": "Tên giúp bạn dễ kiểm tra lại hồ sơ đúng người khi quay lại chỉnh sửa.",
     "dateOfBirth": "Ngày sinh",
+    "dateOfBirthWhy": "Ngày sinh được dùng để tính tuổi, từ đó ước tính BMR chính xác hơn.",
+    "heightWhy": "Chiều cao là dữ liệu bắt buộc để tính BMR và nhu cầu năng lượng cơ bản.",
+    "weightWhy": "Cân nặng hiện tại quyết định mục tiêu calo và gợi ý macro mỗi ngày.",
+    "activityWhy": "Mức vận động chuyển BMR thành TDEE — tổng năng lượng bạn tiêu hao trong ngày.",
+    "bodyFatWhy": "Tỉ lệ mỡ là tùy chọn. Bổ sung khi bạn muốn app tinh chỉnh macro sát hơn.",
+    "setupOrientationTitle": "Chỉ hỏi phần cần cho bước tiếp theo",
+    "setupOrientationDesc": "Tên, ngày sinh, chiều cao, cân nặng và mức vận động là phần bắt buộc để tính năng lượng. Các chi tiết nâng cao có thể thêm sau trong Cài đặt.",
     "notSet": "Chưa thiết lập",
     "notConfigured": "Chưa thiết lập hồ sơ sức khỏe"
   },
@@ -1675,6 +1895,14 @@
       "dateOfBirth": "Ngày sinh",
       "activityLevel": "Mức vận động hàng ngày",
       "activityLevelDesc": "Không tính tập gym — chỉ hoạt động thường ngày",
+      "orientationTitle": "Bắt đầu với dữ liệu tối thiểu để app hiểu cơ thể bạn",
+      "orientationDesc": "Bước này chỉ hỏi những thông tin trực tiếp ảnh hưởng đến BMR, TDEE và mục tiêu calo. Phần nâng cao như tỉ lệ mỡ có thể bổ sung sau.",
+      "nameWhy": "Tên giúp cá nhân hóa onboarding và tránh nhầm hồ sơ khi bạn quay lại chỉnh sửa.",
+      "dateOfBirthWhy": "Ngày sinh cho biết tuổi hiện tại — yếu tố bắt buộc để tính BMR.",
+      "heightWhy": "Chiều cao được dùng cùng cân nặng để ước tính năng lượng cơ bản.",
+      "weightWhy": "Cân nặng hiện tại là nền tảng cho mục tiêu calo và macro.",
+      "activityWhyTitle": "Vì sao phải hỏi mức vận động?",
+      "activityWhyDesc": "Cùng một BMR nhưng người đi lại nhiều sẽ cần nhiều năng lượng hơn. Hãy chọn theo sinh hoạt hằng ngày, không tính buổi tập.",
       "gender_male": "Nam",
       "gender_female": "Nữ",
       "activity_sedentary_desc": "Ngồi nhiều, làm việc văn phòng",
@@ -1686,6 +1914,8 @@
     "goal": {
       "title": "Mục tiêu của bạn?",
       "desc": "Chọn hướng đi phù hợp với bạn",
+      "orientationTitle": "Chọn hướng đi trước, số đích có thể bổ sung sau",
+      "orientationDesc": "App cần biết bạn muốn giảm, giữ hay tăng cân để đặt mục tiêu calo đúng hướng. Cân nặng mục tiêu chỉ là mốc theo dõi, có thể bổ sung sau nếu chưa chắc.",
       "cut": "Giảm cân",
       "cutDesc": "Giảm mỡ, giữ cơ",
       "maintain": "Duy trì",
@@ -1704,6 +1934,7 @@
       "deltaReduce": "giảm",
       "deltaIncrease": "tăng",
       "subtitle": "Chọn hướng đi phù hợp với bạn",
+      "targetWeightHelp": "Có thể để trống bây giờ. Hãy thêm khi bạn muốn theo dõi một mốc cân nặng cụ thể.",
       "type_cut": "Giảm cân",
       "type_cut_desc": "Giảm mỡ, giữ cơ",
       "type_maintain": "Duy trì",
@@ -1742,6 +1973,7 @@
       "moreDetail": "Xem chi tiết",
       "lessDetail": "Ẩn chi tiết",
       "activityLevel": "Mức hoạt động",
+      "reviewLabel": "Tóm tắt sẵn sàng",
       "trainingTitle": "Xác nhận thông tin tập luyện",
       "bmrExplain": "Năng lượng cơ thể tiêu hao khi nghỉ ngơi",
       "tdeeExplain": "Tổng năng lượng tiêu hao hàng ngày",
