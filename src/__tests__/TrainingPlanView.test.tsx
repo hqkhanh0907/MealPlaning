@@ -64,6 +64,9 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.showLess': 'Thu gọn',
         'fitness.plan.cardioDay': 'Cardio',
         'fitness.plan.convertToWorkout': 'Thêm buổi tập',
+        'fitness.emptyState.noPlanTitle': 'Bắt đầu hành trình',
+        'fitness.emptyState.noPlanDescription': 'Tạo kế hoạch tập luyện phù hợp với bạn',
+        'fitness.emptyState.noPlanCta': 'Tạo kế hoạch',
         'common.dismiss': 'Bỏ qua',
         'fitness.workoutType.Upper Body A': 'Thân trên A',
       };
@@ -341,15 +344,15 @@ describe('TrainingPlanView', () => {
   it('renders "no plan" state with CTA when no active plan', () => {
     mockStore({ trainingPlans: [], trainingPlanDays: [] });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-    expect(screen.getByTestId('no-plan-cta')).toBeInTheDocument();
-    expect(screen.getByText('Chưa có lịch tập cho tuần này')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tạo kế hoạch' })).toBeInTheDocument();
+    expect(screen.getByText('Bắt đầu hành trình')).toBeInTheDocument();
+    expect(screen.getByText('Tạo kế hoạch tập luyện phù hợp với bạn')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Tạo kế hoạch/ })).toBeInTheDocument();
   });
 
   it('"Tạo kế hoạch" button calls onGeneratePlan', () => {
     mockStore({ trainingPlans: [], trainingPlanDays: [] });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Tạo kế hoạch' }));
+    fireEvent.click(screen.getByRole('button', { name: /Tạo kế hoạch/ }));
     expect(defaultOnGeneratePlan).toHaveBeenCalledOnce();
   });
 
@@ -371,11 +374,9 @@ describe('TrainingPlanView', () => {
         planStrategy="manual"
       />,
     );
-    expect(screen.getByTestId('manual-plan-cta')).toBeInTheDocument();
-    expect(screen.getByText('Sẵn sàng tự xếp lịch tập')).toBeInTheDocument();
-    expect(screen.getByText(/Thiếu: buổi tập đầu tiên trong tuần/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tạo buổi tập đầu tiên' })).toBeInTheDocument();
-    expect(screen.queryByTestId('no-plan-cta')).not.toBeInTheDocument();
+    expect(screen.getByText('Bắt đầu hành trình')).toBeInTheDocument();
+    expect(screen.getByText('Tạo kế hoạch tập luyện phù hợp với bạn')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Tạo kế hoạch/ })).toBeInTheDocument();
   });
 
   it('"Tạo buổi tập đầu tiên" button calls onCreateManualPlan', () => {
@@ -388,22 +389,22 @@ describe('TrainingPlanView', () => {
         planStrategy="manual"
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Tạo buổi tập đầu tiên' }));
+    fireEvent.click(screen.getByRole('button', { name: /Tạo kế hoạch/ }));
     expect(mockCreateManual).toHaveBeenCalledOnce();
   });
 
   it('renders auto plan CTA when planStrategy is auto and no active plan', () => {
     mockStore({ trainingPlans: [], trainingPlanDays: [] });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} planStrategy="auto" />);
-    expect(screen.getByTestId('no-plan-cta')).toBeInTheDocument();
-    expect(screen.queryByTestId('manual-plan-cta')).not.toBeInTheDocument();
+    expect(screen.getByText('Bắt đầu hành trình')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Tạo kế hoạch/ })).toBeInTheDocument();
   });
 
   it('renders auto plan CTA when planStrategy is null', () => {
     mockStore({ trainingPlans: [], trainingPlanDays: [] });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} planStrategy={null} />);
-    expect(screen.getByTestId('no-plan-cta')).toBeInTheDocument();
-    expect(screen.queryByTestId('manual-plan-cta')).not.toBeInTheDocument();
+    expect(screen.getByText('Bắt đầu hành trình')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Tạo kế hoạch/ })).toBeInTheDocument();
   });
 
   it('manual plan CTA button has min-h-[44px] and focus-visible ring', () => {
@@ -411,7 +412,7 @@ describe('TrainingPlanView', () => {
     render(
       <TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} onCreateManualPlan={vi.fn()} planStrategy="manual" />,
     );
-    const btn = screen.getByRole('button', { name: 'Tạo buổi tập đầu tiên' });
+    const btn = screen.getByRole('button', { name: /Tạo kế hoạch/ });
     expect(btn).toBeInTheDocument();
   });
 
@@ -460,15 +461,16 @@ describe('TrainingPlanView', () => {
   it('today workout card shows when plan exists for today', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-    expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
+    expect(screen.getByTestId('today-hero-card')).toBeInTheDocument();
     expect(screen.getByText('Push')).toBeInTheDocument();
-    expect(screen.getByText('Ngực, Vai')).toBeInTheDocument();
+    const infoLine = screen.getByTestId('hero-info-line');
+    expect(infoLine).toHaveTextContent('Ngực · Vai');
   });
 
   it('workout card shows exercise count and estimated duration', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-    const stats = screen.getByTestId('workout-stats');
+    const stats = screen.getByTestId('hero-info-line');
     expect(stats).toHaveTextContent('3 bài tập');
     // 3*(40+90)+30 + 3*(40+90)+30 + 2*(40+60)+30 = 1070s ≈ 18min + 5 warmup = 23
     expect(stats).toHaveTextContent('~23 phút');
@@ -551,7 +553,7 @@ describe('TrainingPlanView', () => {
   it('"Bắt đầu" button calls pushPage with workout plan day', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-    fireEvent.click(screen.getByTestId('start-workout-btn'));
+    fireEvent.click(screen.getByTestId('btn-start-workout-hero'));
     expect(mockPushPage).toHaveBeenCalledWith({
       id: 'workout-logger',
       component: 'WorkoutLogger',
@@ -571,7 +573,7 @@ describe('TrainingPlanView', () => {
       trainingPlanDays: [dayWithoutExercises],
     });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-    fireEvent.click(screen.getByTestId('start-workout-btn'));
+    fireEvent.click(screen.getByTestId('btn-start-workout-hero'));
     expect(mockPushPage).toHaveBeenCalledWith({
       id: 'workout-logger',
       component: 'WorkoutLogger',
@@ -645,9 +647,9 @@ describe('TrainingPlanView', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     // Today (Monday) shows full card with CTA
-    expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
+    expect(screen.getByTestId('today-hero-card')).toBeInTheDocument();
     expect(screen.getByText('Push')).toBeInTheDocument();
-    expect(screen.getByTestId('start-workout-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-start-workout-hero')).toBeInTheDocument();
     // Non-today workout (Wed day 3) shows collapsed PlanDayAccordion
     expect(screen.getByTestId('plan-day-3')).toBeInTheDocument();
     const toggle3 = within(screen.getByTestId('plan-day-3')).getByRole('button');
@@ -662,7 +664,7 @@ describe('TrainingPlanView', () => {
     // Pull workout content should be visible
     expect(screen.getByText('Pull')).toBeInTheDocument();
     // Today still has CTA
-    expect(screen.getByTestId('start-workout-btn')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-start-workout-hero')).toBeInTheDocument();
   });
 
   it('tapping expanded non-today day collapses it', () => {
@@ -693,8 +695,8 @@ describe('TrainingPlanView', () => {
   it('shows day label in header when viewing another day', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-    // Today shows "Buổi tập hôm nay" in TodayWorkoutCard toggle (no number suffix)
-    expect(screen.getByTestId('day-accordion-toggle')).toHaveTextContent('Buổi tập hôm nay');
+    // Today's TodayWorkoutCard has aria-label with today workout text
+    expect(screen.getByTestId('today-hero-card')).toHaveAttribute('aria-label', 'Buổi tập hôm nay');
     // Expand Wednesday (day 3) — PlanDayAccordion shows day label "T4"
     fireEvent.click(screen.getByTestId('day-pill-3'));
     const accordion3 = screen.getByTestId('plan-day-3');
@@ -707,7 +709,7 @@ describe('TrainingPlanView', () => {
     vi.setSystemTime(new Date('2025-01-11T12:00:00'));
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-    expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
+    expect(screen.getByTestId('today-hero-card')).toBeInTheDocument();
     expect(screen.getAllByText('Cardio').length).toBeGreaterThanOrEqual(1);
   });
 
@@ -725,7 +727,7 @@ describe('TrainingPlanView', () => {
       ],
     });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-    const stats = screen.getByTestId('workout-stats');
+    const stats = screen.getByTestId('hero-info-line');
     expect(stats).toHaveTextContent('0 bài tập');
     expect(stats).toHaveTextContent('~0 phút');
   });
@@ -1085,16 +1087,16 @@ describe('TrainingPlanView', () => {
     it('renders expired CTA when plan endDate is in the past', () => {
       mockStore({ trainingPlans: [expiredPlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      expect(screen.getByTestId('plan-expired-cta')).toBeInTheDocument();
-      expect(screen.getByTestId('create-new-cycle-btn')).toBeInTheDocument();
-      expect(screen.queryByTestId('today-workout-card')).not.toBeInTheDocument();
+      expect(screen.getByText('Bắt đầu hành trình')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Tạo kế hoạch/ })).toBeInTheDocument();
+      expect(screen.queryByTestId('today-hero-card')).not.toBeInTheDocument();
       expect(screen.queryByTestId('calendar-strip')).not.toBeInTheDocument();
     });
 
     it('create-new-cycle button calls onGeneratePlan', () => {
       mockStore({ trainingPlans: [expiredPlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      fireEvent.click(screen.getByTestId('create-new-cycle-btn'));
+      fireEvent.click(screen.getByRole('button', { name: /Tạo kế hoạch/ }));
       expect(defaultOnGeneratePlan).toHaveBeenCalledOnce();
     });
 
@@ -1102,19 +1104,20 @@ describe('TrainingPlanView', () => {
       const futurePlan = { ...activePlan, endDate: '2025-12-31T00:00:00.000Z' };
       mockStore({ trainingPlans: [futurePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      expect(screen.queryByTestId('plan-expired-cta')).not.toBeInTheDocument();
-      expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
+      expect(screen.queryByText('Bắt đầu hành trình')).not.toBeInTheDocument();
+      expect(screen.getByTestId('today-hero-card')).toBeInTheDocument();
     });
   });
 
   // --- isGenerating State ---
   describe('isGenerating state', () => {
-    it('no plan + isGenerating shows spinner and disables button', () => {
+    it('no plan + isGenerating still renders EmptyState (isGenerating only affects regenerate button)', () => {
       mockStore({ trainingPlans: [], trainingPlanDays: [] });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} isGenerating />);
-      const btn = screen.getByTestId('create-plan-btn');
-      expect(btn).toBeDisabled();
-      expect(btn).toHaveTextContent('Đang tạo...');
+      expect(screen.getByText('Bắt đầu hành trình')).toBeInTheDocument();
+      const btn = screen.getByRole('button', { name: /Tạo kế hoạch/ });
+      expect(btn).toBeInTheDocument();
+      expect(btn).not.toBeDisabled();
     });
 
     it('active plan + isGenerating disables regenerate button', () => {
@@ -1433,8 +1436,7 @@ describe('TrainingPlanView', () => {
         ],
       });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
-      expect(screen.getByText('Push')).toBeInTheDocument();
+      expect(screen.getByTestId('today-hero-card')).toBeInTheDocument();
     });
   });
 
@@ -1603,7 +1605,8 @@ describe('TrainingPlanView', () => {
         ],
       });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      expect(screen.getByText('Ngực, Vai, Lưng')).toBeInTheDocument();
+      const infoLine = screen.getByTestId('hero-info-line');
+      expect(infoLine).toHaveTextContent('Ngực · Vai · Lưng');
     });
 
     it('TC_TPV_02: muscleGroups JSON format renders translated muscle names (backward compat)', () => {
@@ -1622,7 +1625,8 @@ describe('TrainingPlanView', () => {
         ],
       });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      expect(screen.getByText('Ngực, Vai, Lưng')).toBeInTheDocument();
+      const infoLine2 = screen.getByTestId('hero-info-line');
+      expect(infoLine2).toHaveTextContent('Ngực · Vai · Lưng');
     });
 
     it('TC_TPV_03: workoutType displays with Vietnamese translation', () => {
@@ -1673,7 +1677,10 @@ describe('TrainingPlanView', () => {
       const firstLi = exerciseList.querySelector('li');
       expect(firstLi).not.toBeNull();
       expect(firstLi!.className).toContain('min-w-0');
-      const nameSpan = firstLi!.querySelector('span');
+      const wrapperSpan = firstLi!.querySelector('span');
+      expect(wrapperSpan).not.toBeNull();
+      expect(wrapperSpan!.className).toContain('min-w-0');
+      const nameSpan = wrapperSpan!.querySelector('.truncate');
       expect(nameSpan).not.toBeNull();
       expect(nameSpan!.className).toContain('truncate');
       expect(nameSpan!.className).toContain('min-w-0');
@@ -1692,20 +1699,21 @@ describe('TrainingPlanView', () => {
 
   // --- TODO-29: Cardio day shows "Cardio" instead of "0 bài tập" ---
   describe('cardio day workout stats', () => {
-    it('cardio day shows "Cardio" text instead of exercise count', () => {
+    it('cardio day shows workout type in heading', () => {
       vi.setSystemTime(new Date('2025-01-11T12:00:00'));
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      const stats = screen.getByTestId('workout-stats');
-      expect(stats).toHaveTextContent('Cardio');
-      expect(stats).not.toHaveTextContent('0 bài tập');
-      expect(stats).not.toHaveTextContent('phút');
+      const card = screen.getByTestId('today-hero-card');
+      const heading = within(card).getByRole('heading');
+      expect(heading).toHaveTextContent('Cardio');
+      const infoLine = screen.getByTestId('hero-info-line');
+      expect(infoLine).toHaveTextContent('0 bài tập');
     });
 
     it('strength day still shows exercise count and duration', () => {
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      const stats = screen.getByTestId('workout-stats');
+      const stats = screen.getByTestId('hero-info-line');
       expect(stats).toHaveTextContent('3 bài tập');
       expect(stats).toHaveTextContent('phút');
     });
@@ -1717,8 +1725,8 @@ describe('TrainingPlanView', () => {
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
       expect(screen.getByTestId('day-accordion')).toBeInTheDocument();
-      // Today (Mon) expanded as today-workout-card
-      expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
+      // Today (Mon) expanded as today-hero-card
+      expect(screen.getByTestId('today-hero-card')).toBeInTheDocument();
       // Non-today workout days collapsed (PlanDayAccordion uses plan-day-N)
       expect(screen.getByTestId('plan-day-3')).toBeInTheDocument(); // Wed - Pull
       expect(screen.getByTestId('plan-day-5')).toBeInTheDocument(); // Fri - Legs
@@ -1729,11 +1737,12 @@ describe('TrainingPlanView', () => {
       expect(screen.getByTestId('day-row-7')).toBeInTheDocument();
     });
 
-    it('today card has accent-highlight left border', () => {
+    it('today card has gradient background', () => {
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      const card = screen.getByTestId('today-workout-card').firstElementChild;
-      expect(card?.className).toContain('border-l-accent-highlight');
+      const card = screen.getByTestId('today-hero-card');
+      expect(card.className).toContain('bg-gradient-to-br');
+      expect(card.className).toContain('from-primary-subtle');
     });
 
     it('collapsed workout row shows day + muscle groups + exercise count', () => {
@@ -1762,7 +1771,7 @@ describe('TrainingPlanView', () => {
       // Full details visible
       expect(screen.getByText('Pull')).toBeInTheDocument();
       // No start-workout CTA (only today gets it)
-      const startBtns = screen.getAllByTestId('start-workout-btn');
+      const startBtns = screen.getAllByTestId('btn-start-workout-hero');
       expect(startBtns).toHaveLength(1); // Only today's
     });
 

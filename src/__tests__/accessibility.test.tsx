@@ -364,7 +364,7 @@ describe('TrainingPlanView a11y', () => {
     setupFitnessStore({ trainingPlans: [], trainingPlanDays: [] });
     render(<TrainingPlanView onGeneratePlan={vi.fn()} />);
 
-    const noPlanCta = screen.getByTestId('no-plan-cta');
+    const noPlanCta = screen.getByRole('button', { name: /Tạo kế hoạch/ });
     const svg = noPlanCta.querySelector('svg');
     expect(svg).toHaveAttribute('aria-hidden', 'true');
   });

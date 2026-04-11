@@ -23,10 +23,19 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.showLess': 'Thu gọn',
         'fitness.plan.cardioDay': 'Cardio',
         'fitness.plan.restDay': 'Ngày nghỉ',
+        'fitness.plan.todayLabel': 'Hôm nay',
+        'fitness.plan.completed': 'Hoàn thành',
+        'fitness.plan.tomorrowPreview': 'Ngày mai',
+        'fitness.plan.restDayTip': 'Nghỉ ngơi để cơ thể phục hồi',
+        'fitness.plan.restDayRegion': 'Khu vực ngày nghỉ',
+        'fitness.plan.logWeight': 'Ghi cân nặng',
+        'fitness.plan.quickCardio': 'Cardio nhanh',
+        'fitness.plan.viewSummary': 'Xem tổng kết',
         'fitness.onboarding.muscle_chest': 'Ngực',
         'fitness.onboarding.muscle_shoulders': 'Vai',
         'fitness.onboarding.muscle_core': 'Cơ trung tâm',
         'fitness.workoutType.Upper Body A': 'Thân trên A',
+        'fitness.workoutType.Lower Body A': 'Hạ thể A',
       };
       const template = translations[key];
       if (template && typeof optionsOrFallback === 'object' && optionsOrFallback !== null) {
@@ -135,6 +144,24 @@ const noMuscleGroupsPlanDay: TrainingPlanDay = {
   muscleGroups: undefined,
 };
 
+const restPlanDay: TrainingPlanDay = {
+  ...basePlanDay,
+  id: 'd-rest',
+  workoutType: 'rest',
+  muscleGroups: undefined,
+  exercises: '[]',
+};
+
+const tomorrowPlanDay: TrainingPlanDay = {
+  ...basePlanDay,
+  id: 'd-tomorrow',
+  dayOfWeek: 2,
+  workoutType: 'Lower Body A',
+  muscleGroups: 'legs,glutes',
+};
+
+const completedStats = { durationMin: 45, totalVolume: 2340, totalSets: 18 };
+
 const session1: TrainingPlanDay = { ...basePlanDay, id: 'ms1', sessionOrder: 1 };
 const session2: TrainingPlanDay = {
   ...basePlanDay,
@@ -162,6 +189,9 @@ const defaultCallbacks = {
   onAddSession: vi.fn(),
   onDeleteSession: vi.fn(),
   onToggleExerciseExpand: vi.fn(),
+  onLogWeight: vi.fn(),
+  onQuickCardio: vi.fn(),
+  onViewSummary: vi.fn(),
 };
 
 function renderCard(overrides: Record<string, unknown> = {}) {
@@ -187,146 +217,167 @@ afterEach(() => {
 // --- Tests ---
 
 describe('TodayWorkoutCard', () => {
-  // TC_W1_01_01: Happy path — standard workout with exercises
-  it('renders complete workout card with exercises', () => {
+  // TC_W201_01: Hero card renders with gradient container
+  it('renders gradient hero card as section with correct classes', () => {
     renderCard();
-    expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
-    expect(screen.getByText('Buổi tập hôm nay')).toBeInTheDocument();
-    expect(screen.getByText('Thân trên A')).toBeInTheDocument();
-    expect(screen.getByText('Ngực, Vai')).toBeInTheDocument();
-    expect(screen.getByTestId('workout-stats')).toHaveTextContent('3 bài tập');
-    expect(screen.getByTestId('workout-stats')).toHaveTextContent('~23 phút');
-    expect(screen.getByTestId('exercise-list').children).toHaveLength(3);
-    expect(screen.getByText('Bench Press')).toBeInTheDocument();
-    expect(screen.getByText('Shoulder Press')).toBeInTheDocument();
-    expect(screen.getByText('Fly')).toBeInTheDocument();
-    expect(screen.getByTestId('start-workout-btn')).toBeInTheDocument();
-    expect(screen.getByTestId('edit-exercises-btn')).toBeInTheDocument();
-    expect(screen.getByTestId('day-convert-rest-btn')).toBeInTheDocument();
+    const hero = screen.getByTestId('today-hero-card');
+    expect(hero.tagName).toBe('SECTION');
+    expect(hero.className).toContain('bg-gradient-to-br');
+    expect(hero.className).toContain('from-primary-subtle');
+    expect(hero.className).toContain('to-card');
+    expect(hero.className).toContain('rounded-2xl');
+    expect(hero.className).toContain('border-border/60');
+    expect(hero.className).toContain('p-5');
+    expect(hero.className).toContain('shadow-sm');
+    expect(hero).toHaveAttribute('aria-label', 'Buổi tập hôm nay');
   });
 
-  // TC_W1_01_02: No modified badge when originalExercises is undefined
-  it('does not show modified badge when originalExercises is undefined', () => {
+  // TC_W201_02: animate-slide-up applied on mount
+  it('has animate-slide-up class on hero card', () => {
     renderCard();
-    expect(screen.queryByTestId('modified-badge')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('restore-original-btn')).not.toBeInTheDocument();
+    expect(screen.getByTestId('today-hero-card').className).toContain('animate-slide-up');
   });
 
-  // TC_W1_01_03: Shows modified badge when exercises differ from original
-  it('shows modified badge when exercises differ from original', () => {
-    renderCard({ planDay: modifiedPlanDay });
-    expect(screen.getByTestId('modified-badge')).toHaveTextContent('Đã chỉnh sửa');
-    expect(screen.getByTestId('restore-original-btn')).toBeInTheDocument();
+  // TC_W201_03: Eyebrow shows "Hôm nay" label
+  it('shows Hôm nay eyebrow label without badge when no completions', () => {
+    renderCard({ completedSessionIds: [] });
+    expect(screen.getByText('Hôm nay')).toBeInTheDocument();
+    const eyebrow = screen.getByText('Hôm nay');
+    expect(eyebrow.className).toContain('text-xs');
+    expect(eyebrow.className).toContain('font-medium');
+    expect(eyebrow.className).toContain('uppercase');
+    expect(eyebrow.className).toContain('tracking-wide');
+    expect(screen.queryByText('Hoàn thành')).not.toBeInTheDocument();
   });
 
-  // TC_W1_01_04: No modified badge when exercises equal original
-  it('does not show modified badge when exercises equal original', () => {
-    const sameExercises = JSON.stringify(EXERCISES_3);
-    const planDay: TrainingPlanDay = {
-      ...basePlanDay,
-      exercises: sameExercises,
-      originalExercises: sameExercises,
-    };
-    renderCard({ planDay });
-    expect(screen.queryByTestId('modified-badge')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('restore-original-btn')).not.toBeInTheDocument();
+  // TC_W201_04: Completed badge shows when all sessions done
+  it('shows completed badge with Check icon when all sessions done', () => {
+    renderCard({ completedSessionIds: [basePlanDay.id] });
+    const badge = screen.getByText('Hoàn thành');
+    expect(badge).toBeInTheDocument();
+    expect(badge.className).toContain('bg-success/10');
+    expect(badge.className).toContain('text-success');
+    expect(badge.querySelector('svg')).toBeInTheDocument();
   });
 
-  // TC_W1_01_05: Clicking restore calls onRestoreOriginal with planDay.id
-  it('calls onRestoreOriginal with planDay.id when clicking restore', () => {
-    renderCard({ planDay: modifiedPlanDay });
-    fireEvent.click(screen.getByTestId('restore-original-btn'));
-    expect(defaultCallbacks.onRestoreOriginal).toHaveBeenCalledTimes(1);
-    expect(defaultCallbacks.onRestoreOriginal).toHaveBeenCalledWith('d1');
-  });
-
-  // TC_W1_01_06: Start workout CTA calls onStartWorkout
-  it('calls onStartWorkout with planDay when clicking CTA', () => {
-    renderCard();
-    fireEvent.click(screen.getByTestId('start-workout-btn'));
-    expect(defaultCallbacks.onStartWorkout).toHaveBeenCalledTimes(1);
-    expect(defaultCallbacks.onStartWorkout).toHaveBeenCalledWith(basePlanDay);
-  });
-
-  // TC_W1_01_07: Edit exercises calls onEditExercises
-  it('calls onEditExercises with planDay when clicking edit', () => {
-    renderCard();
-    fireEvent.click(screen.getByTestId('edit-exercises-btn'));
-    expect(defaultCallbacks.onEditExercises).toHaveBeenCalledTimes(1);
-    expect(defaultCallbacks.onEditExercises).toHaveBeenCalledWith(basePlanDay);
-  });
-
-  // TC_W1_01_08: Convert to rest calls onConvertToRest
-  it('calls onConvertToRest when clicking convert button', () => {
-    renderCard();
-    fireEvent.click(screen.getByTestId('day-convert-rest-btn'));
-    expect(defaultCallbacks.onConvertToRest).toHaveBeenCalledTimes(1);
-  });
-
-  // TC_W1_01_09: No exercise list when exercises prop is empty array
-  it('does not render exercise list when exercises is empty array', () => {
-    renderCard({ exercises: [], estimatedMinutes: 0 });
-    expect(screen.queryByTestId('exercise-list')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('exercise-collapse-toggle')).not.toBeInTheDocument();
-    expect(screen.getByTestId('start-workout-btn')).toBeInTheDocument();
-  });
-
-  // TC_W1_01_10: No exercise list when exercises field undefined (0 parsed)
-  it('shows zero stats when exercises prop is empty and planDay has no exercises', () => {
+  // TC_W201_05: Multi-session progress badge "2/3"
+  it('shows multi-session progress badge 2/3', () => {
     renderCard({
-      planDay: { ...basePlanDay, exercises: undefined },
-      exercises: [],
-      estimatedMinutes: 0,
+      daySessions: [session1, session2, session3],
+      completedSessionIds: ['ms1', 'ms2'],
     });
-    expect(screen.queryByTestId('exercise-list')).not.toBeInTheDocument();
-    expect(screen.getByTestId('workout-stats')).toHaveTextContent('0 bài tập');
-    expect(screen.getByTestId('workout-stats')).toHaveTextContent('~0 phút');
+    const badge = screen.getByText('2/3');
+    expect(badge.className).toContain('bg-primary/10');
+    expect(badge.className).toContain('text-primary');
+    expect(screen.queryByText('Hoàn thành')).not.toBeInTheDocument();
   });
 
-  // TC_W1_01_11: Exercise list shows 3 items without collapse when exactly 3
-  it('shows all 3 exercises without collapse toggle at threshold', () => {
-    renderCard({ exercises: EXERCISES_3 });
-    expect(screen.getByTestId('exercise-list').children).toHaveLength(3);
-    expect(screen.queryByTestId('exercise-collapse-toggle')).not.toBeInTheDocument();
+  // TC_W201_06: Workout title as h2 with info line
+  it('renders h2 title with dot-separated info line', () => {
+    renderCard();
+    const h2 = screen.getByRole('heading', { level: 2 });
+    expect(h2).toHaveTextContent('Thân trên A');
+    expect(h2.className).toContain('text-lg');
+    expect(h2.className).toContain('font-bold');
+    const infoLine = screen.getByTestId('hero-info-line');
+    expect(infoLine).toHaveTextContent('Ngực · Vai · 3 bài tập · ~23 phút');
   });
 
-  // TC_W1_01_12: Collapses to 3 with toggle when >3 exercises (collapsed state)
+  // TC_W201_07: Exercise list numbered with border separator
+  it('shows numbered exercises with border-top separator', () => {
+    renderCard();
+    const list = screen.getByTestId('exercise-list');
+    const container = list.parentElement!;
+    expect(container.className).toContain('border-t');
+    expect(container.className).toContain('border-border/60');
+    expect(list.children).toHaveLength(3);
+    const first = list.children[0];
+    expect(first).toHaveTextContent('1');
+    expect(first).toHaveTextContent('Bench Press');
+    const nameSpans = list.querySelectorAll('.truncate');
+    expect(nameSpans.length).toBeGreaterThanOrEqual(3);
+    const numSpans = list.querySelectorAll('.tabular-nums');
+    expect(numSpans.length).toBeGreaterThanOrEqual(3);
+  });
+
+  // TC_W201_08: Exercise sets×reps compact format
+  it('shows compact sets×reps format for exercises', () => {
+    renderCard();
+    const list = screen.getByTestId('exercise-list');
+    expect(list.children[0]).toHaveTextContent('3×8-12');
+    expect(list.children[2]).toHaveTextContent('2×10-15');
+  });
+
+  // TC_W201_09: Collapse at >3 exercises
   it('collapses to 3 items with toggle when >3 exercises', () => {
     renderCard({ exercises: EXERCISES_6, exercisesExpanded: false });
     expect(screen.getByTestId('exercise-list').children).toHaveLength(3);
     const toggle = screen.getByTestId('exercise-collapse-toggle');
-    expect(toggle).toBeInTheDocument();
     expect(toggle).toHaveTextContent('+3 bài tập nữa');
-    expect(toggle).toHaveAttribute('aria-label', '+3 bài tập nữa');
+    fireEvent.click(toggle);
+    expect(defaultCallbacks.onToggleExerciseExpand).toHaveBeenCalledTimes(1);
   });
 
-  // TC_W1_01_13: Shows all exercises when expanded state
-  it('shows all exercises when exercisesExpanded is true', () => {
+  // TC_W201_10: Expand shows all exercises
+  it('shows all 6 exercises when expanded', () => {
     renderCard({ exercises: EXERCISES_6, exercisesExpanded: true });
     expect(screen.getByTestId('exercise-list').children).toHaveLength(6);
     const toggle = screen.getByTestId('exercise-collapse-toggle');
     expect(toggle).toHaveTextContent('Thu gọn');
-  });
-
-  // TC_W1_01_14: Clicking collapse toggle calls onToggleExerciseExpand
-  it('calls onToggleExerciseExpand when clicking collapse toggle', () => {
-    renderCard({ exercises: EXERCISES_6, exercisesExpanded: false });
-    fireEvent.click(screen.getByTestId('exercise-collapse-toggle'));
+    fireEvent.click(toggle);
     expect(defaultCallbacks.onToggleExerciseExpand).toHaveBeenCalledTimes(1);
   });
 
-  // TC_W1_01_15: SessionTabs rendered when daySessions has 1+ session
-  it('renders SessionTabs when daySessions has 1 session', () => {
-    renderCard({ daySessions: [session1] });
-    expect(screen.getByTestId('session-tabs')).toBeInTheDocument();
+  // TC_W201_11: Primary CTA classes
+  it('renders primary CTA with correct classes', () => {
+    renderCard();
+    const cta = screen.getByTestId('btn-start-workout-hero');
+    expect(cta).toHaveTextContent('Bắt đầu tập');
+    expect(cta.className).toContain('min-h-12');
+    expect(cta.className).toContain('rounded-xl');
+    expect(cta.className).toContain('bg-primary');
+    expect(cta.className).toContain('text-lg');
+    expect(cta.className).toContain('font-semibold');
+    expect(cta.className).toContain('shadow-sm');
+    expect(cta.className).toContain('active:scale-[0.98]');
+    expect(cta.className).toContain('motion-reduce:transform-none');
+    expect(cta.className).toContain('focus-visible:ring-2');
+    expect(cta.querySelector('svg')).toBeInTheDocument();
   });
 
-  // TC_W1_01_16: SessionTabs receives correct props for multi-session
-  it('renders SessionTabs with correct props for multi-session', () => {
-    renderCard({
-      daySessions: [session1, session2],
-      activeSessionId: session1.id,
-    });
+  // TC_W201_12: CTA click fires onStartWorkout
+  it('calls onStartWorkout with planDay when clicking CTA', () => {
+    renderCard();
+    fireEvent.click(screen.getByTestId('btn-start-workout-hero'));
+    expect(defaultCallbacks.onStartWorkout).toHaveBeenCalledTimes(1);
+    expect(defaultCallbacks.onStartWorkout).toHaveBeenCalledWith(basePlanDay);
+  });
+
+  // TC_W201_13: Convert to rest button
+  it('renders convert to rest with Moon icon and fires callback', () => {
+    renderCard();
+    const btn = screen.getByTestId('day-convert-rest-btn');
+    expect(btn).toHaveTextContent('Chuyển thành ngày nghỉ');
+    expect(btn.querySelector('svg')).toBeInTheDocument();
+    expect(btn.className).toContain('min-h-11');
+    expect(btn.className).toContain('active:scale-[0.98]');
+    fireEvent.click(btn);
+    expect(defaultCallbacks.onConvertToRest).toHaveBeenCalledTimes(1);
+  });
+
+  // TC_W201_14: Edit exercises button
+  it('fires onEditExercises with planDay when clicking edit', () => {
+    renderCard();
+    const btn = screen.getByTestId('edit-exercises-btn');
+    expect(btn).toHaveAttribute('aria-label', 'Chỉnh sửa bài tập');
+    fireEvent.click(btn);
+    expect(defaultCallbacks.onEditExercises).toHaveBeenCalledTimes(1);
+    expect(defaultCallbacks.onEditExercises).toHaveBeenCalledWith(basePlanDay);
+  });
+
+  // TC_W201_15: SessionTabs delegation for multi-session
+  it('delegates SessionTabs with correct props for multi-session', () => {
+    renderCard({ daySessions: [session1, session2], activeSessionId: session1.id });
     const tabs = screen.getByTestId('session-tabs');
     expect(tabs).toBeInTheDocument();
     expect(tabs.querySelectorAll('[role="tab"]')).toHaveLength(2);
@@ -338,133 +389,285 @@ describe('TodayWorkoutCard', () => {
     expect(defaultCallbacks.onDeleteSession).toHaveBeenCalledWith('ms1');
   });
 
-  // TC_W1_01_17: SessionTabs renders for 3 sessions (BR-13 max)
-  it('renders SessionTabs for 3 sessions at max boundary', () => {
-    renderCard({ daySessions: [session1, session2, session3] });
+  // TC_W201_16: 3 sessions max boundary (BR-13)
+  it('renders 3 session tabs with multi-session badge', () => {
+    renderCard({
+      daySessions: [session1, session2, session3],
+      completedSessionIds: ['ms1'],
+    });
     const tabs = screen.getByTestId('session-tabs');
     expect(tabs.querySelectorAll('[role="tab"]')).toHaveLength(3);
-    expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
+    expect(screen.getByTestId('today-hero-card')).toBeInTheDocument();
+    expect(screen.getByText('1/3')).toBeInTheDocument();
   });
 
-  // TC_W1_01_18: Cardio workout type shows "Cardio" in stats
-  it('shows Cardio label in stats for cardio workout type', () => {
+  // TC_W201_17: Rest Day Hero renders with Moon icon
+  it('renders rest day hero with Moon icon and correct gradient', () => {
+    renderCard({ planDay: restPlanDay, exercises: [], estimatedMinutes: 0 });
+    const rest = screen.getByTestId('today-hero-rest');
+    expect(rest.tagName).toBe('SECTION');
+    expect(rest.className).toContain('bg-gradient-to-br');
+    expect(rest.className).toContain('from-info/5');
+    expect(rest.className).toContain('to-card');
+    expect(rest.className).toContain('animate-slide-up');
+    expect(rest.className).toContain('rounded-2xl');
+    expect(rest.className).toContain('border-border/60');
+    expect(rest.className).toContain('p-5');
+    expect(rest.className).toContain('shadow-sm');
+    expect(rest).toHaveAttribute('aria-label', 'Khu vực ngày nghỉ');
+    expect(screen.getByText('Ngày nghỉ')).toBeInTheDocument();
+    expect(screen.getByText('Nghỉ ngơi để cơ thể phục hồi')).toBeInTheDocument();
+    const moonContainer = rest.querySelector('.bg-info\\/10');
+    expect(moonContainer).toBeInTheDocument();
+    expect(moonContainer!.querySelector('svg')).toBeInTheDocument();
+    expect(screen.queryByTestId('btn-start-workout-hero')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('exercise-list')).not.toBeInTheDocument();
+  });
+
+  // TC_W201_18: Rest Day Hero tomorrow preview
+  it('shows tomorrow preview when tomorrowPlanDay provided', () => {
     renderCard({
-      planDay: cardioPlanDay,
+      planDay: restPlanDay,
       exercises: [],
       estimatedMinutes: 0,
+      tomorrowPlanDay,
     });
-    expect(screen.getByTestId('workout-stats')).toHaveTextContent('Cardio');
-    expect(screen.queryByText('Ngực, Vai')).not.toBeInTheDocument();
+    expect(screen.getByTestId('tomorrow-preview')).toBeInTheDocument();
+    expect(screen.getByText('Ngày mai')).toBeInTheDocument();
+    expect(screen.getByText('Hạ thể A')).toBeInTheDocument();
+    const preview = screen.getByTestId('tomorrow-preview');
+    expect(preview.className).toContain('rounded-xl');
+    expect(preview.className).toContain('border');
   });
 
-  // TC_W1_01_19: Workout type without muscleGroups renders cleanly
-  it('renders without muscle groups paragraph when muscleGroups is undefined', () => {
-    renderCard({ planDay: noMuscleGroupsPlanDay });
-    expect(screen.queryByText('Ngực, Vai')).not.toBeInTheDocument();
-    expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
-    expect(screen.getByText('Thân trên A')).toBeInTheDocument();
+  // TC_W201_19: Rest Day Hero no tomorrow preview
+  it('renders rest hero without tomorrow preview when tomorrowPlanDay undefined', () => {
+    renderCard({ planDay: restPlanDay, exercises: [], estimatedMinutes: 0 });
+    expect(screen.getByTestId('today-hero-rest')).toBeInTheDocument();
+    expect(screen.queryByText('Ngày mai')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('tomorrow-preview')).not.toBeInTheDocument();
   });
 
-  // TC_W1_01_20: Start workout CTA has active:scale and motion-reduce
-  it('has press feedback classes on start workout CTA', () => {
+  // TC_W201_20: Rest Day quick actions
+  it('renders rest day quick actions with callbacks and touch targets', () => {
+    renderCard({ planDay: restPlanDay, exercises: [], estimatedMinutes: 0 });
+    const logWeightBtn = screen.getByText('Ghi cân nặng').closest('button')!;
+    const quickCardioBtn = screen.getByText('Cardio nhanh').closest('button')!;
+
+    expect(logWeightBtn.className).toContain('min-h-11');
+    expect(logWeightBtn.className).toContain('active:scale-[0.98]');
+    expect(logWeightBtn.className).toContain('motion-reduce:transform-none');
+    expect(quickCardioBtn.className).toContain('min-h-11');
+    expect(quickCardioBtn.className).toContain('active:scale-[0.98]');
+
+    fireEvent.click(logWeightBtn);
+    expect(defaultCallbacks.onLogWeight).toHaveBeenCalledTimes(1);
+    fireEvent.click(quickCardioBtn);
+    expect(defaultCallbacks.onQuickCardio).toHaveBeenCalledTimes(1);
+  });
+
+  // TC_W201_21: Completed Hero — stats row and CTA change
+  it('shows completed stats row and outline CTA when all sessions done with stats', () => {
+    renderCard({
+      completedSessionIds: [basePlanDay.id],
+      completedWorkoutStats: completedStats,
+    });
+    expect(screen.getByText('Hoàn thành')).toBeInTheDocument();
+
+    const stats = screen.getByTestId('completed-stats');
+    expect(stats).toHaveTextContent('45m');
+    expect(stats).toHaveTextContent('2340kg');
+    expect(stats).toHaveTextContent('18 sets');
+    const icons = stats.querySelectorAll('svg');
+    expect(icons).toHaveLength(3);
+
+    const cta = screen.getByTestId('btn-start-workout-hero');
+    expect(cta).toHaveTextContent('Xem tổng kết');
+    expect(cta.className).toContain('border-primary');
+    expect(cta.className).toContain('text-primary');
+    const classes = cta.className.split(' ');
+    expect(classes).not.toContain('bg-primary');
+
+    fireEvent.click(cta);
+    expect(defaultCallbacks.onViewSummary).toHaveBeenCalledTimes(1);
+  });
+
+  // TC_W201_22: All 3 sessions completed
+  it('shows completed badge and summary CTA when all 3 sessions done', () => {
+    renderCard({
+      daySessions: [session1, session2, session3],
+      completedSessionIds: ['ms1', 'ms2', 'ms3'],
+      completedWorkoutStats: completedStats,
+    });
+    expect(screen.getByText('Hoàn thành')).toBeInTheDocument();
+    const cta = screen.getByTestId('btn-start-workout-hero');
+    expect(cta).toHaveTextContent('Xem tổng kết');
+    expect(screen.getByTestId('session-tabs')).toBeInTheDocument();
+  });
+
+  // TC_W201_23: Empty exercises still renders hero
+  it('renders hero card without exercise list when exercises empty', () => {
+    renderCard({ exercises: [], estimatedMinutes: 0 });
+    expect(screen.getByTestId('today-hero-card')).toBeInTheDocument();
+    expect(screen.queryByTestId('exercise-list')).not.toBeInTheDocument();
+    expect(screen.getByTestId('hero-info-line')).toHaveTextContent('0 bài tập');
+    expect(screen.getByTestId('btn-start-workout-hero')).toBeInTheDocument();
+    expect(screen.getByTestId('edit-exercises-btn')).toBeInTheDocument();
+  });
+
+  // TC_W201_24: Modified badge and restore (regression)
+  it('shows modified badge and restore button for modified plan', () => {
+    renderCard({ planDay: modifiedPlanDay });
+    expect(screen.getByTestId('modified-badge')).toHaveTextContent('Đã chỉnh sửa');
+    expect(screen.getByTestId('restore-original-btn')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('restore-original-btn'));
+    expect(defaultCallbacks.onRestoreOriginal).toHaveBeenCalledWith('d1');
+  });
+
+  // TC_W201_25: Not modified — no badge
+  it('does not show modified badge when plan is unmodified', () => {
     renderCard();
-    const btn = screen.getByTestId('start-workout-btn');
-    expect(btn.className).toContain('active:scale-[0.98]');
-    expect(btn.className).toContain('motion-reduce:transform-none');
+    expect(screen.queryByTestId('modified-badge')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('restore-original-btn')).not.toBeInTheDocument();
   });
 
-  // TC_W1_01_21: All interactive elements have focus-visible ring
+  // TC_W201_26: Cardio workout type
+  it('renders cardio workout type without muscle groups', () => {
+    renderCard({ planDay: cardioPlanDay, exercises: [], estimatedMinutes: 0 });
+    expect(screen.getByTestId('today-hero-card')).toBeInTheDocument();
+    expect(screen.getByText('Cardio')).toBeInTheDocument();
+    const infoLine = screen.getByTestId('hero-info-line');
+    expect(infoLine).not.toHaveTextContent('Ngực');
+    expect(infoLine).toHaveTextContent('0 bài tập');
+    expect(screen.getByTestId('btn-start-workout-hero')).toBeInTheDocument();
+  });
+
+  // TC_W201_27: Touch targets on all buttons (BR-37)
+  it('has correct touch target sizes on all buttons', () => {
+    renderCard({ planDay: modifiedPlanDay, exercises: EXERCISES_6, exercisesExpanded: false });
+    const cta = screen.getByTestId('btn-start-workout-hero');
+    expect(cta.className).toContain('min-h-12');
+
+    const edit = screen.getByTestId('edit-exercises-btn');
+    expect(edit.className).toContain('min-h-[44px]');
+    expect(edit.className).toContain('min-w-[44px]');
+
+    const convert = screen.getByTestId('day-convert-rest-btn');
+    expect(convert.className).toContain('min-h-11');
+
+    const restore = screen.getByTestId('restore-original-btn');
+    expect(restore.className).toContain('min-h-[44px]');
+    expect(restore.className).toContain('min-w-[44px]');
+  });
+
+  // TC_W201_28: Press feedback on all buttons (BR-42)
+  it('has press feedback classes on all interactive buttons', () => {
+    renderCard();
+    const cta = screen.getByTestId('btn-start-workout-hero');
+    expect(cta.className).toContain('active:scale-[0.98]');
+    expect(cta.className).toContain('motion-reduce:transform-none');
+
+    const convert = screen.getByTestId('day-convert-rest-btn');
+    expect(convert.className).toContain('active:scale-[0.98]');
+    expect(convert.className).toContain('motion-reduce:transform-none');
+
+    const edit = screen.getByTestId('edit-exercises-btn');
+    expect(edit.className).toContain('active:scale-[0.98]');
+    expect(edit.className).toContain('motion-reduce:transform-none');
+  });
+
+  // TC_W201_29: Focus visibility on all buttons
   it('has focus-visible ring classes on all interactive buttons', () => {
     renderCard({
       planDay: modifiedPlanDay,
       exercises: EXERCISES_6,
       exercisesExpanded: false,
     });
-    const buttonTestIds = [
-      'start-workout-btn',
+    const testIds = [
+      'btn-start-workout-hero',
       'edit-exercises-btn',
       'day-convert-rest-btn',
       'restore-original-btn',
       'exercise-collapse-toggle',
     ];
-    for (const testId of buttonTestIds) {
+    for (const testId of testIds) {
       const btn = screen.getByTestId(testId);
       expect(btn.className).toContain('focus-visible:ring-2');
       expect(btn.className).toContain('focus-visible:outline-none');
     }
   });
 
-  // TC_W1_01_22: Touch targets — all buttons ≥44px min size
-  it('has minimum touch target sizes on all action buttons', () => {
-    renderCard({ planDay: modifiedPlanDay });
-    const startBtn = screen.getByTestId('start-workout-btn');
-    expect(startBtn.className).toMatch(/py-3\.5/);
-
-    const editBtn = screen.getByTestId('edit-exercises-btn');
-    expect(editBtn.className).toContain('min-h-[44px]');
-    expect(editBtn.className).toContain('min-w-[44px]');
-
-    const convertBtn = screen.getByTestId('day-convert-rest-btn');
-    expect(convertBtn.className).toContain('min-h-[44px]');
-
-    const restoreBtn = screen.getByTestId('restore-original-btn');
-    expect(restoreBtn.className).toContain('min-h-[44px]');
-    expect(restoreBtn.className).toContain('min-w-[44px]');
+  // TC_W201_30: No muscle groups renders cleanly
+  it('renders info line without muscle groups when undefined', () => {
+    renderCard({ planDay: noMuscleGroupsPlanDay });
+    const infoLine = screen.getByTestId('hero-info-line');
+    expect(infoLine).toHaveTextContent('3 bài tập · ~23 phút');
+    expect(infoLine).not.toHaveTextContent('Ngực');
+    expect(screen.getByText('Thân trên A')).toBeInTheDocument();
   });
 
-  // TC_W1_01_23: Exercise item shows set/rep format correctly
-  it('shows correct set/rep format for exercises', () => {
-    renderCard({ exercises: EXERCISES_3 });
-    const items = screen.getByTestId('exercise-list').children;
-    expect(items[0]).toHaveTextContent('3 hiệp × 8-12 lần');
-    expect(items[2]).toHaveTextContent('2 hiệp × 10-15 lần');
-  });
-
-  // TC_W1_01_24: Exercise names are truncated (CSS class)
-  it('applies truncate CSS class to exercise name spans', () => {
-    renderCard();
-    const list = screen.getByTestId('exercise-list');
-    const nameSpans = list.querySelectorAll('.truncate');
-    expect(nameSpans.length).toBeGreaterThanOrEqual(3);
-  });
-
-  // TC_W1_01_25: Header shows disabled toggle with correct label
-  it('renders disabled header toggle with correct label and icon', () => {
-    renderCard();
-    const toggle = screen.getByTestId('day-accordion-toggle');
-    expect(toggle).toBeDisabled();
-    expect(toggle).toHaveTextContent('Buổi tập hôm nay');
-  });
-
-  // EC_W1_01_02: Single exercise — no collapse
-  it('handles single exercise without collapse', () => {
+  // TC_W201_31: Single exercise — no collapse
+  it('shows single exercise without collapse toggle', () => {
     renderCard({ exercises: [EXERCISES_3[0]], estimatedMinutes: 8 });
     expect(screen.getByTestId('exercise-list').children).toHaveLength(1);
     expect(screen.queryByTestId('exercise-collapse-toggle')).not.toBeInTheDocument();
+    expect(screen.getByTestId('exercise-list').children[0]).toHaveTextContent('1');
   });
 
-  // EC_W1_01_01: Exactly at threshold + 1
-  it('shows collapse toggle with +1 when exercises = 4', () => {
+  // TC_W201_32: onDeleteSession undefined
+  it('renders SessionTabs without delete when onDeleteSession undefined', () => {
+    renderCard({ onDeleteSession: undefined });
+    expect(screen.getByTestId('session-tabs')).toBeInTheDocument();
+    expect(screen.queryByTestId('delete-session-tab')).not.toBeInTheDocument();
+  });
+
+  // TC_W201_33: Rest workout type renders rest hero (regression)
+  it('renders rest hero for rest workout type', () => {
+    renderCard({
+      planDay: { ...basePlanDay, workoutType: 'rest' },
+      exercises: [],
+      estimatedMinutes: 0,
+    });
+    expect(screen.getByTestId('today-hero-rest')).toBeInTheDocument();
+    expect(screen.getByText('Ngày nghỉ')).toBeInTheDocument();
+    expect(screen.queryByTestId('today-hero-card')).not.toBeInTheDocument();
+  });
+
+  // TC_W201_34: Exactly 4 exercises — collapse shows "+1"
+  it('shows +1 collapse toggle with 4 exercises', () => {
     const fourExercises = EXERCISES_6.slice(0, 4);
     renderCard({ exercises: fourExercises, exercisesExpanded: false });
     expect(screen.getByTestId('exercise-list').children).toHaveLength(3);
     expect(screen.getByTestId('exercise-collapse-toggle')).toHaveTextContent('+1 bài tập nữa');
   });
 
-  // EC_W1_01_06: onDeleteSession undefined
-  it('renders SessionTabs without delete when onDeleteSession is undefined', () => {
-    renderCard({ onDeleteSession: undefined });
-    expect(screen.getByTestId('session-tabs')).toBeInTheDocument();
-    expect(screen.queryByTestId('delete-session-tab')).not.toBeInTheDocument();
+  // TC_W201_35: Completed CTA fallback to onStartWorkout when onViewSummary undefined
+  it('falls back to onStartWorkout when onViewSummary undefined and all completed', () => {
+    renderCard({
+      completedSessionIds: [basePlanDay.id],
+      onViewSummary: undefined,
+    });
+    fireEvent.click(screen.getByTestId('btn-start-workout-hero'));
+    expect(defaultCallbacks.onStartWorkout).toHaveBeenCalledWith(basePlanDay);
   });
 
-  // WorkoutStatsContent rest type branch
-  it('shows rest day label for rest workout type', () => {
+  // TC_W201_36: No completed stats when not all sessions done
+  it('does not show completed stats when not all sessions done', () => {
     renderCard({
-      planDay: { ...basePlanDay, workoutType: 'rest' },
-      exercises: [],
-      estimatedMinutes: 0,
+      daySessions: [session1, session2],
+      completedSessionIds: ['ms1'],
+      completedWorkoutStats: completedStats,
     });
-    expect(screen.getByTestId('workout-stats')).toHaveTextContent('Ngày nghỉ');
+    expect(screen.queryByTestId('completed-stats')).not.toBeInTheDocument();
+    expect(screen.getByTestId('btn-start-workout-hero')).toHaveTextContent('Bắt đầu tập');
+  });
+
+  // TC_W201_37: exercises equal originalExercises — no modified badge
+  it('does not show modified badge when exercises equal original', () => {
+    const sameExercises = JSON.stringify(EXERCISES_3);
+    renderCard({
+      planDay: { ...basePlanDay, exercises: sameExercises, originalExercises: sameExercises },
+    });
+    expect(screen.queryByTestId('modified-badge')).not.toBeInTheDocument();
   });
 });

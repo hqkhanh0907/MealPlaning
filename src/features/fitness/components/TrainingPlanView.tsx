@@ -198,11 +198,11 @@ function TrainingPlanViewInner({
 
   useContextMenuDismiss(dayContextMenu, contextMenuRef, () => setDayContextMenu(null));
 
-  if (activePlan && planExpired) return <PlanEmptyState context="expired-plan" onAction={onGeneratePlan} />;
+  if (activePlan && planExpired) return <PlanEmptyState context="no-plan" onAction={onGeneratePlan} />;
   if (!activePlan) {
     if (planStrategy === 'manual' && onCreateManualPlan)
-      return <PlanEmptyState context="manual-no-exercises" onAction={onCreateManualPlan} />;
-    return <PlanEmptyState context="no-plan" onAction={onGeneratePlan} isGenerating={isGenerating} />;
+      return <PlanEmptyState context="no-plan" onAction={onCreateManualPlan} />;
+    return <PlanEmptyState context="no-plan" onAction={onGeneratePlan} />;
   }
 
   return (

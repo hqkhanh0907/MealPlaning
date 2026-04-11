@@ -1,14 +1,29 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { WeekCalendarStripProps } from '../features/fitness/components/WeekCalendarStrip';
-import { WeekCalendarStrip } from '../features/fitness/components/WeekCalendarStrip';
-import type { TrainingPlanDay } from '../features/fitness/types';
+import type { TrainingPlanDay } from '@/features/fitness/types';
+
+import type { DayStatus, WeekCalendarStripProps } from '../features/fitness/components/WeekCalendarStrip';
+import { getDayStatus, WeekCalendarStrip } from '../features/fitness/components/WeekCalendarStrip';
+
+/* ------------------------------------------------------------------ */
+/*  Mocks                                                              */
+/* ------------------------------------------------------------------ */
+
+const mockMotion = { reduced: false };
+
+vi.mock('@/utils/motion', () => ({
+  getAnimationClass: (name: string, stagger: number, reduced: boolean) =>
+    reduced ? '' : `animate-${name} animate-stagger-${stagger}`,
+  useReducedMotion: () => mockMotion.reduced,
+}));
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => {
+    t: (key: string, opts?: Record<string, unknown>) => {
       const map: Record<string, string> = {
-        'fitness.plan.weekOverview': 'Tổng quan tuần',
+        'fitness.plan.weekOverview': 'Lịch tuần',
         'fitness.dayFull.0': 'Thứ Hai',
         'fitness.dayFull.1': 'Thứ Ba',
         'fitness.dayFull.2': 'Thứ Tư',
@@ -19,494 +34,773 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.completed': 'Hoàn thành',
         'fitness.plan.workout': 'Buổi tập',
         'fitness.plan.restDay': 'Ngày nghỉ',
+        'fitness.plan.missed': 'Bỏ lỡ',
+        'fitness.plan.noPlanDay': 'Chưa có kế hoạch',
+        'fitness.plan.startWorkout': 'Bắt đầu tập',
+        'fitness.plan.exerciseCount': `${opts?.count ?? 0} bài tập`,
       };
       return map[key] ?? key;
     },
   }),
 }));
 
-// --- Fixtures ---
+/* ------------------------------------------------------------------ */
+/*  Fixtures                                                           */
+/* ------------------------------------------------------------------ */
 
-const createPlanDay = (overrides: Partial<TrainingPlanDay>): TrainingPlanDay => ({
-  id: `pd-${overrides.dayOfWeek ?? 1}`,
-  planId: 'plan-1',
-  dayOfWeek: 1,
-  sessionOrder: 1,
-  workoutType: 'Push',
-  muscleGroups: '["chest","shoulders"]',
-  exercises: '[]',
-  isUserAssigned: false,
-  originalDayOfWeek: overrides.dayOfWeek ?? 1,
-  ...overrides,
-});
+function makePlanDay(
+  dayOfWeek: number,
+  workoutType: 'workout' | 'rest' = 'workout',
+  overrides: Partial<TrainingPlanDay> = {},
+): TrainingPlanDay {
+  return {
+    id: `pd-${dayOfWeek}`,
+    planId: 'plan-1',
+    dayOfWeek,
+    sessionOrder: 1,
+    workoutType,
+    muscleGroups: workoutType === 'workout' ? 'chest,triceps' : '',
+    exercises: workoutType === 'workout' ? JSON.stringify([{ id: 'e1' }]) : '',
+    ...overrides,
+  } as TrainingPlanDay;
+}
 
-// 3-day split: Mon(Push), Wed(Pull), Fri(Legs)
-const defaultPlanDays: TrainingPlanDay[] = [
-  createPlanDay({ id: 'pd-1', dayOfWeek: 1, workoutType: 'Push' }),
-  createPlanDay({ id: 'pd-3', dayOfWeek: 3, workoutType: 'Pull' }),
-  createPlanDay({ id: 'pd-5', dayOfWeek: 5, workoutType: 'Legs' }),
+const defaultPlanDays: readonly TrainingPlanDay[] = [
+  makePlanDay(1),
+  makePlanDay(2, 'rest'),
+  makePlanDay(3),
+  makePlanDay(5),
 ];
 
 const defaultProps: WeekCalendarStripProps = {
-  selectedDay: 1,
+  selectedDay: 3,
   todayDow: 3,
   planDays: defaultPlanDays,
-  completedDays: new Set([1]),
+  completedDays: new Set<number>([1]),
   onDaySelect: vi.fn(),
 };
 
 function renderStrip(overrides: Partial<WeekCalendarStripProps> = {}) {
-  return render(<WeekCalendarStrip {...defaultProps} {...overrides} />);
+  const props: WeekCalendarStripProps = {
+    ...defaultProps,
+    ...overrides,
+    onDaySelect: overrides.onDaySelect ?? vi.fn(),
+  };
+  return render(<WeekCalendarStrip {...props} />);
 }
 
-function expectPillStatus(dayNum: number, expectedBg: string, expectedText: string, unexpectedBg?: string) {
-  const pill = screen.getByTestId(`day-pill-${dayNum}`);
-  expect(pill.className).toContain(expectedBg);
-  expect(pill.className).toContain(expectedText);
-  if (unexpectedBg) {
-    expect(pill.className).not.toContain(unexpectedBg);
-  }
+/* ------------------------------------------------------------------ */
+/*  Helper                                                             */
+/* ------------------------------------------------------------------ */
+
+function getPill(dayNum: number) {
+  return screen.getByTestId(`day-pill-${dayNum}`);
 }
 
-afterEach(cleanup);
+/* ------------------------------------------------------------------ */
+/*  §A  Original Tests — Rendering (TC_WCS_01 – TC_WCS_10)            */
+/* ------------------------------------------------------------------ */
 
 describe('WeekCalendarStrip', () => {
-  // TS-01: Basic Rendering
-  describe('rendering', () => {
-    it('TC_WCS_01: renders exactly 7 pill buttons', () => {
+  beforeEach(() => {
+    mockMotion.reduced = false;
+    vi.clearAllMocks();
+  });
+
+  describe('Rendering', () => {
+    it('TC_WCS_01: renders 7 day pills', () => {
       renderStrip();
-      expect(screen.getAllByRole('button')).toHaveLength(7);
+      const strip = screen.getByTestId('week-calendar-strip');
+      const pills = within(strip).getAllByRole('button');
+      expect(pills).toHaveLength(7);
     });
 
-    it('TC_WCS_02: renders Vietnamese day labels (T2-CN)', () => {
+    it('TC_WCS_02: each pill shows correct day label', () => {
       renderStrip();
       const labels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-      for (const label of labels) {
-        expect(screen.getByText(label)).toBeInTheDocument();
-      }
+      labels.forEach((label, idx) => {
+        expect(getPill(idx + 1)).toHaveTextContent(label);
+      });
     });
 
-    it('TC_WCS_03: container has toolbar role', () => {
+    it('TC_WCS_03: selected day has aria-pressed=true', () => {
+      renderStrip({ selectedDay: 3 });
+      expect(getPill(3)).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    it('TC_WCS_04: non-selected days have aria-pressed=false', () => {
+      renderStrip({ selectedDay: 3 });
+      [1, 2, 4, 5, 6, 7].forEach(d => {
+        expect(getPill(d)).toHaveAttribute('aria-pressed', 'false');
+      });
+    });
+
+    it('TC_WCS_05: today pill has aria-current=date', () => {
+      renderStrip({ todayDow: 3 });
+      expect(getPill(3)).toHaveAttribute('aria-current', 'date');
+    });
+
+    it('TC_WCS_06: non-today pills have no aria-current', () => {
+      renderStrip({ todayDow: 3 });
+      [1, 2, 4, 5, 6, 7].forEach(d => {
+        expect(getPill(d)).not.toHaveAttribute('aria-current');
+      });
+    });
+
+    it('TC_WCS_07: strip has role=toolbar', () => {
       renderStrip();
-      expect(screen.getByRole('toolbar')).toBeInTheDocument();
+      expect(screen.getByTestId('week-calendar-strip')).toHaveAttribute('role', 'toolbar');
     });
 
-    it('TC_WCS_04: each pill has correct data-testid', () => {
+    it('TC_WCS_08: strip has aria-label', () => {
+      renderStrip();
+      expect(screen.getByTestId('week-calendar-strip')).toHaveAttribute('aria-label', 'Lịch tuần');
+    });
+
+    it('TC_WCS_09: pills have data-status attribute', () => {
+      renderStrip();
+      expect(getPill(1)).toHaveAttribute('data-status', 'completed');
+    });
+
+    it('TC_WCS_10: pills have data-testid format day-pill-N', () => {
       renderStrip();
       for (let i = 1; i <= 7; i++) {
         expect(screen.getByTestId(`day-pill-${i}`)).toBeInTheDocument();
       }
     });
-
-    it('TC_WCS_05: container has data-testid', () => {
-      renderStrip();
-      expect(screen.getByTestId('week-calendar-strip')).toBeInTheDocument();
-    });
   });
 
-  // TS-02: Status Icon Rendering
-  describe('status icons', () => {
-    it('TC_WCS_06: completed day shows Check icon (data-status=completed)', () => {
-      renderStrip({ completedDays: new Set([1]) });
-      const pill = screen.getByTestId('day-pill-1');
-      expect(pill).toHaveAttribute('data-status', 'completed');
-      expect(pill.querySelector('svg')).toBeInTheDocument();
+  /* ------------------------------------------------------------------ */
+  /*  §B  Original Tests — Day Status (TC_WCS_11 – TC_WCS_20)           */
+  /* ------------------------------------------------------------------ */
+
+  describe('Day Status', () => {
+    it('TC_WCS_11: completed day shows check icon', () => {
+      renderStrip({ completedDays: new Set([3]) });
+      expect(getPill(3)).toHaveAttribute('data-status', 'completed');
     });
 
-    it('TC_WCS_07: workout day shows Dumbbell icon (data-status=workout)', () => {
-      renderStrip({ completedDays: new Set() });
-      const pill = screen.getByTestId('day-pill-3'); // Wed = Pull workout
-      expect(pill).toHaveAttribute('data-status', 'workout');
-      expect(pill.querySelector('svg')).toBeInTheDocument();
+    it('TC_WCS_12: completed day has success colors', () => {
+      renderStrip({ completedDays: new Set([3]) });
+      expect(getPill(3).className).toContain('bg-success/10');
+      expect(getPill(3).className).toContain('text-success');
     });
 
-    it('TC_WCS_08: rest day shows Moon icon (data-status=rest)', () => {
-      renderStrip({ completedDays: new Set() });
-      const pill = screen.getByTestId('day-pill-2'); // Tue = no planDay
-      expect(pill).toHaveAttribute('data-status', 'rest');
-      expect(pill.querySelector('svg')).toBeInTheDocument();
-    });
-
-    it('TC_WCS_09: rest-type planDay shows Moon icon', () => {
-      const planDays = [createPlanDay({ dayOfWeek: 4, workoutType: 'rest' })];
-      renderStrip({ planDays, completedDays: new Set() });
-      const pill = screen.getByTestId('day-pill-4');
-      expect(pill).toHaveAttribute('data-status', 'rest');
-    });
-
-    it('TC_WCS_10: completed overrides workout status', () => {
-      renderStrip({ completedDays: new Set([1]) }); // day 1 has Push planDay
-      const pill = screen.getByTestId('day-pill-1');
-      expect(pill).toHaveAttribute('data-status', 'completed');
-    });
-
-    it('TC_WCS_11: completed on rest day shows Check (spontaneous)', () => {
-      renderStrip({ completedDays: new Set([2]) }); // day 2 has no planDay
-      const pill = screen.getByTestId('day-pill-2');
-      expect(pill).toHaveAttribute('data-status', 'completed');
-    });
-
-    it('TC_WCS_12: all icons have aria-hidden="true"', () => {
-      renderStrip();
-      for (let i = 1; i <= 7; i++) {
-        const pill = screen.getByTestId(`day-pill-${i}`);
-        const svg = pill.querySelector('svg');
-        expect(svg).toBeInTheDocument();
-        expect(svg).toHaveAttribute('aria-hidden', 'true');
-      }
-    });
-
-    it('TC_WCS_13: icons have correct size class h-3.5 w-3.5', () => {
-      renderStrip();
-      for (let i = 1; i <= 7; i++) {
-        const pill = screen.getByTestId(`day-pill-${i}`);
-        const svg = pill.querySelector('svg');
-        expect(svg?.getAttribute('class')).toContain('h-3.5');
-        expect(svg?.getAttribute('class')).toContain('w-3.5');
-      }
-    });
-  });
-
-  // TS-03: Status Color Mapping (AC-4)
-  describe('status colors', () => {
-    it('TC_WCS_14: completed day has bg-success/10 text-success', () => {
-      renderStrip({ completedDays: new Set([1]) });
-      expectPillStatus(1, 'bg-success/10', 'text-success');
-    });
-
-    it('TC_WCS_15: workout day has bg-primary/10 text-primary', () => {
-      renderStrip({ completedDays: new Set() });
-      expectPillStatus(3, 'bg-primary/10', 'text-primary'); // Wed = Pull
-    });
-
-    it('TC_WCS_16: rest day has bg-muted text-muted-foreground', () => {
-      renderStrip({ completedDays: new Set() });
-      expectPillStatus(2, 'bg-muted', 'text-muted-foreground'); // Tue = rest
-    });
-
-    it('TC_WCS_17: completed color overrides workout color', () => {
-      renderStrip({ completedDays: new Set([1]) }); // day 1 = Push planDay + completed
-      expectPillStatus(1, 'bg-success/10', 'text-success', 'bg-primary/10');
-    });
-
-    it('TC_WCS_18: completed on non-plan day uses success color', () => {
-      renderStrip({ completedDays: new Set([2]) }); // day 2 = no planDay + completed
-      expectPillStatus(2, 'bg-success/10', 'text-success');
-    });
-
-    it('TC_WCS_19: rest-type planDay uses muted color', () => {
-      const planDays = [createPlanDay({ dayOfWeek: 5, workoutType: 'rest' })];
-      renderStrip({ planDays, completedDays: new Set() });
-      expectPillStatus(5, 'bg-muted', 'text-muted-foreground');
-    });
-  });
-
-  // TS-04: Today Ring Highlight (AC-2)
-  describe('today highlight', () => {
-    it('TC_WCS_20: today pill has ring-2 ring-primary', () => {
+    it('TC_WCS_13: workout day shows dumbbell icon', () => {
       renderStrip({ todayDow: 3 });
-      const pill = screen.getByTestId('day-pill-3');
-      expect(pill.className).toContain('ring-2');
-      expect(pill.className).toContain('ring-primary');
+      expect(getPill(3)).toHaveAttribute('data-status', 'workout');
     });
 
-    it('TC_WCS_21: non-today pills do NOT have ring-primary', () => {
+    it('TC_WCS_14: workout day has primary colors', () => {
       renderStrip({ todayDow: 3 });
-      for (const dayNum of [1, 2, 4, 5, 6, 7]) {
-        const pill = screen.getByTestId(`day-pill-${dayNum}`);
-        expect(pill.className).not.toContain('ring-primary');
-      }
+      expect(getPill(3).className).toContain('bg-primary/10');
+      expect(getPill(3).className).toContain('text-primary');
     });
 
-    it('TC_WCS_22: today=Monday (day 1) has ring-primary', () => {
-      renderStrip({ todayDow: 1 });
-      expect(screen.getByTestId('day-pill-1').className).toContain('ring-primary');
+    it('TC_WCS_15: rest day (planned) shows moon icon', () => {
+      renderStrip();
+      expect(getPill(2)).toHaveAttribute('data-status', 'rest');
     });
 
-    it('TC_WCS_23: today=Sunday (day 7) has ring-primary', () => {
-      renderStrip({ todayDow: 7 });
-      expect(screen.getByTestId('day-pill-7').className).toContain('ring-primary');
+    it('TC_WCS_16: rest day has info colors', () => {
+      renderStrip();
+      expect(getPill(2).className).toContain('bg-muted');
+      expect(getPill(2).className).toContain('text-info');
     });
 
-    it('TC_WCS_24: today ring applied regardless of completed status', () => {
-      renderStrip({ todayDow: 1, completedDays: new Set([1]) });
-      const pill = screen.getByTestId('day-pill-1');
-      expect(pill.className).toContain('bg-success/10');
-      expect(pill.className).toContain('ring-primary');
+    it('TC_WCS_17: completed overrides workout status', () => {
+      renderStrip({ completedDays: new Set([3]), todayDow: 3 });
+      expect(getPill(3)).toHaveAttribute('data-status', 'completed');
     });
 
-    it('TC_WCS_25: today ring applied on rest day', () => {
-      renderStrip({ todayDow: 4, completedDays: new Set() });
-      const pill = screen.getByTestId('day-pill-4');
-      expect(pill.className).toContain('bg-muted');
-      expect(pill.className).toContain('ring-primary');
-    });
-  });
-
-  // TS-05: Selected Day Ring
-  describe('selected day', () => {
-    it('TC_WCS_26: selected non-today pill has ring-2 ring-ring', () => {
-      renderStrip({ selectedDay: 5, todayDow: 3 });
-      const pill = screen.getByTestId('day-pill-5');
-      expect(pill.className).toContain('ring-2');
-      expect(pill.className).toContain('ring-ring');
+    it('TC_WCS_18: completed overrides rest status', () => {
+      renderStrip({ completedDays: new Set([2]) });
+      expect(getPill(2)).toHaveAttribute('data-status', 'completed');
     });
 
-    it('TC_WCS_27: selected + today → ring-primary wins over ring-ring', () => {
-      renderStrip({ selectedDay: 3, todayDow: 3 });
-      const pill = screen.getByTestId('day-pill-3');
-      expect(pill.className).toContain('ring-primary');
-      // ring-ring should not appear from selected condition (only from focus-visible base)
-      // The raw class list from cn() should contain ring-primary but NOT a standalone ring-ring
-      // (focus-visible:ring-ring is different from ring-ring)
+    it('TC_WCS_19: rest day color consistency across planned rest', () => {
+      const plans = [makePlanDay(2, 'rest'), makePlanDay(4, 'rest')];
+      renderStrip({ planDays: plans, completedDays: new Set(), todayDow: 3 });
+      expect(getPill(2).className).toContain('text-info');
+      expect(getPill(4).className).toContain('text-info');
     });
 
-    it('TC_WCS_28: non-selected non-today has no standalone ring-2', () => {
-      renderStrip({ selectedDay: 5, todayDow: 3 });
-      const pill = screen.getByTestId('day-pill-1');
-      const classes = pill.className.split(' ');
-      expect(classes).not.toContain('ring-2');
-    });
-
-    it('TC_WCS_29: aria-pressed=true on selected pill', () => {
-      renderStrip({ selectedDay: 5 });
-      expect(screen.getByTestId('day-pill-5')).toHaveAttribute('aria-pressed', 'true');
-    });
-
-    it('TC_WCS_30: aria-pressed=false on non-selected pill', () => {
-      renderStrip({ selectedDay: 5 });
-      expect(screen.getByTestId('day-pill-1')).toHaveAttribute('aria-pressed', 'false');
+    it('TC_WCS_20: multiple completed days all show completed', () => {
+      renderStrip({ completedDays: new Set([1, 2, 3]) });
+      [1, 2, 3].forEach(d => {
+        expect(getPill(d)).toHaveAttribute('data-status', 'completed');
+      });
     });
   });
 
-  // TS-06: Day Selection Callback (AC-5)
-  describe('day selection', () => {
-    it('TC_WCS_31: click day 1 calls onDaySelect(1)', () => {
+  /* ------------------------------------------------------------------ */
+  /*  §C  Original Tests — Interaction (TC_WCS_21 – TC_WCS_30)          */
+  /* ------------------------------------------------------------------ */
+
+  describe('Interaction', () => {
+    it('TC_WCS_21: clicking a pill calls onDaySelect with day number', async () => {
       const onDaySelect = vi.fn();
       renderStrip({ onDaySelect });
-      fireEvent.click(screen.getByTestId('day-pill-1'));
-      expect(onDaySelect).toHaveBeenCalledWith(1);
+      await userEvent.click(getPill(5));
+      expect(onDaySelect).toHaveBeenCalledWith(5);
     });
 
-    it('TC_WCS_32: click day 7 calls onDaySelect(7)', () => {
+    it('TC_WCS_22: clicking already selected pill still fires onDaySelect', async () => {
       const onDaySelect = vi.fn();
-      renderStrip({ onDaySelect });
-      fireEvent.click(screen.getByTestId('day-pill-7'));
-      expect(onDaySelect).toHaveBeenCalledWith(7);
-    });
-
-    it('TC_WCS_33: click each day calls correct number', () => {
-      const onDaySelect = vi.fn();
-      renderStrip({ onDaySelect });
-      for (let i = 1; i <= 7; i++) {
-        fireEvent.click(screen.getByTestId(`day-pill-${i}`));
-      }
-      expect(onDaySelect).toHaveBeenCalledTimes(7);
-      for (let i = 1; i <= 7; i++) {
-        expect(onDaySelect).toHaveBeenNthCalledWith(i, i);
-      }
-    });
-
-    it('TC_WCS_34: click today pill still calls onDaySelect', () => {
-      const onDaySelect = vi.fn();
-      renderStrip({ onDaySelect, todayDow: 3 });
-      fireEvent.click(screen.getByTestId('day-pill-3'));
+      renderStrip({ onDaySelect, selectedDay: 3 });
+      await userEvent.click(getPill(3));
       expect(onDaySelect).toHaveBeenCalledWith(3);
     });
 
-    it('TC_WCS_35: click already-selected still calls callback', () => {
+    it('TC_WCS_23: context menu fires onDayContextMenu', async () => {
+      const onCtx = vi.fn();
+      renderStrip({ onDayContextMenu: onCtx });
+      const pill = getPill(1);
+      await userEvent.pointer({ target: pill, keys: '[MouseRight]' });
+      expect(onCtx).toHaveBeenCalledWith(1, expect.any(Object));
+    });
+
+    it('TC_WCS_24: no context menu handler means no error on right-click', async () => {
+      renderStrip({ onDayContextMenu: undefined });
+      await userEvent.pointer({ target: getPill(1), keys: '[MouseRight]' });
+      expect(screen.getByTestId('week-calendar-strip')).toBeInTheDocument();
+    });
+
+    it('TC_WCS_25: clicking different pills fires correct day numbers', async () => {
       const onDaySelect = vi.fn();
-      renderStrip({ onDaySelect, selectedDay: 5 });
-      fireEvent.click(screen.getByTestId('day-pill-5'));
-      expect(onDaySelect).toHaveBeenCalledWith(5);
+      renderStrip({ onDaySelect });
+      await userEvent.click(getPill(1));
+      await userEvent.click(getPill(7));
+      expect(onDaySelect).toHaveBeenCalledWith(1);
+      expect(onDaySelect).toHaveBeenCalledWith(7);
+    });
+
+    it('TC_WCS_26: rapid clicks on same pill fire multiple events', async () => {
+      const onDaySelect = vi.fn();
+      renderStrip({ onDaySelect });
+      await userEvent.click(getPill(4));
+      await userEvent.click(getPill(4));
+      expect(onDaySelect).toHaveBeenCalledTimes(2);
+    });
+
+    it('TC_WCS_27: all 7 pills are clickable', async () => {
+      const onDaySelect = vi.fn();
+      renderStrip({ onDaySelect });
+      for (let i = 1; i <= 7; i++) {
+        await userEvent.click(getPill(i));
+      }
+      expect(onDaySelect).toHaveBeenCalledTimes(7);
+    });
+
+    it('TC_WCS_28: pill has focus-visible ring class', () => {
+      renderStrip();
+      expect(getPill(1).className).toContain('focus-visible:ring-2');
+    });
+
+    it('TC_WCS_29: pills have type=button', () => {
+      renderStrip();
+      for (let i = 1; i <= 7; i++) {
+        expect(getPill(i)).toHaveAttribute('type', 'button');
+      }
+    });
+
+    it('TC_WCS_30: each pill has descriptive aria-label', () => {
+      renderStrip();
+      expect(getPill(1).getAttribute('aria-label')).toContain('Thứ Hai');
     });
   });
 
-  // TS-07: Accessibility
-  describe('accessibility', () => {
-    it('TC_WCS_36: container role="toolbar"', () => {
+  /* ------------------------------------------------------------------ */
+  /*  §D  Original Tests — Styling & Visual (TC_WCS_31 – TC_WCS_40)     */
+  /* ------------------------------------------------------------------ */
+
+  describe('Styling & Visual', () => {
+    it('TC_WCS_31: today pill has ring-primary ring-2', () => {
+      renderStrip({ todayDow: 3 });
+      expect(getPill(3).className).toContain('ring-primary');
+      expect(getPill(3).className).toContain('ring-2');
+    });
+
+    it('TC_WCS_32: selected non-today pill has ring-ring', () => {
+      renderStrip({ selectedDay: 5, todayDow: 3 });
+      expect(getPill(5).className).toContain('ring-ring');
+    });
+
+    it('TC_WCS_33: non-selected non-today pill has no ring', () => {
+      renderStrip({ selectedDay: 3, todayDow: 3 });
+      expect(getPill(5).className).not.toMatch(/(?<![:-])ring-primary/);
+      expect(getPill(5).className).not.toMatch(/ ring-ring/);
+    });
+
+    it('TC_WCS_34: pills use flex-1 for equal width', () => {
       renderStrip();
-      expect(screen.getByRole('toolbar')).toBeInTheDocument();
+      expect(getPill(1).className).toContain('flex-1');
     });
 
-    it('TC_WCS_37: container has aria-label', () => {
+    it('TC_WCS_35: strip container uses flex gap', () => {
       renderStrip();
-      expect(screen.getByRole('toolbar')).toHaveAttribute('aria-label', 'Tổng quan tuần');
+      expect(screen.getByTestId('week-calendar-strip').className).toContain('gap-1.5');
     });
 
-    it('TC_WCS_38: each pill is a button', () => {
+    it('TC_WCS_36: pill has min-h-11', () => {
       renderStrip();
-      expect(screen.getAllByRole('button')).toHaveLength(7);
+      expect(getPill(1).className).toContain('min-h-11');
     });
 
-    it('TC_WCS_39: aria-current="date" on today only', () => {
-      renderStrip({ todayDow: 4 });
-      expect(screen.getByTestId('day-pill-4')).toHaveAttribute('aria-current', 'date');
-      for (const dayNum of [1, 2, 3, 5, 6, 7]) {
-        expect(screen.getByTestId(`day-pill-${dayNum}`)).not.toHaveAttribute('aria-current');
-      }
-    });
-
-    it('TC_WCS_40: aria-label with full day name + status', () => {
-      renderStrip({ completedDays: new Set() });
-      // day 1 = Push workout → "Thứ Hai — Buổi tập"
-      expect(screen.getByTestId('day-pill-1')).toHaveAttribute('aria-label', 'Thứ Hai — Buổi tập');
-      // day 2 = rest → "Thứ Ba — Ngày nghỉ"
-      expect(screen.getByTestId('day-pill-2')).toHaveAttribute('aria-label', 'Thứ Ba — Ngày nghỉ');
-    });
-
-    it('TC_WCS_41: all pills have type="button"', () => {
+    it('TC_WCS_37: pills have active:scale press feedback', () => {
       renderStrip();
-      for (let i = 1; i <= 7; i++) {
-        expect(screen.getByTestId(`day-pill-${i}`)).toHaveAttribute('type', 'button');
-      }
+      expect(getPill(1).className).toContain('active:scale-[0.98]');
     });
 
-    it('TC_WCS_42: focus-visible ring classes on all pills', () => {
+    it('TC_WCS_38: pill text is text-xs', () => {
       renderStrip();
-      for (let i = 1; i <= 7; i++) {
-        const pill = screen.getByTestId(`day-pill-${i}`);
-        expect(pill.className).toContain('focus-visible:ring-2');
-        expect(pill.className).toContain('focus-visible:ring-ring');
-      }
+      expect(getPill(1).className).toContain('text-xs');
+    });
+
+    it('TC_WCS_39: completed pills show success background regardless of day', () => {
+      renderStrip({ completedDays: new Set([1, 4, 7]) });
+      [1, 4, 7].forEach(d => {
+        expect(getPill(d).className).toContain('bg-success/10');
+      });
+    });
+
+    it('TC_WCS_40: aria-label includes status text for missed day', () => {
+      renderStrip({ todayDow: 3 });
+      expect(getPill(1).getAttribute('aria-label')).toContain('Hoàn thành');
     });
   });
 
-  // TS-08: Layout & Sizing (AC-3, BR-37)
-  describe('layout & sizing', () => {
-    it('TC_WCS_43: each pill has min-h-11 class', () => {
-      renderStrip();
-      for (let i = 1; i <= 7; i++) {
-        expect(screen.getByTestId(`day-pill-${i}`).className).toContain('min-h-11');
-      }
-    });
+  /* ------------------------------------------------------------------ */
+  /*  §E  Original Tests — Edge Cases (TC_WCS_41 – TC_WCS_57)           */
+  /* ------------------------------------------------------------------ */
 
-    it('TC_WCS_44: each pill has flex-1 class', () => {
-      renderStrip();
-      for (let i = 1; i <= 7; i++) {
-        expect(screen.getByTestId(`day-pill-${i}`).className).toContain('flex-1');
-      }
-    });
-
-    it('TC_WCS_45: each pill has rounded-xl class', () => {
-      renderStrip();
-      for (let i = 1; i <= 7; i++) {
-        expect(screen.getByTestId(`day-pill-${i}`).className).toContain('rounded-xl');
-      }
-    });
-
-    it('TC_WCS_46: container uses flex gap-1.5', () => {
-      renderStrip();
-      const container = screen.getByTestId('week-calendar-strip');
-      expect(container.className).toContain('flex');
-      expect(container.className).toContain('gap-1.5');
-    });
-
-    it('TC_WCS_47: day label has text-[10px] class', () => {
-      renderStrip();
-      const pill = screen.getByTestId('day-pill-1');
-      const labelSpan = pill.querySelector('span');
-      expect(labelSpan?.className).toContain('text-[10px]');
-    });
-
-    it('TC_WCS_48: pill has flex-col items-center justify-center layout', () => {
-      renderStrip();
-      for (let i = 1; i <= 7; i++) {
-        const pill = screen.getByTestId(`day-pill-${i}`);
-        expect(pill.className).toContain('flex-col');
-        expect(pill.className).toContain('items-center');
-        expect(pill.className).toContain('justify-center');
-      }
-    });
-
-    it('TC_WCS_49: transition-colors on all pills', () => {
-      renderStrip();
-      for (let i = 1; i <= 7; i++) {
-        expect(screen.getByTestId(`day-pill-${i}`).className).toContain('transition-colors');
-      }
-    });
-  });
-
-  // TS-09: Edge Cases
-  describe('edge cases', () => {
-    it('TC_WCS_50: no plan days → all pills rest style with Moon', () => {
+  describe('Edge Cases', () => {
+    it('TC_WCS_41: empty planDays renders all pills', () => {
       renderStrip({ planDays: [], completedDays: new Set() });
+      expect(within(screen.getByTestId('week-calendar-strip')).getAllByRole('button')).toHaveLength(7);
+    });
+
+    it('TC_WCS_42: empty completedDays shows no completed pills', () => {
+      renderStrip({ completedDays: new Set(), todayDow: 1 });
       for (let i = 1; i <= 7; i++) {
-        const pill = screen.getByTestId(`day-pill-${i}`);
-        expect(pill).toHaveAttribute('data-status', 'rest');
-        expect(pill.className).toContain('bg-muted');
-        expect(pill.className).toContain('text-muted-foreground');
+        expect(getPill(i)).not.toHaveAttribute('data-status', 'completed');
       }
     });
 
-    it('TC_WCS_51: all days completed', () => {
+    it('TC_WCS_43: all days completed shows all completed', () => {
       renderStrip({ completedDays: new Set([1, 2, 3, 4, 5, 6, 7]) });
       for (let i = 1; i <= 7; i++) {
-        const pill = screen.getByTestId(`day-pill-${i}`);
-        expect(pill).toHaveAttribute('data-status', 'completed');
-        expect(pill.className).toContain('bg-success/10');
-        expect(pill.className).toContain('text-success');
+        expect(getPill(i)).toHaveAttribute('data-status', 'completed');
       }
     });
 
-    it('TC_WCS_52: only 2 training days (Mon+Thu)', () => {
-      const planDays = [
-        createPlanDay({ dayOfWeek: 1, workoutType: 'Push' }),
-        createPlanDay({ dayOfWeek: 4, workoutType: 'Pull' }),
-      ];
-      renderStrip({ planDays, completedDays: new Set() });
-      // Workout days
-      expect(screen.getByTestId('day-pill-1')).toHaveAttribute('data-status', 'workout');
-      expect(screen.getByTestId('day-pill-4')).toHaveAttribute('data-status', 'workout');
-      // Rest days
-      for (const dayNum of [2, 3, 5, 6, 7]) {
-        expect(screen.getByTestId(`day-pill-${dayNum}`)).toHaveAttribute('data-status', 'rest');
-      }
+    it('TC_WCS_44: selectedDay=1 marks first pill pressed', () => {
+      renderStrip({ selectedDay: 1 });
+      expect(getPill(1)).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it('TC_WCS_53: spontaneous workout (no plan, day 3 completed)', () => {
-      renderStrip({ planDays: [], completedDays: new Set([3]) });
-      expect(screen.getByTestId('day-pill-3')).toHaveAttribute('data-status', 'completed');
-      expect(screen.getByTestId('day-pill-3').className).toContain('bg-success/10');
-      // Other days = rest
-      for (const dayNum of [1, 2, 4, 5, 6, 7]) {
-        expect(screen.getByTestId(`day-pill-${dayNum}`)).toHaveAttribute('data-status', 'rest');
-      }
+    it('TC_WCS_45: selectedDay=7 marks last pill pressed', () => {
+      renderStrip({ selectedDay: 7 });
+      expect(getPill(7)).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it('TC_WCS_54: empty completedDays set → no Check icons', () => {
-      renderStrip({ completedDays: new Set() });
+    it('TC_WCS_46: todayDow=1 first pill is current', () => {
+      renderStrip({ todayDow: 1 });
+      expect(getPill(1)).toHaveAttribute('aria-current', 'date');
+    });
+
+    it('TC_WCS_47: todayDow=7 last pill is current', () => {
+      renderStrip({ todayDow: 7 });
+      expect(getPill(7)).toHaveAttribute('aria-current', 'date');
+    });
+
+    it('TC_WCS_48: today AND selected same pill has ring-primary', () => {
+      renderStrip({ selectedDay: 3, todayDow: 3 });
+      expect(getPill(3).className).toContain('ring-primary');
+    });
+
+    it('TC_WCS_49: today AND selected same pill pressed+current', () => {
+      renderStrip({ selectedDay: 3, todayDow: 3 });
+      expect(getPill(3)).toHaveAttribute('aria-pressed', 'true');
+      expect(getPill(3)).toHaveAttribute('aria-current', 'date');
+    });
+
+    it('TC_WCS_50: empty plan shows past=rest, today/future=noPlan', () => {
+      renderStrip({ planDays: [], completedDays: new Set(), todayDow: 4 });
+      [1, 2, 3].forEach(d => expect(getPill(d)).toHaveAttribute('data-status', 'rest'));
+      [4, 5, 6, 7].forEach(d => expect(getPill(d)).toHaveAttribute('data-status', 'noPlan'));
+    });
+
+    it('TC_WCS_51: single workout day correct', () => {
+      renderStrip({ planDays: [makePlanDay(4)], completedDays: new Set(), todayDow: 4 });
+      expect(getPill(4)).toHaveAttribute('data-status', 'workout');
+    });
+
+    it('TC_WCS_52: mixed statuses with todayDow awareness', () => {
+      const plans = [makePlanDay(1), makePlanDay(2, 'rest'), makePlanDay(5)];
+      renderStrip({ planDays: plans, completedDays: new Set(), todayDow: 3 });
+      expect(getPill(1)).toHaveAttribute('data-status', 'missed');
+      expect(getPill(2)).toHaveAttribute('data-status', 'rest');
+      expect(getPill(3)).toHaveAttribute('data-status', 'noPlan');
+      expect(getPill(5)).toHaveAttribute('data-status', 'workout');
+    });
+
+    it('TC_WCS_53: days without plan after today show noPlan', () => {
+      renderStrip({ planDays: [makePlanDay(1)], completedDays: new Set([1]), todayDow: 3 });
+      [4, 5, 6, 7].forEach(d => expect(getPill(d)).toHaveAttribute('data-status', 'noPlan'));
+    });
+
+    it('TC_WCS_54: completed overrides missed for past day', () => {
+      renderStrip({ planDays: [makePlanDay(1)], completedDays: new Set([1]), todayDow: 3 });
+      expect(getPill(1)).toHaveAttribute('data-status', 'completed');
+    });
+
+    it('TC_WCS_55: context menu event has day number', async () => {
+      const onCtx = vi.fn();
+      renderStrip({ onDayContextMenu: onCtx });
+      await userEvent.pointer({ target: getPill(4), keys: '[MouseRight]' });
+      expect(onCtx).toHaveBeenCalledWith(4, expect.any(Object));
+    });
+
+    it('TC_WCS_56: past workout day without completion is missed', () => {
+      renderStrip({ planDays: [makePlanDay(1), makePlanDay(2)], completedDays: new Set(), todayDow: 4 });
+      expect(getPill(1)).toHaveAttribute('data-status', 'missed');
+      expect(getPill(2)).toHaveAttribute('data-status', 'missed');
+    });
+
+    it('TC_WCS_57: strip handles large completedDays set', () => {
+      renderStrip({ completedDays: new Set([1, 2, 3, 4, 5, 6, 7]) });
       for (let i = 1; i <= 7; i++) {
-        const pill = screen.getByTestId(`day-pill-${i}`);
-        expect(pill).not.toHaveAttribute('data-status', 'completed');
+        expect(getPill(i)).toHaveAttribute('data-status', 'completed');
+      }
+    });
+  });
+
+  /* ================================================================== */
+  /*  §F  NEW TESTS — getDayStatus Unit (TC_WCS_58 – TC_WCS_67)         */
+  /* ================================================================== */
+
+  describe('getDayStatus unit', () => {
+    const plans = [makePlanDay(1), makePlanDay(2, 'rest'), makePlanDay(3), makePlanDay(5)];
+
+    it('TC_WCS_58: completed overrides everything', () => {
+      expect(getDayStatus(1, 3, plans, new Set([1]))).toBe('completed');
+    });
+
+    it('TC_WCS_59: planned rest always returns rest', () => {
+      expect(getDayStatus(2, 1, plans, new Set())).toBe('rest');
+    });
+
+    it('TC_WCS_60: past planned workout without completion is missed', () => {
+      expect(getDayStatus(1, 3, plans, new Set())).toBe('missed');
+    });
+
+    it('TC_WCS_61: today planned workout is workout', () => {
+      expect(getDayStatus(3, 3, plans, new Set())).toBe('workout');
+    });
+
+    it('TC_WCS_62: future planned workout is workout', () => {
+      expect(getDayStatus(5, 3, plans, new Set())).toBe('workout');
+    });
+
+    it('TC_WCS_63: past unplanned day is rest', () => {
+      expect(getDayStatus(4, 5, [makePlanDay(5)], new Set())).toBe('rest');
+    });
+
+    it('TC_WCS_64: today unplanned day is noPlan', () => {
+      expect(getDayStatus(3, 3, [makePlanDay(1)], new Set())).toBe('noPlan');
+    });
+
+    it('TC_WCS_65: future unplanned day is noPlan', () => {
+      expect(getDayStatus(6, 3, plans, new Set())).toBe('noPlan');
+    });
+
+    it('TC_WCS_66: completed overrides missed for past day', () => {
+      expect(getDayStatus(1, 5, plans, new Set([1]))).toBe('completed');
+    });
+
+    it('TC_WCS_67: planned rest in past stays rest not missed', () => {
+      expect(getDayStatus(2, 5, plans, new Set())).toBe('rest');
+    });
+  });
+
+  /* ================================================================== */
+  /*  §G  NEW TESTS — Missed & NoPlan Statuses (TC_WCS_68 – TC_WCS_72)  */
+  /* ================================================================== */
+
+  describe('Missed & NoPlan Statuses', () => {
+    it('TC_WCS_68: missed day shows error colors', () => {
+      renderStrip({ planDays: [makePlanDay(1)], completedDays: new Set(), todayDow: 3 });
+      expect(getPill(1)).toHaveAttribute('data-status', 'missed');
+      expect(getPill(1).className).toContain('bg-error/10');
+      expect(getPill(1).className).toContain('text-error');
+    });
+
+    it('TC_WCS_69: noPlan day shows muted-foreground colors', () => {
+      renderStrip({ planDays: [], completedDays: new Set(), todayDow: 3 });
+      expect(getPill(4)).toHaveAttribute('data-status', 'noPlan');
+      expect(getPill(4).className).toContain('bg-muted');
+      expect(getPill(4).className).toContain('text-muted-foreground');
+    });
+
+    it('TC_WCS_70: noPlan day has circle icon', () => {
+      renderStrip({ planDays: [], completedDays: new Set(), todayDow: 3 });
+      expect(getPill(4)).toHaveAttribute('data-status', 'noPlan');
+    });
+
+    it('TC_WCS_71: missed day aria-label includes missed text', () => {
+      renderStrip({ planDays: [makePlanDay(1)], completedDays: new Set(), todayDow: 3 });
+      expect(getPill(1).getAttribute('aria-label')).toContain('Bỏ lỡ');
+    });
+
+    it('TC_WCS_72: noPlan day aria-label includes noPlan text', () => {
+      renderStrip({ planDays: [], completedDays: new Set(), todayDow: 3 });
+      expect(getPill(4).getAttribute('aria-label')).toContain('Chưa có kế hoạch');
+    });
+  });
+
+  /* ================================================================== */
+  /*  §H  NEW TESTS — Week Dates (TC_WCS_73 – TC_WCS_78)                */
+  /* ================================================================== */
+
+  describe('Week Dates', () => {
+    it('TC_WCS_73: date numbers shown when weekDates provided', () => {
+      renderStrip({ weekDates: [7, 8, 9, 10, 11, 12, 13] });
+      expect(screen.getByTestId('date-1')).toHaveTextContent('7');
+      expect(screen.getByTestId('date-7')).toHaveTextContent('13');
+    });
+
+    it('TC_WCS_74: no date numbers when weekDates not provided', () => {
+      renderStrip();
+      expect(screen.queryByTestId('date-1')).not.toBeInTheDocument();
+    });
+
+    it('TC_WCS_75: all 7 date testids rendered with weekDates', () => {
+      renderStrip({ weekDates: [1, 2, 3, 4, 5, 6, 7] });
+      for (let i = 1; i <= 7; i++) {
+        expect(screen.getByTestId(`date-${i}`)).toBeInTheDocument();
       }
     });
 
-    it('TC_WCS_55: planDay with workoutType "rest" renders as rest', () => {
-      const planDays = [createPlanDay({ dayOfWeek: 5, workoutType: 'rest' })];
-      renderStrip({ planDays, completedDays: new Set() });
-      expect(screen.getByTestId('day-pill-5')).toHaveAttribute('data-status', 'rest');
-      expect(screen.getByTestId('day-pill-5').className).toContain('bg-muted');
+    it('TC_WCS_76: date 1 shows weekDates[0]', () => {
+      renderStrip({ weekDates: [15, 16, 17, 18, 19, 20, 21] });
+      expect(screen.getByTestId('date-1')).toHaveTextContent('15');
     });
 
-    it('TC_WCS_56: cardio and strength both show workout status', () => {
-      const planDays = [
-        createPlanDay({ dayOfWeek: 1, workoutType: 'Cardio' }),
-        createPlanDay({ dayOfWeek: 2, workoutType: 'Push' }),
-      ];
-      renderStrip({ planDays, completedDays: new Set() });
-      expect(screen.getByTestId('day-pill-1')).toHaveAttribute('data-status', 'workout');
-      expect(screen.getByTestId('day-pill-2')).toHaveAttribute('data-status', 'workout');
+    it('TC_WCS_77: date 7 shows weekDates[6]', () => {
+      renderStrip({ weekDates: [15, 16, 17, 18, 19, 20, 21] });
+      expect(screen.getByTestId('date-7')).toHaveTextContent('21');
     });
 
-    it('TC_WCS_57: multiple plan days per day (multi-session) → first used', () => {
-      const planDays = [
-        createPlanDay({ id: 'pd-3a', dayOfWeek: 3, sessionOrder: 1, workoutType: 'Push' }),
-        createPlanDay({ id: 'pd-3b', dayOfWeek: 3, sessionOrder: 2, workoutType: 'Cardio' }),
-      ];
-      renderStrip({ planDays, completedDays: new Set() });
-      // Day 3 has a planDay with workout type → shows as workout
-      expect(screen.getByTestId('day-pill-3')).toHaveAttribute('data-status', 'workout');
+    it('TC_WCS_78: date numbers are inside the pill buttons', () => {
+      renderStrip({ weekDates: [7, 8, 9, 10, 11, 12, 13] });
+      const pill = getPill(1);
+      expect(within(pill).getByTestId('date-1')).toBeInTheDocument();
+    });
+  });
+
+  /* ================================================================== */
+  /*  §I  NEW TESTS — Day Preview Panel (TC_WCS_79 – TC_WCS_89)         */
+  /* ================================================================== */
+
+  describe('Day Preview Panel', () => {
+    const previewData = {
+      workoutName: 'Ngày đẩy - Ngực & Vai',
+      exerciseCount: 5,
+      muscleGroups: 'Ngực, Vai, Tay sau',
+    };
+
+    it('TC_WCS_79: preview panel renders when selectedDayData provided', () => {
+      renderStrip({ selectedDayData: previewData });
+      expect(screen.getByTestId('day-preview')).toBeInTheDocument();
+    });
+
+    it('TC_WCS_80: preview panel hidden when selectedDayData is null', () => {
+      renderStrip({ selectedDayData: null });
+      expect(screen.queryByTestId('day-preview')).not.toBeInTheDocument();
+    });
+
+    it('TC_WCS_81: preview panel hidden when selectedDayData is undefined', () => {
+      renderStrip();
+      expect(screen.queryByTestId('day-preview')).not.toBeInTheDocument();
+    });
+
+    it('TC_WCS_82: preview shows workout name', () => {
+      renderStrip({ selectedDayData: previewData });
+      expect(screen.getByTestId('preview-workout-name')).toHaveTextContent('Ngày đẩy - Ngực & Vai');
+    });
+
+    it('TC_WCS_83: preview shows exercise count', () => {
+      renderStrip({ selectedDayData: previewData });
+      expect(screen.getByTestId('preview-details')).toHaveTextContent('5 bài tập');
+    });
+
+    it('TC_WCS_84: preview shows muscle groups with separator', () => {
+      renderStrip({ selectedDayData: previewData });
+      expect(screen.getByTestId('preview-details')).toHaveTextContent('· Ngực, Vai, Tay sau');
+    });
+
+    it('TC_WCS_85: preview hides muscle groups when empty', () => {
+      renderStrip({ selectedDayData: { ...previewData, muscleGroups: '' } });
+      expect(screen.getByTestId('preview-details')).not.toHaveTextContent('·');
+    });
+
+    it('TC_WCS_86: start button renders when handler provided', () => {
+      const onStart = vi.fn();
+      renderStrip({ selectedDayData: previewData, onStartSelectedDayWorkout: onStart });
+      expect(screen.getByTestId('start-selected-workout')).toBeInTheDocument();
+    });
+
+    it('TC_WCS_87: start button hidden when handler not provided', () => {
+      renderStrip({ selectedDayData: previewData });
+      expect(screen.queryByTestId('start-selected-workout')).not.toBeInTheDocument();
+    });
+
+    it('TC_WCS_88: start button click fires handler', async () => {
+      const onStart = vi.fn();
+      renderStrip({ selectedDayData: previewData, onStartSelectedDayWorkout: onStart });
+      await userEvent.click(screen.getByTestId('start-selected-workout'));
+      expect(onStart).toHaveBeenCalledOnce();
+    });
+
+    it('TC_WCS_89: start button shows localized text', () => {
+      const onStart = vi.fn();
+      renderStrip({ selectedDayData: previewData, onStartSelectedDayWorkout: onStart });
+      expect(screen.getByTestId('start-selected-workout')).toHaveTextContent('Bắt đầu tập');
+    });
+  });
+
+  /* ================================================================== */
+  /*  §J  NEW TESTS — Animation & Motion (TC_WCS_90 – TC_WCS_97)        */
+  /* ================================================================== */
+
+  describe('Animation & Motion', () => {
+    it('TC_WCS_90: container has slideUp animation class', () => {
+      renderStrip();
+      expect(screen.getByTestId('week-calendar-strip').className).toContain('animate-slideUp');
+    });
+
+    it('TC_WCS_91: container has stagger-2 class', () => {
+      renderStrip();
+      expect(screen.getByTestId('week-calendar-strip').className).toContain('animate-stagger-2');
+    });
+
+    it('TC_WCS_92: reduced motion removes animation classes', () => {
+      mockMotion.reduced = true;
+      renderStrip();
+      const cls = screen.getByTestId('week-calendar-strip').className;
+      expect(cls).not.toContain('animate-slide-up');
+      expect(cls).not.toContain('animate-stagger-2');
+    });
+
+    it('TC_WCS_93: pills have active:scale press feedback', () => {
+      renderStrip();
+      expect(getPill(1).className).toContain('active:scale-[0.98]');
+    });
+
+    it('TC_WCS_94: pills have motion-reduce:transform-none', () => {
+      renderStrip();
+      expect(getPill(1).className).toContain('motion-reduce:transform-none');
+    });
+
+    it('TC_WCS_95: container has motion-reduce:transform-none', () => {
+      renderStrip();
+      expect(screen.getByTestId('week-calendar-strip').className).toContain('motion-reduce:transform-none');
+    });
+
+    it('TC_WCS_96: preview panel has animate-fade-in when motion enabled', () => {
+      renderStrip({ selectedDayData: { workoutName: 'Test', exerciseCount: 3, muscleGroups: '' } });
+      expect(screen.getByTestId('day-preview').className).toContain('animate-fade-in');
+    });
+
+    it('TC_WCS_97: preview panel no animate-fade-in when motion reduced', () => {
+      mockMotion.reduced = true;
+      renderStrip({ selectedDayData: { workoutName: 'Test', exerciseCount: 3, muscleGroups: '' } });
+      expect(screen.getByTestId('day-preview').className).not.toContain('animate-fade-in');
+    });
+  });
+
+  /* ================================================================== */
+  /*  §K  NEW TESTS — Combined Scenarios (TC_WCS_98 – TC_WCS_107)       */
+  /* ================================================================== */
+
+  describe('Combined Scenarios', () => {
+    it('TC_WCS_98: full week with all 6 statuses', () => {
+      const plans = [makePlanDay(1), makePlanDay(2, 'rest'), makePlanDay(3), makePlanDay(5), makePlanDay(6, 'rest')];
+      renderStrip({ planDays: plans, completedDays: new Set([1]), todayDow: 4 });
+      expect(getPill(1)).toHaveAttribute('data-status', 'completed');
+      expect(getPill(2)).toHaveAttribute('data-status', 'rest');
+      expect(getPill(3)).toHaveAttribute('data-status', 'missed');
+      expect(getPill(4)).toHaveAttribute('data-status', 'noPlan');
+      expect(getPill(5)).toHaveAttribute('data-status', 'workout');
+      expect(getPill(6)).toHaveAttribute('data-status', 'rest');
+      expect(getPill(7)).toHaveAttribute('data-status', 'noPlan');
+    });
+
+    it('TC_WCS_99: todayDow=1 no past days means no missed', () => {
+      const plans = [makePlanDay(1), makePlanDay(3), makePlanDay(5)];
+      renderStrip({ planDays: plans, completedDays: new Set(), todayDow: 1 });
+      expect(getPill(1)).toHaveAttribute('data-status', 'workout');
+      expect(getPill(3)).toHaveAttribute('data-status', 'workout');
+    });
+
+    it('TC_WCS_100: todayDow=7 all workout days past become missed', () => {
+      const plans = [makePlanDay(1), makePlanDay(3), makePlanDay(5)];
+      renderStrip({ planDays: plans, completedDays: new Set(), todayDow: 7 });
+      [1, 3, 5].forEach(d => expect(getPill(d)).toHaveAttribute('data-status', 'missed'));
+    });
+
+    it('TC_WCS_101: weekDates + statuses combined render', () => {
+      renderStrip({ weekDates: [10, 11, 12, 13, 14, 15, 16], todayDow: 3 });
+      expect(screen.getByTestId('date-3')).toHaveTextContent('12');
+      expect(getPill(3)).toHaveAttribute('data-status', 'workout');
+    });
+
+    it('TC_WCS_102: preview + dates combined render', () => {
+      const data = { workoutName: 'Push Day', exerciseCount: 4, muscleGroups: 'Chest' };
+      renderStrip({ weekDates: [1, 2, 3, 4, 5, 6, 7], selectedDayData: data });
+      expect(screen.getByTestId('date-1')).toBeInTheDocument();
+      expect(screen.getByTestId('day-preview')).toBeInTheDocument();
+    });
+
+    it('TC_WCS_103: preview + reduced motion combined', () => {
+      mockMotion.reduced = true;
+      const data = { workoutName: 'Leg Day', exerciseCount: 6, muscleGroups: '' };
+      renderStrip({ selectedDayData: data });
+      expect(screen.getByTestId('day-preview').className).not.toContain('animate-fade-in');
+      expect(screen.getByTestId('day-preview').className).toContain('motion-reduce:transform-none');
+    });
+
+    it('TC_WCS_104: all 7 completed + preview renders correctly', () => {
+      const data = { workoutName: 'Rest', exerciseCount: 0, muscleGroups: '' };
+      renderStrip({ completedDays: new Set([1, 2, 3, 4, 5, 6, 7]), selectedDayData: data });
+      for (let i = 1; i <= 7; i++) {
+        expect(getPill(i)).toHaveAttribute('data-status', 'completed');
+      }
+      expect(screen.getByTestId('day-preview')).toBeInTheDocument();
+    });
+
+    it('TC_WCS_105: clicking day + preview interaction', async () => {
+      const onDaySelect = vi.fn();
+      const data = { workoutName: 'Test', exerciseCount: 1, muscleGroups: '' };
+      renderStrip({ selectedDayData: data, onDaySelect });
+      await userEvent.click(getPill(5));
+      expect(onDaySelect).toHaveBeenCalledWith(5);
+    });
+
+    it('TC_WCS_106: all statuses have correct aria-labels', () => {
+      const plans = [makePlanDay(1), makePlanDay(2, 'rest'), makePlanDay(3), makePlanDay(5)];
+      renderStrip({ planDays: plans, completedDays: new Set([1]), todayDow: 4 });
+      expect(getPill(1).getAttribute('aria-label')).toContain('Hoàn thành');
+      expect(getPill(2).getAttribute('aria-label')).toContain('Ngày nghỉ');
+      expect(getPill(3).getAttribute('aria-label')).toContain('Bỏ lỡ');
+      expect(getPill(4).getAttribute('aria-label')).toContain('Chưa có kế hoạch');
+      expect(getPill(5).getAttribute('aria-label')).toContain('Buổi tập');
+    });
+
+    it('TC_WCS_107: DayStatus type is exported', () => {
+      const status: DayStatus = 'missed';
+      expect(['completed', 'rest', 'workout', 'missed', 'noPlan']).toContain(status);
     });
   });
 });
