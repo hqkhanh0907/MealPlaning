@@ -108,6 +108,7 @@
     "planMeal": "Lên kế hoạch",
     "mealPlan": "Kế hoạch ăn uống",
     "aiSuggest": "Gợi ý AI",
+    "aiSuggesting": "Đang gợi ý...",
     "clearPlan": "Xóa kế hoạch",
     "moreActions": "Thao tác khác",
     "emptyTitle": "Chưa có kế hoạch cho ngày này",
@@ -160,7 +161,13 @@
     "prevMonth": "Tháng trước",
     "nextMonth": "Tháng sau",
     "prevWeek": "Tuần trước",
-    "nextWeek": "Tuần sau"
+    "nextWeek": "Tuần sau",
+    "meal": {
+      "emptySlot": "Chưa có món",
+      "addCTA": "Thêm",
+      "moreCount": "+{{count}} thêm",
+      "slotLabel": "{{type}}: {{count}} món, {{cal}} kcal"
+    }
   },
   "recommendation": {
     "title": "Gợi ý cho bạn",

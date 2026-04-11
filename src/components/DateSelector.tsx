@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, List } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +7,19 @@ import { useDatabase } from '../contexts/DatabaseContext';
 import { getSetting, setSetting } from '../services/appSettings';
 import { DayPlan } from '../types';
 import { parseLocalDate } from '../utils/helpers';
+
+type ViewMode = 'calendar' | 'week';
+
+/** Compute default view mode synchronously (before persisted preference loads). */
+const getDefaultViewMode = (): ViewMode => {
+  try {
+    if (Capacitor.isNativePlatform()) return 'week';
+  } catch {
+    /* Capacitor unavailable */
+  }
+  if (typeof globalThis !== 'undefined' && globalThis.window && globalThis.window.innerWidth < 640) return 'week';
+  return 'calendar';
+};
 
 /** Format a Date to local YYYY-MM-DD (avoids UTC shift from toISOString) */
 const formatLocalDate = (d: Date): string => {
@@ -103,9 +117,7 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
     const d = parseLocalDate(selectedDate);
     return Number.isNaN(d.getTime()) ? new Date() : d;
   });
-  const [viewMode, setViewMode] = useState<'calendar' | 'week'>(() =>
-    typeof globalThis !== 'undefined' && globalThis.window && globalThis.window.innerWidth < 640 ? 'week' : 'calendar',
-  );
+  const [viewMode, setViewMode] = useState<ViewMode>(getDefaultViewMode);
   const [weekOffset, setWeekOffset] = useState(0);
   const [hintDismissed, setHintDismissed] = useState(false);
   const weekContainerRef = useRef<HTMLDivElement>(null);
@@ -116,6 +128,16 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
     getSetting(db, 'date_hint_dismissed')
       .then(val => {
         if (val === '1') setHintDismissed(true);
+      })
+      .catch(() => {
+        /* db read error – keep default */
+      });
+  }, [db]);
+
+  useEffect(() => {
+    getSetting(db, 'calendar_view_mode')
+      .then(val => {
+        if (val === 'calendar' || val === 'week') setViewMode(val);
       })
       .catch(() => {
         /* db read error – keep default */
@@ -227,7 +249,13 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <button
-            onClick={() => setViewMode(viewMode === 'calendar' ? 'week' : 'calendar')}
+            onClick={() => {
+              const newMode: ViewMode = viewMode === 'calendar' ? 'week' : 'calendar';
+              setViewMode(newMode);
+              setSetting(db, 'calendar_view_mode', newMode).catch(() => {
+                /* db write error */
+              });
+            }}
             className="text-muted-foreground hover:bg-accent active:bg-muted flex min-h-11 min-w-11 items-center justify-center rounded-xl p-1.5 transition-all sm:min-h-9 sm:min-w-9 sm:p-2"
             title={viewMode === 'calendar' ? t('calendar.weekMode') : t('calendar.calendarMode')}
             aria-label={viewMode === 'calendar' ? t('calendar.weekMode') : t('calendar.calendarMode')}
@@ -300,12 +328,14 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
                 <span className="text-lg font-semibold">{date.getDate()}</span>
                 <div className="mt-0.5 flex gap-0.5">
                   <div
-                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-energy')}`}
+                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-meal-breakfast')}`}
                   />
                   <div
-                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-macro-carbs')}`}
+                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-meal-lunch')}`}
                   />
-                  <div className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-ai')}`} />
+                  <div
+                    className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-meal-dinner')}`}
+                  />
                 </div>
                 {mealCount > 0 && (
                   <span className="text-[8px] leading-none font-bold text-current opacity-60" aria-hidden="true">
@@ -378,12 +408,14 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
 
                   <div className="absolute bottom-1 flex gap-0.5 sm:bottom-2">
                     <div
-                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-energy')}`}
+                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasBreakfast, isSelected, 'bg-meal-breakfast')}`}
                     />
                     <div
-                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-macro-carbs')}`}
+                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasLunch, isSelected, 'bg-meal-lunch')}`}
                     />
-                    <div className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-ai')}`} />
+                    <div
+                      className={`h-1.5 w-1.5 rounded-full ${getMealDotClass(hasDinner, isSelected, 'bg-meal-dinner')}`}
+                    />
                   </div>
                   {mealCount > 0 && (
                     <span
@@ -417,13 +449,13 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
             })()}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1">
-                <div className="bg-energy h-2 w-2 rounded-full"></div> {t('calendar.morning')}
+                <div className="bg-meal-breakfast h-2 w-2 rounded-full"></div> {t('calendar.morning')}
               </div>
               <div className="flex items-center gap-1">
-                <div className="bg-macro-carbs h-2 w-2 rounded-full"></div> {t('calendar.afternoon')}
+                <div className="bg-meal-lunch h-2 w-2 rounded-full"></div> {t('calendar.afternoon')}
               </div>
               <div className="flex items-center gap-1">
-                <div className="bg-ai h-2 w-2 rounded-full"></div> {t('calendar.evening')}
+                <div className="bg-meal-dinner h-2 w-2 rounded-full"></div> {t('calendar.evening')}
               </div>
             </div>
           </div>
@@ -435,13 +467,13 @@ export const DateSelector = ({ selectedDate, onSelectDate, onPlanClick, dayPlans
           {!hintDismissed && <span>{t('calendar.swipeHint')}</span>}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
-              <div className="bg-energy h-2 w-2 rounded-full"></div> {t('calendar.morning')}
+              <div className="bg-meal-breakfast h-2 w-2 rounded-full"></div> {t('calendar.morning')}
             </div>
             <div className="flex items-center gap-1">
-              <div className="bg-macro-carbs h-2 w-2 rounded-full"></div> {t('calendar.afternoon')}
+              <div className="bg-meal-lunch h-2 w-2 rounded-full"></div> {t('calendar.afternoon')}
             </div>
             <div className="flex items-center gap-1">
-              <div className="bg-ai h-2 w-2 rounded-full"></div> {t('calendar.evening')}
+              <div className="bg-meal-dinner h-2 w-2 rounded-full"></div> {t('calendar.evening')}
             </div>
           </div>
         </div>

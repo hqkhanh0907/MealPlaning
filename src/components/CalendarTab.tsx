@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { CloseButton } from '@/components/shared/CloseButton';
 
 import { useIsDesktop } from '../hooks/useIsDesktop';
+import { CalendarSubTab, useUIStore } from '../store/uiStore';
 import { DayNutritionSummary, DayPlan, Dish, Ingredient, MealType } from '../types';
 import { parseLocalDate } from '../utils/helpers';
 import { DateSelector } from './DateSelector';
@@ -12,8 +13,6 @@ import { GroceryList } from './GroceryList';
 import { MealsSubTab } from './schedule/MealsSubTab';
 import { NutritionSubTab } from './schedule/NutritionSubTab';
 import { ModalBackdrop } from './shared/ModalBackdrop';
-
-type ScheduleSubTab = 'meals' | 'nutrition';
 
 export interface CalendarTabProps {
   selectedDate: string;
@@ -68,7 +67,8 @@ export const CalendarTab = React.memo(function CalendarTab({
 }: CalendarTabProps) {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language === 'vi' ? 'vi-VN' : 'en-US';
-  const [activeSubTab, setActiveSubTab] = useState<ScheduleSubTab>('meals');
+  const activeSubTab = useUIStore(s => s.activeCalendarSubTab);
+  const setActiveSubTab = useUIStore(s => s.setCalendarSubTab);
   const [showGrocery, setShowGrocery] = useState(false);
   const isDesktop = useIsDesktop();
 
@@ -91,7 +91,7 @@ export const CalendarTab = React.memo(function CalendarTab({
     return allIds.slice(0, 8);
   }, [dayPlans, selectedDate]);
 
-  const SUB_TABS: { key: ScheduleSubTab; label: string; icon: React.ReactNode }[] = [
+  const SUB_TABS: { key: CalendarSubTab; label: string; icon: React.ReactNode }[] = [
     { key: 'meals', label: t('schedule.mealsTab'), icon: <UtensilsCrossed className="text-energy h-4 w-4" /> },
     { key: 'nutrition', label: t('schedule.nutritionTab'), icon: <BarChart3 className="h-4 w-4" /> },
   ];

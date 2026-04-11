@@ -8,6 +8,44 @@ import { MiniNutritionBar } from '../components/schedule/MiniNutritionBar';
 import { NutritionSubTab } from '../components/schedule/NutritionSubTab';
 import type { DayNutritionSummary, Dish, SlotInfo } from '../types';
 
+vi.mock('@/components/ui/dropdown-menu', () => {
+  return {
+    DropdownMenu: ({ children }: { children: React.ReactNode }) => <div data-testid="dropdown-root">{children}</div>,
+    DropdownMenuTrigger: ({ children, ...props }: Record<string, unknown>) => (
+      <button {...props}>{children as React.ReactNode}</button>
+    ),
+    DropdownMenuContent: ({ children }: { children: React.ReactNode }) => (
+      <div data-testid="more-actions-menu" role="menu">
+        {children}
+      </div>
+    ),
+    DropdownMenuItem: ({
+      children,
+      onClick,
+      disabled,
+      variant,
+      ...props
+    }: {
+      children: React.ReactNode;
+      onClick?: () => void;
+      disabled?: boolean;
+      variant?: string;
+      [key: string]: unknown;
+    }) => (
+      <button
+        role="menuitem"
+        onClick={disabled ? undefined : onClick}
+        disabled={disabled}
+        data-variant={variant}
+        {...props}
+      >
+        {children}
+      </button>
+    ),
+    DropdownMenuSeparator: () => <hr data-testid="menu-separator" role="separator" />,
+  };
+});
+
 vi.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: () => ({ isDark: false, theme: 'light', cycleTheme: vi.fn(), setTheme: vi.fn() }),
 }));
@@ -65,11 +103,11 @@ const dishes: Dish[] = [
 
 // ─── MealSlot ────────────────────────────────────────────────────────
 describe('MealSlot', () => {
-  it('renders empty state with "Chưa có món" and "Thêm" button', () => {
+  it('renders empty state with "Chưa có món" and add button', () => {
     const onEdit = vi.fn();
     render(<MealSlot type="breakfast" slot={makeSlot([])} dishes={dishes} onEdit={onEdit} />);
     expect(screen.getByText('Chưa có món')).toBeInTheDocument();
-    const addBtn = screen.getByLabelText('Thêm');
+    const addBtn = screen.getByLabelText(/Thêm món cho/);
     expect(addBtn).toBeInTheDocument();
     fireEvent.click(addBtn);
     expect(onEdit).toHaveBeenCalledTimes(1);
@@ -82,20 +120,27 @@ describe('MealSlot', () => {
     expect(screen.getByText(/P 20g/)).toBeInTheDocument();
   });
 
-  it('renders "+N món nữa" when more than 2 dishes', () => {
-    render(<MealSlot type="breakfast" slot={makeSlot(['d1', 'd2', 'd3'], 900, 45)} dishes={dishes} onEdit={vi.fn()} />);
-    // Only first 2 visible
+  it('renders "+N thêm" when more than MAX_VISIBLE dishes', () => {
+    render(
+      <MealSlot
+        type="breakfast"
+        slot={makeSlot(['d1', 'd2', 'd3', 'd4', 'd5'], 1500, 70)}
+        dishes={dishes}
+        onEdit={vi.fn()}
+      />,
+    );
     expect(screen.getByText('Trứng chiên')).toBeInTheDocument();
     expect(screen.getByText('Cơm gà')).toBeInTheDocument();
-    // Extra count text
-    expect(screen.getByText('+1 món nữa')).toBeInTheDocument();
+    expect(screen.getByText('+1 thêm')).toBeInTheDocument();
   });
 
-  it('renders "+N món nữa" with count > 1 when more than 3 dishes', () => {
+  it('shows all dishes without "more" when count <= MAX_VISIBLE (4)', () => {
     render(
       <MealSlot type="lunch" slot={makeSlot(['d1', 'd2', 'd3', 'd4'], 1200, 60)} dishes={dishes} onEdit={vi.fn()} />,
     );
-    expect(screen.getByText('+2 món nữa')).toBeInTheDocument();
+    expect(screen.getByText('Trứng chiên')).toBeInTheDocument();
+    expect(screen.getByText('Phở bò')).toBeInTheDocument();
+    expect(screen.queryByText(/thêm/)).not.toBeInTheDocument();
   });
 
   it('fires onEdit when edit button clicked on filled card', () => {
@@ -284,131 +329,192 @@ describe('MealActionBar', () => {
     onCopyPlan: vi.fn(),
     onSaveTemplate: vi.fn(),
     onOpenTemplateManager: vi.fn(),
+    onOpenGrocery: vi.fn(),
   };
 
   beforeEach(() => vi.clearAllMocks());
 
-  const openMenu = () => {
-    fireEvent.click(screen.getByTestId('btn-more-actions'));
-  };
+  // AC1: allEmpty=true → exactly 1 button, no overflow
+  it('renders only primary button when allEmpty is true', () => {
+    render(<MealActionBar allEmpty={true} onOpenTypeSelection={vi.fn()} />);
+    expect(screen.getByTestId('btn-plan-meal-section')).toBeInTheDocument();
+    expect(screen.queryByTestId('btn-more-actions')).not.toBeInTheDocument();
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
 
-  it('renders plan meal and AI suggest buttons', () => {
+  it('renders full-width primary button with correct text when allEmpty', () => {
+    render(<MealActionBar allEmpty={true} onOpenTypeSelection={vi.fn()} />);
+    const btn = screen.getByTestId('btn-plan-meal-section');
+    expect(btn).toHaveTextContent('Thêm món ăn');
+  });
+
+  // AC2: allEmpty=false → primary + overflow toggle
+  it('renders primary button and overflow toggle when allEmpty is false', () => {
     render(<MealActionBar {...baseProps} />);
     expect(screen.getByTestId('btn-plan-meal-section')).toBeInTheDocument();
-    expect(screen.getByTestId('btn-ai-suggest')).toBeInTheDocument();
-  });
-
-  it('renders more actions button and shows menu items when clicked', () => {
-    render(<MealActionBar {...baseProps} />);
     expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument();
-    openMenu();
-    expect(screen.getByTestId('more-actions-menu')).toBeInTheDocument();
-    expect(screen.getByTestId('btn-clear-plan')).toBeInTheDocument();
-    expect(screen.getByTestId('btn-copy-plan')).toBeInTheDocument();
-    expect(screen.getByTestId('btn-save-template')).toBeInTheDocument();
-    expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument();
   });
 
-  it('hides clear, copy, save items in menu when allEmpty is true', () => {
-    render(<MealActionBar {...baseProps} allEmpty={true} />);
-    openMenu();
-    expect(screen.queryByTestId('btn-clear-plan')).not.toBeInTheDocument();
+  it('calls onOpenTypeSelection when primary button clicked', () => {
+    render(<MealActionBar {...baseProps} />);
+    fireEvent.click(screen.getByTestId('btn-plan-meal-section'));
+    expect(baseProps.onOpenTypeSelection).toHaveBeenCalledTimes(1);
+  });
+
+  // AC3: Menu items ordered per BR-3.2-19, destructive last
+  it('renders menu items in correct order (BR-3.2-19)', () => {
+    render(<MealActionBar {...baseProps} />);
+    const items = screen.getAllByRole('menuitem');
+    const testIds = items.map(item => item.getAttribute('data-testid'));
+    expect(testIds).toEqual([
+      'btn-ai-suggest',
+      'btn-open-grocery',
+      'btn-copy-plan',
+      'btn-save-template',
+      'btn-template-manager',
+      'btn-clear-plan',
+    ]);
+  });
+
+  it('renders separator between non-destructive and destructive items', () => {
+    render(<MealActionBar {...baseProps} />);
+    expect(screen.getByTestId('menu-separator')).toBeInTheDocument();
+  });
+
+  it('renders clear plan item with destructive variant', () => {
+    render(<MealActionBar {...baseProps} />);
+    const clearBtn = screen.getByTestId('btn-clear-plan');
+    expect(clearBtn).toHaveAttribute('data-variant', 'destructive');
+  });
+
+  // AC4: Optional handlers omitted → items not rendered
+  it('does not render AI suggest when onSuggestMealPlan not provided', () => {
+    const { onSuggestMealPlan: _removed, ...props } = baseProps;
+    render(<MealActionBar {...props} />);
+    expect(screen.queryByTestId('btn-ai-suggest')).not.toBeInTheDocument();
+  });
+
+  it('does not render grocery when onOpenGrocery not provided', () => {
+    const { onOpenGrocery: _removed, ...props } = baseProps;
+    render(<MealActionBar {...props} />);
+    expect(screen.queryByTestId('btn-open-grocery')).not.toBeInTheDocument();
+  });
+
+  it('does not render copy when onCopyPlan not provided', () => {
+    const { onCopyPlan: _removed, ...props } = baseProps;
+    render(<MealActionBar {...props} />);
     expect(screen.queryByTestId('btn-copy-plan')).not.toBeInTheDocument();
+  });
+
+  it('does not render save template when onSaveTemplate not provided', () => {
+    const { onSaveTemplate: _removed, ...props } = baseProps;
+    render(<MealActionBar {...props} />);
     expect(screen.queryByTestId('btn-save-template')).not.toBeInTheDocument();
   });
 
-  it('disables AI button when isSuggesting is true', () => {
-    render(<MealActionBar {...baseProps} isSuggesting={true} />);
-    expect(screen.getByTestId('btn-ai-suggest')).toBeDisabled();
+  it('does not render template manager when onOpenTemplateManager not provided', () => {
+    const { onOpenTemplateManager: _removed, ...props } = baseProps;
+    render(<MealActionBar {...props} />);
+    expect(screen.queryByTestId('btn-template-manager')).not.toBeInTheDocument();
   });
 
-  it('calls onOpenTypeSelection when plan button clicked', () => {
-    render(<MealActionBar {...baseProps} />);
-    fireEvent.click(screen.getByTestId('btn-plan-meal-section'));
-    expect(baseProps.onOpenTypeSelection).toHaveBeenCalled();
+  it('does not render clear plan when onOpenClearPlan not provided', () => {
+    const { onOpenClearPlan: _removed, ...props } = baseProps;
+    render(<MealActionBar {...props} />);
+    expect(screen.queryByTestId('btn-clear-plan')).not.toBeInTheDocument();
   });
 
-  it('calls onSuggestMealPlan when AI button clicked', () => {
-    render(<MealActionBar {...baseProps} />);
-    fireEvent.click(screen.getByTestId('btn-ai-suggest'));
-    expect(baseProps.onSuggestMealPlan).toHaveBeenCalled();
-  });
-
-  it('calls onOpenClearPlan when clear menu item clicked', () => {
-    render(<MealActionBar {...baseProps} />);
-    openMenu();
-    fireEvent.click(screen.getByTestId('btn-clear-plan'));
-    expect(baseProps.onOpenClearPlan).toHaveBeenCalled();
-  });
-
-  it('calls onCopyPlan when copy menu item clicked', () => {
-    render(<MealActionBar {...baseProps} />);
-    openMenu();
-    fireEvent.click(screen.getByTestId('btn-copy-plan'));
-    expect(baseProps.onCopyPlan).toHaveBeenCalled();
-  });
-
-  it('calls onSaveTemplate when save menu item clicked', () => {
-    render(<MealActionBar {...baseProps} />);
-    openMenu();
-    fireEvent.click(screen.getByTestId('btn-save-template'));
-    expect(baseProps.onSaveTemplate).toHaveBeenCalled();
-  });
-
-  it('calls onOpenTemplateManager when template menu item clicked', () => {
-    render(<MealActionBar {...baseProps} />);
-    openMenu();
-    fireEvent.click(screen.getByTestId('btn-template-manager'));
-    expect(baseProps.onOpenTemplateManager).toHaveBeenCalled();
-  });
-
-  it('hides more actions button when no callbacks are provided', () => {
-    render(
-      <MealActionBar allEmpty={false} isSuggesting={false} onOpenTypeSelection={vi.fn()} onSuggestMealPlan={vi.fn()} />,
-    );
+  it('hides overflow when no optional handlers provided', () => {
+    render(<MealActionBar allEmpty={false} onOpenTypeSelection={vi.fn()} />);
     expect(screen.queryByTestId('btn-more-actions')).not.toBeInTheDocument();
   });
 
-  it('closes menu after clicking a menu item', () => {
+  it('does not render separator when only destructive item present', () => {
+    render(<MealActionBar allEmpty={false} onOpenTypeSelection={vi.fn()} onOpenClearPlan={vi.fn()} />);
+    expect(screen.queryByTestId('menu-separator')).not.toBeInTheDocument();
+    expect(screen.getByTestId('btn-clear-plan')).toBeInTheDocument();
+  });
+
+  it('does not render separator when only non-destructive items present', () => {
+    render(<MealActionBar allEmpty={false} onOpenTypeSelection={vi.fn()} onSuggestMealPlan={vi.fn()} />);
+    expect(screen.queryByTestId('menu-separator')).not.toBeInTheDocument();
+    expect(screen.getByTestId('btn-ai-suggest')).toBeInTheDocument();
+  });
+
+  // AC5: AI loading → spinner + disabled + text
+  it('shows spinner and loading text when AI is suggesting', () => {
+    render(<MealActionBar {...baseProps} isSuggesting={true} />);
+    const aiItem = screen.getByTestId('btn-ai-suggest');
+    expect(aiItem).toBeDisabled();
+    expect(aiItem).toHaveTextContent('Đang gợi ý...');
+    const sparklesIcon = aiItem.querySelector('.animate-spin');
+    expect(sparklesIcon).toBeInTheDocument();
+  });
+
+  it('shows normal AI text when not suggesting', () => {
+    render(<MealActionBar {...baseProps} isSuggesting={false} />);
+    const aiItem = screen.getByTestId('btn-ai-suggest');
+    expect(aiItem).not.toBeDisabled();
+    expect(aiItem).toHaveTextContent('Gợi ý AI');
+    expect(aiItem.querySelector('.animate-spin')).not.toBeInTheDocument();
+  });
+
+  // Handler calls
+  it('calls onSuggestMealPlan when AI item clicked', () => {
     render(<MealActionBar {...baseProps} />);
-    openMenu();
-    expect(screen.getByTestId('more-actions-menu')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    expect(baseProps.onSuggestMealPlan).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onOpenGrocery when grocery item clicked', () => {
+    render(<MealActionBar {...baseProps} />);
+    fireEvent.click(screen.getByTestId('btn-open-grocery'));
+    expect(baseProps.onOpenGrocery).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onCopyPlan when copy item clicked', () => {
+    render(<MealActionBar {...baseProps} />);
+    fireEvent.click(screen.getByTestId('btn-copy-plan'));
+    expect(baseProps.onCopyPlan).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onSaveTemplate when save item clicked', () => {
+    render(<MealActionBar {...baseProps} />);
+    fireEvent.click(screen.getByTestId('btn-save-template'));
+    expect(baseProps.onSaveTemplate).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onOpenTemplateManager when template item clicked', () => {
+    render(<MealActionBar {...baseProps} />);
+    fireEvent.click(screen.getByTestId('btn-template-manager'));
+    expect(baseProps.onOpenTemplateManager).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onOpenClearPlan when clear item clicked', () => {
+    render(<MealActionBar {...baseProps} />);
     fireEvent.click(screen.getByTestId('btn-clear-plan'));
-    expect(screen.queryByTestId('more-actions-menu')).not.toBeInTheDocument();
+    expect(baseProps.onOpenClearPlan).toHaveBeenCalledTimes(1);
   });
 
-  it('closes menu when clicking outside', () => {
-    render(<MealActionBar {...baseProps} />);
-    openMenu();
-    expect(screen.getByTestId('more-actions-menu')).toBeInTheDocument();
-    fireEvent.mouseDown(document.body);
-    expect(screen.queryByTestId('more-actions-menu')).not.toBeInTheDocument();
+  it('does not call onSuggestMealPlan when AI item clicked while suggesting', () => {
+    render(<MealActionBar {...baseProps} isSuggesting={true} />);
+    fireEvent.click(screen.getByTestId('btn-ai-suggest'));
+    expect(baseProps.onSuggestMealPlan).not.toHaveBeenCalled();
   });
 
-  it('toggles menu open and closed on button clicks', () => {
-    render(<MealActionBar {...baseProps} />);
-    openMenu();
-    expect(screen.getByTestId('more-actions-menu')).toBeInTheDocument();
-    openMenu();
-    expect(screen.queryByTestId('more-actions-menu')).not.toBeInTheDocument();
-  });
-
-  it('has aria-haspopup on trigger and aria-expanded toggles', () => {
+  // Overflow trigger accessibility
+  it('has aria-label on overflow trigger', () => {
     render(<MealActionBar {...baseProps} />);
     const trigger = screen.getByTestId('btn-more-actions');
-    expect(trigger).toHaveAttribute('aria-haspopup', 'true');
-    expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    openMenu();
-    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(trigger).toHaveAttribute('aria-label', 'Thao tác khác');
   });
 
-  it('renders menu with role="menu" and items with role="menuitem"', () => {
-    render(<MealActionBar {...baseProps} />);
-    openMenu();
-    const menu = screen.getByTestId('more-actions-menu');
-    expect(menu).toHaveAttribute('role', 'menu');
-    const menuItems = menu.querySelectorAll('[role="menuitem"]');
-    expect(menuItems.length).toBeGreaterThan(0);
+  // isSuggesting defaults to false
+  it('defaults isSuggesting to false when not provided', () => {
+    render(<MealActionBar allEmpty={false} onOpenTypeSelection={vi.fn()} onSuggestMealPlan={vi.fn()} />);
+    const aiItem = screen.getByTestId('btn-ai-suggest');
+    expect(aiItem).not.toBeDisabled();
+    expect(aiItem).toHaveTextContent('Gợi ý AI');
   });
 });
 
@@ -533,7 +639,8 @@ describe('MealsSubTab', () => {
 
   it('shows empty state tip when all meals are empty', () => {
     render(<MealsSubTab {...baseProps} dayNutrition={emptyNutrition} />);
-    expect(screen.getByText(/Bắt đầu lên kế hoạch/)).toBeInTheDocument();
+    expect(screen.getByText('Ngày này chưa có kế hoạch ăn')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Lên kế hoạch ngày này' })).toBeInTheDocument();
   });
 
   it('shows missing meals message when partially filled', () => {
@@ -543,12 +650,14 @@ describe('MealsSubTab', () => {
       dinner: makeSlot([]),
     };
     render(<MealsSubTab {...baseProps} dayNutrition={partial} />);
-    expect(screen.getByText(/Bạn còn thiếu.*bữa trưa.*bữa tối/)).toBeInTheDocument();
+    expect(screen.getByText('Ngày này vẫn còn bữa chưa lên kế hoạch')).toBeInTheDocument();
+    expect(screen.getByText(/Thiếu: bữa trưa, bữa tối/)).toBeInTheDocument();
   });
 
   it('shows plan complete message when all meals filled', () => {
     render(<MealsSubTab {...baseProps} />);
-    expect(screen.getByText(/Kế hoạch ngày hôm nay đã hoàn tất/)).toBeInTheDocument();
+    expect(screen.getByText('Kế hoạch ăn trong ngày đã đủ')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Xem dinh dưỡng' })).toBeInTheDocument();
   });
 
   it('shows meal progress indicator when not all empty', () => {
@@ -593,7 +702,7 @@ describe('MealsSubTab', () => {
       dinner: makeSlot(['d3'], 500, 25),
     };
     render(<MealsSubTab {...baseProps} dayNutrition={partial} />);
-    expect(screen.getByText(/Bạn còn thiếu.*bữa trưa/)).toBeInTheDocument();
+    expect(screen.getByText(/Thiếu: bữa trưa/)).toBeInTheDocument();
   });
 
   it('renders recent dishes section when recentDishIds and onQuickAdd provided with empty slots', () => {
@@ -741,7 +850,8 @@ describe('NutritionSubTab', () => {
     render(<NutritionSubTab {...baseProps} dayNutrition={emptyNutrition} />);
     const switchBtn = screen.getByTestId('btn-switch-to-meals');
     expect(switchBtn).toBeInTheDocument();
-    expect(screen.getByText('Chuyển sang tab Bữa ăn để bắt đầu')).toBeInTheDocument();
+    expect(screen.getByText('Chưa có dữ liệu dinh dưỡng cho ngày này')).toBeInTheDocument();
+    expect(screen.getByText(/Tiếp theo: chuyển sang tab Bữa ăn/)).toBeInTheDocument();
   });
 
   it('fires onSwitchToMeals when switch button is clicked', () => {

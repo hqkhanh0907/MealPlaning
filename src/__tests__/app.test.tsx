@@ -1,8 +1,41 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
+vi.mock('@/components/ui/dropdown-menu', () => ({
+  DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DropdownMenuTrigger: ({ children, ...props }: Record<string, unknown>) => (
+    <button {...props}>{children as React.ReactNode}</button>
+  ),
+  DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div role="menu">{children}</div>,
+  DropdownMenuItem: ({
+    children,
+    onClick,
+    disabled,
+    variant,
+    ...props
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    disabled?: boolean;
+    variant?: string;
+    [key: string]: unknown;
+  }) => (
+    <button
+      role="menuitem"
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      data-variant={variant}
+      {...props}
+    >
+      {children}
+    </button>
+  ),
+  DropdownMenuSeparator: () => <hr role="separator" />,
+}));
+
 import App from '../App';
 import { initialDishes } from '../data/initialData';
+import { useHealthProfileStore } from '../features/health-profile/store/healthProfileStore';
 import { useDayPlanStore } from '../store/dayPlanStore';
 import { useDishStore } from '../store/dishStore';
 import { useMealTemplateStore } from '../store/mealTemplateStore';
@@ -393,6 +426,7 @@ describe('App', () => {
     useDishStore.setState({ dishes: initialDishes });
     useMealTemplateStore.setState({ templates: [] });
     useNavigationStore.setState({ activeTab: 'calendar', pageStack: [], showBottomNav: true, tabScrollPositions: {} });
+    useHealthProfileStore.setState({ profile: null, activeGoal: null });
   });
 
   it('renders header with app name', () => {
@@ -429,34 +463,56 @@ describe('App', () => {
     expect(settingsBtn).toHaveAttribute('aria-label', 'Cài đặt');
     fireEvent.click(settingsBtn);
     await waitFor(() => expect(screen.getByTestId('settings-overlay')).toBeInTheDocument());
+    expect(screen.getByTestId('settings-orientation-banner')).toHaveTextContent('Cài đặt nền tảng');
     await waitFor(() => expect(screen.getByTestId('settings-tab')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-close-settings'));
     await waitFor(() => expect(screen.queryByTestId('settings-overlay')).not.toBeInTheDocument());
   });
 
-  it('opens meal planner modal when "Lên kế hoạch" is clicked', async () => {
+  it('opens meal planner modal when add dish button is clicked', async () => {
     render(<App />);
-    const planButtons = screen.getAllByText('Lên kế hoạch');
+    const planButtons = screen.getAllByTestId('btn-plan-meal-section');
     fireEvent.click(planButtons[0]);
     await waitFor(() => expect(screen.getByText('Chọn món cho từng bữa')).toBeInTheDocument());
   });
 
   it('handlePlanMeal opens planner when meal slot add button is clicked', async () => {
     render(<App />);
-    const addButtons = screen.getAllByLabelText('Thêm');
+    const addButtons = screen.getAllByLabelText(/Thêm món cho/);
     fireEvent.click(addButtons[0]);
     await waitFor(() => expect(screen.getByTestId('btn-confirm-plan')).toBeInTheDocument());
   });
 
-  it('renders user weight in subtitle', () => {
+  it('renders setup subtitle when health profile is missing', () => {
     render(<App />);
-    expect(screen.getByText(/Dinh dưỡng chính xác cho/)).toBeInTheDocument();
+    expect(screen.getByText('Thiết lập hồ sơ sức khỏe để mở đủ ngữ cảnh dinh dưỡng')).toBeInTheDocument();
+  });
+
+  it('renders user weight in subtitle', () => {
+    useHealthProfileStore.setState({
+      profile: {
+        id: 'hp-1',
+        name: 'Tester',
+        gender: 'male',
+        age: 29,
+        dateOfBirth: '1996-05-15',
+        heightCm: 175,
+        weightKg: 72,
+        activityLevel: 'moderate',
+        proteinRatio: 2,
+        fatPct: 0.25,
+        targetCalories: 2200,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+    render(<App />);
+    expect(screen.getByText('Dinh dưỡng chính xác cho 72kg')).toBeInTheDocument();
   });
 
   it('shows consolidated empty state when no meals planned', () => {
     render(<App />);
-    // Default state has no plans, so consolidated empty state shows
-    expect(screen.getByText(/Bắt đầu lên kế hoạch/)).toBeInTheDocument();
+    expect(screen.getByTestId('shell-orientation-banner')).toHaveTextContent('Lịch trình hôm nay');
+    expect(screen.getByText('Lên kế hoạch ngay')).toBeInTheDocument();
   });
 
   it('renders recommendation panel', () => {
@@ -485,6 +541,7 @@ describe('App', () => {
     const aiTab = navTabs.find(b => b.textContent?.includes('Phân tích'));
     if (aiTab) fireEvent.click(aiTab);
     await waitFor(() => expect(screen.getByTestId('ai-image-analyzer')).toBeInTheDocument());
+    expect(screen.getByTestId('shell-orientation-banner')).toHaveTextContent('Phân tích món ăn bằng AI');
   });
 
   it('handleSaveAnalyzedDish with shouldCreateDish=true creates dish and switches to dishes sub-tab', async () => {
@@ -545,7 +602,7 @@ describe('App', () => {
 
   it('confirms planning modal and shows success notification', async () => {
     render(<App />);
-    const planBtns = screen.getAllByText('Lên kế hoạch');
+    const planBtns = screen.getAllByTestId('btn-plan-meal-section');
     fireEvent.click(planBtns[0]);
     // MealPlannerModal opens with tabs — click confirm directly
     const confirmBtn = await waitFor(() => screen.getByTestId('btn-confirm-plan'));
@@ -863,6 +920,10 @@ describe('App', () => {
   });
 
   it('opens template manager modal', async () => {
+    const today = getLocalToday();
+    useDayPlanStore.setState({
+      dayPlans: [{ date: today, breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] }],
+    });
     render(<App />);
     await waitFor(() => expect(screen.getByTestId('btn-more-actions')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-more-actions'));
@@ -890,13 +951,14 @@ describe('App', () => {
     fireEvent.click(screen.getByTestId('btn-save-template'));
     await waitFor(() => expect(screen.getByTestId('save-template-modal')).toBeInTheDocument());
     fireEvent.change(screen.getByTestId('input-template-name'), { target: { value: 'My Template' } });
-    fireEvent.click(screen.getByTestId('btn-save-template'));
+    const saveBtns = screen.getAllByTestId('btn-save-template');
+    fireEvent.click(saveBtns[saveBtns.length - 1]);
     await waitFor(() => expect(mockNotify.success).toHaveBeenCalled());
   });
 
   it('meal planner single-tab confirm shows meal-specific notification', async () => {
     render(<App />);
-    const planBtns = screen.getAllByText('Lên kế hoạch');
+    const planBtns = screen.getAllByTestId('btn-plan-meal-section');
     fireEvent.click(planBtns[0]);
     await waitFor(() => expect(screen.getByTestId('btn-confirm-plan')).toBeInTheDocument());
     // Select a breakfast dish (d1 has tag 'breakfast')
@@ -907,7 +969,10 @@ describe('App', () => {
   });
 
   it('template apply adds new plan when no existing plan for date', async () => {
-    // No day plans seeded — applying template should create a new plan
+    const today = getLocalToday();
+    useDayPlanStore.setState({
+      dayPlans: [{ date: today, breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] }],
+    });
     useMealTemplateStore.setState({
       templates: [
         {
@@ -1281,7 +1346,7 @@ describe('App', () => {
       dayPlans: [{ date: today, breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] }],
     });
     render(<App />);
-    const planBtns = screen.getAllByText('Lên kế hoạch');
+    const planBtns = screen.getAllByTestId('btn-plan-meal-section');
     fireEvent.click(planBtns[0]);
     await waitFor(() => expect(screen.getByTestId('btn-confirm-plan')).toBeInTheDocument());
   });
@@ -1292,7 +1357,7 @@ describe('App', () => {
       dayPlans: [{ date: today, breakfastDishIds: ['d1'], lunchDishIds: ['d2'], dinnerDishIds: ['d3'] }],
     });
     render(<App />);
-    const planBtns = screen.getAllByText('Lên kế hoạch');
+    const planBtns = screen.getAllByTestId('btn-plan-meal-section');
     fireEvent.click(planBtns[0]);
     await waitFor(() => expect(screen.getByTestId('btn-confirm-plan')).toBeInTheDocument());
   });

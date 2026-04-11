@@ -3,6 +3,38 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 let mockDateHintDismissed: string | null = null;
 const mockSetSetting = vi.fn().mockResolvedValue(undefined);
 
+vi.mock('@/components/ui/dropdown-menu', () => ({
+  DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DropdownMenuTrigger: ({ children, ...props }: Record<string, unknown>) => (
+    <button {...props}>{children as React.ReactNode}</button>
+  ),
+  DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div role="menu">{children}</div>,
+  DropdownMenuItem: ({
+    children,
+    onClick,
+    disabled,
+    variant,
+    ...props
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+    disabled?: boolean;
+    variant?: string;
+    [key: string]: unknown;
+  }) => (
+    <button
+      role="menuitem"
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      data-variant={variant}
+      {...props}
+    >
+      {children}
+    </button>
+  ),
+  DropdownMenuSeparator: () => <hr role="separator" />,
+}));
+
 vi.mock('../contexts/DatabaseContext', () => ({
   DatabaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useDatabase: () => ({
@@ -35,6 +67,7 @@ vi.mock('../services/appSettings', () => ({
 
 import { CalendarTab } from '../components/CalendarTab';
 import { DateSelector } from '../components/DateSelector';
+import { useUIStore } from '../store/uiStore';
 import type { DayNutritionSummary, DayPlan } from '../types';
 
 const makeSlot = (dishIds: string[], cal = 0, pro = 0) => ({
@@ -409,7 +442,10 @@ describe('CalendarTab', () => {
     onSuggestMealPlan: vi.fn(),
   };
 
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useUIStore.setState({ activeCalendarSubTab: 'meals' });
+  });
 
   it('renders main sections: date selection, summary, meal cards', () => {
     render(<CalendarTab {...defaultProps} />);
@@ -430,10 +466,10 @@ describe('CalendarTab', () => {
     expect(screen.getAllByText('Canh rau')[0]).toBeInTheDocument();
   });
 
-  it('shows Lên kế hoạch button and calls onOpenTypeSelection', () => {
+  it('shows add dish button and calls onOpenTypeSelection', () => {
     render(<CalendarTab {...defaultProps} />);
-    const planButtons = screen.getAllByText('Lên kế hoạch');
-    fireEvent.click(planButtons[0]);
+    const planBtns = screen.getAllByTestId('btn-plan-meal-section');
+    fireEvent.click(planBtns[0]);
     expect(defaultProps.onOpenTypeSelection).toHaveBeenCalled();
   });
 
@@ -479,7 +515,8 @@ describe('CalendarTab', () => {
         currentPlan={{ date: todayStr, breakfastDishIds: [], lunchDishIds: [], dinnerDishIds: [] }}
       />,
     );
-    expect(screen.getByText(/Bắt đầu lên kế hoạch/)).toBeInTheDocument();
+    expect(screen.getByText(/Ngày này chưa có kế hoạch ăn/)).toBeInTheDocument();
+    expect(screen.getByText(/Lên kế hoạch ngày này/)).toBeInTheDocument();
   });
 
   it('renders clear plan button and triggers onOpenClearPlan', () => {
@@ -504,7 +541,7 @@ describe('CalendarTab', () => {
 
   it('shows plan complete message when all meals are filled', () => {
     render(<CalendarTab {...defaultProps} />);
-    expect(screen.getByText(/Kế hoạch ngày hôm nay đã hoàn tất/)).toBeInTheDocument();
+    expect(screen.getByText(/Kế hoạch ăn trong ngày đã đủ/)).toBeInTheDocument();
   });
 
   it('shows missing meals message when partial', () => {
@@ -514,7 +551,8 @@ describe('CalendarTab', () => {
       dinner: makeSlot(['d3'], 500, 25),
     };
     render(<CalendarTab {...defaultProps} dayNutrition={partialNutrition} />);
-    expect(screen.getByText(/Bạn còn thiếu.*bữa trưa/)).toBeInTheDocument();
+    expect(screen.getByText(/Ngày này vẫn còn bữa chưa lên kế hoạch/)).toBeInTheDocument();
+    expect(screen.getByText(/Thiếu: bữa trưa/)).toBeInTheDocument();
   });
 
   it('date selector navigates across month boundary Dec→Jan', () => {
@@ -546,9 +584,9 @@ describe('CalendarTab', () => {
       dinner: makeSlot([], 0, 0),
     };
     render(<CalendarTab {...defaultProps} dayNutrition={emptyNutrition} />);
-    expect(screen.getByText(/Bắt đầu lên kế hoạch/)).toBeInTheDocument();
+    expect(screen.getByText(/Ngày này chưa có kế hoạch ăn/)).toBeInTheDocument();
     // No plan complete message
-    expect(screen.queryByText(/Kế hoạch ngày hôm nay đã hoàn tất/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Kế hoạch ăn trong ngày đã đủ/)).not.toBeInTheDocument();
   });
 
   it('shows missing breakfast and dinner slots (lines 94,96)', () => {
@@ -558,7 +596,7 @@ describe('CalendarTab', () => {
       dinner: makeSlot([], 0, 0),
     };
     render(<CalendarTab {...defaultProps} dayNutrition={partialNutrition} />);
-    expect(screen.getByText(/Bạn còn thiếu.*bữa sáng.*bữa tối/)).toBeInTheDocument();
+    expect(screen.getByText(/Thiếu: bữa sáng, bữa tối/)).toBeInTheDocument();
   });
 
   it('switches to nutrition tab via MiniNutritionBar click', () => {

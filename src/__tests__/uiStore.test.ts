@@ -6,6 +6,7 @@ function resetStore() {
   useUIStore.setState({
     hasNewAIResult: false,
     activeManagementSubTab: 'dishes',
+    activeCalendarSubTab: 'meals',
     selectedDate: '2025-01-01',
   });
 }
@@ -41,6 +42,19 @@ describe('uiStore', () => {
     });
   });
 
+  describe('setCalendarSubTab', () => {
+    it('sets tab to nutrition', () => {
+      useUIStore.getState().setCalendarSubTab('nutrition');
+      expect(useUIStore.getState().activeCalendarSubTab).toBe('nutrition');
+    });
+
+    it('sets tab to meals', () => {
+      useUIStore.setState({ activeCalendarSubTab: 'nutrition' });
+      useUIStore.getState().setCalendarSubTab('meals');
+      expect(useUIStore.getState().activeCalendarSubTab).toBe('meals');
+    });
+  });
+
   describe('setSelectedDate', () => {
     it('sets a custom date string', () => {
       useUIStore.getState().setSelectedDate('2025-12-25');
@@ -53,6 +67,7 @@ describe('uiStore', () => {
       useUIStore.setState({
         hasNewAIResult: true,
         activeManagementSubTab: 'ingredients',
+        activeCalendarSubTab: 'nutrition',
         selectedDate: '1999-12-31',
       });
 
@@ -61,6 +76,7 @@ describe('uiStore', () => {
       const state = useUIStore.getState();
       expect(state.hasNewAIResult).toBe(false);
       expect(state.activeManagementSubTab).toBe('dishes');
+      expect(state.activeCalendarSubTab).toBe('meals');
       expect(state.selectedDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     });
   });

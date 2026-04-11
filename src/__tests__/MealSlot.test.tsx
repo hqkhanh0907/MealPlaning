@@ -9,15 +9,14 @@ vi.mock('react-i18next', () => ({
         'meal.breakfast': 'Sáng',
         'meal.lunch': 'Trưa',
         'meal.dinner': 'Tối',
-        'quickPreview.empty': 'Chưa có món',
-        'quickPreview.add': 'Thêm',
-        'quickPreview.more': '+{{count}} món',
+        'calendar.meal.emptySlot': 'Chưa có món',
+        'calendar.meal.addCTA': 'Thêm',
+        'calendar.meal.moreCount': '+{{count}} thêm',
+        'calendar.meal.slotLabel': '{{type}}: {{count}} món, {{cal}} kcal',
+        'calendar.addDishForMeal': 'Thêm món cho {{meal}}',
         'common.edit': 'Sửa',
         'common.decrease': 'Giảm',
         'common.increase': 'Tăng',
-        'common.macroP': 'P',
-        'common.macroF': 'F',
-        'common.macroC': 'C',
       };
       let text = map[key] ?? key;
       if (params) {
@@ -53,6 +52,18 @@ const SAMPLE_DISHES: Dish[] = [
     ingredients: [{ ingredientId: 'i3', amount: 100 }],
     tags: ['lunch', 'dinner'],
   },
+  {
+    id: 'd4',
+    name: { vi: 'Khoai lang luộc' },
+    ingredients: [{ ingredientId: 'i4', amount: 100 }],
+    tags: ['lunch', 'dinner'],
+  },
+  {
+    id: 'd5',
+    name: { vi: 'Bông cải xanh luộc' },
+    ingredients: [{ ingredientId: 'i5', amount: 100 }],
+    tags: ['lunch', 'dinner'],
+  },
 ];
 
 function makeProps(overrides: Partial<MealSlotProps> = {}): MealSlotProps {
@@ -78,34 +89,90 @@ describe('MealSlot', () => {
   });
 
   describe('empty state', () => {
-    it('renders empty slot with add button', () => {
-      const props = makeProps({
-        slot: { dishIds: [], calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
-      });
+    const emptySlot = { dishIds: [], calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 };
+
+    it('renders empty slot with dashed border and centered layout', () => {
+      const props = makeProps({ slot: emptySlot });
       render(<MealSlot {...props} />);
 
       expect(screen.getByText('Sáng')).toBeInTheDocument();
       expect(screen.getByText('Chưa có món')).toBeInTheDocument();
-      expect(screen.getByLabelText('Thêm')).toBeInTheDocument();
+      expect(screen.getByText('Thêm')).toBeInTheDocument();
+
+      const card = screen.getByTestId('meal-slot-breakfast');
+      expect(card.className).toContain('border-dashed');
+      expect(card.className).toContain('border-border');
+      expect(card.className).not.toContain('bg-muted');
     });
 
-    it('calls onEdit when add button is clicked', async () => {
+    it('renders UtensilsCrossed icon with meal color', () => {
+      const props = makeProps({ slot: emptySlot });
+      render(<MealSlot {...props} />);
+      const card = screen.getByTestId('meal-slot-breakfast');
+      const svgs = card.querySelectorAll('svg');
+      expect(svgs.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('has region role with aria-label', () => {
+      const props = makeProps({ slot: emptySlot });
+      render(<MealSlot {...props} />);
+      const card = screen.getByTestId('meal-slot-breakfast');
+      expect(card.tagName).toBe('SECTION');
+      expect(card).toHaveAttribute('aria-label', 'Sáng: 0 món, 0 kcal');
+    });
+
+    it('has left border accent for breakfast', () => {
+      const props = makeProps({ slot: emptySlot });
+      render(<MealSlot {...props} />);
+      const card = screen.getByTestId('meal-slot-breakfast');
+      expect(card.className).toContain('border-l-[3px]');
+      expect(card.className).toContain('border-l-meal-breakfast');
+    });
+
+    it('has left border accent for lunch', () => {
+      const props = makeProps({ slot: emptySlot, type: 'lunch' });
+      render(<MealSlot {...props} />);
+      const card = screen.getByTestId('meal-slot-lunch');
+      expect(card.className).toContain('border-l-meal-lunch');
+    });
+
+    it('has left border accent for dinner', () => {
+      const props = makeProps({ slot: emptySlot, type: 'dinner' });
+      render(<MealSlot {...props} />);
+      const card = screen.getByTestId('meal-slot-dinner');
+      expect(card.className).toContain('border-l-meal-dinner');
+    });
+
+    it('calls onEdit when add CTA is clicked', async () => {
       const user = userEvent.setup();
       const onEdit = vi.fn();
+      const props = makeProps({ slot: emptySlot, onEdit });
+      render(<MealSlot {...props} />);
+      await user.click(screen.getByLabelText('Thêm món cho Sáng'));
+      expect(onEdit).toHaveBeenCalledOnce();
+    });
+
+    it('CTA button has min-h-11 for 44px touch target', () => {
+      const props = makeProps({ slot: emptySlot });
+      render(<MealSlot {...props} />);
+      const btn = screen.getByLabelText('Thêm món cho Sáng');
+      expect(btn.className).toContain('min-h-11');
+    });
+
+    it('shows 0 kcal explicitly for empty slot (EC-13)', () => {
       const props = makeProps({
-        slot: { dishIds: [], calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
-        onEdit,
+        slot: { dishIds: ['d1'], calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
       });
       render(<MealSlot {...props} />);
-      await user.click(screen.getByLabelText('Thêm'));
-      expect(onEdit).toHaveBeenCalledOnce();
+      expect(screen.getByText('0 kcal')).toBeInTheDocument();
     });
   });
 
-  describe('with dishes', () => {
-    it('renders meal type label with correct icon color class', () => {
+  describe('with dishes - filled state', () => {
+    it('renders meal type label with inline nutrition header', () => {
       render(<MealSlot {...makeProps()} />);
       expect(screen.getByText('Sáng')).toBeInTheDocument();
+      expect(screen.getByText('487 kcal · 38g')).toBeInTheDocument();
     });
 
     it('renders dish names', () => {
@@ -114,10 +181,24 @@ describe('MealSlot', () => {
       expect(screen.getByText('Yến mạch sữa chua')).toBeInTheDocument();
     });
 
-    it('shows "+N" for extra dishes beyond MAX_VISIBLE_DISHES', () => {
+    it('has region role with aria-label showing count and calories', () => {
+      render(<MealSlot {...makeProps()} />);
+      const card = screen.getByTestId('meal-slot-breakfast');
+      expect(card.tagName).toBe('SECTION');
+      expect(card).toHaveAttribute('aria-label', 'Sáng: 2 món, 487 kcal');
+    });
+
+    it('has left border accent for filled breakfast', () => {
+      render(<MealSlot {...makeProps()} />);
+      const card = screen.getByTestId('meal-slot-breakfast');
+      expect(card.className).toContain('border-l-[3px]');
+      expect(card.className).toContain('border-l-meal-breakfast');
+    });
+
+    it('shows 4 dishes without "+N" indicator (MAX_VISIBLE=4)', () => {
       const props = makeProps({
         slot: {
-          dishIds: ['d1', 'd2', 'd3'],
+          dishIds: ['d1', 'd2', 'd3', 'd4'],
           calories: 800,
           protein: 100,
           fat: 30,
@@ -126,7 +207,45 @@ describe('MealSlot', () => {
         },
       });
       render(<MealSlot {...props} />);
-      expect(screen.getByText('+1 món')).toBeInTheDocument();
+      expect(screen.getByText('Trứng ốp la')).toBeInTheDocument();
+      expect(screen.getByText('Yến mạch sữa chua')).toBeInTheDocument();
+      expect(screen.getByText('Ức gà áp chảo')).toBeInTheDocument();
+      expect(screen.getByText('Khoai lang luộc')).toBeInTheDocument();
+      expect(screen.queryByText(/\+\d+ thêm/)).not.toBeInTheDocument();
+    });
+
+    it('shows "+N thêm" for dishes beyond MAX_VISIBLE (5 dishes)', () => {
+      const props = makeProps({
+        slot: {
+          dishIds: ['d1', 'd2', 'd3', 'd4', 'd5'],
+          calories: 1000,
+          protein: 120,
+          fat: 40,
+          carbs: 100,
+          fiber: 6,
+        },
+      });
+      render(<MealSlot {...props} />);
+      expect(screen.getByText('+1 thêm')).toBeInTheDocument();
+      expect(screen.queryByText('Bông cải xanh luộc')).not.toBeInTheDocument();
+    });
+
+    it('expands to show all dishes when "+N thêm" is clicked', async () => {
+      const user = userEvent.setup();
+      const props = makeProps({
+        slot: {
+          dishIds: ['d1', 'd2', 'd3', 'd4', 'd5'],
+          calories: 1000,
+          protein: 120,
+          fat: 40,
+          carbs: 100,
+          fiber: 6,
+        },
+      });
+      render(<MealSlot {...props} />);
+      await user.click(screen.getByText('+1 thêm'));
+      expect(screen.getByText('Bông cải xanh luộc')).toBeInTheDocument();
+      expect(screen.queryByText('+1 thêm')).not.toBeInTheDocument();
     });
 
     it('renders calorie badge with energy styling', () => {
@@ -137,7 +256,7 @@ describe('MealSlot', () => {
       expect(calBadge.className).toContain('text-sm');
     });
 
-    it('renders full P/F/C macro pills', () => {
+    it('renders full P/F/C macro pills in footer', () => {
       render(<MealSlot {...makeProps()} />);
       expect(screen.getByText(/P 38g/)).toBeInTheDocument();
       expect(screen.getByText(/F 15g/)).toBeInTheDocument();
@@ -170,6 +289,21 @@ describe('MealSlot', () => {
       expect(screen.getByText(/P 13g/)).toBeInTheDocument();
       expect(screen.getByText(/F 11g/)).toBeInTheDocument();
       expect(screen.getByText(/C 2g/)).toBeInTheDocument();
+    });
+
+    it('shows inline nutrition header with rounded values', () => {
+      const props = makeProps({
+        slot: {
+          dishIds: ['d1'],
+          calories: 155.6,
+          protein: 13.4,
+          fat: 11.2,
+          carbs: 1.8,
+          fiber: 0.1,
+        },
+      });
+      render(<MealSlot {...props} />);
+      expect(screen.getByText('156 kcal · 13g')).toBeInTheDocument();
     });
   });
 
@@ -228,16 +362,20 @@ describe('MealSlot', () => {
   });
 
   describe('meal types', () => {
-    it('renders lunch type', () => {
+    it('renders lunch type with correct border', () => {
       render(<MealSlot {...makeProps({ type: 'lunch' })} />);
       expect(screen.getByText('Trưa')).toBeInTheDocument();
-      expect(screen.getByTestId('meal-slot-lunch')).toBeInTheDocument();
+      const card = screen.getByTestId('meal-slot-lunch');
+      expect(card).toBeInTheDocument();
+      expect(card.className).toContain('border-l-meal-lunch');
     });
 
-    it('renders dinner type', () => {
+    it('renders dinner type with correct border', () => {
       render(<MealSlot {...makeProps({ type: 'dinner' })} />);
       expect(screen.getByText('Tối')).toBeInTheDocument();
-      expect(screen.getByTestId('meal-slot-dinner')).toBeInTheDocument();
+      const card = screen.getByTestId('meal-slot-dinner');
+      expect(card).toBeInTheDocument();
+      expect(card.className).toContain('border-l-meal-dinner');
     });
   });
 

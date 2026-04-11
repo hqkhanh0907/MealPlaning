@@ -1,5 +1,5 @@
-import { ChefHat, Edit3, Minus, Plus } from 'lucide-react';
-import React, { useCallback, useMemo } from 'react';
+import { ChefHat, Edit3, Minus, Plus, UtensilsCrossed } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MEAL_TYPE_ICON_COLORS, MEAL_TYPE_ICONS } from '../../data/constants';
@@ -15,12 +15,18 @@ export interface MealSlotProps {
   onUpdateServings?: (dishId: string, servings: number) => void;
 }
 
-const MAX_VISIBLE_DISHES = 2;
+const MAX_VISIBLE_DISHES = 4;
 
 const TEST_ID_MAP: Record<MealType, string> = {
   breakfast: 'meal-slot-breakfast',
   lunch: 'meal-slot-lunch',
   dinner: 'meal-slot-dinner',
+};
+
+const MEAL_BORDER_COLOR: Record<MealType, string> = {
+  breakfast: 'border-l-meal-breakfast',
+  lunch: 'border-l-meal-lunch',
+  dinner: 'border-l-meal-dinner',
 };
 
 export const MealSlot = React.memo(function MealSlot({
@@ -36,6 +42,7 @@ export const MealSlot = React.memo(function MealSlot({
   const hasDishes = slot.dishIds.length > 0;
   const MealIcon = MEAL_TYPE_ICONS[type];
   const label = t(`meal.${type}`);
+  const [expanded, setExpanded] = useState(false);
 
   const resolvedDishes = useMemo(() => {
     const map = new Map(dishes.map(d => [d.id, d]));
@@ -51,50 +58,58 @@ export const MealSlot = React.memo(function MealSlot({
     [servings, onUpdateServings],
   );
 
-  const visibleDishes = resolvedDishes.slice(0, MAX_VISIBLE_DISHES);
-  const extraCount = resolvedDishes.length - MAX_VISIBLE_DISHES;
+  const dishCount = resolvedDishes.length;
+  const visibleDishes = expanded ? resolvedDishes : resolvedDishes.slice(0, MAX_VISIBLE_DISHES);
+  const extraCount = dishCount - MAX_VISIBLE_DISHES;
+
+  const slotAriaLabel = t('calendar.meal.slotLabel', {
+    type: label,
+    count: dishCount,
+    cal: Math.round(slot.calories),
+  });
 
   if (!hasDishes) {
     return (
-      <div
+      <section
         data-testid={TEST_ID_MAP[type]}
-        className="bg-muted hover:bg-accent flex items-center gap-3 rounded-xl p-3 transition-colors"
+        aria-label={slotAriaLabel}
+        className={`border-l-[3px] ${MEAL_BORDER_COLOR[type]} border-border flex flex-col items-center gap-2 rounded-xl border border-dashed p-4`}
       >
-        <MealIcon className={`size-5 shrink-0 ${MEAL_TYPE_ICON_COLORS[type]}`} aria-hidden="true" />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-baseline gap-2">
-            <span className="text-foreground text-sm font-medium">{label}</span>
-            <span className="text-muted-foreground text-xs">{t('quickPreview.empty')}</span>
-          </div>
-        </div>
+        <UtensilsCrossed className={`size-6 ${MEAL_TYPE_ICON_COLORS[type]}`} aria-hidden="true" />
+        <span className="text-foreground text-sm font-medium">{label}</span>
+        <span className="text-muted-foreground text-xs">{t('calendar.meal.emptySlot')}</span>
         <button
           type="button"
           onClick={onEdit}
-          aria-label={t('quickPreview.add')}
-          className="hover:bg-primary-subtle text-primary flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-lg px-2 text-sm font-medium transition-colors active:scale-[0.98]"
+          aria-label={t('calendar.addDishForMeal', { meal: label })}
+          className="text-primary hover:bg-primary-subtle flex min-h-11 items-center gap-1 rounded-lg px-3 text-sm font-medium transition-colors active:scale-[0.98]"
         >
           <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('quickPreview.add')}</span>
+          {t('calendar.meal.addCTA')}
         </button>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div
+    <section
       data-testid={TEST_ID_MAP[type]}
-      className="bg-card border-border-subtle rounded-xl border p-4 shadow-sm transition-all hover:shadow-md"
+      aria-label={slotAriaLabel}
+      className={`border-l-[3px] ${MEAL_BORDER_COLOR[type]} bg-card border-border-subtle rounded-xl border p-4 shadow-sm transition-all hover:shadow-md`}
     >
       <div className="mb-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <MealIcon className={`size-5 shrink-0 ${MEAL_TYPE_ICON_COLORS[type]}`} aria-hidden="true" />
-          <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">{label}</span>
+          <span className="text-muted-foreground shrink-0 text-xs font-semibold tracking-wider uppercase">{label}</span>
+          <span className="text-muted-foreground truncate text-xs tabular-nums">
+            {Math.round(slot.calories)} kcal · {Math.round(slot.protein)}g
+          </span>
         </div>
         <button
           type="button"
           onClick={onEdit}
           aria-label={`${t('common.edit')} ${label}`}
-          className="hover:text-primary hover:bg-primary-subtle text-muted-foreground flex min-h-11 min-w-11 items-center justify-center rounded-lg p-2 transition-all sm:min-h-9 sm:min-w-9"
+          className="hover:text-primary hover:bg-primary-subtle text-muted-foreground flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg p-2 transition-all sm:min-h-9 sm:min-w-9"
         >
           <Edit3 className="h-4 w-4" />
         </button>
@@ -142,8 +157,10 @@ export const MealSlot = React.memo(function MealSlot({
             </div>
           );
         })}
-        {extraCount > 0 && (
-          <span className="text-muted-foreground ml-5.5 text-xs">{t('quickPreview.more', { count: extraCount })}</span>
+        {extraCount > 0 && !expanded && (
+          <button type="button" onClick={() => setExpanded(true)} className="text-primary ml-5.5 text-xs font-medium">
+            {t('calendar.meal.moreCount', { count: extraCount })}
+          </button>
         )}
       </div>
 
@@ -159,7 +176,7 @@ export const MealSlot = React.memo(function MealSlot({
           C {Math.round(slot.carbs)}g
         </span>
       </div>
-    </div>
+    </section>
   );
 });
 
