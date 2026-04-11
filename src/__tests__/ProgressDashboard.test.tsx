@@ -25,6 +25,13 @@ vi.mock('react-i18next', () => ({
         'fitness.coaching.plateau.strength': 'Tạ đang chững lại — thử thay đổi số rep hoặc tăng volume nhé!',
         'fitness.coaching.plateau.volume': 'Volume chưa tăng so với tuần trước — thử thêm 1 set phụ nhé!',
         'fitness.coaching.plateau.both': 'Cả tạ và volume đều chững — đổi bài tập hoặc deload 1 tuần nhé!',
+        'fitness.personalRecords.title': 'Kỷ lục cá nhân',
+        'fitness.personalRecords.empty': 'Chưa có kỷ lục',
+        'fitness.personalRecords.emptyDescription': 'Hoàn thành buổi tập để thiết lập kỷ lục đầu tiên',
+        'fitness.personalRecords.historyLabel': 'Lịch sử',
+        'fitness.personalRecords.kgUnit': 'kg',
+        'fitness.volumeTrend.noData': 'Chưa có dữ liệu',
+        'fitness.volumeTrend.chartLabel': 'Biểu đồ xu hướng khối lượng tập luyện',
       };
       if (key === 'fitness.progress.weekOf' && params) {
         return `Tuần ${params.current} / ${params.total}`;
@@ -41,6 +48,15 @@ vi.mock('react-i18next', () => ({
       if (key === 'fitness.progress.weightChange' && params) {
         return `Cân nặng thay đổi ${params.delta}kg (7 ngày qua)`;
       }
+      if (key === 'fitness.volumeTrend.barLabel' && params) {
+        return `Tuần ${params.week}: ${params.volume} kg`;
+      }
+      if (key === 'fitness.volumeTrend.tooltipLabel' && params) {
+        return `${params.volume} kg`;
+      }
+      if (key === 'fitness.personalRecords.repsFormat' && params) {
+        return `×${params.reps}`;
+      }
       return translations[key] ?? key;
     },
     i18n: { language: 'vi' },
@@ -49,6 +65,20 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('../store/fitnessStore', () => ({
   useFitnessStore: vi.fn(),
+}));
+
+vi.mock('../features/fitness/data/exerciseDatabase', () => ({
+  EXERCISES: [
+    {
+      id: 'e1',
+      nameVi: 'Bench Press',
+      nameEn: 'Bench Press',
+      muscleGroup: 'chest',
+      category: 'compound',
+      equipment: 'barbell',
+    },
+    { id: 'e2', nameVi: 'Squat', nameEn: 'Squat', muscleGroup: 'legs', category: 'compound', equipment: 'barbell' },
+  ],
 }));
 
 const mockUseFitnessStore = useFitnessStore as unknown as Mock;
@@ -405,7 +435,7 @@ describe('ProgressDashboard', () => {
     expect(screen.queryByTestId('metric-bottom-sheet')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('metric-card-weight'));
     expect(screen.getByTestId('metric-bottom-sheet')).toBeInTheDocument();
-    expect(screen.getByTestId('bottom-sheet-chart')).toBeInTheDocument();
+    expect(screen.getByTestId('volume-trend-chart')).toBeInTheDocument();
     expect(screen.getByTestId('time-range-filter')).toBeInTheDocument();
     // Shows card title in sheet header
     expect(screen.getByTestId('metric-bottom-sheet').textContent).toContain('Cân nặng');
@@ -429,38 +459,48 @@ describe('ProgressDashboard', () => {
     expect(screen.queryByTestId('metric-bottom-sheet')).not.toBeInTheDocument();
   });
 
-  it('time range filter changes chart data', () => {
-    // Extra weight entries to span different time ranges
-    const extraWeight1 = {
-      id: 'we3',
-      date: '2024-01-09',
-      weightKg: 74.5,
-      createdAt: '2024-01-09T10:00:00Z',
-      updatedAt: '2024-01-09T10:00:00Z',
-    };
-    const extraWeight2 = {
-      id: 'we4',
-      date: '2023-12-20',
-      weightKg: 73,
-      createdAt: '2023-12-20T10:00:00Z',
-      updatedAt: '2023-12-20T10:00:00Z',
-    };
+  it('time range filter changes volume chart data', () => {
+    // Generate workouts across multiple weeks to produce volume bars
+    const multiWeekWorkouts = [];
+    const multiWeekSets = [];
+    // Create workouts for 5 weeks back (Mon of each week)
+    const weekDates = ['2024-01-08', '2024-01-01', '2023-12-25', '2023-12-18', '2023-12-11'];
+    for (let i = 0; i < weekDates.length; i++) {
+      multiWeekWorkouts.push({
+        id: `mw${i}`,
+        date: weekDates[i],
+        name: `Week ${i}`,
+        createdAt: `${weekDates[i]}T10:00:00Z`,
+        updatedAt: `${weekDates[i]}T10:00:00Z`,
+      });
+      multiWeekSets.push({
+        id: `ms${i}`,
+        workoutId: `mw${i}`,
+        exerciseId: 'e1',
+        setNumber: 1,
+        reps: 10,
+        weightKg: 50 + i * 10,
+        updatedAt: `${weekDates[i]}T10:00:00Z`,
+      });
+    }
     setupStore({
       ...fullState(),
-      weightEntries: [recentWeight, oldWeight, extraWeight1, extraWeight2],
+      workouts: multiWeekWorkouts,
+      workoutSets: multiWeekSets,
     });
     render(<ProgressDashboard />);
     fireEvent.click(screen.getByTestId('metric-card-weight'));
 
-    // 1W: cutoff=2024-01-03, entries: we1(01-10), we3(01-09) → 2 bars
-    const barsIn1W = screen.getAllByTestId('chart-bar').length;
-    expect(barsIn1W).toBe(2);
+    // Default 1W → 1 volume bar (current week only)
+    expect(screen.getAllByTestId(/^volume-bar-/).length).toBe(1);
 
-    // Switch to 1M: cutoff=2023-12-11, entries: we4(12-20), we2(01-02), we3(01-09), we1(01-10) → 4 bars
+    // Switch to 1M → 4 volume bars
     fireEvent.click(screen.getByTestId('time-range-1M'));
-    const barsIn1M = screen.getAllByTestId('chart-bar').length;
-    expect(barsIn1M).toBe(4);
-    expect(barsIn1M).toBeGreaterThan(barsIn1W);
+    expect(screen.getAllByTestId(/^volume-bar-/).length).toBe(4);
+
+    // Switch to 3M → 13 bars (MAX_VOLUME_WEEKS, most with 0 volume)
+    fireEvent.click(screen.getByTestId('time-range-3M'));
+    expect(screen.getAllByTestId(/^volume-bar-/).length).toBe(13);
   });
 
   it('each metric card opens bottom sheet with correct title', () => {
@@ -519,5 +559,171 @@ describe('ProgressDashboard', () => {
     render(<ProgressDashboard />);
     const change = screen.getByTestId('volume-change');
     expect(change.textContent).toContain('+0%');
+  });
+
+  // ── W4-04: PersonalRecords integration tests ──
+
+  it('renders PersonalRecords between cycle-progress and insights', () => {
+    setupStore(fullState());
+    render(<ProgressDashboard />);
+    expect(screen.getByTestId('personal-records')).toBeInTheDocument();
+    // Verify ordering: personal-records appears in DOM after cycle-progress
+    const dashboard = screen.getByTestId('progress-dashboard');
+    const html = dashboard.innerHTML;
+    const prIdx = html.indexOf('personal-records');
+    const insightsIdx = html.indexOf('insights-section');
+    expect(prIdx).toBeGreaterThan(-1);
+    expect(prIdx).toBeLessThan(insightsIdx);
+  });
+
+  it('PersonalRecords shows correct PR data from workout sets', () => {
+    setupStore(fullState());
+    render(<ProgressDashboard />);
+    // e1 has thisWeekSet (100kg×10) and lastWeekSet (80kg×10) → best=100kg
+    expect(screen.getByTestId('pr-item-e1')).toBeInTheDocument();
+    expect(screen.getByTestId('pr-weight-e1').textContent).toContain('100');
+  });
+
+  it('PersonalRecords shows empty state when no sets', () => {
+    setupStore({
+      workouts: [thisWeekWorkout],
+      workoutSets: [],
+      weightEntries: [],
+      trainingProfile: null,
+      getActivePlan: () => undefined,
+    });
+    render(<ProgressDashboard />);
+    expect(screen.getByTestId('pr-empty-state')).toBeInTheDocument();
+  });
+
+  it('PersonalRecords uses exercise name from EXERCISES database', () => {
+    setupStore(fullState());
+    render(<ProgressDashboard />);
+    // e1 maps to 'Bench Press' from mocked EXERCISES
+    const prItem = screen.getByTestId('pr-item-e1');
+    expect(prItem.textContent).toContain('Bench Press');
+  });
+
+  it('PersonalRecords falls back to exerciseId for unknown exercises', () => {
+    const unknownSet = {
+      id: 's-unknown',
+      workoutId: 'w1',
+      exerciseId: 'unknown-exercise',
+      setNumber: 1,
+      reps: 5,
+      weightKg: 60,
+      updatedAt: '2024-01-10T10:00:00Z',
+    };
+    setupStore({
+      ...fullState(),
+      workoutSets: [thisWeekSet, lastWeekSet, unknownSet],
+    });
+    render(<ProgressDashboard />);
+    const prItem = screen.getByTestId('pr-item-unknown-exercise');
+    expect(prItem.textContent).toContain('unknown-exercise');
+  });
+
+  it('PersonalRecords skips sets with null exerciseId', () => {
+    const nullExSet = {
+      id: 's-null',
+      workoutId: 'w1',
+      exerciseId: null,
+      setNumber: 1,
+      reps: 5,
+      weightKg: 200,
+      updatedAt: '2024-01-10T10:00:00Z',
+    };
+    setupStore({
+      ...fullState(),
+      workoutSets: [thisWeekSet, nullExSet],
+    });
+    render(<ProgressDashboard />);
+    // Only e1 PR should exist, not a null-exercise PR
+    expect(screen.getByTestId('pr-item-e1')).toBeInTheDocument();
+    expect(screen.queryByTestId('pr-item-null')).not.toBeInTheDocument();
+  });
+
+  it('VolumeTrendChart renders in bottom sheet for all metric cards', () => {
+    setupStore(fullState());
+    render(<ProgressDashboard />);
+
+    const cards: string[] = ['weight', '1rm', 'adherence', 'sessions'];
+    for (const card of cards) {
+      fireEvent.click(screen.getByTestId(`metric-card-${card}`));
+      expect(screen.getByTestId('volume-trend-chart')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('close-bottom-sheet'));
+    }
+  });
+
+  it('old SimpleBarChart testids no longer in DOM', () => {
+    setupStore(fullState());
+    render(<ProgressDashboard />);
+    fireEvent.click(screen.getByTestId('metric-card-weight'));
+    expect(screen.queryByTestId('bottom-sheet-chart')).not.toBeInTheDocument();
+    expect(screen.queryAllByTestId('chart-bar')).toHaveLength(0);
+  });
+
+  it('PersonalRecords sorted by bestWeight descending', () => {
+    const heavySet = {
+      id: 's-heavy',
+      workoutId: 'w1',
+      exerciseId: 'e2',
+      setNumber: 1,
+      reps: 5,
+      weightKg: 150,
+      updatedAt: '2024-01-10T10:00:00Z',
+    };
+    setupStore({
+      ...fullState(),
+      workoutSets: [thisWeekSet, lastWeekSet, heavySet],
+    });
+    render(<ProgressDashboard />);
+    // e2 (150kg) should appear before e1 (100kg)
+    const items = screen.getAllByTestId(/^pr-item-/);
+    expect(items[0].getAttribute('data-testid')).toBe('pr-item-e2');
+    expect(items[1].getAttribute('data-testid')).toBe('pr-item-e1');
+  });
+
+  it('PersonalRecords tie-break by most recent workout date', () => {
+    // Two sets with same weight for e1 — newer workout should win
+    const olderSameWeight = {
+      id: 's-older',
+      workoutId: 'w2',
+      exerciseId: 'e1',
+      setNumber: 1,
+      reps: 8,
+      weightKg: 100,
+      updatedAt: '2024-01-03T10:00:00Z',
+    };
+    setupStore({
+      ...fullState(),
+      workoutSets: [thisWeekSet, olderSameWeight],
+    });
+    render(<ProgressDashboard />);
+    // Best set should be thisWeekSet (w1, 2024-01-10) due to more recent date
+    expect(screen.getByTestId('pr-reps-e1').textContent).toContain('10');
+  });
+
+  it('PersonalRecords history limited to 5 entries', () => {
+    // Create 7 sets for same exercise — history should show max 5 (excluding best)
+    const sets = Array.from({ length: 7 }, (_, i) => ({
+      id: `sh${i}`,
+      workoutId: i < 4 ? 'w1' : 'w2',
+      exerciseId: 'e1',
+      setNumber: i + 1,
+      reps: 10,
+      weightKg: 50 + i * 5,
+      updatedAt: `2024-01-${String(10 - i).padStart(2, '0')}T10:00:00Z`,
+    }));
+    setupStore({
+      ...fullState(),
+      workoutSets: sets,
+    });
+    render(<ProgressDashboard />);
+    // Toggle history
+    fireEvent.click(screen.getByTestId('pr-toggle-e1'));
+    // Each history entry has data-testid="pr-history-entry-{i}"
+    const entries = screen.getAllByTestId(/^pr-history-entry-/);
+    expect(entries.length).toBeLessThanOrEqual(5);
   });
 });

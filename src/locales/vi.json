@@ -1213,8 +1213,13 @@
       "minutes": "phút",
       "completedAt": "Hoàn thành lúc",
       "weekOf": "Tuần từ {{date}}",
+      "weekRange": "Tuần {{week}}: {{start}} - {{end}}",
       "exerciseCount": "{{count}} bài tập",
-      "deletedExercise": "Bài tập đã xóa"
+      "deletedExercise": "Bài tập đã xóa",
+      "prBadge": "Kỷ lục mới",
+      "prBadgeAria": "Kỷ lục cá nhân mới cho {{exercise}}",
+      "cloneWorkout": "Sao chép buổi tập",
+      "cloneWorkoutAria": "Sao chép buổi tập {{name}}"
     },
     "progress": {
       "title": "Tiến trình",
@@ -1442,6 +1447,20 @@
     },
     "session": {
       "milestone": "🎯 Buổi tập thứ {{count}}!"
+    },
+    "volumeTrend": {
+      "noData": "Chưa có dữ liệu",
+      "chartLabel": "Biểu đồ xu hướng khối lượng tập luyện",
+      "barLabel": "Tuần {{week}}: {{volume}} kg",
+      "tooltipLabel": "{{volume}} kg"
+    },
+    "personalRecords": {
+      "title": "Kỷ lục cá nhân",
+      "empty": "Chưa có kỷ lục",
+      "emptyDescription": "Hoàn thành buổi tập để thiết lập kỷ lục đầu tiên",
+      "historyLabel": "Lịch sử",
+      "kgUnit": "kg",
+      "repsFormat": "×{{reps}}"
     }
   },
   "dashboard": {

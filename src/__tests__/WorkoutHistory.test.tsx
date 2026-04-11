@@ -22,9 +22,14 @@ vi.mock('react-i18next', () => ({
         'fitness.history.yesterday': 'Hôm qua',
         'fitness.history.daysAgo': '{{count}} ngày trước',
         'fitness.history.exerciseCount': '{{count}} bài tập',
-        'fitness.history.weekOf': 'Tuần từ {{date}}',
+        'fitness.history.weekRange': 'Tuần {{week}}: {{start}} - {{end}}',
         'fitness.history.notes': 'Ghi chú',
         'fitness.history.completedAt': 'Hoàn thành lúc',
+        'fitness.history.deletedExercise': 'Bài tập đã xóa',
+        'fitness.history.prBadge': 'Kỷ lục mới',
+        'fitness.history.prBadgeAria': 'Kỷ lục cá nhân mới cho {{exercise}}',
+        'fitness.history.cloneWorkout': 'Sao chép buổi tập',
+        'fitness.history.cloneWorkoutAria': 'Sao chép buổi tập {{name}}',
         'fitness.emptyState.historyTitle': 'Chưa có lịch sử tập luyện',
         'fitness.emptyState.historyDescription': 'Bắt đầu buổi tập đầu tiên để xem lịch sử tại đây',
       };
@@ -42,6 +47,14 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('../store/fitnessStore', () => ({
   useFitnessStore: vi.fn(),
+}));
+
+const mockNavigateTab = vi.fn();
+
+vi.mock('../store/navigationStore', () => ({
+  useNavigationStore: vi.fn((selector: (state: Record<string, unknown>) => unknown) =>
+    selector({ navigateTab: mockNavigateTab }),
+  ),
 }));
 
 const mockUseFitnessStore = useFitnessStore as unknown as Mock;
@@ -165,7 +178,7 @@ describe('WorkoutHistory', () => {
   describe('empty state', () => {
     beforeEach(() => {
       mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
-        selector({ workouts: [], workoutSets: [] }),
+        selector({ workouts: [], workoutSets: [], setWorkoutDraft: vi.fn() }),
       );
     });
 
@@ -199,14 +212,18 @@ describe('WorkoutHistory', () => {
 
   describe('with workouts', () => {
     const mockDeleteWorkout = vi.fn().mockResolvedValue(undefined);
+    const mockSetWorkoutDraft = vi.fn();
 
     beforeEach(() => {
       mockDeleteWorkout.mockClear();
+      mockSetWorkoutDraft.mockClear();
+      mockNavigateTab.mockClear();
       mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
         selector({
           workouts: mockWorkouts,
           workoutSets: mockWorkoutSets,
           deleteWorkout: mockDeleteWorkout,
+          setWorkoutDraft: mockSetWorkoutDraft,
         }),
       );
     });
@@ -241,16 +258,16 @@ describe('WorkoutHistory', () => {
       expect(screen.getByTestId('workout-date-w4')).toHaveTextContent('T3, 10/03/2026');
     });
 
-    it('groups workouts by week with headers', () => {
+    it('groups workouts by week with headers showing ISO week + date range', () => {
       render(<WorkoutHistory />);
       const weekHeader1 = screen.getByTestId('week-header-2026-03-23');
-      expect(weekHeader1).toHaveTextContent('Tuần từ 23/03');
+      expect(weekHeader1).toHaveTextContent('Tuần 13: 23/03 - 29/03');
 
       const weekHeader2 = screen.getByTestId('week-header-2026-03-16');
-      expect(weekHeader2).toHaveTextContent('Tuần từ 16/03');
+      expect(weekHeader2).toHaveTextContent('Tuần 12: 16/03 - 22/03');
 
       const weekHeader3 = screen.getByTestId('week-header-2026-03-09');
-      expect(weekHeader3).toHaveTextContent('Tuần từ 09/03');
+      expect(weekHeader3).toHaveTextContent('Tuần 11: 09/03 - 15/03');
     });
 
     it('shows exercise count per workout', () => {
@@ -460,6 +477,512 @@ describe('WorkoutHistory', () => {
       });
 
       expect(mockDeleteWorkout).toHaveBeenCalledWith('w3');
+    });
+
+    describe('sticky week headers', () => {
+      it('week headers have sticky positioning classes', () => {
+        render(<WorkoutHistory />);
+        const header = screen.getByTestId('week-header-2026-03-23');
+        expect(header.className).toContain('sticky');
+        expect(header.className).toContain('top-0');
+        expect(header.className).toContain('z-10');
+      });
+
+      it('week headers are h3 elements', () => {
+        render(<WorkoutHistory />);
+        const header = screen.getByTestId('week-header-2026-03-23');
+        expect(header.tagName).toBe('H3');
+      });
+
+      it('week header has bg-background for overlap visibility', () => {
+        render(<WorkoutHistory />);
+        const header = screen.getByTestId('week-header-2026-03-23');
+        expect(header.className).toContain('bg-background');
+      });
+    });
+
+    describe('week label format', () => {
+      it('shows ISO week number in header', () => {
+        render(<WorkoutHistory />);
+        expect(screen.getByTestId('week-header-2026-03-23')).toHaveTextContent('Tuần 13');
+        expect(screen.getByTestId('week-header-2026-03-16')).toHaveTextContent('Tuần 12');
+        expect(screen.getByTestId('week-header-2026-03-09')).toHaveTextContent('Tuần 11');
+      });
+
+      it('shows start and end dates in dd/mm format', () => {
+        render(<WorkoutHistory />);
+        expect(screen.getByTestId('week-header-2026-03-23')).toHaveTextContent('23/03 - 29/03');
+        expect(screen.getByTestId('week-header-2026-03-16')).toHaveTextContent('16/03 - 22/03');
+        expect(screen.getByTestId('week-header-2026-03-09')).toHaveTextContent('09/03 - 15/03');
+      });
+
+      it('filtered view preserves correct week headers', () => {
+        render(<WorkoutHistory />);
+        fireEvent.click(screen.getByTestId('filter-cardio'));
+        // w2 (2026-03-21) is the only cardio workout → week starting 2026-03-16
+        expect(screen.getByTestId('week-header-2026-03-16')).toHaveTextContent('Tuần 12: 16/03 - 22/03');
+        expect(screen.queryByTestId('week-header-2026-03-23')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('week-header-2026-03-09')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('clone workout button', () => {
+      it('renders clone button for each workout card', () => {
+        render(<WorkoutHistory />);
+        expect(screen.getByTestId('clone-workout-w1')).toBeInTheDocument();
+        expect(screen.getByTestId('clone-workout-w2')).toBeInTheDocument();
+        expect(screen.getByTestId('clone-workout-w3')).toBeInTheDocument();
+        expect(screen.getByTestId('clone-workout-w4')).toBeInTheDocument();
+      });
+
+      it('clone button has aria-label with workout name', () => {
+        render(<WorkoutHistory />);
+        expect(screen.getByTestId('clone-workout-w1')).toHaveAttribute('aria-label', 'Sao chép buổi tập Chest Day');
+        expect(screen.getByTestId('clone-workout-w3')).toHaveAttribute('aria-label', 'Sao chép buổi tập Leg Day');
+      });
+
+      it('clone button is visible alongside toggle button', () => {
+        render(<WorkoutHistory />);
+        const card = screen.getByTestId('workout-card-w1');
+        const toggle = screen.getByTestId('workout-toggle-w1');
+        const clone = screen.getByTestId('clone-workout-w1');
+        expect(card).toContainElement(toggle);
+        expect(card).toContainElement(clone);
+      });
+    });
+
+    describe('clone workout action', () => {
+      // Use a real exerciseId from EXERCISES so handleClone finds it
+      const realWorkouts = [
+        {
+          id: 'rw1',
+          date: '2026-03-25',
+          name: 'Bench Day',
+          durationMin: 45,
+          createdAt: '2026-03-25T09:00:00Z',
+          updatedAt: '2026-03-25T09:45:00Z',
+        },
+      ];
+
+      const realWorkoutSets = [
+        {
+          id: 'rs1',
+          workoutId: 'rw1',
+          exerciseId: 'barbell-bench-press',
+          setNumber: 1,
+          reps: 10,
+          weightKg: 60,
+          rpe: 7,
+          updatedAt: '2026-03-25T09:10:00Z',
+        },
+        {
+          id: 'rs2',
+          workoutId: 'rw1',
+          exerciseId: 'barbell-bench-press',
+          setNumber: 2,
+          reps: 8,
+          weightKg: 70,
+          rpe: 8,
+          updatedAt: '2026-03-25T09:15:00Z',
+        },
+      ];
+
+      it('calls setWorkoutDraft with exercises and cloned sets', () => {
+        const localMockSetDraft = vi.fn();
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: realWorkouts,
+            workoutSets: realWorkoutSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: localMockSetDraft,
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        fireEvent.click(screen.getByTestId('clone-workout-rw1'));
+
+        expect(localMockSetDraft).toHaveBeenCalledTimes(1);
+        const draftArg = localMockSetDraft.mock.calls[0][0];
+        expect(draftArg.exercises).toHaveLength(1);
+        expect(draftArg.exercises[0].id).toBe('barbell-bench-press');
+        expect(draftArg.sets).toHaveLength(2);
+        expect(draftArg.elapsedSeconds).toBe(0);
+        // Cloned sets have new IDs and empty workoutId
+        expect(draftArg.sets[0].id).not.toBe('rs1');
+        expect(draftArg.sets[0].workoutId).toBe('');
+        expect(draftArg.sets[1].id).not.toBe('rs2');
+        expect(draftArg.sets[1].workoutId).toBe('');
+      });
+
+      it('cloned sets preserve original weight and reps', () => {
+        const localMockSetDraft = vi.fn();
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: realWorkouts,
+            workoutSets: realWorkoutSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: localMockSetDraft,
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        fireEvent.click(screen.getByTestId('clone-workout-rw1'));
+
+        const draftArg = localMockSetDraft.mock.calls[0][0];
+        expect(draftArg.sets[0].weightKg).toBe(60);
+        expect(draftArg.sets[0].reps).toBe(10);
+        expect(draftArg.sets[1].weightKg).toBe(70);
+        expect(draftArg.sets[1].reps).toBe(8);
+      });
+
+      it('includes exerciseMetas in draft', () => {
+        const localMockSetDraft = vi.fn();
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: realWorkouts,
+            workoutSets: realWorkoutSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: localMockSetDraft,
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        fireEvent.click(screen.getByTestId('clone-workout-rw1'));
+
+        const draftArg = localMockSetDraft.mock.calls[0][0];
+        expect(draftArg.exerciseMetas).toBeDefined();
+        expect(draftArg.exerciseMetas).toHaveLength(1);
+        expect(draftArg.exerciseMetas[0].exercise.id).toBe('barbell-bench-press');
+        expect(draftArg.exerciseMetas[0].plannedSets).toBe(2);
+        expect(draftArg.exerciseMetas[0].restSeconds).toBe(90);
+      });
+
+      it('navigates to fitness tab after cloning', () => {
+        const localMockSetDraft = vi.fn();
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: realWorkouts,
+            workoutSets: realWorkoutSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: localMockSetDraft,
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        fireEvent.click(screen.getByTestId('clone-workout-rw1'));
+
+        expect(mockNavigateTab).toHaveBeenCalledWith('fitness');
+      });
+
+      it('skips exercises not found in EXERCISES database', () => {
+        const localMockSetDraft = vi.fn();
+        const unknownSets = [
+          {
+            id: 'us1',
+            workoutId: 'rw1',
+            exerciseId: 'nonexistent-exercise-xyz',
+            setNumber: 1,
+            reps: 10,
+            weightKg: 50,
+            updatedAt: '2026-03-25T09:10:00Z',
+          },
+        ];
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: realWorkouts,
+            workoutSets: unknownSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: localMockSetDraft,
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        fireEvent.click(screen.getByTestId('clone-workout-rw1'));
+
+        const draftArg = localMockSetDraft.mock.calls[0][0];
+        expect(draftArg.exercises).toHaveLength(0);
+        expect(draftArg.exerciseMetas).toBeUndefined();
+      });
+
+      it('handles cardio-only workout clone (exerciseId: null)', () => {
+        const localMockSetDraft = vi.fn();
+        const cardioSets = [
+          {
+            id: 'cs1',
+            workoutId: 'rw1',
+            exerciseId: null,
+            setNumber: 1,
+            weightKg: 0,
+            durationMin: 30,
+            updatedAt: '2026-03-25T09:10:00Z',
+          },
+        ];
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: realWorkouts,
+            workoutSets: cardioSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: localMockSetDraft,
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        fireEvent.click(screen.getByTestId('clone-workout-rw1'));
+
+        const draftArg = localMockSetDraft.mock.calls[0][0];
+        expect(draftArg.exercises).toHaveLength(0);
+        expect(draftArg.sets).toHaveLength(1);
+        expect(draftArg.sets[0].workoutId).toBe('');
+      });
+    });
+
+    describe('PR badges', () => {
+      // PR requires: same exerciseId + same reps + higher weightKg in current vs previous
+      const prWorkouts = [
+        {
+          id: 'pw-old',
+          date: '2026-03-10',
+          name: 'Old Bench',
+          createdAt: '2026-03-10T09:00:00Z',
+          updatedAt: '2026-03-10T09:45:00Z',
+        },
+        {
+          id: 'pw-new',
+          date: '2026-03-25',
+          name: 'PR Bench',
+          createdAt: '2026-03-25T09:00:00Z',
+          updatedAt: '2026-03-25T09:45:00Z',
+        },
+      ];
+
+      const prWorkoutSets = [
+        // Old workout: 60kg × 10
+        {
+          id: 'ps-old1',
+          workoutId: 'pw-old',
+          exerciseId: 'barbell-bench-press',
+          setNumber: 1,
+          reps: 10,
+          weightKg: 60,
+          updatedAt: '2026-03-10T09:10:00Z',
+        },
+        // New workout: 70kg × 10 (PR! — same reps, higher weight)
+        {
+          id: 'ps-new1',
+          workoutId: 'pw-new',
+          exerciseId: 'barbell-bench-press',
+          setNumber: 1,
+          reps: 10,
+          weightKg: 70,
+          updatedAt: '2026-03-25T09:10:00Z',
+        },
+      ];
+
+      it('shows PR badge when expanded workout has a personal record', () => {
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: prWorkouts,
+            workoutSets: prWorkoutSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: vi.fn(),
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        fireEvent.click(screen.getByTestId('workout-toggle-pw-new'));
+
+        expect(screen.getByTestId('pr-badge-barbell-bench-press')).toBeInTheDocument();
+        expect(screen.getByTestId('pr-badge-barbell-bench-press')).toHaveTextContent('Kỷ lục mới');
+      });
+
+      it('PR badge has accessible aria-label', () => {
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: prWorkouts,
+            workoutSets: prWorkoutSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: vi.fn(),
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        fireEvent.click(screen.getByTestId('workout-toggle-pw-new'));
+
+        const badge = screen.getByTestId('pr-badge-barbell-bench-press');
+        expect(badge).toHaveAttribute('aria-label', 'Kỷ lục cá nhân mới cho Đẩy tạ đòn nằm ngang');
+      });
+
+      it('does not show PR badge when there is no improvement', () => {
+        const noImprovementSets = [
+          {
+            id: 'ni-old1',
+            workoutId: 'pw-old',
+            exerciseId: 'barbell-bench-press',
+            setNumber: 1,
+            reps: 10,
+            weightKg: 60,
+            updatedAt: '2026-03-10T09:10:00Z',
+          },
+          // Same weight as before — no PR
+          {
+            id: 'ni-new1',
+            workoutId: 'pw-new',
+            exerciseId: 'barbell-bench-press',
+            setNumber: 1,
+            reps: 10,
+            weightKg: 60,
+            updatedAt: '2026-03-25T09:10:00Z',
+          },
+        ];
+
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: prWorkouts,
+            workoutSets: noImprovementSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: vi.fn(),
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        fireEvent.click(screen.getByTestId('workout-toggle-pw-new'));
+
+        expect(screen.queryByTestId('pr-badge-barbell-bench-press')).not.toBeInTheDocument();
+      });
+
+      it('does not show PR badge for first-ever workout (no history)', () => {
+        const firstWorkoutSets = [
+          {
+            id: 'fw1',
+            workoutId: 'pw-new',
+            exerciseId: 'barbell-bench-press',
+            setNumber: 1,
+            reps: 10,
+            weightKg: 70,
+            updatedAt: '2026-03-25T09:10:00Z',
+          },
+        ];
+
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: [prWorkouts[1]],
+            workoutSets: firstWorkoutSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: vi.fn(),
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        fireEvent.click(screen.getByTestId('workout-toggle-pw-new'));
+
+        expect(screen.queryByTestId('pr-badge-barbell-bench-press')).not.toBeInTheDocument();
+      });
+
+      it('does not show PR badge for collapsed workout', () => {
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: prWorkouts,
+            workoutSets: prWorkoutSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: vi.fn(),
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        // Do NOT expand — PR badges only appear in expanded detail
+        expect(screen.queryByTestId('pr-badge-barbell-bench-press')).not.toBeInTheDocument();
+      });
+
+      it('PR badge disappears when workout is collapsed', () => {
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: prWorkouts,
+            workoutSets: prWorkoutSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: vi.fn(),
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        fireEvent.click(screen.getByTestId('workout-toggle-pw-new'));
+        expect(screen.getByTestId('pr-badge-barbell-bench-press')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByTestId('workout-toggle-pw-new'));
+        expect(screen.queryByTestId('pr-badge-barbell-bench-press')).not.toBeInTheDocument();
+      });
+
+      it('old workout does not show PR badge when expanded', () => {
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: prWorkouts,
+            workoutSets: prWorkoutSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: vi.fn(),
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        // Expand the OLD workout (pw-old) — no previous sets before it
+        fireEvent.click(screen.getByTestId('workout-toggle-pw-old'));
+        expect(screen.queryByTestId('pr-badge-barbell-bench-press')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('deleted exercise display', () => {
+      it('shows deleted exercise label for sets with null exerciseId', () => {
+        const deletedSets = [
+          {
+            id: 'ds1',
+            workoutId: 'w3',
+            exerciseId: null,
+            setNumber: 1,
+            weightKg: 50,
+            reps: 10,
+            updatedAt: '2026-03-25T10:10:00Z',
+          },
+        ];
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: mockWorkouts,
+            workoutSets: deletedSets,
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: vi.fn(),
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        fireEvent.click(screen.getByTestId('workout-toggle-w3'));
+        expect(screen.getByTestId('exercise-group-_deleted')).toBeInTheDocument();
+        expect(screen.getByTestId('exercise-group-_deleted')).toHaveTextContent('Bài tập đã xóa');
+      });
+    });
+
+    describe('ISO week number edge cases', () => {
+      it('handles year boundary — Jan 1 2026 is Thursday (ISO week 1)', () => {
+        const jan1Workouts = [
+          {
+            id: 'jan1',
+            date: '2026-01-01',
+            name: 'New Year',
+            createdAt: '2026-01-01T09:00:00Z',
+            updatedAt: '2026-01-01T09:45:00Z',
+          },
+        ];
+        mockUseFitnessStore.mockImplementation((selector: (state: Record<string, unknown>) => unknown) =>
+          selector({
+            workouts: jan1Workouts,
+            workoutSets: [],
+            deleteWorkout: vi.fn(),
+            setWorkoutDraft: vi.fn(),
+          }),
+        );
+
+        render(<WorkoutHistory />);
+        // Jan 1, 2026 = Thursday → Monday of that week = Dec 29, 2025 → weekKey = 2025-12-29
+        const header = screen.getByTestId('week-header-2025-12-29');
+        expect(header).toHaveTextContent('Tuần 1');
+        expect(header).toHaveTextContent('29/12 - 04/01');
+      });
     });
   });
 });

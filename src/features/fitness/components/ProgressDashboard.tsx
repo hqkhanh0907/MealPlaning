@@ -3,10 +3,15 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useFitnessStore } from '../../../store/fitnessStore';
+import { EXERCISES } from '../data/exerciseDatabase';
 import { useCurrentDate } from '../hooks/useCurrentDate';
 import { getWeekBounds } from '../utils/dateUtils';
 import { analyzePlateau } from '../utils/plateauAnalysis';
 import { calculateWeeklyVolume, estimate1RM } from '../utils/trainingMetrics';
+import type { PersonalRecord } from './PersonalRecords';
+import PersonalRecords from './PersonalRecords';
+import type { WeekVolume } from './VolumeTrendChart';
+import VolumeTrendChart from './VolumeTrendChart';
 
 type MetricCardType = 'weight' | '1rm' | 'adherence' | 'sessions';
 type TimeRange = '1W' | '1M' | '3M' | 'all';
@@ -20,32 +25,16 @@ const CARD_TITLE_KEYS: Record<MetricCardType, string> = {
   sessions: 'fitness.progress.sessions',
 };
 
-function getCutoffDate(range: TimeRange): string {
-  if (range === 'all') return '0000-01-01';
-  const daysMap = { '1W': 7, '1M': 30, '3M': 90 } as const;
-  const d = new Date();
-  d.setDate(d.getDate() - daysMap[range]);
-  return d.toISOString().split('T')[0];
-}
+const MAX_VOLUME_WEEKS = 13;
 
-function SimpleBarChart({ data }: Readonly<{ data: number[] }>) {
-  const maxVal = Math.max(...data, 1);
-  return (
-    <div data-testid="bottom-sheet-chart" className="flex h-32 items-end gap-1">
-      {data.map((val, idx) => (
-        <div
-          key={`item-${String(idx)}`}
-          data-testid="chart-bar"
-          className="bg-primary flex-1 rounded-t"
-          style={{
-            height: `${(val / maxVal) * 100}%`,
-            minHeight: val > 0 ? '4px' : '2px',
-          }}
-        />
-      ))}
-    </div>
-  );
-}
+const TIME_RANGE_WEEKS: Record<TimeRange, number> = {
+  '1W': 1,
+  '1M': 4,
+  '3M': 13,
+  all: MAX_VOLUME_WEEKS,
+};
+
+const EXERCISE_NAME_MAP = new Map(EXERCISES.map(ex => [ex.id, ex.nameVi]));
 
 function ProgressDashboardInner() {
   const { t } = useTranslation();
@@ -141,6 +130,78 @@ function ProgressDashboardInner() {
     return days;
   }, [workouts, workoutSets]);
 
+  const allWeeklyVolumes = useMemo((): WeekVolume[] => {
+    const result: WeekVolume[] = [];
+    for (let offset = -(MAX_VOLUME_WEEKS - 1); offset <= 0; offset++) {
+      const bounds = getWeekBounds(offset, currentDate);
+      const weekWorkouts = workouts.filter(w => w.date >= bounds.start && w.date <= bounds.end);
+      const volume = calculateWeeklyVolume(weekWorkouts, workoutSets);
+      result.push({
+        weekLabel: `W${offset}`,
+        volume,
+        isCurrent: offset === 0,
+      });
+    }
+    return result;
+  }, [workouts, workoutSets, currentDate]);
+
+  const filteredWeeklyVolumes = useMemo(
+    (): WeekVolume[] => allWeeklyVolumes.slice(-TIME_RANGE_WEEKS[timeRange]),
+    [allWeeklyVolumes, timeRange],
+  );
+
+  const personalRecords = useMemo((): PersonalRecord[] => {
+    const grouped = new Map<string, typeof workoutSets>();
+    for (const set of workoutSets) {
+      if (!set.exerciseId) continue;
+      const arr = grouped.get(set.exerciseId) ?? [];
+      arr.push(set);
+      grouped.set(set.exerciseId, arr);
+    }
+
+    const records: PersonalRecord[] = [];
+    for (const [exerciseId, sets] of grouped) {
+      let bestSet = sets[0];
+      for (let i = 1; i < sets.length; i++) {
+        const set = sets[i];
+        const setWorkout = workouts.find(w => w.id === set.workoutId);
+        const bestWorkout = workouts.find(w => w.id === bestSet.workoutId);
+        const setDate = setWorkout?.date ?? '';
+        const bestDate = bestWorkout?.date ?? '';
+        if (set.weightKg > bestSet.weightKg || (set.weightKg === bestSet.weightKg && setDate > bestDate)) {
+          bestSet = set;
+        }
+      }
+
+      const bestWorkout = workouts.find(w => w.id === bestSet.workoutId);
+      const bestDate = bestWorkout?.date ?? bestSet.updatedAt.split('T')[0];
+
+      const history = sets
+        .filter(s => s.id !== bestSet.id)
+        .map(s => {
+          const sw = workouts.find(w => w.id === s.workoutId);
+          return {
+            weight: s.weightKg,
+            reps: s.reps ?? 0,
+            date: sw?.date ?? s.updatedAt.split('T')[0],
+          };
+        })
+        .sort((a, b) => b.date.localeCompare(a.date))
+        .slice(0, 5);
+
+      records.push({
+        exerciseId,
+        exerciseName: EXERCISE_NAME_MAP.get(exerciseId) ?? exerciseId,
+        bestWeight: bestSet.weightKg,
+        bestReps: bestSet.reps ?? 0,
+        date: bestDate,
+        history: history.length > 0 ? history : undefined,
+      });
+    }
+
+    return records.sort((a, b) => b.bestWeight - a.bestWeight);
+  }, [workoutSets, workouts]);
+
   const plateauInsights = useMemo(() => {
     const exerciseIds = [...new Set(workoutSets.map(s => s.exerciseId).filter((id): id is string => id !== null))];
     const results: { id: string; text: string }[] = [];
@@ -207,61 +268,6 @@ function ProgressDashboardInner() {
   ]);
 
   const visibleInsights = insights.filter(i => !dismissedInsights.includes(i.id));
-
-  const bottomSheetChartData = useMemo((): number[] => {
-    if (!selectedCard) return [];
-    const cutoffStr = getCutoffDate(timeRange);
-
-    switch (selectedCard) {
-      case 'weight':
-        return sortedWeights
-          .filter(w => w.date >= cutoffStr)
-          .reverse()
-          .map(w => w.weightKg);
-      case '1rm': {
-        const filtered = workouts.filter(w => w.date >= cutoffStr);
-        return filtered.map(w => {
-          const sets = workoutSets.filter(s => s.workoutId === w.id);
-          if (sets.length === 0) return 0;
-          return Math.max(0, ...sets.map(s => estimate1RM(s.weightKg, s.reps ?? 0)));
-        });
-      }
-      case 'adherence': {
-        const filtered = workouts.filter(w => w.date >= cutoffStr);
-        const target = trainingProfile?.daysPerWeek ?? 1;
-        const weekMap = new Map<string, number>();
-        for (const w of filtered) {
-          const d = new Date(w.date);
-          const weekStart = new Date(d);
-          weekStart.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-          const key = weekStart.toISOString().split('T')[0];
-          weekMap.set(key, (weekMap.get(key) ?? 0) + 1);
-        }
-        return Array.from(weekMap.keys())
-          .sort((a, b) => a.localeCompare(b))
-          .map(key => Math.min(100, Math.round(((weekMap.get(key) ?? 0) / target) * 100)));
-      }
-      case 'sessions': {
-        const filtered = workouts.filter(w => w.date >= cutoffStr);
-        const weekMap = new Map<string, number>();
-        for (const w of filtered) {
-          const d = new Date(w.date);
-          const weekStart = new Date(d);
-          weekStart.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-          const key = weekStart.toISOString().split('T')[0];
-          weekMap.set(key, (weekMap.get(key) ?? 0) + 1);
-        }
-        return Array.from(weekMap.keys())
-          .sort((a, b) => a.localeCompare(b))
-          .map(key => weekMap.get(key) ?? 0);
-      }
-      /* v8 ignore next 3 -- TypeScript exhaustiveness check: all MetricCardType values handled above */
-      default: {
-        const _exhaustive: never = selectedCard;
-        return _exhaustive;
-      }
-    }
-  }, [selectedCard, timeRange, sortedWeights, workouts, workoutSets, trainingProfile]);
 
   const handleDismiss = useCallback((id: string) => {
     setDismissedInsights(prev => [...prev, id]);
@@ -439,6 +445,8 @@ function ProgressDashboardInner() {
         </div>
       )}
 
+      <PersonalRecords records={personalRecords} />
+
       {visibleInsights.length > 0 && (
         <div data-testid="insights-section" className="space-y-2">
           <p className="text-foreground text-sm font-medium">{t('fitness.progress.insights')}</p>
@@ -506,7 +514,7 @@ function ProgressDashboardInner() {
               ))}
             </div>
             <div className="mt-4">
-              <SimpleBarChart data={bottomSheetChartData} />
+              <VolumeTrendChart weeks={filteredWeeklyVolumes} />
             </div>
           </div>
         </div>
