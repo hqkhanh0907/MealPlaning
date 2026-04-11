@@ -173,7 +173,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
                     data-testid={`swap-item-${exercise.id}`}
                     aria-label={`${t('fitness.swap.title')}: ${exercise.nameVi}`}
                     onClick={() => handleSelect(exercise)}
-                    className="focus-visible:ring-ring hover:bg-accent focus-visible:ring-offset-2/50 min-h-11 w-full rounded-lg px-3 py-3 text-left transition-colors focus-visible:ring-2"
+                    className="focus-visible:ring-ring hover:bg-accent focus-visible:ring-offset-2/50 min-h-11 w-full rounded-lg px-3 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
                   >
                     <p className="text-foreground text-sm font-medium">{exercise.nameVi}</p>
                     <div className="mt-0.5 flex items-center gap-2">

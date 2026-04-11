@@ -329,4 +329,14 @@ describe('SwapExerciseSheet', () => {
     const flyButton = screen.getByTestId('swap-item-dumbbell-fly');
     expect(flyButton).toHaveAttribute('aria-label', 'Đổi bài tập: Bay tạ tay');
   });
+
+  describe('touch targets & accessibility', () => {
+    it('swap item buttons have press feedback and focus ring', () => {
+      render(<SwapExerciseSheet {...defaultProps} />);
+      const swapItem = screen.getByTestId('swap-item-dumbbell-fly');
+      expect(swapItem).toHaveClass('active:scale-[0.98]');
+      expect(swapItem).toHaveClass('motion-reduce:transform-none');
+      expect(swapItem).toHaveClass('focus-visible:outline-none');
+    });
+  });
 });

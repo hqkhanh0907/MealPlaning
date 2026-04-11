@@ -139,13 +139,13 @@ export function CustomExerciseModal({
             <button
               type="button"
               onClick={onClose}
-              className="text-foreground-secondary border-border hover:bg-accent focus-visible:ring-ring flex min-h-[44px] flex-1 items-center justify-center rounded-lg border py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="text-foreground-secondary border-border hover:bg-accent focus-visible:ring-ring flex min-h-12 flex-1 items-center justify-center rounded-lg border py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
             >
               {t('common.cancel')}
             </button>
             <button
               type="submit"
-              className="focus-visible:ring-ring bg-primary hover:bg-primary/90 text-primary-foreground flex min-h-[44px] flex-1 items-center justify-center rounded-lg py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
+              className="focus-visible:ring-ring bg-primary hover:bg-primary/90 text-primary-foreground flex min-h-12 flex-1 items-center justify-center rounded-lg py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] disabled:opacity-50 motion-reduce:transform-none"
               data-testid="save-custom-exercise"
             >
               {t('common.save')}

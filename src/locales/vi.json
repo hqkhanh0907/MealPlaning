@@ -981,7 +981,10 @@
       "saveAndClose": "Lưu & đóng",
       "discardWorkout": "Hủy buổi tập",
       "emptyWorkout": "Buổi tập trống",
-      "discardEmpty": "Bỏ qua"
+      "discardEmpty": "Bỏ qua",
+      "suggestWeight": "Tăng lên {{weight}}kg",
+      "suggestReps": "Tăng lên {{reps}} rep",
+      "highWeightWarning": "Cân nặng cao bất thường"
     },
     "summary": {
       "title": "Tổng kết buổi tập",
@@ -1007,6 +1010,8 @@
       "search": "Tìm bài tập...",
       "all": "Tất cả",
       "noResults": "Không tìm thấy bài tập",
+      "recentlyUsed": "Gần đây",
+      "createNew": "Tạo bài tập mới",
       "compound": "Đa khớp",
       "secondary": "Phụ trợ",
       "isolation": "Cô lập",
@@ -1154,6 +1159,7 @@
       "restDayRegion": "Khu vực ngày nghỉ",
       "quickCardio": "Cardio nhanh",
       "viewSummary": "Xem tổng kết",
+      "weekOverview": "Tổng quan tuần",
       "exerciseFormat": {
         "guide": "Hướng dẫn định dạng",
         "setsExplain": "Hiệp (sets): Số lần lặp lại 1 nhóm lần tập.",
@@ -1219,7 +1225,9 @@
       "prBadge": "Kỷ lục mới",
       "prBadgeAria": "Kỷ lục cá nhân mới cho {{exercise}}",
       "cloneWorkout": "Sao chép buổi tập",
-      "cloneWorkoutAria": "Sao chép buổi tập {{name}}"
+      "cloneWorkoutAria": "Sao chép buổi tập {{name}}",
+      "week": "Tuần {{n}}",
+      "workouts": "buổi tập"
     },
     "progress": {
       "title": "Tiến trình",
@@ -1237,7 +1245,12 @@
       "volumeUp": "Khối lượng tăng {{percent}}%",
       "volumeDown": "Khối lượng giảm {{percent}}%",
       "weightChange": "Cân nặng thay đổi {{delta}} kg (7 ngày qua)",
-      "weekOf": "Tuần {{current}}/{{total}}"
+      "weekOf": "Tuần {{current}}/{{total}}",
+      "stable": "Ổn định",
+      "volumeUnit": "Tổng khối lượng (kg)",
+      "volumeChartAria": "Biểu đồ khối lượng tập luyện 8 tuần",
+      "noPRs": "Chưa có kỷ lục",
+      "noPRsDesc": "Tập luyện để lập kỷ lục đầu tiên"
     },
     "cardio": {
       "title": "Cardio",
@@ -1264,12 +1277,26 @@
       "moderate": "Trung bình",
       "high": "Cao"
     },
+    "draft": {
+      "resumeTitle": "Buổi tập chưa hoàn thành",
+      "resumeDesc": "{{exercises}} bài tập, {{sets}} set đã ghi",
+      "continue": "Tiếp tục",
+      "discard": "Hủy"
+    },
+    "restTimer": {
+      "title": "Nghỉ giữa set",
+      "remaining": "còn lại",
+      "addTime": "Thêm 30 giây",
+      "skip": "Bỏ qua",
+      "progress": "Tiến trình nghỉ"
+    },
     "editor": {
       "title": "Chỉnh sửa set",
       "weight": "Cân nặng (kg)",
       "kg": "kg",
       "reps": "Số lần",
       "rpe": "RPE",
+      "rest": "Nghỉ (giây)",
       "recentWeights": "Cân nặng gần đây",
       "save": "Lưu",
       "cancel": "Hủy"
@@ -1443,7 +1470,10 @@
       "exercises": "Bài tập"
     },
     "streak": {
-      "milestone": "🔥 Chuỗi {{count}} ngày liên tiếp!"
+      "milestone": "🔥 Chuỗi {{count}} ngày liên tiếp!",
+      "days": "ngày liên tiếp",
+      "atRisk": "Sắp mất!",
+      "weekView": "7 ngày gần đây"
     },
     "session": {
       "milestone": "🎯 Buổi tập thứ {{count}}!"

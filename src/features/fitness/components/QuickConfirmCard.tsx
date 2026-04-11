@@ -41,7 +41,7 @@ export function QuickConfirmCard({
             type="button"
             onClick={onCustomize}
             aria-label={t('common.edit')}
-            className="text-muted-foreground focus-visible:ring-ring/50 rounded-lg border p-2 focus-visible:ring-3"
+            className="text-muted-foreground focus-visible:ring-ring min-h-12 min-w-12 rounded-lg border p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
             data-testid="customize-button"
           >
             <Pencil className="h-5 w-5" aria-hidden="true" />
@@ -50,7 +50,7 @@ export function QuickConfirmCard({
             type="button"
             onClick={() => onConfirm(suggestion)}
             aria-label={t('common.confirm')}
-            className="bg-info focus-visible:ring-ring/50 text-primary-foreground rounded-lg p-2 focus-visible:ring-3"
+            className="bg-info text-primary-foreground focus-visible:ring-ring min-h-12 min-w-12 rounded-lg p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
             data-testid="quick-confirm-button"
           >
             <Check className="h-5 w-5" aria-hidden="true" />

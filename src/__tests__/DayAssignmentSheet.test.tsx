@@ -235,4 +235,14 @@ describe('DayAssignmentSheet', () => {
     expect(onSelectDay).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
   });
+
+  describe('touch targets & accessibility', () => {
+    it('day buttons meet touch target minimum and have press feedback', () => {
+      render(<DayAssignmentSheet {...defaultProps} />);
+      const dayBtn = screen.getByTestId('day-option-1');
+      expect(dayBtn).toHaveClass('min-h-12');
+      expect(dayBtn).toHaveClass('active:scale-[0.98]');
+      expect(dayBtn).toHaveClass('motion-reduce:transform-none');
+    });
+  });
 });

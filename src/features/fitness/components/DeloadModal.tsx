@@ -46,7 +46,7 @@ export function DeloadModal({ isOpen, reason, onAccept, onOverride }: Readonly<D
           <button
             type="button"
             onClick={onAccept}
-            className="bg-warning hover:bg-warning/90 focus-visible:ring-warning text-foreground flex min-h-[44px] flex-1 items-center justify-center rounded-lg px-4 py-2.5 text-center font-medium break-words whitespace-normal transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className="bg-warning hover:bg-warning/90 text-foreground focus-visible:ring-ring flex min-h-12 flex-1 items-center justify-center rounded-lg px-4 py-2.5 text-center font-medium break-words whitespace-normal transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
             data-testid="deload-accept"
           >
             {t('fitness.deload.accept')}
@@ -54,7 +54,7 @@ export function DeloadModal({ isOpen, reason, onAccept, onOverride }: Readonly<D
           <button
             type="button"
             onClick={onOverride}
-            className="text-foreground-secondary border-border hover:bg-accent focus-visible:ring-ring flex min-h-[44px] flex-1 items-center justify-center rounded-lg border px-4 py-2.5 text-center font-medium break-words whitespace-normal transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className="text-foreground-secondary border-border hover:bg-accent focus-visible:ring-ring flex min-h-12 flex-1 items-center justify-center rounded-lg border px-4 py-2.5 text-center font-medium break-words whitespace-normal transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
             data-testid="deload-override"
             aria-describedby={reasonId}
           >

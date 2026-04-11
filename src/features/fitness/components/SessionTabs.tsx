@@ -112,7 +112,7 @@ function SessionTabsInner({
                   onPointerUp={handlePointerUpOrLeave}
                   onPointerLeave={handlePointerUpOrLeave}
                   onContextMenu={handleContextMenu}
-                  className={`focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.97] motion-reduce:transform-none ${
+                  className={`focus-visible:ring-ring flex min-h-12 min-w-12 items-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none ${
                     isActive
                       ? 'bg-accent-highlight text-accent-highlight-foreground dark:bg-accent-highlight'
                       : 'text-foreground-secondary bg-muted'
@@ -134,7 +134,7 @@ function SessionTabsInner({
                     data-testid={`delete-session-${session.id}`}
                     onClick={() => setConfirmDeleteId(session.id)}
                     aria-label={t('fitness.plan.deleteSession')}
-                    className="text-muted-foreground hover:bg-accent flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                    className="text-muted-foreground hover:bg-accent focus-visible:ring-ring flex min-h-12 min-w-12 items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -150,7 +150,7 @@ function SessionTabsInner({
           disabled={isMaxReached}
           onClick={onAddSession}
           aria-label={t('fitness.plan.addSession')}
-          className="focus-visible:ring-ring text-muted-foreground hover:bg-accent flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-3 transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+          className="focus-visible:ring-ring text-muted-foreground hover:bg-accent flex min-h-12 min-w-12 items-center justify-center rounded-full p-3 transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transform-none"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -170,7 +170,7 @@ function SessionTabsInner({
             type="button"
             onClick={handleConfirmDelete}
             aria-label={t('fitness.plan.deleteSession')}
-            className="focus-visible:ring-ring bg-destructive hover:bg-destructive/90 text-destructive-foreground ml-auto min-h-[44px] min-w-[44px] rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className="focus-visible:ring-ring bg-destructive hover:bg-destructive/90 text-destructive-foreground ml-auto min-h-12 min-w-12 rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
           >
             <Trash2 className="mr-1 inline h-3.5 w-3.5" aria-hidden="true" />
             {t('fitness.plan.delete')}
@@ -181,7 +181,7 @@ function SessionTabsInner({
             onClick={handleCancelDelete}
             autoFocus
             aria-label={t('fitness.plan.cancelDelete')}
-            className="focus-visible:ring-ring bg-muted text-foreground hover:bg-accent min-h-[44px] min-w-[44px] rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className="focus-visible:ring-ring bg-muted text-foreground hover:bg-accent min-h-12 min-w-12 rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
           >
             {t('fitness.plan.cancelDelete')}
           </button>

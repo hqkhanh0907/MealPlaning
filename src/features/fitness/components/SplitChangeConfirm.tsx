@@ -87,7 +87,7 @@ export function SplitChangeConfirm({
             variant="outline"
             onClick={onClose}
             disabled={isLoading}
-            className="flex-1 touch-manipulation"
+            className="flex-1 touch-manipulation active:scale-[0.98] motion-reduce:transform-none"
             data-testid="cancel-button"
           >
             {t('fitness.splitChanger.cancel')}
@@ -96,7 +96,7 @@ export function SplitChangeConfirm({
             variant={isRegenerate ? 'destructive' : 'default'}
             onClick={onConfirm}
             disabled={isLoading}
-            className="flex-1 touch-manipulation"
+            className="flex-1 touch-manipulation active:scale-[0.98] motion-reduce:transform-none"
             data-testid="confirm-button"
           >
             {isLoading ? (

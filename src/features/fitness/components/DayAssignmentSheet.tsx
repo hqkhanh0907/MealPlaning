@@ -120,10 +120,11 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                     disabled={isFull}
                     onClick={() => handleSelect(day)}
                     className={[
-                      'flex w-full items-center gap-3 rounded-xl px-4 py-3',
+                      'flex min-h-12 w-full items-center gap-3 rounded-xl px-4 py-3',
                       'touch-manipulation text-left text-sm',
                       'transition-colors motion-reduce:transition-none',
                       'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+                      'active:scale-[0.98] motion-reduce:transform-none',
                       isCurrent
                         ? 'border-primary bg-primary-subtle border-2'
                         : 'bg-card border-border hover:bg-accent border',

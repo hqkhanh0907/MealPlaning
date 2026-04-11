@@ -1,130 +1,86 @@
-import { Check, Minus, Plus, X } from 'lucide-react';
-import React, { useCallback, useState } from 'react';
+import { Check, X } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { CloseButton } from '@/components/shared/CloseButton';
+import { ModalBackdrop } from '@/components/shared/ModalBackdrop';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { blockNegativeKeys } from '@/utils/numericInputHandlers';
 
-import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
-import { MIN_REPS, MIN_WEIGHT_KG, REPS_INCREMENT, RPE_OPTIONS, WEIGHT_INCREMENT } from '../constants';
+import { DEFAULT_REST_SECONDS, MIN_REPS, MIN_WEIGHT_KG, RPE_OPTIONS } from '../constants';
+import { StepperInput } from './StepperInput';
+
+const REST_STEP = 15;
+const WEIGHT_WARNING_THRESHOLD = 300;
+
+const RPE_COLOR_MAP: Record<number, { selected: string; unselected: string }> = {
+  6: {
+    selected: 'bg-green-500 text-white border-green-500',
+    unselected: 'bg-green-500/10 text-green-600 border-green-500/30',
+  },
+  7: {
+    selected: 'bg-lime-500 text-white border-lime-500',
+    unselected: 'bg-lime-500/10 text-lime-600 border-lime-500/30',
+  },
+  8: {
+    selected: 'bg-yellow-500 text-white border-yellow-500',
+    unselected: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30',
+  },
+  9: {
+    selected: 'bg-orange-500 text-white border-orange-500',
+    unselected: 'bg-orange-500/10 text-orange-600 border-orange-500/30',
+  },
+  10: {
+    selected: 'bg-red-500 text-white border-red-500',
+    unselected: 'bg-red-500/10 text-red-600 border-red-500/30',
+  },
+};
 
 interface SetEditorProps {
   initialWeight: number;
   initialReps: number;
   initialRpe?: number;
+  initialRestSeconds?: number;
   recentWeights: number[];
-  onSave: (data: { weight: number; reps: number; rpe?: number }) => void;
+  onSave: (data: { weight: number; reps: number; rpe?: number; restSeconds: number }) => void;
   onCancel: () => void;
   isVisible: boolean;
 }
 
-export const SetEditor = React.memo(function SetEditor({
+export function SetEditor({
   initialWeight,
   initialReps,
   initialRpe,
+  initialRestSeconds,
   recentWeights,
   onSave,
   onCancel,
   isVisible,
-}: SetEditorProps) {
+}: Readonly<SetEditorProps>) {
   const { t } = useTranslation();
   const [weight, setWeight] = useState(initialWeight);
   const [reps, setReps] = useState(initialReps);
+  const [restSeconds, setRestSeconds] = useState(initialRestSeconds ?? DEFAULT_REST_SECONDS);
   const [rpe, setRpe] = useState<number | undefined>(initialRpe);
-  const [weightStr, setWeightStr] = useState(String(initialWeight));
-  const [repsStr, setRepsStr] = useState(String(initialReps));
 
-  const handleWeightDecrement = useCallback(() => {
-    setWeight(prev => {
-      const next = Math.max(MIN_WEIGHT_KG, prev - WEIGHT_INCREMENT);
-      setWeightStr(String(next));
-      return next;
-    });
-  }, []);
+  if (!isVisible) return null;
 
-  const handleWeightIncrement = useCallback(() => {
-    setWeight(prev => {
-      const next = prev + WEIGHT_INCREMENT;
-      setWeightStr(String(next));
-      return next;
-    });
-  }, []);
-
-  const handleWeightInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value;
-    setWeightStr(raw);
-    if (raw !== '') {
-      const value = Number(raw);
-      if (!Number.isNaN(value)) {
-        setWeight(value);
-      }
-    }
-  }, []);
-
-  const handleWeightBlur = useCallback(() => {
-    if (weightStr !== '' && !Number.isNaN(Number(weightStr))) {
-      setWeightStr(String(weight));
-    }
-  }, [weightStr, weight]);
-
-  const handleWeightChip = useCallback((value: number) => {
-    setWeight(value);
-    setWeightStr(String(value));
-  }, []);
-
-  const handleRepsDecrement = useCallback(() => {
-    setReps(prev => {
-      const next = Math.max(MIN_REPS, prev - REPS_INCREMENT);
-      setRepsStr(String(next));
-      return next;
-    });
-  }, []);
-
-  const handleRepsIncrement = useCallback(() => {
-    setReps(prev => {
-      const next = prev + REPS_INCREMENT;
-      setRepsStr(String(next));
-      return next;
-    });
-  }, []);
-
-  const handleRepsInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value;
-    setRepsStr(raw);
-    if (raw !== '') {
-      const value = Number(raw);
-      if (!Number.isNaN(value)) {
-        setReps(value);
-      }
-    }
-  }, []);
-
-  const handleRepsBlur = useCallback(() => {
-    if (repsStr !== '' && !Number.isNaN(Number(repsStr))) {
-      setRepsStr(String(reps));
-    }
-  }, [repsStr, reps]);
-
-  const handleRpeSelect = useCallback((value: number) => {
+  const handleRpeSelect = (value: number) => {
     setRpe(prev => (prev === value ? undefined : value));
-  }, []);
+  };
 
-  const handleSave = useCallback(() => {
+  const handleSave = () => {
     onSave({
       weight: Math.max(MIN_WEIGHT_KG, weight),
       reps: Math.max(MIN_REPS, reps),
       rpe,
+      restSeconds,
     });
-  }, [weight, reps, rpe, onSave]);
-
-  if (!isVisible) return null;
+  };
 
   return (
     <ModalBackdrop onClose={onCancel} zIndex="z-50">
       <div
-        className="bg-card relative w-full max-w-md rounded-t-2xl p-6 shadow-xl sm:rounded-2xl"
+        className="animate-slide-up bg-card relative w-full max-w-md rounded-t-2xl p-6 shadow-xl sm:rounded-2xl"
         aria-label={t('fitness.editor.title')}
         data-testid="set-editor"
       >
@@ -133,45 +89,21 @@ export const SetEditor = React.memo(function SetEditor({
           <CloseButton onClick={onCancel} data-testid="editor-close-button" ariaLabel={t('common.close')} />
         </div>
 
-        {/* Weight section */}
+        {/* Weight */}
         <div className="mb-4">
           <label className="text-muted-foreground mb-2 block text-xs leading-relaxed font-medium">
-            {t('fitness.editor.weight')} ({t('fitness.editor.kg')})
+            {t('fitness.editor.weight')}
           </label>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={handleWeightDecrement}
-              className="h-11 w-11 shrink-0"
-              aria-label={`${t('common.decrease')} ${t('fitness.editor.weight')}`}
-              data-testid="weight-minus-button"
-            >
-              <Minus className="h-5 w-5" aria-hidden="true" />
-            </Button>
-            <Input
-              type="number"
-              value={weightStr}
-              onChange={handleWeightInput}
-              onBlur={handleWeightBlur}
-              onKeyDown={blockNegativeKeys}
-              inputMode="decimal"
-              min={MIN_WEIGHT_KG}
-              step={WEIGHT_INCREMENT}
-              className="text-foreground w-full text-center font-semibold tabular-nums"
-              data-testid="weight-input"
-            />
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={handleWeightIncrement}
-              className="h-11 w-11 shrink-0"
-              aria-label={`${t('common.increase')} ${t('fitness.editor.weight')}`}
-              data-testid="weight-plus-button"
-            >
-              <Plus className="h-5 w-5" aria-hidden="true" />
-            </Button>
-          </div>
+          <StepperInput
+            value={weight}
+            onChange={setWeight}
+            step={0.5}
+            min={MIN_WEIGHT_KG}
+            warningThreshold={WEIGHT_WARNING_THRESHOLD}
+            unit="kg"
+            label={t('fitness.editor.weight')}
+            testId="weight-stepper"
+          />
         </div>
 
         {/* Recent weight chips */}
@@ -186,7 +118,7 @@ export const SetEditor = React.memo(function SetEditor({
                   key={w}
                   variant={weight === w ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => handleWeightChip(w)}
+                  onClick={() => setWeight(w)}
                   className="rounded-full tabular-nums"
                   data-testid={`weight-chip-${w}`}
                 >
@@ -197,76 +129,82 @@ export const SetEditor = React.memo(function SetEditor({
           </div>
         )}
 
-        {/* Reps section */}
+        {/* Reps */}
         <div className="mb-4">
           <label className="text-muted-foreground mb-2 block text-xs font-medium">{t('fitness.editor.reps')}</label>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={handleRepsDecrement}
-              className="h-11 w-11 shrink-0"
-              aria-label={`${t('common.decrease')} ${t('fitness.editor.reps')}`}
-              data-testid="reps-minus-button"
-            >
-              <Minus className="h-5 w-5" aria-hidden="true" />
-            </Button>
-            <Input
-              type="number"
-              value={repsStr}
-              onChange={handleRepsInput}
-              onBlur={handleRepsBlur}
-              onKeyDown={blockNegativeKeys}
-              inputMode="numeric"
-              min={MIN_REPS}
-              step={REPS_INCREMENT}
-              className="text-foreground w-full text-center font-semibold tabular-nums"
-              data-testid="reps-input"
-            />
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={handleRepsIncrement}
-              className="h-11 w-11 shrink-0"
-              aria-label={`${t('common.increase')} ${t('fitness.editor.reps')}`}
-              data-testid="reps-plus-button"
-            >
-              <Plus className="h-5 w-5" aria-hidden="true" />
-            </Button>
-          </div>
+          <StepperInput
+            value={reps}
+            onChange={setReps}
+            step={1}
+            min={MIN_REPS}
+            unit="rep"
+            label={t('fitness.editor.reps')}
+            testId="reps-stepper"
+          />
         </div>
 
         {/* RPE selector */}
-        <div className="mb-6">
+        <div className="mb-4">
           <label className="text-muted-foreground mb-2 block text-xs font-medium">{t('fitness.editor.rpe')}</label>
           <fieldset
             className="m-0 flex gap-2 border-0 p-0"
             aria-label={t('fitness.editor.rpe')}
             data-testid="rpe-selector"
           >
-            {RPE_OPTIONS.map(value => (
-              <Button
-                key={value}
-                variant={rpe === value ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handleRpeSelect(value)}
-                className="h-11 w-11 rounded-full tabular-nums"
-                aria-pressed={rpe === value}
-                data-testid={`rpe-button-${value}`}
-              >
-                {value}
-              </Button>
-            ))}
+            {RPE_OPTIONS.map(value => {
+              const isSelected = rpe === value;
+              const colors = RPE_COLOR_MAP[value];
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => handleRpeSelect(value)}
+                  className={`flex h-11 w-11 items-center justify-center rounded-full border text-sm font-semibold tabular-nums transition-colors ${isSelected ? colors.selected : colors.unselected}`}
+                  aria-pressed={isSelected}
+                  data-testid={`rpe-button-${value}`}
+                >
+                  {value}
+                </button>
+              );
+            })}
           </fieldset>
+        </div>
+
+        {/* Rest seconds */}
+        <div className="mb-6">
+          <label className="text-muted-foreground mb-2 block text-xs font-medium">
+            {t('fitness.editor.restSeconds')}
+          </label>
+          <StepperInput
+            value={restSeconds}
+            onChange={setRestSeconds}
+            step={REST_STEP}
+            min={0}
+            unit="s"
+            label={t('fitness.editor.restSeconds')}
+            testId="rest-stepper"
+          />
         </div>
 
         {/* Action buttons */}
         <div className="flex gap-3">
-          <Button variant="outline" size="lg" onClick={onCancel} className="flex-1" data-testid="cancel-button">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={onCancel}
+            className="min-h-12 flex-1"
+            data-testid="cancel-button"
+          >
             <X className="h-4 w-4" aria-hidden="true" />
             {t('fitness.editor.cancel')}
           </Button>
-          <Button variant="default" size="lg" onClick={handleSave} className="flex-1" data-testid="save-button">
+          <Button
+            variant="default"
+            size="lg"
+            onClick={handleSave}
+            className="min-h-12 flex-1"
+            data-testid="save-button"
+          >
             <Check className="h-4 w-4" aria-hidden="true" />
             {t('fitness.editor.save')}
           </Button>
@@ -274,4 +212,4 @@ export const SetEditor = React.memo(function SetEditor({
       </div>
     </ModalBackdrop>
   );
-});
+}

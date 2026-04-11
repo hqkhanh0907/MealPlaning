@@ -5,28 +5,48 @@ import { FitnessTab } from '../features/fitness/components/FitnessTab';
 import { useFitnessStore } from '../store/fitnessStore';
 import { useNavigationStore } from '../store/navigationStore';
 
-const { mockGeneratePlan, mockNotifySuccess, mockNotifyError, mockPushPage, mockInsightRef, mockHealthProfileRef } =
-  vi.hoisted(() => ({
-    mockGeneratePlan: vi.fn(),
-    mockNotifySuccess: vi.fn(),
-    mockNotifyError: vi.fn(),
-    mockPushPage: vi.fn(),
-    mockInsightRef: { current: null as string | null },
-    mockHealthProfileRef: {
-      current: { age: 25 as number | null, weightKg: 83 } as { age: number | null; weightKg: number } | null,
-    },
-  }));
+const {
+  mockGeneratePlan,
+  mockNotifySuccess,
+  mockNotifyError,
+  mockPushPage,
+  mockInsightRef,
+  mockHealthProfileRef,
+  mockLoadWorkoutDraft,
+  mockClearWorkoutDraft,
+} = vi.hoisted(() => ({
+  mockGeneratePlan: vi.fn(),
+  mockNotifySuccess: vi.fn(),
+  mockNotifyError: vi.fn(),
+  mockPushPage: vi.fn(),
+  mockInsightRef: { current: null as string | null },
+  mockHealthProfileRef: {
+    current: { age: 25 as number | null, weightKg: 83 } as { age: number | null; weightKg: number } | null,
+  },
+  mockLoadWorkoutDraft: vi.fn(),
+  mockClearWorkoutDraft: vi.fn(),
+}));
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => {
+    t: (key: string, params?: Record<string, unknown>) => {
       const translations: Record<string, string> = {
         'fitness.plan.tab': 'Kế hoạch',
         'fitness.history.title': 'Lịch sử',
         'fitness.progress.title': 'Tiến trình',
         'fitness.plan.manualPlanName': 'Kế hoạch thủ công',
+        'fitness.draft.resumeTitle': 'Buổi tập chưa hoàn thành',
+        'fitness.draft.resumeDesc': '{{exercises}} bài tập, {{sets}} set đã ghi',
+        'fitness.draft.continue': 'Tiếp tục',
+        'fitness.draft.discard': 'Hủy',
       };
-      return translations[key] ?? key;
+      let text = translations[key] ?? key;
+      if (params) {
+        for (const [k, v] of Object.entries(params)) {
+          text = text.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), String(v));
+        }
+      }
+      return text;
     },
     i18n: { language: 'vi' },
   }),
@@ -118,6 +138,23 @@ interface MockFitnessState {
   addTrainingPlan: Mock;
   addPlanDays: Mock;
   setActivePlan: Mock;
+  workoutDraft: {
+    exercises: Array<{ id: string; nameVi: string; muscleGroup: string; category: string; equipment: string }>;
+    exerciseMetas?: unknown[];
+    sets: Array<{
+      id: string;
+      workoutId: string;
+      exerciseId: string;
+      setNumber: number;
+      reps: number;
+      weightKg: number;
+      updatedAt: string;
+    }>;
+    elapsedSeconds: number;
+    planDayId?: string;
+  } | null;
+  loadWorkoutDraft: Mock;
+  clearWorkoutDraft: Mock;
 }
 
 const mockUseFitnessStore = useFitnessStore as unknown as Mock;
@@ -139,6 +176,8 @@ describe('FitnessTab', () => {
       mockNotifySuccess.mockClear();
       mockNotifyError.mockClear();
       mockPushPage.mockClear();
+      mockLoadWorkoutDraft.mockClear();
+      mockClearWorkoutDraft.mockClear();
       mockInsightRef.current = null;
       mockHealthProfileRef.current = { age: 25, weightKg: 83 };
       mockUseNavigationStore.mockImplementation((selector: (s: { pushPage: Mock }) => unknown) =>
@@ -153,6 +192,9 @@ describe('FitnessTab', () => {
           addTrainingPlan: mockAddTrainingPlan,
           addPlanDays: mockAddPlanDays,
           setActivePlan: mockSetActivePlan,
+          workoutDraft: null,
+          loadWorkoutDraft: mockLoadWorkoutDraft,
+          clearWorkoutDraft: mockClearWorkoutDraft,
         }),
       );
     });
@@ -264,6 +306,9 @@ describe('FitnessTab', () => {
           addTrainingPlan: localAddTrainingPlan,
           addPlanDays: localAddPlanDays,
           setActivePlan: localSetActivePlan,
+          workoutDraft: null,
+          loadWorkoutDraft: mockLoadWorkoutDraft,
+          clearWorkoutDraft: mockClearWorkoutDraft,
           ...overrides,
         }),
       );
@@ -386,6 +431,9 @@ describe('FitnessTab', () => {
           addTrainingPlan: localAddTrainingPlan,
           addPlanDays: localAddPlanDays,
           setActivePlan: localSetActivePlan,
+          workoutDraft: null,
+          loadWorkoutDraft: mockLoadWorkoutDraft,
+          clearWorkoutDraft: mockClearWorkoutDraft,
           ...overrides,
         }),
       );
@@ -517,6 +565,8 @@ describe('FitnessTab', () => {
       mockNotifySuccess.mockClear();
       mockNotifyError.mockClear();
       mockPushPage.mockClear();
+      mockLoadWorkoutDraft.mockClear();
+      mockClearWorkoutDraft.mockClear();
       mockHealthProfileRef.current = { age: 25, weightKg: 83 };
       mockUseNavigationStore.mockImplementation((selector: (s: { pushPage: Mock }) => unknown) =>
         selector({ pushPage: mockPushPage }),
@@ -530,6 +580,9 @@ describe('FitnessTab', () => {
           addTrainingPlan: vi.fn(),
           addPlanDays: vi.fn(),
           setActivePlan: vi.fn(),
+          workoutDraft: null,
+          loadWorkoutDraft: mockLoadWorkoutDraft,
+          clearWorkoutDraft: mockClearWorkoutDraft,
         }),
       );
     });
@@ -578,6 +631,9 @@ describe('FitnessTab', () => {
           addTrainingPlan: localAddTrainingPlan,
           addPlanDays: localAddPlanDays,
           setActivePlan: localSetActivePlan,
+          workoutDraft: null,
+          loadWorkoutDraft: mockLoadWorkoutDraft,
+          clearWorkoutDraft: mockClearWorkoutDraft,
           ...overrides,
         }),
       );
@@ -666,6 +722,276 @@ describe('FitnessTab', () => {
       expect(localAddPlanDays).toHaveBeenCalledWith(mockDays);
       expect(localSetActivePlan).toHaveBeenCalledWith('regen-1');
       expect(mockNotifySuccess).toHaveBeenCalledWith('fitness.plan.planCreated');
+    });
+  });
+
+  describe('Draft recovery prompt', () => {
+    const localAddTrainingPlan = vi.fn();
+    const localAddPlanDays = vi.fn();
+    const localSetActivePlan = vi.fn();
+
+    const VALID_DRAFT = {
+      exercises: [
+        { id: 'ex-1', nameVi: 'Bench Press', muscleGroup: 'chest', category: 'compound', equipment: 'barbell' },
+        { id: 'ex-2', nameVi: 'Squat', muscleGroup: 'legs', category: 'compound', equipment: 'barbell' },
+      ],
+      sets: [
+        {
+          id: 'set-1',
+          workoutId: 'w1',
+          exerciseId: 'ex-1',
+          setNumber: 1,
+          reps: 10,
+          weightKg: 60,
+          updatedAt: '2025-07-17',
+        },
+        {
+          id: 'set-2',
+          workoutId: 'w1',
+          exerciseId: 'ex-1',
+          setNumber: 2,
+          reps: 8,
+          weightKg: 65,
+          updatedAt: '2025-07-17',
+        },
+        {
+          id: 'set-3',
+          workoutId: 'w1',
+          exerciseId: 'ex-2',
+          setNumber: 1,
+          reps: 8,
+          weightKg: 80,
+          updatedAt: '2025-07-17',
+        },
+      ],
+      elapsedSeconds: 1200,
+      planDayId: 'plan-day-1',
+    };
+
+    function setupStore(overrides: Partial<MockFitnessState> = {}) {
+      mockUseFitnessStore.mockImplementation((selector: (state: MockFitnessState) => unknown) =>
+        selector({
+          trainingProfile: null,
+          planStrategy: null,
+          profileOutOfSync: false,
+          profileChangedFields: [],
+          addTrainingPlan: localAddTrainingPlan,
+          addPlanDays: localAddPlanDays,
+          setActivePlan: localSetActivePlan,
+          workoutDraft: null,
+          loadWorkoutDraft: mockLoadWorkoutDraft,
+          clearWorkoutDraft: mockClearWorkoutDraft,
+          ...overrides,
+        }),
+      );
+      mockUseNavigationStore.mockImplementation((selector: (s: { pushPage: Mock }) => unknown) =>
+        selector({ pushPage: mockPushPage }),
+      );
+    }
+
+    beforeEach(() => {
+      localAddTrainingPlan.mockClear();
+      localAddPlanDays.mockClear();
+      localSetActivePlan.mockClear();
+      mockGeneratePlan.mockClear();
+      mockNotifySuccess.mockClear();
+      mockNotifyError.mockClear();
+      mockPushPage.mockClear();
+      mockLoadWorkoutDraft.mockClear();
+      mockClearWorkoutDraft.mockClear();
+      mockInsightRef.current = null;
+      mockHealthProfileRef.current = { age: 25, weightKg: 83 };
+    });
+
+    it('calls loadWorkoutDraft on mount', () => {
+      setupStore();
+      render(<FitnessTab />);
+      expect(mockLoadWorkoutDraft).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not render draft prompt when workoutDraft is null', () => {
+      setupStore({ workoutDraft: null });
+      render(<FitnessTab />);
+      expect(screen.queryByTestId('draft-recovery-prompt')).not.toBeInTheDocument();
+    });
+
+    it('renders draft prompt when workoutDraft is present on plan tab', () => {
+      setupStore({ workoutDraft: VALID_DRAFT });
+      render(<FitnessTab />);
+      expect(screen.getByTestId('draft-recovery-prompt')).toBeInTheDocument();
+    });
+
+    it('hides draft prompt on history tab', () => {
+      setupStore({ workoutDraft: VALID_DRAFT });
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('subtab-history'));
+      expect(screen.queryByTestId('draft-recovery-prompt')).not.toBeInTheDocument();
+    });
+
+    it('hides draft prompt on progress tab', () => {
+      setupStore({ workoutDraft: VALID_DRAFT });
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('subtab-progress'));
+      expect(screen.queryByTestId('draft-recovery-prompt')).not.toBeInTheDocument();
+    });
+
+    it('re-shows draft prompt when returning to plan tab', () => {
+      setupStore({ workoutDraft: VALID_DRAFT });
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('subtab-history'));
+      expect(screen.queryByTestId('draft-recovery-prompt')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('subtab-plan'));
+      expect(screen.getByTestId('draft-recovery-prompt')).toBeInTheDocument();
+    });
+
+    it('displays correct title text', () => {
+      setupStore({ workoutDraft: VALID_DRAFT });
+      render(<FitnessTab />);
+      expect(screen.getByText('Buổi tập chưa hoàn thành')).toBeInTheDocument();
+    });
+
+    it('displays correct description with exercise and set counts', () => {
+      setupStore({ workoutDraft: VALID_DRAFT });
+      render(<FitnessTab />);
+      const desc = screen.getByTestId('draft-recovery-desc');
+      expect(desc).toHaveTextContent('2 bài tập, 3 set đã ghi');
+    });
+
+    it('renders continue button with correct testid', () => {
+      setupStore({ workoutDraft: VALID_DRAFT });
+      render(<FitnessTab />);
+      expect(screen.getByTestId('draft-continue-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('draft-continue-btn')).toHaveTextContent('Tiếp tục');
+    });
+
+    it('renders discard button with correct testid', () => {
+      setupStore({ workoutDraft: VALID_DRAFT });
+      render(<FitnessTab />);
+      expect(screen.getByTestId('draft-discard-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('draft-discard-btn')).toHaveTextContent('Hủy');
+    });
+
+    it('clicking continue pushes WorkoutLogger page with draft data', () => {
+      setupStore({ workoutDraft: VALID_DRAFT });
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('draft-continue-btn'));
+
+      expect(mockPushPage).toHaveBeenCalledTimes(1);
+      expect(mockPushPage).toHaveBeenCalledWith({
+        id: 'workout-logger',
+        component: 'WorkoutLogger',
+        props: {
+          exercises: VALID_DRAFT.exercises,
+          exerciseMetas: undefined,
+          sets: VALID_DRAFT.sets,
+          elapsedSeconds: 1200,
+          planDayId: 'plan-day-1',
+        },
+      });
+    });
+
+    it('clicking discard calls clearWorkoutDraft', () => {
+      setupStore({ workoutDraft: VALID_DRAFT });
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('draft-discard-btn'));
+
+      expect(mockClearWorkoutDraft).toHaveBeenCalledTimes(1);
+    });
+
+    it('draft prompt has role="alert" for accessibility', () => {
+      setupStore({ workoutDraft: VALID_DRAFT });
+      render(<FitnessTab />);
+      expect(screen.getByTestId('draft-recovery-prompt')).toHaveAttribute('role', 'alert');
+    });
+
+    it('draft prompt has warning styling classes', () => {
+      setupStore({ workoutDraft: VALID_DRAFT });
+      render(<FitnessTab />);
+      const prompt = screen.getByTestId('draft-recovery-prompt');
+      expect(prompt.className).toContain('bg-warning/10');
+      expect(prompt.className).toContain('border-warning/20');
+      expect(prompt.className).toContain('rounded-xl');
+    });
+
+    it('draft prompt renders BEFORE scrollable content in DOM order', () => {
+      setupStore({ workoutDraft: VALID_DRAFT });
+      render(<FitnessTab />);
+      const prompt = screen.getByTestId('draft-recovery-prompt');
+      const planContent = screen.getByTestId('plan-subtab-content');
+      const comparison = prompt.compareDocumentPosition(planContent);
+      expect(comparison & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('coexists with profileOutOfSync banner', () => {
+      setupStore({ workoutDraft: VALID_DRAFT, profileOutOfSync: true });
+      render(<FitnessTab />);
+      expect(screen.getByTestId('profile-out-of-sync-banner')).toBeInTheDocument();
+      expect(screen.getByTestId('draft-recovery-prompt')).toBeInTheDocument();
+    });
+
+    it('profileOutOfSync banner renders before draft prompt in DOM', () => {
+      setupStore({ workoutDraft: VALID_DRAFT, profileOutOfSync: true });
+      render(<FitnessTab />);
+      const syncBanner = screen.getByTestId('profile-out-of-sync-banner');
+      const draftPrompt = screen.getByTestId('draft-recovery-prompt');
+      const comparison = syncBanner.compareDocumentPosition(draftPrompt);
+      expect(comparison & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('handles draft with exerciseMetas in resume', () => {
+      const draftWithMetas = {
+        ...VALID_DRAFT,
+        exerciseMetas: [{ exerciseId: 'ex-1', order: 0 }],
+      };
+      setupStore({ workoutDraft: draftWithMetas });
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('draft-continue-btn'));
+
+      expect(mockPushPage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          props: expect.objectContaining({
+            exerciseMetas: [{ exerciseId: 'ex-1', order: 0 }],
+          }),
+        }),
+      );
+    });
+
+    it('handles draft without planDayId', () => {
+      const draftNoPlan = {
+        exercises: VALID_DRAFT.exercises,
+        sets: VALID_DRAFT.sets,
+        elapsedSeconds: 600,
+      };
+      setupStore({ workoutDraft: draftNoPlan });
+      render(<FitnessTab />);
+      fireEvent.click(screen.getByTestId('draft-continue-btn'));
+
+      expect(mockPushPage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          props: expect.objectContaining({
+            elapsedSeconds: 600,
+            planDayId: undefined,
+          }),
+        }),
+      );
+    });
+
+    it('handles draft with single exercise and single set', () => {
+      const minimalDraft = {
+        exercises: [VALID_DRAFT.exercises[0]],
+        sets: [VALID_DRAFT.sets[0]],
+        elapsedSeconds: 60,
+      };
+      setupStore({ workoutDraft: minimalDraft });
+      render(<FitnessTab />);
+      expect(screen.getByTestId('draft-recovery-desc')).toHaveTextContent('1 bài tập, 1 set đã ghi');
+    });
+
+    it('continue button does nothing when workoutDraft becomes null', () => {
+      setupStore({ workoutDraft: null });
+      render(<FitnessTab />);
+      expect(screen.queryByTestId('draft-continue-btn')).not.toBeInTheDocument();
     });
   });
 

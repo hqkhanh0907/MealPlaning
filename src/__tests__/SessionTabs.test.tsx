@@ -346,4 +346,74 @@ describe('SessionTabs', () => {
       expect(screen.queryByTestId('delete-session-confirm')).not.toBeInTheDocument();
     });
   });
+
+  describe('touch targets & accessibility', () => {
+    const touchClasses = ['min-h-12', 'active:scale-[0.98]', 'motion-reduce:transform-none'];
+    const focusClasses = ['focus-visible:ring-2', 'focus-visible:ring-ring', 'focus-visible:outline-none'];
+
+    it('tab buttons meet touch target minimum', () => {
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 }), makePlanDay({ id: 'pd-2', sessionOrder: 2 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+        />,
+      );
+      const tabs = screen.getAllByRole('tab');
+      for (const cls of touchClasses) expect(tabs[0]).toHaveClass(cls);
+    });
+
+    it('add button meets touch target minimum', () => {
+      render(
+        <SessionTabs
+          sessions={[makePlanDay()]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+        />,
+      );
+      const addBtn = screen.getByTestId('add-session-tab');
+      for (const cls of touchClasses) expect(addBtn).toHaveClass(cls);
+    });
+
+    it('delete button has focus ring and press feedback', () => {
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 }), makePlanDay({ id: 'pd-2', sessionOrder: 2 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+          onDeleteSession={vi.fn()}
+        />,
+      );
+      const deleteBtn = screen.getByTestId('delete-session-pd-1');
+      for (const cls of focusClasses) expect(deleteBtn).toHaveClass(cls);
+      expect(deleteBtn).toHaveClass('active:scale-[0.98]');
+    });
+
+    it('confirm and cancel delete buttons meet touch target minimum', async () => {
+      const user = userEvent.setup();
+      render(
+        <SessionTabs
+          sessions={[makePlanDay({ id: 'pd-1', sessionOrder: 1 }), makePlanDay({ id: 'pd-2', sessionOrder: 2 })]}
+          activeSessionId="pd-1"
+          completedSessionIds={[]}
+          onSelectSession={vi.fn()}
+          onAddSession={vi.fn()}
+          onDeleteSession={vi.fn()}
+        />,
+      );
+      await user.click(screen.getByTestId('delete-session-pd-1'));
+      const confirmBtn = screen.getByTestId('confirm-delete-session');
+      const cancelBtn = screen.getByTestId('cancel-delete-session');
+      for (const cls of touchClasses) {
+        expect(confirmBtn).toHaveClass(cls);
+        expect(cancelBtn).toHaveClass(cls);
+      }
+    });
+  });
 });

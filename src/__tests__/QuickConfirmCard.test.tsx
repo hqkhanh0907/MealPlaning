@@ -86,4 +86,26 @@ describe('QuickConfirmCard', () => {
     );
     expect(screen.getByText('unknown_source')).toBeInTheDocument();
   });
+
+  describe('touch targets & accessibility', () => {
+    it('customize and confirm buttons meet touch target minimum', () => {
+      render(
+        <QuickConfirmCard
+          exerciseName="Bench Press"
+          suggestion={{ weight: 80, reps: 5, source: 'progressive_overload' }}
+          onConfirm={vi.fn()}
+          onCustomize={vi.fn()}
+        />,
+      );
+      const customizeBtn = screen.getByTestId('customize-button');
+      const confirmBtn = screen.getByTestId('quick-confirm-button');
+      for (const btn of [customizeBtn, confirmBtn]) {
+        expect(btn).toHaveClass('min-h-12');
+        expect(btn).toHaveClass('min-w-12');
+        expect(btn).toHaveClass('active:scale-[0.98]');
+        expect(btn).toHaveClass('focus-visible:ring-2');
+        expect(btn).toHaveClass('focus-visible:ring-ring');
+      }
+    });
+  });
 });

@@ -127,4 +127,22 @@ describe('AddSessionModal', () => {
     fireEvent.click(screen.getByText('Sức mạnh'));
     expect(mockUseModalBackHandler).toHaveBeenLastCalledWith(true, expect.any(Function));
   });
+
+  describe('touch targets & accessibility', () => {
+    const touchClasses = ['min-h-12', 'active:scale-[0.98]', 'motion-reduce:transform-none'];
+    const focusClasses = ['focus-visible:ring-2', 'focus-visible:ring-ring', 'focus-visible:outline-none'];
+
+    it('session type buttons meet touch target minimum', () => {
+      render(<AddSessionModal {...defaultProps} />);
+      const strengthBtn = screen.getByText('Sức mạnh').closest('button')!;
+      for (const cls of [...touchClasses, ...focusClasses]) expect(strengthBtn).toHaveClass(cls);
+    });
+
+    it('create session button meets touch target minimum', () => {
+      render(<AddSessionModal {...defaultProps} />);
+      fireEvent.click(screen.getByText('Sức mạnh'));
+      const createBtn = screen.getByText('Tạo buổi tập').closest('button')!;
+      for (const cls of [...touchClasses, ...focusClasses]) expect(createBtn).toHaveClass(cls);
+    });
+  });
 });

@@ -70,7 +70,7 @@ function AddSessionModalInner({
                 type="button"
                 disabled={isMaxReached}
                 onClick={handleStrengthClick}
-                className="bg-primary-subtle hover:bg-primary/10 flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                className="bg-primary-subtle hover:bg-primary/10 focus-visible:ring-ring flex min-h-12 items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transform-none"
               >
                 <Dumbbell className="text-primary h-5 w-5" aria-hidden="true" />
                 <div>
@@ -83,7 +83,7 @@ function AddSessionModalInner({
                 type="button"
                 disabled={isMaxReached}
                 onClick={onSelectCardio}
-                className="bg-info/10 hover:bg-info/15 flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                className="bg-info/10 hover:bg-info/15 focus-visible:ring-ring flex min-h-12 items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transform-none"
               >
                 <Heart className="text-rose h-5 w-5" aria-hidden="true" />
                 <div>
@@ -96,7 +96,7 @@ function AddSessionModalInner({
                 type="button"
                 disabled={isMaxReached}
                 onClick={onSelectFreestyle}
-                className="bg-warning/10 hover:bg-warning/15 flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                className="bg-warning/10 hover:bg-warning/15 focus-visible:ring-ring flex min-h-12 items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transform-none"
               >
                 <Zap className="text-warning h-5 w-5" aria-hidden="true" />
                 <div>
@@ -115,7 +115,7 @@ function AddSessionModalInner({
                 type="button"
                 onClick={handleBack}
                 aria-label={t('common.back')}
-                className="hover:bg-accent flex h-11 w-11 items-center justify-center rounded-full"
+                className="hover:bg-accent focus-visible:ring-ring flex h-11 w-11 items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
               >
                 <ChevronLeft className="text-foreground-secondary h-5 w-5" />
               </button>
@@ -132,7 +132,7 @@ function AddSessionModalInner({
                     aria-label={t(MUSCLE_GROUP_LABEL_KEYS[group])}
                     aria-pressed={isSelected}
                     onClick={() => toggleGroup(group)}
-                    className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                    className={`focus-visible:ring-ring min-h-11 rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none ${
                       isSelected
                         ? 'bg-primary text-primary-foreground dark:bg-primary'
                         : 'text-foreground-secondary bg-muted'
@@ -149,7 +149,7 @@ function AddSessionModalInner({
               data-testid="create-strength-session"
               disabled={selectedGroups.length === 0}
               onClick={handleCreateStrength}
-              className="bg-primary text-primary-foreground hover:bg-primary dark:bg-primary dark:hover:bg-primary/80 w-full rounded-xl py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              className="bg-primary text-primary-foreground hover:bg-primary dark:bg-primary dark:hover:bg-primary/80 focus-visible:ring-ring min-h-12 w-full rounded-xl py-3 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transform-none"
             >
               {t('fitness.plan.createSession')}
             </button>

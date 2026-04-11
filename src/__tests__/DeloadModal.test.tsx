@@ -84,4 +84,19 @@ describe('DeloadModal', () => {
     const { container } = render(<DeloadModal {...defaultProps} isOpen={false} />);
     expect(container).toBeEmptyDOMElement();
   });
+
+  describe('touch targets & accessibility', () => {
+    it('accept and override buttons meet touch target minimum', () => {
+      render(<DeloadModal {...defaultProps} />);
+      const acceptBtn = screen.getByTestId('deload-accept');
+      const overrideBtn = screen.getByTestId('deload-override');
+      for (const btn of [acceptBtn, overrideBtn]) {
+        expect(btn).toHaveClass('min-h-12');
+        expect(btn).toHaveClass('active:scale-[0.98]');
+        expect(btn).toHaveClass('motion-reduce:transform-none');
+        expect(btn).toHaveClass('focus-visible:ring-2');
+        expect(btn).toHaveClass('focus-visible:ring-ring');
+      }
+    });
+  });
 });

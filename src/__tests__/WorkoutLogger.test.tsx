@@ -1436,8 +1436,8 @@ describe('WorkoutLogger', () => {
 
     const editor = screen.getByTestId('set-editor');
     expect(editor).toBeInTheDocument();
-    expect((within(editor).getByTestId('weight-input') as HTMLInputElement).value).toBe('75');
-    expect((within(editor).getByTestId('reps-input') as HTMLInputElement).value).toBe('10');
+    expect((within(editor).getByTestId('weight-stepper-input') as HTMLInputElement).value).toBe('75');
+    expect((within(editor).getByTestId('reps-stepper-input') as HTMLInputElement).value).toBe('10');
   });
 
   it('TC_SET_02: saving edit updates set weight/reps/rpe', () => {
@@ -1451,8 +1451,10 @@ describe('WorkoutLogger', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Chỉnh sửa set' }));
     const editor = screen.getByTestId('set-editor');
 
-    fireEvent.change(within(editor).getByTestId('weight-input'), { target: { value: '70' } });
-    fireEvent.change(within(editor).getByTestId('reps-input'), { target: { value: '8' } });
+    fireEvent.change(within(editor).getByTestId('weight-stepper-input'), { target: { value: '70' } });
+    fireEvent.blur(within(editor).getByTestId('weight-stepper-input'));
+    fireEvent.change(within(editor).getByTestId('reps-stepper-input'), { target: { value: '8' } });
+    fireEvent.blur(within(editor).getByTestId('reps-stepper-input'));
     fireEvent.click(screen.getByTestId('save-button'));
 
     expect(screen.queryByTestId('set-editor')).not.toBeInTheDocument();
@@ -1502,7 +1504,8 @@ describe('WorkoutLogger', () => {
     fireEvent.click(editButtons[0]);
 
     const editor = screen.getByTestId('set-editor');
-    fireEvent.change(within(editor).getByTestId('weight-input'), { target: { value: '62.5' } });
+    fireEvent.change(within(editor).getByTestId('weight-stepper-input'), { target: { value: '62.5' } });
+    fireEvent.blur(within(editor).getByTestId('weight-stepper-input'));
     fireEvent.click(screen.getByTestId('save-button'));
 
     const sets = getLoggedSets();
@@ -1553,7 +1556,7 @@ describe('WorkoutLogger', () => {
     expect(screen.getByTestId('set-editor')).toBeInTheDocument();
 
     const editor = screen.getByTestId('set-editor');
-    fireEvent.change(within(editor).getByTestId('weight-input'), { target: { value: '99' } });
+    fireEvent.change(within(editor).getByTestId('weight-stepper-input'), { target: { value: '99' } });
 
     fireEvent.click(screen.getByTestId('cancel-button'));
 

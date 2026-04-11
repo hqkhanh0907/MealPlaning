@@ -4,310 +4,474 @@ import { SetEditor } from '../features/fitness/components/SetEditor';
 
 afterEach(cleanup);
 
-describe('SetEditor', () => {
-  const defaultProps = {
-    initialWeight: 60,
-    initialReps: 10,
-    initialRpe: undefined as number | undefined,
-    recentWeights: [50, 55, 60, 65, 70],
-    onSave: vi.fn(),
-    onCancel: vi.fn(),
-    isVisible: true,
+const defaultProps = {
+  initialWeight: 60,
+  initialReps: 10,
+  initialRpe: undefined as number | undefined,
+  initialRestSeconds: 90,
+  recentWeights: [50, 55, 60, 65, 70],
+  onSave: vi.fn(),
+  onCancel: vi.fn(),
+  isVisible: true,
+};
+
+function renderEditor(overrides: Partial<typeof defaultProps> = {}) {
+  const props = {
+    ...defaultProps,
+    ...overrides,
+    onSave: overrides.onSave ?? vi.fn(),
+    onCancel: overrides.onCancel ?? vi.fn(),
   };
+  const result = render(<SetEditor {...props} />);
+  return { ...result, props };
+}
 
-  function renderEditor(overrides: Partial<typeof defaultProps> = {}) {
-    const props = {
-      ...defaultProps,
-      ...overrides,
-      onSave: overrides.onSave ?? vi.fn(),
-      onCancel: overrides.onCancel ?? vi.fn(),
-    };
-    const result = render(<SetEditor {...props} />);
-    return { ...result, props };
-  }
+function clickStepper(testId: string) {
+  const btn = screen.getByTestId(testId);
+  fireEvent.pointerDown(btn);
+  fireEvent.pointerUp(btn);
+}
 
-  it('renders the editor when isVisible is true', () => {
+/* ================================================================== */
+/* SC_W504_01: Modal Rendering & Structure                             */
+/* ================================================================== */
+describe('SC_W504_01: Modal Rendering & Structure', () => {
+  it('TC_W504_01: renders modal when isVisible=true', () => {
     renderEditor();
     expect(screen.getByTestId('set-editor')).toBeInTheDocument();
   });
 
-  it('renders nothing when isVisible is false', () => {
+  it('TC_W504_02: returns null when isVisible=false', () => {
     renderEditor({ isVisible: false });
     expect(screen.queryByTestId('set-editor')).not.toBeInTheDocument();
   });
 
-  it('displays initial weight value', () => {
+  it('TC_W504_03: modal container has animate-slide-up class', () => {
+    renderEditor();
+    expect(screen.getByTestId('set-editor').className).toContain('animate-slide-up');
+  });
+
+  it('TC_W504_04: title displays "Chỉnh sửa set"', () => {
+    renderEditor();
+    expect(screen.getByText('Chỉnh sửa set')).toBeInTheDocument();
+  });
+
+  it('TC_W504_05: close button has aria-label "Đóng"', () => {
+    renderEditor();
+    expect(screen.getByTestId('editor-close-button')).toHaveAttribute('aria-label', 'Đóng');
+  });
+});
+
+/* ================================================================== */
+/* SC_W504_02: Weight StepperInput                                     */
+/* ================================================================== */
+describe('SC_W504_02: Weight StepperInput', () => {
+  it('TC_W504_06: renders initial weight value', () => {
     renderEditor({ initialWeight: 75 });
-    const input = screen.getByTestId('weight-input') as HTMLInputElement;
-    expect(input.value).toBe('75');
+    expect((screen.getByTestId('weight-stepper-input') as HTMLInputElement).value).toBe('75');
   });
 
-  it('displays initial reps value', () => {
-    renderEditor({ initialReps: 12 });
-    const input = screen.getByTestId('reps-input') as HTMLInputElement;
-    expect(input.value).toBe('12');
-  });
-
-  // Weight ±0.5kg tests
-  it('+0.5kg button increments weight', () => {
+  it('TC_W504_07: increment adds 0.5kg', () => {
     renderEditor({ initialWeight: 60 });
-    fireEvent.click(screen.getByTestId('weight-plus-button'));
-    const input = screen.getByTestId('weight-input') as HTMLInputElement;
-    expect(input.value).toBe('60.5');
+    clickStepper('weight-stepper-increment');
+    expect((screen.getByTestId('weight-stepper-input') as HTMLInputElement).value).toBe('60.5');
   });
 
-  it('-0.5kg button decrements weight', () => {
+  it('TC_W504_08: decrement subtracts 0.5kg', () => {
     renderEditor({ initialWeight: 60 });
-    fireEvent.click(screen.getByTestId('weight-minus-button'));
-    const input = screen.getByTestId('weight-input') as HTMLInputElement;
-    expect(input.value).toBe('59.5');
+    clickStepper('weight-stepper-decrement');
+    expect((screen.getByTestId('weight-stepper-input') as HTMLInputElement).value).toBe('59.5');
   });
 
-  it('weight does not go below 0', () => {
+  it('TC_W504_09: weight=0 disables decrement', () => {
+    renderEditor({ initialWeight: 0 });
+    expect(screen.getByTestId('weight-stepper-decrement')).toBeDisabled();
+  });
+
+  it('TC_W504_10: weight 0.5 → 0 on decrement', () => {
     renderEditor({ initialWeight: 0.5 });
-    fireEvent.click(screen.getByTestId('weight-minus-button'));
-    const input = screen.getByTestId('weight-input') as HTMLInputElement;
-    expect(input.value).toBe('0');
-    fireEvent.click(screen.getByTestId('weight-minus-button'));
-    expect(input.value).toBe('0');
+    clickStepper('weight-stepper-decrement');
+    expect((screen.getByTestId('weight-stepper-input') as HTMLInputElement).value).toBe('0');
   });
 
-  it('direct weight input updates value', () => {
-    renderEditor({ initialWeight: 60 });
-    const input = screen.getByTestId('weight-input');
-    fireEvent.change(input, { target: { value: '80' } });
-    expect((input as HTMLInputElement).value).toBe('80');
+  it('TC_W504_11: unit displays "kg"', () => {
+    renderEditor();
+    expect(screen.getByTestId('weight-stepper-unit')).toHaveTextContent('kg');
   });
 
-  it('direct weight input accepts negative values during typing', () => {
-    renderEditor({ initialWeight: 60 });
-    const input = screen.getByTestId('weight-input');
-    fireEvent.change(input, { target: { value: '-5' } });
-    fireEvent.blur(input);
-    expect((input as HTMLInputElement).value).toBe('-5');
+  it('TC_W504_12: warning at >300kg', () => {
+    renderEditor({ initialWeight: 301 });
+    expect(screen.getByTestId('weight-stepper-warning')).toBeInTheDocument();
   });
 
-  // Quick weight chips
-  it('renders recent weight chips', () => {
+  it('TC_W504_13: no warning at 300kg', () => {
+    renderEditor({ initialWeight: 300 });
+    expect(screen.queryByTestId('weight-stepper-warning')).not.toBeInTheDocument();
+  });
+
+  it('TC_W504_14: no warning at 100kg', () => {
+    renderEditor({ initialWeight: 100 });
+    expect(screen.queryByTestId('weight-stepper-warning')).not.toBeInTheDocument();
+  });
+});
+
+/* ================================================================== */
+/* SC_W504_03: Recent Weight Chips                                     */
+/* ================================================================== */
+describe('SC_W504_03: Recent Weight Chips', () => {
+  it('TC_W504_15: renders chips for each recent weight', () => {
     renderEditor({ recentWeights: [50, 55, 60] });
     expect(screen.getByTestId('weight-chip-50')).toBeInTheDocument();
     expect(screen.getByTestId('weight-chip-55')).toBeInTheDocument();
     expect(screen.getByTestId('weight-chip-60')).toBeInTheDocument();
   });
 
-  it('clicking a weight chip sets the weight', () => {
-    renderEditor({ initialWeight: 60, recentWeights: [50, 55, 70] });
+  it('TC_W504_16: clicking chip updates weight', () => {
+    renderEditor({ initialWeight: 60, recentWeights: [70, 80] });
     fireEvent.click(screen.getByTestId('weight-chip-70'));
-    const input = screen.getByTestId('weight-input') as HTMLInputElement;
-    expect(input.value).toBe('70');
+    expect((screen.getByTestId('weight-stepper-input') as HTMLInputElement).value).toBe('70');
   });
 
-  it('hides recent weights section when recentWeights is empty', () => {
+  it('TC_W504_17: active chip has default variant', () => {
+    renderEditor({ initialWeight: 60, recentWeights: [50, 60, 70] });
+    expect(screen.getByTestId('weight-chip-60').className).toContain('bg-primary');
+    expect(screen.getByTestId('weight-chip-50').className).not.toContain('bg-primary');
+    expect(screen.getByTestId('weight-chip-70').className).not.toContain('bg-primary');
+  });
+
+  it('TC_W504_18: no chips section when recentWeights empty', () => {
     renderEditor({ recentWeights: [] });
     expect(screen.queryByTestId('recent-weights-section')).not.toBeInTheDocument();
   });
 
-  // Reps ±1 tests
-  it('+1 button increments reps', () => {
-    renderEditor({ initialReps: 10 });
-    fireEvent.click(screen.getByTestId('reps-plus-button'));
-    const input = screen.getByTestId('reps-input') as HTMLInputElement;
-    expect(input.value).toBe('11');
+  it('TC_W504_19: label "Cân nặng gần đây" visible', () => {
+    renderEditor({ recentWeights: [50] });
+    expect(screen.getByText('Cân nặng gần đây')).toBeInTheDocument();
+  });
+});
+
+/* ================================================================== */
+/* SC_W504_04: Reps StepperInput                                       */
+/* ================================================================== */
+describe('SC_W504_04: Reps StepperInput', () => {
+  it('TC_W504_20: renders initial reps value', () => {
+    renderEditor({ initialReps: 12 });
+    expect((screen.getByTestId('reps-stepper-input') as HTMLInputElement).value).toBe('12');
   });
 
-  it('-1 button decrements reps', () => {
+  it('TC_W504_21: increment adds 1', () => {
     renderEditor({ initialReps: 10 });
-    fireEvent.click(screen.getByTestId('reps-minus-button'));
-    const input = screen.getByTestId('reps-input') as HTMLInputElement;
-    expect(input.value).toBe('9');
+    clickStepper('reps-stepper-increment');
+    expect((screen.getByTestId('reps-stepper-input') as HTMLInputElement).value).toBe('11');
   });
 
-  it('reps does not go below 1', () => {
+  it('TC_W504_22: decrement subtracts 1', () => {
+    renderEditor({ initialReps: 10 });
+    clickStepper('reps-stepper-decrement');
+    expect((screen.getByTestId('reps-stepper-input') as HTMLInputElement).value).toBe('9');
+  });
+
+  it('TC_W504_23: reps=1 disables decrement (min=1)', () => {
     renderEditor({ initialReps: 1 });
-    fireEvent.click(screen.getByTestId('reps-minus-button'));
-    const input = screen.getByTestId('reps-input') as HTMLInputElement;
-    expect(input.value).toBe('1');
+    expect(screen.getByTestId('reps-stepper-decrement')).toBeDisabled();
   });
 
-  it('direct reps input updates value', () => {
-    renderEditor({ initialReps: 10 });
-    const input = screen.getByTestId('reps-input');
-    fireEvent.change(input, { target: { value: '15' } });
-    expect((input as HTMLInputElement).value).toBe('15');
-  });
-
-  it('direct reps input accepts zero during typing', () => {
-    renderEditor({ initialReps: 10 });
-    const input = screen.getByTestId('reps-input');
-    fireEvent.change(input, { target: { value: '0' } });
-    fireEvent.blur(input);
-    expect((input as HTMLInputElement).value).toBe('0');
-  });
-
-  // RPE selector
-  it('renders RPE pill buttons 6 through 10', () => {
+  it('TC_W504_24: unit displays "rep"', () => {
     renderEditor();
-    for (const rpe of [6, 7, 8, 9, 10]) {
-      expect(screen.getByTestId(`rpe-button-${rpe}`)).toBeInTheDocument();
+    expect(screen.getByTestId('reps-stepper-unit')).toHaveTextContent('rep');
+  });
+});
+
+/* ================================================================== */
+/* SC_W504_05: RPE Selector                                            */
+/* ================================================================== */
+describe('SC_W504_05: RPE Selector', () => {
+  it('TC_W504_25: renders 5 RPE buttons [6,7,8,9,10]', () => {
+    renderEditor();
+    for (const val of [6, 7, 8, 9, 10]) {
+      expect(screen.getByTestId(`rpe-button-${val}`)).toBeInTheDocument();
     }
   });
 
-  it('selecting an RPE value highlights it', () => {
+  it('TC_W504_26: buttons display correct values', () => {
     renderEditor();
-    const rpeButton = screen.getByTestId('rpe-button-8');
-    fireEvent.click(rpeButton);
-    expect(rpeButton.className).toContain('bg-primary');
+    for (const val of [6, 7, 8, 9, 10]) {
+      expect(screen.getByTestId(`rpe-button-${val}`)).toHaveTextContent(String(val));
+    }
   });
 
-  it('toggling same RPE value deselects it', () => {
-    renderEditor({ initialRpe: 8 });
-    const rpeButton = screen.getByTestId('rpe-button-8');
-    expect(rpeButton.className).toContain('bg-primary');
-    fireEvent.click(rpeButton);
-    expect(rpeButton.className).not.toContain('bg-primary');
+  it('TC_W504_27: selecting RPE sets aria-pressed=true', () => {
+    renderEditor();
+    fireEvent.click(screen.getByTestId('rpe-button-8'));
+    expect(screen.getByTestId('rpe-button-8')).toHaveAttribute('aria-pressed', 'true');
+    for (const val of [6, 7, 9, 10]) {
+      expect(screen.getByTestId(`rpe-button-${val}`)).toHaveAttribute('aria-pressed', 'false');
+    }
   });
 
-  it('selecting a different RPE value switches selection', () => {
-    renderEditor({ initialRpe: 7 });
-    const rpe7 = screen.getByTestId('rpe-button-7');
-    const rpe9 = screen.getByTestId('rpe-button-9');
-    expect(rpe7.className).toContain('bg-primary');
-    fireEvent.click(rpe9);
-    expect(rpe9.className).toContain('bg-primary');
-    expect(rpe7.className).not.toContain('bg-primary');
-  });
-
-  it('RPE buttons have aria-pressed attribute', () => {
+  it('TC_W504_28: toggling same RPE deselects', () => {
     renderEditor({ initialRpe: 8 });
     expect(screen.getByTestId('rpe-button-8')).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByTestId('rpe-button-6')).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(screen.getByTestId('rpe-button-8'));
+    expect(screen.getByTestId('rpe-button-8')).toHaveAttribute('aria-pressed', 'false');
   });
 
-  // Save behavior
-  it('save button calls onSave with correct data', () => {
+  it('TC_W504_29: switching RPE from 7 → 9', () => {
+    renderEditor({ initialRpe: 7 });
+    fireEvent.click(screen.getByTestId('rpe-button-9'));
+    expect(screen.getByTestId('rpe-button-9')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTestId('rpe-button-7')).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('TC_W504_30: initial RPE 10 highlighted', () => {
+    renderEditor({ initialRpe: 10 });
+    expect(screen.getByTestId('rpe-button-10')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('TC_W504_31: RPE color progression classes', () => {
+    renderEditor();
+    expect(screen.getByTestId('rpe-button-6').className).toContain('green');
+    expect(screen.getByTestId('rpe-button-7').className).toContain('lime');
+    expect(screen.getByTestId('rpe-button-8').className).toContain('yellow');
+    expect(screen.getByTestId('rpe-button-9').className).toContain('orange');
+    expect(screen.getByTestId('rpe-button-10').className).toContain('red');
+  });
+
+  it('TC_W504_32: fieldset has RPE aria-label', () => {
+    renderEditor();
+    expect(screen.getByTestId('rpe-selector')).toHaveAttribute('aria-label', 'RPE');
+  });
+});
+
+/* ================================================================== */
+/* SC_W504_06: Rest Seconds StepperInput                               */
+/* ================================================================== */
+describe('SC_W504_06: Rest Seconds StepperInput', () => {
+  it('TC_W504_33: renders default 90s', () => {
+    renderEditor();
+    expect((screen.getByTestId('rest-stepper-input') as HTMLInputElement).value).toBe('90');
+  });
+
+  it('TC_W504_34: increment adds 15s', () => {
+    renderEditor({ initialRestSeconds: 90 });
+    clickStepper('rest-stepper-increment');
+    expect((screen.getByTestId('rest-stepper-input') as HTMLInputElement).value).toBe('105');
+  });
+
+  it('TC_W504_35: decrement subtracts 15s', () => {
+    renderEditor({ initialRestSeconds: 90 });
+    clickStepper('rest-stepper-decrement');
+    expect((screen.getByTestId('rest-stepper-input') as HTMLInputElement).value).toBe('75');
+  });
+
+  it('TC_W504_36: rest=0 disables decrement', () => {
+    renderEditor({ initialRestSeconds: 0 });
+    expect(screen.getByTestId('rest-stepper-decrement')).toBeDisabled();
+  });
+
+  it('TC_W504_37: rest 15 → 0 on decrement', () => {
+    renderEditor({ initialRestSeconds: 15 });
+    clickStepper('rest-stepper-decrement');
+    expect((screen.getByTestId('rest-stepper-input') as HTMLInputElement).value).toBe('0');
+  });
+
+  it('TC_W504_38: unit displays "s"', () => {
+    renderEditor();
+    expect(screen.getByTestId('rest-stepper-unit')).toHaveTextContent('s');
+  });
+
+  it('TC_W504_39: custom initial rest value', () => {
+    renderEditor({ initialRestSeconds: 120 });
+    expect((screen.getByTestId('rest-stepper-input') as HTMLInputElement).value).toBe('120');
+  });
+
+  it('TC_W504_39b: defaults to 90 when initialRestSeconds undefined', () => {
+    renderEditor({ initialRestSeconds: undefined });
+    expect((screen.getByTestId('rest-stepper-input') as HTMLInputElement).value).toBe('90');
+  });
+});
+
+/* ================================================================== */
+/* SC_W504_07: Save Behavior                                           */
+/* ================================================================== */
+describe('SC_W504_07: Save Behavior', () => {
+  it('TC_W504_40: save with defaults', () => {
     const onSave = vi.fn();
-    renderEditor({ initialWeight: 60, initialReps: 10, onSave });
-
-    fireEvent.click(screen.getByTestId('weight-plus-button'));
-    fireEvent.click(screen.getByTestId('reps-plus-button'));
-    fireEvent.click(screen.getByTestId('rpe-button-8'));
+    renderEditor({ onSave });
     fireEvent.click(screen.getByTestId('save-button'));
+    expect(onSave).toHaveBeenCalledWith({
+      weight: 60,
+      reps: 10,
+      rpe: undefined,
+      restSeconds: 90,
+    });
+  });
 
-    expect(onSave).toHaveBeenCalledTimes(1);
+  it('TC_W504_41: save after modifying all fields', () => {
+    const onSave = vi.fn();
+    renderEditor({ onSave });
+    clickStepper('weight-stepper-increment');
+    clickStepper('reps-stepper-increment');
+    fireEvent.click(screen.getByTestId('rpe-button-8'));
+    clickStepper('rest-stepper-increment');
+    fireEvent.click(screen.getByTestId('save-button'));
     expect(onSave).toHaveBeenCalledWith({
       weight: 60.5,
       reps: 11,
       rpe: 8,
+      restSeconds: 105,
     });
   });
 
-  it('save without RPE selection returns rpe as undefined', () => {
+  it('TC_W504_42: save enforces min weight=0', () => {
     const onSave = vi.fn();
-    renderEditor({ initialWeight: 50, initialReps: 8, onSave });
+    renderEditor({ initialWeight: 60, onSave });
+    const input = screen.getByTestId('weight-stepper-input');
+    fireEvent.change(input, { target: { value: '-5' } });
+    fireEvent.blur(input);
     fireEvent.click(screen.getByTestId('save-button'));
-    expect(onSave).toHaveBeenCalledWith({
-      weight: 50,
-      reps: 8,
-      rpe: undefined,
-    });
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ weight: 0 }));
   });
 
-  // Cancel behavior
-  it('cancel button calls onCancel', () => {
+  it('TC_W504_43: save enforces min reps=1', () => {
+    const onSave = vi.fn();
+    renderEditor({ initialReps: 10, onSave });
+    const input = screen.getByTestId('reps-stepper-input');
+    fireEvent.change(input, { target: { value: '0' } });
+    fireEvent.blur(input);
+    fireEvent.click(screen.getByTestId('save-button'));
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ reps: 1 }));
+  });
+
+  it('TC_W504_44: save without RPE → undefined', () => {
+    const onSave = vi.fn();
+    renderEditor({ onSave });
+    fireEvent.click(screen.getByTestId('save-button'));
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ rpe: undefined }));
+  });
+
+  it('TC_W504_45: save button text "Lưu"', () => {
+    renderEditor();
+    expect(screen.getByTestId('save-button')).toHaveTextContent('Lưu');
+  });
+
+  it('TC_W504_46: save button has min-h-12', () => {
+    renderEditor();
+    expect(screen.getByTestId('save-button').className).toContain('min-h-12');
+  });
+});
+
+/* ================================================================== */
+/* SC_W504_08: Cancel & Dismiss                                        */
+/* ================================================================== */
+describe('SC_W504_08: Cancel & Dismiss', () => {
+  it('TC_W504_47: cancel button calls onCancel', () => {
     const onCancel = vi.fn();
     renderEditor({ onCancel });
     fireEvent.click(screen.getByTestId('cancel-button'));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
-  it('close (X) button calls onCancel', () => {
+  it('TC_W504_48: cancel button text "Hủy"', () => {
+    renderEditor();
+    expect(screen.getByTestId('cancel-button')).toHaveTextContent('Hủy');
+  });
+
+  it('TC_W504_49: cancel button has min-h-12', () => {
+    renderEditor();
+    expect(screen.getByTestId('cancel-button').className).toContain('min-h-12');
+  });
+
+  it('TC_W504_50: close (X) button calls onCancel', () => {
     const onCancel = vi.fn();
     renderEditor({ onCancel });
     fireEvent.click(screen.getByTestId('editor-close-button'));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
-  // Labels
-  it('renders Vietnamese labels', () => {
-    renderEditor();
-    expect(screen.getByText('Chỉnh sửa set')).toBeInTheDocument();
-    expect(screen.getByText('Lưu')).toBeInTheDocument();
-    expect(screen.getByText('Hủy')).toBeInTheDocument();
+  it('TC_W504_51: backdrop click calls onCancel', () => {
+    const onCancel = vi.fn();
+    renderEditor({ onCancel });
+    const dialog = screen.getByRole('dialog');
+    const backdrop = dialog.querySelector('button[tabindex="-1"]') as HTMLElement;
+    fireEvent.click(backdrop);
+    expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
-  it('renders recent weights label', () => {
-    renderEditor({ recentWeights: [50] });
-    expect(screen.getByText('Cân nặng gần đây')).toBeInTheDocument();
+  it('TC_W504_52: Escape key calls onCancel', () => {
+    const onCancel = vi.fn();
+    renderEditor({ onCancel });
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onCancel).toHaveBeenCalledTimes(1);
   });
+});
 
-  // Accessibility
-  it('editor has proper aria attributes', () => {
+/* ================================================================== */
+/* SC_W504_09: Accessibility                                           */
+/* ================================================================== */
+describe('SC_W504_09: Accessibility', () => {
+  it('TC_W504_53: dialog has aria-modal=true', () => {
     renderEditor();
-    const editor = screen.getByTestId('set-editor');
-    expect(editor).toHaveAttribute('aria-label', 'Chỉnh sửa set');
-    const dialog = editor.closest('dialog');
+    const dialog = screen.getByRole('dialog');
     expect(dialog).toHaveAttribute('aria-modal', 'true');
   });
 
-  // Touch target size
-  it('increment/decrement buttons have minimum 44px touch targets', () => {
+  it('TC_W504_54: editor has aria-label', () => {
     renderEditor();
-    const weightMinus = screen.getByTestId('weight-minus-button');
-    expect(weightMinus.className).toContain('h-11');
-    expect(weightMinus.className).toContain('w-11');
+    expect(screen.getByTestId('set-editor')).toHaveAttribute('aria-label', 'Chỉnh sửa set');
   });
 
-  // Tabular nums
-  it('weight input uses tabular-nums for number display', () => {
+  it('TC_W504_55: RPE buttons have correct aria-pressed', () => {
+    renderEditor({ initialRpe: 7 });
+    expect(screen.getByTestId('rpe-button-7')).toHaveAttribute('aria-pressed', 'true');
+    for (const val of [6, 8, 9, 10]) {
+      expect(screen.getByTestId(`rpe-button-${val}`)).toHaveAttribute('aria-pressed', 'false');
+    }
+  });
+
+  it('TC_W504_56: RPE fieldset element', () => {
     renderEditor();
-    const input = screen.getByTestId('weight-input');
-    expect(input.className).toContain('tabular-nums');
+    const selector = screen.getByTestId('rpe-selector');
+    expect(selector.tagName.toLowerCase()).toBe('fieldset');
   });
 
-  it('reps input uses tabular-nums for number display', () => {
+  it('TC_W504_57: weight label contains "Cân nặng"', () => {
     renderEditor();
-    const input = screen.getByTestId('reps-input');
-    expect(input.className).toContain('tabular-nums');
+    expect(screen.getAllByText(/Cân nặng/).length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+/* ================================================================== */
+/* SC_W504_10: i18n Labels                                             */
+/* ================================================================== */
+describe('SC_W504_10: i18n Labels', () => {
+  it('TC_W504_58: title "Chỉnh sửa set"', () => {
+    renderEditor();
+    expect(screen.getByText('Chỉnh sửa set')).toBeInTheDocument();
   });
 
-  // Clear input bug-fix tests
-  it('clearing weight input shows empty, not zero', () => {
-    renderEditor({ initialWeight: 60 });
-    const input = screen.getByTestId('weight-input');
-    fireEvent.change(input, { target: { value: '' } });
-    expect((input as HTMLInputElement).value).toBe('');
+  it('TC_W504_59: weight label "Cân nặng (kg)"', () => {
+    renderEditor();
+    expect(screen.getByText('Cân nặng (kg)')).toBeInTheDocument();
   });
 
-  it('clearing reps input shows empty, not one', () => {
-    renderEditor({ initialReps: 10 });
-    const input = screen.getByTestId('reps-input');
-    fireEvent.change(input, { target: { value: '' } });
-    expect((input as HTMLInputElement).value).toBe('');
+  it('TC_W504_60: reps label "Số lần"', () => {
+    renderEditor();
+    expect(screen.getByText('Số lần')).toBeInTheDocument();
   });
 
-  it('blur after clearing weight keeps empty', () => {
-    renderEditor({ initialWeight: 60 });
-    const input = screen.getByTestId('weight-input');
-    fireEvent.change(input, { target: { value: '' } });
-    fireEvent.blur(input);
-    expect((input as HTMLInputElement).value).toBe('');
+  it('TC_W504_61: RPE label', () => {
+    renderEditor();
+    expect(screen.getByText('RPE')).toBeInTheDocument();
   });
 
-  it('blur after clearing reps keeps empty', () => {
-    renderEditor({ initialReps: 10 });
-    const input = screen.getByTestId('reps-input');
-    fireEvent.change(input, { target: { value: '' } });
-    fireEvent.blur(input);
-    expect((input as HTMLInputElement).value).toBe('');
+  it('TC_W504_62: save text "Lưu"', () => {
+    renderEditor();
+    expect(screen.getByTestId('save-button')).toHaveTextContent('Lưu');
   });
 
-  it('save after clear and blur uses last valid weight', () => {
-    const onSave = vi.fn();
-    renderEditor({ initialWeight: 75, initialReps: 8, onSave });
-    const input = screen.getByTestId('weight-input');
-    fireEvent.change(input, { target: { value: '' } });
-    fireEvent.blur(input);
-    fireEvent.click(screen.getByTestId('save-button'));
-    expect(onSave).toHaveBeenCalledWith({ weight: 75, reps: 8, rpe: undefined });
+  it('TC_W504_63: cancel text "Hủy"', () => {
+    renderEditor();
+    expect(screen.getByTestId('cancel-button')).toHaveTextContent('Hủy');
   });
 });

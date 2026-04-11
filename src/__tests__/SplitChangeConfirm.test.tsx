@@ -275,4 +275,16 @@ describe('SplitChangeConfirm', () => {
     expect(summary).toHaveTextContent('0 Gợi ý');
     expect(summary).toHaveTextContent('0 Chưa ghép');
   });
+
+  describe('touch targets & accessibility', () => {
+    it('cancel and confirm buttons have press feedback', () => {
+      render(<SplitChangeConfirm {...defaultProps} />);
+      const cancelBtn = screen.getByTestId('cancel-button');
+      const confirmBtn = screen.getByTestId('confirm-button');
+      for (const btn of [cancelBtn, confirmBtn]) {
+        expect(btn).toHaveClass('active:scale-[0.98]');
+        expect(btn).toHaveClass('motion-reduce:transform-none');
+      }
+    });
+  });
 });

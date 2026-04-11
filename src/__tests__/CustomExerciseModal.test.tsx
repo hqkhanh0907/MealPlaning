@@ -160,4 +160,16 @@ describe('CustomExerciseModal', () => {
     render(<CustomExerciseModal isOpen onClose={vi.fn()} onSave={vi.fn()} />);
     expect(screen.getByTestId('custom-exercise-name')).toHaveAttribute('maxLength', '80');
   });
+
+  describe('touch targets & accessibility', () => {
+    it('cancel and save buttons meet touch target minimum', () => {
+      render(<CustomExerciseModal isOpen onClose={vi.fn()} onSave={vi.fn()} />);
+      const cancelBtn = screen.getByText('Hủy').closest('button')!;
+      const saveBtn = screen.getByTestId('save-custom-exercise');
+      for (const cls of ['min-h-12', 'active:scale-[0.98]', 'motion-reduce:transform-none']) {
+        expect(cancelBtn).toHaveClass(cls);
+        expect(saveBtn).toHaveClass(cls);
+      }
+    });
+  });
 });

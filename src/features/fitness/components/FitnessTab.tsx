@@ -1,5 +1,5 @@
-import { AlertTriangle, BarChart3, ClipboardList, History } from 'lucide-react';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { AlertTriangle, BarChart3, ClipboardList, History, Play, X } from 'lucide-react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { SubTab } from '../../../components/shared/SubTabBar';
@@ -29,11 +29,18 @@ const FitnessTabInner = () => {
   const addTrainingPlan = useFitnessStore(s => s.addTrainingPlan);
   const addPlanDays = useFitnessStore(s => s.addPlanDays);
   const setActivePlan = useFitnessStore(s => s.setActivePlan);
+  const workoutDraft = useFitnessStore(s => s.workoutDraft);
+  const loadWorkoutDraft = useFitnessStore(s => s.loadWorkoutDraft);
+  const clearWorkoutDraft = useFitnessStore(s => s.clearWorkoutDraft);
   const pushPage = useNavigationStore(s => s.pushPage);
   const healthProfileWeight = useHealthProfileStore(s => s.profile?.weightKg ?? 70);
   const healthProfileAge = useHealthProfileStore(s => s.profile?.age ?? 30);
   const { generatePlan, isGenerating } = useTrainingPlan();
   const notify = useNotification();
+
+  useEffect(() => {
+    loadWorkoutDraft();
+  }, [loadWorkoutDraft]);
 
   const subTabs: SubTab[] = useMemo(
     () => [
@@ -47,6 +54,25 @@ const FitnessTabInner = () => {
   const handleTabChange = useCallback((id: string) => {
     setActiveSubTab(id as FitnessSubTab);
   }, []);
+
+  const handleResumeDraft = useCallback(() => {
+    if (!workoutDraft) return;
+    pushPage({
+      id: 'workout-logger',
+      component: 'WorkoutLogger',
+      props: {
+        exercises: workoutDraft.exercises,
+        exerciseMetas: workoutDraft.exerciseMetas,
+        sets: workoutDraft.sets,
+        elapsedSeconds: workoutDraft.elapsedSeconds,
+        planDayId: workoutDraft.planDayId,
+      },
+    });
+  }, [workoutDraft, pushPage]);
+
+  const handleDiscardDraft = useCallback(() => {
+    clearWorkoutDraft();
+  }, [clearWorkoutDraft]);
 
   const handleGeneratePlan = useCallback(async () => {
     if (!trainingProfile) return;
@@ -153,6 +179,47 @@ const FitnessTabInner = () => {
           >
             {t('fitness.plan.regeneratePlan')}
           </button>
+        </div>
+      )}
+
+      {workoutDraft && activeSubTab === 'plan' && (
+        <div
+          className="bg-warning/10 border-warning/20 mx-4 mt-2 rounded-xl border p-4"
+          data-testid="draft-recovery-prompt"
+          role="alert"
+        >
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="text-warning mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium">{t('fitness.draft.resumeTitle')}</p>
+              <p className="text-muted-foreground mt-0.5 text-xs" data-testid="draft-recovery-desc">
+                {t('fitness.draft.resumeDesc', {
+                  exercises: workoutDraft.exercises.length,
+                  sets: workoutDraft.sets.length,
+                })}
+              </p>
+              <div className="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleResumeDraft}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/50 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium focus-visible:ring-3"
+                  data-testid="draft-continue-btn"
+                >
+                  <Play className="h-3 w-3" aria-hidden="true" />
+                  {t('fitness.draft.continue')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDiscardDraft}
+                  className="text-muted-foreground hover:bg-muted focus-visible:ring-ring/50 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium focus-visible:ring-3"
+                  data-testid="draft-discard-btn"
+                >
+                  <X className="h-3 w-3" aria-hidden="true" />
+                  {t('fitness.draft.discard')}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
