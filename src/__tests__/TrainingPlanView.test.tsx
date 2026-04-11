@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import type { Mock } from 'vitest';
 
 import { TrainingPlanView } from '../features/fitness/components/TrainingPlanView';
@@ -430,16 +430,16 @@ describe('TrainingPlanView', () => {
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     const todayPill = screen.getByTestId('day-pill-1');
     expect(todayPill).toHaveAttribute('aria-current', 'date');
-    expect(todayPill.className).toContain('ring-accent-highlight');
+    expect(todayPill.className).toContain('ring-primary');
   });
 
-  it('strength days show emerald color and cardio days show blue', () => {
+  it('all workout days show primary color (no cardio distinction)', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     const pushDay = screen.getByTestId('day-pill-1');
     expect(pushDay.className).toContain('bg-primary/10');
     const cardioDay = screen.getByTestId('day-pill-6');
-    expect(cardioDay.className).toContain('bg-info');
+    expect(cardioDay.className).toContain('bg-primary/10');
   });
 
   it('rest days show gray color', () => {
@@ -648,9 +648,10 @@ describe('TrainingPlanView', () => {
     expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
     expect(screen.getByText('Push')).toBeInTheDocument();
     expect(screen.getByTestId('start-workout-btn')).toBeInTheDocument();
-    // Non-today workout (Wed day 3) shows collapsed row
-    expect(screen.getByTestId('day-row-3')).toBeInTheDocument();
-    expect(screen.getByTestId('day-accordion-toggle-3')).toBeInTheDocument();
+    // Non-today workout (Wed day 3) shows collapsed PlanDayAccordion
+    expect(screen.getByTestId('plan-day-3')).toBeInTheDocument();
+    const toggle3 = within(screen.getByTestId('plan-day-3')).getByRole('button');
+    expect(toggle3).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('tapping non-today day expands it with full details', () => {
@@ -672,9 +673,10 @@ describe('TrainingPlanView', () => {
     expect(screen.getByText('Pull')).toBeInTheDocument();
     // Collapse again
     fireEvent.click(screen.getByTestId('day-pill-3'));
-    // Pull workout collapsed into compact row
-    const row = screen.getByTestId('day-row-3');
-    expect(row).toBeInTheDocument();
+    // Pull workout collapsed into PlanDayAccordion
+    const accordion = screen.getByTestId('plan-day-3');
+    expect(accordion).toBeInTheDocument();
+    expect(within(accordion).getByRole('button')).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('tapping a rest day expands it without quick actions', () => {
@@ -691,11 +693,12 @@ describe('TrainingPlanView', () => {
   it('shows day label in header when viewing another day', () => {
     mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-    // Today shows "Buổi tập hôm nay" in accordion toggle
-    expect(screen.getByTestId('day-accordion-toggle-1')).toHaveTextContent('Buổi tập hôm nay');
-    // Expand Wednesday (day 3) — header shows "T4"
+    // Today shows "Buổi tập hôm nay" in TodayWorkoutCard toggle (no number suffix)
+    expect(screen.getByTestId('day-accordion-toggle')).toHaveTextContent('Buổi tập hôm nay');
+    // Expand Wednesday (day 3) — PlanDayAccordion shows day label "T4"
     fireEvent.click(screen.getByTestId('day-pill-3'));
-    expect(screen.getByTestId('workout-card-header-3')).toHaveTextContent('T4');
+    const accordion3 = screen.getByTestId('plan-day-3');
+    expect(accordion3).toHaveTextContent('T4');
   });
 
   // --- Edge Cases ---
@@ -1003,11 +1006,11 @@ describe('TrainingPlanView', () => {
 
   // --- Touch Target Compliance ---
   describe('touch targets', () => {
-    it('day pill buttons have min-h-[44px] class', () => {
+    it('day pill buttons have min-h-11 class', () => {
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
       const pill = screen.getByTestId('day-pill-1');
-      expect(pill.className).toContain('min-h-[44px]');
+      expect(pill.className).toContain('min-h-11');
     });
 
     it('edit button has min-h-[44px] and min-w-[44px]', () => {
@@ -1018,12 +1021,12 @@ describe('TrainingPlanView', () => {
       expect(btn.className).toContain('min-w-[44px]');
     });
 
-    it('quick action buttons have min-h-[44px]', () => {
+    it('quick action buttons have min-h-12', () => {
       vi.setSystemTime(new Date('2025-01-07T12:00:00'));
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      expect(screen.getByTestId('quick-log-weight').className).toContain('min-h-[44px]');
-      expect(screen.getByTestId('quick-log-cardio').className).toContain('min-h-[44px]');
+      expect(screen.getByTestId('quick-log-weight').className).toContain('min-h-12');
+      expect(screen.getByTestId('quick-log-cardio').className).toContain('min-h-12');
     });
 
     it('regenerate button has min-h-[44px]', () => {
@@ -1716,10 +1719,10 @@ describe('TrainingPlanView', () => {
       expect(screen.getByTestId('day-accordion')).toBeInTheDocument();
       // Today (Mon) expanded as today-workout-card
       expect(screen.getByTestId('today-workout-card')).toBeInTheDocument();
-      // Non-today workout days collapsed
-      expect(screen.getByTestId('day-row-3')).toBeInTheDocument(); // Wed - Pull
-      expect(screen.getByTestId('day-row-5')).toBeInTheDocument(); // Fri - Legs
-      expect(screen.getByTestId('day-row-6')).toBeInTheDocument(); // Sat - Cardio
+      // Non-today workout days collapsed (PlanDayAccordion uses plan-day-N)
+      expect(screen.getByTestId('plan-day-3')).toBeInTheDocument(); // Wed - Pull
+      expect(screen.getByTestId('plan-day-5')).toBeInTheDocument(); // Fri - Legs
+      expect(screen.getByTestId('plan-day-6')).toBeInTheDocument(); // Sat - Cardio
       // Rest days collapsed
       expect(screen.getByTestId('day-row-2')).toBeInTheDocument();
       expect(screen.getByTestId('day-row-4')).toBeInTheDocument();
@@ -1736,10 +1739,11 @@ describe('TrainingPlanView', () => {
     it('collapsed workout row shows day + muscle groups + exercise count', () => {
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      const row = screen.getByTestId('day-accordion-toggle-3');
-      expect(row).toHaveTextContent('T4');
-      expect(row).toHaveTextContent('Lưng, Tay');
-      expect(row).toHaveTextContent('3 bài tập');
+      const accordion = screen.getByTestId('plan-day-3');
+      const toggle = within(accordion).getByRole('button');
+      expect(toggle).toHaveTextContent('T4');
+      expect(toggle).toHaveTextContent('Lưng, Tay');
+      expect(toggle).toHaveTextContent('3 bài tập');
     });
 
     it('collapsed rest row shows day + rest label', () => {
@@ -1753,8 +1757,8 @@ describe('TrainingPlanView', () => {
     it('expanding non-today workout day shows full details without primary CTA', () => {
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      // Expand Wednesday
-      fireEvent.click(screen.getByTestId('day-accordion-toggle-3'));
+      // Expand Wednesday via pill click
+      fireEvent.click(screen.getByTestId('day-pill-3'));
       // Full details visible
       expect(screen.getByText('Pull')).toBeInTheDocument();
       // No start-workout CTA (only today gets it)
@@ -1774,14 +1778,15 @@ describe('TrainingPlanView', () => {
     it('clicking day-pill toggles accordion expand/collapse for non-today', () => {
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      // Initially collapsed
-      expect(screen.getByTestId('day-accordion-toggle-5')).toBeInTheDocument();
+      // Initially collapsed — PlanDayAccordion renders plan-day-5
+      const accordion5 = screen.getByTestId('plan-day-5');
+      expect(within(accordion5).getByRole('button')).toHaveAttribute('aria-expanded', 'false');
       // Click pill to expand
       fireEvent.click(screen.getByTestId('day-pill-5'));
       expect(screen.getByText('Legs')).toBeInTheDocument();
       // Click pill again to collapse
       fireEvent.click(screen.getByTestId('day-pill-5'));
-      expect(screen.getByTestId('day-accordion-toggle-5')).toBeInTheDocument();
+      expect(within(screen.getByTestId('plan-day-5')).getByRole('button')).toHaveAttribute('aria-expanded', 'false');
     });
 
     it('today rest day is expanded by default with quick actions', () => {
@@ -1796,7 +1801,8 @@ describe('TrainingPlanView', () => {
     it('collapsed workout row has min-h-[44px] touch target', () => {
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      const toggle = screen.getByTestId('day-accordion-toggle-3');
+      const accordion = screen.getByTestId('plan-day-3');
+      const toggle = within(accordion).getByRole('button');
       expect(toggle.className).toContain('min-h-[44px]');
     });
 
@@ -1841,8 +1847,8 @@ describe('TrainingPlanView', () => {
     it('clicking edit button on expanded non-today workout opens PlanDayEditor', () => {
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: planDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      // Expand Wednesday (day 3, Pull day)
-      fireEvent.click(screen.getByTestId('day-accordion-toggle-3'));
+      // Expand Wednesday (day 3, Pull day) via pill
+      fireEvent.click(screen.getByTestId('day-pill-3'));
       // Click the edit pencil button (aria-label = Chỉnh sửa bài tập)
       const editBtns = screen.getAllByLabelText('Chỉnh sửa bài tập');
       // Last edit button is from the expanded non-today day
@@ -1863,8 +1869,8 @@ describe('TrainingPlanView', () => {
       const manyExPlanDays = [{ ...planDays[0] }, { ...planDays[1], exercises: manyExercises }, ...planDays.slice(2)];
       mockStore({ trainingPlans: [activePlan], trainingPlanDays: manyExPlanDays });
       render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-      // Expand Wednesday (day 3 → Pull day with 5 exercises)
-      fireEvent.click(screen.getByTestId('day-accordion-toggle-3'));
+      // Expand Wednesday (day 3 → Pull day with 5 exercises) via pill
+      fireEvent.click(screen.getByTestId('day-pill-3'));
       // Should show first 3 exercises + "more" button
       expect(screen.getByText('Deadlift')).toBeInTheDocument();
       expect(screen.getByText('Barbell Row')).toBeInTheDocument();

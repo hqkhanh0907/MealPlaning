@@ -1,30 +1,10 @@
-import {
-  ArrowRightLeft,
-  BookOpen,
-  Calendar,
-  CalendarCog,
-  CalendarPlus,
-  ChevronDown,
-  ChevronRight,
-  ClipboardList,
-  Dumbbell,
-  Moon,
-  Pencil,
-  Play,
-  Plus,
-  RefreshCw,
-  RotateCcw,
-  Trash2,
-  X,
-} from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Calendar, ChevronDown, Moon, Plus, RefreshCw, Trash2, X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/react/shallow';
 
 import { ConfirmationModal } from '../../../components/modals/ConfirmationModal';
 import { EnergyBalanceCard } from '../../../components/nutrition/EnergyBalanceCard';
-import { EmptyState } from '../../../components/shared/EmptyState';
-import { createSurfaceStateContract } from '../../../components/shared/surfaceState';
 import { useTodayCaloriesOut } from '../../../hooks/useTodayCaloriesOut';
 import { useTodayNutrition } from '../../../hooks/useTodayNutrition';
 import { useFitnessStore } from '../../../store/fitnessStore';
@@ -32,46 +12,28 @@ import { useNavigationStore } from '../../../store/navigationStore';
 import { useNutritionTargets } from '../../health-profile/hooks/useNutritionTargets';
 import { DAY_LABELS } from '../constants';
 import type { SelectedExercise, TrainingPlanDay } from '../types';
-import { safeParseJsonArray } from '../types';
 import { estimateDuration } from '../utils/durationEstimator';
 import { safeJsonParse } from '../utils/safeJsonParse';
-import { translateWorkoutType } from '../utils/translateWorkoutType';
 import { AddSessionModal } from './AddSessionModal';
 import { DailyWeightInput } from './DailyWeightInput';
-import { SessionTabs } from './SessionTabs';
+import { PlanActionBar } from './PlanActionBar';
+import { PlanDayAccordion } from './PlanDayAccordion';
+import { PlanEmptyState } from './PlanEmptyState';
 import { StreakCounter } from './StreakCounter';
-
-const DAY_FULL_LABEL_KEYS = [
-  'fitness.dayFull.0',
-  'fitness.dayFull.1',
-  'fitness.dayFull.2',
-  'fitness.dayFull.3',
-  'fitness.dayFull.4',
-  'fitness.dayFull.5',
-  'fitness.dayFull.6',
-] as const;
-
-interface TrainingPlanViewProps {
-  onGeneratePlan: () => void;
-  onCreateManualPlan?: () => void;
-  planStrategy?: 'auto' | 'manual' | null;
-  isGenerating?: boolean;
-}
+import { TodayRestCard } from './TodayRestCard';
+import { TodayWorkoutCard } from './TodayWorkoutCard';
+import { WeekCalendarStrip } from './WeekCalendarStrip';
 
 function parseExercises(exercises?: string): SelectedExercise[] {
-  if (!exercises) return [];
-  return safeJsonParse<SelectedExercise[]>(exercises, []);
+  return exercises ? safeJsonParse<SelectedExercise[]>(exercises, []) : [];
 }
-
 function getTodayDow(): number {
-  const jsDay = new Date().getDay();
-  return jsDay === 0 ? 7 : jsDay;
+  const d = new Date().getDay();
+  return d === 0 ? 7 : d;
 }
-
-function getTomorrowDow(todayDow: number): number {
-  return todayDow === 7 ? 1 : todayDow + 1;
+function getTomorrowDow(today: number): number {
+  return today === 7 ? 1 : today + 1;
 }
-
 function isPlanExpired(endDate?: string): boolean {
   if (!endDate) return false;
   const today = new Date();
@@ -82,67 +44,33 @@ function isPlanExpired(endDate?: string): boolean {
 }
 
 function useContextMenuDismiss(
-  contextMenu: { dayNum: number; x: number; y: number } | null,
+  menu: { dayNum: number; x: number; y: number } | null,
   ref: React.RefObject<HTMLDivElement | null>,
-  setContextMenu: React.Dispatch<React.SetStateAction<{ dayNum: number; x: number; y: number } | null>>,
+  dismiss: () => void,
 ): void {
   useEffect(() => {
-    if (!contextMenu) return;
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setContextMenu(null);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [contextMenu, ref, setContextMenu]);
-
-  useEffect(() => {
-    if (!contextMenu) return;
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        setContextMenu(null);
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [contextMenu, setContextMenu]);
-
-  useEffect(() => {
-    if (contextMenu && ref.current) {
-      ref.current.focus();
-    }
-  }, [contextMenu, ref]);
+    if (!menu) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) dismiss();
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') dismiss();
+    };
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    ref.current?.focus();
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [menu, ref, dismiss]);
 }
 
-function WorkoutStatsContent({
-  workoutType,
-  exerciseCount,
-  minutes,
-}: Readonly<{
-  workoutType: string;
-  exerciseCount: number;
-  minutes: number;
-}>): React.JSX.Element {
-  const { t } = useTranslation();
-  const normalizedType = workoutType.toLowerCase();
-
-  if (normalizedType.includes('cardio')) {
-    return <span className="text-muted-foreground">{t('fitness.plan.cardioDay')}</span>;
-  }
-  if (normalizedType === 'rest') {
-    return <span className="text-muted-foreground">{t('fitness.plan.restDay')}</span>;
-  }
-  return (
-    <>
-      <span>
-        {exerciseCount} {t('fitness.plan.exercises')}
-      </span>
-      <span>
-        ~{minutes} {t('fitness.plan.minutes')}
-      </span>
-    </>
-  );
+interface TrainingPlanViewProps {
+  onGeneratePlan: () => void;
+  onCreateManualPlan?: () => void;
+  planStrategy?: 'auto' | 'manual' | null;
+  isGenerating?: boolean;
 }
 
 function TrainingPlanViewInner({
@@ -153,21 +81,20 @@ function TrainingPlanViewInner({
 }: Readonly<TrainingPlanViewProps>): React.JSX.Element {
   const { t } = useTranslation();
   const { trainingPlans, trainingPlanDays } = useFitnessStore(
-    useShallow(s => ({
-      trainingPlans: s.trainingPlans,
-      trainingPlanDays: s.trainingPlanDays,
-    })),
+    useShallow(s => ({ trainingPlans: s.trainingPlans, trainingPlanDays: s.trainingPlanDays })),
   );
   const pushPage = useNavigationStore(s => s.pushPage);
   const { targetCalories, targetProtein } = useNutritionTargets();
   const { eaten: rawEaten, protein: rawProtein } = useTodayNutrition();
   const eaten = rawEaten ?? 0;
   const protein = rawProtein ?? 0;
+  const todayCaloriesOut = useTodayCaloriesOut();
 
   const [expandedDays, setExpandedDays] = useState<Set<number>>(() => new Set([getTodayDow()]));
+  const [selectedDay, setSelectedDay] = useState(getTodayDow);
   const [activeSessionIds, setActiveSessionIds] = useState<Record<number, string>>({});
   const [showAddSessionModal, setShowAddSessionModal] = useState(false);
-  const [addSessionDow, setAddSessionDow] = useState<number>(0);
+  const [addSessionDow, setAddSessionDow] = useState(0);
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const [dayContextMenu, setDayContextMenu] = useState<{ dayNum: number; x: number; y: number } | null>(null);
   const [showConvertToRestConfirm, setShowConvertToRestConfirm] = useState<number | null>(null);
@@ -181,246 +108,106 @@ function TrainingPlanViewInner({
   const [exercisesExpandedMap, setExercisesExpandedMap] = useState<Record<string, boolean>>({});
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
-  const todayCaloriesOut = useTodayCaloriesOut();
-
-  const activePlan = useMemo(() => trainingPlans.find(p => p.status === 'active'), [trainingPlans]);
-
-  const planExpired = useMemo(() => (activePlan ? isPlanExpired(activePlan.endDate) : false), [activePlan]);
-
-  const planDays = useMemo(
-    () => (activePlan ? trainingPlanDays.filter(d => d.planId === activePlan.id) : []),
-    [activePlan, trainingPlanDays],
-  );
-
-  const daySessionsMap = useMemo(() => {
-    const map = new Map<number, TrainingPlanDay[]>();
-    for (const day of planDays) {
-      const existing = map.get(day.dayOfWeek) ?? [];
-      existing.push(day);
-      map.set(
-        day.dayOfWeek,
-        [...existing].sort((a, b) => (a.sessionOrder ?? 1) - (b.sessionOrder ?? 1)),
-      );
-    }
-    return map;
-  }, [planDays]);
-
   const todayDow = getTodayDow();
+  const activePlan = trainingPlans.find(p => p.status === 'active');
+  const planExpired = activePlan ? isPlanExpired(activePlan.endDate) : false;
+  const planDays = activePlan ? trainingPlanDays.filter(d => d.planId === activePlan.id) : [];
+
+  const daySessionsMap = new Map<number, TrainingPlanDay[]>();
+  for (const d of planDays) {
+    const arr = daySessionsMap.get(d.dayOfWeek) ?? [];
+    arr.push(d);
+    daySessionsMap.set(d.dayOfWeek, arr);
+  }
+  for (const [, arr] of daySessionsMap) arr.sort((a, b) => (a.sessionOrder ?? 1) - (b.sessionOrder ?? 1));
 
   const getActivePlanDay = (dayNum: number) => {
     const sessions = daySessionsMap.get(dayNum) ?? [];
-    if (sessions.length === 0) return undefined;
-    const activeId = activeSessionIds[dayNum];
-    if (activeId) return sessions.find(s => s.id === activeId) ?? sessions[0];
-    return sessions[0];
+    return sessions.find(s => s.id === activeSessionIds[dayNum]) ?? sessions[0];
   };
-
   const tomorrowDow = getTomorrowDow(todayDow);
+  const tomorrowPlanDay = planDays.find(d => d.dayOfWeek === tomorrowDow);
+  const tomorrowExercises = parseExercises(tomorrowPlanDay?.exercises);
 
-  const tomorrowPlanDay = useMemo(() => planDays.find(d => d.dayOfWeek === tomorrowDow), [planDays, tomorrowDow]);
-
-  const tomorrowExercises = useMemo(() => parseExercises(tomorrowPlanDay?.exercises), [tomorrowPlanDay]);
-
-  const handleStartWorkout = useCallback(
-    (planDay: TrainingPlanDay) => {
-      pushPage({
-        id: 'workout-logger',
-        component: 'WorkoutLogger',
-        props: { planDay },
-      });
-    },
-    [pushPage],
-  );
-
-  const handleLogCardio = useCallback(() => {
-    pushPage({
-      id: 'cardio-logger',
-      component: 'CardioLogger',
-      props: {},
+  const handleStartWorkout = (p: TrainingPlanDay) =>
+    pushPage({ id: 'workout-logger', component: 'WorkoutLogger', props: { planDay: p } });
+  const handleLogCardio = () => pushPage({ id: 'cardio-logger', component: 'CardioLogger', props: {} });
+  const handleLogWeight = () =>
+    document
+      .querySelector('[data-testid="daily-weight-input"]')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const handleDaySelect = (dayNum: number) => {
+    setSelectedDay(dayNum);
+    if (dayNum === todayDow) return;
+    setExpandedDays(prev => {
+      const next = new Set(prev);
+      if (next.has(dayNum)) next.delete(dayNum);
+      else next.add(dayNum);
+      return next;
     });
-  }, [pushPage]);
-
-  const handleDaySelect = useCallback(
-    (dayNum: number) => {
-      if (dayNum === todayDow) return;
-      setExpandedDays(prev => {
-        const next = new Set(prev);
-        if (next.has(dayNum)) {
-          next.delete(dayNum);
-        } else {
-          next.add(dayNum);
-        }
-        return next;
-      });
-    },
-    [todayDow],
-  );
-
-  const handleDayContextMenu = useCallback((e: React.MouseEvent, dayNum: number) => {
-    e.preventDefault();
-    setDayContextMenu({ dayNum, x: e.clientX, y: e.clientY });
-  }, []);
-
-  const handleAddWorkoutToDay = useCallback((dayNum: number) => {
-    setDayContextMenu(null);
-    setAddSessionDow(dayNum);
-    setShowAddSessionModal(true);
-  }, []);
-
-  const toggleExerciseExpand = (key: string, current: boolean) => {
-    setExercisesExpandedMap(prev => ({ ...prev, [key]: !current }));
   };
-
-  const handleConvertToRest = useCallback((dayNum: number) => {
+  const handleAddWorkoutToDay = (d: number) => {
     setDayContextMenu(null);
-    setShowConvertToRestConfirm(dayNum);
-  }, []);
-
-  const confirmConvertToRest = useCallback(
-    (dayNum: number) => {
-      const sessions = daySessionsMap.get(dayNum) ?? [];
-      for (const session of sessions) {
-        useFitnessStore.getState().removePlanDaySession(session.id);
-      }
-      setShowConvertToRestConfirm(null);
-    },
-    [daySessionsMap],
-  );
-
-  const handleRegeneratePlan = useCallback(() => {
+    setAddSessionDow(d);
+    setShowAddSessionModal(true);
+  };
+  const toggleExerciseExpand = (key: string, current: boolean) =>
+    setExercisesExpandedMap(prev => ({ ...prev, [key]: !current }));
+  const handleConvertToRest = (d: number) => {
+    setDayContextMenu(null);
+    setShowConvertToRestConfirm(d);
+  };
+  const confirmConvertToRest = (d: number) => {
+    for (const s of daySessionsMap.get(d) ?? []) useFitnessStore.getState().removePlanDaySession(s.id);
+    setShowConvertToRestConfirm(null);
+  };
+  const handleRegeneratePlan = () => {
     setShowRegenerateConfirm(false);
     onGeneratePlan();
-  }, [onGeneratePlan]);
-
-  const handleDismissCoaching = useCallback(() => {
+  };
+  const handleDismissCoaching = () => {
     setCoachingDismissed(true);
     try {
       localStorage.setItem('planCoachingDismissed', 'true');
     } catch {
-      /* ignore */
+      /* noop */
     }
-  }, []);
-
-  const handleSelectSession = useCallback((dayNum: number, id: string) => {
-    setActiveSessionIds(prev => ({ ...prev, [dayNum]: id }));
-  }, []);
-
-  const handleOpenAddSession = useCallback((dayNum: number) => {
-    setAddSessionDow(dayNum);
+  };
+  const handleSelectSession = (d: number, id: string) => setActiveSessionIds(prev => ({ ...prev, [d]: id }));
+  const handleOpenAddSession = (d: number) => {
+    setAddSessionDow(d);
     setShowAddSessionModal(true);
-  }, []);
-
-  useContextMenuDismiss(dayContextMenu, contextMenuRef, setDayContextMenu);
-
-  if (activePlan && planExpired) {
-    return (
-      <div data-testid="training-plan-view" className="flex flex-col items-center justify-center py-12 text-center">
-        <div data-testid="plan-expired-cta" className="flex flex-col items-center gap-4">
-          <RefreshCw className="text-warning h-12 w-12" aria-hidden="true" />
-          <h3 className="text-foreground text-lg font-semibold">{t('fitness.plan.planExpired')}</h3>
-          <p className="text-muted-foreground max-w-xs text-sm">{t('fitness.plan.planExpiredMessage')}</p>
-          <button
-            data-testid="create-new-cycle-btn"
-            type="button"
-            onClick={onGeneratePlan}
-            className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring flex items-center gap-2 rounded-xl px-6 py-3 font-semibold transition-[colors,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-95 motion-reduce:transform-none"
-          >
-            <RefreshCw className="h-4 w-4" aria-hidden="true" />
-            {t('fitness.plan.createNewCycle')}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!activePlan) {
-    if (planStrategy === 'manual' && onCreateManualPlan) {
-      const manualEmptyContract = createSurfaceStateContract({
-        surface: 'fitness.plan',
-        state: 'setup',
-        copy: {
-          title: t('fitness.plan.manualReadyTitle'),
-          missing: t('fitness.plan.manualReadyMissing'),
-          reason: t('fitness.plan.manualReadyReason'),
-          nextStep: t('fitness.plan.manualReadyNextStep'),
-        },
-        primaryAction: {
-          label: t('fitness.plan.createFirstWorkout'),
-        },
-      });
-
-      return (
-        <div data-testid="training-plan-view" className="py-12">
-          <div data-testid="manual-plan-cta" className="space-y-4 text-center">
-            <EmptyState variant="hero" icon={CalendarPlus} contract={manualEmptyContract} />
-            <p className="text-muted-foreground text-sm">{t('fitness.plan.manualReadyValue')}</p>
-            <button
-              data-testid="create-manual-plan-btn"
-              type="button"
-              onClick={onCreateManualPlan}
-              className="bg-primary text-primary-foreground hover:bg-primary mx-auto flex min-h-[44px] items-center gap-2 rounded-xl px-6 py-3 font-semibold transition-[colors,transform] active:scale-95"
-            >
-              <CalendarPlus className="h-4 w-4" aria-hidden="true" />
-              {t('fitness.plan.createFirstWorkout')}
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    const autoEmptyContract = createSurfaceStateContract({
-      surface: 'fitness.plan',
-      state: 'setup',
-      copy: {
-        title: t('fitness.plan.autoReadyTitle'),
-        missing: t('fitness.plan.autoReadyMissing'),
-        reason: t('fitness.plan.autoReadyReason'),
-        nextStep: t('fitness.plan.autoReadyNextStep'),
-      },
-      primaryAction: {
-        label: t('fitness.plan.createPlan'),
-      },
+  };
+  const addSession = (type: string, groups?: string[]) => {
+    const plan = useFitnessStore.getState().getActivePlan();
+    if (!plan) return;
+    const existing = daySessionsMap.get(addSessionDow) ?? [];
+    useFitnessStore.getState().addPlanDaySession(plan.id, addSessionDow, {
+      planId: plan.id,
+      dayOfWeek: addSessionDow,
+      sessionOrder: existing.length + 1,
+      workoutType: type,
+      muscleGroups: groups ? JSON.stringify(groups) : '',
+      exercises: '[]',
+      originalExercises: '[]',
+      isUserAssigned: true,
+      originalDayOfWeek: addSessionDow,
     });
+    setShowAddSessionModal(false);
+  };
 
-    return (
-      <div data-testid="training-plan-view" className="py-12">
-        <div data-testid="no-plan-cta" className="space-y-4 text-center">
-          <EmptyState variant="hero" icon={Dumbbell} contract={autoEmptyContract} />
-          <p className="text-muted-foreground text-sm">{t('fitness.plan.autoReadyValue')}</p>
-          <button
-            data-testid="create-plan-btn"
-            type="button"
-            onClick={onGeneratePlan}
-            disabled={isGenerating}
-            className="bg-primary text-primary-foreground hover:bg-primary mx-auto flex min-h-[44px] items-center gap-2 rounded-xl px-6 py-3 font-semibold transition-[colors,transform] active:scale-95 disabled:opacity-50"
-          >
-            {isGenerating ? (
-              <>
-                <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
-                {t('fitness.plan.generating')}
-              </>
-            ) : (
-              <>
-                {t('fitness.plan.createPlan')}
-                <ChevronRight className="h-4 w-4" aria-hidden="true" />
-              </>
-            )}
-          </button>
-          {isGenerating && (
-            <div className="text-primary inline-flex items-center gap-2 text-sm font-medium">
-              <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" />
-              {t('fitness.plan.generating')}
-            </div>
-          )}
-        </div>
-      </div>
-    );
+  useContextMenuDismiss(dayContextMenu, contextMenuRef, () => setDayContextMenu(null));
+
+  if (activePlan && planExpired) return <PlanEmptyState context="expired-plan" onAction={onGeneratePlan} />;
+  if (!activePlan) {
+    if (planStrategy === 'manual' && onCreateManualPlan)
+      return <PlanEmptyState context="manual-no-exercises" onAction={onCreateManualPlan} />;
+    return <PlanEmptyState context="no-plan" onAction={onGeneratePlan} isGenerating={isGenerating} />;
   }
 
   return (
     <div data-testid="training-plan-view" className="flex flex-col gap-4">
       <StreakCounter />
-
       <EnergyBalanceCard
         caloriesIn={eaten}
         caloriesOut={todayCaloriesOut}
@@ -430,97 +217,35 @@ function TrainingPlanViewInner({
         isCollapsible
       />
 
-      <div data-testid="calendar-strip" className="flex gap-1.5">
-        {Array.from({ length: 7 }, (_, i) => {
-          const dayNum = i + 1;
-          const daySessions = daySessionsMap.get(dayNum) ?? [];
-          const planDay = daySessions[0];
-          const isToday = dayNum === todayDow;
-          const isExpanded = expandedDays.has(dayNum);
-          const isCardio = planDay?.workoutType.toLowerCase().includes('cardio') ?? false;
-
-          let colorClass = 'bg-muted text-muted-foreground';
-          if (planDay) {
-            colorClass = isCardio ? 'bg-info/15 text-info' : 'bg-primary/10 text-primary-emphasis';
-          }
-
-          let ringClass: string;
-          if (isToday) {
-            ringClass = 'ring-2 ring-accent-highlight';
-          } else if (isExpanded) {
-            ringClass = 'ring-2 ring-ring';
-          } else {
-            ringClass = '';
-          }
-
-          return (
-            <button
-              key={dayNum}
-              data-testid={`day-pill-${dayNum}`}
-              type="button"
-              onClick={() => handleDaySelect(dayNum)}
-              onContextMenu={e => handleDayContextMenu(e, dayNum)}
-              className={`focus-visible:ring-ring flex min-h-[44px] flex-1 flex-col items-center justify-center rounded-xl px-1 py-2 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none ${colorClass} ${ringClass}`}
-              aria-current={isToday ? 'date' : undefined}
-              aria-label={t(DAY_FULL_LABEL_KEYS[i])}
-            >
-              <span>{DAY_LABELS[i]}</span>
-            </button>
-          );
-        })}
+      <div data-testid="calendar-strip">
+        <WeekCalendarStrip
+          selectedDay={selectedDay}
+          todayDow={todayDow}
+          planDays={planDays}
+          completedDays={new Set<number>()}
+          onDaySelect={handleDaySelect}
+          onDayContextMenu={(dayNum, e) => {
+            e.preventDefault();
+            setDayContextMenu({ dayNum, x: e.clientX, y: e.clientY });
+          }}
+        />
       </div>
 
-      {/* Plan action buttons */}
-      <div data-testid="plan-action-bar" className="flex gap-2">
-        <button
-          data-testid="action-edit-schedule"
-          type="button"
-          onClick={() =>
-            pushPage({
-              id: 'plan-schedule-editor',
-              component: 'PlanScheduleEditor',
-              props: { planId: activePlan.id },
-            })
-          }
-          aria-label={t('fitness.planActions.editSchedule')}
-          className="bg-card focus-visible:ring-ring border-border text-foreground-secondary hover:bg-accent flex min-h-[44px] flex-1 touch-manipulation items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-        >
-          <CalendarCog className="h-4 w-4" aria-hidden="true" />
-          {t('fitness.planActions.editSchedule')}
-        </button>
-        <button
-          data-testid="action-change-split"
-          type="button"
-          onClick={() =>
-            pushPage({
-              id: 'split-changer',
-              component: 'SplitChanger',
-              props: { planId: activePlan.id, currentSplit: activePlan.splitType },
-            })
-          }
-          aria-label={t('fitness.planActions.changeSplit')}
-          className="bg-card focus-visible:ring-ring border-border text-foreground-secondary hover:bg-accent flex min-h-[44px] flex-1 touch-manipulation items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-        >
-          <ArrowRightLeft className="h-4 w-4" aria-hidden="true" />
-          {t('fitness.planActions.changeSplit')}
-        </button>
-        <button
-          data-testid="action-templates"
-          type="button"
-          onClick={() =>
-            pushPage({
-              id: 'plan-template-gallery',
-              component: 'PlanTemplateGallery',
-              props: { planId: activePlan.id },
-            })
-          }
-          aria-label={t('fitness.planActions.templates')}
-          className="bg-card focus-visible:ring-ring border-border text-foreground-secondary hover:bg-accent flex min-h-[44px] flex-1 touch-manipulation items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-        >
-          <BookOpen className="h-4 w-4" aria-hidden="true" />
-          {t('fitness.planActions.templates')}
-        </button>
-      </div>
+      <PlanActionBar
+        onEditSchedule={() =>
+          pushPage({ id: 'plan-schedule-editor', component: 'PlanScheduleEditor', props: { planId: activePlan.id } })
+        }
+        onChangeSplit={() =>
+          pushPage({
+            id: 'split-changer',
+            component: 'SplitChanger',
+            props: { planId: activePlan.id, currentSplit: activePlan.splitType },
+          })
+        }
+        onBrowseTemplates={() =>
+          pushPage({ id: 'plan-template-gallery', component: 'PlanTemplateGallery', props: { planId: activePlan.id } })
+        }
+      />
 
       {dayContextMenu && (
         <div
@@ -592,7 +317,6 @@ function TrainingPlanViewInner({
         {t('fitness.plan.regenerate')}
       </button>
 
-      {/* --- 7-Day Accordion --- */}
       <div data-testid="day-accordion" className="space-y-2">
         {Array.from({ length: 7 }, (_, i) => {
           const dayNum = i + 1;
@@ -600,173 +324,35 @@ function TrainingPlanViewInner({
           const isExpanded = expandedDays.has(dayNum);
           const daySessions = daySessionsMap.get(dayNum) ?? [];
           const planDay = getActivePlanDay(dayNum);
-          const isRestDay = !planDay;
-          const dayExercises = planDay ? parseExercises(planDay.exercises) : [];
-          const dayMinutes = estimateDuration(dayExercises);
-          const exerciseKey = planDay?.id ?? `rest-${dayNum}`;
-          const exExpanded = exercisesExpandedMap[exerciseKey] ?? false;
+          const exercises = planDay ? parseExercises(planDay.exercises) : [];
+          const exKey = planDay?.id ?? `rest-${dayNum}`;
 
           if (isToday && planDay) {
-            // --- Today workout: always expanded ---
             return (
-              <div key={dayNum} data-testid="today-workout-card">
-                <div className="bg-card border-border border-l-accent-highlight rounded-2xl border border-l-4 p-4">
-                  <button
-                    data-testid={`day-accordion-toggle-${dayNum}`}
-                    type="button"
-                    disabled
-                    className="text-foreground-secondary mb-1 flex min-h-[44px] w-full items-center gap-1.5 text-left text-xs font-medium tracking-wider uppercase"
-                  >
-                    <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
-                    {t('fitness.plan.todayWorkout')}
-                  </button>
-
-                  {daySessions.length >= 1 && (
-                    <SessionTabs
-                      sessions={daySessions}
-                      activeSessionId={activeSessionIds[dayNum] ?? daySessions[0].id}
-                      completedSessionIds={[]}
-                      onSelectSession={id => handleSelectSession(dayNum, id)}
-                      onAddSession={() => handleOpenAddSession(dayNum)}
-                      onDeleteSession={dayId => useFitnessStore.getState().removePlanDaySession(dayId)}
-                    />
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-foreground text-xl font-semibold">
-                        {translateWorkoutType(t, planDay.workoutType)}
-                      </h3>
-                      {planDay.originalExercises != null && planDay.exercises !== planDay.originalExercises && (
-                        <span
-                          data-testid="modified-badge"
-                          className="bg-warning/10 text-warning inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
-                        >
-                          {t('fitness.plan.modified')}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {planDay.originalExercises != null && planDay.exercises !== planDay.originalExercises && (
-                        <button
-                          data-testid="restore-original-btn"
-                          type="button"
-                          onClick={() => useFitnessStore.getState().restorePlanDayOriginal(planDay.id)}
-                          className="text-primary focus-visible:ring-ring hover:bg-accent flex min-h-[44px] min-w-[44px] items-center justify-center gap-1 rounded-full p-2.5 text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                          aria-label={t('fitness.plan.restore')}
-                        >
-                          <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                        </button>
-                      )}
-                      <button
-                        data-testid="edit-exercises-btn"
-                        type="button"
-                        aria-label={t('fitness.plan.editExercises')}
-                        onClick={() =>
-                          pushPage({
-                            id: 'plan-day-editor',
-                            component: 'PlanDayEditor',
-                            props: { planDay },
-                          })
-                        }
-                        className="focus-visible:ring-ring hover:bg-accent flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2.5 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                      >
-                        <Pencil className="text-muted-foreground h-4 w-4" aria-hidden="true" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {planDay.muscleGroups && (
-                    <p className="text-muted-foreground text-sm">
-                      {safeParseJsonArray<string>(planDay.muscleGroups)
-                        .map(g => t(`fitness.onboarding.muscle_${g}`, g))
-                        .join(', ')}
-                    </p>
-                  )}
-                  <div
-                    data-testid="workout-stats"
-                    className="text-foreground-secondary mt-2 flex items-center gap-3 text-sm"
-                  >
-                    <WorkoutStatsContent
-                      workoutType={planDay.workoutType}
-                      exerciseCount={dayExercises.length}
-                      minutes={dayMinutes}
-                    />
-                  </div>
-
-                  {dayExercises.length > 0 &&
-                    (() => {
-                      const COLLAPSE_THRESHOLD = 3;
-                      const shouldCollapse = dayExercises.length > COLLAPSE_THRESHOLD;
-                      const displayedExercises =
-                        shouldCollapse && !exExpanded ? dayExercises.slice(0, COLLAPSE_THRESHOLD) : dayExercises;
-                      const hiddenCount = dayExercises.length - COLLAPSE_THRESHOLD;
-
-                      return (
-                        <>
-                          <ul data-testid="exercise-list" className="mt-3 space-y-1.5">
-                            {displayedExercises.map(ex => (
-                              <li
-                                key={ex.exercise.id}
-                                className="text-foreground-secondary flex min-w-0 items-center justify-between text-sm"
-                              >
-                                <span className="min-w-0 truncate">{ex.exercise.nameVi}</span>
-                                <span className="text-muted-foreground shrink-0 text-xs">
-                                  {ex.sets} {t('fitness.plan.setsLabel')} × {ex.repsMin}-{ex.repsMax}{' '}
-                                  {t('fitness.plan.repsLabel')}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                          {shouldCollapse && (
-                            <button
-                              type="button"
-                              data-testid="exercise-collapse-toggle"
-                              onClick={() => toggleExerciseExpand(exerciseKey, exExpanded)}
-                              className="text-primary focus-visible:ring-ring hover:text-primary-emphasis mt-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                              aria-label={
-                                exExpanded
-                                  ? t('fitness.plan.showLess')
-                                  : t('fitness.plan.moreExercises', { remaining: hiddenCount })
-                              }
-                            >
-                              {exExpanded
-                                ? t('fitness.plan.showLess')
-                                : t('fitness.plan.moreExercises', { remaining: hiddenCount })}
-                            </button>
-                          )}
-                        </>
-                      );
-                    })()}
-
-                  <button
-                    data-testid="start-workout-btn"
-                    type="button"
-                    onClick={() => handleStartWorkout(planDay)}
-                    className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-lg font-semibold transition-[colors,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] motion-reduce:transform-none"
-                  >
-                    <Play className="h-5 w-5" aria-hidden="true" />
-                    {t('fitness.plan.startWorkout')}
-                  </button>
-
-                  <div className="border-border-subtle mt-3 flex gap-2 border-t pt-3">
-                    <button
-                      data-testid="day-convert-rest-btn"
-                      type="button"
-                      onClick={() => handleConvertToRest(dayNum)}
-                      className="focus-visible:ring-ring border-rose/20 bg-rose/10 text-rose hover:bg-rose/15 flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                    >
-                      <Moon className="text-info h-4 w-4" aria-hidden="true" />
-                      {t('fitness.plan.convertToRest')}
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <TodayWorkoutCard
+                key={dayNum}
+                planDay={planDay}
+                daySessions={daySessions}
+                activeSessionId={activeSessionIds[dayNum] ?? daySessions[0]?.id ?? ''}
+                completedSessionIds={[]}
+                exercises={exercises}
+                estimatedMinutes={estimateDuration(exercises)}
+                exercisesExpanded={exercisesExpandedMap[exKey] ?? false}
+                onStartWorkout={handleStartWorkout}
+                onEditExercises={p =>
+                  pushPage({ id: 'plan-day-editor', component: 'PlanDayEditor', props: { planDay: p } })
+                }
+                onConvertToRest={() => handleConvertToRest(dayNum)}
+                onRestoreOriginal={id => useFitnessStore.getState().restorePlanDayOriginal(id)}
+                onSelectSession={id => handleSelectSession(dayNum, id)}
+                onAddSession={() => handleOpenAddSession(dayNum)}
+                onDeleteSession={dayId => useFitnessStore.getState().removePlanDaySession(dayId)}
+                onToggleExerciseExpand={() => toggleExerciseExpand(exKey, exercisesExpandedMap[exKey] ?? false)}
+              />
             );
           }
 
-          if (isToday && isRestDay) {
-            // --- Today rest: always expanded ---
+          if (isToday) {
             return (
               <div key={dayNum}>
                 <button
@@ -778,72 +364,35 @@ function TrainingPlanViewInner({
                   <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
                   {t('fitness.plan.todayWorkout')}
                 </button>
-                <div
-                  data-testid="rest-day-card"
-                  className="from-muted to-muted/80 text-foreground rounded-2xl bg-gradient-to-br p-4"
-                >
-                  <div className="mb-3 flex items-center gap-2">
-                    <Moon className="h-5 w-5" aria-hidden="true" />
-                    <h3 className="text-lg font-semibold">{t('fitness.plan.restDay')}</h3>
-                  </div>
-                  <ul className="text-primary-foreground/90 space-y-2 text-sm">
-                    <li>{t('fitness.plan.restDayTip1')}</li>
-                    <li>{t('fitness.plan.restDayTip2')}</li>
-                    <li>{t('fitness.plan.restDayTip3')}</li>
-                  </ul>
-
-                  <button
-                    data-testid="rest-add-workout-btn"
-                    type="button"
-                    onClick={() => handleAddWorkoutToDay(dayNum)}
-                    className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground focus-visible:ring-primary-foreground/60 mt-3 flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    <Plus className="h-4 w-4" aria-hidden="true" />
-                    {t('fitness.plan.convertToWorkout')}
-                  </button>
-
-                  {tomorrowPlanDay && (
-                    <p data-testid="tomorrow-preview" className="text-primary-foreground/80 mt-3 text-sm">
-                      <ClipboardList className="inline-block size-4" aria-hidden="true" /> {t('fitness.plan.tomorrow')}:{' '}
-                      {translateWorkoutType(t, tomorrowPlanDay.workoutType)} — {tomorrowExercises.length}{' '}
-                      {t('fitness.plan.exercises')}
-                    </p>
-                  )}
-
-                  <div data-testid="quick-actions" className="mt-3 flex gap-2">
-                    <button
-                      data-testid="quick-log-weight"
-                      type="button"
-                      onClick={() => {
-                        const el = document.querySelector('[data-testid="daily-weight-input"]');
-                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }}
-                      className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground focus-visible:ring-primary-foreground/60 min-h-[44px] rounded-full px-3 py-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                    >
-                      {t('fitness.plan.logWeight')}
-                    </button>
-                    <button
-                      data-testid="quick-log-cardio"
-                      type="button"
-                      onClick={handleLogCardio}
-                      className="bg-primary-foreground/20 hover:bg-primary-foreground/30 text-primary-foreground focus-visible:ring-primary-foreground/60 min-h-[44px] rounded-full px-3 py-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                    >
-                      {t('fitness.plan.logLightCardio')}
-                    </button>
-                  </div>
-                </div>
+                <TodayRestCard
+                  tomorrowPlanDay={tomorrowPlanDay}
+                  tomorrowExerciseCount={tomorrowExercises.length}
+                  onConvertToWorkout={() => handleAddWorkoutToDay(dayNum)}
+                  onLogWeight={handleLogWeight}
+                  onLogCardio={handleLogCardio}
+                />
               </div>
             );
           }
 
-          // --- Non-today days ---
+          if (planDay) {
+            return (
+              <PlanDayAccordion
+                key={dayNum}
+                planDay={planDay}
+                dayOfWeek={dayNum}
+                isExpanded={isExpanded}
+                isCompleted={false}
+                onToggle={() => handleDaySelect(dayNum)}
+                onStartWorkout={() => handleStartWorkout(planDay)}
+                onEditExercises={() =>
+                  pushPage({ id: 'plan-day-editor', component: 'PlanDayEditor', props: { planDay } })
+                }
+              />
+            );
+          }
+
           if (!isExpanded) {
-            // Collapsed compact row
-            const muscleText = planDay?.muscleGroups
-              ? safeParseJsonArray<string>(planDay.muscleGroups)
-                  .map(g => t(`fitness.onboarding.muscle_${g}`, g))
-                  .join(', ')
-              : '';
             return (
               <div key={dayNum} data-testid={`day-row-${dayNum}`}>
                 <button
@@ -854,125 +403,14 @@ function TrainingPlanViewInner({
                 >
                   <span className="text-foreground w-7 text-sm font-semibold">{DAY_LABELS[i]}</span>
                   <span className="text-foreground-secondary min-w-0 flex-1 truncate text-sm">
-                    {isRestDay ? t('fitness.plan.restDay') : muscleText}
+                    {t('fitness.plan.restDay')}
                   </span>
-                  {!isRestDay && (
-                    <span className="text-muted-foreground shrink-0 text-xs">
-                      {dayExercises.length} {t('fitness.plan.exercises')}
-                    </span>
-                  )}
                   <ChevronDown className="text-muted-foreground h-4 w-4 shrink-0" aria-hidden="true" />
                 </button>
               </div>
             );
           }
 
-          // Expanded non-today workout
-          if (planDay) {
-            return (
-              <div key={dayNum} data-testid={`day-row-${dayNum}`}>
-                <div className="bg-card border-border rounded-2xl border p-4">
-                  <button
-                    data-testid={`day-accordion-toggle-${dayNum}`}
-                    type="button"
-                    onClick={() => handleDaySelect(dayNum)}
-                    className="text-muted-foreground mb-1 flex min-h-[44px] w-full items-center gap-1.5 text-left text-xs font-medium tracking-wider uppercase"
-                  >
-                    <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
-                    <span data-testid={`workout-card-header-${dayNum}`}>{DAY_LABELS[i]}</span>
-                    <ChevronDown className="ml-auto h-4 w-4 rotate-180" aria-hidden="true" />
-                  </button>
-
-                  {daySessions.length >= 1 && (
-                    <SessionTabs
-                      sessions={daySessions}
-                      activeSessionId={activeSessionIds[dayNum] ?? daySessions[0].id}
-                      completedSessionIds={[]}
-                      onSelectSession={id => handleSelectSession(dayNum, id)}
-                      onAddSession={() => handleOpenAddSession(dayNum)}
-                      onDeleteSession={dayId => useFitnessStore.getState().removePlanDaySession(dayId)}
-                    />
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-foreground text-xl font-semibold">
-                      {translateWorkoutType(t, planDay.workoutType)}
-                    </h3>
-                    <button
-                      type="button"
-                      aria-label={t('fitness.plan.editExercises')}
-                      onClick={() =>
-                        pushPage({
-                          id: 'plan-day-editor',
-                          component: 'PlanDayEditor',
-                          props: { planDay },
-                        })
-                      }
-                      className="focus-visible:ring-ring hover:bg-accent flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full p-2.5 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                    >
-                      <Pencil className="text-muted-foreground h-4 w-4" aria-hidden="true" />
-                    </button>
-                  </div>
-
-                  {planDay.muscleGroups && (
-                    <p className="text-muted-foreground text-sm">
-                      {safeParseJsonArray<string>(planDay.muscleGroups)
-                        .map(g => t(`fitness.onboarding.muscle_${g}`, g))
-                        .join(', ')}
-                    </p>
-                  )}
-                  <div className="text-foreground-secondary mt-2 flex items-center gap-3 text-sm">
-                    <WorkoutStatsContent
-                      workoutType={planDay.workoutType}
-                      exerciseCount={dayExercises.length}
-                      minutes={dayMinutes}
-                    />
-                  </div>
-
-                  {dayExercises.length > 0 &&
-                    (() => {
-                      const COLLAPSE_THRESHOLD = 3;
-                      const shouldCollapse = dayExercises.length > COLLAPSE_THRESHOLD;
-                      const displayedExercises =
-                        shouldCollapse && !exExpanded ? dayExercises.slice(0, COLLAPSE_THRESHOLD) : dayExercises;
-                      const hiddenCount = dayExercises.length - COLLAPSE_THRESHOLD;
-
-                      return (
-                        <>
-                          <ul className="mt-3 space-y-1.5">
-                            {displayedExercises.map(ex => (
-                              <li
-                                key={ex.exercise.id}
-                                className="text-foreground-secondary flex min-w-0 items-center justify-between text-sm"
-                              >
-                                <span className="min-w-0 truncate">{ex.exercise.nameVi}</span>
-                                <span className="text-muted-foreground shrink-0 text-xs">
-                                  {ex.sets} {t('fitness.plan.setsLabel')} × {ex.repsMin}-{ex.repsMax}{' '}
-                                  {t('fitness.plan.repsLabel')}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                          {shouldCollapse && (
-                            <button
-                              type="button"
-                              onClick={() => toggleExerciseExpand(exerciseKey, exExpanded)}
-                              className="text-primary focus-visible:ring-ring hover:text-primary-emphasis mt-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                            >
-                              {exExpanded
-                                ? t('fitness.plan.showLess')
-                                : t('fitness.plan.moreExercises', { remaining: hiddenCount })}
-                            </button>
-                          )}
-                        </>
-                      );
-                    })()}
-                </div>
-              </div>
-            );
-          }
-
-          // Expanded non-today rest day
           return (
             <div key={dayNum} data-testid={`day-row-${dayNum}`}>
               <div className="from-muted to-muted/80 text-foreground rounded-2xl bg-gradient-to-br p-4">
@@ -1014,48 +452,10 @@ function TrainingPlanViewInner({
       <AddSessionModal
         isOpen={showAddSessionModal}
         onClose={() => setShowAddSessionModal(false)}
-        onSelectStrength={groups => {
-          const plan = useFitnessStore.getState().getActivePlan();
-          if (plan) {
-            const existingSessions = daySessionsMap.get(addSessionDow) ?? [];
-            useFitnessStore.getState().addPlanDaySession(plan.id, addSessionDow, {
-              planId: plan.id,
-              dayOfWeek: addSessionDow,
-              sessionOrder: existingSessions.length + 1,
-              workoutType: 'Strength',
-              muscleGroups: JSON.stringify(groups),
-              exercises: '[]',
-              originalExercises: '[]',
-              isUserAssigned: true,
-              originalDayOfWeek: addSessionDow,
-            });
-          }
-          setShowAddSessionModal(false);
-        }}
-        onSelectCardio={() => {
-          const plan = useFitnessStore.getState().getActivePlan();
-          if (plan) {
-            const existingSessions = daySessionsMap.get(addSessionDow) ?? [];
-            useFitnessStore.getState().addPlanDaySession(plan.id, addSessionDow, {
-              planId: plan.id,
-              dayOfWeek: addSessionDow,
-              sessionOrder: existingSessions.length + 1,
-              workoutType: 'Cardio',
-              muscleGroups: '',
-              exercises: '[]',
-              originalExercises: '[]',
-              isUserAssigned: true,
-              originalDayOfWeek: addSessionDow,
-            });
-          }
-          setShowAddSessionModal(false);
-        }}
+        onSelectStrength={groups => addSession('Strength', groups)}
+        onSelectCardio={() => addSession('Cardio')}
         onSelectFreestyle={() => {
-          pushPage({
-            id: 'workout-logger',
-            component: 'WorkoutLogger',
-            props: {},
-          });
+          pushPage({ id: 'workout-logger', component: 'WorkoutLogger', props: {} });
           setShowAddSessionModal(false);
         }}
         currentSessionCount={(daySessionsMap.get(addSessionDow) ?? []).length}
@@ -1079,9 +479,7 @@ function TrainingPlanViewInner({
         message={t('fitness.plan.convertToRestConfirm')}
         confirmLabel={t('fitness.plan.confirmConvertToRest')}
         onConfirm={() => {
-          if (showConvertToRestConfirm !== null) {
-            confirmConvertToRest(showConvertToRestConfirm);
-          }
+          if (showConvertToRestConfirm !== null) confirmConvertToRest(showConvertToRestConfirm);
         }}
         onCancel={() => setShowConvertToRestConfirm(null)}
       />
