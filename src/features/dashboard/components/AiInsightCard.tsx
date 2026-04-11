@@ -79,12 +79,12 @@ const COLOR_MAP: Record<InsightColor, ColorConfig> = {
     dismiss: 'text-primary dark:text-primary hover:text-primary-emphasis',
   },
   gray: {
-    bg: 'bg-muted',
-    border: 'border-border',
-    icon: 'text-muted-foreground',
+    bg: 'bg-ai-subtle',
+    border: 'border-ai/20',
+    icon: 'text-ai',
     title: 'text-foreground',
     message: 'text-foreground-secondary',
-    action: 'text-foreground-secondary hover:bg-accent',
+    action: 'text-ai hover:bg-ai/10',
     dismiss: 'text-muted-foreground hover:text-foreground-secondary',
   },
 };
@@ -106,7 +106,9 @@ const ICON_COLOR_OVERRIDE: Partial<Record<InsightType, string>> = {
   motivate: 'text-ai',
 };
 
-export const AiInsightCard = React.memo(function AiInsightCard() {
+export const AiInsightCard = React.memo(function AiInsightCard({
+  suppressAction = false,
+}: Readonly<{ suppressAction?: boolean }>) {
   const { t } = useTranslation();
   const { currentInsight, dismissInsight, handleAction } = useInsightEngine();
 
@@ -153,13 +155,13 @@ export const AiInsightCard = React.memo(function AiInsightCard() {
           {currentInsight.message}
         </p>
 
-        {currentInsight.actionLabel && (
+        {currentInsight.actionLabel && !suppressAction && (
           <Button
             variant="ghost"
             size="sm"
             data-testid="insight-action-btn"
             onClick={onAction}
-            className={`mt-1.5 min-h-11 gap-1 px-2 py-1 ${colors.action}`}
+            className={`interactive mt-1.5 min-h-11 gap-1 px-2 py-1 ${colors.action}`}
           >
             {currentInsight.actionLabel}
             <ChevronRight className="h-3 w-3" />
@@ -174,7 +176,7 @@ export const AiInsightCard = React.memo(function AiInsightCard() {
           data-testid="insight-dismiss-btn"
           onClick={onDismiss}
           aria-label={t('insightCard.dismiss')}
-          className={`min-h-11 min-w-11 shrink-0 ${colors.dismiss}`}
+          className={`interactive min-h-11 min-w-11 shrink-0 ${colors.dismiss}`}
         >
           <X className="h-4 w-4" />
         </Button>

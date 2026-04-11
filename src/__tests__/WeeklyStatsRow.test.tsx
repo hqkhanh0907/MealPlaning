@@ -234,6 +234,9 @@ describe('WeeklyStatsRow', () => {
 
       const dot = screen.getByTestId('weekly-dot-3');
       expect(dot).toHaveAttribute('data-status', 'today');
+      expect(dot.className).toContain('ring-2');
+      expect(dot.className).toContain('ring-primary');
+      expect(dot.className).toContain('bg-primary/30');
     });
 
     it('upcoming dots are empty', () => {
@@ -266,8 +269,12 @@ describe('WeeklyStatsRow', () => {
       render(<WeeklyStatsRow />);
 
       // Mon+Tue = missed, Wed = today, Thu-Sun = upcoming
-      expect(screen.getByTestId('weekly-dot-1')).toHaveAttribute('data-status', 'missed');
-      expect(screen.getByTestId('weekly-dot-2')).toHaveAttribute('data-status', 'missed');
+      const dot1 = screen.getByTestId('weekly-dot-1');
+      expect(dot1).toHaveAttribute('data-status', 'missed');
+      expect(dot1.className).toContain('bg-destructive/50');
+      const dot2 = screen.getByTestId('weekly-dot-2');
+      expect(dot2).toHaveAttribute('data-status', 'missed');
+      expect(dot2.className).toContain('bg-destructive/50');
       expect(screen.getByTestId('weekly-dot-3')).toHaveAttribute('data-status', 'today');
       expect(screen.getByTestId('weekly-dot-4')).toHaveAttribute('data-status', 'upcoming');
     });
@@ -388,6 +395,47 @@ describe('WeeklyStatsRow', () => {
 
       expect(screen.getByTestId('weekly-adherence')).toHaveTextContent('—');
       expect(screen.queryByTestId('weekly-adherence-bar')).not.toBeInTheDocument();
+    });
+
+    // ===== Adherence bar color thresholds =====
+
+    it('progress bar uses success color at 100% adherence', () => {
+      // Plan on Mon(1), Wed(3). Both done = 100%
+      setupStore({
+        workouts: [makeWorkout('2024-01-08'), makeWorkout('2024-01-10')],
+        trainingPlans: [makePlan()],
+        trainingPlanDays: makePlanDays([1, 3, 5]),
+      });
+      render(<WeeklyStatsRow />);
+
+      const bar = screen.getByTestId('weekly-adherence-bar');
+      expect(bar.className).toContain('bg-success');
+    });
+
+    it('progress bar uses warning color at 50% adherence', () => {
+      // Plan on Mon(1), Wed(3). Only Mon done = 50%
+      setupStore({
+        workouts: [makeWorkout('2024-01-08')],
+        trainingPlans: [makePlan()],
+        trainingPlanDays: makePlanDays([1, 3, 5]),
+      });
+      render(<WeeklyStatsRow />);
+
+      const bar = screen.getByTestId('weekly-adherence-bar');
+      expect(bar.className).toContain('bg-warning');
+    });
+
+    it('progress bar uses destructive color at 0% adherence', () => {
+      // Plan on Mon(1), Wed(3). None done = 0%
+      setupStore({
+        workouts: [],
+        trainingPlans: [makePlan()],
+        trainingPlanDays: makePlanDays([1, 3, 5]),
+      });
+      render(<WeeklyStatsRow />);
+
+      const bar = screen.getByTestId('weekly-adherence-bar');
+      expect(bar.className).toContain('bg-destructive');
     });
   });
 

@@ -1502,7 +1502,14 @@
       "mealSlotBreakfast": "Bữa sáng",
       "mealSlotLunch": "Bữa trưa",
       "mealSlotDinner": "Bữa tối",
-      "addMeal": "Thêm"
+      "addMeal": "Thêm",
+      "a11y": {
+        "pending": "Kế hoạch hôm nay: Chờ bắt đầu",
+        "partial": "Kế hoạch hôm nay: Đang thực hiện",
+        "completed": "Kế hoạch hôm nay: Hoàn thành",
+        "restDay": "Kế hoạch hôm nay: Ngày nghỉ",
+        "noPlan": "Kế hoạch hôm nay: Chưa có kế hoạch"
+      }
     },
     "weightMini": {
       "noData": "Chưa có dữ liệu cân nặng",
@@ -1536,6 +1543,12 @@
       "adherenceLabel": "tuân thủ",
       "noAdherence": "—",
       "a11y": "Tuần này: cân nặng {{weight}}, chuỗi {{streak}} ngày, tuân thủ {{adherence}}"
+    },
+    "nextAction": {
+      "logMeal": "Thêm bữa ăn hôm nay",
+      "startWorkout": "Bắt đầu buổi tập",
+      "logWeight": "Ghi cân nặng",
+      "a11y": "Hành động tiếp theo: {{action}}"
     },
     "greetingMorning": "Chào buổi sáng!",
     "greetingAfternoon": "Chào buổi chiều!",

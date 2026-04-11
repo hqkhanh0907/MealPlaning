@@ -54,6 +54,7 @@ describe('QuickActionsBar', () => {
         expect(button.className).toContain('bg-muted');
         expect(button.className).toContain('text-foreground');
         expect(button.className).toContain('shadow-sm');
+        expect(button.className).toContain('interactive');
       }
     });
 

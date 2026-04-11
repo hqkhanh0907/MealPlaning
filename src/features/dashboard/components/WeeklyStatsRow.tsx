@@ -60,10 +60,16 @@ function computeAdherence(
 const DOT_COLORS: Record<string, string> = {
   completed: 'bg-success',
   rest: 'bg-info',
-  missed: 'border-2 border-border bg-transparent',
+  missed: 'bg-destructive/50',
   upcoming: 'border-2 border-border bg-transparent',
-  today: 'border-2 border-success bg-success/30',
+  today: 'ring-2 ring-primary bg-primary/30',
 };
+
+function getAdherenceBarColor(value: number): string {
+  if (value >= 80) return '[&::-webkit-progress-value]:bg-success [&::-moz-progress-bar]:bg-success';
+  if (value >= 50) return '[&::-webkit-progress-value]:bg-warning [&::-moz-progress-bar]:bg-warning';
+  return '[&::-webkit-progress-value]:bg-destructive [&::-moz-progress-bar]:bg-destructive';
+}
 
 // ===== Component =====
 
@@ -185,7 +191,7 @@ function WeeklyStatsRowInner(): React.ReactElement {
             <span className="text-foreground text-base font-semibold tabular-nums">{adherence}%</span>
             <span className="text-muted-foreground text-xs tracking-wider">{t('dashboard.weekly.adherenceLabel')}</span>
             <progress
-              className="[&::-moz-progress-bar]:bg-success [&::-webkit-progress-value]:bg-success bg-muted mt-0.5 h-1.5 w-full appearance-none overflow-hidden rounded-full [&::-moz-progress-bar]:rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all"
+              className={`${getAdherenceBarColor(adherence)} bg-muted mt-0.5 h-1.5 w-full appearance-none overflow-hidden rounded-full [&::-moz-progress-bar]:rounded-full [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-transparent [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:transition-all`}
               data-testid="weekly-adherence-bar"
               value={Math.min(adherence, 100)}
               max={100}

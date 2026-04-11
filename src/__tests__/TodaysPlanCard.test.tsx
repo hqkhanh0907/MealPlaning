@@ -381,11 +381,11 @@ describe('TodaysPlanCard', () => {
       expect(screen.queryByTestId('streak-count')).not.toBeInTheDocument();
     });
 
-    it('uses bg-accent-subtle background for rest day card', () => {
+    it('uses bg-muted background for rest day card', () => {
       render(<TodaysPlanCard />);
 
       const card = screen.getByTestId('todays-plan-card');
-      expect(card.className).toContain('bg-accent-subtle');
+      expect(card.className).toContain('bg-muted');
     });
   });
 
@@ -858,6 +858,163 @@ describe('TodaysPlanCard', () => {
 
       // All 5 sets counted (3 from w-1 + 2 from w-2), not just 3 from first workout
       expect(screen.getByTestId('workout-sets')).toHaveTextContent('5 set');
+    });
+  });
+
+  describe('Design token alignment', () => {
+    it('applies bg-warning-subtle card class for training-pending', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [makePlanDay()],
+      });
+
+      render(<TodaysPlanCard />);
+
+      const card = screen.getByTestId('todays-plan-card');
+      expect(card.className).toContain('bg-warning-subtle');
+    });
+
+    it('applies bg-info-subtle card class for training-partial', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [
+          makePlanDay({ id: 'day-s1', sessionOrder: 1, workoutType: 'Strength' }),
+          makePlanDay({ id: 'day-s2', sessionOrder: 2, workoutType: 'Cardio' }),
+        ],
+        workouts: [makeWorkout({ id: 'w-1', planDayId: 'day-s1' })],
+        workoutSets: [makeWorkoutSet({ id: 'set-partial-1', workoutId: 'w-1' })],
+      });
+
+      render(<TodaysPlanCard />);
+
+      const card = screen.getByTestId('todays-plan-card');
+      expect(card.className).toContain('bg-info-subtle');
+    });
+
+    it('applies bg-success-subtle card class for training-completed', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [makePlanDay()],
+        workouts: [makeWorkout({ planDayId: 'day-wed' })],
+        workoutSets: [
+          makeWorkoutSet({ id: 'set-1' }),
+          makeWorkoutSet({ id: 'set-2', setNumber: 2 }),
+          makeWorkoutSet({ id: 'set-3', setNumber: 3 }),
+        ],
+      });
+
+      render(<TodaysPlanCard />);
+
+      const card = screen.getByTestId('todays-plan-card');
+      expect(card.className).toContain('bg-success-subtle');
+    });
+
+    it('applies bg-card class for no-plan state', () => {
+      render(<TodaysPlanCard />);
+
+      const card = screen.getByTestId('todays-plan-card');
+      expect(card.className).toContain('bg-card');
+    });
+
+    it('applies interactive class to CTA button in training-pending', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [makePlanDay()],
+      });
+
+      render(<TodaysPlanCard />);
+
+      const cta = screen.getByTestId('start-workout-cta');
+      expect(cta.className).toContain('interactive');
+    });
+
+    it('applies interactive class to CTA button in no-plan', () => {
+      render(<TodaysPlanCard />);
+
+      const cta = screen.getByTestId('create-plan-cta');
+      expect(cta.className).toContain('interactive');
+    });
+
+    it('applies interactive class to quick-action chips in rest-day', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan({ restDays: [new Date().getDay()] })],
+        trainingPlanDays: [],
+      });
+
+      render(<TodaysPlanCard />);
+
+      const logWeight = screen.getByTestId('log-weight-chip');
+      const logCardio = screen.getByTestId('log-cardio-chip');
+      expect(logWeight.className).toContain('interactive');
+      expect(logCardio.className).toContain('interactive');
+    });
+  });
+
+  describe('Accessibility aria-labels', () => {
+    it('sets pending aria-label for training-pending state', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [makePlanDay()],
+      });
+
+      render(<TodaysPlanCard />);
+
+      const card = screen.getByTestId('todays-plan-card');
+      expect(card).toHaveAttribute('aria-label', 'Kế hoạch hôm nay: Chờ bắt đầu');
+    });
+
+    it('sets partial aria-label for training-partial state', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [
+          makePlanDay({ id: 'day-s1', sessionOrder: 1, workoutType: 'Strength' }),
+          makePlanDay({ id: 'day-s2', sessionOrder: 2, workoutType: 'Cardio' }),
+        ],
+        workouts: [makeWorkout({ id: 'w-1', planDayId: 'day-s1' })],
+        workoutSets: [makeWorkoutSet({ id: 'set-partial-1', workoutId: 'w-1' })],
+      });
+
+      render(<TodaysPlanCard />);
+
+      const card = screen.getByTestId('todays-plan-card');
+      expect(card).toHaveAttribute('aria-label', 'Kế hoạch hôm nay: Đang thực hiện');
+    });
+
+    it('sets completed aria-label for training-completed state', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan()],
+        trainingPlanDays: [makePlanDay()],
+        workouts: [makeWorkout({ planDayId: 'day-wed' })],
+        workoutSets: [
+          makeWorkoutSet({ id: 'set-1' }),
+          makeWorkoutSet({ id: 'set-2', setNumber: 2 }),
+          makeWorkoutSet({ id: 'set-3', setNumber: 3 }),
+        ],
+      });
+
+      render(<TodaysPlanCard />);
+
+      const card = screen.getByTestId('todays-plan-card');
+      expect(card).toHaveAttribute('aria-label', 'Kế hoạch hôm nay: Hoàn thành');
+    });
+
+    it('sets rest day aria-label for rest-day state', () => {
+      useFitnessStore.setState({
+        trainingPlans: [makePlan({ restDays: [new Date().getDay()] })],
+        trainingPlanDays: [],
+      });
+
+      render(<TodaysPlanCard />);
+
+      const card = screen.getByTestId('todays-plan-card');
+      expect(card).toHaveAttribute('aria-label', 'Kế hoạch hôm nay: Ngày nghỉ');
+    });
+
+    it('sets no-plan aria-label for no-plan state', () => {
+      render(<TodaysPlanCard />);
+
+      const card = screen.getByTestId('todays-plan-card');
+      expect(card).toHaveAttribute('aria-label', 'Kế hoạch hôm nay: Chưa có kế hoạch');
     });
   });
 });
