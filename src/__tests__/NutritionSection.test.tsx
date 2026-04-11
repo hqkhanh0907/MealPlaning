@@ -14,6 +14,7 @@ const I18N_MAP: Record<string, string> = {
   'dashboard.nutritionHero.greetingName': 'Chào {{name}}!',
   'dashboard.nutritionHero.a11y': 'Tổng quan dinh dưỡng hôm nay',
   'dashboard.nutritionHero.scoreA11y': 'Điểm: {{score}}',
+  'dashboard.score.a11y': 'Điểm: {{score}}',
   'dashboard.nutritionHero.setupTitle': 'Thiết lập hồ sơ sức khỏe',
   'dashboard.nutritionHero.setupDescription': 'Cập nhật hồ sơ để xem mục tiêu dinh dưỡng hàng ngày',
   'dashboard.nutritionHero.addFirstMeal': 'Thêm bữa ăn đầu tiên cho hôm nay',
@@ -70,6 +71,10 @@ vi.mock('../store/ingredientStore', () => ({
 
 vi.mock('../utils/nutrition', () => ({
   calculateDishesNutrition: vi.fn(),
+}));
+
+vi.mock('../hooks/useReducedMotion', () => ({
+  useReducedMotion: () => true,
 }));
 
 /* ------------------------------------------------------------------ */
@@ -237,7 +242,7 @@ describe('NutritionSection', () => {
     it('does not render score badge when loading', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps({ isLoading: true })} />);
-      expect(screen.queryByTestId('nutrition-hero-score')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('score-badge')).not.toBeInTheDocument();
     });
   });
 
@@ -277,7 +282,7 @@ describe('NutritionSection', () => {
     it('does not show score badge', () => {
       setupFirstTime();
       render(<NutritionSection {...defaultProps({ isFirstTimeUser: true, heroContext: 'first-time' })} />);
-      expect(screen.queryByTestId('nutrition-hero-score')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('score-badge')).not.toBeInTheDocument();
     });
   });
 
@@ -299,7 +304,7 @@ describe('NutritionSection', () => {
     it('shows score badge', () => {
       setupNoPlan();
       render(<NutritionSection {...defaultProps({ heroContext: 'empty-day' })} />);
-      expect(screen.getByTestId('nutrition-hero-score')).toBeInTheDocument();
+      expect(screen.getByTestId('score-badge')).toBeInTheDocument();
     });
 
     it('does not show macro bars when no plan', () => {
@@ -379,8 +384,10 @@ describe('NutritionSection', () => {
     it('shows progress ring with calorie number', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps()} />);
-      // Ring shows eaten calories (1327) + "kcal" text
-      expect(screen.getByText('1327')).toBeInTheDocument();
+      // CalorieRing shows eaten / target in a single span
+      const ring = screen.getByTestId('calorie-ring');
+      expect(ring).toHaveTextContent('1327');
+      expect(ring).toHaveTextContent('2091');
       // "kcal" appears in both ring and target details — verify at least one exists
       expect(screen.getAllByText('kcal').length).toBeGreaterThanOrEqual(1);
     });
@@ -395,29 +402,29 @@ describe('NutritionSection', () => {
   /* --- Score badge colors --- */
 
   describe('score badge colors', () => {
-    it('renders emerald badge for high score', () => {
+    it('renders success badge for high score', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps({ totalScore: 90, scoreColor: 'emerald' })} />);
-      const badge = screen.getByTestId('nutrition-hero-score');
-      expect(badge.className).toContain('border-success/30');
-      expect(badge.className).toContain('bg-success/10');
+      const badge = screen.getByTestId('score-badge');
+      expect(badge.className).toContain('bg-success-subtle');
+      expect(badge.className).toContain('text-success');
       expect(badge).toHaveTextContent('90');
     });
 
-    it('renders amber badge for medium score', () => {
+    it('renders warning badge for medium score', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps({ totalScore: 63, scoreColor: 'amber' })} />);
-      const badge = screen.getByTestId('nutrition-hero-score');
-      expect(badge.className).toContain('border-energy/30');
-      expect(badge.className).toContain('bg-energy/10');
+      const badge = screen.getByTestId('score-badge');
+      expect(badge.className).toContain('bg-warning-subtle');
+      expect(badge.className).toContain('text-warning');
     });
 
-    it('renders slate badge for low score', () => {
+    it('renders muted badge for low score', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps({ totalScore: 30, scoreColor: 'slate' })} />);
-      const badge = screen.getByTestId('nutrition-hero-score');
-      expect(badge.className).toContain('border-muted-foreground/30');
+      const badge = screen.getByTestId('score-badge');
       expect(badge.className).toContain('bg-muted');
+      expect(badge.className).toContain('text-muted-foreground');
     });
   });
 
@@ -524,8 +531,9 @@ describe('NutritionSection', () => {
         nutrition: { calories: 5000, protein: 300, fat: 100, carbs: 500, fiber: 20 },
       });
       render(<NutritionSection {...defaultProps()} />);
-      // Ring shows eaten calorie number
-      expect(screen.getByText('5000')).toBeInTheDocument();
+      // CalorieRing shows eaten value
+      const ring = screen.getByTestId('calorie-ring');
+      expect(ring).toHaveTextContent('5000');
       // Percentage shows clamped at 100%
       expect(screen.getByText(/100%/)).toBeInTheDocument();
     });
@@ -535,7 +543,8 @@ describe('NutritionSection', () => {
         nutrition: { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 },
       });
       render(<NutritionSection {...defaultProps()} />);
-      expect(screen.getByText('0')).toBeInTheDocument();
+      const ring = screen.getByTestId('calorie-ring');
+      expect(ring).toHaveTextContent('0');
     });
 
     it('does not render gradient on wrapper (gradient is on parent)', () => {
@@ -556,7 +565,7 @@ describe('NutritionSection', () => {
     it('has aria-label on score badge', () => {
       setupWithMeals();
       render(<NutritionSection {...defaultProps()} />);
-      expect(screen.getByTestId('nutrition-hero-score')).toHaveAttribute('aria-label', 'Điểm: 63');
+      expect(screen.getByTestId('score-badge')).toHaveAttribute('aria-label', 'Điểm: 63');
     });
   });
 

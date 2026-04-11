@@ -9,7 +9,9 @@ import { useIngredientStore } from '@/store/ingredientStore';
 import { calculateDishesNutrition } from '@/utils/nutrition';
 
 import type { HeroContext } from '../hooks/useDailyScore';
-import type { ScoreColor } from '../types';
+import { CalorieRing } from './CalorieRing';
+import { MacroBar } from './MacroBar';
+import { ScoreBadge } from './ScoreBadge';
 
 /* ------------------------------------------------------------------ */
 /*  Local hook: today's full macro nutrition                           */
@@ -79,17 +81,6 @@ function safePositive(value: number): number {
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 
-const SCORE_BADGE_CLASSES: Record<ScoreColor, { border: string; bg: string; dot: string; text: string }> = {
-  emerald: { border: 'border-success/30', bg: 'bg-success/10', dot: 'bg-success', text: 'text-success' },
-  amber: { border: 'border-energy/30', bg: 'bg-energy/10', dot: 'bg-energy', text: 'text-energy' },
-  slate: {
-    border: 'border-muted-foreground/30',
-    bg: 'bg-muted',
-    dot: 'bg-muted-foreground',
-    text: 'text-muted-foreground',
-  },
-};
-
 const HERO_CONTEXT_I18N: Record<Exclude<HeroContext, 'first-time'>, string> = {
   'rest-day-with-meals': 'dashboard.hero.contextual.restDayWithMeals',
   'training-day-needs-workout': 'dashboard.hero.contextual.trainingDayNeedsWorkout',
@@ -98,94 +89,6 @@ const HERO_CONTEXT_I18N: Record<Exclude<HeroContext, 'first-time'>, string> = {
   'empty-day': 'dashboard.hero.contextual.emptyDay',
   'rest-day-empty': 'dashboard.hero.contextual.restDayEmpty',
 };
-
-const RING_SIZE = 96;
-const RING_STROKE = 6;
-const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
-
-/* ------------------------------------------------------------------ */
-/*  Sub-components                                                     */
-/* ------------------------------------------------------------------ */
-
-interface ProgressRingProps {
-  pct: number;
-  eatenText: string;
-}
-
-function ProgressRing({ pct, eatenText }: Readonly<ProgressRingProps>) {
-  /* v8 ignore start -- defensive: pct is always finite from caller */
-  const safePct = Number.isFinite(pct) ? pct : 0;
-  /* v8 ignore stop */
-  const clamped = Math.min(100, Math.max(0, safePct));
-  const offset = RING_CIRCUMFERENCE - (clamped / 100) * RING_CIRCUMFERENCE;
-
-  return (
-    <div className="relative flex shrink-0 items-center justify-center" style={{ width: RING_SIZE, height: RING_SIZE }}>
-      <svg width={RING_SIZE} height={RING_SIZE} className="absolute -rotate-90" aria-hidden="true">
-        <circle
-          cx={RING_SIZE / 2}
-          cy={RING_SIZE / 2}
-          r={RING_RADIUS}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={RING_STROKE}
-          className="text-muted-foreground/20"
-        />
-        <circle
-          cx={RING_SIZE / 2}
-          cy={RING_SIZE / 2}
-          r={RING_RADIUS}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={RING_STROKE}
-          strokeDasharray={RING_CIRCUMFERENCE}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          className="text-success transition-all duration-500"
-        />
-      </svg>
-      <div className="flex flex-col items-center justify-center">
-        <span className="text-foreground text-2xl font-bold tabular-nums">{eatenText}</span>
-        <span className="text-muted-foreground -mt-0.5 text-[10px]">kcal</span>
-      </div>
-    </div>
-  );
-}
-
-interface MacroBarProps {
-  label: string;
-  current: number | null;
-  target: number;
-  colorClass: string;
-  testId: string;
-}
-
-function MacroBar({ label, current, target, colorClass, testId }: Readonly<MacroBarProps>) {
-  const displayCurrent = safeRound(current);
-  const displayTarget = safePositive(target);
-  const safeTarget = displayTarget > 0 ? displayTarget : 1;
-  const pct =
-    displayCurrent === null
-      ? 0
-      : Math.min(100, Math.max(0, Math.round((Math.max(0, displayCurrent) / safeTarget) * 100)));
-
-  return (
-    <div className="flex-1 space-y-1" data-testid={testId}>
-      <div className="flex items-baseline justify-between">
-        <span className="text-muted-foreground text-[10px] font-medium">{label}</span>
-        <span className="text-foreground text-xs font-semibold tabular-nums">
-          {displayCurrent === null
-            ? `—/${Math.round(displayTarget)}g`
-            : `${displayCurrent}/${Math.round(displayTarget)}g`}
-        </span>
-      </div>
-      <div className="bg-muted h-1.5 overflow-hidden rounded-full">
-        <div className={`h-full rounded-full transition-all ${colorClass}`} style={{ width: `${pct}%` }} />
-      </div>
-    </div>
-  );
-}
 
 /* ------------------------------------------------------------------ */
 /*  Skeleton                                                           */
@@ -262,15 +165,11 @@ function NutritionSectionInner({
   greeting,
   heroContext,
   totalScore,
-  scoreColor,
 }: Readonly<NutritionSectionProps>): React.ReactElement {
   const { t } = useTranslation();
   const { targetCalories, targetProtein, targetFat, targetCarbs } = useNutritionTargets();
   const profileName = useHealthProfileStore(s => s.profile?.name ?? '');
   const todayMacros = useTodayFullNutrition();
-
-  const color = scoreColor as ScoreColor;
-  const badgeClasses = SCORE_BADGE_CLASSES[color];
 
   const { displayEaten, displayTarget, caloriePct, isOverTarget, hasNutritionData, remaining } = computeCalorieSummary(
     todayMacros.eaten,
@@ -278,8 +177,6 @@ function NutritionSectionInner({
     todayMacros.hasDishes,
   );
 
-  /* v8 ignore next -- defensive: displayEaten is non-null when hasNutritionData */
-  const eatenText = String(displayEaten ?? '—');
   /* v8 ignore next -- defensive: remaining is non-null when hasNutritionData */
   const overOrRemainingLabel =
     remaining !== null && remaining < 0
@@ -323,25 +220,18 @@ function NutritionSectionInner({
               </p>
             )}
         </div>
-        <div
-          className={`flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 ${badgeClasses.border} ${badgeClasses.bg}`}
-          data-testid="nutrition-hero-score"
-          aria-label={t('dashboard.nutritionHero.scoreA11y', { score: totalScore })}
-        >
-          <div className={`h-2 w-2 rounded-full ${badgeClasses.dot}`} />
-          <span className={`text-xs font-bold tabular-nums ${badgeClasses.text}`}>{totalScore}</span>
-        </div>
+        <ScoreBadge score={totalScore} className="shrink-0" />
       </div>
 
       {/* Row 2: Calorie Hero Card — ring left + details right + macros inside */}
       {hasNutritionData ? (
         <div
-          className="border-border/60 bg-card rounded-2xl border p-5 shadow-sm"
+          className="border-border/60 from-card to-primary-subtle rounded-2xl border bg-gradient-to-br p-5 shadow-sm"
           data-testid="nutrition-hero-calories"
         >
           <div className="flex items-center gap-5">
-            {/* Large progress ring — LEFT side, focal point */}
-            <ProgressRing pct={caloriePct} eatenText={eatenText} />
+            {/* Calorie ring — LEFT side, focal point */}
+            <CalorieRing eaten={displayEaten ?? 0} target={displayTarget} />
 
             {/* Calorie details — RIGHT side */}
             <div className="min-w-0 flex-1">
@@ -383,21 +273,21 @@ function NutritionSectionInner({
             <div className="grid grid-cols-3 gap-3">
               <MacroBar
                 label={t('dashboard.nutritionHero.macroP')}
-                current={todayMacros.protein}
+                current={todayMacros.protein ?? 0}
                 target={targetProtein}
                 colorClass="bg-macro-protein"
                 testId="nutrition-hero-protein"
               />
               <MacroBar
                 label={t('dashboard.nutritionHero.macroF')}
-                current={todayMacros.fat}
+                current={todayMacros.fat ?? 0}
                 target={targetFat}
                 colorClass="bg-macro-fat"
                 testId="nutrition-hero-fat"
               />
               <MacroBar
                 label={t('dashboard.nutritionHero.macroC')}
-                current={todayMacros.carbs}
+                current={todayMacros.carbs ?? 0}
                 target={targetCarbs}
                 colorClass="bg-macro-carbs"
                 testId="nutrition-hero-carbs"
