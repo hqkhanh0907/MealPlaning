@@ -96,6 +96,10 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
         <h2 className="text-foreground mb-1 text-xl font-semibold">{t('goal.title')}</h2>
         <p className="text-muted-foreground mb-6 text-sm">{t('goal.subtitle')}</p>
+        <div className="bg-muted mb-6 rounded-2xl p-4">
+          <p className="text-foreground text-sm font-medium">{t('onboarding.goal.orientationTitle')}</p>
+          <p className="text-muted-foreground mt-1 text-xs leading-relaxed">{t('onboarding.goal.orientationDesc')}</p>
+        </div>
 
         {/* Goal Type */}
         <fieldset className="m-0 mb-6 space-y-3 border-0 p-0" aria-label={t('goal.title')}>
@@ -153,7 +157,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
 
             <div>
               <label htmlFor="ob-target" className="text-foreground mb-1 block text-sm font-medium">
-                {t('goal.targetWeight')}
+                {t('goal.targetWeightOptional')}
               </label>
               <div className="relative">
                 <input
@@ -161,6 +165,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                   name="targetWeightKg"
                   type="number"
                   inputMode="decimal"
+                  aria-label={t('goal.targetWeight')}
                   aria-invalid={!!targetField.fieldState.error}
                   aria-describedby={targetField.fieldState.error ? 'ob-target-error' : undefined}
                   className="bg-card focus-visible:ring-ring border-border text-foreground w-full rounded-xl border px-4 py-3 pr-12 text-base focus-visible:ring-2 focus-visible:outline-none"
@@ -177,6 +182,7 @@ export function NutritionGoalStep({ form, goNext, goBack }: Readonly<NutritionGo
                   {t(targetField.fieldState.error.message ?? 'onboarding.validation.required')}
                 </p>
               )}
+              <p className="text-muted-foreground mt-1 text-xs">{t('onboarding.goal.targetWeightHelp')}</p>
             </div>
           </div>
         )}

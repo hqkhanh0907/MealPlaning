@@ -68,26 +68,43 @@ export const AIImageAnalyzer = ({ onAnalysisComplete, onSave }: AIImageAnalyzerP
       className="bg-card border-border-subtle rounded-2xl border p-6 shadow-sm sm:p-8"
     >
       {!image && !result && (
-        <div className="text-muted-foreground mb-6 flex items-center justify-center gap-4 text-xs sm:gap-6 sm:text-sm">
-          <div className="flex items-center gap-1.5">
-            <span className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
-              1
-            </span>
-            <span>{t('ai.step1')}</span>
+        <div className="mb-6 space-y-4">
+          <div className="bg-ai-subtle border-ai/20 rounded-2xl border p-4">
+            <h3 className="text-ai text-base font-semibold">{t('ai.valueTitle')}</h3>
+            <p className="text-ai mt-1 text-sm">{t('ai.valueDescription')}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="bg-card text-foreground rounded-full px-3 py-1 text-xs font-medium">
+                {t('ai.valueBadgeCalories')}
+              </span>
+              <span className="bg-card text-foreground rounded-full px-3 py-1 text-xs font-medium">
+                {t('ai.valueBadgeProtein')}
+              </span>
+              <span className="bg-card text-foreground rounded-full px-3 py-1 text-xs font-medium">
+                {t('ai.valueBadgeExamples')}
+              </span>
+            </div>
           </div>
-          <ArrowRight className="text-muted-foreground h-4 w-4" aria-hidden="true" />
-          <div className="flex items-center gap-1.5">
-            <span className="bg-ai-subtle text-ai flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
-              2
-            </span>
-            <span>{t('ai.step2')}</span>
-          </div>
-          <ArrowRight className="text-muted-foreground h-4 w-4" aria-hidden="true" />
-          <div className="flex items-center gap-1.5">
-            <span className="bg-energy-subtle text-energy flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
-              3
-            </span>
-            <span>{t('ai.step3')}</span>
+          <div className="text-muted-foreground flex items-center justify-center gap-4 text-xs sm:gap-6 sm:text-sm">
+            <div className="flex items-center gap-1.5">
+              <span className="bg-primary/10 text-primary flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
+                1
+              </span>
+              <span>{t('ai.step1')}</span>
+            </div>
+            <ArrowRight className="text-muted-foreground h-4 w-4" aria-hidden="true" />
+            <div className="flex items-center gap-1.5">
+              <span className="bg-ai-subtle text-ai flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
+                2
+              </span>
+              <span>{t('ai.step2')}</span>
+            </div>
+            <ArrowRight className="text-muted-foreground h-4 w-4" aria-hidden="true" />
+            <div className="flex items-center gap-1.5">
+              <span className="bg-energy-subtle text-energy flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
+                3
+              </span>
+              <span>{t('ai.step3')}</span>
+            </div>
           </div>
         </div>
       )}

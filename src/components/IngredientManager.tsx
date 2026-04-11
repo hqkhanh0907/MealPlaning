@@ -13,6 +13,7 @@ import { IngredientEditModal } from './modals/IngredientEditModal';
 import { DetailModal } from './shared/DetailModal';
 import { EmptyState } from './shared/EmptyState';
 import { ListToolbar } from './shared/ListToolbar';
+import { createSurfaceStateContract } from './shared/surfaceState';
 
 interface IngredientManagerProps {
   ingredients: Ingredient[];
@@ -140,6 +141,36 @@ export const IngredientManager = ({
   };
 
   // --- Render ---
+  const hasSearchResultsGap = !!list.searchQuery;
+  const emptyIngredientContract = hasSearchResultsGap
+    ? createSurfaceStateContract({
+        surface: 'library.ingredients',
+        state: 'warning',
+        copy: {
+          title: t('library.ingredients.noResultsTitle'),
+          missing: t('library.ingredients.noResultsMissing', { query: list.searchQuery }),
+          reason: t('library.ingredients.noResultsReason'),
+          nextStep: t('library.ingredients.noResultsNextStep'),
+        },
+        primaryAction: {
+          label: t('library.ingredients.noResultsAction'),
+          onAction: () => list.setSearchQuery(''),
+        },
+      })
+    : createSurfaceStateContract({
+        surface: 'library.ingredients',
+        state: 'empty',
+        copy: {
+          title: t('library.ingredients.emptyTitle'),
+          missing: t('library.ingredients.emptyMissing'),
+          reason: t('library.ingredients.emptyReason'),
+          nextStep: t('library.ingredients.emptyNextStep'),
+        },
+        primaryAction: {
+          label: t('library.ingredients.emptyAction'),
+          onAction: () => modal.openEdit(),
+        },
+      });
 
   return (
     <div className="space-y-6">
@@ -224,12 +255,9 @@ export const IngredientManager = ({
           ))}
           {list.filteredItems.length === 0 && (
             <EmptyState
-              variant={list.searchQuery ? 'compact' : 'hero'}
+              variant={hasSearchResultsGap ? 'compact' : 'hero'}
               icon={Apple}
-              title={list.searchQuery ? t('emptyState.searchEmpty') : t('emptyState.ingredient.title')}
-              description={list.searchQuery ? undefined : t('emptyState.ingredient.description')}
-              actionLabel={list.searchQuery ? undefined : t('emptyState.ingredient.action')}
-              onAction={list.searchQuery ? undefined : () => modal.openEdit()}
+              contract={emptyIngredientContract}
               className="col-span-full"
             />
           )}
@@ -369,12 +397,9 @@ export const IngredientManager = ({
           </div>
           {list.filteredItems.length === 0 && (
             <EmptyState
-              variant={list.searchQuery ? 'compact' : 'hero'}
+              variant={hasSearchResultsGap ? 'compact' : 'hero'}
               icon={Apple}
-              title={list.searchQuery ? t('emptyState.searchEmpty') : t('emptyState.ingredient.title')}
-              description={list.searchQuery ? undefined : t('emptyState.ingredient.description')}
-              actionLabel={list.searchQuery ? undefined : t('emptyState.ingredient.action')}
-              onAction={list.searchQuery ? undefined : () => modal.openEdit()}
+              contract={emptyIngredientContract}
             />
           )}
         </div>

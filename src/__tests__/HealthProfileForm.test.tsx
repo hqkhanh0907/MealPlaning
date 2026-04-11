@@ -73,6 +73,7 @@ describe('HealthProfileForm', () => {
     render(<HealthProfileForm />);
 
     expect(screen.getByText('Hồ sơ sức khỏe')).toBeInTheDocument();
+    expect(screen.getByText('Chỉ hỏi phần cần cho bước tiếp theo')).toBeInTheDocument();
     expect(screen.getByLabelText('Tên')).toBeInTheDocument();
     expect(screen.getByText('Giới tính')).toBeInTheDocument();
     expect(screen.getByLabelText('Ngày sinh')).toBeInTheDocument();
@@ -346,6 +347,9 @@ describe('HealthProfileForm', () => {
     render(<HealthProfileForm />);
 
     expect(screen.queryByTestId('hp-computed-age')).not.toBeInTheDocument();
+    expect(screen.getByTestId('health-profile-preview-blocked')).toBeInTheDocument();
+    expect(screen.getByText(/Thiếu Ngày sinh/)).toBeInTheDocument();
+    expect(screen.queryByTestId('bmr-value')).not.toBeInTheDocument();
   });
 
   it('syncs form when profile changes in store and form is not dirty', async () => {
@@ -544,8 +548,7 @@ describe('HealthProfileForm', () => {
     expect(screen.getByLabelText('Chiều cao (cm)')).toHaveValue('');
     expect(screen.getByLabelText('Cân nặng (kg)')).toHaveValue('');
     expect(screen.getByLabelText('Tỉ lệ protein (g/kg)')).toHaveValue('');
-    // Macro display uses profile?.fatPct ?? 0.25 fallback (line 156)
-    expect(screen.getByTestId('bmr-value')).toHaveTextContent('0');
+    expect(screen.getByTestId('health-profile-preview-blocked')).toBeInTheDocument();
   });
 
   it('saves with fallback base profile when store profile is null', async () => {

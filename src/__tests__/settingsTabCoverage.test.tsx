@@ -159,8 +159,7 @@ describe('SettingsMenu activeGoal branch (coverage)', () => {
   it('displays translated goal type when activeGoal exists', () => {
     mockActiveGoal = { type: 'cut' };
     render(<SettingsTab {...defaultProps} />);
-
-    expect(screen.getByText('Giảm cân')).toBeInTheDocument();
+    expect(screen.getByTestId('settings-nav-goal')).toHaveTextContent('Đang theo mục tiêu Giảm cân');
   });
 });
 
@@ -170,7 +169,7 @@ describe('SettingsMenu null profile branch (coverage)', () => {
   it('renders with BMR=0 and TDEE=0 when profile is null', () => {
     mockCoverageProfile = null;
     render(<SettingsTab {...defaultProps} />);
-    expect(screen.getByText(/BMR: 0/)).toBeInTheDocument();
-    expect(screen.getByText(/TDEE: 0/)).toBeInTheDocument();
+    expect(screen.getByTestId('settings-nav-health-profile')).toHaveTextContent('Chưa hoàn tất');
+    expect(screen.queryByText(/BMR: 0/)).not.toBeInTheDocument();
   });
 });

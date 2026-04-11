@@ -7,12 +7,17 @@ import { useFitnessStore } from '../store/fitnessStore';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => {
+    t: (key: string, options?: Record<string, string>) => {
       const map: Record<string, string> = {
         'fitness.plan.editExercises': 'Chỉnh sửa bài tập',
         'fitness.plan.addExercise': 'Thêm bài tập',
         'fitness.plan.save': 'Lưu',
         'fitness.plan.restore': 'Khôi phục gốc',
+        'fitness.plan.decreaseField': 'Giảm {{label}}',
+        'fitness.plan.increaseField': 'Tăng {{label}}',
+        'fitness.plan.moveUpExercise': 'Đưa {{name}} lên trên',
+        'fitness.plan.moveDownExercise': 'Đưa {{name}} xuống dưới',
+        'fitness.plan.removeExercise': 'Xóa {{name}}',
         'fitness.plan.modified': 'Đã chỉnh sửa',
         'fitness.plan.noExercises': 'Chưa có bài tập nào',
         'fitness.plan.unsavedChanges': 'Bạn có thay đổi chưa lưu. Bỏ thay đổi?',
@@ -39,7 +44,10 @@ vi.mock('react-i18next', () => ({
         'common.cancel': 'Hủy',
         'common.close': 'Đóng',
       };
-      return map[key] ?? key;
+      const text = map[key] ?? key;
+      if (options?.name) return text.replace('{{name}}', options.name);
+      if (options?.label) return text.replace('{{label}}', options.label);
+      return text;
     },
   }),
 }));
@@ -212,7 +220,7 @@ describe('PlanDayEditor', () => {
 
   it('click remove button hides exercise and shows undo toast', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
-    const removeButtons = screen.getAllByLabelText(/remove/i);
+    const removeButtons = screen.getAllByLabelText(/xóa/i);
     fireEvent.click(removeButtons[0]);
     const benchEl = screen.getByText('Bench Press');
     expect(benchEl.closest('li')?.className).toContain('opacity-0');
@@ -221,7 +229,7 @@ describe('PlanDayEditor', () => {
 
   it('undo restores exercise after remove', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
-    const removeButtons = screen.getAllByLabelText(/remove/i);
+    const removeButtons = screen.getAllByLabelText(/xóa/i);
     fireEvent.click(removeButtons[0]);
     fireEvent.click(screen.getByText('Hoàn tác'));
     const benchEl = screen.getByText('Bench Press');
@@ -232,7 +240,7 @@ describe('PlanDayEditor', () => {
   it('exercise is permanently removed after timeout', async () => {
     vi.useFakeTimers();
     render(<PlanDayEditor planDay={makePlanDay()} />);
-    const removeButtons = screen.getAllByLabelText(/remove/i);
+    const removeButtons = screen.getAllByLabelText(/xóa/i);
     fireEvent.click(removeButtons[0]);
     await act(async () => {
       vi.advanceTimersByTime(5000);
@@ -245,11 +253,8 @@ describe('PlanDayEditor', () => {
   it('click save calls updatePlanDayExercises and popPage', async () => {
     vi.useFakeTimers();
     render(<PlanDayEditor planDay={makePlanDay()} />);
-    const removeButtons = screen.getAllByLabelText(/remove/i);
+    const removeButtons = screen.getAllByLabelText(/xóa/i);
     fireEvent.click(removeButtons[0]);
-    await act(async () => {
-      vi.advanceTimersByTime(5000);
-    });
     fireEvent.click(screen.getByText('Lưu'));
     expect(useFitnessStore.getState().updatePlanDayExercises).toBeDefined();
     expect(mockPopPage).toHaveBeenCalled();
@@ -269,7 +274,7 @@ describe('PlanDayEditor', () => {
   it('move up button reorders exercises', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
     // The second exercise should have a move-up button
-    const moveUpButtons = screen.getAllByLabelText(/move up/i);
+    const moveUpButtons = screen.getAllByLabelText(/đưa .* lên trên/i);
     // Click move up on the second exercise (index 1)
     if (moveUpButtons.length > 0) {
       fireEvent.click(moveUpButtons[moveUpButtons.length - 1]);
@@ -322,7 +327,7 @@ describe('PlanDayEditor', () => {
     fireEvent.click(exerciseNames[0]);
 
     // sampleExercise has sets=4, click increment
-    const incrementBtn = screen.getByTestId('stepper-sets-0').querySelector('[aria-label="Increase hiệp"]');
+    const incrementBtn = screen.getByTestId('stepper-sets-0').querySelector('[aria-label="Tăng hiệp"]');
     expect(incrementBtn).not.toBeNull();
     fireEvent.click(incrementBtn!);
 
@@ -363,7 +368,7 @@ describe('PlanDayEditor', () => {
 
   it('move down reorders exercises correctly', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
-    const moveDownButtons = screen.getAllByLabelText(/move down/i);
+    const moveDownButtons = screen.getAllByLabelText(/đưa .* xuống dưới/i);
     fireEvent.click(moveDownButtons[0]);
     const names = screen.getAllByTestId('exercise-name');
     expect(names[0].textContent).toContain('OHP');
@@ -372,7 +377,7 @@ describe('PlanDayEditor', () => {
 
   it('move down on last exercise is a no-op', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
-    const moveDownButtons = screen.getAllByLabelText(/move down/i);
+    const moveDownButtons = screen.getAllByLabelText(/đưa .* xuống dưới/i);
     fireEvent.click(moveDownButtons[moveDownButtons.length - 1]);
     const names = screen.getAllByTestId('exercise-name');
     expect(names[names.length - 1].textContent).toContain('OHP');
@@ -380,7 +385,7 @@ describe('PlanDayEditor', () => {
 
   it('move up on first exercise is a no-op', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
-    const moveUpButtons = screen.getAllByLabelText(/move up/i);
+    const moveUpButtons = screen.getAllByLabelText(/đưa .* lên trên/i);
     fireEvent.click(moveUpButtons[0]);
     const names = screen.getAllByTestId('exercise-name');
     expect(names[0].textContent).toContain('Bench Press');
@@ -389,7 +394,7 @@ describe('PlanDayEditor', () => {
   it('decrement sets stepper decreases value', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
     fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
-    const btn = screen.getByTestId('stepper-sets-0').querySelector('[aria-label="Decrease hiệp"]');
+    const btn = screen.getByTestId('stepper-sets-0').querySelector('[aria-label="Giảm hiệp"]');
     expect(btn).not.toBeNull();
     fireEvent.click(btn!);
     const info = screen.getAllByTestId('exercise-name')[0].parentElement;
@@ -399,8 +404,8 @@ describe('PlanDayEditor', () => {
   it('increment and decrement repsMin stepper', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
     fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
-    const inc = screen.getByTestId('stepper-repsMin-0').querySelector('[aria-label="Increase Lần tối thiểu"]');
-    const dec = screen.getByTestId('stepper-repsMin-0').querySelector('[aria-label="Decrease Lần tối thiểu"]');
+    const inc = screen.getByTestId('stepper-repsMin-0').querySelector('[aria-label="Tăng Lần tối thiểu"]');
+    const dec = screen.getByTestId('stepper-repsMin-0').querySelector('[aria-label="Giảm Lần tối thiểu"]');
     expect(inc).not.toBeNull();
     expect(dec).not.toBeNull();
     fireEvent.click(inc!);
@@ -410,8 +415,8 @@ describe('PlanDayEditor', () => {
   it('increment and decrement repsMax stepper', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
     fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
-    const inc = screen.getByTestId('stepper-repsMax-0').querySelector('[aria-label="Increase Lần tối đa"]');
-    const dec = screen.getByTestId('stepper-repsMax-0').querySelector('[aria-label="Decrease Lần tối đa"]');
+    const inc = screen.getByTestId('stepper-repsMax-0').querySelector('[aria-label="Tăng Lần tối đa"]');
+    const dec = screen.getByTestId('stepper-repsMax-0').querySelector('[aria-label="Giảm Lần tối đa"]');
     expect(inc).not.toBeNull();
     expect(dec).not.toBeNull();
     fireEvent.click(inc!);
@@ -421,8 +426,8 @@ describe('PlanDayEditor', () => {
   it('increment and decrement rest stepper', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
     fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
-    const inc = screen.getByTestId('stepper-rest-0').querySelector('[aria-label="Increase Nghỉ"]');
-    const dec = screen.getByTestId('stepper-rest-0').querySelector('[aria-label="Decrease Nghỉ"]');
+    const inc = screen.getByTestId('stepper-rest-0').querySelector('[aria-label="Tăng Nghỉ"]');
+    const dec = screen.getByTestId('stepper-rest-0').querySelector('[aria-label="Giảm Nghỉ"]');
     expect(inc).not.toBeNull();
     expect(dec).not.toBeNull();
     fireEvent.click(inc!);
@@ -436,7 +441,7 @@ describe('PlanDayEditor', () => {
     };
     render(<PlanDayEditor planDay={makePlanDay([minExercise])} />);
     fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
-    const dec = screen.getByTestId('stepper-sets-0').querySelector('[aria-label="Decrease hiệp"]');
+    const dec = screen.getByTestId('stepper-sets-0').querySelector('[aria-label="Giảm hiệp"]');
     expect(dec).toBeDisabled();
   });
 
@@ -447,7 +452,7 @@ describe('PlanDayEditor', () => {
     };
     render(<PlanDayEditor planDay={makePlanDay([maxExercise])} />);
     fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
-    const inc = screen.getByTestId('stepper-sets-0').querySelector('[aria-label="Increase hiệp"]');
+    const inc = screen.getByTestId('stepper-sets-0').querySelector('[aria-label="Tăng hiệp"]');
     expect(inc).toBeDisabled();
   });
 
@@ -459,7 +464,7 @@ describe('PlanDayEditor', () => {
     };
     render(<PlanDayEditor planDay={makePlanDay([exercise])} />);
     fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
-    const inc = screen.getByTestId('stepper-repsMin-0').querySelector('[aria-label="Increase Lần tối thiểu"]');
+    const inc = screen.getByTestId('stepper-repsMin-0').querySelector('[aria-label="Tăng Lần tối thiểu"]');
     expect(inc).toBeDisabled();
   });
 
@@ -471,7 +476,7 @@ describe('PlanDayEditor', () => {
     };
     render(<PlanDayEditor planDay={makePlanDay([exercise])} />);
     fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
-    const dec = screen.getByTestId('stepper-repsMax-0').querySelector('[aria-label="Decrease Lần tối đa"]');
+    const dec = screen.getByTestId('stepper-repsMax-0').querySelector('[aria-label="Giảm Lần tối đa"]');
     expect(dec).toBeDisabled();
   });
 
@@ -482,7 +487,7 @@ describe('PlanDayEditor', () => {
     };
     render(<PlanDayEditor planDay={makePlanDay([exercise])} />);
     fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
-    const dec = screen.getByTestId('stepper-rest-0').querySelector('[aria-label="Decrease Nghỉ"]');
+    const dec = screen.getByTestId('stepper-rest-0').querySelector('[aria-label="Giảm Nghỉ"]');
     expect(dec).toBeDisabled();
   });
 
@@ -493,7 +498,7 @@ describe('PlanDayEditor', () => {
     };
     render(<PlanDayEditor planDay={makePlanDay([exercise])} />);
     fireEvent.click(screen.getAllByTestId('exercise-name')[0]);
-    const inc = screen.getByTestId('stepper-rest-0').querySelector('[aria-label="Increase Nghỉ"]');
+    const inc = screen.getByTestId('stepper-rest-0').querySelector('[aria-label="Tăng Nghỉ"]');
     expect(inc).toBeDisabled();
   });
 
@@ -550,10 +555,10 @@ describe('PlanDayEditor', () => {
   it('second removal commits first pending removal', async () => {
     vi.useFakeTimers();
     render(<PlanDayEditor planDay={makePlanDay()} />);
-    const removeButtons = screen.getAllByLabelText(/remove/i);
+    const removeButtons = screen.getAllByLabelText(/xóa/i);
     fireEvent.click(removeButtons[0]);
     expect(screen.getByText('Hoàn tác')).toBeInTheDocument();
-    fireEvent.click(screen.getAllByLabelText(/remove/i)[1]);
+    fireEvent.click(screen.getAllByLabelText(/xóa/i)[1]);
     await act(async () => {
       vi.advanceTimersByTime(5000);
     });
@@ -571,7 +576,7 @@ describe('PlanDayEditor', () => {
   it('save while undo toast is showing still navigates', () => {
     vi.useFakeTimers();
     render(<PlanDayEditor planDay={makePlanDay()} />);
-    const removeButtons = screen.getAllByLabelText(/remove/i);
+    const removeButtons = screen.getAllByLabelText(/xóa/i);
     fireEvent.click(removeButtons[0]);
     expect(screen.getByText('Hoàn tác')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Lưu'));
@@ -582,7 +587,7 @@ describe('PlanDayEditor', () => {
   it('cleanup effect clears timeout on unmount', () => {
     vi.useFakeTimers();
     const { unmount } = render(<PlanDayEditor planDay={makePlanDay()} />);
-    const removeButtons = screen.getAllByLabelText(/remove/i);
+    const removeButtons = screen.getAllByLabelText(/xóa/i);
     fireEvent.click(removeButtons[0]);
     unmount();
     vi.advanceTimersByTime(5000);
@@ -634,7 +639,7 @@ describe('PlanDayEditor', () => {
 
   it('undo toast has aria-live polite attribute', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
-    const removeButtons = screen.getAllByLabelText(/remove/i);
+    const removeButtons = screen.getAllByLabelText(/xóa/i);
     fireEvent.click(removeButtons[0]);
     const toast = screen.getByRole('status');
     expect(toast).toHaveAttribute('aria-live', 'polite');
@@ -662,7 +667,7 @@ describe('PlanDayEditor', () => {
 
   it('button group uses gap-2 spacing and delete button has visual separator', () => {
     render(<PlanDayEditor planDay={makePlanDay()} />);
-    const removeButton = screen.getAllByLabelText(/remove/i)[0];
+    const removeButton = screen.getAllByLabelText(/xóa/i)[0];
     expect(removeButton.className).toContain('ml-2');
     expect(removeButton.className).toContain('border-l');
     expect(removeButton.className).toContain('border-border');

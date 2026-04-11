@@ -431,7 +431,6 @@ describe('CalendarTab', () => {
     ingredients: [],
     currentPlan: dayPlans[0],
     dayNutrition: filledNutrition,
-    userWeight: 70,
     targetCalories: 2000,
     targetProtein: 140,
     isSuggesting: false,
@@ -486,11 +485,11 @@ describe('CalendarTab', () => {
     expect(aiBtn).toBeDisabled();
   });
 
-  it('renders Summary with nutrition data', () => {
+  it('renders NutritionOverview with nutrition data', () => {
     render(<CalendarTab {...defaultProps} />);
     // Switch to Nutrition sub-tab
     fireEvent.click(screen.getByTestId('subtab-nutrition'));
-    expect(screen.getByText('Dinh dưỡng trong ngày')).toBeInTheDocument();
+    expect(screen.getByTestId('nutrition-overview')).toBeInTheDocument();
   });
 
   it('calls onPlanMeal when edit button on meal card is clicked', () => {
@@ -500,11 +499,11 @@ describe('CalendarTab', () => {
     expect(defaultProps.onPlanMeal).toHaveBeenCalledWith('breakfast');
   });
 
-  it('shows recommendation panel with tips', () => {
+  it('renders NutritionDetails with meal breakdown', () => {
     render(<CalendarTab {...defaultProps} />);
     // Switch to Nutrition sub-tab
     fireEvent.click(screen.getByTestId('subtab-nutrition'));
-    expect(screen.getByText('Gợi ý cho bạn')).toBeInTheDocument();
+    expect(screen.getByTestId('nutrition-details')).toBeInTheDocument();
   });
 
   it('shows consolidated empty state when all meals are empty', () => {
@@ -608,8 +607,10 @@ describe('CalendarTab', () => {
   it('switches back to meals tab from nutrition via switch button', () => {
     render(<CalendarTab {...defaultProps} dayNutrition={emptyNutrition} />);
     fireEvent.click(screen.getByTestId('subtab-nutrition'));
-    expect(screen.getByTestId('btn-switch-to-meals')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('btn-switch-to-meals'));
+    // Expand NutritionDetails accordion to reveal switch button
+    fireEvent.click(screen.getByTestId('nutrition-details-header'));
+    expect(screen.getByTestId('btn-switch-meals')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('btn-switch-meals'));
     expect(screen.getByTestId('meals-subtab')).toBeInTheDocument();
   });
 

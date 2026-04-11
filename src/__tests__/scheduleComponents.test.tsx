@@ -1,6 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import { MacroChart } from '../components/schedule/MacroChart';
 import { MealActionBar } from '../components/schedule/MealActionBar';
 import { MealSlot } from '../components/schedule/MealSlot';
 import { MealsSubTab } from '../components/schedule/MealsSubTab';
@@ -50,34 +49,12 @@ vi.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: () => ({ isDark: false, theme: 'light', cycleTheme: vi.fn(), setTheme: vi.fn() }),
 }));
 
-vi.mock('@/components/nutrition/EnergyBalanceCard', () => ({
-  EnergyBalanceCard: (props: Record<string, unknown>) => (
-    <div
-      data-testid="energy-balance-card"
-      data-calories-in={props.caloriesIn}
-      data-calories-out={props.caloriesOut}
-      data-target={props.targetCalories}
-      data-protein-current={props.proteinCurrent}
-      data-protein-target={props.proteinTarget}
-    />
-  ),
-}));
-
 const makeSlot = (dishIds: string[], cal = 0, pro = 0): SlotInfo => ({
   dishIds,
   calories: cal,
   protein: pro,
   carbs: 0,
   fat: 0,
-  fiber: 0,
-});
-
-const makeFullSlot = (dishIds: string[], cal: number, pro: number, carbs: number, fat: number): SlotInfo => ({
-  dishIds,
-  calories: cal,
-  protein: pro,
-  carbs,
-  fat,
   fiber: 0,
 });
 
@@ -796,203 +773,99 @@ describe('NutritionSubTab', () => {
     dayNutrition: filledNutrition,
     targetCalories: 2000,
     targetProtein: 140,
-    userWeight: 70,
     onEditGoals: vi.fn(),
     onSwitchToMeals: vi.fn(),
   };
 
   beforeEach(() => vi.clearAllMocks());
 
-  it('renders nutrition-subtab with Summary and RecommendationPanel', () => {
+  it('renders NutritionOverview and NutritionDetails in normal state', () => {
     render(<NutritionSubTab {...baseProps} />);
     expect(screen.getByTestId('nutrition-subtab')).toBeInTheDocument();
-    expect(screen.getByText('Gợi ý cho bạn')).toBeInTheDocument();
-    expect(screen.getByText(/70kg/)).toBeInTheDocument();
-    expect(screen.getAllByText(/2000 kcal/).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByTestId('nutrition-overview')).toBeInTheDocument();
+    expect(screen.getByTestId('nutrition-details')).toBeInTheDocument();
   });
 
-  it('shows plan complete when all meals are filled', () => {
+  it('shows setup state when targetCalories is 0', () => {
+    render(<NutritionSubTab {...baseProps} targetCalories={0} />);
+    expect(screen.getByTestId('nutrition-subtab')).toBeInTheDocument();
+    expect(screen.getByText('Thiết lập mục tiêu dinh dưỡng')).toBeInTheDocument();
+    expect(screen.queryByTestId('nutrition-overview')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nutrition-details')).not.toBeInTheDocument();
+  });
+
+  it('shows setup state when targetCalories is NaN', () => {
+    render(<NutritionSubTab {...baseProps} targetCalories={NaN} />);
+    expect(screen.getByText('Thiết lập mục tiêu dinh dưỡng')).toBeInTheDocument();
+    expect(screen.queryByTestId('nutrition-overview')).not.toBeInTheDocument();
+  });
+
+  it('shows setup state when targetCalories is negative', () => {
+    render(<NutritionSubTab {...baseProps} targetCalories={-100} />);
+    expect(screen.getByText('Thiết lập mục tiêu dinh dưỡng')).toBeInTheDocument();
+  });
+
+  it('renders setup EmptyState with correct surface-state attribute', () => {
+    render(<NutritionSubTab {...baseProps} targetCalories={0} />);
+    const setupEl = screen.getByTestId('nutrition-subtab').querySelector('[data-surface-state="setup"]');
+    expect(setupEl).toBeInTheDocument();
+  });
+
+  it('fires onEditGoals when setup CTA is clicked', () => {
+    render(<NutritionSubTab {...baseProps} targetCalories={0} />);
+    fireEvent.click(screen.getByText(/Thiết lập ngay/));
+    expect(baseProps.onEditGoals).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows skeletons when isHydrating is true', () => {
+    render(<NutritionSubTab {...baseProps} isHydrating />);
+    const container = screen.getByTestId('nutrition-subtab');
+    expect(container).toHaveAttribute('aria-busy', 'true');
+    expect(screen.queryByTestId('nutrition-overview')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nutrition-details')).not.toBeInTheDocument();
+  });
+
+  it('does not show aria-busy when isHydrating is false', () => {
+    render(<NutritionSubTab {...baseProps} isHydrating={false} />);
+    expect(screen.getByTestId('nutrition-subtab')).not.toHaveAttribute('aria-busy');
+    expect(screen.getByTestId('nutrition-overview')).toBeInTheDocument();
+  });
+
+  it('passes caloriesOut to NutritionOverview', () => {
+    render(<NutritionSubTab {...baseProps} caloriesOut={350} />);
+    expect(screen.getByTestId('energy-out-section')).toBeInTheDocument();
+  });
+
+  it('does not show energy-out when caloriesOut is undefined', () => {
     render(<NutritionSubTab {...baseProps} />);
-    expect(screen.getByText('Kế hoạch ngày hôm nay đã hoàn tất!')).toBeInTheDocument();
+    expect(screen.queryByTestId('energy-out-section')).not.toBeInTheDocument();
   });
 
-  it('shows missing meals text for partial state (missing lunch)', () => {
-    const partial: DayNutritionSummary = {
-      breakfast: makeSlot(['d1'], 400, 20),
-      lunch: makeSlot([]),
-      dinner: makeSlot(['d3'], 500, 25),
-    };
-    render(<NutritionSubTab {...baseProps} dayNutrition={partial} />);
-    expect(screen.getByText(/Bạn còn thiếu.*bữa trưa/)).toBeInTheDocument();
+  it('renders NutritionDetails with per-meal breakdown', () => {
+    render(<NutritionSubTab {...baseProps} />);
+    expect(screen.getByTestId('nutrition-details')).toBeInTheDocument();
+    expect(screen.getByTestId('nutrition-details-header')).toBeInTheDocument();
   });
 
-  it('shows missing meals text for partial state (missing breakfast and dinner)', () => {
-    const partial: DayNutritionSummary = {
-      breakfast: makeSlot([]),
-      lunch: makeSlot(['d2'], 600, 30),
-      dinner: makeSlot([]),
-    };
-    render(<NutritionSubTab {...baseProps} dayNutrition={partial} />);
-    expect(screen.getByText(/Bạn còn thiếu.*bữa sáng.*bữa tối/)).toBeInTheDocument();
-  });
-
-  it('shows missing meals text for partial state (missing dinner only)', () => {
-    const partial: DayNutritionSummary = {
-      breakfast: makeSlot(['d1'], 400, 20),
-      lunch: makeSlot(['d2'], 600, 30),
-      dinner: makeSlot([]),
-    };
-    render(<NutritionSubTab {...baseProps} dayNutrition={partial} />);
-    expect(screen.getByText(/Bạn còn thiếu.*bữa tối/)).toBeInTheDocument();
-  });
-
-  it('shows switch-to-meals button when empty and callback provided', () => {
-    render(<NutritionSubTab {...baseProps} dayNutrition={emptyNutrition} />);
-    const switchBtn = screen.getByTestId('btn-switch-to-meals');
-    expect(switchBtn).toBeInTheDocument();
-    expect(screen.getByText('Chưa có dữ liệu dinh dưỡng cho ngày này')).toBeInTheDocument();
-    expect(screen.getByText(/Tiếp theo: chuyển sang tab Bữa ăn/)).toBeInTheDocument();
-  });
-
-  it('fires onSwitchToMeals when switch button is clicked', () => {
-    render(<NutritionSubTab {...baseProps} dayNutrition={emptyNutrition} />);
-    fireEvent.click(screen.getByTestId('btn-switch-to-meals'));
-    expect(baseProps.onSwitchToMeals).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not show switch button when onSwitchToMeals is undefined', () => {
+  it('works without onSwitchToMeals (uses fallback)', () => {
     render(
-      <NutritionSubTab
-        dayNutrition={emptyNutrition}
-        targetCalories={2000}
-        targetProtein={140}
-        userWeight={70}
-        onEditGoals={vi.fn()}
-      />,
+      <NutritionSubTab dayNutrition={emptyNutrition} targetCalories={2000} targetProtein={140} onEditGoals={vi.fn()} />,
     );
-    expect(screen.queryByTestId('btn-switch-to-meals')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nutrition-details')).toBeInTheDocument();
   });
 
-  it('does not show switch button when meals have data', () => {
-    render(<NutritionSubTab {...baseProps} />);
-    expect(screen.queryByTestId('btn-switch-to-meals')).not.toBeInTheDocument();
-  });
-
-  it('renders macro chart within nutrition subtab', () => {
-    const nutritionWithMacros: DayNutritionSummary = {
-      breakfast: makeFullSlot(['d1'], 400, 20, 50, 10),
-      lunch: makeFullSlot(['d2'], 600, 30, 70, 15),
-      dinner: makeFullSlot(['d3'], 500, 25, 40, 20),
-    };
-    render(<NutritionSubTab {...baseProps} dayNutrition={nutritionWithMacros} />);
-    expect(screen.getByTestId('macro-chart')).toBeInTheDocument();
-  });
-
-  it('renders macro chart empty state when no nutrition data', () => {
-    render(<NutritionSubTab {...baseProps} dayNutrition={emptyNutrition} />);
-    expect(screen.getByTestId('macro-chart-empty')).toBeInTheDocument();
-  });
-
-  it('does not render EnergyBalanceCard when caloriesOut is undefined', () => {
-    render(<NutritionSubTab {...baseProps} />);
+  it('does not render old EnergyBalanceCard component', () => {
+    render(<NutritionSubTab {...baseProps} caloriesOut={350} />);
     expect(screen.queryByTestId('energy-balance-card')).not.toBeInTheDocument();
   });
 
-  it('renders EnergyBalanceCard when caloriesOut is provided', () => {
-    render(<NutritionSubTab {...baseProps} caloriesOut={350} />);
-    const card = screen.getByTestId('energy-balance-card');
-    expect(card).toBeInTheDocument();
-    expect(card).toHaveAttribute('data-calories-in', '1500');
-    expect(card).toHaveAttribute('data-calories-out', '350');
-    expect(card).toHaveAttribute('data-target', '2000');
-    expect(card).toHaveAttribute('data-protein-current', '75');
-    expect(card).toHaveAttribute('data-protein-target', '140');
+  it('does not render old MacroChart component', () => {
+    render(<NutritionSubTab {...baseProps} />);
+    expect(screen.queryByTestId('macro-chart')).not.toBeInTheDocument();
   });
 
-  it('renders EnergyBalanceCard before Summary', () => {
-    render(<NutritionSubTab {...baseProps} caloriesOut={350} />);
-    const container = screen.getByTestId('nutrition-subtab');
-    const energyCard = screen.getByTestId('energy-balance-card');
-    const summaryCalories = screen.getByTestId('summary-total-calories');
-    const children = Array.from(container.children);
-    const energyIndex = children.findIndex(child => child.contains(energyCard));
-    const summaryIndex = children.findIndex(child => child.contains(summaryCalories));
-    expect(energyIndex).toBeLessThan(summaryIndex);
-  });
-});
-
-// ─── MacroChart ──────────────────────────────────────────────────────
-describe('MacroChart', () => {
-  it('shows empty state when all macros are zero', () => {
-    render(<MacroChart dayNutrition={emptyNutrition} />);
-    expect(screen.getByTestId('macro-chart-empty')).toBeInTheDocument();
-    expect(screen.getByText('Chưa có dữ liệu dinh dưỡng')).toBeInTheDocument();
-    expect(screen.getByText('Thêm bữa ăn để xem biểu đồ dinh dưỡng')).toBeInTheDocument();
-  });
-
-  it('renders pie chart with macro percentages', () => {
-    const nutrition: DayNutritionSummary = {
-      breakfast: makeFullSlot(['d1'], 400, 25, 50, 10),
-      lunch: makeFullSlot([], 0, 0, 0, 0),
-      dinner: makeFullSlot([], 0, 0, 0, 0),
-    };
-    render(<MacroChart dayNutrition={nutrition} />);
-    expect(screen.getByTestId('macro-chart')).toBeInTheDocument();
-    expect(screen.getByText('Tỉ lệ dinh dưỡng')).toBeInTheDocument();
-    expect(screen.getByText('Protein')).toBeInTheDocument();
-    expect(screen.getByText('Carbs')).toBeInTheDocument();
-    expect(screen.getByText('Chất béo')).toBeInTheDocument();
-  });
-
-  it('calculates correct macro percentages', () => {
-    const nutrition: DayNutritionSummary = {
-      breakfast: makeFullSlot(['d1'], 500, 50, 50, 0),
-      lunch: makeFullSlot([], 0, 0, 0, 0),
-      dinner: makeFullSlot([], 0, 0, 0, 0),
-    };
-    render(<MacroChart dayNutrition={nutrition} />);
-    // protein: 50g * 4 = 200 cal, carbs: 50g * 4 = 200 cal, fat: 0
-    // total = 400 cal → protein 50%, carbs 50%, fat 0%
-    expect(screen.getByTestId('macro-percent-Protein')).toHaveTextContent('50%');
-    expect(screen.getByTestId('macro-percent-Carbs')).toHaveTextContent('50%');
-    expect(screen.getByTestId('macro-percent-Chất béo')).toHaveTextContent('0%');
-  });
-
-  it('aggregates macros across all meals', () => {
-    const nutrition: DayNutritionSummary = {
-      breakfast: makeFullSlot(['d1'], 200, 10, 20, 5),
-      lunch: makeFullSlot(['d2'], 300, 20, 30, 10),
-      dinner: makeFullSlot(['d3'], 400, 10, 50, 5),
-    };
-    render(<MacroChart dayNutrition={nutrition} />);
-    // protein: 40g, carbs: 100g, fat: 20g
-    // pCal: 160, cCal: 400, fCal: 180 → total: 740
-    // p%: 22, c%: 54, f%: 24
-    expect(screen.getByTestId('macro-percent-Protein')).toHaveTextContent('22%');
-    expect(screen.getByTestId('macro-percent-Carbs')).toHaveTextContent('54%');
-    expect(screen.getByTestId('macro-percent-Chất béo')).toHaveTextContent('24%');
-  });
-
-  it('displays gram values for each macro', () => {
-    const nutrition: DayNutritionSummary = {
-      breakfast: makeFullSlot(['d1'], 500, 30, 60, 15),
-      lunch: makeFullSlot([], 0, 0, 0, 0),
-      dinner: makeFullSlot([], 0, 0, 0, 0),
-    };
-    render(<MacroChart dayNutrition={nutrition} />);
-    expect(screen.getByText('30g')).toBeInTheDocument();
-    expect(screen.getByText('60g')).toBeInTheDocument();
-    expect(screen.getByText('15g')).toBeInTheDocument();
-  });
-
-  it('renders SVG circles for each macro segment', () => {
-    const nutrition: DayNutritionSummary = {
-      breakfast: makeFullSlot(['d1'], 400, 25, 40, 10),
-      lunch: makeFullSlot([], 0, 0, 0, 0),
-      dinner: makeFullSlot([], 0, 0, 0, 0),
-    };
-    const { container } = render(<MacroChart dayNutrition={nutrition} />);
-    const circles = container.querySelectorAll('circle');
-    expect(circles.length).toBe(3);
+  it('setup state shows contract description text', () => {
+    render(<NutritionSubTab {...baseProps} targetCalories={0} />);
+    expect(screen.getByText(/Mục tiêu calo và protein chưa được cài đặt/)).toBeInTheDocument();
   });
 });

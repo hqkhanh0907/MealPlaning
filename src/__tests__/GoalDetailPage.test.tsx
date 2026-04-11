@@ -62,12 +62,21 @@ describe('GoalDetailPage', () => {
   describe('no active goal', () => {
     it('shows empty state', () => {
       render(<GoalDetailPage onBack={vi.fn()} />);
-      expect(screen.getByTestId('goal-view-empty')).toBeInTheDocument();
+      expect(screen.getByText('Chưa thiết lập mục tiêu')).toBeInTheDocument();
+      expect(screen.getByTestId('goal-view-empty').firstChild).toHaveAttribute('data-surface-state', 'setup');
     });
 
     it('does not show goal view', () => {
       render(<GoalDetailPage onBack={vi.fn()} />);
       expect(screen.queryByTestId('goal-view')).not.toBeInTheDocument();
+    });
+
+    it('uses setup state contract copy while leaving the header edit button as the single primary CTA', () => {
+      render(<GoalDetailPage onBack={vi.fn()} />);
+      expect(screen.getByText(/Thiếu: Mục tiêu cân nặng/i)).toBeInTheDocument();
+      expect(screen.getAllByRole('button', { name: 'Chỉnh sửa' })).toHaveLength(1);
+      fireEvent.click(screen.getByTestId('settings-detail-edit'));
+      expect(screen.getByTestId('goal-phase-selector')).toBeInTheDocument();
     });
   });
 

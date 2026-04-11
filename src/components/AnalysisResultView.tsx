@@ -1,6 +1,8 @@
 import { Image as ImageIcon, Loader2, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { EmptyState } from '@/components/shared/EmptyState';
+import { createSurfaceStateContract } from '@/components/shared/surfaceState';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { AnalyzedDishResult, AnalyzedIngredient } from '../types';
@@ -48,16 +50,25 @@ const AnalysisSkeleton = () => {
   );
 };
 
-const EmptyState = () => {
+const AnalysisEmptyState = () => {
   const { t } = useTranslation();
+  const contract = createSurfaceStateContract({
+    surface: 'ai.analysis',
+    state: 'empty',
+    copy: {
+      title: t('ai.emptyTitle'),
+      missing: t('ai.emptyMissing'),
+      reason: t('ai.emptyReason'),
+      nextStep: t('ai.emptyNextStep'),
+    },
+  });
+
   return (
-    <div className="flex h-full flex-col items-center justify-center space-y-5 py-8 text-center">
-      <div className="from-muted to-muted/50 flex h-24 w-24 items-center justify-center rounded-2xl bg-gradient-to-br">
-        <ImageIcon className="text-muted-foreground h-12 w-12" />
-      </div>
-      <div className="space-y-2">
-        <h4 className="text-foreground text-lg font-semibold">{t('ai.title')}</h4>
-        <p className="text-muted-foreground mx-auto max-w-xs text-sm leading-relaxed">{t('ai.emptyHint')}</p>
+    <div className="space-y-4">
+      <EmptyState variant="standard" icon={ImageIcon} contract={contract} />
+      <div className="bg-card border-border-subtle rounded-xl border p-4">
+        <p className="text-foreground text-sm font-semibold">{t('ai.exampleTitle')}</p>
+        <p className="text-muted-foreground mt-1 text-sm">{t('ai.exampleDescription')}</p>
       </div>
     </div>
   );
@@ -134,7 +145,7 @@ const IngredientCard = ({ ing }: { ing: AnalyzedIngredient }) => {
 export const AnalysisResultView = ({ result, isAnalyzing, onOpenSaveModal }: AnalysisResultViewProps) => {
   const { t } = useTranslation();
   if (isAnalyzing) return <AnalysisSkeleton />;
-  if (!result) return <EmptyState />;
+  if (!result) return <AnalysisEmptyState />;
 
   return (
     <div className="space-y-6">

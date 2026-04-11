@@ -62,7 +62,8 @@ describe('DatabaseProvider', () => {
       </DatabaseProvider>,
     );
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Đang chuẩn bị MealPlaning')).toBeInTheDocument();
+    expect(screen.getByText(/Ứng dụng đang mở cơ sở dữ liệu/)).toBeInTheDocument();
     expect(screen.queryByText('Child Content')).not.toBeInTheDocument();
   });
 
@@ -78,7 +79,7 @@ describe('DatabaseProvider', () => {
     await waitFor(() => {
       expect(screen.getByText('Child Content')).toBeInTheDocument();
     });
-    expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+    expect(screen.queryByText('Đang chuẩn bị MealPlaning')).not.toBeInTheDocument();
   });
 
   it('shows error state on initialization failure', async () => {
@@ -93,6 +94,7 @@ describe('DatabaseProvider', () => {
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
     });
+    expect(screen.getByText('Không thể chuẩn bị ứng dụng')).toBeInTheDocument();
     expect(screen.getByText(/WASM load failed/)).toBeInTheDocument();
     expect(screen.queryByText('Child Content')).not.toBeInTheDocument();
   });
@@ -110,6 +112,30 @@ describe('DatabaseProvider', () => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
     });
     expect(screen.getByText(/string error/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Thử lại' })).toBeInTheDocument();
+  });
+
+  it('retries initialization from the error state', async () => {
+    mockInitialize.mockRejectedValueOnce(new Error('first fail')).mockResolvedValueOnce(undefined);
+
+    render(
+      <DatabaseProvider>
+        <div>Child Content</div>
+      </DatabaseProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Thử lại' })).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      screen.getByRole('button', { name: 'Thử lại' }).click();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Child Content')).toBeInTheDocument();
+    });
+    expect(mockInitialize).toHaveBeenCalledTimes(2);
   });
 
   it('useDatabase() returns database service inside provider', async () => {
@@ -270,7 +296,7 @@ describe('DatabaseProvider', () => {
       </DatabaseProvider>,
     );
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Đang chuẩn bị MealPlaning')).toBeInTheDocument();
     unmount();
 
     await act(async () => {

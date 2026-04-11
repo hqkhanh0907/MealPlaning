@@ -64,7 +64,6 @@ const defaultProps = {
   ingredients: [],
   currentPlan: dayPlans[0],
   dayNutrition: filledNutrition,
-  userWeight: 70,
   targetCalories: 2000,
   targetProtein: 140,
   isSuggesting: false,

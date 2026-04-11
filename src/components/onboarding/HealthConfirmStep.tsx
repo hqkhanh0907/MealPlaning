@@ -12,6 +12,7 @@ import { getCalorieOffset } from '@/services/nutritionEngine';
 import { useAppOnboardingStore } from '@/store/appOnboardingStore';
 import { logger } from '@/utils/logger';
 
+import { getHealthProfileSetupContract } from '../settings/readiness';
 import type { OnboardingFormData } from './onboardingSchema';
 import { STEP_FIELDS } from './onboardingSchema';
 
@@ -67,6 +68,34 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
     const offset = getCalorieOffset(values.goalType, values.rateOfChange ?? 'moderate');
     return estimatedTdee + offset;
   }, [estimatedTdee, values.goalType, values.rateOfChange]);
+  const readiness = useMemo(
+    () =>
+      getHealthProfileSetupContract(
+        {
+          name: values.name,
+          gender: values.gender,
+          dateOfBirth: values.dateOfBirth,
+          heightCm: values.heightCm,
+          weightKg: values.weightKg,
+          activityLevel: values.activityLevel,
+          bodyFatPct: values.bodyFatPct,
+        },
+        {
+          id: 'pending',
+          type: values.goalType,
+          rateOfChange: values.rateOfChange ?? 'moderate',
+          targetWeightKg: values.targetWeightKg,
+          calorieOffset:
+            values.goalType === 'maintain' ? 0 : getCalorieOffset(values.goalType, values.rateOfChange ?? 'moderate'),
+          startDate: '',
+          isActive: true,
+          createdAt: '',
+          updatedAt: '',
+        },
+        t,
+      ),
+    [values, t],
+  );
 
   const handleConfirm = async () => {
     const healthFields = [...STEP_FIELDS['2a'], ...STEP_FIELDS['2b'], ...STEP_FIELDS['2c']] as const;
@@ -144,6 +173,17 @@ export function HealthConfirmStep({ form, goNext, goBack }: Readonly<HealthConfi
           {t('onboarding.confirm.title', { name: values.name })}
         </h2>
         <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.confirm.subtitle')}</p>
+        <div className="bg-muted mb-6 rounded-2xl p-4">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-foreground text-sm font-medium">{readiness.badgeLabel}</p>
+            <p className="text-muted-foreground text-xs">{t('onboarding.confirm.reviewLabel')}</p>
+          </div>
+          <p className="text-muted-foreground mt-1 text-xs leading-relaxed">{readiness.summary}</p>
+          <p className="text-muted-foreground mt-1 text-xs leading-relaxed">{readiness.nextStep}</p>
+          {readiness.optionalNote && (
+            <p className="text-primary mt-2 text-xs leading-relaxed">{readiness.optionalNote}</p>
+          )}
+        </div>
 
         {/* Hero Calorie */}
         <div className="bg-primary-subtle mb-6 rounded-2xl p-6 text-center">

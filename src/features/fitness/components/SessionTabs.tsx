@@ -100,48 +100,46 @@ function SessionTabsInner({
             const Icon = SESSION_ICONS[index] ?? Sun;
 
             return (
-              <button
-                key={session.id}
-                role="tab"
-                type="button"
-                aria-selected={isActive}
-                data-completed={isCompleted ? 'true' : undefined}
-                data-session-id={session.id}
-                onClick={handleSelect}
-                onPointerDown={handlePointerDown}
-                onPointerUp={handlePointerUpOrLeave}
-                onPointerLeave={handlePointerUpOrLeave}
-                onContextMenu={handleContextMenu}
-                className={`focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.97] motion-reduce:transform-none ${
-                  isActive
-                    ? 'bg-accent-highlight text-accent-highlight-foreground dark:bg-accent-highlight'
-                    : 'text-foreground-secondary bg-muted'
-                }`}
-              >
-                {isCompleted ? (
-                  <Check className="h-4 w-4" aria-hidden="true" />
-                ) : (
-                  <Icon
-                    className={`h-4 w-4 ${isActive ? '' : (SESSION_ICON_COLORS[index] ?? '')}`}
-                    aria-hidden="true"
-                  />
-                )}
-                {t('fitness.plan.sessionTab', { order: session.sessionOrder })}
+              <div key={session.id} className="flex items-center gap-1">
+                <button
+                  role="tab"
+                  type="button"
+                  aria-selected={isActive}
+                  data-completed={isCompleted ? 'true' : undefined}
+                  data-session-id={session.id}
+                  onClick={handleSelect}
+                  onPointerDown={handlePointerDown}
+                  onPointerUp={handlePointerUpOrLeave}
+                  onPointerLeave={handlePointerUpOrLeave}
+                  onContextMenu={handleContextMenu}
+                  className={`focus-visible:ring-ring flex min-h-[44px] min-w-[44px] items-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none active:scale-[0.97] motion-reduce:transform-none ${
+                    isActive
+                      ? 'bg-accent-highlight text-accent-highlight-foreground dark:bg-accent-highlight'
+                      : 'text-foreground-secondary bg-muted'
+                  }`}
+                >
+                  {isCompleted ? (
+                    <Check className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <Icon
+                      className={`h-4 w-4 ${isActive ? '' : (SESSION_ICON_COLORS[index] ?? '')}`}
+                      aria-hidden="true"
+                    />
+                  )}
+                  {t('fitness.plan.sessionTab', { order: session.sessionOrder })}
+                </button>
                 {isActive && canDelete && (
                   <button
                     type="button"
                     data-testid={`delete-session-${session.id}`}
-                    onClick={e => {
-                      e.stopPropagation();
-                      setConfirmDeleteId(session.id);
-                    }}
+                    onClick={() => setConfirmDeleteId(session.id)}
                     aria-label={t('fitness.plan.deleteSession')}
-                    className="bg-card/30 hover:bg-card/50 ml-1 flex h-5 w-5 items-center justify-center rounded-full text-current transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                    className="text-muted-foreground hover:bg-accent flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 )}
-              </button>
+              </div>
             );
           })}
         </div>

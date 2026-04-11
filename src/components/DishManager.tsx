@@ -26,6 +26,7 @@ import { DetailModal } from './shared/DetailModal';
 import { EmptyState } from './shared/EmptyState';
 import { ListToolbar } from './shared/ListToolbar';
 import { ModalBackdrop } from './shared/ModalBackdrop';
+import { createSurfaceStateContract } from './shared/surfaceState';
 
 type DishSortOption = BaseSortOption | 'ing-asc' | 'ing-desc' | 'rating-asc' | 'rating-desc';
 
@@ -348,13 +349,46 @@ export const DishManager = ({
 
   // --- Render helpers ---
   const isSearching = !!list.searchQuery;
+  const hasResultsRefinement = isSearching || !!filterTag;
+  const emptyStateContract = hasResultsRefinement
+    ? createSurfaceStateContract({
+        surface: 'library.dishes',
+        state: 'warning',
+        copy: {
+          title: t('library.dishes.noResultsTitle'),
+          missing: list.searchQuery
+            ? t('library.dishes.noResultsMissingSearch', { query: list.searchQuery })
+            : t('library.dishes.noResultsMissingFilter'),
+          reason: t('library.dishes.noResultsReason'),
+          nextStep: t('library.dishes.noResultsNextStep'),
+        },
+        primaryAction: {
+          label: t('library.dishes.noResultsAction'),
+          onAction: () => {
+            list.setSearchQuery('');
+            setFilterTag(null);
+          },
+        },
+      })
+    : createSurfaceStateContract({
+        surface: 'library.dishes',
+        state: 'empty',
+        copy: {
+          title: t('library.dishes.emptyTitle'),
+          missing: t('library.dishes.emptyMissing'),
+          reason: t('library.dishes.emptyReason'),
+          nextStep: t('library.dishes.emptyNextStep'),
+        },
+        primaryAction: {
+          label: t('library.dishes.emptyAction'),
+          onAction: () => modal.openEdit(),
+        },
+      });
+
   const emptyStateProps = {
-    variant: isSearching ? ('compact' as const) : ('hero' as const),
+    variant: hasResultsRefinement ? ('compact' as const) : ('hero' as const),
     icon: ChefHat,
-    title: isSearching ? t('emptyState.searchEmpty') : t('emptyState.dish.title'),
-    description: isSearching ? undefined : t('emptyState.dish.description'),
-    actionLabel: isSearching ? undefined : t('emptyState.dish.action'),
-    onAction: isSearching ? undefined : () => modal.openEdit(),
+    contract: emptyStateContract,
   };
 
   return (

@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+import { EmptyState } from '../components/shared/EmptyState';
+import { createSurfaceStateContract } from '../components/shared/surfaceState';
 import { createDatabaseService, type DatabaseService } from '../services/databaseService';
 import {
   isFitnessMigrationCompleted,
@@ -14,10 +16,13 @@ const DatabaseContext = createContext<DatabaseService | null>(null);
 export function DatabaseProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [db, setDb] = useState<DatabaseService | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     const service = createDatabaseService();
+    setDb(null);
+    setError(null);
     service
       .initialize()
       .then(async () => {
@@ -72,14 +77,54 @@ export function DatabaseProvider({ children }: Readonly<{ children: React.ReactN
       cancelled = true;
       service.close().catch(() => {});
     };
-  }, []);
+  }, [attempt]);
 
   if (error) {
-    return <div role="alert">Database error: {error}</div>;
+    return (
+      <div className="bg-muted dark:bg-background flex min-h-dvh items-center justify-center px-4 py-10">
+        <div role="alert" className="w-full max-w-xl">
+          <EmptyState
+            variant="hero"
+            contract={createSurfaceStateContract({
+              surface: 'shell.startup',
+              state: 'error',
+              copy: {
+                title: 'Không thể chuẩn bị ứng dụng',
+                missing: 'Kết nối cơ sở dữ liệu cục bộ',
+                reason: error,
+                nextStep: 'Thử khởi động lại shell để tải lại dữ liệu nền',
+              },
+              primaryAction: {
+                label: 'Thử lại',
+                onAction: () => setAttempt(current => current + 1),
+              },
+            })}
+          />
+        </div>
+      </div>
+    );
   }
 
   if (!db) {
-    return <div>Loading...</div>;
+    return (
+      <div className="bg-muted dark:bg-background flex min-h-dvh items-center justify-center px-4 py-10">
+        <div className="w-full max-w-xl">
+          <EmptyState
+            variant="hero"
+            contract={createSurfaceStateContract({
+              surface: 'shell.startup',
+              state: 'loading',
+              copy: {
+                title: 'Đang chuẩn bị MealPlaning',
+                missing: 'Dữ liệu nền và điều hướng ban đầu',
+                reason: 'Ứng dụng đang mở cơ sở dữ liệu, chạy migration và nạp trạng thái cần thiết',
+                nextStep: 'Giữ màn hình này trong giây lát, shell sẽ sẵn sàng ngay sau khi đồng bộ xong',
+              },
+            })}
+          />
+        </div>
+      </div>
+    );
   }
 
   return <DatabaseContext.Provider value={db}>{children}</DatabaseContext.Provider>;

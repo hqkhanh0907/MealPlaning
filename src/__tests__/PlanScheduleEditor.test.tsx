@@ -306,12 +306,13 @@ describe('PlanScheduleEditor', () => {
   });
 
   describe('Auto-assign button', () => {
-    it('calls store autoAssignWorkouts on click', () => {
+    it('marks editor dirty on auto-assign without mutating store immediately', () => {
       setupStoreMock(makePlan(), []);
       render(<PlanScheduleEditor planId={PLAN_ID} />);
 
       fireEvent.click(screen.getByTestId('auto-assign-button'));
-      expect(mockAutoAssignWorkouts).toHaveBeenCalledWith(PLAN_ID);
+      expect(mockAutoAssignWorkouts).not.toHaveBeenCalled();
+      expect(screen.getByTestId('save-button')).not.toBeDisabled();
     });
 
     it('displays auto-assign label', () => {
@@ -323,12 +324,14 @@ describe('PlanScheduleEditor', () => {
   });
 
   describe('Restore button', () => {
-    it('calls store restoreOriginalSchedule on click', () => {
+    it('restore resets local dirty state without mutating store immediately', () => {
       setupStoreMock(makePlan(), []);
       render(<PlanScheduleEditor planId={PLAN_ID} />);
 
+      fireEvent.click(screen.getByTestId('toggle-day-7'));
       fireEvent.click(screen.getByTestId('restore-button'));
-      expect(mockRestoreOriginalSchedule).toHaveBeenCalledWith(PLAN_ID);
+      expect(mockRestoreOriginalSchedule).not.toHaveBeenCalled();
+      expect(screen.getByTestId('save-button')).toBeDisabled();
     });
 
     it('displays restore label', () => {
@@ -405,6 +408,14 @@ describe('PlanScheduleEditor', () => {
       fireEvent.click(backBtn);
       expect(mockPopPage).toHaveBeenCalledTimes(1);
     });
+
+    it('create plan cta is actionable in empty state', () => {
+      setupStoreMock(undefined, []);
+      render(<PlanScheduleEditor planId="nonexistent" />);
+
+      fireEvent.click(screen.getByTestId('create-plan-cta'));
+      expect(mockPopPage).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('Validation: unassigned workouts', () => {
@@ -431,8 +442,8 @@ describe('PlanScheduleEditor', () => {
       setupStoreMock(makePlan({ trainingDays: [1, 3] }), days);
       render(<PlanScheduleEditor planId={PLAN_ID} />);
 
-      // Make dirty, then attempt save
-      fireEvent.click(screen.getByTestId('auto-assign-button'));
+      // Make dirty without fixing the unassigned workout, then attempt save
+      fireEvent.click(screen.getByTestId('toggle-day-7'));
       fireEvent.click(screen.getByTestId('save-button'));
 
       expect(mockNotify.warning).toHaveBeenCalledWith('Còn bài tập chưa được phân công');
@@ -504,7 +515,7 @@ describe('PlanScheduleEditor', () => {
       expect(screen.getByTestId('day-assignment-sheet')).toBeInTheDocument();
     });
 
-    it('calls reassignWorkoutToDay when day is selected in sheet', () => {
+    it('defers reassign persistence until save', () => {
       const days = [makePlanDay('d1', 1)];
       setupStoreMock(makePlan(), days);
       render(<PlanScheduleEditor planId={PLAN_ID} />);
@@ -512,6 +523,8 @@ describe('PlanScheduleEditor', () => {
       fireEvent.click(screen.getByTestId('reassign-d1'));
       fireEvent.click(screen.getByTestId('sheet-select-day-3'));
 
+      expect(mockReassignWorkoutToDay).not.toHaveBeenCalled();
+      fireEvent.click(screen.getByTestId('save-button'));
       expect(mockReassignWorkoutToDay).toHaveBeenCalledWith('d1', 3);
     });
 
@@ -552,16 +565,6 @@ describe('PlanScheduleEditor', () => {
       const plan = makePlan({ trainingDays: [1, 3, 5] });
       setupStoreMock(plan, []);
 
-      // After restore, getState returns same plan
-      (useFitnessStore as unknown as { getState: Mock }).getState = vi.fn(() => ({
-        trainingPlans: [plan],
-        trainingPlanDays: [],
-        updateTrainingDays: mockUpdateTrainingDays,
-        autoAssignWorkouts: mockAutoAssignWorkouts,
-        restoreOriginalSchedule: mockRestoreOriginalSchedule,
-        reassignWorkoutToDay: mockReassignWorkoutToDay,
-      }));
-
       render(<PlanScheduleEditor planId={PLAN_ID} />);
 
       // Dirty via auto-assign
@@ -570,7 +573,7 @@ describe('PlanScheduleEditor', () => {
 
       // Restore
       fireEvent.click(screen.getByTestId('restore-button'));
-      expect(mockRestoreOriginalSchedule).toHaveBeenCalledWith(PLAN_ID);
+      expect(mockRestoreOriginalSchedule).not.toHaveBeenCalled();
       expect(screen.getByTestId('save-button')).toBeDisabled();
     });
   });

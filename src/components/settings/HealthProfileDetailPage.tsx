@@ -7,6 +7,9 @@ import { HealthProfileForm } from '../../features/health-profile/components/Heal
 import { useHealthProfileStore } from '../../features/health-profile/store/healthProfileStore';
 import { getAge } from '../../features/health-profile/types';
 import { calculateBMR, calculateMacros, calculateTDEE } from '../../services/nutritionEngine';
+import { EmptyState } from '../shared/EmptyState';
+import { createSurfaceStateContract } from '../shared/surfaceState';
+import { getHealthProfileSetupContract } from './readiness';
 import { SettingsDetailLayout } from './SettingsDetailLayout';
 
 const ACTIVITY_LEVEL_I18N: Record<string, string> = {
@@ -20,11 +23,23 @@ const ACTIVITY_LEVEL_I18N: Record<string, string> = {
 function HealthProfileViewMode() {
   const { t } = useTranslation();
   const profile = useHealthProfileStore(s => s.profile);
+  const activeGoal = useHealthProfileStore(s => s.activeGoal);
+  const readiness = getHealthProfileSetupContract(profile, activeGoal, t);
+  const readinessContract = createSurfaceStateContract({
+    surface: 'settings.healthProfile',
+    state: readiness.surfaceState,
+    copy: {
+      title: readiness.title,
+      missing: readiness.badgeLabel,
+      reason: [readiness.summary, readiness.optionalNote].filter(Boolean).join(' '),
+      nextStep: readiness.nextStep,
+    },
+  });
 
-  if (!profile) {
+  if (!profile || readiness.surfaceState !== 'success') {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <p className="text-muted-foreground">{t('healthProfile.notConfigured')}</p>
+      <div data-testid="health-profile-readiness" data-surface-state={readiness.surfaceState}>
+        <EmptyState icon={Heart} contract={readinessContract} className="py-12" />
       </div>
     );
   }
@@ -92,6 +107,7 @@ function HealthProfileViewMode() {
 
       {/* Computed Values */}
       <div className="bg-primary-subtle space-y-3 rounded-xl p-4">
+        {readiness.optionalNote && <p className="text-primary text-xs leading-relaxed">{readiness.optionalNote}</p>}
         <div className="flex justify-between text-sm">
           <span className="text-foreground-secondary">{t('healthProfile.bmr')}</span>
           <span className="text-foreground font-semibold tabular-nums">{bmr} kcal</span>

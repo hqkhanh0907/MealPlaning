@@ -54,6 +54,7 @@ import { CombinedHero } from '../features/dashboard/components/CombinedHero';
 import { NutritionSection } from '../features/dashboard/components/NutritionSection';
 import { WeeklyStatsRow } from '../features/dashboard/components/WeeklyStatsRow';
 import { useDailyScore } from '../features/dashboard/hooks/useDailyScore';
+import type { DashboardOrchestration } from '../features/dashboard/hooks/useDashboardOrchestration';
 
 const mockedUseDailyScore = vi.mocked(useDailyScore);
 const mockedNutritionSection = vi.mocked(NutritionSection);
@@ -68,6 +69,20 @@ const DEFAULT_SCORE: DailyScoreData = {
   greeting: 'Chào buổi sáng!',
   isFirstTimeUser: false,
   heroContext: 'balanced-day',
+};
+
+const DEFAULT_ORCHESTRATION: DashboardOrchestration = {
+  heroMode: 'passive',
+  heroContract: {
+    surface: 'dashboard.hero',
+    state: 'success',
+    copy: { title: 'Ổn định', reason: 'Đã sẵn sàng', nextStep: 'Theo dõi tiếp' },
+  },
+  showInsights: true,
+  suppressInsightAction: false,
+  showQuickActions: true,
+  suppressPlanPrimaryActions: false,
+  allowMealSlotActions: true,
 };
 
 function ThrowingComponent(): never {
@@ -140,5 +155,58 @@ describe('CombinedHero', () => {
       greeting: 'Chào buổi sáng!',
       heroContext: 'balanced-day',
     });
+  });
+
+  it('renders hero empty state when orchestration is blocking', () => {
+    render(
+      <CombinedHero
+        orchestration={{
+          ...DEFAULT_ORCHESTRATION,
+          heroMode: 'blocking',
+          heroContract: {
+            ...DEFAULT_ORCHESTRATION.heroContract,
+            state: 'setup',
+            copy: {
+              title: 'Hoàn tất hồ sơ sức khỏe trước',
+              missing: 'Dữ liệu sức khỏe nền tảng',
+              reason: 'Thiếu ngày sinh',
+              nextStep: 'Mở cài đặt sức khỏe',
+            },
+            primaryAction: { label: 'Mở cài đặt', onAction: vi.fn() },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText('Hoàn tất hồ sơ sức khỏe trước')).toBeInTheDocument();
+    expect(screen.getByText(/Thiếu: Dữ liệu sức khỏe nền tảng/)).toBeInTheDocument();
+    expect(screen.queryByTestId('nutrition-hero')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('weekly-snapshot')).not.toBeInTheDocument();
+  });
+
+  it('renders a single promoted next action strip for guided orchestration', () => {
+    render(
+      <CombinedHero
+        orchestration={{
+          ...DEFAULT_ORCHESTRATION,
+          heroMode: 'guided',
+          heroContract: {
+            ...DEFAULT_ORCHESTRATION.heroContract,
+            state: 'warning',
+            copy: {
+              title: 'Bắt đầu buổi tập được lên lịch',
+              reason: 'Hôm nay còn buổi tập chưa bắt đầu.',
+              nextStep: 'Bắt đầu buổi tập trước.',
+            },
+            primaryAction: { label: 'Bắt đầu buổi tập', onAction: vi.fn() },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByTestId('nutrition-hero')).toBeInTheDocument();
+    expect(screen.getByTestId('dashboard-next-action')).toBeInTheDocument();
+    expect(screen.getByTestId('dashboard-primary-action')).toHaveTextContent('Bắt đầu buổi tập');
+    expect(screen.queryByTestId('weekly-snapshot')).not.toBeInTheDocument();
   });
 });

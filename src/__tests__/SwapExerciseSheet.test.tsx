@@ -8,8 +8,25 @@ import type { Exercise } from '../features/fitness/types';
 
 // Mock ModalBackdrop — render children directly with a backdrop button
 vi.mock('../components/shared/ModalBackdrop', () => ({
-  ModalBackdrop: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
-    <div data-testid="modal-backdrop">
+  ModalBackdrop: ({
+    children,
+    onClose,
+    mobileLayout,
+    allowSwipeToDismiss,
+    ariaLabelledBy,
+  }: {
+    children: React.ReactNode;
+    onClose: () => void;
+    mobileLayout?: string;
+    allowSwipeToDismiss?: boolean;
+    ariaLabelledBy?: string;
+  }) => (
+    <div
+      data-testid="modal-backdrop"
+      data-mobile-layout={mobileLayout}
+      data-allow-swipe={String(allowSwipeToDismiss)}
+      data-aria-labelledby={ariaLabelledBy}
+    >
       <button data-testid="backdrop-overlay" onClick={onClose} type="button" />
       {children}
     </div>
@@ -153,6 +170,14 @@ describe('SwapExerciseSheet', () => {
     expect(screen.getByTestId('modal-backdrop')).toBeInTheDocument();
   });
 
+  it('uses sheet contract with stable title and internal scroll region', () => {
+    render(<SwapExerciseSheet {...defaultProps} />);
+    expect(screen.getByTestId('modal-backdrop')).toHaveAttribute('data-mobile-layout', 'sheet');
+    expect(screen.getByTestId('swap-exercise-title')).toBeInTheDocument();
+    expect(screen.getByTestId('swap-search-region')).toBeInTheDocument();
+    expect(screen.getByTestId('swap-list-region')).toBeInTheDocument();
+  });
+
   it('shows header with title and current exercise name', () => {
     render(<SwapExerciseSheet {...defaultProps} />);
     expect(screen.getByText('Đổi bài tập')).toBeInTheDocument();
@@ -286,6 +311,16 @@ describe('SwapExerciseSheet', () => {
     render(<SwapExerciseSheet {...defaultProps} />);
     const input = screen.getByTestId('swap-search-input');
     expect(input).toHaveAttribute('placeholder', 'Tìm bài tập...');
+  });
+
+  it('disables swipe dismissal while search input is focused', async () => {
+    const user = userEvent.setup();
+    render(<SwapExerciseSheet {...defaultProps} />);
+    const input = screen.getByTestId('swap-search-input');
+    await user.click(input);
+    expect(screen.getByTestId('modal-backdrop')).toHaveAttribute('data-allow-swipe', 'false');
+    await user.tab();
+    expect(screen.getByTestId('modal-backdrop')).toHaveAttribute('data-allow-swipe', 'true');
   });
 
   it('renders with correct aria-labels on exercise buttons', () => {

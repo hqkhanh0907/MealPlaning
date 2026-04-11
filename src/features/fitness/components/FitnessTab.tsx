@@ -83,7 +83,7 @@ const FitnessTabInner = () => {
 
     const plan = {
       id: planId,
-      name: 'Manual Plan',
+      name: t('fitness.plan.manualPlanName'),
       status: 'active' as const,
       splitType: 'custom' as const,
       durationWeeks: 1,
@@ -149,7 +149,7 @@ const FitnessTabInner = () => {
             type="button"
             onClick={handleGeneratePlan}
             className="text-primary hover:bg-muted focus-visible:ring-ring/50 rounded px-1 text-xs font-semibold whitespace-nowrap underline focus-visible:ring-3"
-            data-testid="regenerate-plan-btn"
+            data-testid="profile-sync-regenerate-btn"
           >
             {t('fitness.plan.regeneratePlan')}
           </button>

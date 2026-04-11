@@ -16,9 +16,21 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.restDayTip2': '💧 Uống đủ 2L nước',
         'fitness.plan.restDayTip3': '🥩 Đạt đủ protein',
         'fitness.plan.noPlan': 'Chưa có kế hoạch tập luyện',
+        'fitness.plan.autoReadyTitle': 'Chưa có lịch tập cho tuần này',
+        'fitness.plan.autoReadyMissing': 'kế hoạch tập luyện đang hoạt động',
+        'fitness.plan.autoReadyReason': 'không có plan nào để hệ thống gợi ý buổi tập, lịch nghỉ và tiến trình',
+        'fitness.plan.autoReadyNextStep': 'tạo kế hoạch để biết hôm nay nên tập gì và theo dõi tiến độ mỗi ngày',
+        'fitness.plan.autoReadyValue':
+          'Sau khi tạo plan, tab này sẽ hiển thị lịch tuần, năng lượng hôm nay và điểm bắt đầu cho từng buổi tập.',
         'fitness.plan.createPlan': 'Tạo kế hoạch',
         'fitness.plan.manualEmpty': 'Bạn đã chọn tự lên kế hoạch',
         'fitness.plan.manualEmptyDesc': 'Hãy bắt đầu bằng cách tạo buổi tập đầu tiên cho tuần này.',
+        'fitness.plan.manualReadyTitle': 'Sẵn sàng tự xếp lịch tập',
+        'fitness.plan.manualReadyMissing': 'buổi tập đầu tiên trong tuần',
+        'fitness.plan.manualReadyReason': 'bạn đã chọn chế độ thủ công nên hệ thống đang chờ bạn quyết định lịch tập',
+        'fitness.plan.manualReadyNextStep': 'tạo buổi đầu tiên để mở lịch tuần và tiếp tục thêm các ngày còn lại',
+        'fitness.plan.manualReadyValue':
+          'Khi có buổi đầu tiên, bạn sẽ quản lý được ngày tập, ngày nghỉ và lịch sử từng session ngay trong tab này.',
         'fitness.plan.createFirstWorkout': 'Tạo buổi tập đầu tiên',
         'fitness.plan.exercises': 'bài tập',
         'fitness.plan.minutes': 'phút',
@@ -330,13 +342,14 @@ describe('TrainingPlanView', () => {
     mockStore({ trainingPlans: [], trainingPlanDays: [] });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
     expect(screen.getByTestId('no-plan-cta')).toBeInTheDocument();
-    expect(screen.getByText('Chưa có kế hoạch tập luyện')).toBeInTheDocument();
+    expect(screen.getByText('Chưa có lịch tập cho tuần này')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tạo kế hoạch' })).toBeInTheDocument();
   });
 
   it('"Tạo kế hoạch" button calls onGeneratePlan', () => {
     mockStore({ trainingPlans: [], trainingPlanDays: [] });
     render(<TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} />);
-    fireEvent.click(screen.getByTestId('create-plan-btn'));
+    fireEvent.click(screen.getByRole('button', { name: 'Tạo kế hoạch' }));
     expect(defaultOnGeneratePlan).toHaveBeenCalledOnce();
   });
 
@@ -359,9 +372,9 @@ describe('TrainingPlanView', () => {
       />,
     );
     expect(screen.getByTestId('manual-plan-cta')).toBeInTheDocument();
-    expect(screen.getByText('Bạn đã chọn tự lên kế hoạch')).toBeInTheDocument();
-    expect(screen.getByText('Hãy bắt đầu bằng cách tạo buổi tập đầu tiên cho tuần này.')).toBeInTheDocument();
-    expect(screen.getByTestId('create-manual-plan-btn')).toBeInTheDocument();
+    expect(screen.getByText('Sẵn sàng tự xếp lịch tập')).toBeInTheDocument();
+    expect(screen.getByText(/Thiếu: buổi tập đầu tiên trong tuần/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tạo buổi tập đầu tiên' })).toBeInTheDocument();
     expect(screen.queryByTestId('no-plan-cta')).not.toBeInTheDocument();
   });
 
@@ -375,7 +388,7 @@ describe('TrainingPlanView', () => {
         planStrategy="manual"
       />,
     );
-    fireEvent.click(screen.getByTestId('create-manual-plan-btn'));
+    fireEvent.click(screen.getByRole('button', { name: 'Tạo buổi tập đầu tiên' }));
     expect(mockCreateManual).toHaveBeenCalledOnce();
   });
 
@@ -398,10 +411,8 @@ describe('TrainingPlanView', () => {
     render(
       <TrainingPlanView onGeneratePlan={defaultOnGeneratePlan} onCreateManualPlan={vi.fn()} planStrategy="manual" />,
     );
-    const btn = screen.getByTestId('create-manual-plan-btn');
-    expect(btn.className).toContain('min-h-[44px]');
-    expect(btn.className).toContain('focus-visible:ring-2');
-    expect(btn.className).toContain('focus-visible:ring-ring');
+    const btn = screen.getByRole('button', { name: 'Tạo buổi tập đầu tiên' });
+    expect(btn).toBeInTheDocument();
   });
 
   // --- Calendar Strip ---

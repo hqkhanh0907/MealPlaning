@@ -370,7 +370,8 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
       /* v8 ignore start */
       const current = getValues(key) ?? { ...setInputDefaults };
       /* v8 ignore stop */
-      setValue(key, { ...current, rpe: rpe === undefined ? undefined : current.rpe === rpe ? undefined : rpe });
+      const nextRpe = rpe === undefined || current.rpe === rpe ? undefined : rpe;
+      setValue(key, { ...current, rpe: nextRpe });
     },
     [getValues, setValue],
   );

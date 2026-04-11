@@ -3,6 +3,9 @@ import { Flame, Minus, Scale, Target, TrendingDown, TrendingUp, Zap } from 'luci
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { EmptyState } from '@/components/shared/EmptyState';
+import { createSurfaceStateContract, resolveCanonicalSurfaceState } from '@/components/shared/surfaceState';
+
 import { GoalPhaseSelector } from '../../features/health-profile/components/GoalPhaseSelector';
 import { useHealthProfileStore } from '../../features/health-profile/store/healthProfileStore';
 import { SettingsDetailLayout } from './SettingsDetailLayout';
@@ -62,11 +65,20 @@ function GoalViewMode() {
   }, [activeGoal, t]);
 
   if (!activeGoal) {
+    const emptyStateContract = createSurfaceStateContract({
+      surface: 'settings.goal',
+      state: resolveCanonicalSurfaceState({ isConfigured: false }),
+      copy: {
+        title: t('settings.goalNotSet'),
+        missing: t('settings.goalSection'),
+        reason: t('settings.goalDesc'),
+        nextStep: t('settings.goalMissingNextStep'),
+      },
+    });
+
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center" data-testid="goal-view-empty">
-        <Target className="text-muted-foreground mb-3 h-12 w-12" />
-        <p className="text-foreground-secondary text-sm font-medium">{t('settings.goalNotSet')}</p>
-        <p className="text-muted-foreground mt-1 text-xs">{t('settings.goalDesc')}</p>
+      <div data-testid="goal-view-empty">
+        <EmptyState icon={Target} title={t('settings.goalNotSet')} contract={emptyStateContract} className="py-12" />
       </div>
     );
   }

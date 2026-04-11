@@ -69,6 +69,8 @@ export function ExerciseSelector({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMuscleGroup, setSelectedMuscleGroup] = useState<MuscleGroup | 'all'>(muscleGroupFilter ?? 'all');
   const [showCustomModal, setShowCustomModal] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const titleId = React.useId();
 
   useModalBackHandler(isOpen, onClose);
 
@@ -150,23 +152,24 @@ export function ExerciseSelector({
   if (!isOpen) return null;
 
   return (
-    <ModalBackdrop onClose={onClose} zIndex="z-60">
+    <ModalBackdrop
+      onClose={onClose}
+      zIndex="z-60"
+      mobileLayout="sheet"
+      ariaLabelledBy={titleId}
+      allowSwipeToDismiss={!isSearchFocused && !showCustomModal}
+    >
       <div
         data-testid="exercise-selector-sheet"
         className="bg-card relative flex max-h-[85dvh] w-full flex-col rounded-t-2xl shadow-xl sm:max-w-md sm:rounded-2xl"
       >
-        {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="bg-muted h-1 w-10 rounded-full" />
+        <div className="px-4 pb-2 text-center">
+          <h2 id={titleId} data-testid="exercise-selector-title" className="text-foreground text-xl font-semibold">
+            {t('fitness.exerciseSelector.title')}
+          </h2>
         </div>
 
-        {/* Title */}
-        <h2 className="text-foreground px-4 pb-2 text-center text-xl font-semibold">
-          {t('fitness.exerciseSelector.title')}
-        </h2>
-
-        {/* Search bar */}
-        <div className="px-4 pb-3">
+        <div data-testid="exercise-selector-search-region" className="bg-card shrink-0 px-4 pb-3">
           <div className="relative">
             <Search
               className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
@@ -178,6 +181,8 @@ export function ExerciseSelector({
               placeholder={t('fitness.exerciseSelector.search')}
               value={searchQuery}
               onChange={handleSearchChange}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
               aria-label={t('fitness.exerciseSelector.search')}
               maxLength={100}
               className="focus:ring-ring bg-muted text-foreground placeholder:text-muted-foreground w-full rounded-xl border-none py-2.5 pr-4 pl-10 text-sm outline-none focus:ring-2"
@@ -185,8 +190,7 @@ export function ExerciseSelector({
           </div>
         </div>
 
-        {/* Muscle group chips */}
-        <div className="shrink-0 overflow-x-auto px-4 pb-3">
+        <div data-testid="exercise-selector-chip-region" className="bg-card shrink-0 overflow-x-auto px-4 pb-3">
           <div className="flex min-w-max gap-2" data-testid="muscle-group-chips">
             <button
               type="button"
@@ -216,8 +220,7 @@ export function ExerciseSelector({
           </div>
         </div>
 
-        {/* Exercise list */}
-        <div className="flex-1 overflow-y-auto px-4 pb-3">
+        <div data-testid="exercise-selector-list-region" className="flex-1 overflow-y-auto px-4 pb-3">
           {filteredExercises.length === 0 ? (
             <div data-testid="exercise-empty-state" className="flex flex-col items-center justify-center py-12">
               <div className="bg-muted mb-3 flex h-12 w-12 items-center justify-center rounded-full">
@@ -263,8 +266,7 @@ export function ExerciseSelector({
           )}
         </div>
 
-        {/* Custom Exercise button — sticky footer outside scroll */}
-        <div className="pb-safe border-border border-t px-4 py-3">
+        <div className="pb-safe border-border shrink-0 border-t px-4 py-3">
           <button
             type="button"
             onClick={openCustomModal}
@@ -276,7 +278,6 @@ export function ExerciseSelector({
           </button>
         </div>
 
-        {/* Custom Exercise Modal */}
         <CustomExerciseModal isOpen={showCustomModal} onClose={closeCustomModal} onSave={handleSaveCustomExercise} />
       </div>
     </ModalBackdrop>

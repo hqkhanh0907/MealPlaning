@@ -98,18 +98,6 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
     [setValue],
   );
 
-  const handleNameBlur = useCallback(
-    (nameValue: string) => {
-      const match = findMatch(nameValue);
-      if (match) {
-        applySmartFill(match);
-        return;
-      }
-      triggerAIFill(nameValue, qaUnit.vi);
-    },
-    [findMatch, applySmartFill, qaUnit.vi],
-  );
-
   const triggerAIFill = useCallback(
     (name: string, unit: string) => {
       if (!name.trim() || !unit.trim()) return;
@@ -136,6 +124,18 @@ const QuickAddIngredientFormInner = ({ onAdd, onCancel }: QuickAddIngredientForm
       }, 800);
     },
     [setValue],
+  );
+
+  const handleNameBlur = useCallback(
+    (nameValue: string) => {
+      const match = findMatch(nameValue);
+      if (match) {
+        applySmartFill(match);
+        return;
+      }
+      triggerAIFill(nameValue, qaUnit.vi);
+    },
+    [findMatch, applySmartFill, qaUnit.vi, triggerAIFill],
   );
 
   const handleCancel = useCallback(() => {

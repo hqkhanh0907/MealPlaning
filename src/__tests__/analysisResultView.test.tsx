@@ -32,7 +32,9 @@ describe('AnalysisResultView', () => {
 
   it('shows empty state when no result and not analyzing', () => {
     render(<AnalysisResultView result={null} isAnalyzing={false} />);
-    expect(screen.getByText(/Tải ảnh lên và nhấn/)).toBeInTheDocument();
+    expect(screen.getByText('Chưa có ảnh để AI phân tích')).toBeInTheDocument();
+    expect(screen.getByText(/Thiếu: ảnh món ăn rõ nét/)).toBeInTheDocument();
+    expect(screen.getByText('Phù hợp nhất cho')).toBeInTheDocument();
   });
 
   it('renders dish name and description when result is provided', () => {

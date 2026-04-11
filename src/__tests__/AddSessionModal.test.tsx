@@ -3,6 +3,7 @@ import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AddSessionModal } from '../features/fitness/components/AddSessionModal';
+const { mockUseModalBackHandler } = vi.hoisted(() => ({ mockUseModalBackHandler: vi.fn() }));
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -18,6 +19,13 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.maxSessions': 'Tối đa 3 buổi/ngày',
         'fitness.plan.selectMuscleGroups': 'Chọn nhóm cơ',
         'fitness.plan.createSession': 'Tạo buổi tập',
+        'fitness.exerciseSelector.muscleChest': 'Ngực',
+        'fitness.exerciseSelector.muscleBack': 'Lưng',
+        'fitness.exerciseSelector.muscleShoulders': 'Vai',
+        'fitness.exerciseSelector.muscleLegs': 'Chân',
+        'fitness.exerciseSelector.muscleArms': 'Tay',
+        'fitness.exerciseSelector.muscleCore': 'Bụng',
+        'fitness.exerciseSelector.muscleGlutes': 'Mông',
         'common.close': 'Đóng',
         'common.back': 'Quay lại',
       };
@@ -32,6 +40,10 @@ vi.mock('../components/shared/ModalBackdrop', () => ({
       {children}
     </div>
   ),
+}));
+
+vi.mock('../hooks/useModalBackHandler', () => ({
+  useModalBackHandler: mockUseModalBackHandler,
 }));
 
 afterEach(cleanup);
@@ -58,16 +70,16 @@ describe('AddSessionModal', () => {
     fireEvent.click(screen.getByText('Sức mạnh'));
     expect(screen.getByText('Chọn nhóm cơ')).toBeInTheDocument();
     // 7 muscle groups should be visible as buttons
-    expect(screen.getByRole('button', { name: 'chest' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'back' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'legs' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ngực' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Lưng' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Chân' })).toBeInTheDocument();
   });
 
   it('selecting muscle groups and confirming calls onSelectStrength with groups', () => {
     render(<AddSessionModal {...defaultProps} />);
     fireEvent.click(screen.getByText('Sức mạnh'));
-    fireEvent.click(screen.getByRole('button', { name: 'chest' }));
-    fireEvent.click(screen.getByRole('button', { name: 'shoulders' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ngực' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Vai' }));
     fireEvent.click(screen.getByTestId('create-strength-session'));
     expect(defaultProps.onSelectStrength).toHaveBeenCalledWith(['chest', 'shoulders']);
   });
@@ -106,5 +118,13 @@ describe('AddSessionModal', () => {
     expect(screen.getByText('Chọn nhóm cơ')).toBeInTheDocument();
     fireEvent.click(screen.getByLabelText('Quay lại'));
     expect(screen.getByText('Sức mạnh')).toBeInTheDocument();
+  });
+
+  it('registers modal back handling for close and nested step back', () => {
+    render(<AddSessionModal {...defaultProps} />);
+    expect(mockUseModalBackHandler).toHaveBeenCalledWith(true, defaultProps.onClose);
+
+    fireEvent.click(screen.getByText('Sức mạnh'));
+    expect(mockUseModalBackHandler).toHaveBeenLastCalledWith(true, expect.any(Function));
   });
 });

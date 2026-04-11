@@ -169,13 +169,19 @@
     "nutritionNet": "Ròng",
     "nutritionSetupTitle": "Thiết lập mục tiêu dinh dưỡng",
     "nutritionSetupDesc": "Thiết lập hồ sơ sức khỏe và mục tiêu để theo dõi dinh dưỡng",
+    "nutritionSetupMissing": "Mục tiêu calo và protein chưa được cài đặt",
+    "nutritionSetupReason": "Bạn cần thiết lập mục tiêu dinh dưỡng để theo dõi tiến trình ăn uống hàng ngày",
+    "nutritionSetupNextStep": "Vào Cài đặt → Mục tiêu để thiết lập",
     "nutritionSetupAction": "Thiết lập ngay",
     "nutritionProteinNotConfigured": "Chưa thiết lập",
     "meal": {
       "emptySlot": "Chưa có món",
       "addCTA": "Thêm",
       "moreCount": "+{{count}} thêm",
-      "slotLabel": "{{type}}: {{count}} món, {{cal}} kcal"
+      "slotLabel": "{{type}}: {{count}} món, {{cal}} kcal",
+      "clearSlot": "Xóa bữa {{type}}",
+      "clearConfirmTitle": "Xóa bữa {{type}}?",
+      "clearConfirmDesc": "Tất cả món ăn trong bữa {{type}} sẽ bị xóa."
     },
     "recentDishesLabel": "GẦN ĐÂY",
     "budgetStripTitle": "Dinh dưỡng hôm nay",

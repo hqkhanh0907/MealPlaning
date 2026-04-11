@@ -26,6 +26,10 @@ vi.mock('react-i18next', () => ({
         'fitness.scheduleEditor.trainingDay': 'Ngày tập',
         'fitness.scheduleEditor.restDay': 'Ngày nghỉ',
         'fitness.scheduleEditor.maxSessions': 'Đã đầy (tối đa 3 buổi)',
+        'fitness.scheduleEditor.sheetMissing': 'ngày còn chỗ cho buổi tập này',
+        'fitness.scheduleEditor.sheetReason': 'buổi hiện đang ở {{currentDay}}; các ngày đã đủ 3 buổi sẽ bị khóa',
+        'fitness.scheduleEditor.sheetNextStep':
+          'chọn một ngày khác để di chuyển, hoặc đóng sheet để giữ nguyên lịch hiện tại',
         'common.close': 'Đóng',
       };
       if (key === 'fitness.scheduleEditor.sessionsCount' && opts) {
@@ -37,8 +41,18 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('../components/shared/ModalBackdrop', () => ({
-  ModalBackdrop: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
-    <div data-testid="modal-backdrop">
+  ModalBackdrop: ({
+    children,
+    onClose,
+    mobileLayout,
+    ariaLabelledBy,
+  }: {
+    children: React.ReactNode;
+    onClose: () => void;
+    mobileLayout?: string;
+    ariaLabelledBy?: string;
+  }) => (
+    <div data-testid="modal-backdrop" data-mobile-layout={mobileLayout} data-aria-labelledby={ariaLabelledBy}>
       <button data-testid="backdrop-overlay" onClick={onClose} type="button" />
       {children}
     </div>
@@ -69,6 +83,13 @@ describe('DayAssignmentSheet', () => {
   it('renders title when open', () => {
     render(<DayAssignmentSheet {...defaultProps} />);
     expect(screen.getByTestId('day-assignment-title')).toHaveTextContent('Chọn ngày tập');
+    expect(screen.getByTestId('day-assignment-description')).toHaveTextContent('Thiếu: ngày còn chỗ cho buổi tập này');
+  });
+
+  it('uses sheet modal contract with stable title and scroll region', () => {
+    render(<DayAssignmentSheet {...defaultProps} />);
+    expect(screen.getByTestId('modal-backdrop')).toHaveAttribute('data-mobile-layout', 'sheet');
+    expect(screen.getByTestId('day-assignment-scroll-region')).toBeInTheDocument();
   });
 
   it('renders all training days as options', () => {
@@ -92,8 +113,10 @@ describe('DayAssignmentSheet', () => {
     render(<DayAssignmentSheet {...defaultProps} />);
     const day1 = screen.getByTestId('day-option-1');
     expect(day1).toHaveAttribute('aria-pressed', 'true');
+    expect(day1).toHaveAttribute('aria-current', 'true');
     const day3 = screen.getByTestId('day-option-3');
     expect(day3).toHaveAttribute('aria-pressed', 'false');
+    expect(day3).not.toHaveAttribute('aria-current');
   });
 
   it('calls onSelectDay and onClose when a day is selected', () => {

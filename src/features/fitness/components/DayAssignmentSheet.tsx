@@ -3,6 +3,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
+import { buildStateDescription, createSurfaceStateContract } from '../../../components/shared/surfaceState';
 import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 
 export interface DayAssignmentSheetProps {
@@ -45,6 +46,18 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
   existingDayCounts = {},
 }: DayAssignmentSheetProps): React.JSX.Element | null {
   const { t } = useTranslation();
+  const titleId = React.useId();
+  const currentDayLabel = t(DAY_FULL_KEYS[currentDay - 1]);
+  const sheetContract = createSurfaceStateContract({
+    surface: 'overlay.day-assignment',
+    state: 'success',
+    copy: {
+      title: t('fitness.scheduleEditor.selectDay'),
+      missing: t('fitness.scheduleEditor.sheetMissing'),
+      reason: t('fitness.scheduleEditor.sheetReason', { currentDay: currentDayLabel }),
+      nextStep: t('fitness.scheduleEditor.sheetNextStep'),
+    },
+  });
 
   useModalBackHandler(open, onClose);
 
@@ -63,26 +76,22 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
   if (!open) return null;
 
   return (
-    <ModalBackdrop onClose={onClose}>
+    <ModalBackdrop onClose={onClose} mobileLayout="sheet" ariaLabelledBy={titleId}>
       <div
         data-testid="day-assignment-sheet"
-        className="bg-card relative w-full rounded-t-2xl shadow-xl sm:max-w-md sm:rounded-2xl"
+        className="bg-card relative flex max-h-[85dvh] w-full flex-col rounded-t-2xl shadow-xl sm:max-w-md sm:rounded-2xl"
         style={{ overscrollBehavior: 'contain' }}
       >
-        {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="bg-muted h-1 w-10 rounded-full" />
-        </div>
-
-        {/* Header */}
         <div className="px-4 pb-3 text-center">
-          <h2 data-testid="day-assignment-title" className="text-foreground text-xl font-semibold">
-            {t('fitness.scheduleEditor.selectDay')}
+          <h2 id={titleId} data-testid="day-assignment-title" className="text-foreground text-xl font-semibold">
+            {sheetContract.copy.title}
           </h2>
+          <p data-testid="day-assignment-description" className="text-muted-foreground mt-2 text-sm">
+            {buildStateDescription(sheetContract.copy)}
+          </p>
         </div>
 
-        {/* Day list */}
-        <div className="pb-safe px-4">
+        <div data-testid="day-assignment-scroll-region" className="pb-safe flex-1 overflow-y-auto px-4">
           <div role="radiogroup" aria-label={t('fitness.scheduleEditor.selectDay')} className="space-y-2 pb-4">
             {sortedDays.map(day => {
               const count = existingDayCounts[day] ?? 0;
@@ -106,6 +115,7 @@ const DayAssignmentSheetInner = React.memo(function DayAssignmentSheetInner({
                   <button
                     type="button"
                     aria-pressed={isCurrent}
+                    aria-current={isCurrent ? 'true' : undefined}
                     data-testid={`day-option-${day}`}
                     disabled={isFull}
                     onClick={() => handleSelect(day)}

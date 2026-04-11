@@ -30,6 +30,10 @@ export function ActivityLevelStep({ form, goNext, goBack }: Readonly<ActivityLev
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
         <h2 className="text-foreground mb-1 text-xl font-semibold">{t('onboarding.health.activityLevel')}</h2>
         <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.health.activityLevelDesc')}</p>
+        <div className="bg-muted mb-6 rounded-2xl p-4">
+          <p className="text-foreground text-sm font-medium">{t('onboarding.health.activityWhyTitle')}</p>
+          <p className="text-muted-foreground mt-1 text-xs leading-relaxed">{t('onboarding.health.activityWhyDesc')}</p>
+        </div>
 
         <fieldset className="m-0 space-y-3 border-0 p-0" aria-label={t('onboarding.health.activityLevel')}>
           {LEVELS.map(level => (

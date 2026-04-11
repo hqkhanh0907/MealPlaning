@@ -1,9 +1,29 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FilterBottomSheet } from '../components/shared/FilterBottomSheet';
 import type { FilterConfig } from '../types';
 
 vi.mock('../hooks/useModalBackHandler', () => ({ useModalBackHandler: vi.fn() }));
+vi.mock('../components/shared/ModalBackdrop', () => ({
+  ModalBackdrop: ({
+    children,
+    onClose,
+    mobileLayout,
+    ariaLabelledBy,
+  }: {
+    children: React.ReactNode;
+    onClose: () => void;
+    mobileLayout?: string;
+    ariaLabelledBy?: string;
+  }) => (
+    <div data-testid="modal-backdrop" data-mobile-layout={mobileLayout} data-aria-labelledby={ariaLabelledBy}>
+      <button data-testid="backdrop-overlay" onClick={onClose} type="button" />
+      {children}
+    </div>
+  ),
+}));
 
 describe('FilterBottomSheet', () => {
   const defaultConfig: FilterConfig = { sortBy: 'name-asc' };
@@ -103,5 +123,45 @@ describe('FilterBottomSheet', () => {
   it('renders with data-testid on root', () => {
     render(<FilterBottomSheet {...defaultProps} />);
     expect(screen.getByTestId('filter-bottom-sheet')).toBeInTheDocument();
+  });
+
+  it('uses sheet modal contract with stable title and scroll region', () => {
+    render(<FilterBottomSheet {...defaultProps} />);
+    expect(screen.getByTestId('modal-backdrop')).toHaveAttribute('data-mobile-layout', 'sheet');
+    expect(screen.getByTestId('filter-bottom-sheet-title')).toBeInTheDocument();
+    expect(screen.getByTestId('filter-bottom-sheet-description')).toBeInTheDocument();
+    expect(screen.getByTestId('filter-bottom-sheet-scroll-region')).toBeInTheDocument();
+  });
+
+  it('dismissing from backdrop discards draft changes', () => {
+    const onChange = vi.fn();
+    const onClose = vi.fn();
+    render(<FilterBottomSheet {...defaultProps} onChange={onChange} onClose={onClose} />);
+    fireEvent.click(screen.getByText('Calo (Cao → Thấp)'));
+    fireEvent.click(screen.getByTestId('backdrop-overlay'));
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('reopen reflects latest config prop instead of stale draft', () => {
+    const { rerender } = render(<FilterBottomSheet {...defaultProps} />);
+    fireEvent.click(screen.getByText('Calo (Cao → Thấp)'));
+    expect(screen.getByText('Calo (Cao → Thấp)').className).toContain('bg-primary');
+
+    rerender(<FilterBottomSheet {...defaultProps} config={{ sortBy: 'pro-desc', minProtein: 20 }} />);
+
+    expect(screen.getByText('Protein (Cao → Thấp)').className).toContain('bg-primary');
+    expect(screen.getByText('Calo (Cao → Thấp)').className).not.toContain('bg-primary');
+    expect(screen.getByText('Protein cao (≥20g)').className).toContain('bg-primary');
+  });
+
+  it('reset only changes local draft until apply', () => {
+    const onChange = vi.fn();
+    render(
+      <FilterBottomSheet {...defaultProps} onChange={onChange} config={{ sortBy: 'cal-desc', maxCalories: 300 }} />,
+    );
+    fireEvent.click(screen.getByTestId('filter-reset-btn'));
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByText('Tên (A-Z)').className).toContain('bg-primary');
   });
 });

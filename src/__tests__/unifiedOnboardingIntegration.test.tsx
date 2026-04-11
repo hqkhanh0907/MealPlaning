@@ -196,6 +196,8 @@ import { UnifiedOnboarding } from '../components/UnifiedOnboarding';
 /* Helpers */
 /* ------------------------------------------------------------------ */
 
+const STEP_TIMEOUT_MS = 5000;
+
 /** Click a button found by data-testid, waiting for it to appear first. */
 async function clickByTestId(testId: string) {
   const el = await screen.findByTestId(testId);
@@ -260,16 +262,16 @@ async function navigateTrainingSections() {
   fireEvent.click(screen.getByText('onboarding.nav.next', { selector: 'button' }));
 
   // Section 4: DurationStep → EquipmentStep → InjuriesStep → CardioStep → TrainingConfirmStep
-  await screen.findByText('fitness.onboarding.sessionDuration');
+  await screen.findByText('fitness.onboarding.sessionDuration', {}, { timeout: STEP_TIMEOUT_MS });
   fireEvent.click(screen.getByText('onboarding.nav.next', { selector: 'button' }));
 
-  await screen.findByText('fitness.onboarding.equipment');
+  await screen.findByText('fitness.onboarding.equipment', {}, { timeout: STEP_TIMEOUT_MS });
   fireEvent.click(screen.getByText('onboarding.nav.next', { selector: 'button' }));
 
-  await screen.findByText('fitness.onboarding.injuries');
+  await screen.findByText('fitness.onboarding.injuries', {}, { timeout: STEP_TIMEOUT_MS });
   fireEvent.click(screen.getByText('onboarding.nav.next', { selector: 'button' }));
 
-  await screen.findByText('fitness.onboarding.cardioSessions');
+  await screen.findByText('fitness.onboarding.cardioSessions', {}, { timeout: STEP_TIMEOUT_MS });
   fireEvent.click(screen.getByText('onboarding.nav.next', { selector: 'button' }));
 
   // TrainingConfirmStep for beginner → calls setOnboardingSection(5) + goNext

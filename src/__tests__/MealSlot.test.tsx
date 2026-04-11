@@ -13,8 +13,14 @@ vi.mock('react-i18next', () => ({
         'calendar.meal.addCTA': 'Thêm',
         'calendar.meal.moreCount': '+{{count}} thêm',
         'calendar.meal.slotLabel': '{{type}}: {{count}} món, {{cal}} kcal',
+        'calendar.meal.clearSlot': 'Xóa bữa {{type}}',
+        'calendar.meal.clearConfirmTitle': 'Xóa bữa {{type}}?',
+        'calendar.meal.clearConfirmDesc': 'Tất cả món ăn trong bữa {{type}} sẽ bị xóa.',
         'calendar.addDishForMeal': 'Thêm món cho {{meal}}',
         'common.edit': 'Sửa',
+        'common.delete': 'Xóa',
+        'common.cancel': 'Hủy',
+        'common.confirm': 'Xác nhận',
         'common.decrease': 'Giảm',
         'common.increase': 'Tăng',
       };
@@ -28,6 +34,10 @@ vi.mock('react-i18next', () => ({
     },
     i18n: { language: 'vi' },
   }),
+}));
+
+vi.mock('../components/modals/ConfirmationModal', () => ({
+  ConfirmationModal: () => null,
 }));
 
 import { MealSlot, MealSlotProps } from '../components/schedule/MealSlot';
@@ -86,6 +96,20 @@ function makeProps(overrides: Partial<MealSlotProps> = {}): MealSlotProps {
 describe('MealSlot', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      configurable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
   });
 
   describe('empty state', () => {
@@ -191,8 +215,9 @@ describe('MealSlot', () => {
     it('has left border accent for filled breakfast', () => {
       render(<MealSlot {...makeProps()} />);
       const card = screen.getByTestId('meal-slot-breakfast');
-      expect(card.className).toContain('border-l-[3px]');
-      expect(card.className).toContain('border-l-meal-breakfast');
+      const content = card.querySelector('[class*="bg-card"]')!;
+      expect(content.className).toContain('border-l-[3px]');
+      expect(content.className).toContain('border-l-meal-breakfast');
     });
 
     it('shows 4 dishes without "+N" indicator (MAX_VISIBLE=4)', () => {
@@ -367,7 +392,8 @@ describe('MealSlot', () => {
       expect(screen.getByText('Trưa')).toBeInTheDocument();
       const card = screen.getByTestId('meal-slot-lunch');
       expect(card).toBeInTheDocument();
-      expect(card.className).toContain('border-l-meal-lunch');
+      const content = card.querySelector('[class*="bg-card"]')!;
+      expect(content.className).toContain('border-l-meal-lunch');
     });
 
     it('renders dinner type with correct border', () => {
@@ -375,7 +401,8 @@ describe('MealSlot', () => {
       expect(screen.getByText('Tối')).toBeInTheDocument();
       const card = screen.getByTestId('meal-slot-dinner');
       expect(card).toBeInTheDocument();
-      expect(card.className).toContain('border-l-meal-dinner');
+      const content = card.querySelector('[class*="bg-card"]')!;
+      expect(content.className).toContain('border-l-meal-dinner');
     });
   });
 
@@ -393,8 +420,9 @@ describe('MealSlot', () => {
     it('uses raised card style with shadow-sm for populated slot', () => {
       render(<MealSlot {...makeProps()} />);
       const card = screen.getByTestId('meal-slot-breakfast');
-      expect(card.className).toContain('shadow-sm');
-      expect(card.className).toContain('hover:shadow-md');
+      const content = card.querySelector('[class*="bg-card"]')!;
+      expect(content.className).toContain('shadow-sm');
+      expect(content.className).toContain('hover:shadow-md');
     });
 
     it('uses flat style without shadow for empty slot', () => {

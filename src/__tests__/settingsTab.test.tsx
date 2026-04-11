@@ -105,8 +105,10 @@ describe('SettingsTab', () => {
   it('renders with BMR=0 and TDEE=0 when profile is null', () => {
     mockSettingsProfile = null;
     render(<SettingsTab {...defaultProps} />);
-    expect(screen.getByText(/BMR: 0/)).toBeInTheDocument();
-    expect(screen.getByText(/TDEE: 0/)).toBeInTheDocument();
+    const healthCard = screen.getByTestId('settings-nav-health-profile');
+    expect(healthCard).toHaveTextContent('Chưa hoàn tất');
+    expect(healthCard).toHaveTextContent('Thiếu hồ sơ cơ bản nên chưa thể tính BMR, TDEE và macro.');
+    expect(screen.queryByText(/BMR: 0/)).not.toBeInTheDocument();
   });
 
   it('renders settings page without duplicate heading', () => {
@@ -124,8 +126,20 @@ describe('SettingsTab', () => {
 
   it('shows summary info on menu cards', () => {
     render(<SettingsTab {...defaultProps} />);
-    expect(screen.getByText(/BMR: 1618/)).toBeInTheDocument();
-    expect(screen.getByText(/TDEE: 2508/)).toBeInTheDocument();
+    const healthCard = screen.getByTestId('settings-nav-health-profile');
+    expect(healthCard).toHaveTextContent('Đã sẵn sàng');
+    expect(healthCard).toHaveTextContent('Hồ sơ đã đủ dữ liệu để tính BMR, TDEE và gợi ý macro hằng ngày.');
+    expect(healthCard).toHaveTextContent('BMR 1618 • TDEE 2508');
+  });
+
+  it('treats zero weight as needs attention instead of not configured', () => {
+    mockSettingsProfile = { ...mockSettingsProfile, weightKg: 0 };
+    render(<SettingsTab {...defaultProps} />);
+    expect(screen.getByText('Cần chú ý')).toBeInTheDocument();
+    expect(
+      screen.getByText('Cân nặng (kg) đang có giá trị chưa hợp lệ nên ứng dụng chưa thể tính đúng nhu cầu năng lượng.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/BMR 1618 • TDEE 2508/)).not.toBeInTheDocument();
   });
 
   it('renders theme section with all options', () => {

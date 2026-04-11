@@ -586,7 +586,10 @@ describe('fitnessStore', () => {
   describe('addPlanDaySession', () => {
     it('adds a new session with next sessionOrder', () => {
       const day1 = samplePlanDay({ sessionOrder: 1 });
-      useFitnessStore.setState({ trainingPlanDays: [day1] });
+      useFitnessStore.setState({
+        trainingPlans: [samplePlan({ id: 'plan-1', trainingDays: [1], restDays: [2, 3, 4, 5, 6, 7] })],
+        trainingPlanDays: [day1],
+      });
 
       useFitnessStore.getState().addPlanDaySession('plan-1', 1, {
         planId: 'plan-1',
@@ -603,6 +606,7 @@ describe('fitnessStore', () => {
       const days = useFitnessStore.getState().trainingPlanDays;
       expect(days).toHaveLength(2);
       expect(days[1].sessionOrder).toBe(2);
+      expect(useFitnessStore.getState().trainingPlans[0].trainingDays).toEqual([1]);
     });
 
     it('rejects when 3 sessions already exist', () => {
@@ -627,12 +631,34 @@ describe('fitnessStore', () => {
 
       expect(useFitnessStore.getState().trainingPlanDays).toHaveLength(3);
     });
+
+    it('updates plan schedule when first manual day is added', () => {
+      useFitnessStore.setState({
+        trainingPlans: [samplePlan({ id: 'plan-1', trainingDays: [], restDays: [1, 2, 3, 4, 5, 6, 7] })],
+        trainingPlanDays: [],
+      });
+
+      useFitnessStore.getState().addPlanDaySession('plan-1', 4, {
+        planId: 'plan-1',
+        dayOfWeek: 4,
+        sessionOrder: 1,
+        workoutType: 'Strength',
+        exercises: '[]',
+        originalExercises: '[]',
+        isUserAssigned: true,
+        originalDayOfWeek: 4,
+      });
+
+      expect(useFitnessStore.getState().trainingPlans[0].trainingDays).toEqual([4]);
+      expect(useFitnessStore.getState().trainingPlans[0].restDays).toEqual([1, 2, 3, 5, 6, 7]);
+    });
   });
 
   /* ---------- removePlanDaySession ---------- */
   describe('removePlanDaySession', () => {
     it('removes session and reorders remaining', () => {
       useFitnessStore.setState({
+        trainingPlans: [samplePlan({ id: 'plan-1', trainingDays: [1], restDays: [2, 3, 4, 5, 6, 7] })],
         trainingPlanDays: [
           samplePlanDay({ id: 'pd-1', sessionOrder: 1 }),
           samplePlanDay({ id: 'pd-2', sessionOrder: 2 }),
@@ -646,6 +672,19 @@ describe('fitnessStore', () => {
       expect(days).toHaveLength(2);
       expect(days[0].sessionOrder).toBe(1);
       expect(days[1].sessionOrder).toBe(2);
+      expect(useFitnessStore.getState().trainingPlans[0].trainingDays).toEqual([1]);
+    });
+
+    it('clears training day when last session is removed', () => {
+      useFitnessStore.setState({
+        trainingPlans: [samplePlan({ id: 'plan-1', trainingDays: [1], restDays: [2, 3, 4, 5, 6, 7] })],
+        trainingPlanDays: [samplePlanDay({ id: 'solo-day', sessionOrder: 1 })],
+      });
+
+      useFitnessStore.getState().removePlanDaySession('solo-day');
+
+      expect(useFitnessStore.getState().trainingPlans[0].trainingDays).toEqual([]);
+      expect(useFitnessStore.getState().trainingPlans[0].restDays).toEqual([1, 2, 3, 4, 5, 6, 7]);
     });
   });
 });
@@ -1025,12 +1064,20 @@ describe('fitnessStore – additional coverage', () => {
     useFitnessStore.setState({
       trainingPlans: [samplePlan()],
       trainingPlanDays: [samplePlanDay()],
+      showPlanCelebration: true,
     });
 
     useFitnessStore.getState().clearTrainingPlans();
 
     expect(useFitnessStore.getState().trainingPlans).toEqual([]);
     expect(useFitnessStore.getState().trainingPlanDays).toEqual([]);
+    expect(useFitnessStore.getState().showPlanCelebration).toBe(false);
+  });
+
+  it('addTrainingPlan enables celebration banner', async () => {
+    await useFitnessStore.getState().addTrainingPlan(samplePlan({ id: 'celebrate-plan' }));
+
+    expect(useFitnessStore.getState().showPlanCelebration).toBe(true);
   });
 
   /* ---------- dismissPlanCelebration ---------- */
@@ -4910,6 +4957,23 @@ describe('fitnessStore – branch coverage gaps', () => {
     expect(preview).toHaveProperty('mapped');
     expect(preview).toHaveProperty('suggested');
     expect(preview).toHaveProperty('unmapped');
+  });
+
+  it('previewSplitChange derives day count from existing sessions when plan trainingDays is empty', () => {
+    const plan = samplePlan({
+      id: 'manual-preview-plan',
+      splitType: 'custom',
+      trainingDays: [],
+      restDays: [1, 2, 3, 4, 5, 6, 7],
+    });
+    const days = [
+      samplePlanDay({ id: 'manual-day-1', planId: 'manual-preview-plan', dayOfWeek: 4, workoutType: 'Strength' }),
+    ];
+    useFitnessStore.setState({ trainingPlans: [plan], trainingPlanDays: days });
+
+    const preview = useFitnessStore.getState().previewSplitChange('manual-preview-plan', 'upper_lower');
+
+    expect(preview.suggested.length + preview.mapped.length + preview.unmapped.length).toBeGreaterThan(0);
   });
 
   /* ---- applyTemplate: daysPerWeek > plan.trainingDays → index fallback (line 1293) ---- */

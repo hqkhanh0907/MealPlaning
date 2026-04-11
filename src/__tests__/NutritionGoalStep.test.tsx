@@ -182,6 +182,7 @@ describe('NutritionGoalStep', () => {
     expect(screen.getByTestId('nutrition-goal-step')).toBeInTheDocument();
     expect(screen.getByText('goal.title')).toBeInTheDocument();
     expect(screen.getByText('goal.subtitle')).toBeInTheDocument();
+    expect(screen.getByText('onboarding.goal.orientationTitle')).toBeInTheDocument();
   });
 
   it('renders all 3 goal type buttons', () => {
@@ -213,19 +214,20 @@ describe('NutritionGoalStep', () => {
     expect(screen.getByText('goal.rate_conservative')).toBeInTheDocument();
     expect(screen.getByText('goal.rate_moderate')).toBeInTheDocument();
     expect(screen.getByText('goal.rate_aggressive')).toBeInTheDocument();
-    expect(screen.getByLabelText('goal.targetWeight')).toBeInTheDocument();
+    expect(screen.getByLabelText('goal.targetWeightOptional')).toBeInTheDocument();
+    expect(screen.getByText('onboarding.goal.targetWeightHelp')).toBeInTheDocument();
   });
 
   it('shows rate and target weight fields when goal is bulk', () => {
     renderStep({ goalType: 'bulk' });
     expect(screen.getByText('goal.rate')).toBeInTheDocument();
-    expect(screen.getByLabelText('goal.targetWeight')).toBeInTheDocument();
+    expect(screen.getByLabelText('goal.targetWeightOptional')).toBeInTheDocument();
   });
 
   it('hides rate and target weight fields when goal is maintain', () => {
     renderStep({ goalType: 'maintain' });
     expect(screen.queryByText('goal.rate')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('goal.targetWeight')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('goal.targetWeightOptional')).not.toBeInTheDocument();
   });
 
   /* ---------------------------------------------------------------- */
@@ -239,7 +241,7 @@ describe('NutritionGoalStep', () => {
     fireEvent.click(cutBtn);
 
     expect(screen.getByText('goal.rate')).toBeInTheDocument();
-    expect(screen.getByLabelText('goal.targetWeight')).toBeInTheDocument();
+    expect(screen.getByLabelText('goal.targetWeightOptional')).toBeInTheDocument();
   });
 
   it('switches from cut to maintain and hides conditional fields (lines 57-58)', () => {
@@ -250,7 +252,7 @@ describe('NutritionGoalStep', () => {
     fireEvent.click(maintainBtn);
 
     expect(screen.queryByText('goal.rate')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('goal.targetWeight')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('goal.targetWeightOptional')).not.toBeInTheDocument();
   });
 
   it('clears target weight and errors when switching to maintain', () => {
@@ -259,7 +261,7 @@ describe('NutritionGoalStep', () => {
     fireEvent.click(maintainBtn);
 
     // Conditional fields hidden confirms targetField was cleared
-    expect(screen.queryByLabelText('goal.targetWeight')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('goal.targetWeightOptional')).not.toBeInTheDocument();
   });
 
   it('switches from cut to bulk', () => {
@@ -269,7 +271,7 @@ describe('NutritionGoalStep', () => {
 
     // Rate and target fields still visible
     expect(screen.getByText('goal.rate')).toBeInTheDocument();
-    expect(screen.getByLabelText('goal.targetWeight')).toBeInTheDocument();
+    expect(screen.getByLabelText('goal.targetWeightOptional')).toBeInTheDocument();
   });
 
   /* ---------------------------------------------------------------- */
@@ -292,14 +294,14 @@ describe('NutritionGoalStep', () => {
   /* ---------------------------------------------------------------- */
   it('accepts numeric target weight input', () => {
     renderStep({ goalType: 'cut' });
-    const input = screen.getByLabelText('goal.targetWeight') as HTMLInputElement;
+    const input = screen.getByLabelText('goal.targetWeightOptional') as HTMLInputElement;
     fireEvent.change(input, { target: { value: '60' } });
     expect(input.value).toBe('60');
   });
 
   it('handles empty target weight input (sets undefined)', () => {
     renderStep({ goalType: 'cut' });
-    const input = screen.getByLabelText('goal.targetWeight') as HTMLInputElement;
+    const input = screen.getByLabelText('goal.targetWeightOptional') as HTMLInputElement;
     // Type a value then clear it
     fireEvent.change(input, { target: { value: '65' } });
     expect(input.value).toBe('65');
@@ -310,7 +312,7 @@ describe('NutritionGoalStep', () => {
 
   it('fires onBlur on target weight input', () => {
     renderStep({ goalType: 'cut' });
-    const input = screen.getByLabelText('goal.targetWeight');
+    const input = screen.getByLabelText('goal.targetWeightOptional');
     fireEvent.blur(input);
     // No error — just verifies onBlur handler is wired
     expect(input).toBeInTheDocument();
@@ -321,7 +323,7 @@ describe('NutritionGoalStep', () => {
   /* ---------------------------------------------------------------- */
   it('shows error when cut target weight >= current weight (line 45)', async () => {
     renderStep({ goalType: 'cut', weightKg: 70 });
-    const input = screen.getByLabelText('goal.targetWeight');
+    const input = screen.getByLabelText('goal.targetWeightOptional');
 
     // Target 80 is above current 70 for a cut goal → direction error
     fireEvent.change(input, { target: { value: '80' } });
@@ -334,7 +336,7 @@ describe('NutritionGoalStep', () => {
 
   it('shows error when bulk target weight <= current weight', async () => {
     renderStep({ goalType: 'bulk', weightKg: 70 });
-    const input = screen.getByLabelText('goal.targetWeight');
+    const input = screen.getByLabelText('goal.targetWeightOptional');
 
     // Target 60 is below current 70 for a bulk goal → direction error
     fireEvent.change(input, { target: { value: '60' } });
@@ -347,7 +349,7 @@ describe('NutritionGoalStep', () => {
 
   it('clears error when target weight corrected to valid direction', async () => {
     renderStep({ goalType: 'cut', weightKg: 70 });
-    const input = screen.getByLabelText('goal.targetWeight');
+    const input = screen.getByLabelText('goal.targetWeightOptional');
 
     // Invalid: cut with target above current
     fireEvent.change(input, { target: { value: '80' } });
@@ -364,7 +366,7 @@ describe('NutritionGoalStep', () => {
 
   it('clears direction error when goal switches to maintain', async () => {
     renderStep({ goalType: 'cut', weightKg: 70 });
-    const input = screen.getByLabelText('goal.targetWeight');
+    const input = screen.getByLabelText('goal.targetWeightOptional');
 
     // Create a direction error
     fireEvent.change(input, { target: { value: '80' } });
@@ -416,7 +418,7 @@ describe('NutritionGoalStep', () => {
   /* ---------------------------------------------------------------- */
   it('sets aria-invalid and aria-describedby when target has error', async () => {
     renderStep({ goalType: 'cut', weightKg: 70 });
-    const input = screen.getByLabelText('goal.targetWeight');
+    const input = screen.getByLabelText('goal.targetWeightOptional');
 
     expect(input).toHaveAttribute('aria-invalid', 'false');
 
@@ -481,7 +483,7 @@ describe('NutritionGoalStep', () => {
     const { goNext } = renderStep({ goalType: 'cut', weightKg: 70 });
 
     // Set invalid target: 80 >= 70 for cut goal
-    const input = screen.getByLabelText('goal.targetWeight');
+    const input = screen.getByLabelText('goal.targetWeightOptional');
     fireEvent.change(input, { target: { value: '80' } });
 
     await act(async () => {
@@ -499,7 +501,7 @@ describe('NutritionGoalStep', () => {
   it('does NOT call goNext when bulk target <= current weight (handleNext cross-field)', async () => {
     const { goNext } = renderStep({ goalType: 'bulk', weightKg: 70 });
 
-    const input = screen.getByLabelText('goal.targetWeight');
+    const input = screen.getByLabelText('goal.targetWeightOptional');
     fireEvent.change(input, { target: { value: '60' } });
 
     await act(async () => {
@@ -551,7 +553,7 @@ describe('NutritionGoalStep', () => {
   /* ---------------------------------------------------------------- */
   it('renders error message with role="alert" when present', async () => {
     renderStep({ goalType: 'cut', weightKg: 70 });
-    const input = screen.getByLabelText('goal.targetWeight');
+    const input = screen.getByLabelText('goal.targetWeightOptional');
 
     fireEvent.change(input, { target: { value: '80' } });
 
@@ -569,7 +571,7 @@ describe('NutritionGoalStep', () => {
     renderStep({ goalType: 'cut', weightKg: 70 });
 
     // Create error
-    const input = screen.getByLabelText('goal.targetWeight');
+    const input = screen.getByLabelText('goal.targetWeightOptional');
     fireEvent.change(input, { target: { value: '80' } });
 
     await waitFor(() => {
@@ -588,7 +590,7 @@ describe('NutritionGoalStep', () => {
   it('checkDirectionError clears error when weight is null (empty input)', async () => {
     renderStep({ goalType: 'cut', weightKg: 70 });
 
-    const input = screen.getByLabelText('goal.targetWeight');
+    const input = screen.getByLabelText('goal.targetWeightOptional');
 
     // Create error first
     fireEvent.change(input, { target: { value: '80' } });

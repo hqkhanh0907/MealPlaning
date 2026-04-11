@@ -48,11 +48,6 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
   const hasChanges = JSON.stringify(localExercises) !== initialSnapshot;
   const isModified = planDay.originalExercises !== undefined && planDay.exercises !== planDay.originalExercises;
 
-  const handleSave = useCallback(() => {
-    useFitnessStore.getState().updatePlanDayExercises(planDay.id, localExercises);
-    popPage();
-  }, [planDay.id, localExercises, popPage]);
-
   const handleRestore = useCallback(() => {
     const original = safeJsonParse<SelectedExercise[]>(planDay.originalExercises ?? '[]', []);
     setLocalExercises(original);
@@ -66,11 +61,6 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
       popPage();
     }
   }, [hasChanges, popPage]);
-
-  const handleSaveAndBack = useCallback(() => {
-    setShowConfirmDialog(false);
-    handleSave();
-  }, [handleSave]);
 
   const handleDiscardAndBack = useCallback(() => {
     setShowConfirmDialog(false);
@@ -95,6 +85,25 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
     setPendingRemoval(null);
     pendingRemovalTimeoutRef.current = null;
   }, []);
+
+  const handleSave = useCallback(() => {
+    const pendingIndex = pendingRemovalRef.current?.index;
+    const exercisesToSave =
+      pendingIndex === undefined ? localExercises : localExercises.filter((_, index) => index !== pendingIndex);
+    if (pendingRemovalTimeoutRef.current) {
+      clearTimeout(pendingRemovalTimeoutRef.current);
+      pendingRemovalRef.current = null;
+      setPendingRemoval(null);
+      pendingRemovalTimeoutRef.current = null;
+    }
+    useFitnessStore.getState().updatePlanDayExercises(planDay.id, exercisesToSave);
+    popPage();
+  }, [localExercises, planDay.id, popPage]);
+
+  const handleSaveAndBack = useCallback(() => {
+    setShowConfirmDialog(false);
+    handleSave();
+  }, [handleSave]);
 
   const handleRemove = useCallback(
     (index: number) => {
@@ -348,7 +357,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                       <button
                         type="button"
                         onClick={() => handleMoveUp(index)}
-                        aria-label={`Move up ${item.exercise.nameVi}`}
+                        aria-label={t('fitness.plan.moveUpExercise', { name: item.exercise.nameVi })}
                         disabled={index === 0}
                         className="focus-visible:ring-ring text-muted-foreground enabled:active:bg-muted flex min-h-[44px] min-w-[44px] items-center justify-center rounded transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
                       >
@@ -357,7 +366,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                       <button
                         type="button"
                         onClick={() => handleMoveDown(index)}
-                        aria-label={`Move down ${item.exercise.nameVi}`}
+                        aria-label={t('fitness.plan.moveDownExercise', { name: item.exercise.nameVi })}
                         disabled={index === localExercises.length - 1}
                         className="focus-visible:ring-ring text-muted-foreground enabled:active:bg-muted flex min-h-[44px] min-w-[44px] items-center justify-center rounded transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
                       >
@@ -366,7 +375,7 @@ export const PlanDayEditor = memo(function PlanDayEditor({ planDay }: PlanDayEdi
                       <button
                         type="button"
                         onClick={() => handleRemove(index)}
-                        aria-label={`Remove ${item.exercise.nameVi}`}
+                        aria-label={t('fitness.plan.removeExercise', { name: item.exercise.nameVi })}
                         className="border-border text-destructive active:bg-destructive/10 focus-visible:ring-ring ml-2 flex min-h-[44px] min-w-[44px] items-center justify-center rounded border-l pl-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
                       >
                         <X className="h-4 w-4" />
@@ -502,6 +511,7 @@ const StepperField = memo(function StepperField({
   max,
   testId,
 }: StepperFieldProps) {
+  const { t } = useTranslation();
   return (
     <fieldset aria-label={label} className="m-0 flex flex-col items-center gap-1 border-0 p-0" data-testid={testId}>
       <span className="text-muted-foreground text-xs">{label}</span>
@@ -510,7 +520,7 @@ const StepperField = memo(function StepperField({
           type="button"
           onClick={onDecrement}
           disabled={value <= min}
-          aria-label={`Decrease ${label}`}
+          aria-label={t('fitness.plan.decreaseField', { label })}
           className="focus-visible:ring-ring border-border text-foreground-secondary enabled:active:bg-muted flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
         >
           <Minus className="h-3.5 w-3.5" />
@@ -523,7 +533,7 @@ const StepperField = memo(function StepperField({
           type="button"
           onClick={onIncrement}
           disabled={value >= max}
-          aria-label={`Increase ${label}`}
+          aria-label={t('fitness.plan.increaseField', { label })}
           className="focus-visible:ring-ring border-border text-foreground-secondary enabled:active:bg-muted flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border focus-visible:ring-2 focus-visible:outline-none disabled:opacity-50"
         >
           <Plus className="h-3.5 w-3.5" />

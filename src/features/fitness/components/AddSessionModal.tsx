@@ -3,8 +3,18 @@ import React, { memo, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ModalBackdrop } from '../../../components/shared/ModalBackdrop';
+import { useModalBackHandler } from '../../../hooks/useModalBackHandler';
 
 const MUSCLE_GROUPS = ['chest', 'back', 'shoulders', 'legs', 'arms', 'core', 'glutes'] as const;
+const MUSCLE_GROUP_LABEL_KEYS: Record<(typeof MUSCLE_GROUPS)[number], string> = {
+  chest: 'fitness.exerciseSelector.muscleChest',
+  back: 'fitness.exerciseSelector.muscleBack',
+  shoulders: 'fitness.exerciseSelector.muscleShoulders',
+  legs: 'fitness.exerciseSelector.muscleLegs',
+  arms: 'fitness.exerciseSelector.muscleArms',
+  core: 'fitness.exerciseSelector.muscleCore',
+  glutes: 'fitness.exerciseSelector.muscleGlutes',
+};
 
 interface AddSessionModalProps {
   isOpen: boolean;
@@ -44,6 +54,7 @@ function AddSessionModalInner({
   }, [selectedGroups, onSelectStrength]);
 
   const handleBack = useCallback(() => setStep('options'), []);
+  useModalBackHandler(isOpen, step === 'muscle-groups' ? handleBack : onClose);
 
   if (!isOpen) return null;
 
@@ -118,7 +129,7 @@ function AddSessionModalInner({
                   <button
                     key={group}
                     type="button"
-                    aria-label={group}
+                    aria-label={t(MUSCLE_GROUP_LABEL_KEYS[group])}
                     aria-pressed={isSelected}
                     onClick={() => toggleGroup(group)}
                     className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
@@ -127,7 +138,7 @@ function AddSessionModalInner({
                         : 'text-foreground-secondary bg-muted'
                     }`}
                   >
-                    {group}
+                    {t(MUSCLE_GROUP_LABEL_KEYS[group])}
                   </button>
                 );
               })}

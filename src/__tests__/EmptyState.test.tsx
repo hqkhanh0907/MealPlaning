@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { Dumbbell, Image, Search } from 'lucide-react';
 
 import { EmptyState } from '../components/shared/EmptyState';
+import { createSurfaceStateContract } from '../components/shared/surfaceState';
 
 describe('EmptyState', () => {
   describe('compact variant', () => {
@@ -97,6 +98,35 @@ describe('EmptyState', () => {
     it('applies custom className', () => {
       const { container } = render(<EmptyState title="Trống" className="my-custom" />);
       expect(container.firstChild).toHaveClass('my-custom');
+    });
+
+    it('renders structured contract copy and keeps one primary CTA', () => {
+      const onAction = vi.fn();
+      const contract = createSurfaceStateContract({
+        surface: 'settings.goal',
+        state: 'setup',
+        copy: {
+          title: 'Chưa thiết lập mục tiêu',
+          missing: 'mục tiêu dinh dưỡng',
+          reason: 'chưa có hồ sơ sức khỏe',
+          nextStep: 'mở phần chỉnh sửa',
+        },
+        primaryAction: {
+          label: 'Chỉnh sửa',
+          onAction,
+        },
+      });
+
+      render(<EmptyState icon={Dumbbell} contract={contract} />);
+
+      expect(screen.getByText('Chưa thiết lập mục tiêu')).toBeInTheDocument();
+      expect(
+        screen.getByText('Thiếu: mục tiêu dinh dưỡng · Lý do: chưa có hồ sơ sức khỏe · Tiếp theo: mở phần chỉnh sửa'),
+      ).toBeInTheDocument();
+
+      const button = screen.getByRole('button', { name: 'Chỉnh sửa' });
+      fireEvent.click(button);
+      expect(onAction).toHaveBeenCalledTimes(1);
     });
   });
 

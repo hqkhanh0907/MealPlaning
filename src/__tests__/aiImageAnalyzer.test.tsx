@@ -78,6 +78,7 @@ describe('AIImageAnalyzer', () => {
     render(<AIImageAnalyzer {...defaultProps} />);
     expect(screen.getByTestId('image-capture')).toBeInTheDocument();
     expect(screen.getByTestId('analysis-result')).toBeInTheDocument();
+    expect(screen.getByText('Ước tính nhanh calo và protein trước khi lưu vào thư viện')).toBeInTheDocument();
   });
 
   it('renders analyze button disabled when no image', () => {

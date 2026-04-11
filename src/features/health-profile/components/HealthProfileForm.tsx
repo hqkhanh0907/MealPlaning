@@ -8,6 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { FormField } from '../../../components/form/FormField';
 import { RadioPills } from '../../../components/form/RadioPills';
 import { StringNumberController } from '../../../components/form/StringNumberController';
+import { getHealthProfileSetupContract } from '../../../components/settings/readiness';
+import { EmptyState } from '../../../components/shared/EmptyState';
+import { createSurfaceStateContract } from '../../../components/shared/surfaceState';
 import { useDatabase } from '../../../contexts/DatabaseContext';
 import { type HealthProfileFormData, healthProfileSchema } from '../../../schemas/healthProfileSchema';
 import { calculateBMR, calculateMacros, calculateTDEE } from '../../../services/nutritionEngine';
@@ -137,6 +140,47 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
   });
 
   const watchedAge = useMemo(() => computeAgeFromDob(watchedDateOfBirth), [watchedDateOfBirth]);
+  const readiness = useMemo(
+    () =>
+      getHealthProfileSetupContract(
+        {
+          name: watchedName,
+          gender: watchedGender,
+          dateOfBirth: watchedDateOfBirth,
+          heightCm: watchedHeightCm,
+          weightKg: watchedWeightKg,
+          activityLevel: watchedActivityLevel,
+          bodyFatPct: typeof watchedBodyFatPct === 'number' ? watchedBodyFatPct : undefined,
+        },
+        activeGoal,
+        t,
+      ),
+    [
+      watchedName,
+      watchedGender,
+      watchedDateOfBirth,
+      watchedHeightCm,
+      watchedWeightKg,
+      watchedActivityLevel,
+      watchedBodyFatPct,
+      activeGoal,
+      t,
+    ],
+  );
+  const previewBlockedContract = useMemo(
+    () =>
+      createSurfaceStateContract({
+        surface: 'settings.healthProfile',
+        state: readiness.surfaceState,
+        copy: {
+          title: readiness.title,
+          missing: readiness.badgeLabel,
+          reason: [readiness.summary, readiness.optionalNote].filter(Boolean).join(' '),
+          nextStep: readiness.nextStep,
+        },
+      }),
+    [readiness],
+  );
 
   const bmr = useMemo(() => {
     if (watchedBmrOverrideEnabled && watchedBmrOverride) return watchedBmrOverride;
@@ -238,6 +282,10 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
   return (
     <div className="space-y-6" data-testid="health-profile-form">
       {!embedded && <h3 className="text-foreground text-xl font-semibold">{t('healthProfile.title')}</h3>}
+      <div className="bg-muted rounded-xl p-4 text-sm">
+        <p className="text-foreground font-medium">{t('healthProfile.setupOrientationTitle')}</p>
+        <p className="text-muted-foreground mt-1">{t('healthProfile.setupOrientationDesc')}</p>
+      </div>
 
       {/* Name */}
       <FormField label={t('healthProfile.name')} error={errors.name} htmlFor="hp-name" className="">
@@ -262,6 +310,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
         <div className="text-muted-foreground mt-1 text-right text-xs" data-testid="hp-name-counter">
           {watchedName.length}/50
         </div>
+        <p className="text-muted-foreground mt-1 text-xs">{t('healthProfile.nameWhy')}</p>
       </FormField>
 
       {/* Gender Toggle */}
@@ -302,6 +351,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
             {t('healthProfile.age')}: {watchedAge}
           </p>
         )}
+        <p className="text-muted-foreground mt-1 text-xs">{t('healthProfile.dateOfBirthWhy')}</p>
       </FormField>
 
       {/* Height */}
@@ -315,6 +365,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
           step={0.5}
           className={inputClass('heightCm')}
         />
+        <p className="text-muted-foreground mt-1 text-xs">{t('healthProfile.heightWhy')}</p>
       </FormField>
 
       {/* Weight */}
@@ -328,6 +379,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
           step={0.1}
           className={inputClass('weightKg')}
         />
+        <p className="text-muted-foreground mt-1 text-xs">{t('healthProfile.weightWhy')}</p>
       </FormField>
 
       {goalWeightWarning && (
@@ -365,6 +417,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
             </select>
           )}
         />
+        <p className="text-muted-foreground mt-1 text-xs">{t('healthProfile.activityWhy')}</p>
       </div>
 
       {/* Body Fat % */}
@@ -382,6 +435,7 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
           placeholder={t('healthProfile.bodyFatOptional')}
           className={inputClass('bodyFatPct')}
         />
+        <p className="text-muted-foreground mt-1 text-xs">{t('healthProfile.bodyFatWhy')}</p>
       </div>
 
       {/* BMR Override */}
@@ -451,43 +505,51 @@ export function HealthProfileForm({ embedded, saveRef, blankDefaults }: HealthPr
       </FormField>
 
       {/* Computed Values */}
-      <div className="bg-primary-subtle space-y-3 rounded-xl p-4">
-        <div className="flex justify-between text-sm">
-          <span className="text-foreground-secondary">{t('healthProfile.bmr')}</span>
-          <span className="text-foreground font-semibold tabular-nums" data-testid="bmr-value">
-            {bmr} kcal
-          </span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-foreground-secondary">{t('healthProfile.tdee')}</span>
-          <span className="text-foreground font-semibold tabular-nums" data-testid="tdee-value">
-            {tdee} kcal
-          </span>
-        </div>
-        <div className="border-primary/20 border-t pt-2">
-          <p className="text-foreground mb-2 text-sm font-medium">{t('healthProfile.macroPreview')}</p>
-          <div className="grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-3">
-            <div className="bg-card rounded-lg p-4">
-              <p className="text-muted-foreground">{t('common.protein')}</p>
-              <p className="text-primary font-semibold tabular-nums" data-testid="macro-protein">
-                {macros.proteinG}g
-              </p>
-            </div>
-            <div className="bg-card rounded-lg p-4">
-              <p className="text-muted-foreground">{t('common.fat')}</p>
-              <p className="text-macro-fat font-semibold tabular-nums" data-testid="macro-fat">
-                {macros.fatG}g
-              </p>
-            </div>
-            <div className="bg-card rounded-lg p-4">
-              <p className="text-muted-foreground">{t('common.carbs')}</p>
-              <p className="text-macro-carbs font-semibold tabular-nums" data-testid="macro-carbs">
-                {macros.carbsG}g
-              </p>
+      {readiness.surfaceState === 'success' ? (
+        <div className="bg-primary-subtle space-y-3 rounded-xl p-4">
+          <p className="text-primary text-xs leading-relaxed">{t('healthProfile.previewReady')}</p>
+          {readiness.optionalNote && <p className="text-muted-foreground text-xs">{readiness.optionalNote}</p>}
+          <div className="flex justify-between text-sm">
+            <span className="text-foreground-secondary">{t('healthProfile.bmr')}</span>
+            <span className="text-foreground font-semibold tabular-nums" data-testid="bmr-value">
+              {bmr} kcal
+            </span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-foreground-secondary">{t('healthProfile.tdee')}</span>
+            <span className="text-foreground font-semibold tabular-nums" data-testid="tdee-value">
+              {tdee} kcal
+            </span>
+          </div>
+          <div className="border-primary/20 border-t pt-2">
+            <p className="text-foreground mb-2 text-sm font-medium">{t('healthProfile.macroPreview')}</p>
+            <div className="grid grid-cols-2 gap-2 text-center text-xs sm:grid-cols-3">
+              <div className="bg-card rounded-lg p-4">
+                <p className="text-muted-foreground">{t('common.protein')}</p>
+                <p className="text-primary font-semibold tabular-nums" data-testid="macro-protein">
+                  {macros.proteinG}g
+                </p>
+              </div>
+              <div className="bg-card rounded-lg p-4">
+                <p className="text-muted-foreground">{t('common.fat')}</p>
+                <p className="text-macro-fat font-semibold tabular-nums" data-testid="macro-fat">
+                  {macros.fatG}g
+                </p>
+              </div>
+              <div className="bg-card rounded-lg p-4">
+                <p className="text-muted-foreground">{t('common.carbs')}</p>
+                <p className="text-macro-carbs font-semibold tabular-nums" data-testid="macro-carbs">
+                  {macros.carbsG}g
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div data-testid="health-profile-preview-blocked">
+          <EmptyState variant="compact" contract={previewBlockedContract} className="bg-muted rounded-xl" />
+        </div>
+      )}
 
       {!embedded && (
         <button

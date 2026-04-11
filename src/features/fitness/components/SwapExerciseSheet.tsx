@@ -61,6 +61,8 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
 }: SwapExerciseSheetProps): React.JSX.Element | null {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const titleId = React.useId();
 
   useModalBackHandler(isOpen, onClose);
 
@@ -97,21 +99,23 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
   if (!isOpen) return null;
 
   return (
-    <ModalBackdrop onClose={onClose} zIndex="z-70">
+    <ModalBackdrop
+      onClose={onClose}
+      zIndex="z-70"
+      mobileLayout="sheet"
+      ariaLabelledBy={titleId}
+      allowSwipeToDismiss={!isSearchFocused}
+    >
       <div
         data-testid="swap-exercise-sheet"
         className="bg-card relative flex max-h-[85dvh] w-full flex-col rounded-t-2xl shadow-xl sm:max-w-md sm:rounded-2xl"
       >
-        {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="bg-muted h-1 w-10 rounded-full" />
-        </div>
-
-        {/* Header */}
         <div className="px-4 pb-3 text-center">
           <div className="mb-1 flex items-center justify-center gap-2">
             <ArrowLeftRight className="text-primary h-5 w-5" />
-            <h2 className="text-foreground text-xl font-semibold">{t('fitness.swap.title')}</h2>
+            <h2 id={titleId} data-testid="swap-exercise-title" className="text-foreground text-xl font-semibold">
+              {t('fitness.swap.title')}
+            </h2>
           </div>
           <p className="text-muted-foreground text-sm">
             <span>{t('fitness.swap.current')}: </span>
@@ -124,8 +128,7 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
           </p>
         </div>
 
-        {/* Search bar */}
-        <div className="px-4 pb-3">
+        <div data-testid="swap-search-region" className="shrink-0 px-4 pb-3">
           <div className="relative">
             <Search
               className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
@@ -137,6 +140,8 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
               placeholder={t('fitness.swap.search')}
               value={searchQuery}
               onChange={handleSearchChange}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
               aria-label={t('fitness.swap.search')}
               maxLength={100}
               className="focus-visible:ring-ring border-border bg-card text-foreground placeholder:text-muted-foreground w-full rounded-lg border px-3 py-2.5 pl-9 text-sm outline-none focus-visible:ring-2"
@@ -144,15 +149,13 @@ export const SwapExerciseSheet = memo(function SwapExerciseSheet({
           </div>
         </div>
 
-        {/* Section label */}
-        <div className="px-4 pb-2">
+        <div className="shrink-0 px-4 pb-2">
           <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
             {t('fitness.swap.alternatives')} ({alternatives.length})
           </p>
         </div>
 
-        {/* Exercise list */}
-        <div className="pb-safe flex-1 overflow-y-auto px-4">
+        <div data-testid="swap-list-region" className="pb-safe flex-1 overflow-y-auto px-4">
           {alternatives.length === 0 ? (
             <div
               data-testid="swap-empty-state"

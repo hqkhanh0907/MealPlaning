@@ -1,4 +1,4 @@
-import { Bot, ChevronLeft, Loader2, SlidersHorizontal, Utensils } from 'lucide-react';
+import { ChevronLeft, Loader2, SlidersHorizontal, Utensils } from 'lucide-react';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -61,6 +61,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import type { MainTab } from './components/navigation';
 import { BottomNavBar, DesktopNav, TabLoadingFallback } from './components/navigation';
 import { getTabLabels } from './components/navigation/types';
+import { ShellOrientationBanner } from './components/shared/ShellOrientationBanner';
 import { useNotification } from './contexts/NotificationContext';
 import { UNDO_TOAST_DURATION_MS } from './data/constants';
 import { useNutritionTargets } from './features/health-profile/hooks/useNutritionTargets';
@@ -96,10 +97,12 @@ import type { PageEntry } from './store/navigationStore';
 function PageStackOverlay({
   page,
   onBack,
-}: Readonly<{ page: PageEntry; onBack: () => void }>): React.JSX.Element | null {
+  originLabel,
+}: Readonly<{ page: PageEntry; onBack: () => void; originLabel: string }>): React.JSX.Element | null {
   const handleWorkoutComplete = useCallback(() => {
     onBack();
   }, [onBack]);
+  const overlayDescriptor = useMemo(() => buildPageOverlayDescriptor(page, originLabel), [originLabel, page]);
 
   const renderPage = (): React.ReactNode => {
     const props = page.props ?? {};
@@ -143,6 +146,18 @@ function PageStackOverlay({
       className="pt-safe bg-muted dark:bg-background fixed inset-0 z-50 overflow-y-auto"
       data-testid={`page-overlay-${page.id}`}
     >
+      <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6">
+        <ShellOrientationBanner
+          variant="compact"
+          eyebrow={`Từ ${originLabel}`}
+          title={overlayDescriptor.title}
+          description={overlayDescriptor.description}
+          nextStep={overlayDescriptor.nextStep}
+          actionLabel={`Quay lại ${originLabel}`}
+          onAction={onBack}
+          testId="page-overlay-orientation"
+        />
+      </div>
       <Suspense fallback={<TabLoadingFallback />}>{content}</Suspense>
     </div>
   );
@@ -151,6 +166,83 @@ function PageStackOverlay({
 type WorkoutLoggerPlanDay = React.ComponentProps<typeof WorkoutLogger>['planDay'];
 type PlanDayEditorPlanDay = React.ComponentProps<typeof PlanDayEditor>['planDay'];
 type SplitChangerSplitType = React.ComponentProps<typeof SplitChanger>['currentSplit'];
+
+type ShellOrientationConfig = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  nextStep: string;
+  actionLabel?: string;
+  onAction?: () => void;
+};
+
+type OverlayDescriptor = {
+  title: string;
+  description: string;
+  nextStep: string;
+};
+
+function focusFirstInteractiveElement(panelId: string): void {
+  const container = document.getElementById(panelId);
+  const target = container?.querySelector<HTMLElement>(
+    '[data-shell-primary], button:not([disabled]), [role="tab"]:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href]',
+  );
+
+  target?.focus();
+}
+
+function buildPageOverlayDescriptor(page: PageEntry, originLabel: string): OverlayDescriptor {
+  switch (page.component) {
+    case 'WorkoutLogger':
+      return {
+        title: 'Ghi buổi tập',
+        description: `Bạn đang tạm rời ${originLabel} để lưu kết quả buổi tập hiện tại.`,
+        nextStep: 'Hoàn tất hoặc quay lại để tiếp tục đúng ngữ cảnh trước đó',
+      };
+    case 'CardioLogger':
+      return {
+        title: 'Ghi cardio',
+        description: `Bạn đang mở màn hình ghi cardio từ ${originLabel}.`,
+        nextStep: 'Nhập kết quả cardio rồi quay lại kế hoạch hoặc lịch sử tập',
+      };
+    case 'PlanDayEditor':
+      return {
+        title: 'Chỉnh ngày tập',
+        description: `Bạn đang chỉnh một ngày trong kế hoạch tập từ ${originLabel}.`,
+        nextStep: 'Cập nhật bài tập cần thiết rồi quay lại kế hoạch chính',
+      };
+    case 'PlanScheduleEditor':
+      return {
+        title: 'Sắp lịch tập',
+        description: `Bạn đang điều chỉnh thứ tự buổi tập từ ${originLabel}.`,
+        nextStep: 'Sắp xếp lịch mới rồi quay lại để kiểm tra toàn bộ giáo án',
+      };
+    case 'SplitChanger':
+      return {
+        title: 'Đổi cấu trúc giáo án',
+        description: `Bạn đang thay đổi split từ ${originLabel}.`,
+        nextStep: 'Chọn split phù hợp rồi quay lại để kiểm tra ngày tập mới',
+      };
+    case 'PlanTemplateGallery':
+      return {
+        title: 'Mẫu kế hoạch tập',
+        description: `Bạn đang xem thư viện mẫu từ ${originLabel}.`,
+        nextStep: 'Chọn một mẫu phù hợp rồi quay lại kế hoạch hiện tại',
+      };
+    case 'GoalDetailPage':
+      return {
+        title: 'Mục tiêu dinh dưỡng',
+        description: `Bạn đang mở chi tiết mục tiêu từ ${originLabel}.`,
+        nextStep: 'Điều chỉnh mục tiêu rồi quay lại để xem tác động lên kế hoạch ngày',
+      };
+    default:
+      return {
+        title: originLabel,
+        description: `Bạn đang mở một màn hình chi tiết từ ${originLabel}.`,
+        nextStep: 'Hoàn tất thao tác hiện tại rồi quay lại vị trí trước đó',
+      };
+  }
+}
 
 // --- Main App component ---
 
@@ -440,6 +532,65 @@ export default function App() {
   // Auto-sync data to Google Drive when authenticated
   useAutoSync();
 
+  const tabLabels = useMemo(() => getTabLabels(t), [t]);
+  const activeTabLabel = tabLabels[activeMainTab];
+  const headerSubtitle =
+    healthProfile?.weightKg && healthProfile.weightKg > 0
+      ? t('header.subtitle', { weight: healthProfile.weightKg })
+      : t('header.subtitleSetup');
+  const shellOrientation = useMemo<ShellOrientationConfig>(() => {
+    switch (activeMainTab) {
+      case 'calendar':
+        return {
+          eyebrow: t('shell.currentLocation', { surface: activeTabLabel }),
+          title: t('shell.orientation.calendar.title'),
+          description: t('shell.orientation.calendar.description'),
+          nextStep: t('shell.orientation.calendar.nextStep'),
+          actionLabel: t('shell.orientation.calendar.action'),
+          onAction: openTypeSelection,
+        };
+      case 'library':
+        return {
+          eyebrow: t('shell.currentLocation', { surface: activeTabLabel }),
+          title: t('shell.orientation.library.title'),
+          description: t('shell.orientation.library.description'),
+          nextStep: t('shell.orientation.library.nextStep'),
+          actionLabel: t('shell.orientation.library.action'),
+          onAction: () => {
+            setActiveManagementSubTab('dishes');
+            focusFirstInteractiveElement('panel-library');
+          },
+        };
+      case 'ai-analysis':
+        return {
+          eyebrow: t('shell.currentLocation', { surface: activeTabLabel }),
+          title: t('shell.orientation.ai.title'),
+          description: t('shell.orientation.ai.description'),
+          nextStep: t('shell.orientation.ai.nextStep'),
+          actionLabel: t('shell.orientation.ai.action'),
+          onAction: () => focusFirstInteractiveElement('panel-ai-analysis'),
+        };
+      case 'fitness':
+        return {
+          eyebrow: t('shell.currentLocation', { surface: activeTabLabel }),
+          title: t('shell.orientation.fitness.title'),
+          description: t('shell.orientation.fitness.description'),
+          nextStep: t('shell.orientation.fitness.nextStep'),
+          actionLabel: t('shell.orientation.fitness.action'),
+          onAction: () => focusFirstInteractiveElement('panel-fitness'),
+        };
+      case 'dashboard':
+        return {
+          eyebrow: t('shell.currentLocation', { surface: activeTabLabel }),
+          title: t('shell.orientation.dashboard.title'),
+          description: t('shell.orientation.dashboard.description'),
+          nextStep: t('shell.orientation.dashboard.nextStep'),
+          actionLabel: t('shell.orientation.dashboard.action'),
+          onAction: () => focusFirstInteractiveElement('panel-dashboard'),
+        };
+    }
+  }, [activeMainTab, activeTabLabel, openTypeSelection, setActiveManagementSubTab, t]);
+
   if (!isAppOnboarded) {
     return (
       <Suspense
@@ -470,7 +621,7 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-foreground text-lg font-semibold tracking-tight sm:text-xl">
-                <span className="sm:hidden">{getTabLabels(t)[activeMainTab]}</span>
+                <span className="sm:hidden">{activeTabLabel}</span>
                 <span className="hidden sm:inline">Smart Meal Planner</span>
               </h1>
               <p className="text-muted-foreground text-[11px] font-medium sm:hidden">
@@ -480,9 +631,7 @@ export default function App() {
                   month: 'numeric',
                 })}
               </p>
-              <p className="text-muted-foreground hidden text-xs font-medium sm:block">
-                {t('header.subtitle', { weight: healthProfile?.weightKg ?? 0 })}
-              </p>
+              <p className="text-muted-foreground hidden text-xs font-medium sm:block">{headerSubtitle}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -501,9 +650,21 @@ export default function App() {
       </header>
 
       <main id="main-content" className="mx-auto max-w-5xl px-4 py-6 pb-24 sm:px-6 sm:py-8 sm:pb-8">
+        <ShellOrientationBanner
+          eyebrow={shellOrientation.eyebrow}
+          title={shellOrientation.title}
+          description={shellOrientation.description}
+          nextStep={shellOrientation.nextStep}
+          actionLabel={shellOrientation.actionLabel}
+          onAction={shellOrientation.onAction}
+          className="mb-6"
+          testId="shell-orientation-banner"
+        />
         <div
+          id="panel-calendar"
           className={activeMainTab === 'calendar' ? 'animate-fade-in block' : 'hidden'}
           role="tabpanel"
+          aria-labelledby="tab-calendar"
           aria-label={t('nav.calendar')}
           key={`calendar-${activeMainTab}`}
           inert={activeMainTab === 'calendar' ? undefined : true}
@@ -517,7 +678,6 @@ export default function App() {
               ingredients={ingredients}
               currentPlan={currentPlan}
               dayNutrition={dayNutrition}
-              userWeight={healthProfile?.weightKg ?? 0}
               targetCalories={computedTargetCalories}
               targetProtein={targetProtein}
               isSuggesting={aiSuggestion.isLoading}
@@ -540,7 +700,7 @@ export default function App() {
         {activeMainTab === 'fitness' && (
           <ErrorBoundary fallbackTitle={t('nav.fitness')}>
             <Suspense fallback={<TabLoadingFallback />}>
-              <div className="animate-fade-in">
+              <div id="panel-fitness" className="animate-fade-in" role="tabpanel" aria-labelledby="tab-fitness">
                 <FitnessTab />
               </div>
             </Suspense>
@@ -548,8 +708,10 @@ export default function App() {
         )}
 
         <div
+          id="panel-library"
           className={activeMainTab === 'library' ? 'animate-fade-in block' : 'hidden'}
           role="tabpanel"
+          aria-labelledby="tab-library"
           aria-label={t('nav.library')}
           key={`library-${activeMainTab}`}
           inert={activeMainTab === 'library' ? undefined : true}
@@ -577,13 +739,12 @@ export default function App() {
         {activeMainTab === 'ai-analysis' && (
           <ErrorBoundary fallbackTitle={t('errorBoundary.aiTab')}>
             <Suspense fallback={<TabLoadingFallback />}>
-              <div className="animate-fade-in space-y-8">
-                <div className="border-border flex items-center justify-between border-b pb-4">
-                  <div className="flex items-center gap-3">
-                    <Bot className="text-primary h-6 w-6" />
-                    <h2 className="text-foreground text-2xl font-semibold">{t('ai.title')}</h2>
-                  </div>
-                </div>
+              <div
+                id="panel-ai-analysis"
+                className="animate-fade-in space-y-8"
+                role="tabpanel"
+                aria-labelledby="tab-ai-analysis"
+              >
                 <AIImageAnalyzer onAnalysisComplete={handleAnalysisComplete} onSave={handleSaveAnalyzedDish} />
               </div>
             </Suspense>
@@ -593,7 +754,7 @@ export default function App() {
         {activeMainTab === 'dashboard' && (
           <ErrorBoundary fallbackTitle={t('nav.dashboard')}>
             <Suspense fallback={<TabLoadingFallback />}>
-              <div className="animate-fade-in">
+              <div id="panel-dashboard" className="animate-fade-in" role="tabpanel" aria-labelledby="tab-dashboard">
                 <DashboardTab />
               </div>
             </Suspense>
@@ -728,6 +889,17 @@ export default function App() {
             </div>
           </div>
           <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
+            <ShellOrientationBanner
+              variant="compact"
+              eyebrow={t('shell.currentLocation', { surface: t('nav.settings') })}
+              title={t('shell.orientation.settings.title')}
+              description={t('shell.orientation.settings.description', { surface: activeTabLabel })}
+              nextStep={t('shell.orientation.settings.nextStep', { surface: activeTabLabel })}
+              actionLabel={t('shell.orientation.settings.action', { surface: activeTabLabel })}
+              onAction={popPage}
+              className="mb-6"
+              testId="settings-orientation-banner"
+            />
             <Suspense fallback={<TabLoadingFallback />}>
               <SettingsTab theme={theme} setTheme={setTheme} />
             </Suspense>
@@ -735,7 +907,9 @@ export default function App() {
         </div>
       )}
 
-      {isFitnessPageOpen && topPage && <PageStackOverlay page={topPage} onBack={popPage} />}
+      {isFitnessPageOpen && topPage && (
+        <PageStackOverlay page={topPage} onBack={popPage} originLabel={activeTabLabel} />
+      )}
     </div>
   );
 }

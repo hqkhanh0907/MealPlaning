@@ -285,7 +285,7 @@ describe('HealthConfirmStep', () => {
     fireEvent.click(screen.getByTestId('health-confirm-btn'));
 
     await waitFor(() => {
-      expect(validateTargetWeight).not.toHaveBeenCalled();
+      expect(form.setError).not.toHaveBeenCalled();
       expect(mockSaveProfile).toHaveBeenCalled();
     });
   });

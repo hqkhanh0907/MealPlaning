@@ -24,6 +24,7 @@ vi.mock('react-i18next', () => ({
         'fitness.plan.tab': 'Kế hoạch',
         'fitness.history.title': 'Lịch sử',
         'fitness.progress.title': 'Tiến trình',
+        'fitness.plan.manualPlanName': 'Kế hoạch thủ công',
       };
       return translations[key] ?? key;
     },
@@ -427,7 +428,7 @@ describe('FitnessTab', () => {
 
       expect(localAddTrainingPlan).toHaveBeenCalledWith({
         id: expectedPlanId,
-        name: 'Manual Plan',
+        name: 'Kế hoạch thủ công',
         status: 'active',
         splitType: 'custom',
         durationWeeks: 1,
@@ -602,7 +603,7 @@ describe('FitnessTab', () => {
       render(<FitnessTab />);
 
       expect(screen.getByTestId('profile-out-of-sync-banner')).toBeInTheDocument();
-      expect(screen.getByTestId('regenerate-plan-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('profile-sync-regenerate-btn')).toBeInTheDocument();
       expect(screen.getByText('fitness.plan.profileOutOfSync')).toBeInTheDocument();
       expect(screen.getByText('fitness.plan.regeneratePlan')).toBeInTheDocument();
     });
@@ -654,7 +655,7 @@ describe('FitnessTab', () => {
 
       render(<FitnessTab />);
       await act(async () => {
-        fireEvent.click(screen.getByTestId('regenerate-plan-btn'));
+        fireEvent.click(screen.getByTestId('profile-sync-regenerate-btn'));
       });
 
       expect(mockGeneratePlan).toHaveBeenCalledWith({

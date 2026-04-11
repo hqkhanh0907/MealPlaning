@@ -29,6 +29,7 @@ export interface MealsSubTabProps {
   onQuickAdd?: (type: MealType, dishId: string) => void;
   onUpdateServings?: (dishId: string, servings: number) => void;
   onOpenGrocery?: () => void;
+  onClearSlot?: (type: MealType) => void;
 }
 
 const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner'];
@@ -52,12 +53,15 @@ export const MealsSubTab = React.memo(function MealsSubTab({
   onQuickAdd,
   onUpdateServings,
   onOpenGrocery,
+  onClearSlot,
 }: MealsSubTabProps) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   const [quickAddDishId, setQuickAddDishId] = useState<string | null>(null);
   const [debouncing, setDebouncing] = useState(false);
+  const [activeSwipeSlot, setActiveSwipeSlot] = useState<MealType | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const allEmpty =
     dayNutrition.breakfast.dishIds.length === 0 &&
     dayNutrition.lunch.dishIds.length === 0 &&
@@ -104,6 +108,15 @@ export const MealsSubTab = React.memo(function MealsSubTab({
       document.removeEventListener('keydown', handleEscape);
     };
   }, [quickAddDishId, dismissDropdown]);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !activeSwipeSlot) return;
+
+    const handleScroll = () => setActiveSwipeSlot(null);
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [activeSwipeSlot]);
 
   const recentDishes = useMemo(() => {
     if (!recentDishIds?.length) return [];
@@ -259,7 +272,10 @@ export const MealsSubTab = React.memo(function MealsSubTab({
         </div>
       )}
 
-      <div className="bg-card border-border-subtle divide-border divide-y overflow-hidden rounded-2xl border shadow-sm">
+      <div
+        ref={scrollContainerRef}
+        className="bg-card border-border-subtle divide-border divide-y overflow-hidden rounded-2xl border shadow-sm"
+      >
         {!allEmpty && (
           <div data-testid="meal-progress" className="flex items-center justify-between px-4 py-2">
             <span className="text-muted-foreground text-xs font-medium">
@@ -282,6 +298,10 @@ export const MealsSubTab = React.memo(function MealsSubTab({
               servings={servings}
               onEdit={() => onPlanMeal(type)}
               onUpdateServings={onUpdateServings}
+              onClearMeal={onClearSlot ? () => onClearSlot(type) : undefined}
+              isSwipeOpen={activeSwipeSlot === type}
+              onSwipeOpen={() => setActiveSwipeSlot(type)}
+              onSwipeClose={() => setActiveSwipeSlot(null)}
             />
           </div>
         ))}

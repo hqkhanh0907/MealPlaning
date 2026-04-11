@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 
 vi.mock('@/components/ui/dropdown-menu', () => ({
@@ -515,11 +515,27 @@ describe('App', () => {
     expect(screen.getByText('Lên kế hoạch ngay')).toBeInTheDocument();
   });
 
-  it('renders recommendation panel', () => {
+  it('renders NutritionOverview in nutrition tab', () => {
+    useHealthProfileStore.setState({
+      profile: {
+        id: 'hp-1',
+        name: 'Tester',
+        gender: 'male',
+        age: 29,
+        dateOfBirth: '1996-05-15',
+        heightCm: 175,
+        weightKg: 72,
+        activityLevel: 'moderate',
+        proteinRatio: 2,
+        fatPct: 0.25,
+        targetCalories: 2200,
+        updatedAt: new Date().toISOString(),
+      },
+    });
     render(<App />);
-    // Switch to Nutrition sub-tab to see the recommendation panel
+    // Switch to Nutrition sub-tab
     fireEvent.click(screen.getByTestId('subtab-nutrition'));
-    expect(screen.getByText('Gợi ý cho bạn')).toBeInTheDocument();
+    expect(screen.getByTestId('nutrition-overview')).toBeInTheDocument();
   });
 
   it('renders DateSelector', () => {
@@ -528,10 +544,32 @@ describe('App', () => {
   });
 
   it('opens goal detail page via pushPage', async () => {
+    const today = getLocalToday();
+    useHealthProfileStore.setState({
+      profile: {
+        id: 'hp-1',
+        name: 'Tester',
+        gender: 'male',
+        age: 29,
+        dateOfBirth: '1996-05-15',
+        heightCm: 175,
+        weightKg: 72,
+        activityLevel: 'moderate',
+        proteinRatio: 2,
+        fatPct: 0.25,
+        targetCalories: 2200,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+    useDayPlanStore.setState({
+      dayPlans: [{ date: today, breakfastDishIds: ['d1'], lunchDishIds: [], dinnerDishIds: [] }],
+    });
     render(<App />);
     fireEvent.click(screen.getByTestId('subtab-nutrition'));
-    const editGoalsBtn = screen.getByLabelText('Chỉnh sửa mục tiêu dinh dưỡng');
-    fireEvent.click(editGoalsBtn);
+    // Expand NutritionDetails accordion to reveal edit goal button
+    fireEvent.click(screen.getByTestId('nutrition-details-header'));
+    const editGoalBtn = screen.getByTestId('btn-edit-goal');
+    fireEvent.click(editGoalBtn);
     await waitFor(() => expect(screen.getByText('Mục tiêu cân nặng')).toBeInTheDocument());
   });
 
@@ -1057,7 +1095,8 @@ describe('App', () => {
     await waitFor(() => expect(screen.getByTestId('btn-template-manager')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('btn-template-manager'));
     await waitFor(() => expect(screen.getByTestId('template-manager-modal')).toBeInTheDocument());
-    const deleteBtns = screen.getAllByText('Xóa');
+    const tmModal = screen.getByTestId('template-manager-modal');
+    const deleteBtns = within(tmModal).getAllByText('Xóa');
     fireEvent.click(deleteBtns[0]);
     expect(mockNotify.success).toHaveBeenCalled();
     mockNotify.success.mockClear();

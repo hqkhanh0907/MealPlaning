@@ -8,8 +8,25 @@ import type { EquipmentType, Exercise } from '../features/fitness/types';
 
 // Mock ModalBackdrop — render children directly with a backdrop button
 vi.mock('../components/shared/ModalBackdrop', () => ({
-  ModalBackdrop: ({ children, onClose }: { children: React.ReactNode; onClose: () => void }) => (
-    <div data-testid="modal-backdrop">
+  ModalBackdrop: ({
+    children,
+    onClose,
+    mobileLayout,
+    allowSwipeToDismiss,
+    ariaLabelledBy,
+  }: {
+    children: React.ReactNode;
+    onClose: () => void;
+    mobileLayout?: string;
+    allowSwipeToDismiss?: boolean;
+    ariaLabelledBy?: string;
+  }) => (
+    <div
+      data-testid="modal-backdrop"
+      data-mobile-layout={mobileLayout}
+      data-allow-swipe={String(allowSwipeToDismiss)}
+      data-aria-labelledby={ariaLabelledBy}
+    >
       <button data-testid="backdrop-overlay" onClick={onClose} type="button" />
       {children}
     </div>
@@ -135,6 +152,15 @@ describe('ExerciseSelector', () => {
     expect(screen.getByTestId('modal-backdrop')).toBeInTheDocument();
   });
 
+  it('uses shared sheet structure with stable title and split regions', () => {
+    render(<ExerciseSelector {...defaultProps} />);
+    expect(screen.getByTestId('modal-backdrop')).toHaveAttribute('data-mobile-layout', 'sheet');
+    expect(screen.getByTestId('exercise-selector-title')).toBeInTheDocument();
+    expect(screen.getByTestId('exercise-selector-search-region')).toBeInTheDocument();
+    expect(screen.getByTestId('exercise-selector-chip-region')).toBeInTheDocument();
+    expect(screen.getByTestId('exercise-selector-list-region')).toBeInTheDocument();
+  });
+
   it('shows search input', () => {
     render(<ExerciseSelector {...defaultProps} />);
     const input = screen.getByTestId('exercise-search-input');
@@ -236,6 +262,16 @@ describe('ExerciseSelector', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('disables swipe dismissal while search input is focused', async () => {
+    const user = userEvent.setup();
+    render(<ExerciseSelector {...defaultProps} />);
+    const input = screen.getByTestId('exercise-search-input');
+    await user.click(input);
+    expect(screen.getByTestId('modal-backdrop')).toHaveAttribute('data-allow-swipe', 'false');
+    await user.tab();
+    expect(screen.getByTestId('modal-backdrop')).toHaveAttribute('data-allow-swipe', 'true');
+  });
+
   it('empty state shown when no exercises match search', async () => {
     const user = userEvent.setup();
     render(<ExerciseSelector {...defaultProps} />);
@@ -297,6 +333,22 @@ describe('ExerciseSelector', () => {
 
     await user.click(screen.getByTestId('add-custom-exercise'));
     expect(screen.getByTestId('custom-exercise-modal')).toBeInTheDocument();
+  });
+
+  it('canceling custom modal closes only topmost overlay and keeps selector state', async () => {
+    const user = userEvent.setup();
+    render(<ExerciseSelector {...defaultProps} />);
+    const input = screen.getByTestId('exercise-search-input');
+    await user.type(input, 'Đẩy');
+    await user.click(screen.getByTestId('add-custom-exercise'));
+    expect(screen.getByTestId('custom-exercise-modal')).toBeInTheDocument();
+
+    const cancelButtons = screen.getAllByText('Hủy');
+    await user.click(cancelButtons[cancelButtons.length - 1]);
+
+    expect(screen.queryByTestId('custom-exercise-modal')).not.toBeInTheDocument();
+    expect(screen.getByTestId('exercise-selector-sheet')).toBeInTheDocument();
+    expect(screen.getByTestId('exercise-search-input')).toHaveValue('Đẩy');
   });
 
   it('saves custom exercise via form submission', async () => {

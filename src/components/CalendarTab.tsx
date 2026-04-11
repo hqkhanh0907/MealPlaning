@@ -22,7 +22,6 @@ export interface CalendarTabProps {
   ingredients: Ingredient[];
   currentPlan: DayPlan;
   dayNutrition: DayNutritionSummary;
-  userWeight: number;
   targetCalories: number;
   targetProtein: number;
   isSuggesting: boolean;
@@ -48,7 +47,6 @@ export const CalendarTab = React.memo(function CalendarTab({
   ingredients,
   currentPlan,
   dayNutrition,
-  userWeight,
   targetCalories,
   targetProtein,
   isSuggesting,
@@ -180,7 +178,6 @@ export const CalendarTab = React.memo(function CalendarTab({
               dayNutrition={dayNutrition}
               targetCalories={targetCalories}
               targetProtein={targetProtein}
-              userWeight={userWeight}
               onEditGoals={onOpenGoalModal}
               onSwitchToMeals={() => setActiveSubTab('meals')}
               caloriesOut={caloriesOut}
@@ -219,7 +216,6 @@ export const CalendarTab = React.memo(function CalendarTab({
               dayNutrition={dayNutrition}
               targetCalories={targetCalories}
               targetProtein={targetProtein}
-              userWeight={userWeight}
               onEditGoals={onOpenGoalModal}
               caloriesOut={caloriesOut}
             />

@@ -180,7 +180,16 @@ describe('DishManager', () => {
 
   it('shows empty state when no dishes match filter', () => {
     render(<DishManager {...defaultProps} dishes={[]} />);
-    expect(screen.getByText(/Chưa có món ăn/)).toBeInTheDocument();
+    expect(screen.getByText('Thư viện món ăn đang trống')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tạo món ăn' })).toBeInTheDocument();
+  });
+
+  it('shows clear-search action when dish search returns no results', () => {
+    render(<DishManager {...defaultProps} />);
+    fireEvent.change(screen.getByPlaceholderText('Tìm kiếm món ăn...'), { target: { value: 'khong-ton-tai' } });
+    expect(screen.getByText('Không có món khớp tìm kiếm hiện tại')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Xóa tìm kiếm' }));
+    expect(screen.getByText('Gà nướng')).toBeInTheDocument();
   });
 
   it('sorts dishes by calories ascending', () => {
@@ -501,24 +510,14 @@ describe('DishManager', () => {
 
   it('shows empty state action in grid view', () => {
     render(<DishManager {...defaultProps} dishes={[]} />);
-    // Empty state shows add button with actionLabel; toolbar also has one.
-    // The EmptyState button has bg-primary class.
-    const btns = screen.getAllByText('Thêm món ăn');
-    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-primary'));
-    expect(emptyBtn).toBeDefined();
-    const emptyBtnEl = emptyBtn?.closest('button');
-    if (emptyBtnEl) fireEvent.click(emptyBtnEl);
+    fireEvent.click(screen.getByRole('button', { name: 'Tạo món ăn' }));
     expect(screen.getByText('Tạo món ăn mới')).toBeInTheDocument();
   });
 
   it('shows empty state action in list view', () => {
     render(<DishManager {...defaultProps} dishes={[]} />);
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
-    const btns = screen.getAllByText('Thêm món ăn');
-    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-primary'));
-    expect(emptyBtn).toBeDefined();
-    const emptyBtnEl = emptyBtn?.closest('button');
-    if (emptyBtnEl) fireEvent.click(emptyBtnEl);
+    fireEvent.click(screen.getByRole('button', { name: 'Tạo món ăn' }));
     expect(screen.getByText('Tạo món ăn mới')).toBeInTheDocument();
   });
 
@@ -852,7 +851,8 @@ describe('IngredientManager', () => {
 
   it('shows empty state when no ingredients', () => {
     render(<IngredientManager {...defaultProps} ingredients={[]} />);
-    expect(screen.getByText(/Chưa có nguyên liệu/)).toBeInTheDocument();
+    expect(screen.getByText('Thư viện nguyên liệu đang trống')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Thêm nguyên liệu đầu tiên' })).toBeInTheDocument();
   });
 
   it('sorts ingredients by calories ascending', () => {
@@ -1091,19 +1091,13 @@ describe('IngredientManager', () => {
   it('shows empty state action in list view', () => {
     render(<IngredientManager {...defaultProps} ingredients={[]} />);
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
-    const btns = screen.getAllByText('Thêm nguyên liệu');
-    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-primary'));
-    expect(emptyBtn).toBeDefined();
-    if (emptyBtn) fireEvent.click(emptyBtn.closest('button') as HTMLElement);
+    fireEvent.click(screen.getByRole('button', { name: 'Thêm nguyên liệu đầu tiên' }));
     expect(screen.getByText('Thêm nguyên liệu mới')).toBeInTheDocument();
   });
 
   it('shows empty state action in grid view', () => {
     render(<IngredientManager {...defaultProps} ingredients={[]} />);
-    const btns = screen.getAllByText('Thêm nguyên liệu');
-    const emptyBtn = btns.find(el => el.closest('button')?.className.includes('bg-primary'));
-    expect(emptyBtn).toBeDefined();
-    if (emptyBtn) fireEvent.click(emptyBtn.closest('button') as HTMLElement);
+    fireEvent.click(screen.getByRole('button', { name: 'Thêm nguyên liệu đầu tiên' }));
     expect(screen.getByText('Thêm nguyên liệu mới')).toBeInTheDocument();
   });
 
@@ -1151,7 +1145,15 @@ describe('IngredientManager', () => {
   it('shows empty state in list view when no ingredients match', () => {
     render(<IngredientManager {...defaultProps} ingredients={[]} />);
     fireEvent.click(screen.getByTitle('Xem dạng danh sách'));
-    expect(screen.getByText(/Chưa có nguyên liệu/)).toBeInTheDocument();
+    expect(screen.getByText('Thư viện nguyên liệu đang trống')).toBeInTheDocument();
+  });
+
+  it('shows clear-search action when ingredient search returns no results', () => {
+    render(<IngredientManager {...defaultProps} />);
+    fireEvent.change(screen.getByPlaceholderText('Tìm kiếm nguyên liệu...'), { target: { value: 'khong-ton-tai' } });
+    expect(screen.getByText('Không có nguyên liệu khớp từ khóa này')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Xóa tìm kiếm' }));
+    expect(screen.getByText('Ức gà')).toBeInTheDocument();
   });
 
   it('delete button uses destructive color by default for unused ingredients', () => {

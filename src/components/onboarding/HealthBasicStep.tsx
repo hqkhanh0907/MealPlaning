@@ -34,6 +34,10 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
       <div className="flex-1 overflow-y-auto px-6 pt-4 pb-24">
         <h2 className="text-foreground mb-1 text-xl font-semibold">{t('onboarding.health.title')}</h2>
         <p className="text-muted-foreground mb-6 text-sm">{t('onboarding.health.subtitle')}</p>
+        <div className="bg-muted mb-6 rounded-2xl p-4">
+          <p className="text-foreground text-sm font-medium">{t('onboarding.health.orientationTitle')}</p>
+          <p className="text-muted-foreground mt-1 text-xs leading-relaxed">{t('onboarding.health.orientationDesc')}</p>
+        </div>
 
         <div className="space-y-4">
           {/* Name */}
@@ -55,6 +59,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               onBlur={nameField.field.onBlur}
             />
             <div className="text-muted-foreground mt-1 text-right text-xs">{nameField.field.value.length}/50</div>
+            <p className="text-muted-foreground mt-1 text-xs">{t('onboarding.health.nameWhy')}</p>
             {nameField.fieldState.error && (
               <p id="ob-name-error" role="alert" className="text-destructive mt-1 text-xs">
                 {t('onboarding.validation.required')}
@@ -104,6 +109,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               onChange={dobField.field.onChange}
               onBlur={dobField.field.onBlur}
             />
+            <p className="text-muted-foreground mt-1 text-xs">{t('onboarding.health.dateOfBirthWhy')}</p>
             {dobField.fieldState.error && (
               <p id="ob-dob-error" role="alert" className="text-destructive mt-1 text-xs">
                 {t('onboarding.validation.required')}
@@ -137,6 +143,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
             {heightField.field.value != null && heightField.field.value < 3 && heightField.field.value > 0 && (
               <p className="text-warning mt-1 text-xs">{t('onboarding.validation.heightHint')}</p>
             )}
+            <p className="text-muted-foreground mt-1 text-xs">{t('onboarding.health.heightWhy')}</p>
             {heightField.fieldState.error && (
               <p id="ob-height-error" role="alert" className="text-destructive mt-1 text-xs">
                 {t('onboarding.validation.heightRange')}
@@ -167,6 +174,7 @@ export function HealthBasicStep({ form, goNext, goBack }: Readonly<HealthBasicSt
               />
               <span className="text-muted-foreground absolute top-1/2 right-4 -translate-y-1/2 text-sm">kg</span>
             </div>
+            <p className="text-muted-foreground mt-1 text-xs">{t('onboarding.health.weightWhy')}</p>
             {weightField.fieldState.error && (
               <p id="ob-weight-error" role="alert" className="text-destructive mt-1 text-xs">
                 {t('onboarding.validation.weightRange')}

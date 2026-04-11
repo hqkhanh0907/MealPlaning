@@ -51,7 +51,6 @@ const defaultProps = {
   ingredients: [],
   currentPlan: dayPlans[0],
   dayNutrition: filledNutrition,
-  userWeight: 70,
   targetCalories: 2000,
   targetProtein: 140,
   isSuggesting: false,
@@ -85,15 +84,14 @@ describe('CalendarTab – desktop layout', () => {
     expect(screen.getByText('Canh rau')).toBeInTheDocument();
   });
 
-  it('shows plan complete message in desktop layout', () => {
+  it('renders NutritionOverview in desktop layout', () => {
     render(<CalendarTab {...defaultProps} />);
-    const completeMessages = screen.getAllByText(/Kế hoạch ngày hôm nay đã hoàn tất/);
-    expect(completeMessages.length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByTestId('nutrition-overview')).toBeInTheDocument();
   });
 
-  it('renders recommendation panel in desktop layout', () => {
+  it('renders NutritionDetails in desktop layout', () => {
     render(<CalendarTab {...defaultProps} />);
-    expect(screen.getByText('Gợi ý cho bạn')).toBeInTheDocument();
+    expect(screen.getByTestId('nutrition-details')).toBeInTheDocument();
   });
 
   it('does not render switch-to-meals button in desktop NutritionSubTab', () => {

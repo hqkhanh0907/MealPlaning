@@ -68,7 +68,9 @@ export const BottomNavBar = ({
           return (
             <button
               key={tab}
+              id={`tab-${tab}`}
               role="tab"
+              aria-controls={`panel-${tab}`}
               aria-selected={activeTab === tab}
               aria-label={label}
               data-testid={`nav-${tab}`}
@@ -99,7 +101,9 @@ export const DesktopNav = ({ activeTab, onTabChange }: { activeTab: MainTab; onT
       {NAV_CONFIG.map(({ tab, desktopIcon, labelKey }) => (
         <button
           key={tab}
+          id={`desktop-tab-${tab}`}
           role="tab"
+          aria-controls={`panel-${tab}`}
           aria-selected={activeTab === tab}
           onClick={() => onTabChange(tab)}
           className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${activeTab === tab ? 'text-primary-emphasis bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
