@@ -98,6 +98,32 @@ function mergePlanDays(current: TrainingPlanDay[], planId: string, updates: Trai
   });
 }
 
+function derivePlanSchedule(days: TrainingPlanDay[]): { trainingDays: number[]; restDays: number[] } {
+  const allDays = [1, 2, 3, 4, 5, 6, 7];
+  const trainingDays = [...new Set(days.map(day => day.dayOfWeek).filter(day => day >= 1 && day <= 7))].sort(
+    (a, b) => a - b,
+  );
+  const trainingDaySet = new Set(trainingDays);
+  return {
+    trainingDays,
+    restDays: allDays.filter(day => !trainingDaySet.has(day)),
+  };
+}
+
+function resolvePlanDaySlots(plan: TrainingPlan, currentDays: TrainingPlanDay[], desiredCount: number): number[] {
+  const preferredDays = [...new Set(plan.trainingDays.filter(day => day >= 1 && day <= 7))];
+  const fallbackDays = [...new Set(currentDays.map(day => day.dayOfWeek).filter(day => day >= 1 && day <= 7))];
+  const resolved: number[] = [];
+
+  for (const day of [...preferredDays, ...fallbackDays, 1, 2, 3, 4, 5, 6, 7]) {
+    if (resolved.includes(day)) continue;
+    resolved.push(day);
+    if (resolved.length >= desiredCount) break;
+  }
+
+  return resolved;
+}
+
 export interface FitnessState {
   trainingProfile: TrainingProfile | null;
   trainingPlans: TrainingPlan[];
@@ -187,7 +213,14 @@ export const useFitnessStore = create<FitnessState>()(
 
       setPlanStrategy: strategy => set({ planStrategy: strategy }),
 
-      clearTrainingPlans: () => set({ trainingPlans: [], trainingPlanDays: [] }),
+      clearTrainingPlans: () =>
+        set({
+          trainingPlans: [],
+          trainingPlanDays: [],
+          profileOutOfSync: false,
+          profileChangedFields: [],
+          showPlanCelebration: false,
+        }),
 
       setTrainingProfile: profile =>
         set(state => {
@@ -218,6 +251,7 @@ export const useFitnessStore = create<FitnessState>()(
         const prevPlans = get().trainingPlans;
         set(state => ({
           trainingPlans: [...state.trainingPlans, plan],
+          showPlanCelebration: true,
           profileOutOfSync: false,
           profileChangedFields: [],
         }));
@@ -243,7 +277,12 @@ export const useFitnessStore = create<FitnessState>()(
               ],
             );
           } catch (error: unknown) {
-            set({ trainingPlans: prevPlans, profileOutOfSync: false, profileChangedFields: [] });
+            set({
+              trainingPlans: prevPlans,
+              showPlanCelebration: false,
+              profileOutOfSync: false,
+              profileChangedFields: [],
+            });
             logger.error({ component: 'fitnessStore', action: 'addTrainingPlan.persist' }, error);
           }
         }
@@ -376,33 +415,55 @@ export const useFitnessStore = create<FitnessState>()(
           ...session,
           id: generateUUID(),
         };
+        const updatedPlanDays = [...get().trainingPlanDays.filter(d => d.planId === planId), newDay];
+        const schedule = derivePlanSchedule(updatedPlanDays);
+
         set(state => ({
+          trainingPlans: state.trainingPlans.map(plan =>
+            plan.id === planId
+              ? {
+                  ...plan,
+                  trainingDays: schedule.trainingDays,
+                  restDays: schedule.restDays,
+                  updatedAt: new Date().toISOString(),
+                }
+              : plan,
+          ),
           trainingPlanDays: [...state.trainingPlanDays, newDay],
         }));
         if (_db) {
-          persistToDb(
-            _db,
-            `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-              newDay.id,
-              newDay.planId,
-              newDay.dayOfWeek,
-              newDay.sessionOrder,
-              newDay.workoutType,
-              newDay.muscleGroups ?? null,
-              newDay.exercises ?? null,
-              newDay.originalExercises ?? null,
-              newDay.notes ?? null,
-            ],
-            'addPlanDaySession',
-          );
+          const db = _db;
+          const updatedAt = new Date().toISOString();
+          db.transaction(async () => {
+            await db.execute(
+              `INSERT INTO training_plan_days (id, plan_id, day_of_week, session_order, workout_type, muscle_groups, exercises, original_exercises, notes)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                newDay.id,
+                newDay.planId,
+                newDay.dayOfWeek,
+                newDay.sessionOrder,
+                newDay.workoutType,
+                newDay.muscleGroups ?? null,
+                newDay.exercises ?? null,
+                newDay.originalExercises ?? null,
+                newDay.notes ?? null,
+              ],
+            );
+            await db.execute(
+              'UPDATE training_plans SET training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?',
+              [JSON.stringify(schedule.trainingDays), JSON.stringify(schedule.restDays), updatedAt, planId],
+            );
+          }).catch(e => logger.error({ component: 'fitnessStore', action: 'addPlanDaySession' }, e));
         }
       },
 
       removePlanDaySession: dayId => {
         const dayToRemove = get().trainingPlanDays.find(d => d.id === dayId);
         if (!dayToRemove) return;
+
+        const remainingForPlan = get().trainingPlanDays.filter(d => d.planId === dayToRemove.planId && d.id !== dayId);
+        const schedule = derivePlanSchedule(remainingForPlan);
 
         set(state => {
           const remaining = state.trainingPlanDays.filter(d => d.id !== dayId);
@@ -413,7 +474,19 @@ export const useFitnessStore = create<FitnessState>()(
             }
             return d;
           });
-          return { trainingPlanDays: reordered };
+          return {
+            trainingPlans: state.trainingPlans.map(plan =>
+              plan.id === dayToRemove.planId
+                ? {
+                    ...plan,
+                    trainingDays: schedule.trainingDays,
+                    restDays: schedule.restDays,
+                    updatedAt: new Date().toISOString(),
+                  }
+                : plan,
+            ),
+            trainingPlanDays: reordered,
+          };
         });
 
         if (_db) {
@@ -426,6 +499,15 @@ export const useFitnessStore = create<FitnessState>()(
             for (const d of remaining) {
               await db.execute('UPDATE training_plan_days SET session_order = ? WHERE id = ?', [d.sessionOrder, d.id]);
             }
+            await db.execute(
+              'UPDATE training_plans SET training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?',
+              [
+                JSON.stringify(schedule.trainingDays),
+                JSON.stringify(schedule.restDays),
+                new Date().toISOString(),
+                dayToRemove.planId,
+              ],
+            );
           }).catch(e => logger.error({ component: 'fitnessStore', action: 'removePlanDaySession' }, e));
         }
       },
@@ -1161,9 +1243,14 @@ export const useFitnessStore = create<FitnessState>()(
         let daysToInsert: TrainingPlanDay[];
 
         if (mode === 'regenerate') {
-          const daysPerWeek = plan.trainingDays.length;
+          const daysPerWeek = Math.max(
+            plan.trainingDays.length,
+            new Set(currentDays.map(day => day.dayOfWeek)).size,
+            1,
+          );
           const preview = remapExercisesToNewSplit([], newSplit, daysPerWeek);
           const { trainingProfile } = get();
+          const targetDays = resolvePlanDaySlots(plan, currentDays, preview.suggested.length);
 
           let sessionVolumes: Record<MuscleGroup, number>[] | null = null;
           let exerciseDB: Exercise[] | undefined;
@@ -1190,19 +1277,28 @@ export const useFitnessStore = create<FitnessState>()(
             return {
               id: generateUUID(),
               planId,
-              dayOfWeek: plan.trainingDays[i] ?? i,
+              dayOfWeek: targetDays[i] ?? i + 1,
               sessionOrder: 1,
               workoutType: s.day,
               muscleGroups: JSON.stringify(s.muscleGroups),
               exercises: exercisesJson,
               originalExercises: exercisesJson,
               isUserAssigned: false,
-              originalDayOfWeek: plan.trainingDays[i] ?? i,
+              originalDayOfWeek: targetDays[i] ?? i + 1,
               notes: s.day,
             };
           });
         } else {
           const preview = remapExercisesToNewSplit(currentDays, newSplit, plan.trainingDays.length);
+          const targetDays = resolvePlanDaySlots(
+            plan,
+            currentDays,
+            Math.max(
+              preview.mapped.length + preview.suggested.length,
+              new Set(currentDays.map(day => day.dayOfWeek)).size,
+              1,
+            ),
+          );
 
           const updatedDays: TrainingPlanDay[] = preview.mapped.map(m => ({
             ...m.from,
@@ -1229,7 +1325,7 @@ export const useFitnessStore = create<FitnessState>()(
                 s.muscleGroups,
                 suggestedVolumes[i],
                 trainingProfile,
-                updatedDays.length + i,
+                updatedDays.length + i + 1,
                 exerciseDB,
               );
               exercisesJson = JSON.stringify(exercises);
@@ -1238,14 +1334,14 @@ export const useFitnessStore = create<FitnessState>()(
             return {
               id: generateUUID(),
               planId,
-              dayOfWeek: plan.trainingDays[updatedDays.length + i] ?? updatedDays.length + i,
+              dayOfWeek: targetDays[updatedDays.length + i] ?? updatedDays.length + i + 1,
               sessionOrder: 1,
               workoutType: s.day,
               muscleGroups: JSON.stringify(s.muscleGroups),
               exercises: exercisesJson,
               originalExercises: exercisesJson,
               isUserAssigned: false,
-              originalDayOfWeek: plan.trainingDays[updatedDays.length + i] ?? updatedDays.length + i,
+              originalDayOfWeek: targetDays[updatedDays.length + i] ?? updatedDays.length + i + 1,
               notes: s.day,
             };
           });
@@ -1253,15 +1349,16 @@ export const useFitnessStore = create<FitnessState>()(
           daysToInsert = [...updatedDays, ...newSuggestedDays];
         }
 
+        const schedule = derivePlanSchedule(daysToInsert);
+
         // --- 2. DB-first transaction (if DB is available) ---
         if (_db) {
           try {
             await _db.transaction(async () => {
-              await _db!.execute('UPDATE training_plans SET split_type = ?, updated_at = ? WHERE id = ?', [
-                newSplit,
-                now,
-                planId,
-              ]);
+              await _db!.execute(
+                'UPDATE training_plans SET split_type = ?, training_days = ?, rest_days = ?, updated_at = ? WHERE id = ?',
+                [newSplit, JSON.stringify(schedule.trainingDays), JSON.stringify(schedule.restDays), now, planId],
+              );
               await replaceAllPlanDays(_db!, planId, daysToInsert);
             });
           } catch (error: unknown) {
@@ -1273,7 +1370,15 @@ export const useFitnessStore = create<FitnessState>()(
         // --- 3. Update Zustand only after successful DB commit ---
         set(state => ({
           trainingPlans: state.trainingPlans.map(p =>
-            p.id === planId ? { ...p, splitType: newSplit, updatedAt: now } : p,
+            p.id === planId
+              ? {
+                  ...p,
+                  splitType: newSplit,
+                  trainingDays: schedule.trainingDays,
+                  restDays: schedule.restDays,
+                  updatedAt: now,
+                }
+              : p,
           ),
           trainingPlanDays: [...state.trainingPlanDays.filter(d => d.planId !== planId), ...daysToInsert],
         }));
@@ -1284,7 +1389,8 @@ export const useFitnessStore = create<FitnessState>()(
         if (!plan) return { mapped: [], suggested: [], unmapped: [] };
 
         const currentDays = get().trainingPlanDays.filter(d => d.planId === planId);
-        return remapExercisesToNewSplit(currentDays, newSplit, plan.trainingDays.length);
+        const daysPerWeek = Math.max(plan.trainingDays.length, new Set(currentDays.map(day => day.dayOfWeek)).size, 1);
+        return remapExercisesToNewSplit(currentDays, newSplit, daysPerWeek);
       },
 
       getTemplates: () => {

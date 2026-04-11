@@ -30,33 +30,38 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
   const planDays = useMemo(() => allPlanDays.filter(d => d.planId === planId), [allPlanDays, planId]);
 
   const [localTrainingDays, setLocalTrainingDays] = useState<number[]>(() => plan?.trainingDays ?? []);
+  const [localPlanDays, setLocalPlanDays] = useState(() => planDays);
   const [isDirty, setIsDirty] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [reassignDayId, setReassignDayId] = useState<string | null>(null);
 
   const initialTrainingDaysSnapshot = useMemo(() => JSON.stringify(plan?.trainingDays ?? []), [plan?.trainingDays]);
+  const initialPlanDaysSnapshot = useMemo(() => JSON.stringify(planDays), [planDays]);
 
   const hasChanges = useMemo(
-    () => isDirty || JSON.stringify(localTrainingDays) !== initialTrainingDaysSnapshot,
-    [isDirty, localTrainingDays, initialTrainingDaysSnapshot],
+    () =>
+      isDirty ||
+      JSON.stringify(localTrainingDays) !== initialTrainingDaysSnapshot ||
+      JSON.stringify(localPlanDays) !== initialPlanDaysSnapshot,
+    [initialPlanDaysSnapshot, initialTrainingDaysSnapshot, isDirty, localPlanDays, localTrainingDays],
   );
 
   const dayCounts = useMemo(() => {
     const counts: Record<number, number> = {};
-    for (const d of planDays) {
+    for (const d of localPlanDays) {
       counts[d.dayOfWeek] = (counts[d.dayOfWeek] ?? 0) + 1;
     }
     return counts;
-  }, [planDays]);
+  }, [localPlanDays]);
 
   const unassignedExists = useMemo(() => {
     const trainingSet = new Set(localTrainingDays);
-    return planDays.some(d => !trainingSet.has(d.dayOfWeek));
-  }, [planDays, localTrainingDays]);
+    return localPlanDays.some(d => !trainingSet.has(d.dayOfWeek));
+  }, [localPlanDays, localTrainingDays]);
 
   const reassignTarget = useMemo(
-    () => (reassignDayId ? planDays.find(d => d.id === reassignDayId) : null),
-    [reassignDayId, planDays],
+    () => (reassignDayId ? localPlanDays.find(d => d.id === reassignDayId) : null),
+    [reassignDayId, localPlanDays],
   );
 
   const handleDayToggle = useCallback(
@@ -82,7 +87,15 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
     [notify, t],
   );
 
-  const handleReorder = useCallback((_fromIndex: number, _toIndex: number) => {
+  const handleReorder = useCallback((fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
+    setLocalPlanDays(prev => {
+      if (fromIndex >= prev.length || toIndex >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
     setIsDirty(true);
   }, []);
 
@@ -93,7 +106,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
   const handleReassignSelect = useCallback(
     (day: number) => {
       if (!reassignDayId) return;
-      useFitnessStore.getState().reassignWorkoutToDay(reassignDayId, day);
+      setLocalPlanDays(prev => prev.map(item => (item.id === reassignDayId ? { ...item, dayOfWeek: day } : item)));
       setReassignDayId(null);
       setIsDirty(true);
     },
@@ -101,28 +114,41 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
   );
 
   const handleAutoAssign = useCallback(() => {
-    useFitnessStore.getState().autoAssignWorkouts(planId);
+    if (localTrainingDays.length > 0 && localPlanDays.length > 0) {
+      const orderedDays = [...localTrainingDays].sort((a, b) => a - b);
+      setLocalPlanDays(prev =>
+        prev.map((item, index) => ({
+          ...item,
+          dayOfWeek: orderedDays[index % orderedDays.length],
+        })),
+      );
+    }
     setIsDirty(true);
-  }, [planId]);
+  }, [localPlanDays.length, localTrainingDays]);
 
   const handleRestore = useCallback(() => {
-    useFitnessStore.getState().restoreOriginalSchedule(planId);
-    const restored = useFitnessStore.getState().trainingPlans.find(p => p.id === planId);
-    if (restored) {
-      setLocalTrainingDays(restored.trainingDays);
-    }
+    setLocalPlanDays(planDays);
+    setLocalTrainingDays(plan?.trainingDays ?? []);
     setIsDirty(false);
-  }, [planId]);
+  }, [plan, planDays]);
 
   const handleSave = useCallback(() => {
     if (unassignedExists) {
       notify.warning(t('fitness.scheduleEditor.unassignedWarning'));
       return;
     }
-    useFitnessStore.getState().updateTrainingDays(planId, localTrainingDays);
+    const store = useFitnessStore.getState();
+    store.updateTrainingDays(planId, localTrainingDays);
+    localPlanDays.forEach((planDay, index) => {
+      const original = planDays[index];
+      if (original?.id !== planDay.id || original?.dayOfWeek !== planDay.dayOfWeek) {
+        store.reassignWorkoutToDay(planDay.id, planDay.dayOfWeek);
+      }
+    });
     notify.success(t('fitness.scheduleEditor.saved'));
+    setIsDirty(false);
     popPage();
-  }, [planId, localTrainingDays, unassignedExists, notify, t, popPage]);
+  }, [localPlanDays, localTrainingDays, notify, planDays, planId, popPage, t, unassignedExists]);
 
   const handleBack = useCallback(() => {
     if (hasChanges) {
@@ -172,6 +198,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
           <button
             type="button"
             data-testid="create-plan-cta"
+            onClick={popPage}
             className="bg-primary text-primary-foreground hover:bg-primary focus-visible:ring-ring dark:bg-primary touch-manipulation rounded-xl px-6 py-3 text-sm font-semibold shadow-md transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none motion-reduce:transition-none"
           >
             {t('fitness.scheduleEditor.emptyPlanCta')}
@@ -255,7 +282,7 @@ export const PlanScheduleEditor = memo(function PlanScheduleEditor({
           )}
 
           <WorkoutAssignmentList
-            planDays={planDays}
+            planDays={localPlanDays}
             trainingDays={localTrainingDays}
             onReorder={handleReorder}
             onReassign={handleReassign}

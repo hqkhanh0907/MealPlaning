@@ -611,3 +611,22 @@ input[type='number'] {
     font-weight: 700;
   }
 }
+
+/* Press feedback for all interactive elements */
+.interactive {
+  @apply transition-transform duration-100 active:scale-[0.97];
+}
+.interactive:disabled,
+.interactive[aria-disabled='true'] {
+  @apply pointer-events-none opacity-50;
+}
+
+/* Global reduced motion override */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}
