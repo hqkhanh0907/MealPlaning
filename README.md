@@ -11,6 +11,7 @@
 - [Yêu cầu hệ thống](#yêu-cầu-hệ-thống)
 - [Cài đặt & Chạy local](#cài-đặt--chạy-local)
 - [Build Android APK](#build-android-apk)
+- [Graphify knowledge graph](#graphify-knowledge-graph)
 - [Kiểm thử](#kiểm-thử)
 - [Cấu trúc thư mục](#cấu-trúc-thư-mục)
 - [Biến môi trường](#biến-môi-trường)
@@ -85,7 +86,31 @@ npm run test           # Unit tests (3135 tests)
 npm run test:coverage  # Unit tests + coverage report
 npm run e2e            # E2E tests (Appium, cần emulator Android)
 npm run analyze        # Bundle analysis (visualizer)
+npm run graphify:build # Build curated code graph for architecture queries
 ```
+
+---
+
+## Graphify knowledge graph
+
+Graphify is wired for a curated source graph so build artifacts, Android bundled web assets, and E2E harness code do not drown the app architecture.
+
+```bash
+# Create/update the graph artifacts
+npm run graphify:build
+
+# Optional: run the local MCP server directly
+npm run graphify:serve
+```
+
+Artifacts are written to `graphify-out/`:
+
+- `graph.json` - graph data consumed by the MCP server
+- `GRAPH_REPORT.md` - summary, god nodes, communities, surprising connections
+- `graph.html` - browser visualization when the graph is small enough
+- `obsidian/` - Obsidian vault + canvas view
+
+The wrapper script intentionally excludes generated code such as `dist/`, `coverage/`, `android/app/src/main/assets/public/`, and test harness files by default. That keeps the graph useful for architecture work inside MealPlaning instead of ranking bundle internals or QA utilities as god nodes.
 
 ---
 

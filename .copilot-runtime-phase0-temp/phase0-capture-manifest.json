@@ -1,0 +1,31 @@
+[
+  {
+    "state": "settings-root",
+    "click": "Tổng quan",
+    "shot": ".copilot-runtime-phase0-temp/P0_settings_root_01_emulator5556_portrait_confirmed.png",
+    "body": "Skip to main content\nTổng quan\n\nTh 5, 9/4\n\nChào buổi sáng!\n\nThiết lập hồ sơ sức khỏe\n\nCập nhật hồ sơ để xem mục tiêu dinh dưỡng hàng ngày\n\nKế hoạch hôm nay\n\nChưa có kế hoạch tập luyện\n\nTạo kế hoạch\nBữa ăn\n0/3 bữa\nBữa sáng\nBữa trưa\nBữa tối\n\nKiên trì\n\nKiên trì tracking giúp bạn đạt mục tiêu nhanh hơn 2x\n\nGhi cân nặng\nGhi cardio\nLịch trình\nThư viện\nPhân tích\nTập luyện\nTổng quan"
+  },
+  {
+    "state": "settings-health-read",
+    "nav": "none",
+    "shot": ".copilot-runtime-phase0-temp/P0_settings_health_read_01_emulator5556_portrait_confirmed.png",
+    "body": "Skip to main content\nTổng quan\n\nTh 5, 9/4\n\nChào buổi sáng!\n\nThiết lập hồ sơ sức khỏe\n\nCập nhật hồ sơ để xem mục tiêu dinh dưỡng hàng ngày\n\nKế hoạch hôm nay\n\nChưa có kế hoạch tập luyện\n\nTạo kế hoạch\nBữa ăn\n0/3 bữa\nBữa sáng\nBữa trưa\nBữa tối\n\nKiên trì\n\nKiên trì tracking giúp bạn đạt mục tiêu nhanh hơn 2x\n\nGhi cân nặng\nGhi cardio\nLịch trình\nThư viện\nPhân tích\nTập luyện\nTổng quan"
+  },
+  {
+    "state": "settings-health-edit",
+    "edit": "none",
+    "shot": ".copilot-runtime-phase0-temp/P0_settings_health_edit_01_emulator5556_portrait_confirmed.png",
+    "body": "Skip to main content\nTổng quan\n\nTh 5, 9/4\n\nChào buổi sáng!\n\nThiết lập hồ sơ sức khỏe\n\nCập nhật hồ sơ để xem mục tiêu dinh dưỡng hàng ngày\n\nKế hoạch hôm nay\n\nChưa có kế hoạch tập luyện\n\nTạo kế hoạch\nBữa ăn\n0/3 bữa\nBữa sáng\nBữa trưa\nBữa tối\n\nKiên trì\n\nKiên trì tracking giúp bạn đạt mục tiêu nhanh hơn 2x\n\nGhi cân nặng\nGhi cardio\nLịch trình\nThư viện\nPhân tích\nTập luyện\nTổng quan"
+  },
+  {
+    "state": "onboarding-welcome",
+    "shot": ".copilot-runtime-phase0-temp/P0_onboarding_welcome_01_emulator5556_portrait_confirmed.png",
+    "body": ""
+  },
+  {
+    "state": "onboarding-health-basic",
+    "advance": ["none", "none", "none"],
+    "shot": ".copilot-runtime-phase0-temp/P0_onboarding_health_basic_01_emulator5556_portrait_confirmed.png",
+    "body": "Chào mừng\n\nBước 1/6\n\nBỏ qua\nChào mừng đến với Smart Meal Planner\n\nLên kế hoạch bữa ăn thông minh, theo dõi dinh dưỡng và tập luyện — tất cả trong một ứng dụng.\n\nTiếp tục"
+  }
+]

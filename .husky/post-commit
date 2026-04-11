@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/h"
+
+if [ ! -x "./.venv-graphify/bin/python" ]; then
+  echo "graphify hook skipped: .venv-graphify is missing"
+  exit 0
+fi
+
+echo "graphify: rebuilding curated code graph"
+npm run graphify:build

@@ -23,6 +23,8 @@
     "e2e:android": "wdio run e2e/wdio.conf.ts",
     "analyze": "ANALYZE=true vite build",
     "build:web": "COMPRESS=true vite build",
+    "graphify:build": "./.venv-graphify/bin/python scripts/build-graph.py",
+    "graphify:serve": "./.venv-graphify/bin/python -m graphify.serve graphify-out/graph.json",
     "prepare": "husky"
   },
   "dependencies": {

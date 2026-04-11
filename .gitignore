@@ -41,3 +41,8 @@ DOCUMENTATION_SUMMARY.txt
 
 # Screenshots (emulator/audit evidence)
 screenshots/
+
+# Graphify
+.venv-graphify/
+graphify-out/
+.graphify_*.json

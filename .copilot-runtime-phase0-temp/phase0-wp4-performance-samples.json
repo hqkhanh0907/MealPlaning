@@ -1,0 +1,246 @@
+{
+  "samples": [
+    {
+      "title": "Smart Meal Planner",
+      "ready": "complete",
+      "bodyChars": 169,
+      "nav": {
+        "type": "navigate",
+        "domContentLoadedEventEnd": 422,
+        "loadEventEnd": 422,
+        "responseEnd": 31
+      },
+      "resources": [
+        {
+          "name": "index-CuezudC-.js",
+          "duration": 236,
+          "type": "script"
+        },
+        {
+          "name": "vendor-react-C7Hj10Ju.js",
+          "duration": 224,
+          "type": "other"
+        },
+        {
+          "name": "vendor-ui-GpKYG1Js.js",
+          "duration": 223,
+          "type": "other"
+        },
+        {
+          "name": "vendor-genai-D0Fx0mUX.js",
+          "duration": 223,
+          "type": "other"
+        },
+        {
+          "name": "vendor-i18n-CGcByii5.js",
+          "duration": 219,
+          "type": "other"
+        },
+        {
+          "name": "onboarding-advanced-CKfLChMj.js",
+          "duration": 237,
+          "type": "other"
+        },
+        {
+          "name": "index-C6n4kTTD.css",
+          "duration": 223,
+          "type": "link"
+        },
+        {
+          "name": "favicon.svg",
+          "duration": 2,
+          "type": "other"
+        },
+        {
+          "name": "UnifiedOnboarding-B6gC_IGp.js",
+          "duration": 15,
+          "type": "script"
+        },
+        {
+          "name": "schemas-Se-zWJkF.js",
+          "duration": 16,
+          "type": "script"
+        },
+        {
+          "name": "goalValidation-QLQl4lZK.js",
+          "duration": 15,
+          "type": "script"
+        },
+        {
+          "name": "index-DdoIAZS8.js",
+          "duration": 13,
+          "type": "script"
+        }
+      ],
+      "wallClockLaunchSeconds": 8.2,
+      "sample": 1
+    },
+    {
+      "title": "Smart Meal Planner",
+      "ready": "complete",
+      "bodyChars": 169,
+      "nav": {
+        "type": "navigate",
+        "domContentLoadedEventEnd": 381,
+        "loadEventEnd": 381,
+        "responseEnd": 49
+      },
+      "resources": [
+        {
+          "name": "index-CuezudC-.js",
+          "duration": 231,
+          "type": "script"
+        },
+        {
+          "name": "vendor-react-C7Hj10Ju.js",
+          "duration": 206,
+          "type": "other"
+        },
+        {
+          "name": "vendor-i18n-CGcByii5.js",
+          "duration": 200,
+          "type": "other"
+        },
+        {
+          "name": "index-C6n4kTTD.css",
+          "duration": 204,
+          "type": "link"
+        },
+        {
+          "name": "vendor-ui-GpKYG1Js.js",
+          "duration": 213,
+          "type": "other"
+        },
+        {
+          "name": "vendor-genai-D0Fx0mUX.js",
+          "duration": 210,
+          "type": "other"
+        },
+        {
+          "name": "onboarding-advanced-CKfLChMj.js",
+          "duration": 205,
+          "type": "other"
+        },
+        {
+          "name": "favicon.svg",
+          "duration": 1,
+          "type": "other"
+        },
+        {
+          "name": "UnifiedOnboarding-B6gC_IGp.js",
+          "duration": 3,
+          "type": "script"
+        },
+        {
+          "name": "schemas-Se-zWJkF.js",
+          "duration": 4,
+          "type": "script"
+        },
+        {
+          "name": "goalValidation-QLQl4lZK.js",
+          "duration": 3,
+          "type": "script"
+        },
+        {
+          "name": "index-DdoIAZS8.js",
+          "duration": 6,
+          "type": "script"
+        }
+      ],
+      "wallClockLaunchSeconds": 8.13,
+      "sample": 2
+    },
+    {
+      "title": "Smart Meal Planner",
+      "ready": "complete",
+      "bodyChars": 169,
+      "nav": {
+        "type": "navigate",
+        "domContentLoadedEventEnd": 295,
+        "loadEventEnd": 295,
+        "responseEnd": 14
+      },
+      "resources": [
+        {
+          "name": "index-CuezudC-.js",
+          "duration": 163,
+          "type": "script"
+        },
+        {
+          "name": "vendor-i18n-CGcByii5.js",
+          "duration": 147,
+          "type": "other"
+        },
+        {
+          "name": "onboarding-advanced-CKfLChMj.js",
+          "duration": 152,
+          "type": "other"
+        },
+        {
+          "name": "vendor-react-C7Hj10Ju.js",
+          "duration": 152,
+          "type": "other"
+        },
+        {
+          "name": "vendor-ui-GpKYG1Js.js",
+          "duration": 151,
+          "type": "other"
+        },
+        {
+          "name": "index-C6n4kTTD.css",
+          "duration": 151,
+          "type": "link"
+        },
+        {
+          "name": "vendor-genai-D0Fx0mUX.js",
+          "duration": 152,
+          "type": "other"
+        },
+        {
+          "name": "favicon.svg",
+          "duration": 1,
+          "type": "other"
+        },
+        {
+          "name": "UnifiedOnboarding-B6gC_IGp.js",
+          "duration": 2,
+          "type": "script"
+        },
+        {
+          "name": "schemas-Se-zWJkF.js",
+          "duration": 3,
+          "type": "script"
+        },
+        {
+          "name": "goalValidation-QLQl4lZK.js",
+          "duration": 3,
+          "type": "script"
+        },
+        {
+          "name": "index-DdoIAZS8.js",
+          "duration": 1,
+          "type": "script"
+        }
+      ],
+      "wallClockLaunchSeconds": 8.17,
+      "sample": 3
+    }
+  ],
+  "summary": {
+    "domContentLoaded_ms": {
+      "min": 295,
+      "median": 381,
+      "max": 422
+    },
+    "loadEventEnd_ms": {
+      "min": 295,
+      "median": 381,
+      "max": 422
+    },
+    "wallClockLaunch_s": {
+      "min": 8.13,
+      "median": 8.17,
+      "max": 8.2
+    }
+  }
+}
