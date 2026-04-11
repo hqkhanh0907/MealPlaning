@@ -6,12 +6,12 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, params?: Record<string, unknown>) => {
       const map: Record<string, string> = {
-        'schedule.quickNutrition': 'Dinh dưỡng nhanh',
-        'summary.remaining': 'Còn {{value}} {{unit}}',
-        'summary.over': 'Vượt {{value}} {{unit}}',
-        'common.macroP': 'P',
-        'common.macroF': 'F',
-        'common.macroC': 'C',
+        'calendar.budgetStripTitle': 'Dinh dưỡng hôm nay',
+        'calendar.budgetSetupLabel': 'Chưa thiết lập mục tiêu',
+        'calendar.budgetSetupCta': 'Thiết lập',
+        'calendar.budgetGoalReached': 'Đã đạt mục tiêu! 🎉',
+        'calendar.budgetRemaining': 'Còn: {{value}} {{unit}}',
+        'calendar.budgetOverflow': 'Vượt: {{value}} {{unit}}',
         'nutrition.proteinNudge': 'Còn thiếu {{amount}}g protein — thêm {{suggestion}}?',
         'nutrition.proteinNudgeSuggestions': 'ức gà, cá hồi hoặc trứng',
         'nutrition.calorieNudge': 'Còn {{amount}} kcal — thêm bữa phụ nhẹ hoặc snack?',
@@ -68,13 +68,13 @@ describe('MiniNutritionBar', () => {
 
     it('shows remaining calories when under target', () => {
       render(<MiniNutritionBar {...makeProps()} />);
-      expect(screen.getByTestId('mini-remaining-cal')).toHaveTextContent('Còn 764 kcal');
+      expect(screen.getByTestId('mini-remaining-cal')).toHaveTextContent('Còn: 764 kcal');
     });
 
     it('shows over calories when exceeding target', () => {
       const props = makeProps({ targetCalories: 1000 });
       render(<MiniNutritionBar {...props} />);
-      expect(screen.getByTestId('mini-remaining-cal')).toHaveTextContent('Vượt 327 kcal');
+      expect(screen.getByTestId('mini-remaining-cal')).toHaveTextContent('Vượt: 327 kcal');
     });
   });
 
@@ -86,13 +86,13 @@ describe('MiniNutritionBar', () => {
 
     it('shows remaining protein', () => {
       render(<MiniNutritionBar {...makeProps()} />);
-      expect(screen.getByTestId('mini-remaining-pro')).toHaveTextContent('Còn 0 g');
+      expect(screen.getByTestId('mini-remaining-pro')).toHaveTextContent('Còn: 0 g');
     });
 
     it('shows over protein when exceeding target', () => {
       const props = makeProps({ targetProtein: 100 });
       render(<MiniNutritionBar {...props} />);
-      expect(screen.getByTestId('mini-remaining-pro')).toHaveTextContent('Vượt 70 g');
+      expect(screen.getByTestId('mini-remaining-pro')).toHaveTextContent('Vượt: 70 g');
     });
   });
 
@@ -274,7 +274,7 @@ describe('MiniNutritionBar', () => {
       });
       render(<MiniNutritionBar {...props} />);
       const button = screen.getByTestId('mini-nutrition-bar');
-      expect(button).toHaveAttribute('aria-label', 'Dinh dưỡng nhanh');
+      expect(button).toHaveAttribute('aria-label', 'Dinh dưỡng hôm nay');
     });
   });
 
@@ -282,13 +282,13 @@ describe('MiniNutritionBar', () => {
     it('handles zero target calories safely', () => {
       const props = makeProps({ targetCalories: 0 });
       render(<MiniNutritionBar {...props} />);
-      expect(screen.getByText(/1327\/0 kcal/)).toBeInTheDocument();
+      expect(screen.getByTestId('budget-setup-label')).toHaveTextContent('Chưa thiết lập mục tiêu');
     });
 
     it('handles non-finite target calories', () => {
       const props = makeProps({ targetCalories: NaN });
       render(<MiniNutritionBar {...props} />);
-      expect(screen.getByText(/1327\/0 kcal/)).toBeInTheDocument();
+      expect(screen.getByTestId('budget-setup-label')).toHaveTextContent('Chưa thiết lập mục tiêu');
     });
 
     it('handles non-finite target protein', () => {

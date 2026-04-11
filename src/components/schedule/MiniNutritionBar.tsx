@@ -1,4 +1,4 @@
-import { Beef, Flame } from 'lucide-react';
+import { Beef, Flame, Settings2 } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -37,8 +37,11 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
   const hasMacros = totalPro > 0 || totalFat > 0 || totalCarbs > 0;
   const hasIntake = totalCal > 0 || totalPro > 0;
 
+  const isSetup = displayCal <= 0;
+  const isGoalReached = !isSetup && totalCal >= displayCal && displayCal > 0;
+
   const nudgeText = useMemo(() => {
-    if (!hasIntake) return null;
+    if (!hasIntake || isSetup || isGoalReached) return null;
     if (remainingPro > 30) {
       return t('nutrition.proteinNudge', {
         amount: remainingPro,
@@ -49,19 +52,52 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
       return t('nutrition.calorieNudge', { amount: remainingCal });
     }
     return null;
-  }, [hasIntake, remainingPro, remainingCal, t]);
+  }, [hasIntake, isSetup, isGoalReached, remainingPro, remainingCal, t]);
 
-  const ariaLabel = nudgeText ? `${t('schedule.quickNutrition')} — ${nudgeText}` : t('schedule.quickNutrition');
+  const headerText = isGoalReached ? t('calendar.budgetGoalReached') : `📊 ${t('calendar.budgetStripTitle')}`;
+
+  const ariaLabel = nudgeText ? `${t('calendar.budgetStripTitle')} — ${nudgeText}` : t('calendar.budgetStripTitle');
+
+  const containerClass = isGoalReached
+    ? 'border-success/20 bg-success/5 hover:bg-success/10'
+    : 'border-primary/20 bg-primary/5 hover:bg-primary/10';
+
+  if (isSetup) {
+    return (
+      <button
+        type="button"
+        onClick={onSwitchToNutrition}
+        data-testid="mini-nutrition-bar"
+        data-budget-strip=""
+        className="border-primary/20 bg-primary/5 hover:bg-primary/10 w-full cursor-pointer rounded-2xl border p-4 text-left transition-all active:scale-[0.99] lg:hidden"
+        aria-label={t('calendar.budgetSetupLabel')}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-primary mb-1 text-xs font-semibold">{`📊 ${t('calendar.budgetStripTitle')}`}</p>
+            <p data-testid="budget-setup-label" className="text-muted-foreground text-sm">
+              {t('calendar.budgetSetupLabel')}
+            </p>
+          </div>
+          <span className="bg-primary text-primary-foreground inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold">
+            <Settings2 className="h-3.5 w-3.5" aria-hidden="true" />
+            {t('calendar.budgetSetupCta')}
+          </span>
+        </div>
+      </button>
+    );
+  }
 
   return (
     <button
       type="button"
       onClick={onSwitchToNutrition}
       data-testid="mini-nutrition-bar"
-      className="border-primary/20 bg-primary/5 hover:bg-primary/10 w-full cursor-pointer rounded-2xl border p-4 text-left transition-all active:scale-[0.99] lg:hidden"
+      data-budget-strip=""
+      className={`${containerClass} w-full cursor-pointer rounded-2xl border p-4 text-left transition-all active:scale-[0.99] lg:hidden`}
       aria-label={ariaLabel}
     >
-      <p className="text-primary mb-2 text-xs font-semibold">{t('schedule.quickNutrition')}</p>
+      <p className={`mb-2 text-xs font-semibold ${isGoalReached ? 'text-success' : 'text-primary'}`}>{headerText}</p>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <div className="text-foreground flex items-center gap-1.5">
@@ -82,8 +118,8 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
             className={`text-xs font-medium tabular-nums ${remainingCal >= 0 ? 'text-primary' : 'text-destructive'}`}
           >
             {remainingCal >= 0
-              ? t('summary.remaining', { value: remainingCal, unit: 'kcal' })
-              : t('summary.over', { value: Math.abs(remainingCal), unit: 'kcal' })}
+              ? t('calendar.budgetRemaining', { value: remainingCal, unit: 'kcal' })
+              : t('calendar.budgetOverflow', { value: Math.abs(remainingCal), unit: 'kcal' })}
           </p>
         </div>
         <div className="space-y-1">
@@ -105,8 +141,8 @@ export const MiniNutritionBar = React.memo(function MiniNutritionBar({
             className={`text-xs font-medium tabular-nums ${remainingPro >= 0 ? 'text-primary' : 'text-destructive'}`}
           >
             {remainingPro >= 0
-              ? t('summary.remaining', { value: remainingPro, unit: 'g' })
-              : t('summary.over', { value: Math.abs(remainingPro), unit: 'g' })}
+              ? t('calendar.budgetRemaining', { value: remainingPro, unit: 'g' })
+              : t('calendar.budgetOverflow', { value: Math.abs(remainingPro), unit: 'g' })}
           </p>
         </div>
       </div>

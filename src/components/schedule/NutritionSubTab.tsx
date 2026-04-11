@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { DayNutritionSummary } from '../../types';
 import { getDynamicTips, NutritionTip } from '../../utils/tips';
 import { EnergyBalanceCard } from '../nutrition/EnergyBalanceCard';
+import { buildStateDescription, createSurfaceStateContract } from '../shared/surfaceState';
 import { Summary } from '../Summary';
 import { MacroChart } from './MacroChart';
 
@@ -42,6 +43,28 @@ const RecommendationPanel = ({
     dayNutrition.breakfast.dishIds.length > 0 ||
     dayNutrition.lunch.dishIds.length > 0 ||
     dayNutrition.dinner.dishIds.length > 0;
+  const emptyNutritionContract = React.useMemo(
+    () =>
+      createSurfaceStateContract({
+        surface: 'calendar.nutrition',
+        state: 'empty',
+        copy: {
+          title: t('calendar.nutritionEmptyTitle'),
+          missing: t('calendar.nutritionEmptyMissing'),
+          reason: t('calendar.nutritionEmptyReason'),
+          nextStep: t('calendar.nutritionEmptyNextStep'),
+        },
+        primaryAction: onSwitchToMeals
+          ? {
+              label: t('calendar.nutritionEmptyAction'),
+              onAction: onSwitchToMeals,
+            }
+          : {
+              label: t('calendar.nutritionEmptyActionDisabled'),
+            },
+      }),
+    [onSwitchToMeals, t],
+  );
 
   const getMissingSlots = (): string => {
     const missing: string[] = [];
@@ -84,16 +107,22 @@ const RecommendationPanel = ({
             {t('recommendation.missing')} {getMissingSlots()}
           </div>
         )}
-        {!hasAnyPlan && onSwitchToMeals && (
-          <button
-            type="button"
-            onClick={onSwitchToMeals}
-            data-testid="btn-switch-to-meals"
-            className="bg-primary-subtle text-primary-emphasis border-primary/20 hover:bg-primary/10 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all active:scale-[0.98]"
-          >
-            <UtensilsCrossed className="text-energy h-4 w-4" aria-hidden="true" />
-            {t('schedule.switchToMeals')}
-          </button>
+        {!hasAnyPlan && (
+          <div data-testid="nutrition-empty-state" className="border-info/15 bg-info/10 rounded-xl border p-4">
+            <p className="text-info font-semibold">{emptyNutritionContract.copy.title}</p>
+            <p className="text-info mt-1">{buildStateDescription(emptyNutritionContract.copy)}</p>
+            {onSwitchToMeals && (
+              <button
+                type="button"
+                onClick={onSwitchToMeals}
+                data-testid="btn-switch-to-meals"
+                className="bg-primary-subtle text-primary-emphasis border-primary/20 hover:bg-primary/10 mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border p-3 text-sm font-medium transition-all active:scale-[0.98]"
+              >
+                <UtensilsCrossed className="text-energy h-4 w-4" aria-hidden="true" />
+                {emptyNutritionContract.primaryAction?.label}
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>

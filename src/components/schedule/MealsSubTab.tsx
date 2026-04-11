@@ -1,9 +1,11 @@
 import { AlertCircle, CheckCircle2, ClipboardList, Clock, Plus } from 'lucide-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DayNutritionSummary, Dish, MealType, SupportedLang } from '../../types';
 import { getLocalizedField } from '../../utils/localize';
+import { EmptyState } from '../shared/EmptyState';
+import { buildStateDescription, createSurfaceStateContract } from '../shared/surfaceState';
 import { MealActionBar } from './MealActionBar';
 import { MealSlot } from './MealSlot';
 import { MiniNutritionBar } from './MiniNutritionBar';
@@ -54,6 +56,8 @@ export const MealsSubTab = React.memo(function MealsSubTab({
   const { t, i18n } = useTranslation();
   const lang = i18n.language as SupportedLang;
   const [quickAddDishId, setQuickAddDishId] = useState<string | null>(null);
+  const [debouncing, setDebouncing] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const allEmpty =
     dayNutrition.breakfast.dishIds.length === 0 &&
     dayNutrition.lunch.dishIds.length === 0 &&
@@ -75,9 +79,31 @@ export const MealsSubTab = React.memo(function MealsSubTab({
     (type: MealType, dishId: string) => {
       onQuickAdd?.(type, dishId);
       setQuickAddDishId(null);
+      setDebouncing(true);
+      setTimeout(() => setDebouncing(false), 300);
     },
     [onQuickAdd],
   );
+
+  const dismissDropdown = useCallback(() => setQuickAddDishId(null), []);
+
+  useEffect(() => {
+    if (!quickAddDishId) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        dismissDropdown();
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') dismissDropdown();
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [quickAddDishId, dismissDropdown]);
 
   const recentDishes = useMemo(() => {
     if (!recentDishIds?.length) return [];
@@ -110,6 +136,63 @@ export const MealsSubTab = React.memo(function MealsSubTab({
     return count;
   }, [dayNutrition]);
 
+  const emptyDayContract = useMemo(
+    () =>
+      createSurfaceStateContract({
+        surface: 'calendar.meals',
+        state: 'empty',
+        copy: {
+          title: t('calendar.emptyDayTitle'),
+          missing: t('calendar.emptyDayMissing'),
+          reason: t('calendar.emptyDayReason'),
+          nextStep: t('calendar.emptyDayNextStep'),
+        },
+        primaryAction: {
+          label: t('calendar.emptyDayAction'),
+          onAction: onOpenTypeSelection,
+        },
+      }),
+    [onOpenTypeSelection, t],
+  );
+
+  const partialPlanContract = useMemo(
+    () =>
+      createSurfaceStateContract({
+        surface: 'calendar.meals',
+        state: 'warning',
+        copy: {
+          title: t('calendar.partialDayTitle'),
+          missing: missingSlots,
+          reason: t('calendar.partialDayReason', { filled: filledCount, total: MEAL_TYPES.length }),
+          nextStep: t('calendar.partialDayNextStep'),
+        },
+        primaryAction: {
+          label: t('calendar.partialDayAction'),
+          onAction: onOpenTypeSelection,
+        },
+      }),
+    [filledCount, missingSlots, onOpenTypeSelection, t],
+  );
+
+  const completePlanContract = useMemo(
+    () =>
+      createSurfaceStateContract({
+        surface: 'calendar.meals',
+        state: 'success',
+        copy: {
+          title: t('calendar.completeDayTitle'),
+          missing: t('calendar.completeDayMissing'),
+          reason: t('calendar.completeDayReason'),
+          nextStep: t('calendar.completeDayNextStep'),
+        },
+        primaryAction: {
+          label: t('calendar.completeDayAction'),
+          onAction: onSwitchToNutrition,
+        },
+      }),
+    [onSwitchToNutrition, t],
+  );
+
   return (
     <div data-testid="meals-subtab" className="space-y-4">
       <MealActionBar
@@ -127,37 +210,43 @@ export const MealsSubTab = React.memo(function MealsSubTab({
       {recentDishes.length > 0 && emptySlots.length > 0 && onQuickAdd && (
         <div
           data-testid="recent-dishes-section"
+          ref={dropdownRef}
           className="bg-card border-border-subtle rounded-2xl border p-4 shadow-sm"
         >
           <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase">
             <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-            {t('recentDishes.title')}
+            {t('calendar.recentDishesLabel')}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {recentDishes.map(dish => (
               <div key={dish.id} className="relative">
                 <button
                   data-testid={`btn-recent-${dish.id}`}
+                  disabled={debouncing}
                   onClick={() => {
+                    if (debouncing) return;
                     if (emptySlots.length === 1) {
                       handleQuickAdd(emptySlots[0], dish.id);
                     } else {
                       setQuickAddDishId(prev => (prev === dish.id ? null : dish.id));
                     }
                   }}
-                  className="dark:hover:border-primary border-border hover:bg-primary-subtle bg-muted text-foreground hover:border-primary/30 inline-flex min-h-11 items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all"
+                  className="dark:hover:border-primary border-border hover:bg-primary-subtle bg-muted text-foreground hover:border-primary/30 inline-flex min-h-11 items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all disabled:pointer-events-none disabled:opacity-50"
                 >
                   <Plus className="text-primary h-4 w-4" />
                   {getLocalizedField(dish.name, lang)}
                 </button>
                 {quickAddDishId === dish.id && emptySlots.length > 1 && (
-                  <div className="border-border bg-card absolute top-full left-0 z-20 mt-1 min-w-28 rounded-xl border py-1 shadow-lg">
+                  <div
+                    data-testid={`quick-add-dropdown-${dish.id}`}
+                    className="border-border bg-card absolute top-full left-0 z-20 mt-1 min-w-28 rounded-xl border p-1 shadow-lg"
+                  >
                     {emptySlots.map(type => (
                       <button
                         key={type}
                         data-testid={`btn-quick-add-${type}-${dish.id}`}
                         onClick={() => handleQuickAdd(type, dish.id)}
-                        className="hover:bg-primary-subtle text-foreground flex min-h-11 w-full items-center px-3 py-2 text-left text-xs font-medium transition-colors"
+                        className="hover:bg-muted text-foreground flex min-h-11 w-full items-center rounded-lg px-3 py-2 text-left text-xs font-medium transition-colors"
                       >
                         {mealTypeLabels[type]}
                       </button>
@@ -200,23 +289,50 @@ export const MealsSubTab = React.memo(function MealsSubTab({
 
       {/* Inline tip */}
       {allEmpty && (
-        <div className="border-info/15 bg-info/10 text-info flex items-center gap-2 rounded-xl border p-3 text-sm">
-          <ClipboardList className="size-4 shrink-0" aria-hidden="true" />
-          <p className="font-medium">{t('tips.noPlan')}</p>
-        </div>
+        <EmptyState
+          variant="standard"
+          icon={ClipboardList}
+          contract={emptyDayContract}
+          className="border-info/20 bg-info/5 rounded-2xl border"
+        />
       )}
       {!allEmpty && !isComplete && (
-        <div className="border-warning/15 bg-warning/10 text-warning flex items-center gap-2 rounded-xl border p-3 text-sm">
-          <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <p className="font-medium">
-            {t('recommendation.missing')} {missingSlots}
-          </p>
+        <div data-testid="meal-plan-warning" className="border-warning/15 bg-warning/10 rounded-xl border p-4 text-sm">
+          <div className="text-warning flex items-start gap-2">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">{partialPlanContract.copy.title}</p>
+              <p className="mt-1">{buildStateDescription(partialPlanContract.copy)}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={partialPlanContract.primaryAction?.onAction}
+            className="text-warning mt-3 text-sm font-semibold underline underline-offset-2"
+          >
+            {partialPlanContract.primaryAction?.label}
+          </button>
         </div>
       )}
       {isComplete && (
-        <div className="bg-primary-subtle text-primary-emphasis border-primary/10 flex items-center gap-2 rounded-xl border p-3 text-sm">
-          <CheckCircle2 className="h-4 w-4 shrink-0" />
-          <p className="font-medium">{t('recommendation.planComplete')}</p>
+        <div
+          data-testid="meal-plan-success"
+          className="bg-primary-subtle border-primary/10 rounded-xl border p-4 text-sm"
+        >
+          <div className="text-primary-emphasis flex items-start gap-2">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">{completePlanContract.copy.title}</p>
+              <p className="mt-1">{buildStateDescription(completePlanContract.copy)}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={completePlanContract.primaryAction?.onAction}
+            className="text-primary-emphasis mt-3 text-sm font-semibold underline underline-offset-2"
+          >
+            {completePlanContract.primaryAction?.label}
+          </button>
         </div>
       )}
 
