@@ -1055,7 +1055,8 @@ describe('WorkoutLogger', () => {
       source: 'progressive_overload',
     });
     render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
-    expect(screen.getByTestId('overload-chip')).toHaveTextContent('62.5kg × 5');
+    expect(screen.getByTestId('btn-overload-suggestion')).toHaveTextContent('62.5');
+    expect(screen.getByTestId('btn-overload-suggestion')).toHaveTextContent('5');
   });
 
   it('applies suggestion to inputs on chip click', () => {
@@ -1065,7 +1066,7 @@ describe('WorkoutLogger', () => {
       source: 'progressive_overload',
     });
     render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
-    fireEvent.click(screen.getByTestId('overload-chip'));
+    fireEvent.click(screen.getByTestId('btn-overload-suggestion'));
     const card = screen.getByTestId('exercise-workout-card');
     expect((within(card).getByTestId('weight-input') as HTMLInputElement).value).toBe('62.5');
     expect((within(card).getByTestId('reps-input') as HTMLInputElement).value).toBe('5');
@@ -1080,9 +1081,10 @@ describe('WorkoutLogger', () => {
       plateauWeeks: 3,
     });
     render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
-    const chip = screen.getByTestId('overload-chip');
-    expect(chip).toHaveTextContent('60kg × 5');
-    expect(chip).toHaveTextContent('(bế tắc 3 tuần)');
+    const chip = screen.getByTestId('btn-overload-suggestion');
+    expect(chip).toHaveTextContent('60');
+    expect(chip).toHaveTextContent('5');
+    expect(screen.getByTestId('plateau-warning')).toHaveTextContent('3');
   });
 
   it('does not show overload chip when no suggestion data', () => {
@@ -1092,7 +1094,7 @@ describe('WorkoutLogger', () => {
       source: 'manual',
     });
     render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
-    expect(screen.queryByTestId('overload-chip')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('btn-overload-suggestion')).not.toBeInTheDocument();
   });
 
   /* ================================================================
@@ -1507,13 +1509,13 @@ describe('WorkoutLogger', () => {
 
   it('TC_COPY_01: copy-last-set button is hidden when no sets are logged', () => {
     render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
-    expect(screen.queryByTestId('copy-last-set')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('btn-copy-last-set')).not.toBeInTheDocument();
   });
 
   it('TC_COPY_02: copy-last-set button appears after logging a set', () => {
     render(<WorkoutLogger {...defaultProps} planDay={planDayWithExercises} />);
     logSetAndDismissRest('60', '10');
-    expect(screen.getByTestId('copy-last-set')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-copy-last-set')).toBeInTheDocument();
   });
 
   it('TC_COPY_03: clicking copy-last-set prefills weight and reps from the latest set', () => {
@@ -1522,7 +1524,7 @@ describe('WorkoutLogger', () => {
     logSetAndDismissRest('60', '10');
     logSetAndDismissRest('75', '8');
 
-    fireEvent.click(screen.getByTestId('copy-last-set'));
+    fireEvent.click(screen.getByTestId('btn-copy-last-set'));
 
     const card = screen.getByTestId('exercise-workout-card');
     const weightInput = within(card).getByTestId('weight-input') as HTMLInputElement;
@@ -1540,10 +1542,10 @@ describe('WorkoutLogger', () => {
     render(<WorkoutLogger {...defaultProps} planDay={multiPlan} />);
 
     logSetAndDismissRest('60', '10');
-    expect(screen.getByTestId('copy-last-set')).toBeInTheDocument();
+    expect(screen.getByTestId('btn-copy-last-set')).toBeInTheDocument();
 
     navigateToNext();
-    expect(screen.queryByTestId('copy-last-set')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('btn-copy-last-set')).not.toBeInTheDocument();
   });
 
   /* ================================================================

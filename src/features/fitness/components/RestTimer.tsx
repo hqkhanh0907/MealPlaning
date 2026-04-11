@@ -32,6 +32,7 @@ export const RestTimer = React.memo(function RestTimer({
   const { t } = useTranslation();
   const [remaining, setRemaining] = useState(durationSeconds);
   const [totalDuration, setTotalDuration] = useState(durationSeconds);
+  const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const clearTimer = useCallback(() => {
@@ -42,7 +43,7 @@ export const RestTimer = React.memo(function RestTimer({
   }, []);
 
   useEffect(() => {
-    if (!isVisible) {
+    if (!isVisible || isPaused) {
       clearTimer();
       return;
     }
@@ -57,7 +58,7 @@ export const RestTimer = React.memo(function RestTimer({
     }, 1000);
 
     return clearTimer;
-  }, [clearTimer, isVisible]);
+  }, [clearTimer, isVisible, isPaused]);
 
   useEffect(() => {
     if (remaining === 0) {
@@ -76,6 +77,10 @@ export const RestTimer = React.memo(function RestTimer({
     clearTimer();
     onSkip();
   }, [clearTimer, onSkip]);
+
+  const handlePauseToggle = useCallback(() => {
+    setIsPaused(prev => !prev);
+  }, []);
 
   if (!isVisible) return null;
 
@@ -133,25 +138,25 @@ export const RestTimer = React.memo(function RestTimer({
               strokeLinecap="round"
               strokeDasharray={CIRCUMFERENCE}
               strokeDashoffset={dashoffset}
-              className="text-primary"
+              className={`${isPaused ? 'text-muted' : 'text-primary'} motion-reduce:[transition:none]`}
               style={{
                 transform: 'rotate(-90deg)',
                 transformOrigin: 'center',
-                transition: 'stroke-dashoffset 0.3s ease',
+                transition: 'stroke-dashoffset 1s linear',
               }}
               data-testid="progress-circle"
             />
           </svg>
-          <span className="text-foreground absolute text-2xl font-bold tabular-nums" data-testid="timer-display">
+          <span className="text-foreground absolute text-4xl font-bold tabular-nums" data-testid="timer-display">
             {formatTime(remaining)}
           </span>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex w-full gap-3">
           <Button
             variant="outline"
             size="default"
-            className="min-h-11"
+            className="min-h-12 flex-1 rounded-xl"
             onClick={handleAddTime}
             aria-label={t('fitness.timer.addTime')}
             data-testid="add-time-button"
@@ -159,9 +164,19 @@ export const RestTimer = React.memo(function RestTimer({
             {t('fitness.timer.addTime')}
           </Button>
           <Button
+            variant="outline"
+            size="default"
+            className="min-h-12 flex-1 rounded-xl"
+            onClick={handlePauseToggle}
+            aria-label={isPaused ? t('fitness.timer.resume') : t('fitness.timer.pause')}
+            data-testid="pause-button"
+          >
+            {isPaused ? t('fitness.timer.resume') : t('fitness.timer.pause')}
+          </Button>
+          <Button
             variant="default"
             size="default"
-            className="min-h-11"
+            className="min-h-12 flex-1 rounded-xl"
             onClick={handleSkip}
             aria-label={t('fitness.timer.skip')}
             data-testid="skip-button"

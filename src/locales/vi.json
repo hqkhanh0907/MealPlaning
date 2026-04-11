@@ -854,6 +854,9 @@
     "useCloud": "Dùng dữ liệu đám mây"
   },
   "fitness": {
+    "stepper": {
+      "warningHigh": "Cân nặng cao bất thường"
+    },
     "onboarding": {
       "title": "Thiết lập tập luyện",
       "subtitle": "Chọn 3 thông tin cơ bản để bắt đầu",
@@ -968,7 +971,17 @@
       "addSet": "Thêm set",
       "nextExerciseDetail": "{{sets}} hiệp • {{repsMin}}-{{repsMax}} lần",
       "prevExercise": "Bài tập trước",
-      "plateauIndicator": "(bế tắc {{weeks}} tuần)"
+      "plateauIndicator": "(bế tắc {{weeks}} tuần)",
+      "repeatSet": "Lặp set trước",
+      "prevSession": "Buổi trước",
+      "plateauWarning": "Đã {{weeks}} tuần không tiến bộ",
+      "workoutComplete": "Hoàn thành buổi tập!",
+      "firstWorkoutMessage": "Chúc mừng buổi tập đầu tiên!",
+      "newPRs": "Kỷ lục mới",
+      "saveAndClose": "Lưu & đóng",
+      "discardWorkout": "Hủy buổi tập",
+      "emptyWorkout": "Buổi tập trống",
+      "discardEmpty": "Bỏ qua"
     },
     "summary": {
       "title": "Tổng kết buổi tập",
@@ -1268,7 +1281,9 @@
     "timer": {
       "rest": "Nghỉ giữa set",
       "skip": "Bỏ qua",
-      "addTime": "Thêm thời gian"
+      "addTime": "Thêm thời gian",
+      "pause": "Tạm dừng",
+      "resume": "Tiếp tục"
     },
     "weight": {
       "todayWeight": "Cân nặng hôm nay",
@@ -1415,7 +1430,19 @@
       "bro_split": "Chia từng nhóm",
       "custom": "Tùy chỉnh"
     },
-    "setFormat": "{{weight}}kg × {{reps}}"
+    "setFormat": "{{weight}}kg × {{reps}}",
+    "stats": {
+      "duration": "Thời gian",
+      "volume": "Khối lượng",
+      "sets": "Tổng set",
+      "exercises": "Bài tập"
+    },
+    "streak": {
+      "milestone": "🔥 Chuỗi {{count}} ngày liên tiếp!"
+    },
+    "session": {
+      "milestone": "🎯 Buổi tập thứ {{count}}!"
+    }
   },
   "dashboard": {
     "hero": {

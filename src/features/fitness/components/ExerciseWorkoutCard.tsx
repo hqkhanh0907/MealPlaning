@@ -1,8 +1,7 @@
-import { AlertTriangle, ArrowRightLeft, Check, Copy, Pencil, Trash2, TrendingUp } from 'lucide-react';
+import { AlertTriangle, ArrowRightLeft, Check, Copy, History, Pencil, Trash2, TrendingUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import type { SetInputData } from '@/schemas/workoutLoggerSchema';
 
 import { REPS_INCREMENT, RPE_OPTIONS, WEIGHT_INCREMENT } from '../constants';
@@ -19,11 +18,16 @@ const MUSCLE_GROUP_I18N_KEYS: Record<MuscleGroup, string> = {
   glutes: 'fitness.exerciseSelector.muscleGlutes',
 };
 
+function isValidSuggestion(suggestion: OverloadSuggestion): boolean {
+  return Number.isFinite(suggestion.weight) && Number.isFinite(suggestion.reps) && suggestion.weight > 0;
+}
+
 interface ExerciseWorkoutCardProps {
   meta: ExerciseSessionMeta;
   exerciseIndex: number;
   totalExercises: number;
   loggedSets: WorkoutSet[];
+  lastSessionSet: WorkoutSet | null;
   currentInput: SetInputData;
   overloadSuggestion: OverloadSuggestion | null;
   onWeightChange: (delta: number) => void;
@@ -34,6 +38,7 @@ interface ExerciseWorkoutCardProps {
   onDeleteSet: (setId: string) => void;
   onEditSet: (set: WorkoutSet) => void;
   onCopyLastSet: () => void;
+  onCopyPrevSession: () => void;
   onApplyOverload: (suggestion: OverloadSuggestion) => void;
   onSwapExercise: () => void;
   onLogSet: () => void;
@@ -44,6 +49,7 @@ export default function ExerciseWorkoutCard({
   exerciseIndex,
   totalExercises,
   loggedSets,
+  lastSessionSet,
   currentInput,
   overloadSuggestion,
   onWeightChange,
@@ -54,6 +60,7 @@ export default function ExerciseWorkoutCard({
   onDeleteSet,
   onEditSet,
   onCopyLastSet,
+  onCopyPrevSession,
   onApplyOverload,
   onSwapExercise,
   onLogSet,
@@ -65,7 +72,9 @@ export default function ExerciseWorkoutCard({
     .join(' • ');
 
   const nextSetNumber = loggedSets.length + 1;
+  const lastSetThisSession = loggedSets.at(-1) ?? null;
   const isPlateaued = overloadSuggestion?.isPlateaued ?? false;
+  const showOverloadChip = overloadSuggestion != null && isValidSuggestion(overloadSuggestion);
 
   return (
     <div className="bg-card rounded-xl p-4 shadow-sm" data-testid="exercise-workout-card">
@@ -90,28 +99,77 @@ export default function ExerciseWorkoutCard({
         </div>
       </div>
 
-      {/* Progressive Overload Chip */}
-      {overloadSuggestion && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onApplyOverload(overloadSuggestion)}
-          className={cn(
-            'mb-3 w-full rounded-full px-3 py-1.5 text-xs',
-            isPlateaued ? 'bg-warning/10 text-warning hover:bg-warning/15' : 'bg-info/10 text-info hover:bg-info/15',
+      {/* Copy Previous Set + Overload Suggestion Chips */}
+      <div className="mb-3 flex flex-wrap gap-2">
+        {lastSetThisSession && (
+          <button
+            type="button"
+            onClick={onCopyLastSet}
+            className="bg-primary/5 text-primary border-primary/20 active:bg-primary/10 flex min-h-11 items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition-colors active:scale-[0.98] motion-reduce:transform-none"
+            data-testid="btn-copy-last-set"
+          >
+            <Copy className="h-4 w-4" aria-hidden="true" />
+            <span>
+              {t('fitness.logger.repeatSet')}: {lastSetThisSession.weightKg}
+              {t('fitness.logger.weightUnit')} × {lastSetThisSession.reps ?? 0}
+            </span>
+          </button>
+        )}
+        {lastSessionSet && !lastSetThisSession && (
+          <button
+            type="button"
+            onClick={onCopyPrevSession}
+            className="bg-muted text-muted-foreground flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors active:scale-[0.98] motion-reduce:transform-none"
+            data-testid="btn-copy-prev-session"
+          >
+            <History className="h-4 w-4" aria-hidden="true" />
+            <span>
+              {t('fitness.logger.prevSession')}: {lastSessionSet.weightKg}
+              {t('fitness.logger.weightUnit')} × {lastSessionSet.reps ?? 0}
+            </span>
+          </button>
+        )}
+        {showOverloadChip && !isPlateaued && (
+          <button
+            type="button"
+            onClick={() => onApplyOverload(overloadSuggestion)}
+            className="bg-energy-subtle text-energy border-energy/20 flex min-h-11 items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition-colors active:scale-[0.98] motion-reduce:transform-none"
+            data-testid="btn-overload-suggestion"
+          >
+            <TrendingUp className="h-4 w-4" aria-hidden="true" />
+            <span>
+              ↑ {overloadSuggestion.weight}
+              {t('fitness.logger.weightUnit')} × {overloadSuggestion.reps}
+            </span>
+          </button>
+        )}
+      </div>
+
+      {/* Plateau Warning */}
+      {showOverloadChip && isPlateaued && (
+        <div className="mb-3 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => onApplyOverload(overloadSuggestion)}
+            className="bg-warning/10 text-warning border-warning/20 flex min-h-11 items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition-colors active:scale-[0.98] motion-reduce:transform-none"
+            data-testid="btn-overload-suggestion"
+          >
+            <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+            <span>
+              ↑ {overloadSuggestion.weight}
+              {t('fitness.logger.weightUnit')} × {overloadSuggestion.reps}
+            </span>
+          </button>
+          {overloadSuggestion.plateauWeeks != null && (
+            <div
+              className="bg-warning/10 text-warning flex items-center gap-2 rounded-lg px-3 py-2 text-xs"
+              data-testid="plateau-warning"
+            >
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              {t('fitness.logger.plateauWarning', { weeks: overloadSuggestion.plateauWeeks })}
+            </div>
           )}
-          data-testid="overload-chip"
-        >
-          {isPlateaued ? (
-            <AlertTriangle className="mr-1 inline h-3 w-3" aria-hidden="true" />
-          ) : (
-            <TrendingUp className="mr-1 inline h-3 w-3" aria-hidden="true" />
-          )}{' '}
-          {t('fitness.setFormat', { weight: overloadSuggestion.weight, reps: overloadSuggestion.reps })}
-          {isPlateaued &&
-            overloadSuggestion.plateauWeeks != null &&
-            ` ${t('fitness.logger.plateauIndicator', { weeks: overloadSuggestion.plateauWeeks })}`}
-        </Button>
+        </div>
       )}
 
       {/* Completed Sets */}
@@ -296,22 +354,14 @@ export default function ExerciseWorkoutCard({
         </div>
       </div>
 
-      {/* Copy Last Set */}
-      {loggedSets.length > 0 && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onCopyLastSet}
-          className="text-muted-foreground mb-2 w-full"
-          data-testid="copy-last-set"
-        >
-          <Copy className="mr-2 h-4 w-4" aria-hidden="true" />
-          {t('fitness.logger.copyLastSet')}
-        </Button>
-      )}
-
       {/* Swap Exercise */}
-      <Button variant="outline" size="sm" onClick={onSwapExercise} className="w-full" data-testid="swap-exercise">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onSwapExercise}
+        className="min-h-11 w-full active:scale-[0.98] motion-reduce:transform-none"
+        data-testid="swap-exercise"
+      >
         <ArrowRightLeft className="mr-2 h-4 w-4" aria-hidden="true" />
         {t('fitness.logger.swapExercise')}
       </Button>

@@ -133,7 +133,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
   const clearWorkoutDraft = useFitnessStore(s => s.clearWorkoutDraft);
   const loadWorkoutDraft = useFitnessStore(s => s.loadWorkoutDraft);
 
-  const { suggestNextSet: getOverloadSuggestion } = useProgressiveOverload();
+  const { suggestNextSet: getOverloadSuggestion, getLastSets } = useProgressiveOverload();
 
   const { getValues, setValue, watch } = useForm<WorkoutLoggerFormData>({
     resolver: zodResolver(workoutLoggerSchema) as unknown as Resolver<WorkoutLoggerFormData>,
@@ -587,6 +587,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                 exerciseIndex={currentExerciseIndex}
                 totalExercises={currentExercises.length}
                 loggedSets={loggedSets.filter(s => s.exerciseId === currentMeta.exercise.id)}
+                lastSessionSet={getLastSets(currentMeta.exercise.id).at(-1) ?? null}
                 currentInput={watch(`setInputs.${currentMeta.exercise.id}` as const) ?? setInputDefaults}
                 overloadSuggestion={(() => {
                   const s = getOverloadSuggestion(
@@ -619,6 +620,7 @@ export function WorkoutLogger({ planDay, onComplete, onBack }: Readonly<WorkoutL
                 onDeleteSet={handleDeleteSet}
                 onEditSet={setEditingSet}
                 onCopyLastSet={() => handleCopyLastSet(currentMeta.exercise.id)}
+                onCopyPrevSession={() => handleCopyLastSet(currentMeta.exercise.id)}
                 onApplyOverload={s => handleApplySuggestion(currentMeta.exercise.id, s)}
                 onSwapExercise={() => setShowSwapSheet(true)}
                 onLogSet={() => handleLogSet(currentMeta.exercise.id)}
