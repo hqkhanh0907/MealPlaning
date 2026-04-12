@@ -156,28 +156,32 @@ npm run e2e
 ## Cấu trúc thư mục
 
 ```
-src/
-├── components/         # UI components (tabs, modals, shared)
-│   ├── modals/         # Modal dialogs (DishEdit, IngredientEdit, AI, etc.)
-│   ├── navigation/     # BottomNavBar + DesktopNav
-│   └── shared/         # Reusable: UnitSelector, ModalBackdrop, etc.
-├── hooks/              # Custom React hooks
-├── services/           # Business logic (gemini, plan, data)
-├── contexts/           # React contexts (NotificationContext)
-├── utils/              # Pure utilities (helpers, nutrition, logger)
-├── data/               # Static data (initialData, units, constants)
-├── locales/            # i18n translations (vi.json)
-└── types.ts            # TypeScript type definitions
-
-docs/                   # Toàn bộ tài liệu dự án
-├── 01-requirements/    # PRD, Use Cases
-├── 02-architecture/    # SAD, Data Model, Sequence Diagrams
-├── 03-developer-guide/ # Setup, Coding Guidelines, Storage Schema
-├── 04-testing/         # Test Plan, Test Cases, Test Report, E2E Guide
-├── 05-process/         # Release Process, Coding Process
-├── 06-operations/      # Deployment Guide
-├── adr/                # Architecture Decision Records
-└── bug-reports/        # Bug Reports
+docs/                        # Tài liệu dự án (role-based structure)
+├── 1-vision/                # 👤 CEO/PO — Tầm nhìn & Hướng dẫn
+│   ├── product-vision.md    #   Tầm nhìn sản phẩm (source of truth)
+│   └── user-guide.md        #   Hướng dẫn sử dụng cho end-user
+├── 2-requirements/          # 👤 BM — Phân tích nghiệp vụ
+│   ├── prd.md               #   Đặc tả yêu cầu sản phẩm (F-01→F-35)
+│   └── use-cases.md         #   Các luồng tương tác người dùng
+├── 3-design/                # 👤 Designer — Thiết kế UI/UX
+│   ├── design-handoff.md    #   Hướng dẫn bàn giao cho Designer
+│   ├── brand-identity.md    #   Bản sắc thương hiệu & Design Context
+│   ├── color-palette.md     #   Bảng màu (88 primitive + 80 semantic tokens)
+│   └── ui-rules.md          #   Quy tắc thiết kế UI
+├── 4-architecture/          # 👤 Tech Leader — Kiến trúc hệ thống
+│   ├── sad.md               #   System Architecture Document
+│   ├── data-model.md        #   Mô hình dữ liệu
+│   ├── sequence-diagrams.md #   Sơ đồ tuần tự
+│   └── fitness-logic.md     #   Logic nghiệp vụ Fitness
+├── 5-development/           # 👤 Developer — Hướng dẫn phát triển
+│   ├── coding-guidelines.md #   Quy chuẩn lập trình
+│   ├── deployment.md        #   Triển khai ứng dụng
+│   └── release-process.md   #   Quy trình phát hành
+├── 6-decisions/             # 👤 All — Architecture Decision Records
+│   ├── 001-local-storage-only.md
+│   ├── 002-gemini-ai-integration.md
+│   └── 003-i18n-with-i18next.md
+└── 7-appendix/              # Tài liệu bổ sung
 ```
 
 ---
@@ -192,12 +196,11 @@ docs/                   # Toàn bộ tài liệu dự án
 
 ## Tài liệu đầy đủ
 
-| Nhóm          | Tài liệu                                                                                                                                                                            |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 📋 Yêu cầu    | [PRD](docs/01-requirements/PRD.md) · [Use Cases](docs/01-requirements/use-cases.md)                                                                                                 |
-| 🏗️ Kiến trúc  | [SAD](docs/02-architecture/SAD.md) · [Data Model](docs/02-architecture/data-model.md) · [Sequence Diagrams](docs/02-architecture/sequence-diagrams.md)                              |
-| 👩‍💻 Dev Guide  | [Setup](docs/03-developer-guide/setup.md) · [Coding Guidelines](docs/03-developer-guide/coding-guidelines.md) · [Storage Schema](docs/03-developer-guide/localstorage-schema.md)    |
-| 🧪 Testing    | [Test Plan](docs/04-testing/test-plan.md) · [Test Cases](docs/04-testing/test-cases.md) · [Test Report](docs/04-testing/test-report.md) · [E2E Guide](docs/04-testing/e2e-setup.md) |
-| ⚙️ Process    | [Release Process](docs/05-process/release-process.md)                                                                                                                               |
-| 🚀 Operations | [Deployment Guide](docs/06-operations/deployment.md)                                                                                                                                |
-| 📐 ADR        | [001 localStorage](docs/adr/001-local-storage-only.md) · [002 Gemini AI](docs/adr/002-gemini-ai-integration.md) · [003 i18n](docs/adr/003-i18n-with-i18next.md)                     |
+| Vai trò        | Folder            | Tài liệu                                                                                                                                                                                                    |
+| -------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 👤 CEO/PO      | `1-vision/`       | [Product Vision](docs/1-vision/product-vision.md) · [User Guide](docs/1-vision/user-guide.md)                                                                                                               |
+| 👤 BM          | `2-requirements/` | [PRD](docs/2-requirements/prd.md) · [Use Cases](docs/2-requirements/use-cases.md)                                                                                                                           |
+| 👤 Designer    | `3-design/`       | [Design Handoff](docs/3-design/design-handoff.md) · [Brand Identity](docs/3-design/brand-identity.md) · [Color Palette](docs/3-design/color-palette.md) · [UI Rules](docs/3-design/ui-rules.md)             |
+| 👤 Tech Leader | `4-architecture/` | [SAD](docs/4-architecture/sad.md) · [Data Model](docs/4-architecture/data-model.md) · [Sequence Diagrams](docs/4-architecture/sequence-diagrams.md) · [Fitness Logic](docs/4-architecture/fitness-logic.md) |
+| 👤 Developer   | `5-development/`  | [Coding Guidelines](docs/5-development/coding-guidelines.md) · [Deployment](docs/5-development/deployment.md) · [Release Process](docs/5-development/release-process.md)                                    |
+| 📐 ADR         | `6-decisions/`    | [001 localStorage](docs/6-decisions/001-local-storage-only.md) · [002 Gemini AI](docs/6-decisions/002-gemini-ai-integration.md) · [003 i18n](docs/6-decisions/003-i18n-with-i18next.md)                     |

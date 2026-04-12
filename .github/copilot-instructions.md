@@ -253,7 +253,7 @@ z.preprocess(val => (val === '' || val === undefined || val === null ? undefined
 
 ### Feature Specs
 
-Design specs live in `docs/superpowers/specs/`. When implementing any feature, **read the corresponding spec first** and implement exactly what it describes. Do not add tabs, sub-tabs, or navigation flows beyond what the spec defines. If the spec is ambiguous or missing, ask the user.
+Design specs live in `docs/3-design/`. When implementing any feature, **read the corresponding spec first** and implement exactly what it describes. Do not add tabs, sub-tabs, or navigation flows beyond what the spec defines. If the spec is ambiguous or missing, ask the user.
 
 ## Conventions
 
@@ -302,7 +302,7 @@ Every code change must pass:
 2. `npm run test` — 0 new failures, coverage ≥ 100% for new code
 3. `npm run build` — clean production build
 4. `npm run test:coverage && npm run sonar` — SonarQube scan phải 0 issues (Bug, Vulnerability, Code Smell). Nếu còn issues → fix tất cả → chạy lại từ bước 1. **KHÔNG ĐƯỢC commit khi SonarQube còn bất kỳ issue nào.**
-5. Spec cross-check — verify against `docs/superpowers/specs/`
+5. Spec cross-check — verify against `docs/3-design/`
 
 ---
 

@@ -1,0 +1,440 @@
+---
+title: Triển khai Ứng dụng
+status: Active
+version: 1.0
+owner: Developer
+updated: 2026-04-12
+related: []
+---
+
+# Hướng Dẫn Triển Khai (Deployment Guide)
+
+**Version:** 2.2  
+**Date:** 2026-06-28
+
+---
+
+## 1. Tổng quan
+
+App Smart Meal Planner là ứng dụng **Android hybrid** (Capacitor 8 + React). Không có backend server — ứng dụng hoạt động hoàn toàn **offline-first** với SQLite (qua Capacitor SQLite plugin) và IndexedDB/localStorage cho WebView storage. Từ v2.0, hỗ trợ đồng bộ lên Google Drive (appDataFolder) qua Google OAuth2.
+
+> **Lưu ý:** Không cần backend server để chạy ứng dụng. Tất cả dữ liệu được lưu trữ local trên thiết bị. Chỉ cần kết nối internet cho AI features (Gemini API) và Cloud Sync (Google Drive).
+
+| Môi trường  | Mô tả                                                       |
+| ----------- | ----------------------------------------------------------- |
+| **Debug**   | APK debug, dùng cho dev/testing                             |
+| **Release** | APK signed, dùng cho production (Google Play hoặc sideload) |
+
+---
+
+## 2. Build Pipeline
+
+### 2.1 Quy trình build đầy đủ
+
+```
+npm run build → dist/ → npx cap sync android → Android Studio build (hoặc ./build-apk.sh)
+```
+
+### 2.2 Build APK Debug
+
+```bash
+# Full pipeline
+bash scripts/build-apk.sh
+
+# Từng bước nếu cần debug
+npm run build                           # Build React app → dist/
+npx cap sync android                    # Copy dist/ → android/app/src/main/assets/public/
+cd android && ./gradlew assembleDebug   # Build APK
+```
+
+**Output:**
+
+```
+android/app/build/outputs/apk/debug/app-debug.apk
+Size: ~147 MB (bao gồm WebView assets)
+```
+
+---
+
+## 3. Cài đặt lên thiết bị Android
+
+### 3.1 Qua ADB (USB hoặc Emulator)
+
+```bash
+# Cài APK
+adb install android/app/build/outputs/apk/debug/app-debug.apk
+
+# Nếu đã cài phiên bản cũ
+adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+
+# Kết quả:
+# Performing Streamed Install
+# Success
+```
+
+### 3.2 Xác nhận cài thành công
+
+```bash
+adb shell pm list packages | grep mealplaner
+# Output: package:com.mealplaner.app
+```
+
+### 3.3 Mở app
+
+```bash
+adb shell am start -n com.mealplaner.app/.MainActivity
+```
+
+### 3.4 Xem logs app (debug)
+
+```bash
+adb logcat -s Capacitor
+# Hoặc xem tất cả logs của app:
+adb logcat --pid=$(adb shell pidof com.mealplaner.app)
+```
+
+---
+
+## 4. Cài đặt thủ công (Sideload)
+
+1. Bật **Developer Options** trên điện thoại:
+   - Settings → About phone → tap Build number (7 lần)
+2. Bật **Install unknown apps** hoặc **USB debugging**
+3. Chuyển APK sang điện thoại (USB / Google Drive / Email)
+4. Mở file explorer → tap file `.apk` → Install
+
+### 4.1 Upload APK lên Google Drive (tự động)
+
+```bash
+bash scripts/upload-apk-drive.sh
+```
+
+Script tự động upload APK từ `android/app/build/outputs/apk/debug/app-debug.apk` lên Google Drive folder đã cấu hình. File config: `metadata.json`.
+
+#### Setup Google Drive upload
+
+1. Tạo service account trong Google Cloud Console
+2. Share folder Drive với email service account
+3. Đặt credentials file path trong script
+
+---
+
+## 5. Yêu cầu thiết bị
+
+| Yêu cầu  | Giá trị tối thiểu                    |
+| -------- | ------------------------------------ |
+| Android  | 7.0+ (API 24, minSdkVersion)         |
+| RAM      | 2 GB                                 |
+| Storage  | 500 MB trống                         |
+| Internet | Cần để dùng AI features (Gemini API) |
+
+---
+
+## 6. Cấu hình Capacitor
+
+File: `capacitor.config.ts`
+
+> **Capacitor 8** — config dùng TypeScript format.
+
+```typescript
+const config: CapacitorConfig = {
+  appId: 'com.mealplaner.app',
+  appName: 'Smart Meal Planner',
+  webDir: 'dist', // Output của npm run build
+  android: {
+    buildOptions: {
+      keystorePath: undefined, // Debug keystore
+      keystoreAlias: undefined,
+    },
+  },
+  // server.url: KHÔNG set trong production — app load từ local assets
+  // Chỉ enable server.url cho dev mode khi cần hot-reload
+};
+```
+
+**Lưu ý production:**
+
+- `webDir: 'dist'` — Capacitor copy nội dung `dist/` vào Android assets khi `cap sync`
+- Server localhost bị disable trong production — app load trực tiếp từ bundled assets
+- Không cần chạy dev server khi dùng APK
+
+---
+
+## 7. Permissions
+
+App yêu cầu các permissions sau (khai báo trong `AndroidManifest.xml`):
+
+| Permission               | Lý do                  |
+| ------------------------ | ---------------------- |
+| `INTERNET`               | Gọi Gemini API         |
+| `READ_EXTERNAL_STORAGE`  | Import file backup     |
+| `WRITE_EXTERNAL_STORAGE` | Export file backup     |
+| `CAMERA`                 | Chụp ảnh món ăn cho AI |
+| `READ_MEDIA_IMAGES`      | Chọn ảnh từ Gallery    |
+
+---
+
+## 8. Gradle build variants
+
+```bash
+# Debug APK (dùng trong dev/testing)
+./gradlew assembleDebug
+
+# Release APK (cần keystore — dùng cho production)
+./gradlew assembleRelease
+
+# Clean build
+./gradlew clean assembleDebug
+```
+
+---
+
+## 9. Update app
+
+### 9.1 Cập nhật code
+
+```bash
+# 1. Pull code mới
+git pull
+
+# 2. Install dependencies (nếu có thay đổi)
+npm install
+
+# 3. Build lại
+bash scripts/build-apk.sh
+
+# 4. Cài đè lên thiết bị
+adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+### 9.2 Giữ nguyên dữ liệu user
+
+`adb install -r` (replace) giữ nguyên data của app. Dữ liệu trong localStorage/WebView và SQLite database không bị xóa.
+
+### 9.3 Checklist xác nhận sau deploy
+
+1. Cài APK lên thiết bị/emulator
+2. Mở app → tạo dữ liệu test (thêm ingredient, tạo dish, lên meal plan)
+3. Force-stop app: `adb shell am force-stop com.mealplaner.app`
+4. Mở lại app: `adb shell am start -n com.mealplaner.app/.MainActivity`
+5. **Xác nhận dữ liệu vẫn còn** — ingredients, dishes, meal plans phải persist qua restart
+6. Nếu dữ liệu mất → kiểm tra NativeDatabaseService initialization logs
+
+---
+
+## 10. Data Persistence Architecture
+
+### 10.1 Tổng quan
+
+SQLite database được persist qua **Capacitor SQLite plugin** (`@capacitor-community/sqlite`) trên Android. Trên web/dev environment, dùng **sql.js (WASM)** — dữ liệu chỉ tồn tại trong bộ nhớ (in-memory).
+
+### 10.2 Chi tiết
+
+| Thông số       | Giá trị                                                                      |
+| -------------- | ---------------------------------------------------------------------------- |
+| Schema version | 6                                                                            |
+| Số bảng        | 23                                                                           |
+| Migration      | Tự động khi startup (xem `src/services/schema.ts`)                           |
+| Web/Dev        | `WebDatabaseService` (sql.js WASM) — in-memory, mất khi reload               |
+| Android        | `NativeDatabaseService` (@capacitor-community/sqlite) — persistent trên disk |
+
+### 10.3 Store persistence matrix
+
+| Store                | Persistence     | Ghi chú                                   |
+| -------------------- | --------------- | ----------------------------------------- |
+| `ingredientStore`    | ✅ SQLite       | Nguyên liệu + nutrition per 100g          |
+| `dishStore`          | ✅ SQLite       | Recipes với ingredient lists              |
+| `dayPlanStore`       | ✅ SQLite       | Daily meal plans (breakfast/lunch/dinner) |
+| `mealTemplateStore`  | ✅ SQLite       | Meal templates                            |
+| `fitnessStore`       | ✅ SQLite       | Workouts, training plans, weight logs     |
+| `navigationStore`    | ❌ Memory only  | Tab/page stack, scroll positions          |
+| `uiStore`            | ❌ Memory only  | Modal visibility, selected date           |
+| `appOnboardingStore` | ❌ localStorage | First-run state (Zustand persist)         |
+
+### 10.4 Backup & Sync
+
+Google Drive backup hoạt động bằng cách export SQLite database sang JSON format, upload lên `appDataFolder` scope. Import thực hiện quy trình ngược lại.
+
+> **Note (Pre-V1 legacy):** BM-BUG-01 — 4 stores thiếu SQLite persistence — đã được fix trong kiến trúc V1. Tất cả data stores persist qua `useAutoSync` hooks.
+
+---
+
+## 11. Capacitor sync workflow
+
+Khi chỉ thay đổi web code (React/TypeScript):
+
+```bash
+npm run build
+npx cap sync android
+# Không cần build APK lại nếu chỉ test trong Android Studio
+npx cap open android
+# → Run app từ Android Studio
+```
+
+---
+
+## 12. Troubleshooting
+
+### 12.1 App crash khi mở
+
+```bash
+adb logcat -s AndroidRuntime | grep FATAL
+```
+
+### 12.2 WebView blank screen
+
+```bash
+# Kiểm tra assets path
+adb shell ls /data/app/com.mealplaner.app*/base.apk
+
+# Check Chrome WebView version
+adb shell dumpsys package com.google.android.webview | grep versionName
+```
+
+### 12.3 AI không hoạt động
+
+1. Kiểm tra `GEMINI_API_KEY` đã được embed trong build (qua Vite `define` config, **không** dùng prefix `VITE_`)
+2. Kiểm tra thiết bị có kết nối internet
+3. Xem logs: `adb logcat | grep -i gemini`
+
+### 12.4 Lỗi Gradle
+
+```bash
+cd android
+./gradlew clean
+cd ..
+npm run build
+npx cap sync android
+bash scripts/build-apk.sh
+```
+
+### 12.5 Gradle Build Errors
+
+#### Error: "SDK not found"
+
+```bash
+echo "sdk.dir=$ANDROID_HOME" > android/local.properties
+```
+
+#### Error: "Minimum SDK version"
+
+Kiểm tra `android/app/build.gradle`:
+
+```
+minSdkVersion 24
+targetSdkVersion 36
+```
+
+#### Error: "Java version mismatch"
+
+Đảm bảo JDK 17:
+
+```bash
+java -version
+# openjdk version "17.x.x"
+```
+
+---
+
+## 13. File structure quan trọng cho Android
+
+```
+android/
+├── app/
+│   ├── build.gradle          # App-level build config, versionCode/versionName
+│   └── src/main/
+│       ├── AndroidManifest.xml  # App permissions, activities
+│       └── assets/public/       # React app build (được copy vào đây bởi cap sync)
+├── build.gradle              # Project-level build config
+├── local.properties          # sdk.dir path (KHÔNG commit)
+└── variables.gradle          # SDK versions, dependencies
+```
+
+---
+
+## 14. Kiểm tra App Storage trên Emulator
+
+```bash
+# Xem dung lượng app
+adb shell du -sh /data/data/com.mealplaner.app/
+
+# Xem WebView localStorage
+adb shell cat /data/data/com.mealplaner.app/app_webview/Default/Local\ Storage/leveldb/
+
+# Clear app data
+adb shell pm clear com.mealplaner.app
+```
+
+---
+
+## 15. Google API Setup (Cloud Sync)
+
+Để sử dụng tính năng Cloud Sync, cần cấu hình Google OAuth2:
+
+### 15.1 Yêu cầu
+
+- Google Cloud Console project
+- OAuth 2.0 Client ID (Web application type)
+- Authorized JavaScript origins: `http://localhost:3000` (dev), production domain
+- Google Drive API enabled trong project
+
+### 15.2 Biến môi trường
+
+| Biến                    | Mô tả            | Ví dụ                            |
+| ----------------------- | ---------------- | -------------------------------- |
+| `VITE_GOOGLE_CLIENT_ID` | OAuth2 Client ID | `xxx.apps.googleusercontent.com` |
+
+### 15.3 Lưu ý
+
+- App sử dụng `appDataFolder` scope — chỉ truy cập folder ẩn riêng của app trên Google Drive
+- Không cần Drive full access — chỉ cần scope `https://www.googleapis.com/auth/drive.appdata`
+- Token được lưu trong localStorage key `mp-auth-state`
+
+---
+
+## 16. Tài liệu liên quan
+
+- [Release Process](../05-process/release-process.md) — Quy trình release và versioning
+- [Coding Guidelines](../03-developer-guide/coding-guidelines.md) — Quy tắc code, testing và ESLint
+- [Setup Guide](../03-developer-guide/setup.md) — Hướng dẫn cài đặt môi trường phát triển
+
+---
+
+## 17. CI/CD — GitHub Actions
+
+### 17.1 Workflow tổng quan
+
+GitHub Actions workflow tự động chạy build + test + lint cho mỗi push/PR:
+
+```yaml
+# .github/workflows/ci.yml (cấu trúc tham khảo)
+jobs:
+  build-and-test:
+    steps:
+      - npm install
+      - npx tsc --noEmit # TypeScript check
+      - npx eslint src/ # Lint check
+      - npm test # Unit tests (3954 tests)
+      - npm run test:coverage # Coverage check (≥98%)
+      - npm run build # Production build
+```
+
+### 17.2 Quality Gates trong CI
+
+| Step       | Lệnh                    | Pass criteria       |
+| ---------- | ----------------------- | ------------------- |
+| TypeScript | `npx tsc --noEmit`      | 0 errors            |
+| ESLint     | `npx eslint src/`       | 0 errors            |
+| Unit Tests | `npm test`              | All 3954 tests pass |
+| Coverage   | `npm run test:coverage` | ≥98% statements     |
+| Build      | `npm run build`         | Exit code 0         |
+
+### 17.3 SonarQube trong CI
+
+SonarQube analysis có thể được tích hợp vào CI pipeline:
+
+```bash
+bash scripts/sonar-setup.sh
+```
+
+Config: `sonar-project.properties` tại root project. Chạy sau mỗi sprint hoặc khi cần audit code quality.
