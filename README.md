@@ -157,9 +157,8 @@ npm run e2e
 
 ```
 docs/                        # Tài liệu dự án (role-based structure)
-├── 1-vision/                # 👤 CEO/PO — Tầm nhìn & Hướng dẫn
-│   ├── product-vision.md    #   Tầm nhìn sản phẩm (source of truth)
-│   └── user-guide.md        #   Hướng dẫn sử dụng cho end-user
+├── 1-vision/                # 👤 CEO/PO — Tầm nhìn sản phẩm
+│   └── product-vision.md    #   Tầm nhìn sản phẩm (source of truth)
 ├── 2-requirements/          # 👤 BM — Phân tích nghiệp vụ
 │   ├── prd.md               #   Đặc tả yêu cầu sản phẩm (F-01→F-35)
 │   └── use-cases.md         #   Các luồng tương tác người dùng
@@ -198,7 +197,7 @@ docs/                        # Tài liệu dự án (role-based structure)
 
 | Vai trò        | Folder            | Tài liệu                                                                                                                                                                                                    |
 | -------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 👤 CEO/PO      | `1-vision/`       | [Product Vision](docs/1-vision/product-vision.md) · [User Guide](docs/1-vision/user-guide.md)                                                                                                               |
+| 👤 CEO/PO      | `1-vision/`       | [Product Vision](docs/1-vision/product-vision.md)                                                                                                                                                           |
 | 👤 BM          | `2-requirements/` | [PRD](docs/2-requirements/prd.md) · [Use Cases](docs/2-requirements/use-cases.md)                                                                                                                           |
 | 👤 Designer    | `3-design/`       | [Design Handoff](docs/3-design/design-handoff.md) · [Brand Identity](docs/3-design/brand-identity.md) · [Color Palette](docs/3-design/color-palette.md) · [UI Rules](docs/3-design/ui-rules.md)             |
 | 👤 Tech Leader | `4-architecture/` | [SAD](docs/4-architecture/sad.md) · [Data Model](docs/4-architecture/data-model.md) · [Sequence Diagrams](docs/4-architecture/sequence-diagrams.md) · [Fitness Logic](docs/4-architecture/fitness-logic.md) |

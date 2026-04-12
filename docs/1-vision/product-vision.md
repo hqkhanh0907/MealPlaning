@@ -510,13 +510,12 @@ Tác động ↑
 
 ### A. Tài liệu liên quan
 
-| Document                     | Mục đích                                |  Trạng thái   |
-| ---------------------------- | --------------------------------------- | :-----------: |
-| `docs/USER_GUIDE.md`         | Hướng dẫn sử dụng chi tiết cho end-user |     ✅ Có     |
-| `docs/2-requirements/prd.md` | Yêu cầu sản phẩm chi tiết (BM output)   | ⚠️ Cần review |
-| `docs/DESIGN_GUIDE_VI.md`    | Hướng dẫn thiết kế UI/UX                | ⚠️ Cần review |
-| User Persona Research        | Nghiên cứu user chi tiết                |  ❌ Chưa có   |
-| Competitive Analysis Report  | Phân tích cạnh tranh đầy đủ             |  ❌ Chưa có   |
+| Document                     | Mục đích                              |  Trạng thái   |
+| ---------------------------- | ------------------------------------- | :-----------: |
+| `docs/2-requirements/prd.md` | Yêu cầu sản phẩm chi tiết (BM output) | ⚠️ Cần review |
+| `docs/3-design/ui-rules.md`  | Quy tắc thiết kế UI/UX                |     ✅ Có     |
+| User Persona Research        | Nghiên cứu user chi tiết              |  ❌ Chưa có   |
+| Competitive Analysis Report  | Phân tích cạnh tranh đầy đủ           |  ❌ Chưa có   |
 
 ### B. Lịch sử thay đổi
 
