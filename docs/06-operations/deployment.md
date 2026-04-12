@@ -246,7 +246,7 @@ SQLite database được persist qua **Capacitor SQLite plugin** (`@capacitor-co
 
 Google Drive backup hoạt động bằng cách export SQLite database sang JSON format, upload lên `appDataFolder` scope. Import thực hiện quy trình ngược lại.
 
-> **BM-BUG-01 (đã fix):** 4 stores (ingredientStore, dishStore, dayPlanStore, mealTemplateStore) trước đây thiếu SQLite persistence — chỉ lưu trong Zustand memory. Đã fix bằng cách thêm `useAutoSync` hooks cho tất cả data stores.
+> **Note (Pre-V1 legacy):** BM-BUG-01 — 4 stores thiếu SQLite persistence — đã được fix trong kiến trúc V1. Tất cả data stores persist qua `useAutoSync` hooks.
 
 ---
 

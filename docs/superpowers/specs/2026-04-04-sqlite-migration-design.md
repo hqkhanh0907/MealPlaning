@@ -1,10 +1,18 @@
-# Design: Migrate sql.js → @capacitor-community/sqlite
+# Design: Dual SQLite Architecture (sql.js + @capacitor-community/sqlite)
 
 > Date: 2026-04-04  
-> Status: Draft  
+> Status: **Implemented** (V1 baseline architecture)  
 > App: MealPlaning (React 19 + Capacitor 8 Android)
 
-## Problem
+## Overview
+
+Tài liệu này mô tả kiến trúc SQLite dual-layer — hiện tại là **kiến trúc chuẩn V1**:
+
+- **Web/Tests**: `WebDatabaseService` (sql.js WASM, in-memory)
+- **Android**: `NativeDatabaseService` (@capacitor-community/sqlite, disk-based, persistent)
+- Factory pattern `createDatabaseService()` chọn implementation theo platform.
+
+## Problem (Đã giải quyết)
 
 App dùng `sql.js` WASM tạo SQLite database **trong bộ nhớ** (`new SQL.Database()`). Data mất khi force-stop hoặc restart. Cần chuyển sang native SQLite plugin để data persist trên filesystem.
 

@@ -617,7 +617,9 @@ Ba hàm migration chạy tự động khi đọc dữ liệu từ localStorage:
 
 ---
 
-## 8. localStorage Keys (Legacy)
+## 8. localStorage Keys (Legacy — Superseded)
+
+> **⚠️ LEGACY**: Mục này mô tả schema localStorage **trước V1 rebuild**. V1 sử dụng SQLite dual-layer (xem §10). Chỉ `appOnboardingStore` và `fitnessStore` UI state còn dùng localStorage via Zustand persist. Tất cả dữ liệu nghiệp vụ đã chuyển sang SQLite.
 
 | Key                  | Type                        | Mô tả                                                      |
 | -------------------- | --------------------------- | ---------------------------------------------------------- |
@@ -639,7 +641,7 @@ File `src/data/initialData.ts` cung cấp bộ dữ liệu mẫu mặc định:
 - Khoảng 20-30 nguyên liệu phổ biến trong ẩm thực Việt Nam
 - Khoảng 10-15 món ăn mẫu (cơm, phở, bún, trứng, rau...)
 
-Chỉ được dùng khi `localStorage` trống (lần khởi chạy đầu tiên).
+Chỉ được dùng khi database trống (lần khởi chạy đầu tiên — seed data tạo trong `createSchema()`).
 
 ---
 
@@ -669,7 +671,7 @@ Chỉ được dùng khi `localStorage` trống (lần khởi chạy đầu tiê
 
 **Remaining tables** not owned by a specific store: `training_profile`, `plan_templates`, `app_settings`, `grocery_checked` — managed directly via service-level queries.
 
-### 10.1 Meal Planning Tables (migrated from localStorage)
+### 10.1 Meal Planning Tables
 
 #### `ingredients`
 

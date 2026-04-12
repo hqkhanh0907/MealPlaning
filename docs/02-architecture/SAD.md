@@ -255,14 +255,14 @@ interface DatabaseService {
 │              │                      │
 │  ┌───────────▼────────────────────┐ │
 │  │  migrationService.ts          │ │
-│  │  localStorage → SQLite        │ │
-│  │  migrateFromLocalStorage()    │ │
-│  │  migrateFitnessData()         │ │
-│  └────────────────────────────────┘ │
-└─────────────────────────────────────┘
+│  │  _(Migration logic removed in V1_  │ │
+│  │  _rebuild — clean SQLite start)_  │ │
+│  │                                    │ │
+│  └────────────────────────────────────┘ │
+└─────────────────────────────────────────┘
 ```
 
-> **Migration path:** Dữ liệu cũ trong localStorage (mp-ingredients, mp-dishes, etc.) tự động migrate sang SQLite khi app khởi động lần đầu sau upgrade. Xem [data-model.md §10](data-model.md#10-sqlite-database-schema-22-tables).
+> **V1 Rebuild Note:** Dữ liệu bắt đầu từ SQLite sạch — không cần migration từ localStorage. Schema v6 được tạo bởi `createSchema()` khi app khởi động lần đầu. Xem [data-model.md §10](data-model.md#10-sqlite-database-schema-22-tables).
 
 #### DB Write Patterns
 
@@ -640,7 +640,7 @@ App.tsx
 
 | Quyết định                            | Lý do                                                                                                                                                                                                                               | ADR                                                           |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| SQLite (sql.js WASM) — offline-first  | Zero cost, offline-first, privacy. Migrated from localStorage for better query support and schema management                                                                                                                        | [ADR-001](../adr/001-local-storage-only.md)                   |
+| SQLite dual-layer — offline-first     | Zero cost, offline-first, privacy. Web uses sql.js WASM (in-memory), Android uses @capacitor-community/sqlite (disk-based)                                                                                                          | [ADR-001 (superseded)](../adr/001-local-storage-only.md)      |
 | **Dual DB implementation**            | **`WebDatabaseService` (sql.js) cho web/tests + `NativeDatabaseService` (@capacitor-community/sqlite) cho Android. Factory pattern `createDatabaseService()` chọn theo platform. Native DB persistent trên disk, Web DB in-memory** |
 | Google Gemini API                     | Multimodal, Google Search tool, structured output                                                                                                                                                                                   | [ADR-002](../adr/002-gemini-ai-integration.md)                |
 | react-i18next                         | Ecosystem mature, interpolation, TypeScript support                                                                                                                                                                                 | [ADR-003](../adr/003-i18n-with-i18next.md)                    |
@@ -663,16 +663,16 @@ App.tsx
 
 Architecture validated through **183 E2E tests** and **1201 unit tests**. The following architectural patterns were confirmed:
 
-| Pattern                                 | Validation                                                                                                                                                                                               |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| localStorage-only persistence (ADR-001) | Validated across all data flows — ingredients, dishes, dayPlans, userProfile                                                                                                                             |
-| Cross-tab state consistency             | Language, theme, and data changes verified consistent across tabs                                                                                                                                        |
-| Cascade data flow                       | Ingredient → Dish → Calendar → Grocery cascade verified end-to-end                                                                                                                                       |
-| MealPlannerModal unified planning       | Replaced 2-step TypeSelection → Planning flow with single MealPlannerModal (internal tabs: breakfast/lunch/dinner). `openTypeSelection()` now finds first empty slot and opens MealPlannerModal directly |
-| Cloud sync auto-backup                  | Google Drive appDataFolder backup verified: upload, download, conflict resolution                                                                                                                        |
-| Desktop responsive layout               | useIsDesktop hook (1024px breakpoint) verified for responsive navigation                                                                                                                                 |
-| Meal template CRUD                      | Save, list, apply, delete templates verified end-to-end                                                                                                                                                  |
-| Copy plan                               | Single-day and multi-day plan copy verified with deep clone                                                                                                                                              |
+| Pattern                           | Validation                                                                                                                                                                                               |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SQLite dual-layer persistence     | Validated across all data flows — ingredients, dishes, dayPlans, healthProfile. Web (sql.js) in-memory, Android (@capacitor-community/sqlite) disk-based                                                 |
+| Cross-tab state consistency       | Language, theme, and data changes verified consistent across tabs                                                                                                                                        |
+| Cascade data flow                 | Ingredient → Dish → Calendar → Grocery cascade verified end-to-end                                                                                                                                       |
+| MealPlannerModal unified planning | Replaced 2-step TypeSelection → Planning flow with single MealPlannerModal (internal tabs: breakfast/lunch/dinner). `openTypeSelection()` now finds first empty slot and opens MealPlannerModal directly |
+| Cloud sync auto-backup            | Google Drive appDataFolder backup verified: upload, download, conflict resolution                                                                                                                        |
+| Desktop responsive layout         | useIsDesktop hook (1024px breakpoint) verified for responsive navigation                                                                                                                                 |
+| Meal template CRUD                | Save, list, apply, delete templates verified end-to-end                                                                                                                                                  |
+| Copy plan                         | Single-day and multi-day plan copy verified with deep clone                                                                                                                                              |
 
 **Key architectural change:** `TypeSelectionModal` was removed from the codebase. The `openTypeSelection()` function in `App.tsx` now checks empty meal slots in the current day plan and opens `MealPlannerModal` with the first empty slot as `initialTab`, enabling users to plan all meals (breakfast/lunch/dinner) in a single session.
 

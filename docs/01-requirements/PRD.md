@@ -1,16 +1,21 @@
 # PRD — Smart Meal Planner
 
-**Version:** 3.2  
-**Date:** 2026-07-20  
-**Status:** Live (Production)
+**Version:** 4.0  
+**Date:** 2026-07-24  
+**Status:** V1 Rebuild
+
+> **⚠️ V1 REBUILD SCOPE**: Dự án đang được rebuild từ đầu (src/ trống). Chỉ **9 Must Have features (M1–M9)** trong [PRODUCT_VISION.md](../PRODUCT_VISION.md) nằm trong scope V1. Các features F-15 trở lên (multi-language, batch delete, v.v.) thuộc Phase 2+ và **KHÔNG** nằm trong scope rebuild hiện tại.
+>
+> **Persistence**: V1 sử dụng SQLite dual-layer (sql.js WASM cho web/tests + @capacitor-community/sqlite cho Android). Không còn dùng localStorage cho dữ liệu nghiệp vụ. Xem [SAD.md §2.3](../02-architecture/SAD.md).
 
 ### Changelog
 
 | Version | Ngày       | Thay đổi                                                                                                                   |
 | ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------- |
-| 3.0     | 2026-07-20 | Thêm F-29→F-35, cập nhật tech stack                                                                                        |
-| 3.1     | 2026-07-20 | CEO Audit Q3: thêm NFR-11 (Data Resilience), cập nhật yêu cầu fault tolerance cho data layer                               |
+| 4.0     | 2026-07-24 | V1 Rebuild: Thêm scope clarification, cập nhật persistence model (localStorage → SQLite dual-layer)                        |
 | 3.2     | 2026-07-20 | Reverse-sync từ BM/Testing audit: schema v6 (23 tables), thêm NFR-12 (Data Persist), NFR-13 (Calc Guard), fix BM-BUG-01/02 |
+| 3.1     | 2026-07-20 | CEO Audit Q3: thêm NFR-11 (Data Resilience), cập nhật yêu cầu fault tolerance cho data layer                               |
+| 3.0     | 2026-07-20 | Thêm F-29→F-35, cập nhật tech stack                                                                                        |
 
 ---
 
