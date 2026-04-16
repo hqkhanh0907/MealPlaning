@@ -1534,3 +1534,112 @@ TRONG PROMPT GỬI CHO TECH LEADER / DESIGNER:
 ### Bài học
 
 Rubber-duck là công cụ tốt nhưng phải **giới hạn**. 2-3 rounds đủ để bắt 90% issues. Rounds 4+ có diminishing returns gần 0. Spawn agent mới cho mỗi round = resource waste — reuse bằng `write_agent`.
+
+---
+
+## 45. Vision Doc Audit — Cross-doc staleness detection pattern
+
+### Vấn đề
+
+Product Vision v1.2 (2026-04-12) có 20 issues phát hiện khi cross-reference với 6 downstream docs (PRD v4.0, SAD v4.1, etc.) — cách nhau 3+ tháng. Appendix ghi "📝 Chờ BM/Designer/Tech Lead tạo" nhưng TẤT CẢ docs đã Active.
+
+### Nguyên nhân
+
+Vision doc tạo đầu tiên trong pipeline → downstream docs phát triển nhanh hơn → Vision không được update. Appendix metadata stale nhất vì không ai nhìn lại.
+
+### Giải pháp: 5-dimension audit framework
+
+```
+1. Internal Consistency:  Check §X references §Y → content match?
+2. Cross-doc Conflicts:   Vision §8 MoSCoW vs PRD features vs Coding Guidelines mandates
+3. Outdated Information:   Appendix statuses, version numbers, paths
+4. Missing Information:    Codebase has feature X but Vision only mentions 1 line
+5. Quality Assessment:     Structure, evidence, actionability scores
+```
+
+### Audit speed trick
+
+Cross-reference MoSCoW tier (Vision) vs implementation evidence (codebase + coding guidelines) phát hiện conflicts nhanh nhất:
+- Dark Mode: Vision says COULD, Coding Guidelines says MANDATORY → conflict
+- Template: Vision says WON'T, PRD has 4 features → conflict
+- Fitness: Vision has 1 line, codebase has 61 files → missing
+
+### 17 edits ≠ 17 retries
+
+Memory Guardian flagged "17 edits, 15 retries" nhưng đây là **17 independent surgical edits** vào 17 sections khác nhau (frontmatter, elevator pitch, personas, principles ×3, MoSCoW ×4, KPIs, assumptions, appendix ×2, changelog). Mỗi edit unique `old_str` → zero retries. Đây là normal pattern cho document với 20 fixes across 13 sections.
+
+### Bài học
+
+1. Vision doc PHẢI sync quarterly với downstream docs — 3+ months drift = 20 issues
+2. Appendix staleness invisible đến khi audit — add reminder "review appendix monthly"
+3. MoSCoW×implementation cross-check = highest-signal audit dimension
+4. Multiple independent edits to different sections ≠ retries — don't confuse edit count with failure count
+
+---
+
+## 46. BM Agent — KHÔNG hỏi user khi đã có đủ thông tin
+
+### Vấn đề
+
+Nhận CEO-BRIEF.md với 8 sections đầy đủ + 6 BM items rõ ràng. Thay vì bắt tay phân tích, BM hỏi user 5 câu hỏi — vi phạm R2 (KHÔNG BAO GIỜ HỎI USER TRỰC TIẾP). User gọi ra ngay: "dựa theo role của bạn thì bạn được phép thực hiện những vấn đề mà bạn hỏi tôi không?"
+
+### Nguyên nhân
+
+1. Lẫn lộn giữa personality rules (P1: "Hỏi trước, làm sau") và BM Agent rules (R2: "KHÔNG hỏi user")
+2. Quá thận trọng — hỏi scope clarification cho thông tin ĐÃ CÓ trong CEO Brief
+3. Không đọc kỹ BM Agent rules trước khi hành động
+
+### Giải pháp
+
+BM Agent workflow khi nhận CEO Brief:
+```
+1. ĐỌC CEO-BRIEF.md
+2. VALIDATE 8 sections → PASS/FAIL
+3. NẾU PASS → BẮT TAY phân tích ngay (grep codebase, cross-ref docs)
+4. NẾU thiếu info → format [BM→CEO] Qn: ... → relay qua user cho CEO
+5. KHÔNG BAO GIỜ hỏi user trực tiếp về scope/approach/priority
+   (CEO Brief §2 đã define scope, §6 đã define priority)
+```
+
+### Bài học
+
+BM Agent rules > Personality rules khi conflict. R2 nói rõ: "KHÔNG BAO GIỜ hỏi user trực tiếp". Nếu CEO Brief đủ thông tin → PHÂN TÍCH NGAY, không hỏi thêm. Thời gian hỏi = thời gian lãng phí.
+
+---
+
+## 47. Cross-doc audit — grep TRƯỚC khi viết BM-SPEC
+
+### Vấn đề
+
+BM cần verify schema table count (CEO Brief BM-2) nhưng 4 documents ghi 4 con số khác nhau (22, 22+, 23, 27). Nếu viết BM-SPEC mà không verify → spec sai.
+
+### Giải pháp: Parallel grep verification
+
+```
+Bước 1: grep -n "bảng\|tables" trong TẤT CẢ docs/ files
+Bước 2: Tạo evidence table: [Document, Location, Số ghi, Evidence]
+Bước 3: Identify inconsistencies
+Bước 4: Flag TQ cho Tech Leader nếu cần execute command
+```
+
+### Pattern phát hiện inconsistency nhanh
+
+```bash
+# Tìm TẤT CẢ references đến table count trong docs
+grep -rn "bảng\|tables\|schema version" docs/ --include='*.md' | grep -i "27\|23\|22\|version"
+```
+
+### Kết quả session này
+
+PRD có **7 internal conflicts** (chỉ CEO Brief flag 1). Bằng cách grep systematic:
+- §1.6: "23 bảng, schema version 6"
+- §F-29: "27 bảng"
+- §5: "27 bảng, version 3" — SAI CẢ 2 GIÁ TRỊ!
+- §5: persistence chỉ nói IndexedDB — thiếu native
+- §6: constraints chỉ nói sql.js — thiếu dual-layer
+- L16: broken path `../PRODUCT_VISION.md`
+- L18: broken path `../02-architecture/SAD.md`
+
+### Bài học
+
+CEO Brief scope chỉ là điểm bắt đầu. BM PHẢI grep toàn bộ file khi verify — 1 inconsistency thường kéo theo 3-5 cái khác. Pattern: CEO flag "schema count sai" → BM phát hiện thêm "version sai", "persistence model sai", "paths sai".

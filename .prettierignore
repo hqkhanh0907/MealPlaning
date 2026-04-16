@@ -1,0 +1,8 @@
+node_modules
+www
+dist
+android
+coverage
+*.min.js
+*.min.css
+package-lock.json

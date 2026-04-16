@@ -1,0 +1,7 @@
+{
+  "name": "HealthMateAI",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

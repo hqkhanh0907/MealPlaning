@@ -1,0 +1,239 @@
+// HealthMate AI — Design System Theme Variables
+// Source: docs/3-design/design-system.md
+
+// =============================================================================
+// LIGHT MODE
+// =============================================================================
+
+:root {
+  // Primary — Material Blue
+  --ion-color-primary: #2196f3;
+  --ion-color-primary-rgb: 33, 150, 243;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #1976d2;
+  --ion-color-primary-tint: #42a5f5;
+
+  // Secondary — Action Accent Orange
+  --ion-color-secondary: #ff9800;
+  --ion-color-secondary-rgb: 255, 152, 0;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #f57c00;
+  --ion-color-secondary-tint: #ffb74d;
+
+  // Tertiary
+  --ion-color-tertiary: #7c4dff;
+  --ion-color-tertiary-rgb: 124, 77, 255;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #6200ea;
+  --ion-color-tertiary-tint: #b388ff;
+
+  // Success — Green
+  --ion-color-success: #4caf50;
+  --ion-color-success-rgb: 76, 175, 80;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #388e3c;
+  --ion-color-success-tint: #66bb6a;
+
+  // Warning — Yellow
+  --ion-color-warning: #ffc107;
+  --ion-color-warning-rgb: 255, 193, 7;
+  --ion-color-warning-contrast: #000000;
+  --ion-color-warning-contrast-rgb: 0, 0, 0;
+  --ion-color-warning-shade: #ffa000;
+  --ion-color-warning-tint: #ffd54f;
+
+  // Danger — Red
+  --ion-color-danger: #f44336;
+  --ion-color-danger-rgb: 244, 67, 54;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #d32f2f;
+  --ion-color-danger-tint: #ef5350;
+
+  // Medium
+  --ion-color-medium: #666666;
+  --ion-color-medium-rgb: 102, 102, 102;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #555555;
+  --ion-color-medium-tint: #999999;
+
+  // Light
+  --ion-color-light: #f5f7fa;
+  --ion-color-light-rgb: 245, 247, 250;
+  --ion-color-light-contrast: #1a1a1a;
+  --ion-color-light-contrast-rgb: 26, 26, 26;
+  --ion-color-light-shade: #e8e8e8;
+  --ion-color-light-tint: #ffffff;
+
+  // Background & Surfaces
+  --ion-background-color: #f5f7fa;
+  --ion-background-color-rgb: 245, 247, 250;
+  --ion-card-background: #ffffff;
+  --ion-toolbar-background: #2196f3;
+  --ion-toolbar-color: #ffffff;
+  --ion-tab-bar-background: #ffffff;
+  --ion-tab-bar-color: #999999;
+  --ion-tab-bar-color-selected: #2196f3;
+
+  // Text
+  --ion-text-color: #1a1a1a;
+  --ion-text-color-rgb: 26, 26, 26;
+
+  // Font
+  --ion-font-family: 'Roboto', sans-serif;
+
+  // ==========================================================================
+  // App-specific Custom Properties
+  // ==========================================================================
+
+  // Primary Scale
+  --primary-900: #0d47a1;
+  --primary-800: #1565c0;
+  --primary-700: #1976d2;
+  --primary-600: #1e88e5;
+  --primary-500: #2196f3;
+  --primary-400: #42a5f5;
+  --primary-300: #64b5f6;
+  --primary-200: #90caf9;
+  --primary-100: #bbdefb;
+  --primary-50: #e3f2fd;
+
+  // Accent Scale
+  --accent-700: #f57c00;
+  --accent-500: #ff9800;
+  --accent-300: #ffb74d;
+  --accent-50: #fff8e1;
+
+  // Neutral
+  --bg-page: #f5f7fa;
+  --bg-card: #ffffff;
+  --bg-elevated: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #333333;
+  --text-tertiary: #666666;
+  --text-disabled: #999999;
+  --border-color: #e8e8e8;
+
+  // AI Card
+  --ai-card-bg: #e3f2fd;
+  --ai-card-border: #bbdefb;
+  --ai-avatar-bg: #2196f3;
+  --ai-text-color: #1565c0;
+
+  // Streak Card
+  --streak-card-bg: #fff8e1;
+  --streak-number-color: #ff9800;
+
+  // Quick Action
+  --quick-action-bg: #e3f2fd;
+  --quick-action-text: #1565c0;
+
+  // Spacing
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+
+  // Border Radius
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  // Shadows (light mode only)
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+// =============================================================================
+// DARK MODE
+// =============================================================================
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    // Primary — Lighter blue for dark backgrounds
+    --ion-color-primary: #42a5f5;
+    --ion-color-primary-rgb: 66, 165, 245;
+    --ion-color-primary-shade: #2196f3;
+    --ion-color-primary-tint: #64b5f6;
+
+    // Secondary — Lighter orange
+    --ion-color-secondary: #ffb74d;
+    --ion-color-secondary-rgb: 255, 183, 77;
+    --ion-color-secondary-shade: #ff9800;
+    --ion-color-secondary-tint: #ffe0b2;
+
+    // Success
+    --ion-color-success: #66bb6a;
+    --ion-color-success-shade: #4caf50;
+    --ion-color-success-tint: #81c784;
+
+    // Warning
+    --ion-color-warning: #ffd54f;
+    --ion-color-warning-shade: #ffc107;
+    --ion-color-warning-tint: #ffe082;
+
+    // Danger
+    --ion-color-danger: #ef5350;
+    --ion-color-danger-shade: #f44336;
+    --ion-color-danger-tint: #e57373;
+
+    // Background & Surfaces
+    --ion-background-color: #121212;
+    --ion-background-color-rgb: 18, 18, 18;
+    --ion-card-background: #1e1e1e;
+    --ion-toolbar-background: #1565c0;
+    --ion-toolbar-color: #ffffff;
+    --ion-tab-bar-background: #1e1e1e;
+    --ion-tab-bar-color: #666666;
+    --ion-tab-bar-color-selected: #42a5f5;
+
+    // Text
+    --ion-text-color: #ffffff;
+    --ion-text-color-rgb: 255, 255, 255;
+
+    // Border
+    --ion-border-color: #333333;
+
+    // Item
+    --ion-item-background: #1e1e1e;
+
+    // App-specific overrides
+    --bg-page: #121212;
+    --bg-card: #1e1e1e;
+    --bg-elevated: #2e2e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-tertiary: #999999;
+    --text-disabled: #666666;
+    --border-color: #333333;
+
+    // AI Card (dark)
+    --ai-card-bg: #1a237e;
+    --ai-card-border: #283593;
+    --ai-avatar-bg: #42a5f5;
+    --ai-text-color: #90caf9;
+
+    // Streak Card (dark)
+    --streak-card-bg: #2e2e1e;
+    --streak-number-color: #ffb74d;
+
+    // Quick Action (dark)
+    --quick-action-bg: #1a237e;
+    --quick-action-text: #90caf9;
+
+    // Shadows — disabled in dark mode, use elevation instead
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+  }
+}

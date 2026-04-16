@@ -1,575 +1,256 @@
----
-title: Tầm nhìn Sản phẩm
-status: Active
-version: 1.1
-owner: CEO
-updated: 2026-04-12
-related:
-  - docs/2-requirements/prd.md
-  - docs/3-design/design-handoff.md
----
+# Product Vision — HealthMate AI
 
-# 📋 PRODUCT VISION — Smart Meal Planner
-
----
-
-## Mục lục
-
-1. [Tầm nhìn sản phẩm](#1-tầm-nhìn-sản-phẩm)
-2. [Vấn đề cần giải quyết](#2-vấn-đề-cần-giải-quyết)
-3. [User Persona](#3-user-persona)
-4. [Jobs-to-be-Done](#4-jobs-to-be-done)
-5. [Nguyên tắc sản phẩm](#5-nguyên-tắc-sản-phẩm)
-6. [Phân tích cạnh tranh](#6-phân-tích-cạnh-tranh)
-7. [Giá trị độc nhất & Lợi thế cạnh tranh](#7-giá-trị-độc-nhất--lợi-thế-cạnh-tranh)
-8. [Phạm vi & Ưu tiên (MoSCoW)](#8-phạm-vi--ưu-tiên-moscow)
-9. [Chỉ số thành công (KPIs)](#9-chỉ-số-thành-công-kpis)
-10. [Đánh giá rủi ro](#10-đánh-giá-rủi-ro)
-11. [Mô hình kinh doanh](#11-mô-hình-kinh-doanh)
-12. [Thị trường mục tiêu](#12-thị-trường-mục-tiêu)
+**Version:** 1.1  
+**Date:** 2026-04-15  
+**Status:** Active
 
 ---
 
 ## 1. Tầm nhìn sản phẩm
 
-### Tuyên bố tầm nhìn (Vision Statement)
+### Vision Statement
 
-> **Trở thành ứng dụng sức khỏe #1 Việt Nam** — nơi mọi người từ 16 đến 45 tuổi có thể theo dõi dinh dưỡng, lập kế hoạch tập luyện, và đạt mục tiêu sức khỏe cá nhân **chỉ trong vài giây mỗi ngày** — mà không cần kiến thức chuyên môn.
+> **HealthMate AI** là huấn luyện viên sức khỏe cá nhân trong túi bạn — ứng dụng duy nhất kết hợp AI thông minh để tự động lên kế hoạch ăn uống, thiết kế lịch tập luyện, và điều chỉnh theo tiến độ thực tế của bạn mỗi ngày.
 
-### Tóm tắt một câu (Elevator Pitch)
+### Elevator Pitch
 
-**Smart Meal Planner** là ứng dụng di động giúp người Việt Nam quản lý dinh dưỡng và tập luyện bằng AI — chỉ cần chụp ảnh đĩa cơm, app tự tính calo. Khác biệt với MyFitnessPal: miễn phí 100%, thiết kế cho người Việt, đơn giản đến mức ai cũng dùng được.
+HealthMate AI giúp người Việt Nam từ 16-45 tuổi đạt mục tiêu sức khỏe (giảm cân, tăng cơ, duy trì, tăng sức mạnh) mà không cần kiến thức chuyên môn. Khác với MyFitnessPal hay Samsung Health — HealthMate AI không chỉ **theo dõi** mà còn **chủ động hướng dẫn**: AI lên thực đơn tuần, lên lịch tập, nhận xét hàng ngày, và tự điều chỉnh plan khi bạn chệch mục tiêu. Miễn phí 100%, chụp ảnh đĩa cơm là xong.
 
-### Sản phẩm dùng để làm gì?
+### 3 Trụ cột
 
-Smart Meal Planner kết hợp **3 trụ cột** trong 1 ứng dụng duy nhất:
-
-| Trụ cột           | Mô tả                                                 | Ví dụ                                            |
-| ----------------- | ----------------------------------------------------- | ------------------------------------------------ |
-| 🍽️ **Dinh dưỡng** | Theo dõi calo, protein, macro hàng ngày               | Chụp ảnh bữa trưa → app log 550 calo             |
-| 💪 **Tập luyện**  | Lên kế hoạch workout và ghi log bài tập               | Mở app tại gym → thấy ngay "Ngày Ngực + Vai"     |
-| 🤖 **AI**         | Nhận diện thức ăn, tra cứu dinh dưỡng, gợi ý thực đơn | Gõ "Đậu hũ" → AI điền: 76 calo, 8g protein /100g |
+| Trụ cột | Mô tả | AI Coach làm gì |
+|---------|-------|------------------|
+| 🍽️ **Dinh dưỡng** | Theo dõi calo, protein, macro hàng ngày | AI lên thực đơn tuần, nhận diện ảnh thức ăn, gợi ý khi ăn thiếu/thừa |
+| 💪 **Tập luyện** | Kế hoạch workout cá nhân hóa, ghi log bài tập | AI lên lịch tập (PPL/Upper-Lower/Full Body), điều chỉnh theo tiến độ |
+| 🤖 **AI Coach** | Huấn luyện viên cá nhân 24/7 | Nhận xét hàng ngày, điều chỉnh plan tự động, gợi ý dựa trên dữ liệu thực tế |
 
 ---
 
 ## 2. Vấn đề cần giải quyết
 
-### Pain Points — 6 vấn đề thực tế người Việt gặp phải
+### 6 Pain Points
 
-| #   | Vấn đề                                                                                                     | Mức độ đau (1-5) | Bằng chứng                           |
-| --- | ---------------------------------------------------------------------------------------------------------- | :--------------: | ------------------------------------ |
-| P1  | **Không biết hôm nay ăn gì cho đúng mục tiêu** — Muốn giảm/tăng cân nhưng không biết cần ăn bao nhiêu calo |    ⭐⭐⭐⭐⭐    | 4/4 persona đều gặp                  |
-| P2  | **Nhập liệu dinh dưỡng quá mất thời gian** — Phải tra từng nguyên liệu, tính khẩu phần, cộng tổng          |    ⭐⭐⭐⭐⭐    | Lý do #1 bỏ app (Minh)               |
-| P3  | **Không biết món Việt có bao nhiêu calo** — Phở, bún chả, cơm tấm không có trong database MyFitnessPal     |     ⭐⭐⭐⭐     | MFP chỉ có món Tây                   |
-| P4  | **Không có kế hoạch tập phù hợp** — Đến gym không biết tập gì, tập xong quên ghi                           |     ⭐⭐⭐⭐     | Persona Anh (PT)                     |
-| P5  | **App hiện tại quá phức tạp hoặc quá đắt** — MFP paywall, Samsung Health thiếu tính năng                   |      ⭐⭐⭐      | Persona Minh dùng MFP nhưng khó dùng |
-| P6  | **Không thấy tiến trình rõ ràng** — Tập 1 tháng mà không biết có tiến bộ không                             |      ⭐⭐⭐      | Persona Anh cần xem tổng quan        |
+| # | Vấn đề | Mức độ | Giải pháp HealthMate AI |
+|---|--------|:------:|------------------------|
+| P1 | **Không biết hôm nay ăn gì** — muốn giảm/tăng cân nhưng không biết cần bao nhiêu calo | ⭐⭐⭐⭐⭐ | AI tự lên thực đơn tuần theo mục tiêu |
+| P2 | **Nhập liệu dinh dưỡng mất thời gian** — tra từng nguyên liệu, tính khẩu phần | ⭐⭐⭐⭐⭐ | Chụp ảnh → AI nhận diện → log tự động |
+| P3 | **Không biết món Việt có bao nhiêu calo** — phở, bún chả không có trong database nước ngoài | ⭐⭐⭐⭐ | Database món Việt + AI tra cứu dinh dưỡng |
+| P4 | **Đến gym không biết tập gì** — không có kế hoạch, tập xong quên ghi | ⭐⭐⭐⭐ | AI lên lịch tập cá nhân hóa + workout logger |
+| P5 | **App hiện tại quá phức tạp hoặc quá đắt** — MFP $79.99/năm, Samsung Health thiếu tính năng | ⭐⭐⭐ | Miễn phí 100%, đơn giản, thiết kế cho người Việt |
+| P6 | **Không thấy tiến trình** — tập 1 tháng mà không biết có tiến bộ không | ⭐⭐⭐ | Dashboard + AI nhận xét hàng ngày + progress charts |
 
 ### Giải pháp cốt lõi
 
-> **Giảm thời gian nhập liệu dinh dưỡng từ 5 phút xuống 10 giây** bằng AI nhận diện ảnh + database món Việt — đồng thời cung cấp kế hoạch tập luyện cá nhân hóa trong cùng 1 app.
+> App không chỉ **tracking** mà còn **coaching** — AI chủ động lên plan, nhận xét, và điều chỉnh. Người dùng chỉ cần mở app, làm theo, và thấy kết quả.
 
 ---
 
-## 3. User Persona
+## 3. User Personas
 
-### Persona 1: Minh — "Người muốn kiểm soát cân nặng nhưng lười nhập liệu"
+### Persona 1: Minh — "Người giảm cân bận rộn"
 
-| Thuộc tính         | Chi tiết                                                                                    |
-| ------------------ | ------------------------------------------------------------------------------------------- |
-| **Tuổi / Giới**    | 25 tuổi, Nam                                                                                |
-| **Nghề nghiệp**    | Nhân viên văn phòng                                                                         |
-| **Thiết bị**       | Android cao cấp (>10 triệu)                                                                 |
-| **Rành công nghệ** | 2-3/5 — Dùng được Facebook, Zalo nhưng không thích app phức tạp                             |
-| **Đang dùng**      | Đã thử MyFitnessPal, bỏ vì nhập liệu quá lâu và phức tạp                                    |
-| **Mục tiêu**       | Giảm cân HOẶC tăng cơ — muốn kiểm soát lượng calo nạp vào chính xác                         |
-| **Pain #1**        | Nhập liệu dinh dưỡng quá mất thời gian — tra từng nguyên liệu, tính khẩu phần               |
-| **Pain #2**        | Không biết dinh dưỡng chính xác của món Việt                                                |
-| **Hành vi**        | Mở app 2-3 lần/ngày (sau mỗi bữa ăn), mỗi lần < 1 phút                                      |
-| **Quote**          | _"Tôi chỉ muốn chụp ảnh đĩa cơm hoặc gõ tên món rồi xong, không muốn tra từng nguyên liệu"_ |
+| Thuộc tính | Chi tiết |
+|------------|----------|
+| **Tuổi / Giới** | 28 tuổi, Nam |
+| **Nghề nghiệp** | Nhân viên văn phòng, làm 9-6 |
+| **Mục tiêu** | Giảm 5kg trong 3 tháng |
+| **Pain chính** | Không có thời gian tính calo, không biết ăn gì cho đúng |
+| **Kỳ vọng** | Mở app → thấy hôm nay ăn gì, không cần suy nghĩ |
+| **Quote** | _"Tôi chỉ muốn ai đó nói cho tôi hôm nay ăn gì và tập gì, tôi làm theo thôi"_ |
 
-> **Lưu ý**: Persona này đại diện cho CẢ nhu cầu giảm cân (calorie deficit) LẪN tăng cân (calorie surplus). Cả hai đều cần cùng core feature: tracking chính xác + nhập liệu nhanh. Khác biệt duy nhất là goal setting (cut vs bulk) — đã được handle trong onboarding.
+### Persona 2: Vy — "Sinh viên mới tập gym"
 
-### Persona 2: Vy — "Sinh viên giảm cân theo mục tiêu"
+| Thuộc tính | Chi tiết |
+|------------|----------|
+| **Tuổi / Giới** | 21 tuổi, Nữ |
+| **Nghề nghiệp** | Sinh viên |
+| **Mục tiêu** | Tăng cơ, giảm mỡ, body đẹp |
+| **Pain chính** | Mới tập gym, không biết gì về dinh dưỡng và training program |
+| **Kỳ vọng** | App dạy từ đầu: ăn gì, tập gì, bao nhiêu set/rep |
+| **Quote** | _"Mình không đủ tiền thuê PT, cần một app như PT trong điện thoại"_ |
 
-| Thuộc tính         | Chi tiết                                                               |
-| ------------------ | ---------------------------------------------------------------------- |
-| **Tuổi / Giới**    | 20 tuổi, Nữ                                                            |
-| **Nghề nghiệp**    | Sinh viên                                                              |
-| **Thiết bị**       | Android tầm trung                                                      |
-| **Rành công nghệ** | 3/5 — Cài app thành thạo                                               |
-| **Đang dùng**      | Không dùng app nào (ghi sổ tay hoặc tính nhẩm)                         |
-| **Mục tiêu**       | Giảm cân có kiểm soát — muốn thâm hụt calo hàng ngày                   |
-| **Pain #1**        | Muốn biết lượng đồ ăn nạp vào có đạt mục tiêu thâm hụt calo không      |
-| **Pain #2**        | Ngân sách eo hẹp — không trả được phí subscription                     |
-| **Hành vi**        | Mở app 3 lần/ngày, check target calo sau mỗi bữa                       |
-| **Quote**          | _"Tôi cần biết hôm nay còn bao nhiêu calo để ăn tối mà không bị vượt"_ |
+### Persona 3: Hùng — "Gym-goer nghiêm túc"
 
-### Persona 3: Anh — "Huấn luyện viên quản lý workout"
+| Thuộc tính | Chi tiết |
+|------------|----------|
+| **Tuổi / Giới** | 32 tuổi, Nam |
+| **Nghề nghiệp** | Kỹ sư phần mềm |
+| **Mục tiêu** | Tăng sức mạnh (bench press 100kg), duy trì 12% body fat |
+| **Pain chính** | Đã biết tập, nhưng cần track progressive overload và macro chính xác |
+| **Kỳ vọng** | Workout logger nhanh, biểu đồ tiến trình, AI điều chỉnh khi plateau |
+| **Quote** | _"Tôi cần data, không cần tutorial. Cho tôi biểu đồ và AI phân tích"_ |
 
-| Thuộc tính         | Chi tiết                                                               |
-| ------------------ | ---------------------------------------------------------------------- |
-| **Tuổi / Giới**    | 20 tuổi, Nam                                                           |
-| **Nghề nghiệp**    | Hướng dẫn viên thể hình (PT)                                           |
-| **Thiết bị**       | Android cao cấp                                                        |
-| **Rành công nghệ** | 4/5 — Rành tech, thích khám phá                                        |
-| **Đang dùng**      | Ghi sổ tay + Excel                                                     |
-| **Mục tiêu**       | Quản lý kế hoạch tập và theo dõi tiến trình                            |
-| **Pain #1**        | Hôm nay tập gì? Nhập bài tập, kiểm tra lại quá trình tập               |
-| **Pain #2**        | Muốn xem tổng quan tiến trình tập trong tuần/tháng/năm                 |
-| **Hành vi**        | Mở app tại gym, log workout real-time, review cuối tuần                |
-| **Quote**          | _"Tôi cần mở app là thấy ngay bài tập hôm nay, không cần click 5 lần"_ |
+### Persona 4: Lan — "Beginner muốn sống khỏe"
 
-### Ma trận Persona × Feature
-
-| Feature              | Minh 🏢 (cut/bulk) | Vy 🎓  | Anh 💪 |
-| -------------------- | :----------------: | :----: | :----: |
-| AI nhận diện ảnh     |       ⭐⭐⭐       |  ⭐⭐  |   ⭐   |
-| Tracking calo        |       ⭐⭐⭐       | ⭐⭐⭐ |  ⭐⭐  |
-| Kế hoạch tập         |        ⭐⭐        |   ⭐   | ⭐⭐⭐ |
-| Workout logging      |        ⭐⭐        |   ⭐   | ⭐⭐⭐ |
-| Dashboard tiến trình |        ⭐⭐        |  ⭐⭐  | ⭐⭐⭐ |
-| Gợi ý thực đơn AI    |        ⭐⭐        | ⭐⭐⭐ |   ⭐   |
-
-> ⭐⭐⭐ = Tính năng cốt lõi cho persona này | ⭐ = Dùng nhưng không phải lý do chính
+| Thuộc tính | Chi tiết |
+|------------|----------|
+| **Tuổi / Giới** | 40 tuổi, Nữ |
+| **Nghề nghiệp** | Nội trợ / kinh doanh nhỏ |
+| **Mục tiêu** | Duy trì sức khỏe, ăn uống cân bằng |
+| **Pain chính** | Không biết gì về calo, protein, chỉ muốn app đơn giản |
+| **Kỳ vọng** | Chụp ảnh bữa ăn → app nói "tốt" hay "cần thêm rau" |
+| **Quote** | _"Tôi chỉ muốn biết bữa ăn của mình có tốt không, đừng cho tôi con số"_ |
 
 ---
 
-## 4. Jobs-to-be-Done
+## 4. Nguyên tắc sản phẩm
 
-Mỗi "Job" mô tả một **tình huống thực tế** mà user cần app giải quyết. Đây là cơ sở để BM viết Use Cases và Designer thiết kế User Flow.
-
-### Job 1: Tracking nhanh sau bữa ăn ⭐ (Core Job)
-
-> **"Khi tôi vừa ăn xong, tôi muốn chụp ảnh đĩa cơm hoặc gõ tên món, để app tự ghi lại dinh dưỡng trong vòng 10 giây — không cần tra từng nguyên liệu."**
-
-| Thuộc tính               | Chi tiết                                                     |
-| ------------------------ | ------------------------------------------------------------ |
-| **Persona**              | Minh                                                         |
-| **Tần suất**             | 2-3 lần/ngày                                                 |
-| **Thước đo thành công**  | Thời gian log 1 bữa ≤ 10 giây                                |
-| **Alternative hiện tại** | MyFitnessPal (5+ phút), ghi sổ tay (quên), không ghi (đa số) |
-
-### Job 2: Biết ngân sách calo còn lại
-
-> **"Khi tôi muốn biết hôm nay còn ăn được bao nhiêu nữa, tôi muốn mở app thấy ngay '764 calo còn lại', để tôi chọn bữa tối phù hợp mà không vượt mục tiêu."**
-
-| Thuộc tính               | Chi tiết                                               |
-| ------------------------ | ------------------------------------------------------ |
-| **Persona**              | Vy, Minh                                               |
-| **Tần suất**             | 1-2 lần/ngày (trước bữa ăn)                            |
-| **Thước đo thành công**  | Thông tin hiển thị trong ≤ 2 giây (mở app → thấy ngay) |
-| **Alternative hiện tại** | Tính nhẩm (không chính xác), không tính (đa số)        |
-
-### Job 3: Tạo món ăn với AI tra cứu
-
-> **"Khi tôi muốn thêm món ăn mới nhưng không biết dinh dưỡng, tôi muốn gõ tên nguyên liệu và AI tự điền số liệu, để tôi không cần tra bảng dinh dưỡng."**
-
-| Thuộc tính               | Chi tiết                                             |
-| ------------------------ | ---------------------------------------------------- |
-| **Persona**              | Minh                                                 |
-| **Tần suất**             | 2-3 lần/tuần (khi thêm món mới)                      |
-| **Thước đo thành công**  | AI điền chính xác ≥ 90% so với bảng dinh dưỡng chuẩn |
-| **Alternative hiện tại** | Google search (5+ phút, không chính xác), bỏ qua     |
-
-### Job 4: Tập luyện có kế hoạch
-
-> **"Khi tôi đến gym và không nhớ hôm nay tập gì, tôi muốn mở app thấy ngay danh sách bài tập với set/rep rõ ràng, để bắt đầu tập trong 10 giây."**
-
-| Thuộc tính               | Chi tiết                                                   |
-| ------------------------ | ---------------------------------------------------------- |
-| **Persona**              | Anh, Minh                                                  |
-| **Tần suất**             | 3-6 lần/tuần                                               |
-| **Thước đo thành công**  | Từ mở app → bắt đầu tập ≤ 10 giây                          |
-| **Alternative hiện tại** | Ghi sổ tay (quên mang), Excel (không tiện trên điện thoại) |
-
-### Job 5: Xem tiến trình tổng quan
-
-> **"Khi tôi muốn biết tuần/tháng này có tiến bộ không, tôi muốn thấy biểu đồ cân nặng, streak tập luyện, và xu hướng calo, để tôi có động lực tiếp tục."**
-
-| Thuộc tính               | Chi tiết                                        |
-| ------------------------ | ----------------------------------------------- |
-| **Persona**              | Anh, Vy                                         |
-| **Tần suất**             | 1-2 lần/tuần                                    |
-| **Thước đo thành công**  | Dashboard hiển thị trend rõ ràng trong ≤ 3 giây |
-| **Alternative hiện tại** | Tự vẽ biểu đồ Excel, không theo dõi             |
+| # | Nguyên tắc | Giải thích |
+|---|-----------|------------|
+| 1 | **AI-first, không phải form-first** | Mọi thao tác phức tạp (lên plan, tính macro) do AI xử lý. User chỉ cần confirm |
+| 2 | **10 giây, không phải 5 phút** | Mọi tương tác hàng ngày phải hoàn thành trong < 10 giây |
+| 3 | **Chủ động, không phải thụ động** | App chủ động gợi ý, nhắc nhở, điều chỉnh — không đợi user hỏi |
+| 4 | **Đơn giản cho beginner, mạnh cho pro** | Beginner thấy gợi ý đơn giản, pro thấy data chi tiết |
+| 5 | **Local-first, AI khi cần** | Data lưu local. Chỉ gọi Gemini khi user dùng tính năng AI |
+| 6 | **Miễn phí mãi mãi** | Không paywall, không quảng cáo, không subscription |
 
 ---
 
-## 5. Nguyên tắc sản phẩm
+## 5. Điểm khác biệt cạnh tranh
 
-5 nguyên tắc dưới đây là **luật bất di bất dịch** — khi hai quyết định mâu thuẫn, nguyên tắc có số thứ tự nhỏ hơn THẮNG.
+### So với đối thủ
 
-### 🥇 Nguyên tắc 1: Evidence-based (Dựa trên khoa học)
+| Tính năng | MyFitnessPal | Samsung Health | HealthMate AI |
+|-----------|:------------:|:--------------:|:-------------:|
+| Tracking dinh dưỡng | ✅ | ✅ (cơ bản) | ✅ |
+| Món Việt Nam | ❌ (<20%) | ❌ | ✅ (AI tra cứu) |
+| AI nhận diện ảnh | ✅ (Premium) | ❌ | ✅ (Gemini) |
+| **AI lên plan ăn tuần** | ❌ | ❌ | ✅ |
+| **AI lên lịch tập** | ❌ | ❌ | ✅ |
+| **AI điều chỉnh theo tiến độ** | ❌ | ❌ | ✅ |
+| **AI nhận xét hàng ngày** | ❌ | ❌ | ✅ |
+| Workout logger | ❌ | ✅ (cơ bản) | ✅ (chi tiết) |
+| Progress charts | ✅ | ✅ | ✅ |
+| Giá | $79.99/năm | Free (hạn chế) | **Free 100%** |
+| Offline | ❌ | ✅ | ✅ (local-first) |
 
-> Mọi công thức, gợi ý, và tính toán trong app PHẢI dựa trên nghiên cứu khoa học đã được kiểm chứng.
+### Unique Value Proposition
 
-**Áp dụng:**
-
-- Công thức BMR: Mifflin-St Jeor (tiêu chuẩn y khoa)
-- Hệ số vận động: Katch-McArdle validated
-- Protein khuyến nghị: 1.6-2.2g/kg (meta-analysis ISSN)
-- AI nutrition: Cross-check với USDA/VNFI database
-
-**Ví dụ mâu thuẫn:** AI gợi ý "detox 3 ngày" → TỪ CHỐI vì không có evidence khoa học.
-
-### 🥈 Nguyên tắc 2: Data Accuracy > Convenience (Chính xác hơn tiện lợi)
-
-> Thà mất thêm 5 giây nhập liệu còn hơn ghi sai 100 calo. Không bao giờ làm tròn số để "nhìn đẹp hơn".
-
-**Áp dụng:**
-
-- Hiển thị calo chính xác đến đơn vị (1704 kcal, không phải "~1700")
-- AI nhận diện ảnh PHẢI cho user review trước khi lưu
-- Khi không chắc chắn → hỏi user thay vì đoán
-
-**Ví dụ mâu thuẫn:** User muốn "1 chạm log bữa ăn" nhưng AI chưa chắc chắn → BẮT BUỘC hiển thị preview để user xác nhận. Accuracy thắng Convenience.
-
-### 🥉 Nguyên tắc 3: Simple > Powerful (Đơn giản hơn phức tạp)
-
-> Người mới PHẢI hiểu app trong 30 giây đầu tiên. Nếu một tính năng cần "hướng dẫn sử dụng" thì tính năng đó chưa đủ đơn giản.
-
-**Áp dụng:**
-
-- Onboarding ≤ 7 bước, mỗi bước 1 hành động duy nhất
-- Navigation: 5 tab rõ ràng, không sub-menu ẩn
-- Empty state: Khi chưa có data → hiển thị hướng dẫn visual thay vì trang trắng
-
-**Ví dụ mâu thuẫn:** Feature "tùy chỉnh macro ratio" cho power user → ẨN trong Settings, không hiển thị trên main screen. Simple cho đa số, Powerful cho ai cần.
-
-### Nguyên tắc 4: AI-Augmented (AI hỗ trợ, user kiểm soát)
-
-> AI là trợ lý, KHÔNG phải người quyết định. User luôn có quyền chỉnh sửa, từ chối, hoặc ghi đè kết quả AI.
-
-**Áp dụng:**
-
-- AI nhận diện ảnh → hiển thị kết quả → user EDIT → user CONFIRM → lưu
-- AI gợi ý thực đơn → user CHỌN chấp nhận hoặc từ chối từng món
-- AI tra cứu dinh dưỡng → user KIỂM TRA số liệu trước khi lưu
-- Khi không có internet → tất cả tính năng non-AI vẫn hoạt động bình thường
-
-**Offline vs Online Feature Map:**
-
-| Feature                        | Offline ✅ | Online 🌐 | Ghi chú                |
-| ------------------------------ | :--------: | :-------: | ---------------------- |
-| Meal planning (thêm/sửa/xóa)   |     ✅     |           | SQLite local           |
-| Nutrition tracking & dashboard |     ✅     |           | Tính toán local        |
-| Workout logging                |     ✅     |           | SQLite local           |
-| Training plan & scheduling     |     ✅     |           | SQLite local           |
-| Ingredient library (có sẵn)    |     ✅     |           | Seed data + user-added |
-| Settings & profile             |     ✅     |           | SQLite + localStorage  |
-| AI nhận diện ảnh               |            |    🌐     | Gemini API             |
-| AI tra cứu dinh dưỡng          |            |    🌐     | Gemini API             |
-| AI gợi ý thực đơn              |            |    🌐     | Gemini API             |
-| Google Drive backup/restore    |            |    🌐     | Google Drive API       |
-
-> **Tỷ lệ**: 7/10 features = 100% offline. 3/10 features = cần internet (đều là AI-powered). Offline coverage ≈ **90%** theo thời gian sử dụng thực tế (user dùng AI ~3 lần/ngày, còn lại đều offline).
-
-**Ví dụ mâu thuẫn:** AI muốn "tự động log bữa ăn khi detect ảnh trong gallery" → TỪ CHỐI vì user chưa chủ động cho phép.
-
-### Nguyên tắc 5: Privacy by default (Riêng tư mặc định)
-
-> Dữ liệu sức khỏe là dữ liệu CỰC KỲ NHẠY CẢM. Không bao giờ rời thiết bị trừ khi user chủ động cho phép.
-
-**Áp dụng:**
-
-- Database SQLite lưu trên thiết bị, KHÔNG có server backend
-- Google Drive sync: CHỈ khi user tự đăng nhập và nhấn "Tải lên"
-- AI request: CHỈ khi user nhấn nút phân tích, KHÔNG tự gửi data
-- Xóa app = xóa toàn bộ dữ liệu (trừ khi đã backup)
-- Không thu thập analytics, không tracking, không ads
-
-**Ví dụ mâu thuẫn:** Muốn thêm "bảng xếp hạng cộng đồng" → TỪ CHỐI ở V1 vì yêu cầu chia sẻ dữ liệu cá nhân lên server.
+> **"Huấn luyện viên AI miễn phí cho người Việt"** — App duy nhất tự động lên plan ăn + tập, điều chỉnh hàng ngày theo tiến độ thực tế, hiểu món Việt, và hoàn toàn miễn phí.
 
 ---
 
-## 6. Phân tích cạnh tranh
+## 6. Scope V1 — Features
 
-### Ma trận so sánh
+### V1 Features (13 features — build hết rồi release)
 
-| Tiêu chí                         |    **Smart Meal Planner**     |     **MyFitnessPal**     |     **Samsung/Apple Health**      |
-| -------------------------------- | :---------------------------: | :----------------------: | :-------------------------------: |
-| Giá                              |       ✅ Miễn phí 100%        | ❌ Freemium ($79.99/năm) |            ✅ Miễn phí            |
-| Món Việt Nam                     | ✅ Database Việt + AI tra cứu |    ❌ Chủ yếu món Tây    |            ❌ Không có            |
-| Giao diện tiếng Việt             |     ✅ Native Vietnamese      |   ⚠️ Có nhưng dịch máy   |               ✅ Có               |
-| AI nhận diện ảnh                 |        ✅ Có (Gemini)         |     ⚠️ Premium only      |             ❌ Không              |
-| Workout logging                  |      ✅ Có + kế hoạch AI      |        ⚠️ Cơ bản         |             ⚠️ Cơ bản             |
-| Offline                          |        ✅ 90% offline         |  ⚠️ Cần mạng cho search  |            ✅ Offline             |
-| Privacy                          |    ✅ No server, local DB     |      ❌ Cloud-based      |           ⚠️ Cloud sync           |
-| All-in-one (Nutrition + Fitness) |    ✅ Tích hợp trong 1 app    |   ⚠️ Chủ yếu nutrition   |        ⚠️ Chủ yếu fitness         |
-| Độ phức tạp UI                   |      ✅ Đơn giản (5 tab)      | ❌ Phức tạp (nhiều menu) | ✅ Đơn giản nhưng thiếu tính năng |
+**Nhóm 1: Core Nutrition**
 
-### Điểm yếu của đối thủ = Cơ hội của chúng ta
+| ID | Feature | Mô tả |
+|----|---------|-------|
+| F-01 | Quản lý Nguyên liệu | CRUD nguyên liệu với dinh dưỡng per 100g |
+| F-02 | Quản lý Món ăn | CRUD món ăn (ingredient-based, quick add, AI auto-fill) |
+| F-03 | Calendar & Meal Planning | Lịch ăn tuần/ngày, thêm món vào bữa, AI lên plan ngày/tuần |
+| F-04 | Nutrition Tracking | Tổng calo, protein, carbs, fat, fiber hàng ngày |
 
-| Đối thủ        | Điểm yếu                                     | Cơ hội cho Smart Meal Planner       |
-| -------------- | -------------------------------------------- | ----------------------------------- |
-| MyFitnessPal   | Trả phí, phức tạp, không có món Việt         | Miễn phí + đơn giản + database Việt |
-| Samsung Health | Ít người biết dùng, thiếu nutrition tracking | All-in-one nutrition + fitness      |
-| Ghi sổ tay     | Quên, không chính xác, không theo dõi trend  | Tự động + chính xác + biểu đồ       |
+**Nhóm 2: AI Features**
 
----
+| ID | Feature | Mô tả |
+|----|---------|-------|
+| F-05 | AI Image Analysis | Chụp ảnh đĩa cơm → AI nhận diện món + dinh dưỡng |
+| F-06 | AI Menu Suggestions | AI gợi ý món ăn phù hợp mục tiêu calo |
+| F-07 | AI Daily Insights | AI nhận xét hàng ngày (ăn thừa/thiếu gì, gợi ý điều chỉnh) |
 
-## 7. Giá trị độc nhất & Lợi thế cạnh tranh
+**Nhóm 3: Fitness**
 
-### Unique Value Proposition (UVP)
+| ID | Feature | Mô tả |
+|----|---------|-------|
+| F-08 | Training Plan System | Chọn program (PPL/Upper-Lower/Full Body), xem lịch tập |
+| F-09 | Workout Logger | Ghi log set/rep/weight tại gym (guided + free mode) |
+| F-10 | Progress Charts | Biểu đồ tiến trình (cân nặng, sức mạnh, volume) |
+| F-11 | AI Training Plan | AI tự lên lịch tập dựa trên mục tiêu và level |
 
-> **"Ứng dụng sức khỏe miễn phí DUY NHẤT cho người Việt kết hợp tracking dinh dưỡng AI + kế hoạch tập luyện cá nhân hóa — đơn giản đến mức chỉ cần chụp ảnh đĩa cơm."**
+**Nhóm 4: App Shell**
 
-### 3 điểm khác biệt cốt lõi
+| ID | Feature | Mô tả |
+|----|---------|-------|
+| F-12 | Dashboard | Feed card stack: AI card, Nutrition, Workout, Streak+Weight, Quick Actions |
+| F-13 | Settings | Profile & Goals, 4 push notifications (toggleable), Light/Dark/System theme |
 
-| #   | Điểm khác biệt                                                                            | Tại sao quan trọng                                                                     | Đối thủ có không?                       |
-| --- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------- |
-| 1   | **Vietnamese-native UX** — Thiết kế từ đầu cho người Việt, không phải localize từ app Tây | Persona tech level 2-3/5, cần UI cực kỳ đơn giản bằng tiếng Việt tự nhiên              | ❌ MFP dịch máy, Samsung Health generic |
-| 2   | **AI + Offline hybrid** — AI khi có mạng, full-function khi không có mạng                 | 90% thời gian dùng = offline (tại bàn ăn, tại gym). AI là bonus, không phải dependency | ❌ MFP cần mạng                         |
-| 3   | **Zero cost, zero data collection** — Miễn phí vĩnh viễn, không thu thập dữ liệu          | Giải quyết pain "trả phí" (MFP) và "lo ngại privacy" (cloud apps)                      | ❌ MFP $79.99/năm                       |
+### Navigation
 
-### Unfair Advantage (Lợi thế không thể copy)
+4 tabs + Settings icon trên toolbar:
 
-**Primary moat: UX Moat** — Trải nghiệm đơn giản nhất cho người Việt.
+| Tab | Feature |
+|-----|---------|
+| 🏠 Dashboard | F-12 |
+| 📅 Calendar | F-03, F-04 |
+| 🍳 Quản lý | F-01, F-02 |
+| 💪 Fitness | F-08, F-09, F-10, F-11 |
+| ⚙️ Settings (toolbar icon) | F-13 |
 
-Đối thủ lớn (MyFitnessPal, Noom) thiết kế cho thị trường toàn cầu → phức tạp hóa để phục vụ mọi người. Smart Meal Planner thiết kế TỪ ĐẦU cho 1 thị trường duy nhất (Việt Nam, 16-45 tuổi) → mọi quyết định UX đều tối ưu cho đúng nhóm này.
-
-**Secondary moat: Speed of execution** — Solo developer ship nhanh hơn team 50 người ở công ty lớn. Mỗi insight từ user → cập nhật app trong ngày, không cần qua 5 lớp approval.
-
----
-
-## 8. Phạm vi & Ưu tiên (MoSCoW)
-
-### V1 — Phiên bản ra mắt
-
-#### 🟢 MUST HAVE — Không có thì KHÔNG ra mắt
-
-| #   | Feature                                                           | Persona chính | Job liên quan |
-| --- | ----------------------------------------------------------------- | :-----------: | :-----------: |
-| M1  | **Onboarding** — Thu thập health profile, tạo kế hoạch            |    Tất cả     |     Setup     |
-| M2  | **Meal Planning** — Lập kế hoạch bữa ăn sáng/trưa/tối             |   Minh, Vy    |   Job 1, 2    |
-| M3  | **Ingredient Library** — Kho nguyên liệu + dinh dưỡng/100g        |    Tất cả     |   Job 1, 3    |
-| M4  | **Nutrition Tracking** — Tính calo/macro tự động, so sánh target  |   Vy, Minh    |     Job 2     |
-| M5  | **Workout Logging** — Ghi log bài tập (set/rep/weight)            |   Anh, Minh   |     Job 4     |
-| M6  | **Settings** — Chỉnh sửa profile, mục tiêu, kế hoạch tập          |    Tất cả     |  Maintenance  |
-| M7  | **AI Photo Analysis** — Chụp ảnh → nhận diện món → log dinh dưỡng |     Minh      |     Job 1     |
-| M8  | **Google Drive Sync** — Sao lưu/khôi phục dữ liệu                 |    Tất cả     |  Data safety  |
-| M9  | **Dashboard** — Tổng quan dinh dưỡng + tập luyện hôm nay          |    Anh, Vy    |   Job 2, 5    |
-
-#### 🟡 COULD HAVE — Nếu kịp thì làm
-
-| #   | Feature           | Lý do xếp Could                         |
-| --- | ----------------- | --------------------------------------- |
-| C1  | Danh sách đi chợ  | Nice-to-have, user có thể tự ghi        |
-| C2  | AI gợi ý thực đơn | Phụ thuộc vào AI quality                |
-| C3  | Dark mode         | UX bonus, không ảnh hưởng core function |
-
-#### 🔴 WON'T HAVE (V1) — Để V2 trở đi
-
-| #   | Feature                         | Lý do hoãn                              |
-| --- | ------------------------------- | --------------------------------------- |
-| W1  | Kết nối smartwatch              | Cần SDK phức tạp, ít user có smartwatch |
-| W2  | Phiên bản iOS                   | Solo dev, focus Android trước           |
-| W3  | Multi-language                  | Vietnamese-first, English sau           |
-| W4  | Social features / Chia sẻ       | Vi phạm Privacy principle               |
-| W5  | Barcode scanner                 | Cần database UPC Việt Nam (chưa có)     |
-| W6  | Template bữa ăn / Copy kế hoạch | Không phát triển ở V1                   |
-
----
-
-## 9. Chỉ số thành công (KPIs)
-
-### North Star Metric
-
-> **Số bữa ăn được log mỗi ngày PER USER** (Meals Logged / Day / User)
->
-> Đo hoàn toàn local (SQLite count). Phản ánh: user MỞ app (active) + DÙNG core feature (engagement) + THẤY GIÁ TRỊ (retention). Không cần server analytics.
-
-### 4 KPIs chính — 100% đo local, không cần backend
-
-| #   | KPI                           | Target V1 | Cách đo                                                                      |
-| --- | ----------------------------- | :-------: | ---------------------------------------------------------------------------- |
-| 🥇  | **Meals Logged / Day / User** | ≥ 1.5 bữa | SQLite: `COUNT(*) FROM day_plans WHERE date = today`                         |
-| 🥈  | **AI Acceptance Rate**        |   ≥ 85%   | Local counter: AI results user accepted ÷ total AI results shown             |
-| 🥉  | **App Store Rating**          | ≥ 4.5 ⭐  | CH Play console (public metric, không phải tracking)                         |
-| 4   | **Crash-free Sessions**       |  ≥ 99.5%  | Firebase Crashlytics (opt-in, chỉ crash data — không thu thập behavior data) |
-
-### KPIs phụ — đo qua proxy, không tracking user
-
-| KPI                        | Cách đo proxy                                          | Ý nghĩa                        |
-| -------------------------- | ------------------------------------------------------ | ------------------------------ |
-| Onboarding Completion Rate | CH Play install → first review ratio                   | Chất lượng first experience    |
-| Active Usage (proxy)       | CH Play "current installs" trend                       | Sức khỏe tổng thể              |
-| Workout Consistency        | Local: `COUNT(DISTINCT date) FROM workouts WHERE week` | Core engagement fitness pillar |
-
-> **Nguyên tắc**: Tuân thủ Product Principle #5 (Privacy by default). KHÔNG sử dụng: Firebase Analytics, Google Analytics, Mixpanel, Amplitude, hoặc bất kỳ user behavior tracking nào. Chỉ đo những gì user có thể thấy trên thiết bị của họ.
-
----
-
-## 10. Đánh giá rủi ro
-
-### 4 rủi ro chính
-
-#### ⚠️ Rủi ro 1: Dữ liệu dinh dưỡng không chính xác (HIGH)
-
-| Thuộc tính     | Chi tiết                                                                                                                                                                                                  |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Mô tả**      | User nhập sai thông tin dinh dưỡng (nhầm khẩu phần, nhầm nguyên liệu) hoặc AI nhận diện sai → tính toán calo/macro sai → user đưa ra quyết định ăn uống sai                                               |
-| **Xác suất**   | Cao — Hầu hết user không có kiến thức dinh dưỡng chuyên sâu                                                                                                                                               |
-| **Tác động**   | Cao — Vi phạm Product Principle #1 (Evidence-based) và #2 (Accuracy). User mất niềm tin → bỏ app                                                                                                          |
-| **Giảm thiểu** | (1) AI nhận diện luôn có bước preview + edit trước khi lưu. (2) Cảnh báo khi giá trị bất thường (VD: 1 quả trứng 500 calo). (3) Database nguyên liệu mẫu có sẵn (đã kiểm chứng). (4) Cho phép sửa mọi lúc |
-
-#### ⚠️ Rủi ro 2: Ghi log workout không chính xác (MEDIUM)
-
-| Thuộc tính     | Chi tiết                                                                                                                                                           |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Mô tả**      | User ghi sai set, rep, khối lượng tập → thống kê tiến trình sai → mất động lực                                                                                     |
-| **Xác suất**   | Trung bình — PT (Anh) sẽ ghi đúng, user thường dễ nhầm                                                                                                             |
-| **Tác động**   | Trung bình — Ảnh hưởng đến Job 5 (xem tiến trình)                                                                                                                  |
-| **Giảm thiểu** | (1) Pre-fill từ lần tập trước (VD: "Lần trước bạn bench 60kg × 8 rep"). (2) Cảnh báo giá trị bất thường (VD: Squat 500kg). (3) Cho phép sửa/xóa log bất cứ lúc nào |
-
-#### ⚠️ Rủi ro 3: Dashboard không trực quan (MEDIUM)
-
-| Thuộc tính     | Chi tiết                                                                                                                                                                                                                                                                                 |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Mô tả**      | User nhìn Dashboard nhưng không hiểu các con số có ý nghĩa gì → không thấy giá trị → bỏ app                                                                                                                                                                                              |
-| **Xác suất**   | Trung bình — Persona tech level 2/5 (Minh) sẽ gặp khó                                                                                                                                                                                                                                    |
-| **Tác động**   | Cao — Dashboard là nơi user thấy GIÁ TRỊ app mang lại. Nếu không hiểu = không thấy giá trị = churn                                                                                                                                                                                       |
-| **Giảm thiểu** | (1) Thiết kế "glanceable" — nhìn 2 giây hiểu ngay (dùng màu sắc, icon, progress bar thay vì số). (2) Giải thích ngắn dưới mỗi số (VD: "1704 kcal — Cơ thể bạn đốt bấy nhiêu khi nghỉ ngơi"). (3) AI Insights bằng ngôn ngữ tự nhiên ("Hôm nay bạn ăn tốt rồi, còn 200 calo cho bữa tối") |
-
-#### ⚠️ Rủi ro 4: Bus Factor = 1 — Solo Developer (HIGH)
-
-| Thuộc tính     | Chi tiết                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Mô tả**      | Dự án chỉ có 1 developer duy nhất. Nếu developer không thể tiếp tục (bệnh, chuyển việc, mất motivation) → dự án dừng hoàn toàn. Không có knowledge transfer, code review peer, hoặc backup.                                                                                                                                                                                                                                                                        |
-| **Xác suất**   | Cao — Thống kê cho thấy >60% solo side-project bị abandon trong 6 tháng đầu (nguồn: GitHub Octoverse 2024)                                                                                                                                                                                                                                                                                                                                                         |
-| **Tác động**   | Rất Cao — Toàn bộ sản phẩm dừng, user mất app, data có thể mất nếu không backup                                                                                                                                                                                                                                                                                                                                                                                    |
-| **Giảm thiểu** | (1) **Modular codebase**: Architecture tách biệt — contributor mới có thể hiểu từng module độc lập. (2) **Comprehensive docs**: 6-group documentation (chính là bộ docs đang xây). (3) **Open-source ready**: Code structure chuẩn, CI/CD, tests 100% → contributor có thể fork/PR. (4) **Google Drive backup**: Data user an toàn ngay cả khi app dừng phát triển. (5) **Scope control**: V1 giữ nhỏ (9 MUST features) → ship nhanh, validate sớm, tránh burn-out |
-
-### Ma trận rủi ro tổng hợp
+### Onboarding Flow
 
 ```
-Tác động ↑
-   Rất  │                              R4: Bus Factor = 1
-   Cao  │                              ─────────────────
-        │                              Xác suất: CAO
-        │
-   Cao  │  R1: Sai dinh dưỡng     R3: Dashboard khó hiểu
-        │  ────────────────────    ─────────────────────
-        │  Xác suất: CAO           Xác suất: TRUNG BÌNH
-        │
-   TB   │  R2: Sai workout
-        │  ─────────────────
-        │  Xác suất: TRUNG BÌNH
-        │
-   Thấp │
-        └──────────────────────────────────────────────→
-          Thấp          Trung bình          Cao     Xác suất
+Mở app lần đầu
+  → Bước 1: Chọn mục tiêu (Giảm cân / Tăng cơ / Duy trì / Performance)
+  → Bước 2: Nhập thông tin cơ bản (chiều cao, cân nặng, tuổi, giới tính)
+  → Vào app — AI bắt đầu gợi ý dần dần
 ```
 
----
+### Mục tiêu hỗ trợ
 
-## 11. Mô hình kinh doanh
-
-### Mô hình: 100% Miễn phí (Passion Project)
-
-| Thuộc tính          | Chi tiết                                                                                                                                                |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Loại**            | Free Forever — Không có paywall, không subscription, không ads                                                                                          |
-| **Lý do**           | (1) Giải quyết vấn đề thực tế cho cộng đồng Việt Nam. (2) Loại bỏ rào cản lớn nhất của đối thủ (MFP $79.99/năm). (3) Passion project của solo developer |
-| **Doanh thu**       | Không có — Chi phí duy nhất là thời gian phát triển + hosting API AI (Google Gemini API)                                                                |
-| **Tác động đến UI** | Không paywall, không premium badge, không upsell, không "bạn đã hết lượt dùng AI"                                                                       |
-| **Bền vững**        | Chi phí API AI thấp ở quy mô nhỏ (xem bảng chi phí bên dưới). Nếu user base lớn → xem xét sponsor/donation model                                        |
-
-### Chi phí API AI — Projection theo user scale
-
-> Nguồn: [Google Gemini API Pricing](https://ai.google.dev/gemini-api/docs/pricing) (04/2026), [CostGoat Gemini Calculator](https://costgoat.com/pricing/gemini-api)
-
-**Giả định**: Mỗi user active dùng AI trung bình 3 lần/ngày (nhận diện ảnh + tra cứu + gợi ý). Model: Gemini 2.5 Flash-Lite — tối ưu chi phí cho mobile use case.
-
-| Scale (DAU) | AI requests/tháng | Chi phí ước tính/tháng | Chi phí/user/tháng |
-| :---------: | :---------------: | :--------------------: | :----------------: |
-|     100     |       9,000       |    ~$0 (free tier)     |         $0         |
-|    1,000    |      90,000       |          ~$27          |       $0.027       |
-|   10,000    |      900,000      |         ~$270          |       $0.027       |
-|   100,000   |     9,000,000     |        ~$2,700         |       $0.027       |
-
-> **Free tier**: Gemini cung cấp 1,500 requests/ngày miễn phí = đủ cho ~130 DAU mà không tốn chi phí.
-
-### Plan B — Sustainability khi vượt free tier
-
-| Trigger              | Hành động                                                                       |
-| -------------------- | ------------------------------------------------------------------------------- |
-| > 130 DAU            | Chi trả từ quỹ cá nhân (~$27/tháng cho 1K DAU — chấp nhận được)                 |
-| > 10K DAU            | Mở **voluntary donation** (Ko-fi/Buy Me a Coffee) — KHÔNG paywall               |
-| > 50K DAU            | Tìm **sponsor** (gym chains, health brands) — banner "Sponsored by X"           |
-| > 100K DAU           | Evaluate: **Gemini caching** giảm 50% cost + **rate limit** AI/user/ngày        |
-| Chi phí > $500/tháng | **Fallback**: Switch sang local AI model (Gemma 3n on-device) cho basic queries |
-
-> **Nguyên tắc bất biến**: KHÔNG BAO GIỜ thêm paywall, subscription, hoặc premium tier. Revenue = donation/sponsor, KHÔNG phải từ user.
-
-### Ý nghĩa cho Designer
-
-> **KHÔNG thiết kế**: Màn hình pricing, premium badge, paywall gate, subscription flow, ads placement.
->
-> **CÓ thiết kế**: Toàn bộ tính năng accessible cho tất cả user từ ngày đầu.
+| Mục tiêu | Chiến lược AI |
+|----------|--------------|
+| **Giảm cân** | Calorie deficit, ưu tiên protein cao, cardio + weight training |
+| **Tăng cơ** | Calorie surplus, protein 1.6-2.2g/kg, progressive overload |
+| **Duy trì** | Calorie maintenance, balanced macro, general fitness |
+| **Performance** | Periodization, strength focus, macro timing |
 
 ---
 
-## 12. Thị trường mục tiêu
+## 7. Tech Stack
 
-### Phạm vi địa lý
-
-**Chỉ Việt Nam** — Giai đoạn V1 tập trung 100% vào thị trường Việt Nam. Đông Nam Á và quốc tế là mục tiêu dài hạn (V3+).
-
-### Đối tượng mục tiêu
-
-| Thuộc tính    | Chi tiết                                                              |
-| ------------- | --------------------------------------------------------------------- |
-| **Độ tuổi**   | 16-45 tuổi                                                            |
-| **Giới tính** | Nam + Nữ (không phân biệt)                                            |
-| **Thu nhập**  | Không giới hạn (app miễn phí)                                         |
-| **Thiết bị**  | Android (tầm trung → cao cấp)                                         |
-| **Hành vi**   | Quan tâm đến sức khỏe, muốn kiểm soát cân nặng, có hoặc không tập gym |
-
-### Ước tính quy mô thị trường (TAM / SAM / SOM)
-
-> Nguồn: [DataReportal Digital 2025 Vietnam](https://datareportal.com/reports/digital-2025-vietnam), [BlueWeave Vietnam Fitness App Market](https://www.blueweaveconsulting.com/report/vietnam-fitness-app-market), [Statista Vietnam Smartphone](https://www.statista.com/topics/9168/smartphone-market-in-vietnam/), [Start.io Vietnam Demographics](https://www.start.io/audience/smartphone-users-in-vietnam)
-
-| Cấp                   |      Quy mô       | Cách tính                                                                                                                |
-| --------------------- | :---------------: | ------------------------------------------------------------------------------------------------------------------------ |
-| **TAM** (Total)       |  ~55 triệu người  | Dân số VN 16-45 tuổi sở hữu smartphone. VN có ~78M smartphone users (DataReportal 2025), ~70% trong 16-45 ≈ 55M          |
-| **SAM** (Serviceable) | ~8-12 triệu người | Trong đó, người CHỦ ĐỘNG quan tâm sức khỏe/fitness. VN fitness market growth 15%/yr (BlueWeave). ~15-20% của TAM ≈ 8-12M |
-| **SOM** (Obtainable)  |  100K-300K người  | Mục tiêu thực tế 2-3 năm cho solo dev app. Top health app VN trên CH Play đạt ~500K installs. Target: 20-60% of that     |
-
-> **Thận trọng**: SOM cũ ghi "1 triệu" — con số đó chỉ khả thi nếu có marketing budget + team. Solo dev realistic target = 100K-300K installs trong 2-3 năm với organic growth (CH Play SEO + community).
-
-### Kênh tiếp cận (Go-to-market)
-
-| Kênh                              | Ưu tiên |  Chi phí  |
-| --------------------------------- | :-----: | :-------: |
-| CH Play (organic search)          |   P0    | Miễn phí  |
-| Cộng đồng fitness Facebook/TikTok |   P1    | Thời gian |
-| Word-of-mouth từ PT/gym           |   P1    | Miễn phí  |
-| Review từ tech YouTuber Việt      |   P2    |    Tùy    |
+| Layer | Công nghệ | Version |
+|-------|-----------|---------|
+| UI Framework | Angular | 19 |
+| UI Components | Ionic | 8 |
+| Language | TypeScript | strict mode |
+| Native Wrapper | Capacitor | latest |
+| Database | SQLite (local) | sql.js + @capacitor-community/sqlite |
+| State Management | Angular Signals | built-in |
+| AI | Google Gemini API | paid tier |
+| Platform | Android only | - |
 
 ---
 
-## Phụ lục
+## 8. Chỉ số thành công (KPIs)
 
-### A. Tài liệu liên quan
-
-| Document                             | Mục đích                              |    Trạng thái    |
-| ------------------------------------ | ------------------------------------- | :--------------: |
-| `docs/2-requirements/prd.md`         | Yêu cầu sản phẩm chi tiết (BM output) |  📝 Chờ BM tạo   |
-| `docs/3-design/design-handoff.md`    | Handoff thiết kế cho Developer        | 📝 Chờ Designer  |
-| `docs/4-architecture/sad.md`         | Kiến trúc hệ thống (Tech Leader)      | 📝 Chờ Tech Lead |
-| `docs/5-development/coding-guide.md` | Quy tắc code & conventions            |  📝 Chờ Dev tạo  |
-
-> Các tài liệu trên sẽ được tạo theo pipeline: CEO (done) → BM → Designer → Tech Leader → Dev → QA
-
-### B. Lịch sử thay đổi
-
-| Ngày       | Phiên bản | Thay đổi                                                                                                                                               |
-| ---------- | :-------: | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 2026-04-12 |    1.0    | Tạo mới từ CEO Q&A session — 12 mục đầy đủ                                                                                                             |
-| 2026-04-12 |    1.1    | CEO Review: Merge persona Minh+Khanh, thay KPIs privacy-compliant, thêm R4 bus factor, API cost projection, TAM/SAM/SOM citations, offline feature map |
+| KPI | Mục tiêu | Cách đo |
+|-----|---------|---------|
+| Daily Active Users (DAU) | 100 trong 3 tháng đầu | Analytics |
+| Retention D7 | > 30% | User quay lại sau 7 ngày |
+| Thời gian nhập liệu trung bình | < 10 giây/bữa | Measure in-app |
+| Play Store rating | > 4.0 | Store reviews |
+| AI accuracy (nhận diện ảnh) | > 80% | User feedback |
 
 ---
 
-> **Smart Meal Planner** — Ăn đúng. Tập đúng. Sống khỏe. 🇻🇳
+## 9. Rủi ro
+
+| Rủi ro | Mức độ | Giảm thiểu |
+|--------|:------:|------------|
+| Gemini API cost cao khi scale | Trung bình | Monitor usage, rate limiting, cache responses |
+| AI accuracy thấp với món Việt | Cao | Fine-tune prompts, cho user sửa kết quả AI |
+| Scope V1 quá lớn (13 features) | Cao | Chia internal milestones, focus core trước |
+| Performance WebView (Capacitor) | Trung bình | Ionic optimization, lazy loading, native plugins |
+| Solo developer burnout | Trung bình | Không deadline cứng, side project pace |
+
+---
+
+## 10. Mô hình kinh doanh
+
+**Free 100%** — không paywall, không quảng cáo, không subscription.
+
+Chi phí duy nhất: **Gemini API** (developer tự chịu).
+
+Mục tiêu hiện tại: **xây portfolio + học hỏi + tạo sản phẩm có giá trị thực**.
+
+---
+
+## 11. Data Privacy
+
+- Tất cả dữ liệu người dùng lưu **local trên device** (SQLite)
+- Dữ liệu chỉ được gửi lên **Google Gemini API** khi user **chủ động** dùng tính năng AI
+- Không thu thập, không tracking, không bán data
+- Không yêu cầu đăng nhập / tạo tài khoản

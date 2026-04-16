@@ -1,48 +1,83 @@
-node_modules/
-build/
-dist/
-coverage/
-.DS_Store
+# Specifies intentionally untracked files to ignore when using Git
+# http://git-scm.com/docs/gitignore
+
+*~
+*.sw[mnpcod]
+.tmp
+*.tmp
+*.tmp.*
+UserInterfaceState.xcuserstate
+$RECYCLE.BIN/
+
 *.log
-.env*
-!.env.example
-.sonar.env
-/android/
+log.txt
 
-# IDE & tools
+/.sourcemaps
+/.versions
+/coverage
+
+# Ionic
+/.ionic
+/www
+/platforms
+/plugins
+
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# IDEs and editors
 .idea/
-.vscode/
-.scannerwork/
-sonar-project.properties
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-project
+*.sublime-workspace
 
-# AI/Copilot skills
-.agents/
-skills-lock.json
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
 
-# Secrets
-client_secret*.json
+# Miscellaneous
+/.angular
+/.angular/cache
+.sass-cache/
+/.nx
+/.nx/cache
+/connect.lock
+/libpeerconnection.log
+testem.log
+/typings
 
-# Build artifacts
-*.apk
+# System files
+.DS_Store
+Thumbs.db
 
-# Bundle analysis
-stats.html
+# Android (Capacitor)
+/android/
+/ios/
 
-# AI/Superpowers
+# Environment secrets (API keys)
+src/environments/environment.local.ts
+
+# AI/Tools
+.claude/
+.copilot-*
+.windsurf/
+.junie/
+.graphify_*
 .superpowers/
-
-# Build/test output logs
-clean_cov.txt
-cov_raw.txt
-vitest_stderr.txt
-coverage_*.txt
-nohup.out
-DOCUMENTATION_SUMMARY.txt
-
-# Screenshots (emulator/audit evidence)
-screenshots/
-
-# Graphify
-.venv-graphify/
-graphify-out/
-.graphify_*.json

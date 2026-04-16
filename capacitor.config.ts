@@ -1,25 +1,25 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.mealplaner.app',
-  appName: 'Smart Meal Planner',
-  webDir: 'dist',
+  appId: 'com.healthmate.ai',
+  appName: 'HealthMate AI',
+  webDir: 'www',
   android: {
-    backgroundColor: '#f8fafc',
-  },
-  server: {
-    androidScheme: 'https',
+    buildOptions: {
+      signingType: 'apksigner',
+    },
   },
   plugins: {
-    SocialLogin: {
-      providers: {
-        google: true,
-      },
-    },
     CapacitorSQLite: {
-      iosDatabaseLocation: 'Library/CapacitorDatabase',
-      iosIsEncryption: false,
       androidIsEncryption: false,
+    },
+    SplashScreen: {
+      launchAutoHide: false,
+      androidSplashResourceName: 'splash',
+    },
+    LocalNotifications: {
+      smallIcon: 'ic_notification',
+      iconColor: '#4CAF50',
     },
   },
 };
