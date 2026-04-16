@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { onboardingGuard } from './core/guards/onboarding.guard';
 
 export const routes: Routes = [
   {
@@ -11,6 +12,7 @@ export const routes: Routes = [
   },
   {
     path: '',
+    canActivate: [onboardingGuard],
     loadChildren: () => import('./tabs/tabs.routes'),
   },
 ];
