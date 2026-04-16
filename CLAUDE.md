@@ -2,17 +2,26 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Prerequisites
+- **Node.js:** 22 LTS (`node -v`)
+- **Java (JDK):** 21 LTS — required for Android build (`java -version`)
+  - macOS: `export JAVA_HOME=$(/usr/libexec/java_home -v 21)`
+  - AGP 8.13 + Gradle 8.14 support Java 17–24. Java 25+ not supported.
+- **Android SDK:** API 36 (compileSdk 36, minSdk 24)
+
 ## Build and Test Commands
 - **Install dependencies:** `npm install`
 - **Development server:** `ionic serve` (Angular dev server with Ionic)
 - **Build web:** `ionic build` or `ng build`
 - **Build production:** `ionic build --prod`
 - **Linting:** `ng lint`
+- **Format check:** `npm run format:check`
 - **Run all tests:** `ng test`
 - **Android development:**
-  - `ionic cap add android` (first time)
-  - `ionic cap sync android` (sync web → Android)
-  - `ionic cap run android` (run on device/emulator)
+  - `npx cap add android` (first time)
+  - `npx cap sync android` (sync web → Android)
+  - `npx cap run android` (run on device/emulator)
+  - `cd android && ./gradlew assembleRelease` (build APK)
 
 ## Code Architecture
 ### Overview

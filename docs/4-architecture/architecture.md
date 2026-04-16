@@ -12,24 +12,33 @@
 
 | Layer | Công nghệ | Version | Ghi chú |
 |-------|-----------|---------|---------|
-| UI Framework | Angular | 19 | Standalone components, Signals, new control flow |
+| UI Framework | Angular | 20 | Standalone components, Signals, new control flow |
 | UI Components | Ionic | 8 | Mobile-native UI components |
-| Language | TypeScript | strict mode | No `any` allowed |
-| Native Wrapper | Capacitor | latest | Android only |
+| Language | TypeScript | 5.9, strict mode | No `any` allowed |
+| Native Wrapper | Capacitor | 8.3 | Android only |
 | Database | SQLite | sql.js + @capacitor-community/sqlite | Dual implementation |
 | State Management | Angular Signals | built-in | signal(), computed(), effect() |
 | AI | Google Gemini API | paid tier | Via HTTP service |
-| Testing | Jest | latest | jest-preset-angular |
+| Testing | Karma + Jasmine | — | Angular default test runner |
 | Styling | Ionic theme + SCSS | — | CSS custom properties + SCSS |
 | Build | Angular CLI | esbuild | Official Angular builder |
 | CI/CD | GitHub Actions | — | Auto build APK |
 | Platform | Android only | — | Play Store |
 
+### Runtime Prerequisites
+
+| Tool | Version | Ghi chú |
+|------|---------|---------|
+| Node.js | **22 LTS** | LTS mới nhất (support đến Apr 2027) |
+| Java (JDK) | **21 LTS** | Cần cho Android build. AGP 8.13 + Gradle 8.14 support Java 17-24. |
+| Android SDK | API 36 | compileSdk 36, minSdk 24 (Android 7.0+) |
+| npm | 10+ | Đi kèm Node 22 |
+
 ### Kiến trúc tổng thể
 
 ```
 ┌─────────────────────────────────────────┐
-│              Angular 19 App              │
+│              Angular 20 App              │
 │                                         │
 │  ┌─────────┐ ┌─────────┐ ┌──────────┐  │
 │  │Dashboard│ │Calendar │ │Management│  │
@@ -631,11 +640,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - run: npm ci
       - run: npm run lint
