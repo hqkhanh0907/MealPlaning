@@ -15,7 +15,7 @@ Tài liệu này mô tả chi tiết **13 features** của HealthMate AI V1, bao
 ### Phạm vi V1
 
 - **Platform:** Android only (Capacitor)
-- **Stack:** Angular 19 + Ionic 8 + Capacitor
+- **Stack:** Angular 20 + Ionic 8 + Capacitor 8
 - **Database:** SQLite local-first
 - **AI:** Google Gemini API (paid tier)
 - **Ngôn ngữ:** Tiếng Việt only
@@ -323,9 +323,7 @@ PlannedDish {
 
 ---
 
-### ~~F-07: AI Auto Meal Plan~~ → **Đã gộp vào F-03 Calendar**
-
-> Tính năng AI lên plan ngày/tuần đã được tích hợp trực tiếp vào F-03 Calendar & Meal Planning. Xem mục "AI Meal Planning" trong F-03.
+> **Note (lịch sử):** Trước đây từng có feature "AI Auto Meal Plan" với ID F-07 — đã được gộp trực tiếp vào F-03 Calendar & Meal Planning (xem mục "AI Meal Planning" trong F-03). ID F-07 hiện dùng cho AI Daily Insights bên dưới.
 
 ---
 
@@ -618,6 +616,8 @@ WorkoutSet {
 | Mục tiêu | Giảm cân / Tăng cơ / Duy trì / Performance | ✅ |
 | Mục tiêu calo/ngày | AI tự tính từ TDEE, user có thể override | ✅ |
 | Mục tiêu protein/ngày | AI tự tính, user có thể override | ✅ |
+| Mục tiêu carbs/ngày (optional) | User có thể set để F-04 track; mặc định null | ⬜ |
+| Mục tiêu fat/ngày (optional) | User có thể set để F-04 track; mặc định null | ⬜ |
 | Level tập luyện | Beginner / Intermediate / Advanced | ✅ |
 
 **TDEE Calculation:**

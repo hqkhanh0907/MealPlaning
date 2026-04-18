@@ -210,12 +210,14 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 
 ### 7.2 Quick Action Icons
 
+Theo PRD F-12 (Dashboard Quick Actions):
+
 | Action | Emoji (mockup) | Ionicon |
 |--------|----------------|---------|
-| Chụp ảnh | 📸 | `camera-outline` |
-| Thêm món | ➕ | `add-circle-outline` |
-| AI Coach | 🤖 | `chatbubble-ellipses-outline` |
+| Chụp ảnh | 📷 | `camera-outline` |
+| Log workout | 🏋️ | `barbell-outline` |
 | Cân nặng | ⚖️ | `scale-outline` |
+| Hỏi AI | 🤖 | `chatbubble-ellipses-outline` |
 
 ---
 

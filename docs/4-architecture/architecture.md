@@ -526,11 +526,12 @@ export class NutritionAiService {
   private readonly profile = inject(ProfileStore);
   private readonly dishRepo = inject(DishRepository);
 
-  async analyzeImage(image: Blob, mealType: string, dbIngredients: string[]): Promise<FoodRecognition> { /* ... */ }
-  async autofillDish(dishName: string, dbIngredients: string[]): Promise<DishIngredient[]> { /* ... */ }
-  async suggestMenu(remaining: MacroRemaining, mealType: string, dbDishes: DishSummary[]): Promise<MenuSuggestion[]> { /* ... */ }
-  async planDay(date: string, targets: MacroTargets, dbDishes: DishSummary[]): Promise<DayMealPlan> { /* ... */ }
-  async planWeek(startDate: string, targets: MacroTargets, dbDishes: DishSummary[]): Promise<WeekMealPlan> { /* ... */ }
+  async lookupIngredient(name: string): Promise<IngredientLookupResult> { /* F-01 — Phase 1.5 */ }
+  async autofillDish(dishName: string, dbIngredients: string[]): Promise<DishIngredient[]> { /* F-02 — Phase 1.5 */ }
+  async analyzeImage(image: Blob, mealType: string, dbIngredients: string[]): Promise<FoodRecognition> { /* F-05 — Phase 5 */ }
+  async suggestMenu(remaining: MacroRemaining, mealType: string, dbDishes: DishSummary[]): Promise<MenuSuggestion[]> { /* F-06 — Phase 5 */ }
+  async planDay(date: string, targets: MacroTargets, dbDishes: DishSummary[]): Promise<DayMealPlan> { /* F-03 — Phase 2 */ }
+  async planWeek(startDate: string, targets: MacroTargets, dbDishes: DishSummary[]): Promise<WeekMealPlan> { /* F-03 — Phase 2 */ }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -538,7 +539,7 @@ export class FitnessAiService {
   private readonly gemini = inject(GeminiService);
   private readonly profile = inject(ProfileStore);
 
-  async generateTrainingPlan(profile: UserProfile, frequency: number, equipment: string[], dbExercises: ExerciseSummary[]): Promise<TrainingPlan> { /* ... */ }
+  async generateTrainingPlan(profile: UserProfile, frequency: number, equipment: string[], dbExercises: ExerciseSummary[]): Promise<TrainingPlan> { /* F-11 — Phase 5 */ }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -546,8 +547,8 @@ export class InsightAiService {
   private readonly gemini = inject(GeminiService);
   private readonly profile = inject(ProfileStore);
 
-  async dailyInsight(dayData: DaySummary, profile: UserProfile): Promise<DailyInsightResult> { /* ... */ }
-  async weeklyReview(weekData: WeekSummary, profile: UserProfile): Promise<WeeklyReviewResult> { /* ... */ }
+  async dailyInsight(dayData: DaySummary, profile: UserProfile): Promise<DailyInsightResult> { /* F-07 — Phase 5 */ }
+  async weeklyReview(weekData: WeekSummary, profile: UserProfile): Promise<WeeklyReviewResult> { /* F-07 — Phase 5 */ }
 }
 ```
 
@@ -600,15 +601,15 @@ export class NetworkService {
 | `@capacitor/camera` | latest | Chụp ảnh cho AI Image (F-05) |
 | `@capacitor/local-notifications` | latest | 4 loại push notification |
 | `@capacitor/network` | latest | Check online/offline |
-| `@capacitor/filesystem` | latest | Backup/export (tương lai) |
+| `@capacitor/filesystem` | latest | Installed for future use — backup/export hoãn V2, chưa wire trong V1 |
 | `@capacitor/status-bar` | latest | Đổi màu theo theme |
 | `@capacitor/splash-screen` | latest | Logo khi mở app |
 
 ---
 
-## 9. Angular 19 Patterns
+## 9. Angular 20 Patterns
 
-Tất cả code tuân thủ Angular 19 best practices:
+Tất cả code tuân thủ Angular 20 best practices:
 
 | Pattern | Mô tả |
 |---------|-------|
@@ -687,13 +688,15 @@ jobs:
     "build": "ionic build --prod",
     "lint": "ng lint",
     "lint:fix": "ng lint --fix",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
-    "android:sync": "ionic build --prod && ionic capacitor sync android",
-    "android:run": "ionic capacitor run android --livereload --external"
+    "test": "ng test",
+    "test:coverage": "ng test --code-coverage --watch=false",
+    "android:sync": "ionic build --prod && npx cap sync android",
+    "android:run": "npx cap run android --livereload --external"
   }
 }
 ```
+
+> **Note:** Angular 20 default test runner là Karma + Jasmine (không phải Jest). Command `ng test` sử dụng Karma theo `angular.json` config.
 
 ---
 

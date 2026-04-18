@@ -203,14 +203,17 @@ Mở app lần đầu
 
 | Layer | Công nghệ | Version |
 |-------|-----------|---------|
-| UI Framework | Angular | 19 |
+| UI Framework | Angular | 20 |
 | UI Components | Ionic | 8 |
-| Language | TypeScript | strict mode |
-| Native Wrapper | Capacitor | latest |
+| Language | TypeScript | 5.9, strict mode |
+| Native Wrapper | Capacitor | 8.3 |
 | Database | SQLite (local) | sql.js + @capacitor-community/sqlite |
 | State Management | Angular Signals | built-in |
 | AI | Google Gemini API | paid tier |
-| Platform | Android only | - |
+| Runtime | Node.js 22 LTS + Java 21 LTS | — |
+| Platform | Android only | API 36 (min 24) |
+
+> **Chi tiết:** xem [architecture.md §1 Tech Stack](../4-architecture/architecture.md)
 
 ---
 

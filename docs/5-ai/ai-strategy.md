@@ -8,7 +8,7 @@
 
 ## 1. Tổng quan
 
-HealthMate AI sử dụng **Google Gemini API** để cung cấp 8 AI prompt templates (thuộc 6 feature IDs). Tất cả AI features đều optional — app hoạt động 100% offline cho tracking cơ bản.
+HealthMate AI sử dụng **Google Gemini API** để cung cấp **9 prompt templates** (Image Analysis, Dish Auto-fill, Ingredient Lookup, Menu Suggest, Day Plan, Week Plan, Daily Insight, Weekly Review, Training Plan) phục vụ **7 features** (F-01, F-02, F-03, F-05, F-06, F-07, F-11). Tất cả AI features đều optional — app hoạt động 100% offline cho tracking cơ bản. F-06 (Menu Suggest) và F-11 (Training Plan) không có offline fallback — khi offline sẽ disable button + banner.
 
 ### Model
 
@@ -409,6 +409,46 @@ Rules:
 
 ---
 
+### 3.9 AI Ingredient Lookup (F-01)
+
+**Trigger:** User vào Management tab → "Thêm nguyên liệu" → nhập tên → bấm 🤖 AI Lookup
+
+**Input:**
+- Tên nguyên liệu: user input (VD "ức gà", "gạo trắng")
+- Locale: `vi-VN` (ưu tiên đơn vị + định danh tiếng Việt)
+
+**Prompt:**
+```
+Tra cứu thông tin dinh dưỡng cho nguyên liệu "{ingredient_name}" (đơn vị: per 100g).
+
+Trả JSON:
+{
+  "name": string,              // Chuẩn hóa tên (Title Case tiếng Việt)
+  "group": string,              // Một trong: "Thịt", "Cá & Hải sản", "Rau củ", "Trái cây", "Ngũ cốc", "Đậu & Hạt", "Trứng & Sữa", "Dầu & Gia vị", "Khác"
+  "calories_per_100g": number,
+  "protein_per_100g": number,
+  "carbs_per_100g": number,
+  "fat_per_100g": number,
+  "fiber_per_100g": number,
+  "confidence": "high" | "medium" | "low",  // Độ tin cậy của AI
+  "note": string               // Ghi chú nếu cần (VD: "đã nấu chín", "raw")
+}
+
+Rules:
+- Nếu tên mơ hồ (VD "thịt") → confidence: "low" + note yêu cầu rõ
+- Số liệu ưu tiên nguồn uy tín (USDA, Viện Dinh dưỡng VN)
+- KHÔNG được bịa số — nếu không chắc, confidence: "low"
+```
+
+**Post-processing:**
+1. Hiển thị kết quả AI với icon confidence
+2. Nếu `confidence: "low"` → highlight + khuyến khích user verify
+3. User có thể sửa tất cả fields trước khi lưu
+4. Confirm → insert vào `ingredient` table với `source: 'ai'`
+5. Log vào `ai_chat_log` với `feature: 'ingredient_lookup'`
+
+---
+
 ## 4. Cost Optimization
 
 ### 4.1 Ước tính cost
@@ -433,14 +473,23 @@ Rules:
 
 ### 4.3 Rate Limiting
 
-**Không áp dụng rate limit.** User dùng thoải mái.
+**V1 strategy (theo Decision D3):**
+- **Không áp dụng per-call throttling UX** — user không bị chặn khi click AI
+- **Internal quota limit per user/day** (soft limit trong code) để bảo vệ dev key khỏi abuse — ví dụ: 50 requests/day/install
+- Khi đạt limit: hiển thị toast "Đã đạt giới hạn AI hôm nay, thử lại ngày mai" + disable AI buttons
 
-### 4.4 API Key Management
+### 4.4 API Key Management (theo Decision D3)
 
-- API key lưu trong `app_config` table (local SQLite)
-- User nhập API key trong Settings (hoặc app dùng developer key)
-- Không hardcode key trong source code
-- Không gửi key lên bất kỳ server nào
+**Strategy V1: Developer key ship trong APK**
+- Dev key bundle trong app (obfuscate — không plain text trong source)
+- User KHÔNG cần nhập API key (không có Settings UI cho API key trong V1)
+- Trade-off: key có thể bị extract khỏi APK → cần quota limit (4.3) để chống abuse
+- V2+ có thể cho user nhập key riêng để bỏ quota
+
+**Rules:**
+- Không commit plain key vào git (dùng env var tại build time + obfuscation)
+- Không gửi key lên bất kỳ server nào ngoài Gemini API endpoint
+- Storage: key không lưu trong DB — read từ bundle config tại runtime
 
 ---
 
@@ -454,7 +503,7 @@ Rules:
 | API timeout (>15s) | Retry 1 lần | Toast: "AI đang bận, thử lại sau" |
 | API error (500, 503) | Retry 1 lần, exponential backoff | Toast: "Lỗi server AI, thử lại sau" |
 | Rate limit (429) | Không retry, hiện cooldown | Toast: "Đã đạt giới hạn, thử lại sau X phút" |
-| Invalid API key | Redirect Settings | Alert: "API key không hợp lệ" |
+| Invalid API key | Log lỗi + disable AI features trong phiên đó (V1 không có Settings UI cho API key — xem §4.4) | Alert: "Lỗi cấu hình AI, vui lòng cập nhật app" |
 | JSON parse error | Retry 1 lần | Toast: "AI trả kết quả lạ, đang thử lại..." |
 | Image too large | Auto resize max 1024px | Tự động, user không thấy |
 | Empty response | Hiện fallback | Toast: "AI không có gợi ý, hãy thử lại" |
@@ -551,18 +600,19 @@ GeminiService (core)
   └─ parseJsonResponse<T>(response, schema)
 
 NutritionAiService (strategy)
-  ├─ analyzeImage(image, mealType, dbIngredients)
-  ├─ autofillDish(dishName, dbIngredients)
-  ├─ suggestMenu(remaining, mealType, dbDishes)
-  ├─ planDay(date, targets, dbDishes)
-  └─ planWeek(startDate, targets, dbDishes)
+  ├─ lookupIngredient(name)                              [F-01 — Phase 1.5]
+  ├─ autofillDish(dishName, dbIngredients)               [F-02 — Phase 1.5]
+  ├─ planDay(date, targets, dbDishes)                    [F-03 — Phase 2]
+  ├─ planWeek(startDate, targets, dbDishes)              [F-03 — Phase 2]
+  ├─ analyzeImage(image, mealType, dbIngredients)        [F-05 — Phase 5]
+  └─ suggestMenu(remaining, mealType, dbDishes)          [F-06 — Phase 5]
 
 FitnessAiService (strategy)
-  └─ generateTrainingPlan(profile, frequency, equipment, dbExercises)
+  └─ generateTrainingPlan(profile, frequency, equipment, dbExercises)   [F-11 — Phase 5]
 
 InsightAiService (strategy)
-  ├─ dailyInsight(dayData, profile)
-  └─ weeklyReview(weekData, profile)
+  ├─ dailyInsight(dayData, profile)                                     [F-07 — Phase 5]
+  └─ weeklyReview(weekData, profile)                                    [F-07 — Phase 5]
 ```
 
 ### Flow Diagram
@@ -582,3 +632,5 @@ Component → AI Strategy Service → GeminiService → Gemini API
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-04-15 | Initial AI Strategy — model, prompts, cost, error handling, behavior rules |
+| 1.1 | 2026-04-18 | §1 clarify "8 templates / 6 features", §4.3 internal quota limit thay Rate Limit, §4.4 Developer key ship trong APK (D3) |
+| 1.2 | 2026-04-18 | Thêm §3.9 AI Ingredient Lookup (F-01) → "9 templates / 7 features". §5.1 Invalid API key không còn redirect Settings. §7 Service Layer: thêm `lookupIngredient` + đánh dấu phase mapping cho mỗi method |

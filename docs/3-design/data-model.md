@@ -282,7 +282,7 @@ CREATE TABLE planned_dish (
   servings          REAL NOT NULL DEFAULT 1,      -- 0.5, 1, 2...
   sort_order        INTEGER NOT NULL DEFAULT 0,   -- Thứ tự hiển thị
   is_completed      INTEGER NOT NULL DEFAULT 0,   -- Đã ăn chưa (0/1)
-  completed_at      TEXT,                         -- Thời điểm đánh dấu đã ăn (AI phân tích)
+  completed_at      TEXT,                         -- Thời điểm user đánh dấu đã ăn (dùng cho streak + insights)
   
   -- Dinh dưỡng đã tính (dish.total × servings)
   calories          REAL NOT NULL,
@@ -522,7 +522,7 @@ CREATE TABLE app_config (
 -- Ví dụ rows:
 -- ('db_version', '1')
 -- ('last_ai_sync', '2026-04-14T10:00:00.000Z')
--- ('active_training_plan_id', 'uuid-xxx')
+-- Note: active training plan được track qua `training_plan.is_active` column (không dùng app_config để tránh duplicate source of truth)
 ```
 
 ---
@@ -709,9 +709,12 @@ App khởi động
   → Update db_version
 ```
 
-### Backup Strategy
+### Backup Strategy (V2 — hoãn theo Decision D5)
 
-- **Export:** Dump toàn bộ SQLite database → file .db
+> **V1 không có backup/export.** User reinstall app = mất data. Onboarding + Settings sẽ communicate rõ.
+
+**V2 kế hoạch:**
+- **Export:** Dump toàn bộ SQLite database → file .db hoặc JSON
 - **Import:** Replace database file → restart app
 - **Vị trí:** Capacitor Filesystem API → Android Downloads folder
 
