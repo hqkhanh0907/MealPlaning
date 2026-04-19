@@ -165,14 +165,14 @@
      FORM INPUTS — floating label Ionic style
      ========================================================================= */
   .form-field {
-    margin-bottom: 4px; border-radius: 8px; overflow: hidden;
+    margin-bottom: 8px;
   }
   .input-wrapper {
     position: relative; padding: 20px 16px 8px;
-    border-bottom: 1px solid;
+    border: 1px solid; border-radius: 4px;
   }
-  body.light .input-wrapper { border-color: #e0e0e0; background: #fff; }
-  body.dark  .input-wrapper { border-color: #333; background: #1e1e1e; }
+  body.light .input-wrapper { border-color: #c8c7cc; background: transparent; }
+  body.dark  .input-wrapper { border-color: #444; background: transparent; }
 
   .input-wrapper.invalid { border-color: #f44336; }
   body.dark .input-wrapper.invalid { border-color: #ef5350; }
@@ -196,10 +196,10 @@
   /* Select */
   .select-wrapper {
     position: relative; padding: 20px 16px 8px;
-    border-bottom: 1px solid; display: flex; align-items: center;
+    border: 1px solid; border-radius: 4px; display: flex; align-items: center;
   }
-  body.light .select-wrapper { border-color: #e0e0e0; background: #fff; }
-  body.dark  .select-wrapper { border-color: #333; background: #1e1e1e; }
+  body.light .select-wrapper { border-color: #c8c7cc; background: transparent; }
+  body.dark  .select-wrapper { border-color: #444; background: transparent; }
   .select-wrapper.invalid { border-color: #f44336; }
 
   .select-arrow {
