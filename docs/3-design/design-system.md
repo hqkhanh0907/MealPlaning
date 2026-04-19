@@ -1,7 +1,7 @@
 # Design System — HealthMate AI
 
-**Version:** 1.0  
-**Date:** 2026-04-14  
+**Version:** 1.1  
+**Date:** 2026-04-19  
 **Status:** Active
 
 ---
@@ -159,8 +159,9 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 
 | Token | Value | Dùng cho |
 |-------|-------|----------|
-| `--radius-sm` | 12px | Input fields, small chips |
-| `--radius-md` | 12px | Quick action buttons, sub-cards (streak), tags |
+| `--radius-xs` | 8px | Small chips, tags |
+| `--radius-sm` | 12px | Input fields, select fields |
+| `--radius-md` | 12px | Quick action buttons, sub-cards (streak) |
 | `--radius-lg` | 16px | **Cards** — component chính |
 | `--radius-xl` | 20px | Modal, bottom sheet |
 | `--radius-full` | 9999px | Avatar, circular icon, FAB |
@@ -284,6 +285,264 @@ Theo PRD F-12 (Dashboard Quick Actions):
   label: 11px/400, color: #999999
 ```
 
+### 8.6 Input Fields
+
+> **Rule:** Input/Select dùng **standalone** (KHÔNG wrap trong `ion-item`). Fill style = `outline`.
+
+| Property | Value | Notes |
+|----------|-------|-------|
+| Fill | `outline` | Viền 4 cạnh, floating label |
+| Label Placement | `floating` | Label animate lên khi focus/có value |
+| Background | `var(--bg-card)` | `#FFFFFF` light / `#1E1E1E` dark — dùng token |
+| Border Color | `#d1d1d6` (light) / `#444` (dark) | Apple system gray |
+| Border Width | `1px` | |
+| Border Radius | `--radius-sm` (12px) | Apple-style soft corners |
+| Height | Auto (~56px with floating label) | |
+| Padding | `16px` horizontal | `--padding-start` + `--padding-end` |
+| Margin Bottom | `8px` | Giữa các fields |
+| Focus Color | `var(--ion-color-primary)` | Highlight border khi focus |
+
+**Error state:**
+| Property | Value |
+|----------|-------|
+| Border Color | `var(--ion-color-danger)` (`#F44336`) |
+| Error Text | `12px/400`, color `var(--ion-color-danger)` |
+| Error Position | Dưới input, `padding-left: 4px`, `margin-bottom: 8px` |
+| Accessibility | `role="alert"` + `aria-describedby` linking input → error |
+
+**ion-select** dùng cùng spec, thêm:
+| Property | Value |
+|----------|-------|
+| Arrow | Ionic default dropdown arrow |
+
+### 8.7 Radio / Checkbox Items
+
+> **Rule:** Radio circles ẩn (`::part(container) { display: none }`). Selection thể hiện qua background change.
+
+| Property | Default | Selected |
+|----------|---------|----------|
+| Background | `var(--bg-card)` | `rgba(var(--ion-color-primary-rgb), 0.08)` |
+| Font Weight | 400 | **600** |
+| Border Radius | `--radius-sm` (12px) | Giữ nguyên |
+| Padding Start | `16px` | Giữ nguyên |
+| Margin Bottom | `8px` | Giữ nguyên |
+| Transition | — | `background 0.15s ease` |
+
+**Icon trong radio items (nếu có):**
+| Property | Value |
+|----------|-------|
+| Size | `22px` |
+| Color | `var(--ion-color-primary)` |
+| Margin Right | `8px` |
+| Offset from left | Tuân theo `--padding-start` (16px) |
+
+### 8.8 Toolbar
+
+| Property | Value | Notes |
+|----------|-------|-------|
+| Background | `var(--ion-color-primary)` | `#2196F3` light / `#1565C0` dark |
+| Title Size | `20px` | |
+| Title Weight | `500` | |
+| Title Color | `#FFFFFF` | |
+| Height | `56px` | Android standard |
+| Back Button | Ionic default `chevron-back` | Color: white |
+
+---
+
+## 8b. Interaction States
+
+> **BẮT BUỘC:** Mọi interactive element phải có đủ 6 states.
+
+### State Definitions
+
+| State | CSS | Visual |
+|-------|-----|--------|
+| Default | — | Trạng thái bình thường |
+| Hover | `:hover` | Chỉ hiện trên web (desktop testing) |
+| Active/Pressed | `:active` | Opacity giảm nhẹ hoặc scale 0.98 |
+| Focus Visible | `:focus-visible` | Ring `2px solid var(--ion-color-primary)`, offset `2px` |
+| Disabled | `[disabled]` | `opacity: 0.5`, `pointer-events: none` |
+| Error | `.ion-invalid` | Border/text chuyển `var(--ion-color-danger)` |
+
+### Per-Component States
+
+| Component | Hover | Active | Focus | Disabled | Error |
+|-----------|-------|--------|-------|----------|-------|
+| Button (CTA) | Shade color | Scale 0.98 | Focus ring | opacity 0.5 | — |
+| Button (Outline) | bg tint nhẹ | Scale 0.98 | Focus ring | opacity 0.5 | — |
+| Input (Outline) | — | — | Primary border | opacity 0.5 | Danger border + text |
+| Radio Item | bg tint nhẹ | — | Focus ring | opacity 0.5 | — |
+| Select | — | — | Primary border | opacity 0.5 | Danger border |
+
+### Loading State
+
+| Pattern | Dùng cho |
+|---------|----------|
+| Skeleton shimmer (`bg-muted animate-pulse`) | Card loading, list loading |
+| Inline spinner (ion-spinner) | Button action pending |
+| **KHÔNG dùng** centered full-page spinner | — |
+
+### Empty State
+
+| Element | Spec |
+|---------|------|
+| Icon | `48px`, color `var(--text-tertiary)` |
+| Message | `14px/400`, encouraging tone, Vietnamese |
+| CTA Button | Optional, primary style |
+| Layout | Center vertical + horizontal |
+
+### Disabled State
+
+| Rule | Spec |
+|------|------|
+| Opacity | `0.5` |
+| Pointer Events | `none` |
+| Tooltip/Explain | **Phải** giải thích WHY disabled (aria-label hoặc tooltip) |
+
+---
+
+## 8c. Touch Targets
+
+> **Minimum 44×44px** cho mọi tappable element (Apple HIG / WCAG 2.5.8).
+
+| Component | Min Height | Min Width | Notes |
+|-----------|-----------|-----------|-------|
+| Button (CTA) | 44px | 44px | `min-height: 44px` |
+| Button (Outline) | 44px | 44px | |
+| Radio Item | 44px | Full width | |
+| Input Field | 44px | Full width | Ionic default ~56px — OK |
+| Icon Button | 44px | 44px | Padding quanh icon để đạt 44px |
+| Tab Bar Item | 48px | Equal flex | Ionic default — OK |
+| Link/Text Button | 44px | — | Dùng padding để đạt min |
+
+**Spacing giữa touch targets:** Minimum `8px` gap để tránh mis-tap.
+
+---
+
+## 8d. Text Transform
+
+| Component | Text Transform | Lý do |
+|-----------|---------------|-------|
+| Button (CTA) | `none` (Title Case) | Thân thiện hơn UPPERCASE |
+| Button (Outline) | `none` (Title Case) | Nhất quán |
+| Tab Label | `none` | Vietnamese diacritics đọc dễ hơn |
+| Section Label | `none` | |
+| **KHÔNG dùng** `uppercase` | — | Trừ khi tag/badge nhỏ cần emphasis |
+
+> **Rule:** Ionic Android mặc định `text-transform: uppercase` cho buttons. **Luôn override** với `text-transform: none`.
+
+---
+
+## 8e. Icon Usage Rules
+
+### Khi nào dùng icon
+
+| Dùng icon ✅ | KHÔNG dùng icon ❌ |
+|-------------|-------------------|
+| Navigation (tab bar) | Mỗi dòng text trong list đơn giản |
+| Quick actions (cần nhận diện nhanh) | Radio options chỉ có text ngắn (gym experience) |
+| Empty states (minh họa) | Form labels (text đủ rõ) |
+| Status indicators (success/error) | Mỗi card header (trừ khi cần phân biệt loại) |
+
+### Rule: Icon KHÔNG tự động thêm vào mọi nơi
+
+> Hỏi: "Icon này mang lại value gì mà text không có?" Nếu không trả lời được → bỏ icon.
+
+### Icon Specs
+
+| Context | Size | Color | Margin |
+|---------|------|-------|--------|
+| Tab bar (inactive) | `24px` | `var(--text-tertiary)` | — |
+| Tab bar (active) | `24px` | `var(--ion-color-primary)` | — |
+| Radio item (nếu có) | `22px` | `var(--ion-color-primary)` | `0 8px 0 0` |
+| Quick action | `24px` | Inherits from parent | — |
+| Empty state | `48px` | `var(--text-tertiary)` | `0 0 12px 0` |
+| Toolbar back | `24px` | `#FFFFFF` | Ionic default |
+
+### Icon Library
+
+**Ionicons only** — không mix với Lucide, Material Icons, hoặc custom SVG.
+- Dùng `-outline` variant cho inactive, filled variant cho active.
+- Import qua `addIcons()` trong component constructor.
+
+---
+
+## 8f. Animations & Transitions
+
+| Element | Property | Duration | Easing | Trigger |
+|---------|----------|----------|--------|---------|
+| Radio item select | `background` | `150ms` | `ease` | Click/tap |
+| Input label float | Built-in Ionic | ~200ms | ease-in-out | Focus/blur |
+| Button press | `transform` | `100ms` | `ease` | `:active` → scale(0.98) |
+| Page transition | Built-in Ionic | ~300ms | cubic-bezier | Navigation push/pop |
+| Skeleton shimmer | `background-position` | `1.5s` | `linear` | Infinite loop |
+| Bottom sheet | `transform` | `300ms` | `cubic-bezier(0.32, 0.72, 0, 1)` | Open/close |
+
+### Reduced Motion
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+```
+
+> **Rule:** Mọi animation PHẢI respect `prefers-reduced-motion`. Skeleton shimmer → static bg. Transitions → instant.
+
+---
+
+## 8g. Onboarding-Specific Components
+
+### Step Title
+
+| Property | Value |
+|----------|-------|
+| Tag | `<h1>` |
+| Size | `headline` (22px) |
+| Weight | 700 |
+| Color | `var(--text-primary)` |
+| Margin Bottom | `4px` |
+| Accessibility | `tabindex="-1"` for programmatic focus |
+
+### Step Subtitle
+
+| Property | Value |
+|----------|-------|
+| Size | `body` (14px) |
+| Weight | 400 |
+| Color | `var(--text-tertiary)` |
+| Margin Bottom | `24px` |
+
+### Section Label (e.g., "Kinh nghiệm tập gym?")
+
+| Property | Value |
+|----------|-------|
+| Size | `subtitle` (16px) |
+| Weight | 500 |
+| Color | `var(--text-secondary)` |
+| Margin | `24px 0 12px` |
+
+### Progress Indicator (Onboarding)
+
+| Property | Value |
+|----------|-------|
+| Component | `ion-progress-bar` |
+| Height | `4px` |
+| Track Color | `rgba(255,255,255,0.3)` |
+| Fill Color | `#FFFFFF` |
+| Buffer | `transparent` |
+| Position | Below toolbar |
+
+### Button Row (Step 2: Quay lại + Hoàn tất)
+
+| Property | Value |
+|----------|-------|
+| Layout | `display: flex; gap: 12px` |
+| Margin Top | `24px` |
+| Button Height | Uniform via `--height: 48px` |
+| Button Margin | `0` (override Ionic defaults) |
+| "Quay lại" | `fill="outline"`, `text-transform: none` |
+| "Hoàn tất" | `color="secondary"` (CTA orange), `text-transform: none` |
+
 ---
 
 ## 9. Ionic Theme Variables
@@ -399,4 +658,5 @@ Tất cả mockup HTML dùng trong quá trình discussion:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.1 | 2026-04-19 | Add: Input/Select spec (8.6), Radio/Checkbox (8.7), Toolbar (8.8), Interaction States (8b), Touch Targets (8c), Text Transform (8d), Icon Rules (8e), Animations (8f), Onboarding Components (8g). Fix: `--radius-sm` 8→12px, add `--radius-xs` 8px. |
 | 1.0 | 2026-04-14 | Initial Design System — Color, Typography, Spacing, Components |
