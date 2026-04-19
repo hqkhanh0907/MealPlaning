@@ -13,11 +13,11 @@
 
 ## 2. Swipe Actions — ion-item-sliding
 
-- Pattern chuẩn Ionic: vuốt trái card → lộ action buttons phía sau.
-- **KHÔNG dùng `overflow: hidden` trên swipe container** — sẽ cắt text card khi dịch trái.
-- Cách đúng cho mockup tĩnh: dùng 2 layers
+- Pattern chuẩn Ionic: vuốt trái card → card dịch sang trái, lộ action buttons phía sau.
+- Đây là hành vi ĐÚNG: phần trái card bị ẩn khi dịch — giống real `ion-item-sliding`.
+- Mockup tĩnh: dùng `overflow: hidden` + `transform: translateX(-Xpx)` trên card là OK.
   - Layer dưới (z-index: 1): action buttons `position: absolute; right: 0`
-  - Layer trên (z-index: 2): card dùng `margin-right: -Xpx; margin-left: Xpx` thay vì `transform: translateX(-Xpx)` + overflow hidden
+  - Layer trên (z-index: 2): card dùng `transform: translateX(-140px)` để lộ 2 buttons
 - Action buttons: mỗi nút 70px wide, icon + label dọc. Sửa = `--primary` (#2196F3), Xóa = `--error` (#F44336).
 - **Mỗi mockup list PHẢI có 1 screen thể hiện swipe state** nếu list có Edit/Delete.
 
