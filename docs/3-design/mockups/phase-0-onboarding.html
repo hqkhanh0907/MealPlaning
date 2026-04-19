@@ -6,30 +6,34 @@
 <title>HealthMate AI — Onboarding Mockup (Phase 0)</title>
 <style>
   /* =========================================================================
-     RESET & BASE
+     RESET & BASE — matches variables.scss tokens exactly
      ========================================================================= */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #e0e0e0;
-    padding: 20px;
+    padding: 24px;
     line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
   }
-  h1 { text-align: center; margin-bottom: 4px; font-size: 24px; font-weight: 700; }
-  .page-subtitle { text-align: center; color: #666; margin-bottom: 12px; font-size: 14px; }
+  body.light { background: #e0e0e0; color: #1a1a1a; }
+  body.dark  { background: #1a1a1a; color: #ffffff; }
+
+  h1.page-title { text-align: center; margin-bottom: 4px; font-size: 24px; font-weight: 700; }
+  .page-subtitle { text-align: center; margin-bottom: 20px; font-size: 14px; }
+  body.light .page-subtitle { color: #666; }
+  body.dark  .page-subtitle { color: #999; }
 
   /* Theme toggle */
-  .theme-toggle {
-    text-align: center; margin-bottom: 24px;
-  }
+  .theme-toggle { text-align: center; margin-bottom: 24px; }
   .theme-toggle button {
     padding: 8px 20px; border: 2px solid #2196F3; border-radius: 8px;
-    background: #fff; color: #2196F3; font-size: 14px; font-weight: 500;
-    cursor: pointer; margin: 0 4px;
+    background: transparent; font-size: 14px; font-weight: 500;
+    cursor: pointer; margin: 0 4px; transition: all 0.2s;
   }
-  .theme-toggle button.active {
-    background: #2196F3; color: #fff;
-  }
+  body.light .theme-toggle button { color: #2196F3; }
+  body.dark  .theme-toggle button { color: #42a5f5; border-color: #42a5f5; }
+  body.light .theme-toggle button.active { background: #2196F3; color: #fff; }
+  body.dark  .theme-toggle button.active { background: #42a5f5; color: #121212; }
 
   /* =========================================================================
      PHONE FRAMES
@@ -37,982 +41,782 @@
   .screens-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(375px, 1fr));
-    gap: 32px;
-    max-width: 1600px;
-    margin: 0 auto;
+    gap: 32px; max-width: 1600px; margin: 0 auto;
   }
-  .screen-wrapper {
-    text-align: center;
-  }
-  .screen-label {
-    font-size: 16px; font-weight: 700; margin-bottom: 4px;
-  }
-  .screen-desc {
-    font-size: 12px; color: #666; margin-bottom: 12px;
-  }
+  .screen-wrapper { text-align: center; }
+  .screen-label { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .screen-desc { font-size: 12px; margin-bottom: 12px; }
+  body.light .screen-desc { color: #666; }
+  body.dark  .screen-desc { color: #999; }
 
   .phone {
-    width: 375px; height: 720px;
-    margin: 0 auto;
-    border-radius: 32px;
+    width: 375px; height: 740px;
+    margin: 0 auto; border-radius: 32px;
     overflow: hidden;
     box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    position: relative;
-    display: flex; flex-direction: column;
+    position: relative; display: flex; flex-direction: column;
   }
+  body.light .phone { border: 3px solid #c0c0c0; }
+  body.dark  .phone { border: 3px solid #444; }
 
-  /* =========================================================================
-     STATUS BAR
-     ========================================================================= */
+  /* Status bar */
   .status-bar {
-    height: 28px;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 20px;
-    font-size: 12px; font-weight: 600;
+    height: 28px; padding: 0 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; font-weight: 600; color: #fff;
   }
 
   /* =========================================================================
-     TOOLBAR
+     TOOLBAR — matches --ion-toolbar-background
      ========================================================================= */
   .toolbar {
-    height: 52px;
-    display: flex; align-items: center; justify-content: center;
-    padding: 0 16px;
-    position: relative;
+    padding: 0 16px; height: 56px;
+    display: flex; align-items: center; gap: 8px;
+    color: #fff; position: relative;
   }
-  .toolbar-title {
-    font-size: 20px; font-weight: 700; color: #fff;
-  }
-  .toolbar-back {
-    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-    width: 36px; height: 36px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; color: #fff; cursor: pointer;
-    background: transparent; border: none;
-  }
+  body.light .status-bar,
+  body.light .toolbar { background: #2196f3; }
+  body.dark  .status-bar,
+  body.dark  .toolbar { background: #1565c0; }
 
-  /* Progress bar under toolbar */
-  .progress-indicator {
-    height: 4px;
-    position: relative;
+  .toolbar-title { font-size: 18px; font-weight: 500; flex: 1; }
+  .toolbar-back {
+    width: 32px; height: 32px; background: none; border: none;
+    color: #fff; font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
   }
-  .progress-indicator-fill {
-    height: 100%; position: absolute; left: 0; top: 0;
-    transition: width 0.3s;
+  .toolbar-back svg { width: 22px; height: 22px; fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Progress bar — 4px, white track, color fill */
+  .progress-bar {
+    height: 4px; width: 100%;
   }
+  body.light .progress-bar { background: rgba(255,255,255,0.3); }
+  body.dark  .progress-bar { background: rgba(255,255,255,0.2); }
+  .progress-fill { height: 100%; transition: width 0.3s; }
+  body.light .progress-fill { background: #fff; }
+  body.dark  .progress-fill { background: rgba(255,255,255,0.7); }
 
   /* =========================================================================
-     CONTENT
+     CONTENT AREA — matches --ion-background-color
      ========================================================================= */
   .content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 24px 16px 16px;
+    flex: 1; padding: 12px 16px 16px; overflow-y: auto;
   }
+  body.light .content { background: #f5f7fa; }
+  body.dark  .content { background: #121212; }
 
+  /* Typography — matches onboarding.page.ts styles */
   .step-title {
-    font-size: 22px; font-weight: 700;
+    font-size: 22px; font-weight: 700; line-height: 1.3;
     margin-bottom: 4px;
-    line-height: 1.3;
   }
+  body.light .step-title { color: #1a1a1a; }
+  body.dark  .step-title { color: #fff; }
+
   .step-subtitle {
-    font-size: 14px; font-weight: 400;
-    margin-bottom: 20px;
-    line-height: 1.6;
+    font-size: 16px; font-weight: 500; line-height: 1.4;
+    margin-bottom: 24px;
   }
+  body.light .step-subtitle { color: #666; }
+  body.dark  .step-subtitle { color: #999; }
 
-  /* =========================================================================
-     RADIO OPTIONS (Goal selection + Gym experience)
-     ========================================================================= */
-  .radio-group {
-    display: flex; flex-direction: column;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-  .radio-item {
-    display: flex; align-items: center;
-    padding: 14px 16px;
-    border-radius: 12px;
-    border: 1.5px solid transparent;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-size: 16px; font-weight: 400;
-    gap: 12px;
-    line-height: 1.4;
-  }
-  .radio-dot {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    border: 2px solid;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.15s;
-  }
-  .radio-dot-inner {
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    opacity: 0;
-    transition: opacity 0.15s;
-  }
-  .radio-item.selected .radio-dot-inner {
-    opacity: 1;
-  }
-  .radio-icon {
-    font-size: 20px; flex-shrink: 0;
-  }
-  .radio-label {
-    flex: 1;
-  }
-
-  /* =========================================================================
-     FORM INPUTS
-     ========================================================================= */
-  .form-group {
-    margin-bottom: 12px;
-    position: relative;
-  }
-  .form-label {
-    font-size: 12px; font-weight: 500;
-    margin-bottom: 4px;
-    display: block;
-    line-height: 1.4;
-  }
-  .form-input {
-    width: 100%;
-    height: 48px;
-    border-radius: 8px;
-    border: 1.5px solid;
-    padding: 0 12px;
-    font-size: 16px;
-    font-family: inherit;
-    outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
-  .form-input::placeholder {
-    font-size: 14px;
-  }
-  .form-select {
-    width: 100%;
-    height: 48px;
-    border-radius: 8px;
-    border: 1.5px solid;
-    padding: 0 12px;
-    font-size: 16px;
-    font-family: inherit;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='2' fill='none'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    cursor: pointer;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .form-error-text {
-    font-size: 12px; font-weight: 400;
-    margin-top: 4px;
-    display: flex; align-items: center; gap: 4px;
-  }
   .section-label {
-    font-size: 14px; font-weight: 500;
+    font-size: 14px; font-weight: 500; line-height: 1.4;
     margin-top: 16px; margin-bottom: 8px;
   }
+  body.light .section-label { color: #1a1a1a; }
+  body.dark  .section-label { color: #fff; }
 
   /* =========================================================================
-     BUTTONS
+     RADIO ITEMS — 12px radius, bg-card, left-aligned labels
      ========================================================================= */
-  .btn {
-    height: 48px;
-    border-radius: 10px;
-    font-size: 16px; font-weight: 500;
-    cursor: pointer;
+  .radio-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; border-radius: 12px;
+    margin-bottom: 8px; cursor: pointer;
+    transition: background 0.2s;
+  }
+  body.light .radio-item { background: #fff; }
+  body.dark  .radio-item { background: #1e1e1e; }
+  body.light .radio-item:hover { background: #e3f2fd; }
+  body.dark  .radio-item:hover { background: #2e2e2e; }
+
+  .radio-circle {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid #999; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    gap: 8px;
-    border: none;
-    transition: all 0.15s;
-    padding: 0 20px;
-    font-family: inherit;
   }
-  .btn-primary {
-    width: 100%;
-    margin-top: 24px;
+  .radio-circle.selected { border-color: #2196f3; }
+  body.dark .radio-circle.selected { border-color: #42a5f5; }
+  .radio-circle.selected::after {
+    content: ''; width: 10px; height: 10px; border-radius: 50%;
+    background: #2196f3;
   }
-  .btn-outline {
-    border: 1.5px solid;
-    background: transparent;
-  }
-  .btn-row {
-    display: flex; gap: 12px;
-    margin-top: 24px;
-  }
-  .btn-row .btn { flex: 1; }
+  body.dark .radio-circle.selected::after { background: #42a5f5; }
 
-  /* Error toast */
+  .radio-icon {
+    width: 22px; height: 22px; flex-shrink: 0;
+  }
+  body.light .radio-icon { color: #2196f3; }
+  body.dark  .radio-icon { color: #42a5f5; }
+  .radio-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .radio-label {
+    font-size: 16px; font-weight: 400; flex: 1;
+  }
+  body.light .radio-label { color: #1a1a1a; }
+  body.dark  .radio-label { color: #e0e0e0; }
+
+  /* Selected item highlight */
+  body.light .radio-item.selected { background: #e3f2fd; }
+  body.dark  .radio-item.selected { background: #1a237e; }
+
+  /* =========================================================================
+     FORM INPUTS — floating label Ionic style
+     ========================================================================= */
+  .form-field {
+    margin-bottom: 4px; border-radius: 8px; overflow: hidden;
+  }
+  .input-wrapper {
+    position: relative; padding: 20px 16px 8px;
+    border-bottom: 1px solid;
+  }
+  body.light .input-wrapper { border-color: #e0e0e0; background: #fff; }
+  body.dark  .input-wrapper { border-color: #333; background: #1e1e1e; }
+
+  .input-wrapper.invalid { border-color: #f44336; }
+  body.dark .input-wrapper.invalid { border-color: #ef5350; }
+
+  .input-label {
+    position: absolute; top: 6px; left: 16px;
+    font-size: 12px; font-weight: 400;
+  }
+  body.light .input-label { color: #666; }
+  body.dark  .input-label { color: #999; }
+  .input-label.invalid { color: #f44336; }
+  body.dark .input-label.invalid { color: #ef5350; }
+
+  .input-value {
+    font-size: 16px; font-weight: 400; min-height: 24px;
+  }
+  body.light .input-value { color: #1a1a1a; }
+  body.dark  .input-value { color: #fff; }
+  .input-value.placeholder { color: transparent; }
+
+  /* Select */
+  .select-wrapper {
+    position: relative; padding: 20px 16px 8px;
+    border-bottom: 1px solid; display: flex; align-items: center;
+  }
+  body.light .select-wrapper { border-color: #e0e0e0; background: #fff; }
+  body.dark  .select-wrapper { border-color: #333; background: #1e1e1e; }
+  .select-wrapper.invalid { border-color: #f44336; }
+
+  .select-arrow {
+    width: 16px; height: 16px; margin-left: auto;
+  }
+  body.light .select-arrow { color: #666; }
+  body.dark  .select-arrow { color: #999; }
+
+  /* =========================================================================
+     FIELD ERROR — 12px, danger color
+     ========================================================================= */
+  .field-error {
+    font-size: 12px; font-weight: 400; line-height: 1.4;
+    padding-left: 4px; margin-bottom: 8px;
+  }
+  body.light .field-error { color: #f44336; }
+  body.dark  .field-error { color: #ef5350; }
+
+  /* Form-level error toast */
   .error-toast {
-    font-size: 13px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    margin-top: 8px;
-    display: flex; align-items: center; gap: 6px;
-    line-height: 1.5;
+    margin-top: 8px; padding: 8px 12px; border-radius: 8px;
+    font-size: 13px; line-height: 1.5;
   }
+  body.light .error-toast { background: rgba(244,67,54,0.08); color: #f44336; }
+  body.dark  .error-toast { background: rgba(239,83,80,0.12); color: #ef5350; }
 
   /* =========================================================================
-     STATES REFERENCE (below phone frames)
+     BUTTONS — CTA orange, outline primary
      ========================================================================= */
-  .states-section {
-    max-width: 1200px;
-    margin: 40px auto 0;
-    padding: 24px;
-    border-radius: 16px;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  .btn-cta {
+    width: 100%; padding: 14px; border: none; border-radius: 10px;
+    font-size: 16px; font-weight: 500; color: #fff;
+    cursor: pointer; margin-top: 24px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
   }
-  .states-section h2 {
-    font-size: 18px; font-weight: 700; margin-bottom: 16px;
+  body.light .btn-cta { background: #ff9800; }
+  body.dark  .btn-cta { background: #ffb74d; color: #121212; }
+  .btn-cta.disabled { opacity: 0.5; pointer-events: none; }
+
+  .btn-cta svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  .button-row {
+    display: flex; gap: 12px; margin-top: 24px;
   }
-  .states-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
+  .button-row > * { flex: 1; }
+
+  .btn-outline {
+    padding: 14px; border-radius: 10px;
+    font-size: 16px; font-weight: 500;
+    cursor: pointer; background: transparent;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
   }
-  .state-card {
-    border-radius: 12px;
-    padding: 16px;
-    text-align: center;
-  }
-  .state-card-label {
-    font-size: 11px; font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 8px;
-  }
+  body.light .btn-outline { border: 2px solid #2196f3; color: #2196f3; }
+  body.dark  .btn-outline { border: 2px solid #42a5f5; color: #42a5f5; }
+  .btn-outline.disabled { opacity: 0.5; pointer-events: none; }
+  .btn-outline svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
   /* =========================================================================
-     LIGHT THEME
+     SPEC NOTES — design annotation panel
      ========================================================================= */
-  .theme-light .phone { background: #F5F7FA; }
-  .theme-light .status-bar { background: #1976D2; color: #fff; }
-  .theme-light .toolbar { background: #2196F3; }
-  .theme-light .progress-indicator { background: rgba(255,255,255,0.3); }
-  .theme-light .progress-indicator-fill { background: #fff; }
-  .theme-light .step-title { color: #1A1A1A; }
-  .theme-light .step-subtitle { color: #333333; }
-  .theme-light .section-label { color: #1A1A1A; }
-
-  /* Radio */
-  .theme-light .radio-item { background: #fff; border-color: #E8E8E8; }
-  .theme-light .radio-item:hover { border-color: #90CAF9; background: #F8FBFF; }
-  .theme-light .radio-item:active { background: #E3F2FD; }
-  .theme-light .radio-item.selected { border-color: #2196F3; background: #E3F2FD; }
-  .theme-light .radio-dot { border-color: #999999; }
-  .theme-light .radio-item.selected .radio-dot { border-color: #2196F3; }
-  .theme-light .radio-dot-inner { background: #2196F3; }
-  .theme-light .radio-item.disabled { opacity: 0.5; pointer-events: none; }
-  .theme-light .radio-label { color: #1A1A1A; }
-
-  /* Focus ring */
-  .theme-light .radio-item:focus-within { box-shadow: 0 0 0 3px rgba(33,150,243,0.3); }
-  .theme-light .form-input:focus { border-color: #2196F3; box-shadow: 0 0 0 3px rgba(33,150,243,0.15); }
-  .theme-light .form-select:focus { border-color: #2196F3; box-shadow: 0 0 0 3px rgba(33,150,243,0.15); }
-
-  /* Inputs */
-  .theme-light .form-label { color: #666666; }
-  .theme-light .form-input { background: #fff; border-color: #E8E8E8; color: #1A1A1A; }
-  .theme-light .form-input::placeholder { color: #999999; }
-  .theme-light .form-select { background-color: #fff; border-color: #E8E8E8; color: #1A1A1A; }
-  .theme-light .form-input.error { border-color: #F44336; }
-  .theme-light .form-error-text { color: #F44336; }
-
-  /* Buttons */
-  .theme-light .btn-primary { background: #FF9800; color: #fff; }
-  .theme-light .btn-primary:hover { background: #F57C00; }
-  .theme-light .btn-primary:active { background: #E65100; }
-  .theme-light .btn-primary:disabled { opacity: 0.5; pointer-events: none; }
-  .theme-light .btn-outline { border-color: #2196F3; color: #2196F3; }
-  .theme-light .btn-outline:hover { background: #E3F2FD; }
-  .theme-light .btn-outline:active { background: #BBDEFB; }
-
-  .theme-light .error-toast { background: #FFEBEE; color: #D32F2F; }
-
-  /* States cards */
-  .theme-light .state-card { background: #F5F7FA; }
-  .theme-light .state-card-label { color: #666; }
-
-  /* =========================================================================
-     DARK THEME
-     ========================================================================= */
-  .theme-dark .phone { background: #121212; }
-  .theme-dark .status-bar { background: #0D47A1; color: #fff; }
-  .theme-dark .toolbar { background: #1565C0; }
-  .theme-dark .progress-indicator { background: rgba(255,255,255,0.15); }
-  .theme-dark .progress-indicator-fill { background: #42A5F5; }
-  .theme-dark .step-title { color: #FFFFFF; }
-  .theme-dark .step-subtitle { color: #E0E0E0; }
-  .theme-dark .section-label { color: #FFFFFF; }
-
-  /* Radio */
-  .theme-dark .radio-item { background: #1E1E1E; border-color: #333333; }
-  .theme-dark .radio-item:hover { border-color: #42A5F5; background: #252525; }
-  .theme-dark .radio-item:active { background: #2E2E2E; }
-  .theme-dark .radio-item.selected { border-color: #42A5F5; background: #1A237E; }
-  .theme-dark .radio-dot { border-color: #666666; }
-  .theme-dark .radio-item.selected .radio-dot { border-color: #42A5F5; }
-  .theme-dark .radio-dot-inner { background: #42A5F5; }
-  .theme-dark .radio-item.disabled { opacity: 0.5; pointer-events: none; }
-  .theme-dark .radio-label { color: #FFFFFF; }
-
-  /* Focus ring (dark) */
-  .theme-dark .radio-item:focus-within { box-shadow: 0 0 0 3px rgba(66,165,245,0.3); }
-  .theme-dark .form-input:focus { border-color: #42A5F5; box-shadow: 0 0 0 3px rgba(66,165,245,0.15); }
-  .theme-dark .form-select:focus { border-color: #42A5F5; box-shadow: 0 0 0 3px rgba(66,165,245,0.15); }
-
-  /* Inputs */
-  .theme-dark .form-label { color: #999999; }
-  .theme-dark .form-input { background: #1E1E1E; border-color: #333333; color: #FFFFFF; }
-  .theme-dark .form-input::placeholder { color: #666666; }
-  .theme-dark .form-select { background-color: #1E1E1E; border-color: #333333; color: #FFFFFF; }
-  .theme-dark .form-input.error { border-color: #EF5350; }
-  .theme-dark .form-error-text { color: #EF5350; }
-
-  /* Buttons */
-  .theme-dark .btn-primary { background: #FFB74D; color: #1A1A1A; }
-  .theme-dark .btn-primary:hover { background: #FF9800; }
-  .theme-dark .btn-primary:active { background: #F57C00; }
-  .theme-dark .btn-primary:disabled { opacity: 0.5; pointer-events: none; }
-  .theme-dark .btn-outline { border-color: #42A5F5; color: #42A5F5; }
-  .theme-dark .btn-outline:hover { background: rgba(66,165,245,0.1); }
-  .theme-dark .btn-outline:active { background: rgba(66,165,245,0.2); }
-
-  .theme-dark .error-toast { background: #3E1A1A; color: #EF5350; }
-
-  .theme-dark .states-section { background: #1E1E1E; }
-  .theme-dark .states-section h2 { color: #fff; }
-  .theme-dark .state-card { background: #2E2E2E; }
-  .theme-dark .state-card-label { color: #999; }
+  .spec-notes {
+    margin-top: 40px; padding: 20px;
+    border-radius: 12px; max-width: 1600px; margin-left: auto; margin-right: auto;
+  }
+  body.light .spec-notes { background: #fff3e0; border: 1px solid #ffcc80; }
+  body.dark  .spec-notes { background: #2e2e1e; border: 1px solid #5a5020; }
+  .spec-notes h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+  .spec-notes table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .spec-notes th, .spec-notes td { padding: 6px 10px; text-align: left; border-bottom: 1px solid; }
+  body.light .spec-notes th, body.light .spec-notes td { border-color: #ffe0b2; }
+  body.dark  .spec-notes th, body.dark  .spec-notes td { border-color: #5a5020; }
+  .spec-notes th { font-weight: 600; }
+  body.light .spec-notes th { color: #e65100; }
+  body.dark  .spec-notes th { color: #ffb74d; }
+  .spec-notes code { font-family: 'Fira Code', monospace; font-size: 12px; padding: 1px 4px; border-radius: 3px; }
+  body.light .spec-notes code { background: #fff8e1; }
+  body.dark  .spec-notes code { background: #3e3e1e; }
 </style>
 </head>
-<body>
-  <h1>Onboarding — Phase 0 Mockup</h1>
-  <p class="page-subtitle">PRD §6 — 2 bước, ≤30 giây hoàn thành, không đăng nhập</p>
+<body class="light">
 
-  <div class="theme-toggle">
-    <button id="btnLight" class="active" onclick="setTheme('light')">☀️ Light</button>
-    <button id="btnDark" onclick="setTheme('dark')">🌙 Dark</button>
+<h1 class="page-title">HealthMate AI — Onboarding Mockup</h1>
+<p class="page-subtitle">Phase 0 · 7 States · Light/Dark · Design System Compliant</p>
+
+<div class="theme-toggle">
+  <button class="active" onclick="setTheme('light')">☀️ Light</button>
+  <button onclick="setTheme('dark')">🌙 Dark</button>
+</div>
+
+<div class="screens-grid">
+
+  <!-- =====================================================================
+       STEP 1: MỤC TIÊU — Default (nothing selected)
+       ===================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Bước 1 — Default</div>
+    <div class="screen-desc">Chưa chọn mục tiêu, CTA enabled</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <div class="toolbar-title">Mục tiêu</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+      <div class="content">
+        <h2 class="step-title">Mục tiêu của bạn?</h2>
+        <p class="step-subtitle">Chọn 1 mục tiêu chính</p>
+
+        <div class="radio-item">
+          <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 14c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/></svg></div>
+          <div class="radio-circle"></div>
+          <div class="radio-label">Giảm cân</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M2 12h3l2.5-3v6L5 12H2zm20 0h-3l-2.5-3v6l2.5-3h3zM9 12h6"/></svg></div>
+          <div class="radio-circle"></div>
+          <div class="radio-label">Tăng cơ</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 12h14M8 7l4-4 4 4M8 17l4 4 4-4"/></svg></div>
+          <div class="radio-circle"></div>
+          <div class="radio-label">Duy trì</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 2l3 6h6l-5 4 2 7-6-4-6 4 2-7-5-4h6z"/></svg></div>
+          <div class="radio-circle"></div>
+          <div class="radio-label">Tăng sức mạnh</div>
+        </div>
+
+        <button class="btn-cta">
+          Tiếp tục
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
   </div>
 
-  <div id="themeRoot" class="theme-light">
-    <div class="screens-grid">
-
-      <!-- ===================================================================
-           STEP 1: MỤC TIÊU (Default State — nothing selected)
-           =================================================================== -->
-      <div class="screen-wrapper">
-        <div class="screen-label">Bước 1 — Chọn mục tiêu</div>
-        <div class="screen-desc">Default state: chưa chọn, CTA enabled</div>
-        <div class="phone">
-          <div class="status-bar">
-            <span>9:41</span>
-            <span>📶 🔋</span>
-          </div>
-          <div class="toolbar">
-            <span class="toolbar-title">Mục tiêu</span>
-          </div>
-          <div class="progress-indicator">
-            <div class="progress-indicator-fill" style="width: 50%"></div>
-          </div>
-          <div class="content">
-            <h1 class="step-title">Mục tiêu của bạn?</h1>
-            <p class="step-subtitle">Chọn 1 mục tiêu chính</p>
-
-            <div class="radio-group">
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-icon">🏃</span>
-                <span class="radio-label">Giảm cân</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-icon">💪</span>
-                <span class="radio-label">Tăng cơ</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-icon">⚖️</span>
-                <span class="radio-label">Duy trì</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-icon">🏋️</span>
-                <span class="radio-label">Tăng sức mạnh</span>
-              </div>
-            </div>
-
-            <button class="btn btn-primary">
-              Tiếp tục
-              <span>→</span>
-            </button>
-          </div>
-        </div>
+  <!-- =====================================================================
+       STEP 1: SELECTED STATE — "Giảm cân" active
+       ===================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Bước 1 — Đã chọn</div>
+    <div class="screen-desc">"Giảm cân" selected, radio filled, item highlighted</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <div class="toolbar-title">Mục tiêu</div>
       </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+      <div class="content">
+        <h2 class="step-title">Mục tiêu của bạn?</h2>
+        <p class="step-subtitle">Chọn 1 mục tiêu chính</p>
 
-      <!-- ===================================================================
-           STEP 1: SELECTED STATE
-           =================================================================== -->
-      <div class="screen-wrapper">
-        <div class="screen-label">Bước 1 — Đã chọn</div>
-        <div class="screen-desc">Selected state: "Giảm cân" đang active</div>
-        <div class="phone">
-          <div class="status-bar">
-            <span>9:41</span>
-            <span>📶 🔋</span>
-          </div>
-          <div class="toolbar">
-            <span class="toolbar-title">Mục tiêu</span>
-          </div>
-          <div class="progress-indicator">
-            <div class="progress-indicator-fill" style="width: 50%"></div>
-          </div>
-          <div class="content">
-            <h1 class="step-title">Mục tiêu của bạn?</h1>
-            <p class="step-subtitle">Chọn 1 mục tiêu chính</p>
-
-            <div class="radio-group">
-              <div class="radio-item selected" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-icon">🏃</span>
-                <span class="radio-label">Giảm cân</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-icon">💪</span>
-                <span class="radio-label">Tăng cơ</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-icon">⚖️</span>
-                <span class="radio-label">Duy trì</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-icon">🏋️</span>
-                <span class="radio-label">Tăng sức mạnh</span>
-              </div>
-            </div>
-
-            <button class="btn btn-primary">
-              Tiếp tục
-              <span>→</span>
-            </button>
-          </div>
+        <div class="radio-item selected">
+          <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 14c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/></svg></div>
+          <div class="radio-circle selected"></div>
+          <div class="radio-label"><strong>Giảm cân</strong></div>
         </div>
+        <div class="radio-item">
+          <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M2 12h3l2.5-3v6L5 12H2zm20 0h-3l-2.5-3v6l2.5-3h3zM9 12h6"/></svg></div>
+          <div class="radio-circle"></div>
+          <div class="radio-label">Tăng cơ</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 12h14M8 7l4-4 4 4M8 17l4 4 4-4"/></svg></div>
+          <div class="radio-circle"></div>
+          <div class="radio-label">Duy trì</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 2l3 6h6l-5 4 2 7-6-4-6 4 2-7-5-4h6z"/></svg></div>
+          <div class="radio-circle"></div>
+          <div class="radio-label">Tăng sức mạnh</div>
+        </div>
+
+        <button class="btn-cta">
+          Tiếp tục
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
       </div>
+    </div>
+  </div>
 
-      <!-- ===================================================================
-           STEP 1: ERROR STATE
-           =================================================================== -->
-      <div class="screen-wrapper">
-        <div class="screen-label">Bước 1 — Lỗi</div>
-        <div class="screen-desc">Error state: bấm Tiếp tục khi chưa chọn</div>
-        <div class="phone">
-          <div class="status-bar">
-            <span>9:41</span>
-            <span>📶 🔋</span>
-          </div>
-          <div class="toolbar">
-            <span class="toolbar-title">Mục tiêu</span>
-          </div>
-          <div class="progress-indicator">
-            <div class="progress-indicator-fill" style="width: 50%"></div>
-          </div>
-          <div class="content">
-            <h1 class="step-title">Mục tiêu của bạn?</h1>
-            <p class="step-subtitle">Chọn 1 mục tiêu chính</p>
-
-            <div class="radio-group">
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-icon">🏃</span>
-                <span class="radio-label">Giảm cân</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-icon">💪</span>
-                <span class="radio-label">Tăng cơ</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-icon">⚖️</span>
-                <span class="radio-label">Duy trì</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-icon">🏋️</span>
-                <span class="radio-label">Tăng sức mạnh</span>
-              </div>
-            </div>
-
-            <div class="error-toast" role="alert">
-              ⚠️ Vui lòng chọn mục tiêu
-            </div>
-
-            <button class="btn btn-primary">
-              Tiếp tục
-              <span>→</span>
-            </button>
-          </div>
-        </div>
+  <!-- =====================================================================
+       STEP 1: ERROR STATE — pressed continue without selecting
+       ===================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Bước 1 — Lỗi</div>
+    <div class="screen-desc">Bấm Tiếp tục khi chưa chọn → error toast</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <div class="toolbar-title">Mục tiêu</div>
       </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+      <div class="content">
+        <h2 class="step-title">Mục tiêu của bạn?</h2>
+        <p class="step-subtitle">Chọn 1 mục tiêu chính</p>
 
-      <!-- ===================================================================
-           STEP 2: THÔNG TIN CƠ BẢN (Default — empty form)
-           =================================================================== -->
-      <div class="screen-wrapper">
-        <div class="screen-label">Bước 2 — Thông tin cơ bản</div>
-        <div class="screen-desc">Default state: form trống, progress 100%</div>
-        <div class="phone">
-          <div class="status-bar">
-            <span>9:41</span>
-            <span>📶 🔋</span>
-          </div>
-          <div class="toolbar">
-            <button class="toolbar-back" aria-label="Quay lại">←</button>
-            <span class="toolbar-title">Thông tin</span>
-          </div>
-          <div class="progress-indicator">
-            <div class="progress-indicator-fill" style="width: 100%"></div>
-          </div>
-          <div class="content">
-            <h1 class="step-title">Thông tin cơ bản</h1>
-            <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
-
-            <div class="form-group">
-              <label class="form-label">Chiều cao (cm)</label>
-              <input class="form-input" type="number" placeholder="VD: 170">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Cân nặng (kg)</label>
-              <input class="form-input" type="number" placeholder="VD: 65">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Tuổi</label>
-              <input class="form-input" type="number" placeholder="VD: 25">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Giới tính</label>
-              <select class="form-select">
-                <option value="" disabled selected>Chọn giới tính</option>
-                <option value="male">Nam</option>
-                <option value="female">Nữ</option>
-              </select>
-            </div>
-
-            <p class="section-label">Kinh nghiệm tập gym?</p>
-            <div class="radio-group">
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">Chưa bao giờ</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">Dưới 6 tháng</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">6 tháng — 2 năm</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">Trên 2 năm</span>
-              </div>
-            </div>
-
-            <div class="btn-row">
-              <button class="btn btn-outline">
-                <span>←</span>
-                Quay lại
-              </button>
-              <button class="btn btn-primary" style="margin-top:0">
-                Hoàn tất
-                <span>✓</span>
-              </button>
-            </div>
-          </div>
+        <div class="radio-item">
+          <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 14c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/></svg></div>
+          <div class="radio-circle"></div>
+          <div class="radio-label">Giảm cân</div>
         </div>
+        <div class="radio-item">
+          <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M2 12h3l2.5-3v6L5 12H2zm20 0h-3l-2.5-3v6l2.5-3h3zM9 12h6"/></svg></div>
+          <div class="radio-circle"></div>
+          <div class="radio-label">Tăng cơ</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 12h14M8 7l4-4 4 4M8 17l4 4 4-4"/></svg></div>
+          <div class="radio-circle"></div>
+          <div class="radio-label">Duy trì</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 2l3 6h6l-5 4 2 7-6-4-6 4 2-7-5-4h6z"/></svg></div>
+          <div class="radio-circle"></div>
+          <div class="radio-label">Tăng sức mạnh</div>
+        </div>
+
+        <div class="error-toast" role="alert">⚠️ Vui lòng chọn mục tiêu trước khi tiếp tục</div>
+
+        <button class="btn-cta">
+          Tiếp tục
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
       </div>
+    </div>
+  </div>
 
-      <!-- ===================================================================
-           STEP 2: FILLED STATE
-           =================================================================== -->
-      <div class="screen-wrapper">
-        <div class="screen-label">Bước 2 — Đã điền</div>
-        <div class="screen-desc">Filled state: form hợp lệ, sẵn sàng submit</div>
-        <div class="phone">
-          <div class="status-bar">
-            <span>9:41</span>
-            <span>📶 🔋</span>
-          </div>
-          <div class="toolbar">
-            <button class="toolbar-back" aria-label="Quay lại">←</button>
-            <span class="toolbar-title">Thông tin</span>
-          </div>
-          <div class="progress-indicator">
-            <div class="progress-indicator-fill" style="width: 100%"></div>
-          </div>
-          <div class="content">
-            <h1 class="step-title">Thông tin cơ bản</h1>
-            <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
-
-            <div class="form-group">
-              <label class="form-label">Chiều cao (cm)</label>
-              <input class="form-input" type="number" value="170">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Cân nặng (kg)</label>
-              <input class="form-input" type="number" value="65">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Tuổi</label>
-              <input class="form-input" type="number" value="25">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Giới tính</label>
-              <select class="form-select">
-                <option value="male" selected>Nam</option>
-                <option value="female">Nữ</option>
-              </select>
-            </div>
-
-            <p class="section-label">Kinh nghiệm tập gym?</p>
-            <div class="radio-group">
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">Chưa bao giờ</span>
-              </div>
-              <div class="radio-item selected" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">Dưới 6 tháng</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">6 tháng — 2 năm</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">Trên 2 năm</span>
-              </div>
-            </div>
-
-            <div class="btn-row">
-              <button class="btn btn-outline">
-                <span>←</span>
-                Quay lại
-              </button>
-              <button class="btn btn-primary" style="margin-top:0">
-                Hoàn tất
-                <span>✓</span>
-              </button>
-            </div>
-          </div>
-        </div>
+  <!-- =====================================================================
+       STEP 2: THÔNG TIN CƠ BẢN — Default (empty form)
+       ===================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Bước 2 — Default</div>
+    <div class="screen-desc">Form trống, floating labels, progress 100%</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="toolbar-title">Thông tin</div>
       </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+      <div class="content">
+        <h2 class="step-title">Thông tin cơ bản</h2>
+        <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
 
-      <!-- ===================================================================
-           STEP 2: ERROR STATE
-           =================================================================== -->
-      <div class="screen-wrapper">
-        <div class="screen-label">Bước 2 — Lỗi validation</div>
-        <div class="screen-desc">Error state: giá trị ngoài phạm vi + field trống</div>
-        <div class="phone">
-          <div class="status-bar">
-            <span>9:41</span>
-            <span>📶 🔋</span>
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Chiều cao (cm)</span>
+            <div class="input-value placeholder">&nbsp;</div>
           </div>
-          <div class="toolbar">
-            <button class="toolbar-back" aria-label="Quay lại">←</button>
-            <span class="toolbar-title">Thông tin</span>
+        </div>
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Cân nặng (kg)</span>
+            <div class="input-value placeholder">&nbsp;</div>
           </div>
-          <div class="progress-indicator">
-            <div class="progress-indicator-fill" style="width: 100%"></div>
+        </div>
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Tuổi</span>
+            <div class="input-value placeholder">&nbsp;</div>
           </div>
-          <div class="content">
-            <h1 class="step-title">Thông tin cơ bản</h1>
-            <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
+        </div>
+        <div class="form-field">
+          <div class="select-wrapper">
+            <div style="flex:1">
+              <span class="input-label">Giới tính</span>
+              <div class="input-value placeholder">&nbsp;</div>
+            </div>
+            <div class="select-arrow">▾</div>
+          </div>
+        </div>
 
-            <div class="form-group">
-              <label class="form-label">Chiều cao (cm)</label>
-              <input class="form-input error" type="number" value="500">
-              <div class="form-error-text" role="alert">⚠️ Chiều cao phải từ 130–250 cm</div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Cân nặng (kg)</label>
-              <input class="form-input" type="number" value="65">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Tuổi</label>
-              <input class="form-input error" type="number" value="">
-              <div class="form-error-text" role="alert">⚠️ Tuổi phải từ 13–120</div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Giới tính</label>
-              <select class="form-select">
-                <option value="" disabled selected>Chọn giới tính</option>
-                <option value="male">Nam</option>
-                <option value="female">Nữ</option>
-              </select>
-            </div>
+        <p class="section-label">Kinh nghiệm tập gym?</p>
+        <div class="radio-item">
+          <div class="radio-circle"></div>
+          <div class="radio-label">Chưa bao giờ</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-circle"></div>
+          <div class="radio-label">Dưới 6 tháng</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-circle"></div>
+          <div class="radio-label">6 tháng — 2 năm</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-circle"></div>
+          <div class="radio-label">Trên 2 năm</div>
+        </div>
 
-            <p class="section-label">Kinh nghiệm tập gym?</p>
-            <div class="radio-group">
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">Chưa bao giờ</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">Dưới 6 tháng</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">6 tháng — 2 năm</span>
-              </div>
-              <div class="radio-item" tabindex="0">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">Trên 2 năm</span>
-              </div>
-            </div>
-
-            <div class="error-toast" role="alert">
-              ⚠️ Vui lòng sửa các trường đánh dấu đỏ
-            </div>
-
-            <div class="btn-row">
-              <button class="btn btn-outline">
-                <span>←</span>
-                Quay lại
-              </button>
-              <button class="btn btn-primary" style="margin-top:0">
-                Hoàn tất
-                <span>✓</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===================================================================
-           STEP 2: SAVING / DISABLED STATE
-           =================================================================== -->
-      <div class="screen-wrapper">
-        <div class="screen-label">Bước 2 — Đang lưu</div>
-        <div class="screen-desc">Disabled state: button disabled khi saving</div>
-        <div class="phone">
-          <div class="status-bar">
-            <span>9:41</span>
-            <span>📶 🔋</span>
-          </div>
-          <div class="toolbar">
-            <button class="toolbar-back" aria-label="Quay lại">←</button>
-            <span class="toolbar-title">Thông tin</span>
-          </div>
-          <div class="progress-indicator">
-            <div class="progress-indicator-fill" style="width: 100%"></div>
-          </div>
-          <div class="content">
-            <h1 class="step-title">Thông tin cơ bản</h1>
-            <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
-
-            <div class="form-group">
-              <label class="form-label">Chiều cao (cm)</label>
-              <input class="form-input" type="number" value="170" disabled style="opacity:0.5">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Cân nặng (kg)</label>
-              <input class="form-input" type="number" value="65" disabled style="opacity:0.5">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Tuổi</label>
-              <input class="form-input" type="number" value="25" disabled style="opacity:0.5">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Giới tính</label>
-              <select class="form-select" disabled style="opacity:0.5">
-                <option value="male" selected>Nam</option>
-              </select>
-            </div>
-
-            <p class="section-label">Kinh nghiệm tập gym?</p>
-            <div class="radio-group">
-              <div class="radio-item disabled" tabindex="-1">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">Chưa bao giờ</span>
-              </div>
-              <div class="radio-item selected disabled" tabindex="-1">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">Dưới 6 tháng</span>
-              </div>
-              <div class="radio-item disabled" tabindex="-1">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">6 tháng — 2 năm</span>
-              </div>
-              <div class="radio-item disabled" tabindex="-1">
-                <div class="radio-dot"><div class="radio-dot-inner"></div></div>
-                <span class="radio-label">Trên 2 năm</span>
-              </div>
-            </div>
-
-            <div class="btn-row">
-              <button class="btn btn-outline" disabled style="opacity:0.5">
-                <span>←</span>
-                Quay lại
-              </button>
-              <button class="btn btn-primary" disabled style="margin-top:0">
-                ⏳ Đang lưu...
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- screens-grid -->
-
-    <!-- =====================================================================
-         6 STATES REFERENCE
-         ===================================================================== -->
-    <div class="states-section">
-      <h2>📋 6 Interaction States — Reference</h2>
-      <div class="states-grid">
-        <div class="state-card">
-          <div class="state-card-label">1. Default</div>
-          <div class="radio-item" style="font-size:14px; padding:10px 12px;">
-            <div class="radio-dot" style="width:18px; height:18px; border-color:#999"><div class="radio-dot-inner" style="width:10px; height:10px"></div></div>
-            <span class="radio-label">Option</span>
-          </div>
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">2. Hover</div>
-          <div class="radio-item" style="font-size:14px; padding:10px 12px; border-color:#90CAF9; background:#F8FBFF;">
-            <div class="radio-dot" style="width:18px; height:18px; border-color:#999"><div class="radio-dot-inner" style="width:10px; height:10px"></div></div>
-            <span class="radio-label">Option</span>
-          </div>
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">3. Active / Pressed</div>
-          <div class="radio-item" style="font-size:14px; padding:10px 12px; background:#E3F2FD;">
-            <div class="radio-dot" style="width:18px; height:18px; border-color:#999"><div class="radio-dot-inner" style="width:10px; height:10px"></div></div>
-            <span class="radio-label">Option</span>
-          </div>
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">4. Focus-visible</div>
-          <div class="radio-item" style="font-size:14px; padding:10px 12px; box-shadow: 0 0 0 3px rgba(33,150,243,0.3);">
-            <div class="radio-dot" style="width:18px; height:18px; border-color:#999"><div class="radio-dot-inner" style="width:10px; height:10px"></div></div>
-            <span class="radio-label">Option</span>
-          </div>
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">5. Selected</div>
-          <div class="radio-item selected" style="font-size:14px; padding:10px 12px; border-color:#2196F3; background:#E3F2FD;">
-            <div class="radio-dot" style="width:18px; height:18px; border-color:#2196F3"><div class="radio-dot-inner" style="width:10px; height:10px; background:#2196F3; opacity:1"></div></div>
-            <span class="radio-label">Option</span>
-          </div>
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">6. Disabled</div>
-          <div class="radio-item" style="font-size:14px; padding:10px 12px; opacity:0.5; pointer-events:none;">
-            <div class="radio-dot" style="width:18px; height:18px; border-color:#999"><div class="radio-dot-inner" style="width:10px; height:10px"></div></div>
-            <span class="radio-label">Option</span>
-          </div>
-        </div>
-      </div>
-
-      <h2 style="margin-top:24px">📋 Button States</h2>
-      <div class="states-grid">
-        <div class="state-card">
-          <div class="state-card-label">Default</div>
-          <button class="btn btn-primary" style="margin:0; height:40px; font-size:14px; background:#FF9800; color:#fff; border:none; border-radius:10px; width:100%;">Hoàn tất ✓</button>
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">Hover</div>
-          <button class="btn btn-primary" style="margin:0; height:40px; font-size:14px; background:#F57C00; color:#fff; border:none; border-radius:10px; width:100%;">Hoàn tất ✓</button>
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">Active</div>
-          <button class="btn btn-primary" style="margin:0; height:40px; font-size:14px; background:#E65100; color:#fff; border:none; border-radius:10px; width:100%;">Hoàn tất ✓</button>
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">Focus</div>
-          <button class="btn btn-primary" style="margin:0; height:40px; font-size:14px; background:#FF9800; color:#fff; border:none; border-radius:10px; width:100%; box-shadow: 0 0 0 3px rgba(255,152,0,0.3);">Hoàn tất ✓</button>
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">Disabled</div>
-          <button class="btn btn-primary" disabled style="margin:0; height:40px; font-size:14px; background:#FF9800; color:#fff; border:none; border-radius:10px; width:100%; opacity:0.5;">Hoàn tất ✓</button>
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">Loading</div>
-          <button class="btn btn-primary" disabled style="margin:0; height:40px; font-size:14px; background:#FF9800; color:#fff; border:none; border-radius:10px; width:100%; opacity:0.7;">⏳ Đang lưu...</button>
-        </div>
-      </div>
-
-      <h2 style="margin-top:24px">📋 Input States</h2>
-      <div class="states-grid">
-        <div class="state-card">
-          <div class="state-card-label">Default</div>
-          <input class="form-input" style="border-color:#E8E8E8; background:#fff; color:#1A1A1A; font-size:14px; height:40px;" placeholder="VD: 170">
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">Focused</div>
-          <input class="form-input" style="border-color:#2196F3; background:#fff; color:#1A1A1A; font-size:14px; height:40px; box-shadow: 0 0 0 3px rgba(33,150,243,0.15);" value="170">
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">Filled</div>
-          <input class="form-input" style="border-color:#E8E8E8; background:#fff; color:#1A1A1A; font-size:14px; height:40px;" value="170">
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">Error</div>
-          <input class="form-input error" style="border-color:#F44336; background:#fff; color:#1A1A1A; font-size:14px; height:40px;" value="500">
-          <div class="form-error-text" style="color:#F44336; font-size:11px;">⚠️ 130–250 cm</div>
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">Disabled</div>
-          <input class="form-input" disabled style="border-color:#E8E8E8; background:#f0f0f0; color:#999; font-size:14px; height:40px; opacity:0.5;" value="170">
-        </div>
-        <div class="state-card">
-          <div class="state-card-label">Placeholder</div>
-          <input class="form-input" style="border-color:#E8E8E8; background:#fff; color:#999; font-size:14px; height:40px;" placeholder="VD: 170">
+        <div class="button-row">
+          <button class="btn-outline">
+            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Quay lại
+          </button>
+          <button class="btn-cta" style="margin-top:0">
+            Hoàn tất
+            <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
+          </button>
         </div>
       </div>
     </div>
-
-  </div><!-- themeRoot -->
-
-  <!-- =====================================================================
-       DESIGN SPEC NOTES
-       ===================================================================== -->
-  <div style="max-width:1200px; margin:32px auto 0; padding:20px; background:#FFFDE7; border-radius:12px; border:1px solid #FFF9C4;">
-    <h3 style="font-size:16px; margin-bottom:12px;">📐 Design System Compliance Notes</h3>
-    <table style="width:100%; font-size:13px; border-collapse:collapse;">
-      <tr><td style="padding:4px 8px; font-weight:500; width:180px;">Font</td><td style="padding:4px 8px;">Roboto — headline 22px/700, body 14px/400, caption 12px/400</td></tr>
-      <tr><td style="padding:4px 8px; font-weight:500;">Toolbar</td><td style="padding:4px 8px;">Light: #2196F3, Dark: #1565C0. Title: 20px/700 white</td></tr>
-      <tr><td style="padding:4px 8px; font-weight:500;">Status bar</td><td style="padding:4px 8px;">Light: #1976D2 (primary-700), Dark: #0D47A1 (primary-900)</td></tr>
-      <tr><td style="padding:4px 8px; font-weight:500;">CTA Button</td><td style="padding:4px 8px;">Light: #FF9800 (accent-500), Dark: #FFB74D (accent-300). Radius: 10px</td></tr>
-      <tr><td style="padding:4px 8px; font-weight:500;">Radio items</td><td style="padding:4px 8px;">Radius: 12px (radius-md). Selected bg: #E3F2FD / #1A237E</td></tr>
-      <tr><td style="padding:4px 8px; font-weight:500;">Inputs</td><td style="padding:4px 8px;">Height: 48px. Radius: 8px (radius-sm). Border: #E8E8E8 / #333333</td></tr>
-      <tr><td style="padding:4px 8px; font-weight:500;">Spacing</td><td style="padding:4px 8px;">Page: 16px sides, 24px top. Gap: 8px radios, 12px form groups</td></tr>
-      <tr><td style="padding:4px 8px; font-weight:500;">Error</td><td style="padding:4px 8px;">Light: #F44336, Dark: #EF5350. Text 12px + role="alert"</td></tr>
-      <tr><td style="padding:4px 8px; font-weight:500;">Progress bar</td><td style="padding:4px 8px;">4px height under toolbar. Light: white fill, Dark: #42A5F5 fill</td></tr>
-      <tr><td style="padding:4px 8px; font-weight:500;">Phone frame</td><td style="padding:4px 8px;">375px width (design reference), 720px height</td></tr>
-    </table>
   </div>
 
-  <script>
-    function setTheme(theme) {
-      const root = document.getElementById('themeRoot');
-      root.className = theme === 'dark' ? 'theme-dark' : 'theme-light';
-      document.getElementById('btnLight').className = theme === 'light' ? 'active' : '';
-      document.getElementById('btnDark').className = theme === 'dark' ? 'active' : '';
-      // Also update body bg for visual consistency
-      document.body.style.background = theme === 'dark' ? '#333' : '#e0e0e0';
-    }
-  </script>
+  <!-- =====================================================================
+       STEP 2: FILLED STATE — valid form ready to submit
+       ===================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Bước 2 — Đã điền</div>
+    <div class="screen-desc">Form hợp lệ, gym "6 tháng — 2 năm" selected</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="toolbar-title">Thông tin</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+      <div class="content">
+        <h2 class="step-title">Thông tin cơ bản</h2>
+        <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
+
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Chiều cao (cm)</span>
+            <div class="input-value">175</div>
+          </div>
+        </div>
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Cân nặng (kg)</span>
+            <div class="input-value">70</div>
+          </div>
+        </div>
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Tuổi</span>
+            <div class="input-value">28</div>
+          </div>
+        </div>
+        <div class="form-field">
+          <div class="select-wrapper">
+            <div style="flex:1">
+              <span class="input-label">Giới tính</span>
+              <div class="input-value">Nam</div>
+            </div>
+            <div class="select-arrow">▾</div>
+          </div>
+        </div>
+
+        <p class="section-label">Kinh nghiệm tập gym?</p>
+        <div class="radio-item">
+          <div class="radio-circle"></div>
+          <div class="radio-label">Chưa bao giờ</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-circle"></div>
+          <div class="radio-label">Dưới 6 tháng</div>
+        </div>
+        <div class="radio-item selected">
+          <div class="radio-circle selected"></div>
+          <div class="radio-label"><strong>6 tháng — 2 năm</strong></div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-circle"></div>
+          <div class="radio-label">Trên 2 năm</div>
+        </div>
+
+        <div class="button-row">
+          <button class="btn-outline">
+            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Quay lại
+          </button>
+          <button class="btn-cta" style="margin-top:0">
+            Hoàn tất
+            <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       STEP 2: ERROR STATE — per-field validation errors
+       ===================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Bước 2 — Lỗi validation</div>
+    <div class="screen-desc">Per-field errors + missing gym selection</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="toolbar-title">Thông tin</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+      <div class="content">
+        <h2 class="step-title">Thông tin cơ bản</h2>
+        <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
+
+        <div class="form-field">
+          <div class="input-wrapper invalid">
+            <span class="input-label invalid">Chiều cao (cm)</span>
+            <div class="input-value">50</div>
+          </div>
+        </div>
+        <div class="field-error">Chiều cao phải từ 130–250 cm</div>
+
+        <div class="form-field">
+          <div class="input-wrapper invalid">
+            <span class="input-label invalid">Cân nặng (kg)</span>
+            <div class="input-value placeholder">&nbsp;</div>
+          </div>
+        </div>
+        <div class="field-error">Cân nặng phải từ 30–200 kg</div>
+
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Tuổi</span>
+            <div class="input-value">25</div>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <div class="select-wrapper invalid">
+            <div style="flex:1">
+              <span class="input-label invalid">Giới tính</span>
+              <div class="input-value placeholder">&nbsp;</div>
+            </div>
+            <div class="select-arrow">▾</div>
+          </div>
+        </div>
+        <div class="field-error">Vui lòng chọn giới tính</div>
+
+        <p class="section-label">Kinh nghiệm tập gym?</p>
+        <div class="radio-item">
+          <div class="radio-circle"></div>
+          <div class="radio-label">Chưa bao giờ</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-circle"></div>
+          <div class="radio-label">Dưới 6 tháng</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-circle"></div>
+          <div class="radio-label">6 tháng — 2 năm</div>
+        </div>
+        <div class="radio-item">
+          <div class="radio-circle"></div>
+          <div class="radio-label">Trên 2 năm</div>
+        </div>
+        <div class="field-error">Vui lòng chọn kinh nghiệm gym</div>
+
+        <div class="button-row">
+          <button class="btn-outline">
+            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Quay lại
+          </button>
+          <button class="btn-cta" style="margin-top:0">
+            Hoàn tất
+            <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       STEP 2: SAVING / DISABLED STATE
+       ===================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Bước 2 — Đang lưu</div>
+    <div class="screen-desc">Buttons disabled, text "Đang lưu..."</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="toolbar-title">Thông tin</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+      <div class="content">
+        <h2 class="step-title">Thông tin cơ bản</h2>
+        <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
+
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Chiều cao (cm)</span>
+            <div class="input-value">175</div>
+          </div>
+        </div>
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Cân nặng (kg)</span>
+            <div class="input-value">70</div>
+          </div>
+        </div>
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Tuổi</span>
+            <div class="input-value">28</div>
+          </div>
+        </div>
+        <div class="form-field">
+          <div class="select-wrapper">
+            <div style="flex:1">
+              <span class="input-label">Giới tính</span>
+              <div class="input-value">Nam</div>
+            </div>
+            <div class="select-arrow">▾</div>
+          </div>
+        </div>
+
+        <p class="section-label">Kinh nghiệm tập gym?</p>
+        <div class="radio-item selected">
+          <div class="radio-circle selected"></div>
+          <div class="radio-label"><strong>6 tháng — 2 năm</strong></div>
+        </div>
+
+        <div class="button-row">
+          <button class="btn-outline disabled">
+            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Quay lại
+          </button>
+          <button class="btn-cta disabled" style="margin-top:0">
+            Đang lưu...
+            <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div> <!-- /screens-grid -->
+
+<!-- =====================================================================
+     DESIGN SPEC NOTES
+     ===================================================================== -->
+<div class="spec-notes">
+  <h2>📐 Design Spec Notes</h2>
+  <table>
+    <tr><th>Token</th><th>Light</th><th>Dark</th><th>Source</th></tr>
+    <tr><td>Toolbar bg</td><td><code>#2196f3</code></td><td><code>#1565c0</code></td><td><code>--ion-toolbar-background</code></td></tr>
+    <tr><td>CTA button</td><td><code>#ff9800</code> orange</td><td><code>#ffb74d</code> light orange</td><td><code>--ion-color-secondary</code> via <code>color="secondary"</code></td></tr>
+    <tr><td>Page bg</td><td><code>#f5f7fa</code></td><td><code>#121212</code></td><td><code>--ion-background-color</code></td></tr>
+    <tr><td>Card / Item bg</td><td><code>#fff</code></td><td><code>#1e1e1e</code></td><td><code>--bg-card</code></td></tr>
+    <tr><td>Title</td><td colspan="2">22px / 700 / 1.3</td><td>DS headline</td></tr>
+    <tr><td>Subtitle</td><td colspan="2">16px / 500 / 1.4</td><td>DS subtitle</td></tr>
+    <tr><td>Section label</td><td colspan="2">14px / 500 / 1.4</td><td>DS section</td></tr>
+    <tr><td>Field error</td><td><code>#f44336</code> 12px</td><td><code>#ef5350</code> 12px</td><td><code>--ion-color-danger</code></td></tr>
+    <tr><td>Radio radius</td><td colspan="2">12px</td><td><code>--radius-md</code></td></tr>
+    <tr><td>Button radius</td><td colspan="2">10px</td><td>Custom (between sm/md)</td></tr>
+    <tr><td>Progress bar</td><td colspan="2">4px, white track</td><td><code>ion-progress-bar</code></td></tr>
+    <tr><td>Selected bg</td><td><code>#e3f2fd</code></td><td><code>#1a237e</code></td><td><code>--primary-50</code> / custom dark</td></tr>
+  </table>
+
+  <h3 style="margin-top:16px">🔄 Interaction States (all 6)</h3>
+  <table>
+    <tr><th>State</th><th>Step 1</th><th>Step 2</th></tr>
+    <tr><td>Default</td><td>Screen 1: empty radio group</td><td>Screen 4: empty form fields</td></tr>
+    <tr><td>Hover</td><td>Radio item bg → <code>#e3f2fd</code></td><td>Same on radio items</td></tr>
+    <tr><td>Active/Selected</td><td>Screen 2: filled radio, blue highlight</td><td>Screen 5: filled form + gym selected</td></tr>
+    <tr><td>Focus</td><td><code>tabindex="-1"</code> on heading for a11y</td><td>Focus first invalid field on error</td></tr>
+    <tr><td>Disabled</td><td>—</td><td>Screen 7: buttons 50% opacity while saving</td></tr>
+    <tr><td>Error</td><td>Screen 3: toast "Vui lòng chọn mục tiêu"</td><td>Screen 6: per-field errors + focus</td></tr>
+  </table>
+
+  <h3 style="margin-top:16px">♿ Accessibility</h3>
+  <table>
+    <tr><th>Feature</th><th>Implementation</th></tr>
+    <tr><td>Error messages</td><td><code>role="alert"</code> + <code>aria-live="assertive"</code></td></tr>
+    <tr><td>Invalid fields</td><td><code>aria-invalid="true"</code> + <code>aria-describedby="err-{field}"</code></td></tr>
+    <tr><td>Radio groups</td><td><code>aria-label</code> on <code>ion-radio-group</code></td></tr>
+    <tr><td>Focus management</td><td>Heading focus on step transition, first invalid field on error</td></tr>
+  </table>
+
+  <h3 style="margin-top:16px">🧮 TDEE Calculation (PRD §6)</h3>
+  <table>
+    <tr><th>Gym Experience</th><th>Activity Factor</th><th>Fitness Level</th></tr>
+    <tr><td>Chưa bao giờ</td><td>1.2 (sedentary)</td><td>beginner</td></tr>
+    <tr><td>Dưới 6 tháng</td><td>1.375 (lightly active)</td><td>beginner</td></tr>
+    <tr><td>6 tháng — 2 năm</td><td>1.55 (moderately active)</td><td>intermediate</td></tr>
+    <tr><td>Trên 2 năm</td><td>1.725 (very active)</td><td>advanced</td></tr>
+  </table>
+  <table style="margin-top:8px">
+    <tr><th>Goal</th><th>Calorie Adj</th><th>Protein Multiplier</th></tr>
+    <tr><td>Giảm cân</td><td>−500 kcal</td><td>2.0 g/kg</td></tr>
+    <tr><td>Tăng cơ</td><td>+300 kcal</td><td>2.2 g/kg</td></tr>
+    <tr><td>Duy trì</td><td>±0 kcal</td><td>1.6 g/kg</td></tr>
+    <tr><td>Tăng sức mạnh</td><td>+200 kcal</td><td>2.0 g/kg</td></tr>
+  </table>
+</div>
+
+<script>
+function setTheme(theme) {
+  document.body.className = theme;
+  document.querySelectorAll('.theme-toggle button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+</script>
+
 </body>
 </html>
