@@ -27,6 +27,8 @@ Copilot trong dự án này: **cực kỳ khó tính, khắt khe, kỹ lưỡng*
 4. Xác nhận hiểu biết → đề xuất approach + trade-off
 5. Chờ user approve → MỚI code
 
+**Auto skill selection** — TỰ ĐỘNG chọn skills phù hợp khi phân tích/implement. User KHÔNG cần liệt kê. Ví dụ: `brainstorming` cho feature mới, `context7` cho tra cứu docs, `shadcn-ui` cho UI components, `react-vite-best-practices` cho code patterns.
+
 **Ngoại lệ** (không cần hỏi): Bug rõ ràng 100% | User nói "tự động làm hết" | Hotfix production | Task đơn giản (fix typo)
 
 ### Autopilot Mode
@@ -171,8 +173,20 @@ Every code change must pass:
 1. `npm run lint` — 0 errors, no `eslint-disable`
 2. `npm run test` — 0 new failures, coverage ≥ 100% for new code
 3. `npm run build` — clean production build
-4. `npm run test:coverage && npm run sonar` — SonarQube scan phải 0 issues (Bug, Vulnerability, Code Smell). Nếu còn issues → fix tất cả → chạy lại từ bước 1. **KHÔNG ĐƯỢC commit khi SonarQube còn bất kỳ issue nào.**
+4. `npm run test:coverage && npm run sonar` — SonarQube 0 issues. Nếu còn → fix → lặp từ bước 1. **KHÔNG commit khi SonarQube còn issue.**
 5. Spec cross-check — verify against `docs/3-design/`
+
+**SonarQube setup** (nếu server chưa chạy):
+```
+docker compose up -d sonarqube  # chờ status="UP"
+npm run test:coverage && npm run sonar
+```
+
+**Emulator verify** (cho mọi UI/code change — Capacitor project):
+```
+npx cap sync android → cd android && ./gradlew assembleDebug
+adb -s emulator-5556 install -r app-debug.apk → CDP test → screenshot
+```
 
 ### /team Pipeline & Sub-Agent Rules
 
@@ -279,7 +293,7 @@ Khi xảy ra **BẤT KỲ** tình huống nào sau đây trong session:
 - **CHỌN LỌC** — chỉ lưu thông tin có giá trị tái sử dụng, không lưu lỗi typo hay lỗi 1 lần
 - **NGẮN GỌN** — mỗi entry tối đa 5-10 dòng, tập trung vào actionable knowledge
 - **KHÔNG TRÙNG** — kiểm tra file đã có entry tương tự chưa trước khi thêm
-- Các file memory được Copilot **tự động load** cho mọi session trong project
+- Khi cần kinh nghiệm → đọc `.github/instructions/memory/` on-demand
 
 #### Cấu trúc thư mục memory
 
