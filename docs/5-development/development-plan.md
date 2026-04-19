@@ -39,12 +39,12 @@ Tài liệu này mô tả **kế hoạch phát triển theo giai đoạn** để
 
 | # | Vấn đề | Quyết định | Impact |
 |---|--------|-----------|--------|
-| D1 | Seed ingredient data | Scrape USDA FoodData Central CSV + bổ sung món VN đặc thù sau | Cần script download + parse + filter → JSON |
+| D1 | Seed nutrition data | Curated **20 món Việt core** (6 sáng / 7 trưa / 7 tối) + ingredient set liên quan; external datasets chỉ dùng để bootstrap/discovery | Cần seed pipeline cho `ingredients.json` + `dishes.json`, không seed đồ ăn vặt |
 | D2 | Seed exercise data | Scrape ExerciseDB/wger API + translate VN | Cần migration script + translate fields |
 | D3 | Gemini API key | Dev key ship trong APK (obfuscated + quota limit trong code) | ADR cần document security trade-off |
 | D4 | Photo storage (F-05) | Không lưu — AI analyze xong → discard ảnh | Đơn giản hóa Filesystem usage |
 | D5 | Backup/Export | Hoãn V2 — V1 communicate rõ với user | Onboarding + Settings cần disclaimer |
-| D6 | Schema migration | Version + sequential migrations (`schema_version` field) | Phase 1 cần setup migration system từ đầu |
+| D6 | Schema migration | Version + sequential migrations (`db_version` field trong `app_config`) | Phase 1 cần setup migration system từ đầu |
 | D7 | Testing | Full 4 levels: Unit + Component + E2E + Manual QA | Cần setup Karma (có sẵn) + Cypress/Playwright |
 | D8 | Screen mockup | HTML mockup trước mỗi phase → chốt layout → code | Thêm 1 bước mockup trước khi code mỗi phase |
 
@@ -104,7 +104,7 @@ AI features split 2 phases:
 
 | Phase | Tên | Features | Shared platform built | Deliverable |
 |-------|-----|----------|----------------------|-------------|
-| **1** | Management (CRUD) | F-01, F-02 (phần non-AI) | IngredientRepo, DishRepo, DishIngredientRepo, stores, migration system, seed data loader | User CRUD nguyên liệu + món ăn (manual + quick add, chưa có AI) |
+| **1** | Management (CRUD) | F-01, F-02 (phần non-AI) | IngredientRepo, DishRepo, DishIngredientRepo, stores, migration system, seed data loader | User CRUD nguyên liệu + món ăn (ingredient-based + quick add, chưa có AI) |
 | **1.5** | AI Foundation | F-01 AI Lookup + F-02 AI Auto-fill | GeminiService (HTTP, retry, error handling), prompt template executor, AI error UI | F-01/F-02 complete-done với AI; infra sẵn cho các AI features sau |
 | **2** | Calendar & Tracking | F-03, F-04 | DayPlanRepo, MealSlotRepo, PlannedDishRepo, daily summary computation, AI Meal Plan templates (day+week, dùng Phase 1.5 infra) | User lên kế hoạch bữa ăn + track macro hàng ngày + AI meal plan |
 | **3** | Dashboard | F-12 | Dashboard store, shared macro/progress components | User có màn tổng quan: nutrition + streak + weight |
@@ -119,20 +119,20 @@ AI features split 2 phases:
 ### Phase 1: Management — CRUD only (F-01 + F-02, non-AI)
 
 **Features:**
-- F-01 Quản lý Nguyên liệu: CRUD thủ công + quick add + USDA seed (chưa có AI Lookup)
-- F-02 Quản lý Món ăn: CRUD 2/3 cách (ingredient-based + quick add; AI auto-fill để Phase 1.5)
+- F-01 Quản lý Nguyên liệu: CRUD thủ công + curated ingredient seed liên kết trực tiếp với 20 món Việt core (chưa có AI Lookup)
+- F-02 Quản lý Món ăn: CRUD 2/3 cách (ingredient-based + quick add; AI auto-fill để Phase 1.5) + ship sẵn 20 món Việt curated
 
 **Shared platform built trong phase này:**
 - Schema migration system (`db_version`, migration scripts)
-- Seed data loader (USDA CSV → ingredients.json)
+- Seed data loader (`ingredients.json` + `dishes.json`)
 - IngredientRepository, DishRepository, DishIngredientRepository
 - IngredientStore, DishStore (Angular Signals)
 - Shared components: `<app-nutrition-badge>`, `<app-search-toolbar>`, `<app-empty-state>`, `<app-confirm-dialog>`
 - Testing setup: Karma config verify + Cypress/Playwright chọn & setup
 
-**Deliverable:** User mở Management tab → thấy 100+ ingredients từ USDA seed → CRUD được → tạo món ăn từ ingredients (thủ công + quick add).
+**Deliverable:** User mở Management tab → thấy ingredient set gắn với 20 món Việt core (6 sáng / 7 trưa / 7 tối) → CRUD được → tạo/sửa món ăn từ ingredients (thủ công + quick add).
 
-**Detail doc:** `phase-1-management.md` (sẽ viết khi bắt đầu Phase 1)
+**Detail doc:** `phase-1-management.md` (đã viết, tiếp tục refine trước khi start code)
 
 ---
 
@@ -276,7 +276,7 @@ Sau khi end phase:
 
 ### 7.4 Database migration discipline
 
-- `schema.ts` KHÔNG sửa trực tiếp sau Phase 1 — mỗi change = 1 migration script
+- Phase 1 sẽ introduce `V1_initial_schema.sql`; sau đó mọi thay đổi schema đều đi qua migration mới
 - Mỗi migration = 1 file: `migrations/V{version}_{description}.sql` (theo data-model.md §10)
 - Ví dụ: `V1_initial_schema.sql`, `V2_add_fiber_column.sql`
 - `db_version` key trong `app_config` table, tăng monotonic
@@ -301,7 +301,7 @@ Sau khi end phase:
 | Doc | Status | Khi cần |
 |-----|:------:|---------|
 | `5-development/development-plan.md` (file này) | ✅ Active | — |
-| `5-development/phase-1-management.md` | ⏳ Chưa viết | Trước khi start Phase 1 |
+| `5-development/phase-1-management.md` | ✅ Active | — |
 | `5-development/phase-1.5-ai-foundation.md` | ⏳ Chưa viết | Trước khi start Phase 1.5 |
 | `5-development/phase-2-calendar.md` | ⏳ Chưa viết | Trước khi start Phase 2 |
 | `5-development/phase-3-dashboard.md` | ⏳ Chưa viết | Trước khi start Phase 3 |
@@ -313,7 +313,7 @@ Sau khi end phase:
 | `6-decisions/ADR-002-migration-strategy.md` | ⏳ Chưa viết | Phase 1 |
 | `3-design/mockups/phase-1-*.html` | ⏳ Chưa viết | Trước Phase 1 code |
 
-**Missing artifacts hiện tại:** Tất cả docs ⏳ chưa viết. Viết khi tới phase tương ứng theo triết lý "only write detail for next phase".
+**Missing artifacts hiện tại:** `phase-1-management.md` đã tồn tại; các docs ⏳ còn lại sẽ viết khi tới phase tương ứng theo triết lý "only write detail for next phase".
 
 ---
 

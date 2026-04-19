@@ -95,7 +95,9 @@ src/
 │   │   │   │   ├── web-database.service.ts    # sql.js WASM (web/tests)
 │   │   │   │   ├── native-database.service.ts # @capacitor-community/sqlite
 │   │   │   │   ├── database.provider.ts       # Factory provider
-│   │   │   │   └── schema.ts                  # DDL + migrations
+│   │   │   │   ├── migration-runner.ts        # Versioned migrations executor
+│   │   │   │   └── migrations/
+│   │   │   │       └── V1_initial_schema.sql
 │   │   │   ├── ai/
 │   │   │   │   ├── gemini.service.ts          # Core Gemini API caller
 │   │   │   │   ├── nutrition-ai.service.ts    # Menu suggest, meal plan, autofill
@@ -379,9 +381,29 @@ export class IngredientRepository {
   async insert(data: Omit<Ingredient, 'id' | 'created_at'>): Promise<Ingredient> {
     const id = crypto.randomUUID();
     await this.db.execute(
-      `INSERT INTO ingredient (id, name, group_name, calories, protein, carbs, fat, fiber, source)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, data.name, data.group_name, data.calories, data.protein, data.carbs, data.fat, data.fiber, data.source]
+      `INSERT INTO ingredient (
+         id, name, category,
+         nutrition_basis_unit, nutrition_basis_quantity,
+         calories, protein, carbs, fat, fiber,
+         default_entry_unit, grams_per_unit, ml_per_unit,
+         source
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        data.name,
+        data.category,
+        data.nutrition_basis_unit,
+        data.nutrition_basis_quantity,
+        data.calories,
+        data.protein,
+        data.carbs,
+        data.fat,
+        data.fiber,
+        data.default_entry_unit,
+        data.grams_per_unit ?? null,
+        data.ml_per_unit ?? null,
+        data.source,
+      ]
     );
     return this.getById(id) as Promise<Ingredient>;
   }

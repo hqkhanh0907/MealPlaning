@@ -99,7 +99,8 @@ Trả JSON theo schema:
       "ingredients": [
         {
           "name": string,      // Tên nguyên liệu (match DB nếu có)
-          "amount_grams": number,
+          "amount_value": number,
+          "amount_unit": "g" | "ml" | "piece",
           "is_in_db": boolean  // true nếu match được với DB
         }
       ],
@@ -137,7 +138,7 @@ Nếu không phải đồ ăn, trả dishes: [].
 
 **Prompt:**
 ```
-Cho món "{dish_name}", liệt kê nguyên liệu thông dụng và khối lượng cho 1 phần ăn.
+Cho món "{dish_name}", liệt kê nguyên liệu thông dụng và số lượng cho 1 phần ăn.
 
 Danh sách nguyên liệu trong database (ưu tiên match):
 {db_ingredient_names}
@@ -149,7 +150,8 @@ Trả JSON:
   "ingredients": [
     {
       "name": string,          // Ưu tiên match DB
-      "amount_grams": number,
+      "amount_value": number,
+      "amount_unit": "g" | "ml" | "piece",
       "is_in_db": boolean
     }
   ]
@@ -415,37 +417,51 @@ Rules:
 
 **Input:**
 - Tên nguyên liệu: user input (VD "ức gà", "gạo trắng")
-- Locale: `vi-VN` (ưu tiên đơn vị + định danh tiếng Việt)
+- Locale: `vi-VN` (ưu tiên định danh tiếng Việt + unit mặc định tự nhiên)
 
 **Prompt:**
 ```
-Tra cứu thông tin dinh dưỡng cho nguyên liệu "{ingredient_name}" (đơn vị: per 100g).
+Tra cứu thông tin dinh dưỡng canonical cho nguyên liệu "{ingredient_name}".
+
+Rules về basis:
+- Nguyên liệu rắn: trả nutrition theo `100g`
+- Nguyên liệu lỏng: trả nutrition theo `100ml`
+- `piece` chỉ được dùng làm default entry unit nếu có conversion rõ ràng sang `g` hoặc `ml`
 
 Trả JSON:
 {
-  "name": string,              // Chuẩn hóa tên (Title Case tiếng Việt)
-  "group": string,              // Một trong: "Thịt", "Cá & Hải sản", "Rau củ", "Trái cây", "Ngũ cốc", "Đậu & Hạt", "Trứng & Sữa", "Dầu & Gia vị", "Khác"
-  "calories_per_100g": number,
-  "protein_per_100g": number,
-  "carbs_per_100g": number,
-  "fat_per_100g": number,
-  "fiber_per_100g": number,
+  "name": string,              // Chuẩn hóa tên tiếng Việt
+  "category": string,          // Ví dụ: "Thịt", "Ngũ cốc", "Trứng & Sữa"
+  "nutrition_basis_unit": "g" | "ml",
+  "nutrition_basis_quantity": 100,
+  "calories": number,
+  "protein": number,
+  "carbs": number,
+  "fat": number,
+  "fiber": number,
+  "default_entry_unit": "g" | "ml" | "piece",
+  "grams_per_unit": number | null,
+  "ml_per_unit": number | null,
   "confidence": "high" | "medium" | "low",  // Độ tin cậy của AI
   "note": string               // Ghi chú nếu cần (VD: "đã nấu chín", "raw")
 }
 
 Rules:
 - Nếu tên mơ hồ (VD "thịt") → confidence: "low" + note yêu cầu rõ
-- Số liệu ưu tiên nguồn uy tín (USDA, Viện Dinh dưỡng VN)
+- Phase 1 ưu tiên USDA làm nutrition authority chính ở mức ingredient-level
+- Nguồn phụ tiếng Việt chỉ dùng để hỗ trợ naming/alias hoặc fill gap sau khi review thủ công
+- Nếu không xác định chắc conversion cho `piece` → default_entry_unit phải là `g` hoặc `ml`
 - KHÔNG được bịa số — nếu không chắc, confidence: "low"
 ```
 
 **Post-processing:**
 1. Hiển thị kết quả AI với icon confidence
 2. Nếu `confidence: "low"` → highlight + khuyến khích user verify
-3. User có thể sửa tất cả fields trước khi lưu
-4. Confirm → insert vào `ingredient` table với `source: 'ai'`
-5. Log vào `ai_chat_log` với `feature: 'ingredient_lookup'`
+3. **Duplicate check:** So khớp tên ingredient AI trả về với DB hiện có. Nếu trùng/gần giống → cảnh báo "đã tồn tại" + cho user chọn: cập nhật ingredient cũ hoặc tạo mới
+4. User có thể sửa tất cả fields trước khi lưu
+5. Confirm → insert vào `ingredient` table với `source: 'ai'` (hoặc update ingredient cũ nếu user chọn cập nhật)
+6. Log vào `ai_chat_log` với `feature: 'ingredient_lookup'`
+7. **Source lifecycle:** Nếu user sửa một AI-lookup ingredient sau này (`source = 'ai'`), record đó flip sang `source = 'manual'` — nhất quán với logic seed (`db → manual`)
 
 ---
 

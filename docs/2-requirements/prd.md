@@ -33,18 +33,18 @@ Tài liệu này mô tả chi tiết **13 features** của HealthMate AI V1, bao
 
 ### F-01: Quản lý Nguyên liệu
 
-**Mô tả:** CRUD nguyên liệu với thông tin dinh dưỡng per 100g. Là nền tảng cho toàn bộ hệ thống tính calo.
+**Mô tả:** CRUD nguyên liệu với thông tin dinh dưỡng canonical theo `100g` hoặc `100ml`. Là nền tảng cho toàn bộ hệ thống tính calo.
 
 **Chức năng chi tiết:**
 
 | Chức năng | Mô tả |
 |-----------|-------|
 | **Xem danh sách** | Hiển thị tất cả nguyên liệu, hỗ trợ tìm kiếm, sắp xếp theo tên/nhóm |
-| **Thêm thủ công** | Form nhập: tên, nhóm, calo, protein, carbs, fat, fiber per 100g |
+| **Thêm thủ công** | Form nhập: tên, category, calories/protein/carbs/fat/fiber + nutrition basis (`100g` hoặc `100ml`) + default entry unit (`g` / `ml` / `piece`) |
 | **Sửa** | Chỉnh sửa thông tin nguyên liệu đã thêm |
 | **Xóa** | Xóa nguyên liệu (confirm dialog nếu đang dùng trong món ăn) |
 | **AI Lookup** | Nhập tên nguyên liệu → AI tra cứu thông tin dinh dưỡng → user confirm |
-| **Vietnamese Food DB** | Database sẵn các nguyên liệu phổ biến Việt Nam (gạo, thịt, rau...) |
+| **Vietnamese Core Seed** | App ship sẵn dataset nền cho **20 món Việt curated** (6 sáng / 7 trưa / 7 tối), không gồm snack |
 
 **Dữ liệu nguyên liệu:**
 
@@ -52,23 +52,54 @@ Tài liệu này mô tả chi tiết **13 features** của HealthMate AI V1, bao
 Ingredient {
   id: string
   name: string                    // "Ức gà"
-  group: string                   // "Thịt"
-  calories_per_100g: number       // 165
-  protein_per_100g: number        // 31
-  carbs_per_100g: number          // 0
-  fat_per_100g: number            // 3.6
-  fiber_per_100g: number          // 0
+  category: string                // "Thịt"
+  nutrition_basis_unit: 'g' | 'ml'
+  nutrition_basis_quantity: 100
+  calories: number                // 165
+  protein: number                 // 31
+  carbs: number                   // 0
+  fat: number                     // 3.6
+  fiber: number                   // 0
+  default_entry_unit: 'g' | 'ml' | 'piece'
+  grams_per_unit?: number         // VD trứng gà: 50
+  ml_per_unit?: number
   source: 'manual' | 'ai' | 'db' // Nguồn dữ liệu
   created_at: timestamp
   updated_at: timestamp
 }
 ```
 
+> Rule: macro values luôn canonical theo `100g` hoặc `100ml`. `piece` chỉ là entry/display unit có conversion rõ ràng.
+> Phase 1 cho phép một số `Ingredient` đóng vai trò **composite ingredient** cho nước dùng / nước chấm / base canh nếu cần để giữ seed dataset gọn và nhất quán.
+> `Ingredient.source` dùng để phân biệt provenance: seed mặc định = `db`, user tự tạo/sửa ingredient = `manual`, AI lookup tạo ingredient = `ai`. Khi user sửa một seed ingredient, record đó đổi từ `db` sang `manual`. Khi user sửa một AI-lookup ingredient, record đó đổi từ `ai` sang `manual`.
+> **AI Lookup duplicate handling:** Trước khi insert, app kiểm tra tên ingredient trùng/gần giống trong DB. Nếu trùng → cảnh báo user + cho chọn: cập nhật ingredient cũ hoặc tạo mới.
+
 **Tiêu chí chấp nhận:**
 - [ ] CRUD hoạt động đúng, data persist sau restart
 - [ ] Tìm kiếm real-time theo tên
 - [ ] AI lookup trả về kết quả và user có thể sửa trước khi lưu
-- [ ] Vietnamese food DB có sẵn ≥ 100 nguyên liệu phổ biến
+- [ ] Core Vietnamese seed dataset hỗ trợ 20 món Việt curated (6 sáng / 7 trưa / 7 tối), không gồm snack
+
+**Validation rules (Phase 1):**
+
+| Field | Required | Min | Max | Default | Notes |
+|-------|:--------:|-----|-----|---------|-------|
+| `name` | ✅ | 1 char | 100 chars | — | — |
+| `category` | ✅ | — | — | — | Từ enum chuẩn (xem danh sách bên dưới) |
+| `calories` | ✅ | 0 | 2000 | — | per 100g/ml |
+| `protein` | — | 0 | 100 | 0 | g per 100g/ml |
+| `carbs` | — | 0 | 100 | 0 | g per 100g/ml |
+| `fat` | — | 0 | 100 | 0 | g per 100g/ml |
+| `fiber` | — | 0 | 100 | 0 | g per 100g/ml |
+| `grams_per_unit` | Khi piece | 1 | 5000 | — | Bắt buộc nếu default_entry_unit = piece (solid) |
+| `ml_per_unit` | Khi piece | 1 | 5000 | — | Bắt buộc nếu default_entry_unit = piece (liquid) |
+
+**Ingredient categories chuẩn (Phase 1):**
+
+```
+'Thịt' | 'Cá & Hải sản' | 'Trứng & Sữa' | 'Rau củ' | 'Ngũ cốc & Tinh bột' |
+'Đậu & Hạt' | 'Dầu & Mỡ' | 'Gia vị' | 'Nước dùng & Nước chấm' | 'Trái cây' | 'Khác'
+```
 
 ---
 
@@ -80,7 +111,7 @@ Ingredient {
 
 | Cách | Mô tả | Khi nào dùng |
 |------|-------|-------------|
-| **Ingredient-based** | Chọn nguyên liệu + nhập khối lượng (g) → tự tính nutrition | Muốn chính xác, tự chọn |
+| **Ingredient-based** | Chọn nguyên liệu + nhập số lượng theo unit hợp lệ (`g`, `ml`, `piece`) → tự tính nutrition | Muốn chính xác, tự chọn |
 | **Quick Add** | Nhập trực tiếp tên + tổng calo/protein/carbs/fat | Muốn nhanh, không cần chi tiết |
 | **🤖 AI Auto-fill** | Nhập tên món → bấm AI → AI trả về nguyên liệu + khối lượng thông dụng → User confirm | Muốn chính xác nhưng không biết nguyên liệu |
 
@@ -118,7 +149,8 @@ Dish {
   id: string
   name: string                       // "Cơm gà xối mỡ"
   description?: string
-  type: 'ingredient-based' | 'quick'
+  type: 'ingredient_based' | 'quick' | 'ai_autofill'
+  source: 'db' | 'custom' | 'ai'
   ingredients: DishIngredient[]      // Nếu ingredient-based
   total_calories: number             // Auto-calculated hoặc manual
   total_protein: number
@@ -132,17 +164,45 @@ Dish {
 
 DishIngredient {
   ingredient_id: string
-  amount_grams: number               // 150g gạo, 200g ức gà...
+  amount_value: number               // 150, 2, 300...
+  amount_unit: 'g' | 'ml' | 'piece'
+  normalized_amount: number          // Đã convert về basis unit của ingredient
+  normalized_unit: 'g' | 'ml'
 }
 ```
 
+> Phase 1 cho phép `DishIngredient` trỏ tới ingredient thường hoặc composite ingredient đã curate sẵn cho broth/sauce/base.
+> Với 20 món seed của Phase 1, user sửa trực tiếp record seed gốc; app không tạo bản copy tự động trước khi sửa.
+> Khi app update, seeded dishes đã tồn tại trong DB không bị overwrite bởi seed artifact mới của Phase 1.
+> Seed dataset chỉ được nạp ở fresh install; các version sau không tự thêm lại seed đã bị xóa và cũng không tự thêm seed mới vào DB đã tồn tại.
+> `Dish.source` dùng để phân biệt provenance: seed mặc định = `db`, user tự tạo/sửa món = `custom`, AI tạo = `ai`. Khi user sửa một seed dish, record đó đổi từ `db` sang `custom`.
+
+**Validation rules — Dish (Phase 1):**
+
+| Field | Required | Min | Max | Default | Notes |
+|-------|:--------:|-----|-----|---------|-------|
+| `dish.name` | ✅ | 1 char | 150 chars | — | — |
+| `dish.servings` | ✅ | 0.5 | 20 | 1 | — |
+| `dish_ingredient.amount_value` | ✅ | 0.1 | 10000 | — | — |
+
+**Validation rules — Quick Add (Phase 1):**
+
+| Field | Required | Min | Max | Default | Notes |
+|-------|:--------:|-----|-----|---------|-------|
+| `name` | ✅ | 1 char | 150 chars | — | — |
+| `calories` | ✅ | 0 | 5000 | — | — |
+| `protein` | — | 0 | 500 | 0 | — |
+| `carbs` | — | 0 | 500 | 0 | — |
+| `fat` | — | 0 | 500 | 0 | — |
+
 **Tiêu chí chấp nhận:**
-- [ ] Ingredient-based: chọn nguyên liệu, nhập khối lượng, tự tính tổng
+- [ ] Ingredient-based: chọn nguyên liệu, nhập số lượng theo unit hợp lệ, tự tính tổng
 - [ ] Quick add: nhập trực tiếp số liệu dinh dưỡng
 - [ ] AI Auto-fill: nhập tên → AI trả về nguyên liệu → user confirm → lưu
 - [ ] AI Auto-fill: nguyên liệu mới → hỏi user có lưu vào DB chung không
 - [ ] Hiển thị tổng nutrition mỗi món
 - [ ] Tìm kiếm món ăn theo tên
+- [ ] App ship sẵn 20 món Việt curated dưới dạng `1 serving` templates để user có dữ liệu nền ngay từ lần mở đầu tiên
 
 ---
 

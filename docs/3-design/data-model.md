@@ -140,20 +140,29 @@ CREATE TABLE weight_log (
 
 ### 4.1 ingredient
 
-Nguyên liệu với thông tin dinh dưỡng per 100g (F-01).
+Nguyên liệu với thông tin dinh dưỡng canonical theo `100g` hoặc `100ml` (F-01). `piece` chỉ là entry unit có conversion rõ ràng. Phase 1 cho phép một số ingredient được curate dưới dạng **composite ingredient** cho broth/sauce/base để giữ seed dataset gọn.
 
 ```sql
 CREATE TABLE ingredient (
   id                TEXT PRIMARY KEY,
   name              TEXT NOT NULL,                -- "Ức gà"
-  group_name        TEXT,                         -- "Thịt", "Rau", "Ngũ cốc"...
+  category          TEXT NOT NULL CHECK (category IN ('Thịt', 'Cá & Hải sản', 'Trứng & Sữa', 'Rau củ', 'Ngũ cốc & Tinh bột', 'Đậu & Hạt', 'Dầu & Mỡ', 'Gia vị', 'Nước dùng & Nước chấm', 'Trái cây', 'Khác')),
   
-  -- Dinh dưỡng per 100g
+  -- Canonical nutrition basis
+  nutrition_basis_unit TEXT NOT NULL CHECK (nutrition_basis_unit IN ('g', 'ml')),
+  nutrition_basis_quantity REAL NOT NULL DEFAULT 100,
+
+  -- Dinh dưỡng canonical (per 100g hoặc 100ml)
   calories          REAL NOT NULL,                -- kcal
   protein           REAL NOT NULL DEFAULT 0,      -- g
   carbs             REAL NOT NULL DEFAULT 0,      -- g
   fat               REAL NOT NULL DEFAULT 0,      -- g
   fiber             REAL NOT NULL DEFAULT 0,      -- g
+
+  -- Entry/display unit
+  default_entry_unit TEXT NOT NULL CHECK (default_entry_unit IN ('g', 'ml', 'piece')),
+  grams_per_unit    REAL,                         -- dùng khi default_entry_unit = 'piece' và basis là 'g'
+  ml_per_unit       REAL,                         -- dùng khi default_entry_unit = 'piece' và basis là 'ml'
   
   -- Nguồn dữ liệu
   source            TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('manual', 'ai', 'db')),
@@ -163,12 +172,20 @@ CREATE TABLE ingredient (
 );
 
 CREATE INDEX idx_ingredient_name ON ingredient(name);
-CREATE INDEX idx_ingredient_group ON ingredient(group_name);
+CREATE INDEX idx_ingredient_category ON ingredient(category);
 ```
+
+Rule provenance cho `ingredient`:
+- Seed ingredient insert từ `ingredients.json` phải dùng `source = 'db'`
+- User tạo ingredient thủ công mới dùng `source = 'manual'`
+- Ingredient tạo từ AI lookup dùng `source = 'ai'`
+- Nếu user sửa một seed ingredient gốc, record đó đổi `source` từ `db` sang `manual`
+- Nếu user sửa một AI-lookup ingredient (`source = 'ai'`), record đó đổi `source` từ `ai` sang `manual`
+- Trước khi insert AI-lookup ingredient: app kiểm tra tên trùng/gần giống trong DB → nếu trùng, cảnh báo user + cho chọn cập nhật record cũ hoặc tạo mới
 
 ### 4.2 dish
 
-Món ăn — ingredient-based, quick add, hoặc AI auto-fill (F-02).
+Món ăn — ingredient-based, quick add, hoặc AI auto-fill (F-02). Các seeded dishes của Phase 1 được lưu như dish rows bình thường và cho phép user sửa trực tiếp record gốc.
 
 ```sql
 CREATE TABLE dish (
@@ -178,6 +195,7 @@ CREATE TABLE dish (
   
   -- Loại món
   type              TEXT NOT NULL CHECK (type IN ('ingredient_based', 'quick', 'ai_autofill')),
+  source            TEXT NOT NULL DEFAULT 'custom' CHECK (source IN ('db', 'custom', 'ai')),
   
   -- Tổng dinh dưỡng (auto-calculated cho ingredient-based, manual cho quick)
   total_calories    REAL NOT NULL,
@@ -196,18 +214,26 @@ CREATE TABLE dish (
 CREATE INDEX idx_dish_name ON dish(name);
 ```
 
+Rule provenance cho `dish`:
+- Seed dish insert từ `dishes.json` phải dùng `source = 'db'`
+- User tạo quick/ingredient-based dish mới dùng `source = 'custom'`
+- AI auto-fill saved dish dùng `source = 'ai'`
+- Nếu user sửa một seed dish gốc, record đó đổi `source` từ `db` sang `custom`
+
 ### 4.3 dish_ingredient
 
-Bảng trung gian: món ăn ↔ nguyên liệu (khối lượng).
+Bảng trung gian: món ăn ↔ nguyên liệu (khối lượng). `ingredient_id` có thể trỏ tới ingredient thường hoặc composite ingredient đã curate sẵn.
 
 ```sql
 CREATE TABLE dish_ingredient (
   id                TEXT PRIMARY KEY,
   dish_id           TEXT NOT NULL REFERENCES dish(id) ON DELETE CASCADE,
   ingredient_id     TEXT NOT NULL REFERENCES ingredient(id) ON DELETE RESTRICT,
-  amount_grams      REAL NOT NULL,                -- Khối lượng (g)
+  amount_value      REAL NOT NULL,                -- 150, 300, 2...
+  amount_unit       TEXT NOT NULL CHECK (amount_unit IN ('g', 'ml', 'piece')),
+  normalized_amount REAL NOT NULL,                -- Đã convert về basis unit của ingredient
   
-  -- Dinh dưỡng đã tính (amount × nutrition/100)
+  -- Dinh dưỡng đã tính (normalized_amount × nutrition / nutrition_basis_quantity)
   calories          REAL NOT NULL,
   protein           REAL NOT NULL DEFAULT 0,
   carbs             REAL NOT NULL DEFAULT 0,
@@ -219,6 +245,32 @@ CREATE TABLE dish_ingredient (
 
 CREATE INDEX idx_dish_ingredient_dish ON dish_ingredient(dish_id);
 ```
+
+**Normalization formula:**
+```
+Step 1: Convert user input to base unit (g or ml)
+  if amount_unit == 'piece':
+    REJECT nếu ingredient thiếu grams_per_unit (hoặc ml_per_unit cho liquid)
+    base_amount = amount_value × grams_per_unit  (hoặc ml_per_unit)
+  if amount_unit == 'g' hoặc 'ml':
+    base_amount = amount_value
+
+Step 2: normalized_amount = base_amount  (lưu cả user input gốc + normalized)
+
+Step 3: Calculate macro
+  ratio = base_amount / ingredient.nutrition_basis_quantity  (= 100)
+  calories = ingredient.calories × ratio
+  protein  = ingredient.protein  × ratio
+  carbs    = ingredient.carbs    × ratio
+  fat      = ingredient.fat      × ratio
+  fiber    = ingredient.fiber    × ratio
+```
+
+**Rules:**
+- Lưu **cả** `amount_value + amount_unit` (user input gốc) **và** `normalized_amount` (đã convert về g/ml) + macro đã tính
+- `piece` chỉ hợp lệ khi ingredient có `grams_per_unit` (solid) hoặc `ml_per_unit` (liquid). Nếu thiếu → **reject input**, yêu cầu user chọn g hoặc ml
+- Macro được tính tại thời điểm insert/update `dish_ingredient`, không on-the-fly
+- Khi ingredient nutrition thay đổi → dish_ingredient macro **KHÔNG auto-recalculate** (snapshot tại thời điểm nhập)
 
 ### 4.4 day_plan
 
@@ -533,7 +585,7 @@ CREATE TABLE app_config (
 |---|-------|------|-------|--------|
 | 1 | `user_profile` | User | Singleton — profile + settings + targets | — |
 | 2 | `weight_log` | User | Lịch sử cân nặng | — |
-| 3 | `ingredient` | Nutrition | Nguyên liệu + dinh dưỡng/100g | — |
+| 3 | `ingredient` | Nutrition | Nguyên liệu + canonical nutrition + unit metadata | — |
 | 4 | `dish` | Nutrition | Món ăn | — |
 | 5 | `dish_ingredient` | Nutrition | Nguyên liệu trong món | dish, ingredient |
 | 6 | `day_plan` | Nutrition | Kế hoạch ăn 1 ngày | — |
@@ -556,74 +608,45 @@ CREATE TABLE app_config (
 
 ## 9. Seed Data
 
-### 9.1 Vietnamese Ingredients (≥ 100)
+### 9.1 Vietnamese Core Seed (Phase 1)
 
 ```sql
--- Nhóm: Ngũ cốc
-INSERT INTO ingredient (id, name, group_name, calories, protein, carbs, fat, fiber, source) VALUES
-  (uuid(), 'Gạo trắng (nấu)', 'Ngũ cốc', 130, 2.7, 28, 0.3, 0.4, 'db'),
-  (uuid(), 'Bún tươi', 'Ngũ cốc', 108, 3.4, 25, 0.2, 0, 'db'),
-  (uuid(), 'Phở tươi', 'Ngũ cốc', 109, 3.2, 24, 0.4, 0, 'db'),
-  (uuid(), 'Mì trứng', 'Ngũ cốc', 138, 4.5, 25, 2, 1, 'db'),
-  (uuid(), 'Bánh mì', 'Ngũ cốc', 265, 9, 49, 3.2, 2.7, 'db'),
-  (uuid(), 'Yến mạch', 'Ngũ cốc', 389, 16.9, 66, 6.9, 10.6, 'db'),
-  -- ... thêm ~15 loại ngũ cốc
+-- Phase 1 ship curated dataset cho 20 món Việt core:
+--   6 món sáng / 7 món trưa / 7 món tối
+--   không có snack
+-- Ingredient seed = union ingredients từ 20 món trên + staple bắt buộc
 
--- Nhóm: Thịt
-  (uuid(), 'Ức gà', 'Thịt', 165, 31, 0, 3.6, 0, 'db'),
-  (uuid(), 'Đùi gà (bỏ da)', 'Thịt', 177, 24, 0, 8.4, 0, 'db'),
-  (uuid(), 'Thịt bò nạc', 'Thịt', 250, 26, 0, 15, 0, 'db'),
-  (uuid(), 'Thịt heo nạc', 'Thịt', 143, 26, 0, 3.5, 0, 'db'),
-  (uuid(), 'Thịt heo ba chỉ', 'Thịt', 518, 9.3, 0, 53, 0, 'db'),
-  -- ... thêm ~15 loại thịt
-
--- Nhóm: Hải sản
-  (uuid(), 'Cá hồi', 'Hải sản', 208, 20, 0, 13, 0, 'db'),
-  (uuid(), 'Cá basa', 'Hải sản', 90, 16, 0, 3, 0, 'db'),
-  (uuid(), 'Tôm', 'Hải sản', 99, 24, 0.2, 0.3, 0, 'db'),
-  (uuid(), 'Mực', 'Hải sản', 92, 15.6, 3.1, 1.4, 0, 'db'),
-  -- ... thêm ~10 loại hải sản
-
--- Nhóm: Trứng & Sữa
-  (uuid(), 'Trứng gà', 'Trứng & Sữa', 155, 13, 1.1, 11, 0, 'db'),
-  (uuid(), 'Sữa tươi không đường', 'Trứng & Sữa', 42, 3.4, 5, 1, 0, 'db'),
-  (uuid(), 'Sữa chua Hy Lạp', 'Trứng & Sữa', 97, 9, 3.6, 5, 0, 'db'),
-  (uuid(), 'Phô mai', 'Trứng & Sữa', 402, 25, 1.3, 33, 0, 'db'),
-  -- ... thêm ~8 loại
-
--- Nhóm: Rau
-  (uuid(), 'Rau muống', 'Rau', 19, 2.6, 3.1, 0.2, 2.1, 'db'),
-  (uuid(), 'Cải bó xôi', 'Rau', 23, 2.9, 3.6, 0.4, 2.2, 'db'),
-  (uuid(), 'Bắp cải', 'Rau', 25, 1.3, 5.8, 0.1, 2.5, 'db'),
-  (uuid(), 'Cà chua', 'Rau', 18, 0.9, 3.9, 0.2, 1.2, 'db'),
-  (uuid(), 'Giá đỗ', 'Rau', 31, 3.1, 5.9, 0.2, 1.8, 'db'),
-  -- ... thêm ~20 loại rau
-
--- Nhóm: Trái cây
-  (uuid(), 'Chuối', 'Trái cây', 89, 1.1, 22.8, 0.3, 2.6, 'db'),
-  (uuid(), 'Táo', 'Trái cây', 52, 0.3, 13.8, 0.2, 2.4, 'db'),
-  (uuid(), 'Cam', 'Trái cây', 47, 0.9, 11.8, 0.1, 2.4, 'db'),
-  -- ... thêm ~10 loại
-
--- Nhóm: Đậu & Hạt
-  (uuid(), 'Đậu phụ', 'Đậu & Hạt', 76, 8, 1.9, 4.8, 0.3, 'db'),
-  (uuid(), 'Đậu nành', 'Đậu & Hạt', 446, 36, 30, 20, 9.3, 'db'),
-  (uuid(), 'Lạc (đậu phộng)', 'Đậu & Hạt', 567, 25.8, 16.1, 49.2, 8.5, 'db'),
-  -- ... thêm ~8 loại
-
--- Nhóm: Dầu & Gia vị
-  (uuid(), 'Dầu ăn', 'Dầu & Gia vị', 884, 0, 0, 100, 0, 'db'),
-  (uuid(), 'Nước mắm', 'Dầu & Gia vị', 35, 5.1, 3.6, 0, 0, 'db'),
-  (uuid(), 'Đường', 'Dầu & Gia vị', 387, 0, 100, 0, 0, 'db'),
-  -- ... thêm ~8 loại
-
--- Nhóm: Đồ uống & Khác
-  (uuid(), 'Whey Protein', 'Thực phẩm bổ sung', 400, 80, 10, 5, 0, 'db'),
-  (uuid(), 'Nước dừa', 'Đồ uống', 19, 0.7, 3.7, 0.2, 1.1, 'db'),
-  -- ... thêm ~5 loại
+INSERT INTO ingredient (
+  id, name, category,
+  nutrition_basis_unit, nutrition_basis_quantity,
+  calories, protein, carbs, fat, fiber,
+  default_entry_unit, grams_per_unit, ml_per_unit,
+  source
+) VALUES
+  (uuid(), 'Ức gà', 'Thịt', 'g', 100, 165, 31, 0, 3.6, 0, 'g', NULL, NULL, 'db'),
+  (uuid(), 'Trứng gà', 'Trứng & Sữa', 'g', 100, 155, 13, 1.1, 11, 0, 'piece', 50, NULL, 'db'),
+  (uuid(), 'Sữa tươi không đường', 'Trứng & Sữa', 'ml', 100, 42, 3.4, 5, 1, 0, 'ml', NULL, NULL, 'db'),
+  (uuid(), 'Nước mắm', 'Dầu & Gia vị', 'ml', 100, 35, 5.1, 3.6, 0, 0, 'ml', NULL, NULL, 'db');
 ```
 
-### 9.2 Exercise Database (≥ 50)
+### 9.2 Vietnamese Core Dishes (Phase 1)
+
+```sql
+-- Dish seed được build từ curated source, insert sau ingredient seed
+INSERT INTO dish (id, name, description, type, total_calories, total_protein, total_carbs, total_fat, total_fiber, servings)
+VALUES
+  (uuid(), 'Phở bò', 'Seed món Việt core cho bữa sáng', 'ingredient_based', 420, 28, 45, 12, 2, 1);
+
+INSERT INTO dish_ingredient (
+  id, dish_id, ingredient_id,
+  amount_value, amount_unit, normalized_amount,
+  calories, protein, carbs, fat, fiber
+) VALUES
+  (uuid(), dish_uuid('pho-bo'), ingredient_uuid('Thịt bò nạc'), 100, 'g', 100, 250, 26, 0, 15, 0),
+  (uuid(), dish_uuid('pho-bo'), ingredient_uuid('Phở tươi'), 200, 'g', 200, 218, 6.4, 48, 0.8, 0);
+```
+
+### 9.3 Exercise Database (≥ 50)
 
 ```sql
 -- Push
@@ -665,7 +688,7 @@ INSERT INTO exercise (id, name, name_vi, muscle_group, category, equipment, sour
   -- ... thêm ~5 bài abs
 ```
 
-### 9.3 Preset Training Plans
+### 9.4 Preset Training Plans
 
 ```sql
 -- Full Body (Beginner) — 3 ngày/tuần
@@ -703,10 +726,13 @@ INSERT INTO training_plan (id, name, type, frequency, is_active, source) VALUES
 
 ```
 App khởi động
-  → Đọc db_version từ app_config
+  → Đọc db_version từ app_config (nếu app_config chưa tồn tại thì xem là 0)
   → So sánh với LATEST_VERSION trong code
   → Nếu cần upgrade → chạy migration scripts tuần tự
   → Update db_version
+  → Sau khi migration xong mới chạy seed loader cho fresh DB
+  → Existing DB: không overwrite seeded records đã tồn tại
+  → Existing DB: không tự thêm lại seed đã bị xóa hoặc seed mới của version sau
 ```
 
 ### Backup Strategy (V2 — hoãn theo Decision D5)
@@ -725,7 +751,7 @@ App khởi động
 | Table | Index | Columns | Mục đích |
 |-------|-------|---------|---------|
 | ingredient | idx_ingredient_name | name | Tìm kiếm theo tên |
-| ingredient | idx_ingredient_group | group_name | Filter theo nhóm |
+| ingredient | idx_ingredient_category | category | Filter theo nhóm |
 | dish | idx_dish_name | name | Tìm kiếm theo tên |
 | dish_ingredient | idx_dish_ingredient_dish | dish_id | Join nhanh |
 | day_plan | idx_day_plan_date | date | Query theo ngày |
