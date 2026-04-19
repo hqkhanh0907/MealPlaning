@@ -36,3 +36,9 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 /* @import '@ionic/angular/css/palettes/dark.system.css'; */
+
+// Onboarding: hide radio circles — highlight-only selection
+app-onboarding .goal-item ion-radio::part(container),
+app-onboarding .gym-item ion-radio::part(container) {
+  display: none;
+}

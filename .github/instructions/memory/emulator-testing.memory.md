@@ -1169,3 +1169,12 @@ Luôn kiểm tra schema bằng `SELECT sql FROM sqlite_master WHERE name = 'tabl
 
 - ❌ `labelPlacement="end"` on `ion-radio` inside `ion-item` → label text right-aligned (pushed to far right)
 - ✅ Add `justify="start"` alongside `labelPlacement="end"` → text left-aligned next to radio circle
+
+## Hiding ion-radio circle indicator (Ionic 8 + Angular)
+
+- ❌ `--size: 0` in component styles → does NOT work. Angular's emulated ViewEncapsulation adds `_ngcontent` attributes, but `--size` CSS custom property doesn't pierce `ion-radio`'s shadow DOM effectively
+- ❌ Component-scoped `.goal-item ion-radio { --size: 0; }` → compiles correctly but has no visible effect on device
+- ✅ Use `::part(container) { display: none; }` in **global.scss** (not component styles). `::part()` selectors cannot work with Angular's emulated encapsulation — they must be in unscoped global styles
+- ✅ Scope with component selector: `app-onboarding .goal-item ion-radio::part(container) { display: none; }`
+- ✅ Use `[class.selected]="signal() === 'value'"` on `ion-item` + CSS `.selected { --background: var(--primary-50); }` for highlight-only selection
+- 💡 `ion-radio` still handles keyboard a11y + `aria-checked` even with hidden indicator

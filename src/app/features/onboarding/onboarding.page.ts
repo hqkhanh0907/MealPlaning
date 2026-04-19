@@ -19,9 +19,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
 import {
-  arrowForwardOutline,
   arrowBackOutline,
-  checkmarkOutline,
   bodyOutline,
   barbellOutline,
   scaleOutline,
@@ -111,23 +109,23 @@ const EMPTY_ERRORS: Step2Errors = {
               (ionChange)="onGoalChange($event.detail.value)"
               aria-label="Chọn mục tiêu"
             >
-              <ion-item lines="none" class="goal-item">
+              <ion-item lines="none" class="goal-item" [class.selected]="goal() === 'lose_weight'">
                 <ion-icon name="body-outline" slot="start" class="goal-icon" />
                 <ion-radio value="lose_weight" justify="start" labelPlacement="end"
                   >Giảm cân</ion-radio
                 >
               </ion-item>
-              <ion-item lines="none" class="goal-item">
+              <ion-item lines="none" class="goal-item" [class.selected]="goal() === 'gain_muscle'">
                 <ion-icon name="barbell-outline" slot="start" class="goal-icon" />
                 <ion-radio value="gain_muscle" justify="start" labelPlacement="end"
                   >Tăng cơ</ion-radio
                 >
               </ion-item>
-              <ion-item lines="none" class="goal-item">
+              <ion-item lines="none" class="goal-item" [class.selected]="goal() === 'maintain'">
                 <ion-icon name="scale-outline" slot="start" class="goal-icon" />
                 <ion-radio value="maintain" justify="start" labelPlacement="end">Duy trì</ion-radio>
               </ion-item>
-              <ion-item lines="none" class="goal-item">
+              <ion-item lines="none" class="goal-item" [class.selected]="goal() === 'performance'">
                 <ion-icon name="trophy-outline" slot="start" class="goal-icon" />
                 <ion-radio value="performance" justify="start" labelPlacement="end"
                   >Tăng sức mạnh</ion-radio
@@ -143,7 +141,6 @@ const EMPTY_ERRORS: Step2Errors = {
 
             <ion-button expand="block" color="secondary" class="cta-button" (click)="nextStep()">
               Tiếp tục
-              <ion-icon slot="end" name="arrow-forward-outline" />
             </ion-button>
           </div>
         }
@@ -235,22 +232,38 @@ const EMPTY_ERRORS: Step2Errors = {
               (ionChange)="gymExperience.set($event.detail.value)"
               aria-label="Kinh nghiệm tập gym"
             >
-              <ion-item lines="none" class="gym-item">
+              <ion-item
+                lines="none"
+                class="gym-item"
+                [class.selected]="gymExperience() === 'never'"
+              >
                 <ion-radio value="never" justify="start" labelPlacement="end"
                   >Chưa bao giờ</ion-radio
                 >
               </ion-item>
-              <ion-item lines="none" class="gym-item">
+              <ion-item
+                lines="none"
+                class="gym-item"
+                [class.selected]="gymExperience() === 'under_6m'"
+              >
                 <ion-radio value="under_6m" justify="start" labelPlacement="end"
                   >Dưới 6 tháng</ion-radio
                 >
               </ion-item>
-              <ion-item lines="none" class="gym-item">
+              <ion-item
+                lines="none"
+                class="gym-item"
+                [class.selected]="gymExperience() === '6m_2y'"
+              >
                 <ion-radio value="6m_2y" justify="start" labelPlacement="end"
                   >6 tháng — 2 năm</ion-radio
                 >
               </ion-item>
-              <ion-item lines="none" class="gym-item">
+              <ion-item
+                lines="none"
+                class="gym-item"
+                [class.selected]="gymExperience() === 'over_2y'"
+              >
                 <ion-radio value="over_2y" justify="start" labelPlacement="end"
                   >Trên 2 năm</ion-radio
                 >
@@ -268,7 +281,6 @@ const EMPTY_ERRORS: Step2Errors = {
 
             <div class="button-row">
               <ion-button fill="outline" (click)="goBack()" [disabled]="saving()">
-                <ion-icon slot="start" name="arrow-back-outline" />
                 Quay lại
               </ion-button>
               <ion-button
@@ -278,7 +290,6 @@ const EMPTY_ERRORS: Step2Errors = {
                 [disabled]="saving()"
               >
                 {{ saving() ? 'Đang lưu...' : 'Hoàn tất' }}
-                <ion-icon slot="end" name="checkmark-outline" />
               </ion-button>
             </div>
           </div>
@@ -317,10 +328,20 @@ const EMPTY_ERRORS: Step2Errors = {
         --border-radius: 12px;
         --background: var(--bg-card);
         margin-bottom: 8px;
+        transition: background 0.15s ease;
       }
       .goal-item:hover,
       .gym-item:hover {
         --background: var(--primary-50, #e3f2fd);
+      }
+      .goal-item.selected,
+      .gym-item.selected {
+        --background: var(--primary-50, #e3f2fd);
+      }
+      .goal-item ion-radio,
+      .gym-item ion-radio {
+        min-width: 0;
+        margin: 0;
       }
       .goal-icon {
         color: var(--ion-color-primary);
@@ -418,9 +439,7 @@ export default class OnboardingPage {
 
   constructor() {
     addIcons({
-      arrowForwardOutline,
       arrowBackOutline,
-      checkmarkOutline,
       bodyOutline,
       barbellOutline,
       scaleOutline,
