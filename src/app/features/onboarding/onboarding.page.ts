@@ -151,77 +151,77 @@ const EMPTY_ERRORS: Step2Errors = {
             <h1 #step2Heading class="step-title" tabindex="-1">Thông tin cơ bản</h1>
             <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
 
-            <ion-item [class.ion-invalid]="step2Errors().heightCm">
-              <ion-input
-                #heightInput
-                label="Chiều cao (cm)"
-                labelPlacement="floating"
-                type="number"
-                [value]="heightCm() ?? ''"
-                (ionInput)="heightCm.set($event.detail.value ? +$event.detail.value : null)"
-                min="130"
-                max="250"
-                [attr.aria-invalid]="step2Errors().heightCm ? 'true' : null"
-                [attr.aria-describedby]="step2Errors().heightCm ? 'err-height' : null"
-              />
-            </ion-item>
+            <ion-input
+              #heightInput
+              label="Chiều cao (cm)"
+              labelPlacement="floating"
+              fill="outline"
+              type="number"
+              [value]="heightCm() ?? ''"
+              (ionInput)="heightCm.set($event.detail.value ? +$event.detail.value : null)"
+              min="130"
+              max="250"
+              [class.ion-invalid]="step2Errors().heightCm"
+              [attr.aria-invalid]="step2Errors().heightCm ? 'true' : null"
+              [attr.aria-describedby]="step2Errors().heightCm ? 'err-height' : null"
+            />
             @if (step2Errors().heightCm) {
               <div id="err-height" class="field-error" role="alert">
                 {{ step2Errors().heightCm }}
               </div>
             }
 
-            <ion-item [class.ion-invalid]="step2Errors().weightKg">
-              <ion-input
-                #weightInput
-                label="Cân nặng (kg)"
-                labelPlacement="floating"
-                type="number"
-                [value]="weightKg() ?? ''"
-                (ionInput)="weightKg.set($event.detail.value ? +$event.detail.value : null)"
-                min="30"
-                max="200"
-                [attr.aria-invalid]="step2Errors().weightKg ? 'true' : null"
-                [attr.aria-describedby]="step2Errors().weightKg ? 'err-weight' : null"
-              />
-            </ion-item>
+            <ion-input
+              #weightInput
+              label="Cân nặng (kg)"
+              labelPlacement="floating"
+              fill="outline"
+              type="number"
+              [value]="weightKg() ?? ''"
+              (ionInput)="weightKg.set($event.detail.value ? +$event.detail.value : null)"
+              min="30"
+              max="200"
+              [class.ion-invalid]="step2Errors().weightKg"
+              [attr.aria-invalid]="step2Errors().weightKg ? 'true' : null"
+              [attr.aria-describedby]="step2Errors().weightKg ? 'err-weight' : null"
+            />
             @if (step2Errors().weightKg) {
               <div id="err-weight" class="field-error" role="alert">
                 {{ step2Errors().weightKg }}
               </div>
             }
 
-            <ion-item [class.ion-invalid]="step2Errors().age">
-              <ion-input
-                #ageInput
-                label="Tuổi"
-                labelPlacement="floating"
-                type="number"
-                [value]="age() ?? ''"
-                (ionInput)="age.set($event.detail.value ? +$event.detail.value : null)"
-                min="13"
-                max="120"
-                [attr.aria-invalid]="step2Errors().age ? 'true' : null"
-                [attr.aria-describedby]="step2Errors().age ? 'err-age' : null"
-              />
-            </ion-item>
+            <ion-input
+              #ageInput
+              label="Tuổi"
+              labelPlacement="floating"
+              fill="outline"
+              type="number"
+              [value]="age() ?? ''"
+              (ionInput)="age.set($event.detail.value ? +$event.detail.value : null)"
+              min="13"
+              max="120"
+              [class.ion-invalid]="step2Errors().age"
+              [attr.aria-invalid]="step2Errors().age ? 'true' : null"
+              [attr.aria-describedby]="step2Errors().age ? 'err-age' : null"
+            />
             @if (step2Errors().age) {
               <div id="err-age" class="field-error" role="alert">{{ step2Errors().age }}</div>
             }
 
-            <ion-item [class.ion-invalid]="step2Errors().gender">
-              <ion-select
-                label="Giới tính"
-                labelPlacement="floating"
-                [value]="gender()"
-                (ionChange)="gender.set($event.detail.value)"
-                [attr.aria-invalid]="step2Errors().gender ? 'true' : null"
-                [attr.aria-describedby]="step2Errors().gender ? 'err-gender' : null"
-              >
-                <ion-select-option value="male">Nam</ion-select-option>
-                <ion-select-option value="female">Nữ</ion-select-option>
-              </ion-select>
-            </ion-item>
+            <ion-select
+              label="Giới tính"
+              labelPlacement="floating"
+              fill="outline"
+              [value]="gender()"
+              (ionChange)="gender.set($event.detail.value)"
+              [class.ion-invalid]="step2Errors().gender"
+              [attr.aria-invalid]="step2Errors().gender ? 'true' : null"
+              [attr.aria-describedby]="step2Errors().gender ? 'err-gender' : null"
+            >
+              <ion-select-option value="male">Nam</ion-select-option>
+              <ion-select-option value="female">Nữ</ion-select-option>
+            </ion-select>
             @if (step2Errors().gender) {
               <div id="err-gender" class="field-error" role="alert">{{ step2Errors().gender }}</div>
             }
@@ -355,6 +355,14 @@ const EMPTY_ERRORS: Step2Errors = {
       }
       ion-item.ion-invalid {
         --highlight-color-invalid: var(--ion-color-danger);
+      }
+      ion-input[fill],
+      ion-select[fill] {
+        margin-bottom: 4px;
+      }
+      ion-input.ion-invalid,
+      ion-select.ion-invalid {
+        --border-color: var(--ion-color-danger);
       }
       .field-error {
         font: 400 12px/1.4 var(--ion-font-family);
