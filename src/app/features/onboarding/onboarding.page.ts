@@ -337,6 +337,7 @@ const EMPTY_ERRORS: Step2Errors = {
       .goal-item.selected,
       .gym-item.selected {
         --background: var(--primary-50, #e3f2fd);
+        font-weight: 600;
       }
       .goal-item ion-radio,
       .gym-item ion-radio {
@@ -372,6 +373,7 @@ const EMPTY_ERRORS: Step2Errors = {
         --border-radius: 10px;
         margin-top: 24px;
         font-weight: 500;
+        text-transform: none;
       }
       .back-button {
         --color: #fff;
@@ -379,6 +381,7 @@ const EMPTY_ERRORS: Step2Errors = {
       ion-button[fill='outline'] {
         --border-radius: 10px;
         font-weight: 500;
+        text-transform: none;
       }
       .button-row {
         display: flex;
