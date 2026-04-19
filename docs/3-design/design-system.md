@@ -381,16 +381,41 @@ Theo PRD F-12 (Dashboard Quick Actions):
 
 > **Rule:** Mọi form Add/Edit có scroll content > 1 viewport PHẢI có nút "Lưu" trên toolbar header. User không nên phải scroll xuống cuối chỉ để save.
 
-### 8.8b Form Error Strategy — Auto-scroll to Error
+### 8.8b CTA Behavior — 2 Context Rules
 
-> **KHÔNG disable nút Lưu** khi form invalid. Thay vào đó:
+#### Context 1: Step Navigation (Tiếp tục / Next)
 
-1. Nút Lưu **luôn active** (cả header lẫn bottom)
-2. Khi user tap Lưu mà form invalid → `scrollIntoView()` đến field lỗi đầu tiên
-3. Field lỗi: border chuyển `var(--ion-color-danger)` + error text hiện bên dưới
-4. Optional: flash animation nhẹ (border pulse 2 lần) để thu hút chú ý
+> Áp dụng khi: wizard steps, onboarding, flow tuần tự có ≤2 required actions rõ ràng.
 
-**Lý do:** "Tại sao nút Lưu bị mờ?" gây confusion cho user hơn là "Bấm Lưu → thấy lỗi ở đâu".
+| State | Visual | Behavior |
+|-------|--------|----------|
+| **Chưa hoàn thành** | `opacity: 0.5`, `pointer-events: none` | Disable cho tới khi step requirements met |
+| **Đã hoàn thành** | Full opacity, enabled | Tap → chuyển step tiếp |
+
+**Lý do:** Chỉ 1-2 action cần làm → user biết rõ tại sao nút mờ. Nút sáng lên = instant feedback.
+**Ví dụ:** Onboarding bước 1 "Tiếp tục" — disable cho tới khi chọn radio.
+
+#### Context 2: Form Submission (Lưu / Hoàn tất / Submit)
+
+> Áp dụng khi: form có ≥3 fields, user không biết chắc đâu sai.
+
+| State | Visual | Behavior |
+|-------|--------|----------|
+| **Luôn luôn** | Full opacity, enabled | Tap → validate → auto-scroll to first error |
+
+1. Nút Lưu/Hoàn tất **KHÔNG BAO GIỜ disable** (trừ saving state)
+2. Khi tap mà form invalid → `scrollIntoView()` đến field lỗi đầu tiên
+3. Field lỗi: border `var(--ion-color-danger)` + error text bên dưới
+4. Optional: flash animation nhẹ (border pulse 2 lần)
+
+**Lý do:** "Tại sao nút mờ?" gây confusion → "Bấm Lưu → thấy lỗi ở đâu" = guided UX.
+**Ví dụ:** Onboarding bước 2 "Hoàn tất", Lưu nguyên liệu/món ăn.
+
+#### Context 3: Saving State (async)
+
+| State | Visual | Behavior |
+|-------|--------|----------|
+| **Đang lưu** | `opacity: 0.5` + spinner + "Đang lưu..." | Disable tất cả interactions |
 
 ---
 
@@ -546,23 +571,35 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Property | Value | Notes |
 |----------|-------|-------|
 | Component | `ion-segment` + `ion-segment-button` | Ionic native |
-| Background | `rgba(255,255,255,0.15)` trên toolbar | Nằm dưới toolbar, cùng dải màu primary |
-| Active indicator | White pill (`#FFFFFF`, radius 8px) | Text dark trên active pill |
-| Inactive text | `rgba(255,255,255,0.6)` | |
-| Active text | `--ion-color-primary` trên white bg | |
-| Font | `14px / 500` | Overline weight |
-| Padding | `4px` outer, `8px 16px` per button | |
-| Height | `36px` | Compact, below toolbar |
+| **Position** | **Trong content area** (dưới toolbar) | KHÔNG nằm trên toolbar bg — giảm top chrome nặng |
+| Background | `var(--bg-page)` (`#F5F7FA` / `#121212`) | Nền page, không nền primary |
+| Container bg | `#E8E8E8` (light) / `#333` (dark) | Pill track background |
+| Active indicator | `var(--bg-card)` (white/dark card) pill, radius 8px | |
+| Inactive text | `var(--text-tertiary)` | `#666` / `#999` |
+| Active text | `var(--text-primary)`, `font-weight: 600` | `#1A1A1A` / `#FFF` |
+| Font | `14px / 500` (inactive), `14px / 600` (active) | |
+| Padding | `4px` outer (track), `8px 16px` per button | |
+| Height | `36px` | Compact |
+| Margin | `12px 16px` | Page padding alignment |
 | Mode | `md` | Material Design style |
 
 ```
-┌─────────────────────────────────────┐  ← toolbar bg
-│  ┌──────────────┐ ┌──────────────┐  │
-│  │ Nguyên liệu  │ │  Món ăn      │  │  ← segment
-│  └──────────────┘ └──────────────┘  │
-└─────────────────────────────────────┘
-   ▲ active (white pill)   ▲ inactive (transparent)
+┌─ Toolbar (blue) ────────────────────┐
+│  ← Quản lý                          │
+└──────────────────────────────────────┘
+┌─ Content area (gray/dark bg) ────────┐
+│  ┌─────────────────────────────────┐ │
+│  │ [Nguyên liệu] │  Món ăn        │ │  ← segment (page bg)
+│  └─────────────────────────────────┘ │
+│  ┌─ Search ──────────────────────┐   │
+│  │ 🔍 Tìm kiếm...               │   │
+│  └───────────────────────────────┘   │
+│  ...cards...                         │
+└──────────────────────────────────────┘
+   ▲ active (white pill)  ▲ inactive
 ```
+
+> **Lý do đổi:** Status bar + toolbar + segment cùng xanh = "dày đầu màn hình". Đưa segment xuống nền trắng/xám giảm visual weight đáng kể.
 
 ---
 

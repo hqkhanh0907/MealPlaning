@@ -82,27 +82,35 @@
   .toolbar-title { font-size: 20px; font-weight: 500; flex: 1; }
 
   /* =========================================================================
-     SUB-TABS
+     SEGMENT CONTROL (neutral bg, inside content area)
      ========================================================================= */
   .sub-tabs {
-    display: flex; flex-shrink: 0; padding: 4px 16px 8px;
-    gap: 4px;
+    display: flex; padding: 2px; gap: 2px;
+    border-radius: 10px; height: 36px;
+    margin-bottom: 12px;
   }
-  body.light .sub-tabs { background: #2196F3; }
-  body.dark  .sub-tabs { background: #1565C0; }
+  body.light .sub-tabs { background: #E8E8E8; }
+  body.dark  .sub-tabs { background: #333; }
 
   .sub-tab {
-    flex: 1; text-align: center; padding: 8px 16px;
+    flex: 1; text-align: center; padding: 0 16px;
     font-size: 14px; font-weight: 500; border-radius: 8px;
     cursor: pointer; transition: all 0.2s; border: none;
-    color: rgba(255,255,255,0.6); background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent;
   }
+  body.light .sub-tab { color: #666; }
+  body.dark  .sub-tab { color: #999; }
   .sub-tab.active {
-    color: #2196F3; background: #fff;
     font-weight: 600;
   }
+  body.light .sub-tab.active {
+    color: #1A1A1A; background: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
   body.dark .sub-tab.active {
-    color: #42A5F5; background: #fff;
+    color: #FFF; background: #2A2A2A;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   }
 
   /* =========================================================================
@@ -179,8 +187,8 @@
   }
   body.light .filter-chip { background: #fff; border-color: #E8E8E8; color: #666; }
   body.dark  .filter-chip { background: #1E1E1E; border-color: #333; color: #999; }
-  body.light .filter-chip.active { background: #2196F3; border-color: #2196F3; color: #fff; }
-  body.dark  .filter-chip.active { background: #42A5F5; border-color: #42A5F5; color: #121212; }
+  body.light .filter-chip.active { background: rgba(33,150,243,0.15); border-color: rgba(33,150,243,0.3); color: #1976D2; font-weight: 600; }
+  body.dark  .filter-chip.active { background: rgba(66,165,245,0.15); border-color: rgba(66,165,245,0.3); color: #90CAF9; font-weight: 600; }
 
   /* =========================================================================
      INGREDIENT CARDS
@@ -188,8 +196,19 @@
   .ingredient-card {
     padding: 14px 16px; border-radius: 16px; margin-bottom: 12px;
     display: flex; align-items: center; gap: 12px;
-    transition: all 0.2s;
+    transition: all 0.2s; position: relative;
   }
+
+  .card-more-btn {
+    position: absolute; top: 2px; right: 2px;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; line-height: 1; cursor: pointer;
+    background: none; border: none; padding: 0;
+    z-index: 1;
+  }
+  body.light .card-more-btn { color: #999; }
+  body.dark  .card-more-btn { color: #666; }
   body.light .ingredient-card { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
   body.dark  .ingredient-card { background: #1E1E1E; }
 
@@ -212,29 +231,29 @@
     font-size: 11px; font-weight: 500; line-height: 1.4;
   }
   /* Category color palette */
-  .cat-thit         { background: #FFEBEE; color: #C62828; }
-  .cat-ca           { background: #E3F2FD; color: #1565C0; }
-  .cat-trung        { background: #FFF8E1; color: #F57F17; }
-  .cat-rau          { background: #E8F5E9; color: #2E7D32; }
-  .cat-ngu-coc      { background: #FFF3E0; color: #E65100; }
-  .cat-dau-hat      { background: #F3E5F5; color: #7B1FA2; }
-  .cat-dau-mo       { background: #FFFDE7; color: #F9A825; }
-  .cat-gia-vi       { background: #FCE4EC; color: #AD1457; }
-  .cat-nuoc-dung    { background: #E0F2F1; color: #00695C; }
-  .cat-trai-cay     { background: #FBE9E7; color: #BF360C; }
-  .cat-khac         { background: #ECEFF1; color: #546E7A; }
+  .cat-thit         { background: rgba(198,40,40,0.10); color: #C62828; }
+  .cat-ca           { background: rgba(21,101,192,0.10); color: #1565C0; }
+  .cat-trung        { background: rgba(245,127,23,0.10); color: #F57F17; }
+  .cat-rau          { background: rgba(46,125,50,0.10); color: #2E7D32; }
+  .cat-ngu-coc      { background: rgba(230,81,0,0.10); color: #E65100; }
+  .cat-dau-hat      { background: rgba(123,31,162,0.10); color: #7B1FA2; }
+  .cat-dau-mo       { background: rgba(249,168,37,0.10); color: #F9A825; }
+  .cat-gia-vi       { background: rgba(173,20,87,0.10); color: #AD1457; }
+  .cat-nuoc-dung    { background: rgba(0,105,92,0.10); color: #00695C; }
+  .cat-trai-cay     { background: rgba(191,54,12,0.10); color: #BF360C; }
+  .cat-khac         { background: rgba(84,110,122,0.10); color: #546E7A; }
   /* Dark mode category chips */
-  body.dark .cat-thit      { background: rgba(198,40,40,0.2);  color: #EF9A9A; }
-  body.dark .cat-ca        { background: rgba(21,101,192,0.2); color: #90CAF9; }
-  body.dark .cat-trung     { background: rgba(245,127,23,0.2); color: #FFE082; }
-  body.dark .cat-rau       { background: rgba(46,125,50,0.2);  color: #A5D6A7; }
-  body.dark .cat-ngu-coc   { background: rgba(230,81,0,0.2);   color: #FFCC80; }
-  body.dark .cat-dau-hat   { background: rgba(123,31,162,0.2); color: #CE93D8; }
-  body.dark .cat-dau-mo    { background: rgba(249,168,37,0.2); color: #FFF59D; }
-  body.dark .cat-gia-vi    { background: rgba(173,20,87,0.2);  color: #F48FB1; }
-  body.dark .cat-nuoc-dung { background: rgba(0,105,92,0.2);   color: #80CBC4; }
-  body.dark .cat-trai-cay  { background: rgba(191,54,12,0.2);  color: #FFAB91; }
-  body.dark .cat-khac      { background: rgba(84,110,122,0.2); color: #B0BEC5; }
+  body.dark .cat-thit      { background: rgba(198,40,40,0.12);  color: #EF9A9A; }
+  body.dark .cat-ca        { background: rgba(21,101,192,0.12); color: #90CAF9; }
+  body.dark .cat-trung     { background: rgba(245,127,23,0.12); color: #FFE082; }
+  body.dark .cat-rau       { background: rgba(46,125,50,0.12);  color: #A5D6A7; }
+  body.dark .cat-ngu-coc   { background: rgba(230,81,0,0.12);   color: #FFCC80; }
+  body.dark .cat-dau-hat   { background: rgba(123,31,162,0.12); color: #CE93D8; }
+  body.dark .cat-dau-mo    { background: rgba(249,168,37,0.12); color: #FFF59D; }
+  body.dark .cat-gia-vi    { background: rgba(173,20,87,0.12);  color: #F48FB1; }
+  body.dark .cat-nuoc-dung { background: rgba(0,105,92,0.12);   color: #80CBC4; }
+  body.dark .cat-trai-cay  { background: rgba(191,54,12,0.12);  color: #FFAB91; }
+  body.dark .cat-khac      { background: rgba(84,110,122,0.12); color: #B0BEC5; }
 
   .source-badge {
     font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 4px;
@@ -452,11 +471,11 @@
       <div class="toolbar">
         <div class="toolbar-title">Quản lý</div>
       </div>
-      <div class="sub-tabs">
-        <div class="sub-tab active">Nguyên liệu</div>
-        <div class="sub-tab">Món ăn</div>
-      </div>
       <div class="content">
+        <div class="sub-tabs">
+          <div class="sub-tab active">Nguyên liệu</div>
+          <div class="sub-tab">Món ăn</div>
+        </div>
         <!-- Search bar -->
         <div class="search-bar">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -465,6 +484,7 @@
 
         <!-- Ingredient cards -->
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Ức gà</div>
             <div class="ingredient-meta">
@@ -476,6 +496,7 @@
         </div>
 
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Trứng gà</div>
             <div class="ingredient-meta">
@@ -487,6 +508,7 @@
         </div>
 
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Cơm trắng</div>
             <div class="ingredient-meta">
@@ -497,6 +519,7 @@
         </div>
 
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Bông cải xanh</div>
             <div class="ingredient-meta">
@@ -507,6 +530,7 @@
         </div>
 
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Dầu olive</div>
             <div class="ingredient-meta">
@@ -518,6 +542,7 @@
         </div>
 
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Nước mắm</div>
             <div class="ingredient-meta">
@@ -552,11 +577,11 @@
       <div class="toolbar">
         <div class="toolbar-title">Quản lý</div>
       </div>
-      <div class="sub-tabs">
-        <div class="sub-tab active">Nguyên liệu</div>
-        <div class="sub-tab">Món ăn</div>
-      </div>
       <div class="content">
+        <div class="sub-tabs">
+          <div class="sub-tab active">Nguyên liệu</div>
+          <div class="sub-tab">Món ăn</div>
+        </div>
         <div class="search-bar">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text placeholder">Tìm nguyên liệu...</span>
@@ -564,6 +589,7 @@
 
         <!-- Normal card (not swiped) -->
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Ức gà</div>
             <div class="ingredient-meta">
@@ -587,6 +613,7 @@
             </button>
           </div>
           <div class="swipe-card">
+            <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
             <div class="ingredient-info">
               <div class="ingredient-name">Trứng gà</div>
               <div class="ingredient-meta">
@@ -600,6 +627,7 @@
 
         <!-- Normal card -->
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Cơm trắng</div>
             <div class="ingredient-meta">
@@ -615,6 +643,7 @@
         </div>
 
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Bông cải xanh</div>
             <div class="ingredient-meta">
@@ -646,11 +675,11 @@
       <div class="toolbar">
         <div class="toolbar-title">Quản lý</div>
       </div>
-      <div class="sub-tabs">
-        <div class="sub-tab active">Nguyên liệu</div>
-        <div class="sub-tab">Món ăn</div>
-      </div>
       <div class="content">
+        <div class="sub-tabs">
+          <div class="sub-tab active">Nguyên liệu</div>
+          <div class="sub-tab">Món ăn</div>
+        </div>
         <!-- Search bar — focused, with value -->
         <div class="search-bar focused">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -660,6 +689,7 @@
 
         <!-- Filtered results -->
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Ức gà</div>
             <div class="ingredient-meta">
@@ -671,6 +701,7 @@
         </div>
 
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Trứng gà</div>
             <div class="ingredient-meta">
@@ -682,6 +713,7 @@
         </div>
 
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Đùi gà</div>
             <div class="ingredient-meta">
@@ -717,11 +749,11 @@
       <div class="toolbar">
         <div class="toolbar-title">Quản lý</div>
       </div>
-      <div class="sub-tabs">
-        <div class="sub-tab active">Nguyên liệu</div>
-        <div class="sub-tab">Món ăn</div>
-      </div>
       <div class="content">
+        <div class="sub-tabs">
+          <div class="sub-tab active">Nguyên liệu</div>
+          <div class="sub-tab">Món ăn</div>
+        </div>
         <!-- Search bar with query -->
         <div class="search-bar focused">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -757,11 +789,11 @@
       <div class="toolbar">
         <div class="toolbar-title">Quản lý</div>
       </div>
-      <div class="sub-tabs">
-        <div class="sub-tab active">Nguyên liệu</div>
-        <div class="sub-tab">Món ăn</div>
-      </div>
       <div class="content">
+        <div class="sub-tabs">
+          <div class="sub-tab active">Nguyên liệu</div>
+          <div class="sub-tab">Món ăn</div>
+        </div>
         <div class="empty-state" style="padding-top: 100px;">
           <div class="empty-icon">🥗</div>
           <div class="empty-title">Chưa có nguyên liệu nào</div>
@@ -789,11 +821,11 @@
       <div class="toolbar">
         <div class="toolbar-title">Quản lý</div>
       </div>
-      <div class="sub-tabs">
-        <div class="sub-tab active">Nguyên liệu</div>
-        <div class="sub-tab">Món ăn</div>
-      </div>
       <div class="content" style="position:relative;">
+        <div class="sub-tabs">
+          <div class="sub-tab active">Nguyên liệu</div>
+          <div class="sub-tab">Món ăn</div>
+        </div>
         <!-- Search bar -->
         <div class="search-bar">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -831,8 +863,9 @@
         <div class="dialog-box">
           <div class="dialog-title">Không thể xóa</div>
           <div class="dialog-msg"><strong>Ức gà</strong> đang được sử dụng trong <strong>3 món ăn</strong>. Hãy xóa khỏi các món trước khi xóa nguyên liệu này.</div>
-          <div class="dialog-actions">
-            <button class="dialog-btn dialog-btn-primary">Đã hiểu</button>
+          <div class="dialog-actions" style="justify-content: space-between;">
+            <button class="dialog-btn dialog-btn-cancel">Đóng</button>
+            <button class="dialog-btn dialog-btn-primary">Xem 3 món đang dùng</button>
           </div>
         </div>
       </div>
@@ -858,11 +891,11 @@
       <div class="toolbar">
         <div class="toolbar-title">Quản lý</div>
       </div>
-      <div class="sub-tabs">
-        <div class="sub-tab active">Nguyên liệu</div>
-        <div class="sub-tab">Món ăn</div>
-      </div>
       <div class="content" style="position:relative;">
+        <div class="sub-tabs">
+          <div class="sub-tab active">Nguyên liệu</div>
+          <div class="sub-tab">Món ăn</div>
+        </div>
         <div class="search-bar">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text placeholder">Tìm nguyên liệu...</span>
@@ -916,11 +949,11 @@
       <div class="toolbar">
         <div class="toolbar-title">Quản lý</div>
       </div>
-      <div class="sub-tabs">
-        <div class="sub-tab active">Nguyên liệu</div>
-        <div class="sub-tab">Món ăn</div>
-      </div>
       <div class="content">
+        <div class="sub-tabs">
+          <div class="sub-tab active">Nguyên liệu</div>
+          <div class="sub-tab">Món ăn</div>
+        </div>
         <!-- Search bar -->
         <div class="search-bar">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -941,6 +974,7 @@
 
         <!-- Filtered list — Rau củ only -->
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Bông cải xanh</div>
             <div class="ingredient-meta">
@@ -951,6 +985,7 @@
         </div>
 
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Cà chua</div>
             <div class="ingredient-meta">
@@ -961,6 +996,7 @@
         </div>
 
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Cà rốt</div>
             <div class="ingredient-meta">
@@ -971,6 +1007,7 @@
         </div>
 
         <div class="ingredient-card">
+          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Rau bina</div>
             <div class="ingredient-meta">
@@ -1033,8 +1070,8 @@
     <tr><td>FAB</td><td>56px circle, bottom-right</td><td>16px from right edge, 72px from bottom (above tab bar)</td></tr>
     <tr><td>Scroll-to-top</td><td>40px circle</td><td>Above FAB (bottom: 136px, right: 16px). Visible after scroll &gt;200px</td></tr>
     <tr><td>Content padding-bottom</td><td>80px</td><td>56px FAB + 16px gap + 8px safe — last item never hidden</td></tr>
-    <tr><td colspan="3"><strong>🚫 Delete rule:</strong> Ingredient used in ≥1 dish → hard block (no delete). Dialog: "Không thể xóa" + [Đã hiểu]. Only unused ingredients show confirm dialog with [Xóa].</td></tr>
-    <tr><td colspan="3"><strong>👆 Interactions:</strong> Tap card → navigate to edit page. Swipe left (ion-item-sliding) → reveal [Sửa] + [Xóa] buttons. Sửa = blue (#2196F3), Xóa = red (#F44336). Each action button 70px wide.</td></tr>
+    <tr><td colspan="3"><strong>🚫 Delete rule:</strong> Ingredient used in ≥1 dish → hard block (no delete). Dialog: "Không thể xóa" + [Đóng] + [Xem N món đang dùng] (actionable CTA). Only unused ingredients show confirm dialog with [Xóa].</td></tr>
+    <tr><td colspan="3"><strong>👆 Interactions:</strong> Tap card → navigate to edit page. Swipe left (ion-item-sliding) → reveal [Sửa] + [Xóa] buttons. Sửa = blue (#2196F3), Xóa = red (#F44336). Each action button 70px wide. ⋮ more icon top-right of each card (44×44 hitbox) as backup affordance for edit/delete.</td></tr>
   </table>
 </div>
 

@@ -193,19 +193,25 @@
     display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
   }
 
-  /* Macro-colored left border on nutrition inputs */
-  .macro-field {
+  /* Macro-colored left border — Calorie hero field only */
+  .macro-field.cal {
     position: relative;
   }
-  .macro-field::before {
+  .macro-field.cal::before {
     content: ''; position: absolute; left: 0; top: 8px; bottom: 8px;
     width: 3px; border-radius: 2px; z-index: 1;
+    background: #2196F3;
   }
-  .macro-field.cal::before  { background: #2196F3; }
-  .macro-field.prot::before { background: #4CAF50; }
-  .macro-field.carb::before { background: #FF9800; }
-  .macro-field.fat::before  { background: #F44336; }
-  .macro-field .input-wrapper { padding-left: 20px; }
+  .macro-field.cal .input-wrapper { padding-left: 20px; }
+
+  /* Macro colored dots for P/C/F labels (8px circle before label text) */
+  .macro-dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; margin-right: 4px; vertical-align: middle;
+  }
+  .macro-dot-prot { background: #4CAF50; }
+  .macro-dot-carb { background: #FF9800; }
+  .macro-dot-fat  { background: #F44336; }
 
   /* Calorie visual hierarchy */
   .macro-cal-value { font-size: 24px; font-weight: 700; }
@@ -341,7 +347,7 @@
           <div class="input-wrapper">
             <div class="input-label macro-cal-label">Calories *</div>
             <div class="input-with-suffix">
-              <div class="input-value placeholder macro-cal-value">0</div>
+              <div class="input-value placeholder macro-cal-value">Nhập số</div>
               <div class="input-suffix">kcal</div>
             </div>
           </div>
@@ -350,9 +356,9 @@
         <div class="nutrition-grid">
           <div class="form-field macro-field prot">
             <div class="input-wrapper">
-              <div class="input-label macro-sub-label">Protein</div>
+              <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-prot"></span>Protein</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-sub-value">0</div>
+                <div class="input-value placeholder macro-sub-value">Nhập số</div>
                 <div class="input-suffix">g</div>
               </div>
             </div>
@@ -360,9 +366,9 @@
 
           <div class="form-field macro-field carb">
             <div class="input-wrapper">
-              <div class="input-label macro-sub-label">Carbs</div>
+              <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-carb"></span>Carbs</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-sub-value">0</div>
+                <div class="input-value placeholder macro-sub-value">Nhập số</div>
                 <div class="input-suffix">g</div>
               </div>
             </div>
@@ -370,9 +376,9 @@
 
           <div class="form-field macro-field fat">
             <div class="input-wrapper">
-              <div class="input-label macro-sub-label">Fat</div>
+              <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-fat"></span>Fat</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-sub-value">0</div>
+                <div class="input-value placeholder macro-sub-value">Nhập số</div>
                 <div class="input-suffix">g</div>
               </div>
             </div>
@@ -436,7 +442,7 @@
         <div class="nutrition-grid">
           <div class="form-field macro-field prot">
             <div class="input-wrapper">
-              <div class="input-label macro-sub-label">Protein</div>
+              <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-prot"></span>Protein</div>
               <div class="input-with-suffix">
                 <div class="input-value macro-sub-value">25</div>
                 <div class="input-suffix">g</div>
@@ -446,7 +452,7 @@
 
           <div class="form-field macro-field carb">
             <div class="input-wrapper">
-              <div class="input-label macro-sub-label">Carbs</div>
+              <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-carb"></span>Carbs</div>
               <div class="input-with-suffix">
                 <div class="input-value macro-sub-value">35</div>
                 <div class="input-suffix">g</div>
@@ -456,7 +462,7 @@
 
           <div class="form-field macro-field fat">
             <div class="input-wrapper">
-              <div class="input-label macro-sub-label">Fat</div>
+              <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-fat"></span>Fat</div>
               <div class="input-with-suffix">
                 <div class="input-value macro-sub-value">12</div>
                 <div class="input-suffix">g</div>
@@ -526,9 +532,9 @@
         <div class="nutrition-grid">
           <div class="form-field macro-field prot">
             <div class="input-wrapper">
-              <div class="input-label macro-sub-label">Protein</div>
+              <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-prot"></span>Protein</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-sub-value">0</div>
+                <div class="input-value placeholder macro-sub-value">Nhập số</div>
                 <div class="input-suffix">g</div>
               </div>
             </div>
@@ -536,9 +542,9 @@
 
           <div class="form-field macro-field carb">
             <div class="input-wrapper">
-              <div class="input-label macro-sub-label">Carbs</div>
+              <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-carb"></span>Carbs</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-sub-value">0</div>
+                <div class="input-value placeholder macro-sub-value">Nhập số</div>
                 <div class="input-suffix">g</div>
               </div>
             </div>
@@ -546,9 +552,9 @@
 
           <div class="form-field macro-field fat">
             <div class="input-wrapper">
-              <div class="input-label macro-sub-label">Fat</div>
+              <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-fat"></span>Fat</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-sub-value">0</div>
+                <div class="input-value placeholder macro-sub-value">Nhập số</div>
                 <div class="input-suffix">g</div>
               </div>
             </div>
@@ -562,7 +568,7 @@
             <div class="input-wrapper invalid">
               <div class="input-label invalid macro-cal-label">Calories *</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-cal-value">0</div>
+                <div class="input-value placeholder macro-cal-value">Nhập số</div>
                 <div class="input-suffix">kcal</div>
               </div>
             </div>
@@ -627,7 +633,7 @@
         <div class="nutrition-grid">
           <div class="form-field macro-field prot">
             <div class="input-wrapper">
-              <div class="input-label macro-sub-label">Protein</div>
+              <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-prot"></span>Protein</div>
               <div class="input-with-suffix">
                 <div class="input-value macro-sub-value">15</div>
                 <div class="input-suffix">g</div>
@@ -637,7 +643,7 @@
 
           <div class="form-field macro-field carb">
             <div class="input-wrapper">
-              <div class="input-label macro-sub-label">Carbs</div>
+              <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-carb"></span>Carbs</div>
               <div class="input-with-suffix">
                 <div class="input-value macro-sub-value">40</div>
                 <div class="input-suffix">g</div>
@@ -647,7 +653,7 @@
 
           <div class="form-field macro-field fat">
             <div class="input-wrapper">
-              <div class="input-label macro-sub-label">Fat</div>
+              <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-fat"></span>Fat</div>
               <div class="input-with-suffix">
                 <div class="input-value macro-sub-value">12</div>
                 <div class="input-suffix">g</div>
@@ -687,7 +693,8 @@
     <tr><td><code>--error</code></td><td>#F44336 / #EF5350</td><td>Invalid field borders, error text, delete button</td></tr>
     <tr><td><code>radius-xs</code></td><td>8px</td><td>Type badge</td></tr>
     <tr><td><code>radius-sm</code></td><td>12px</td><td>Input fields</td></tr>
-    <tr><td>Macro accent bars</td><td>3px left border, colored per macro</td><td>Cal=#2196F3, P=#4CAF50, C=#FF9800, F=#F44336</td></tr>
+    <tr><td>Macro accent — Cal</td><td>3px left border #2196F3</td><td>Calorie hero field only (kept for visual hierarchy)</td></tr>
+    <tr><td>Macro dots — P/C/F</td><td>8px circle before label text</td><td>P=#4CAF50, C=#FF9800, F=#F44336. Neutral field borders. Reduces visual noise</td></tr>
     <tr><td>Nutrition grid</td><td>2×2 CSS grid, 8px gap</td><td>Protein, Carbs, Fat in compact layout. Calories full-width above</td></tr>
     <tr><td>Input suffix</td><td>14px/400, tertiary color</td><td>"kcal" and "g" after numeric values</td></tr>
     <tr><td>Page desc banner</td><td>Blue bg, 13px, radius 10px</td><td>Explains quick-add mode at top</td></tr>

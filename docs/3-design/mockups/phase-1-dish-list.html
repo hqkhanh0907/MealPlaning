@@ -82,28 +82,32 @@
   .toolbar-title { font-size: 20px; font-weight: 500; flex: 1; }
 
   /* =========================================================================
-     SUB-TABS
+     SEGMENT CONTROL (in content area, neutral background)
      ========================================================================= */
   .sub-tabs {
-    display: flex; flex-shrink: 0; padding: 4px 16px 8px;
-    gap: 4px;
+    padding: 12px 16px; flex-shrink: 0;
   }
-  body.light .sub-tabs { background: #2196F3; }
-  body.dark  .sub-tabs { background: #1565C0; }
+  body.light .sub-tabs { background: #F5F7FA; }
+  body.dark  .sub-tabs { background: #121212; }
+
+  .sub-tab-track {
+    display: flex; height: 36px; border-radius: 10px; padding: 2px; gap: 2px;
+  }
+  body.light .sub-tab-track { background: #E8E8E8; }
+  body.dark  .sub-tab-track { background: #333; }
 
   .sub-tab {
-    flex: 1; text-align: center; padding: 8px 16px;
+    flex: 1; text-align: center; padding: 0 16px;
     font-size: 14px; font-weight: 500; border-radius: 8px;
     cursor: pointer; transition: all 0.2s; border: none;
-    color: rgba(255,255,255,0.6); background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent;
   }
-  .sub-tab.active {
-    color: #2196F3; background: #fff;
-    font-weight: 600;
-  }
-  body.dark .sub-tab.active {
-    color: #42A5F5; background: #fff;
-  }
+  body.light .sub-tab { color: #666; }
+  body.dark  .sub-tab { color: #999; }
+  .sub-tab.active { font-weight: 600; }
+  body.light .sub-tab.active { color: #1A1A1A; background: #FFFFFF; }
+  body.dark  .sub-tab.active { color: #FFF; background: #2A2A2A; }
 
   /* =========================================================================
      CONTENT AREA
@@ -168,18 +172,31 @@
      ========================================================================= */
   .dish-card {
     padding: 14px 16px; border-radius: 16px; margin-bottom: 12px;
-    transition: all 0.2s;
+    transition: all 0.2s; position: relative;
   }
   body.light .dish-card { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
   body.dark  .dish-card { background: #1E1E1E; }
 
+  /* ⋮ More icon — top-right of card */
+  .dish-more {
+    position: absolute; top: 4px; right: 4px;
+    min-width: 44px; min-height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; cursor: pointer; line-height: 1;
+    border: none; background: none; padding: 0;
+    font-family: inherit; letter-spacing: 1px;
+  }
+  body.light .dish-more { color: #999; }
+  body.dark  .dish-more { color: #666; }
+
   .dish-header {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
-    flex-wrap: wrap;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+    flex-wrap: wrap; padding-right: 36px;
   }
 
+  /* Line 1: Dish name — 16px/600 */
   .dish-name {
-    font-size: 14px; font-weight: 500; line-height: 1.3;
+    font-size: 16px; font-weight: 600; line-height: 1.3;
   }
   body.light .dish-name { color: #1A1A1A; }
   body.dark  .dish-name { color: #fff; }
@@ -196,33 +213,34 @@
 
   .source-badge {
     font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 4px;
+    vertical-align: middle;
   }
   body.light .source-badge { background: #E8E8E8; color: #666; }
   body.dark  .source-badge { background: #333; color: #999; }
 
+  /* Line 2: Calories — hero stat, 22px/700 */
+  .dish-calories {
+    font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 4px;
+  }
+  body.light .dish-calories { color: #1A1A1A; }
+  body.dark  .dish-calories { color: #FFFFFF; }
+
+  /* Line 3: P/C/F macros — secondary, 13px/400 */
   .dish-macros {
-    font-size: 12px; font-weight: 400; line-height: 1.5;
+    font-size: 13px; font-weight: 400; line-height: 1.5;
     display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
     margin-bottom: 4px;
   }
   body.light .dish-macros { color: #666; }
   body.dark  .dish-macros { color: #999; }
 
-  .macro-cal  { font-weight: 500; }
-  body.light .macro-cal  { color: #2196F3; }
-  body.dark  .macro-cal  { color: #42A5F5; }
-  .macro-p { font-weight: 500; }
-  body.light .macro-p { color: #4CAF50; }
-  body.dark  .macro-p { color: #66BB6A; }
-  .macro-c { font-weight: 500; }
-  body.light .macro-c { color: #FF9800; }
-  body.dark  .macro-c { color: #FFB74D; }
-  .macro-f { font-weight: 500; }
-  body.light .macro-f { color: #F44336; }
-  body.dark  .macro-f { color: #EF5350; }
+  .macro-p, .macro-c, .macro-f { font-weight: 400; }
+  body.light .macro-p, body.light .macro-c, body.light .macro-f { color: #666; }
+  body.dark  .macro-p, body.dark  .macro-c, body.dark  .macro-f { color: #999; }
 
+  /* Line 4: Servings/source — tertiary, 12px/400 */
   .dish-servings {
-    font-size: 11px; font-weight: 400;
+    font-size: 12px; font-weight: 400;
   }
   body.light .dish-servings { color: #999; }
   body.dark  .dish-servings { color: #666; }
@@ -422,8 +440,10 @@
         <div class="toolbar-title">Quản lý</div>
       </div>
       <div class="sub-tabs">
-        <div class="sub-tab">Nguyên liệu</div>
-        <div class="sub-tab active">Món ăn</div>
+        <div class="sub-tab-track">
+          <div class="sub-tab">Nguyên liệu</div>
+          <div class="sub-tab active">Món ăn</div>
+        </div>
       </div>
       <div class="content">
         <!-- Search -->
@@ -434,63 +454,56 @@
 
         <!-- Dish 1 -->
         <div class="dish-card">
+          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
           <div class="dish-header">
             <span class="dish-name">Phở bò</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
-            <span class="source-badge">Có sẵn</span>
           </div>
+          <div class="dish-calories">488 kcal</div>
           <div class="dish-macros">
-            <span class="macro-cal">488 kcal</span> ·
-            <span class="macro-p">28g protein</span> ·
-            <span class="macro-c">52g carbs</span> ·
-            <span class="macro-f">12g fat</span>
+            <span class="macro-p">P: 28g</span> · <span class="macro-c">C: 52g</span> · <span class="macro-f">F: 12g</span>
           </div>
-          <div class="dish-servings">1 phần</div>
+          <div class="dish-servings">1 phần · <span class="source-badge">Có sẵn</span></div>
         </div>
 
         <!-- Dish 2 -->
         <div class="dish-card">
+          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
           <div class="dish-header">
             <span class="dish-name">Cơm gà xối mỡ</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
-            <span class="source-badge">Có sẵn</span>
           </div>
+          <div class="dish-calories">580 kcal</div>
           <div class="dish-macros">
-            <span class="macro-cal">580 kcal</span> ·
-            <span class="macro-p">35g protein</span> ·
-            <span class="macro-c">65g carbs</span> ·
-            <span class="macro-f">18g fat</span>
+            <span class="macro-p">P: 35g</span> · <span class="macro-c">C: 65g</span> · <span class="macro-f">F: 18g</span>
           </div>
-          <div class="dish-servings">1 phần</div>
+          <div class="dish-servings">1 phần · <span class="source-badge">Có sẵn</span></div>
         </div>
 
         <!-- Dish 3 -->
         <div class="dish-card">
+          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
           <div class="dish-header">
             <span class="dish-name">Bún chả</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
-            <span class="source-badge">Có sẵn</span>
           </div>
+          <div class="dish-calories">520 kcal</div>
           <div class="dish-macros">
-            <span class="macro-cal">520 kcal</span> ·
-            <span class="macro-p">30g protein</span> ·
-            <span class="macro-c">48g carbs</span> ·
-            <span class="macro-f">22g fat</span>
+            <span class="macro-p">P: 30g</span> · <span class="macro-c">C: 48g</span> · <span class="macro-f">F: 22g</span>
           </div>
-          <div class="dish-servings">1 phần</div>
+          <div class="dish-servings">1 phần · <span class="source-badge">Có sẵn</span></div>
         </div>
 
         <!-- Dish 4 — Quick type -->
         <div class="dish-card">
+          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
           <div class="dish-header">
             <span class="dish-name">Sandwich nhanh</span>
             <span class="type-badge type-quick">Nhập nhanh</span>
           </div>
+          <div class="dish-calories">350 kcal</div>
           <div class="dish-macros">
-            <span class="macro-cal">350 kcal</span> ·
-            <span class="macro-p">15g protein</span> ·
-            <span class="macro-c">40g carbs</span> ·
-            <span class="macro-f">12g fat</span>
+            <span class="macro-p">P: 15g</span> · <span class="macro-c">C: 40g</span> · <span class="macro-f">F: 12g</span>
           </div>
           <div class="dish-servings">1 phần</div>
         </div>
@@ -519,8 +532,10 @@
         <div class="toolbar-title">Quản lý</div>
       </div>
       <div class="sub-tabs">
-        <div class="sub-tab">Nguyên liệu</div>
-        <div class="sub-tab active">Món ăn</div>
+        <div class="sub-tab-track">
+          <div class="sub-tab">Nguyên liệu</div>
+          <div class="sub-tab active">Món ăn</div>
+        </div>
       </div>
       <div class="content">
         <div class="search-bar" style="border-color: #2196F3;">
@@ -532,18 +547,16 @@
         <div class="result-count">1 kết quả</div>
 
         <div class="dish-card">
+          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
           <div class="dish-header">
             <span class="dish-name">Phở bò</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
-            <span class="source-badge">Có sẵn</span>
           </div>
+          <div class="dish-calories">488 kcal</div>
           <div class="dish-macros">
-            <span class="macro-cal">488 kcal</span> ·
-            <span class="macro-p">28g protein</span> ·
-            <span class="macro-c">52g carbs</span> ·
-            <span class="macro-f">12g fat</span>
+            <span class="macro-p">P: 28g</span> · <span class="macro-c">C: 52g</span> · <span class="macro-f">F: 12g</span>
           </div>
-          <div class="dish-servings">1 phần</div>
+          <div class="dish-servings">1 phần · <span class="source-badge">Có sẵn</span></div>
         </div>
       </div>
       <button class="fab">+</button>
@@ -568,8 +581,10 @@
         <div class="toolbar-title">Quản lý</div>
       </div>
       <div class="sub-tabs">
-        <div class="sub-tab">Nguyên liệu</div>
-        <div class="sub-tab active">Món ăn</div>
+        <div class="sub-tab-track">
+          <div class="sub-tab">Nguyên liệu</div>
+          <div class="sub-tab active">Món ăn</div>
+        </div>
       </div>
       <div class="content">
         <div class="search-bar" style="border-color: #2196F3;">
@@ -606,8 +621,10 @@
         <div class="toolbar-title">Quản lý</div>
       </div>
       <div class="sub-tabs">
-        <div class="sub-tab">Nguyên liệu</div>
-        <div class="sub-tab active">Món ăn</div>
+        <div class="sub-tab-track">
+          <div class="sub-tab">Nguyên liệu</div>
+          <div class="sub-tab active">Món ăn</div>
+        </div>
       </div>
       <div class="content">
         <div class="empty-state" style="padding-top: 100px;">
@@ -639,8 +656,10 @@
         <div class="toolbar-title">Quản lý</div>
       </div>
       <div class="sub-tabs">
-        <div class="sub-tab">Nguyên liệu</div>
-        <div class="sub-tab active">Món ăn</div>
+        <div class="sub-tab-track">
+          <div class="sub-tab">Nguyên liệu</div>
+          <div class="sub-tab active">Món ăn</div>
+        </div>
       </div>
       <div class="content" style="opacity: 0.3;">
         <div class="search-bar">
@@ -648,21 +667,25 @@
           <span class="search-text placeholder">Tìm món ăn...</span>
         </div>
         <div class="dish-card">
+          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
           <div class="dish-header">
             <span class="dish-name">Phở bò</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
           </div>
+          <div class="dish-calories">488 kcal</div>
           <div class="dish-macros">
-            <span class="macro-cal">488 kcal</span> · <span class="macro-p">28g protein</span>
+            <span class="macro-p">P: 28g</span> · <span class="macro-c">C: 52g</span> · <span class="macro-f">F: 12g</span>
           </div>
         </div>
         <div class="dish-card">
+          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
           <div class="dish-header">
             <span class="dish-name">Cơm gà xối mỡ</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
           </div>
+          <div class="dish-calories">580 kcal</div>
           <div class="dish-macros">
-            <span class="macro-cal">580 kcal</span> · <span class="macro-p">35g protein</span>
+            <span class="macro-p">P: 35g</span> · <span class="macro-c">C: 65g</span> · <span class="macro-f">F: 18g</span>
           </div>
         </div>
       </div>
@@ -698,8 +721,10 @@
         <div class="toolbar-title">Quản lý</div>
       </div>
       <div class="sub-tabs">
-        <div class="sub-tab">Nguyên liệu</div>
-        <div class="sub-tab active">Món ăn</div>
+        <div class="sub-tab-track">
+          <div class="sub-tab">Nguyên liệu</div>
+          <div class="sub-tab active">Món ăn</div>
+        </div>
       </div>
       <div class="content" style="opacity: 0.4;">
         <div class="search-bar">
@@ -707,21 +732,25 @@
           <span class="search-text placeholder">Tìm món ăn...</span>
         </div>
         <div class="dish-card">
+          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
           <div class="dish-header">
             <span class="dish-name">Phở bò</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
           </div>
+          <div class="dish-calories">488 kcal</div>
           <div class="dish-macros">
-            <span class="macro-cal">488 kcal</span> · <span class="macro-p">28g protein</span>
+            <span class="macro-p">P: 28g</span> · <span class="macro-c">C: 52g</span> · <span class="macro-f">F: 12g</span>
           </div>
         </div>
         <div class="dish-card">
+          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
           <div class="dish-header">
             <span class="dish-name">Cơm gà xối mỡ</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
           </div>
+          <div class="dish-calories">580 kcal</div>
           <div class="dish-macros">
-            <span class="macro-cal">580 kcal</span> · <span class="macro-p">35g protein</span>
+            <span class="macro-p">P: 35g</span> · <span class="macro-c">C: 65g</span> · <span class="macro-f">F: 18g</span>
           </div>
         </div>
       </div>
@@ -759,7 +788,9 @@
     <tr><td><code>--bg-page</code></td><td>#F5F7FA / #121212</td><td>Content background</td></tr>
     <tr><td><code>--bg-card</code></td><td>#FFFFFF / #1E1E1E</td><td>Dish cards, search bar, dialog, tab bar</td></tr>
     <tr><td><code>--bg-elevated</code></td><td>#FFFFFF / #2E2E2E</td><td>FAB menu items, dialog box (dark)</td></tr>
-    <tr><td><code>--primary</code></td><td>#2196F3 / #42A5F5</td><td>Toolbar, segment control active text, active tab, macro-cal color</td></tr>
+    <tr><td><code>--primary</code></td><td>#2196F3 / #42A5F5</td><td>Toolbar, active tab</td></tr>
+    <tr><td><code>--segment-track</code></td><td>#E8E8E8 / #333333</td><td>Segment control track background</td></tr>
+    <tr><td><code>--segment-active</code></td><td>#FFFFFF / #2A2A2A</td><td>Segment control active pill</td></tr>
     <tr><td><code>--status-bar</code></td><td>#1976D2 / #0D47A1</td><td>Status bar background</td></tr>
     <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>FAB button, empty-state CTA</td></tr>
     <tr><td><code>--text-primary</code></td><td>#1A1A1A / #FFFFFF</td><td>Dish name, dialog title</td></tr>
@@ -779,8 +810,9 @@
     <tr><td><code>space-md</code></td><td>12px</td><td>Card gap, search margin-bottom, content top padding</td></tr>
     <tr><td><code>space-lg</code></td><td>16px</td><td>Page side padding, card padding, FAB offset</td></tr>
     <tr><td>Typography — Title</td><td>18px/500</td><td>Dialog title</td></tr>
-    <tr><td>Typography — Body</td><td>14px/500</td><td>Dish name, search text, segment control text, FAB menu label</td></tr>
-    <tr><td>Typography — Caption</td><td>12px/400</td><td>Macro summary, result count</td></tr>
+    <tr><td>Typography — Body</td><td>16px/600</td><td>Dish name, search text, segment control text, FAB menu label</td></tr>
+    <tr><td>Typography — Hero</td><td>22px/700</td><td>Calories hero stat on dish card</td></tr>
+    <tr><td>Typography — Caption</td><td>13px/400</td><td>P/C/F macro summary, result count</td></tr>
     <tr><td>Typography — Overline</td><td>11px/500</td><td>Type badge text, source badge, tab bar labels, servings</td></tr>
     <tr><td>Macro colors</td><td>Cal=#2196F3, P=#4CAF50, C=#FF9800, F=#F44336</td><td>Color-coded macro values in dish summary</td></tr>
     <tr><td>Type badge — Nguyên liệu</td><td>Blue bg + blue text</td><td>#E3F2FD/#1565C0 (light), rgba(33,150,243,0.2)/#90CAF9 (dark)</td></tr>

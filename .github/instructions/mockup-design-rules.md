@@ -48,11 +48,12 @@
 
 | Trường hợp | Dialog | Actions |
 |------------|--------|---------|
-| Item đang được dùng (ingredient in dish, dish in meal plan) | "Không thể xóa" — info dialog | Chỉ [Đã hiểu] (--primary) |
+| Item đang được dùng (ingredient in dish, dish in meal plan) | "Không thể xóa" — info dialog | [Xem N món đang dùng] (--primary) — **actionable CTA** dẫn đến danh sách liên quan |
 | Item không dùng | "Xóa [tên]?" — confirm dialog | [Hủy] + [Xóa] (--error) |
 
 - Delete trigger: swipe left → nút [Xóa] đỏ.
 - KHÔNG cho phép xóa bằng long-press hoặc menu ẩn.
+- Dialog "không thể xóa" phải giúp user đi tiếp (xem món liên quan), KHÔNG chỉ acknowledge.
 
 ## 7. Annotations & Hints
 
@@ -105,7 +106,9 @@ Mỗi file mockup PHẢI kết thúc bằng bảng Design Spec Notes gồm:
 
 - **KHÔNG dùng underline tabs** cho sub-tabs trong page.
 - Dùng **Segment Control** (ion-segment) — theo spec `phase-1-management.md`.
-- Visual: White pill trên primary background, text inactive = `rgba(255,255,255,0.6)`.
+- **Vị trí: TRONG content area** (dưới toolbar), KHÔNG trên toolbar background.
+- Visual: pill track `#E8E8E8` (light) / `#333` (dark), active pill trắng, text inactive `#666`.
+- Lý do: Status bar + toolbar + segment cùng xanh = "nặng đầu". Segment trên nền page giảm visual weight.
 - Xem chi tiết: `design-system.md §8g`.
 
 ## 14. Filter Chips — Gradient Fade Affordance
@@ -119,7 +122,10 @@ Mỗi file mockup PHẢI kết thúc bằng bảng Design Spec Notes gồm:
 
 - Mọi form Add/Edit có nội dung dài hơn 1 viewport → PHẢI có nút **"Lưu"** ở góc phải toolbar.
 - Nút text trắng, 16px/500, `margin-left: auto`.
-- Nút **KHÔNG bao giờ disable** — khi tap mà form invalid → auto-scroll to first error.
+- **2-context rule:**
+  - **Step nav** (wizard, ≤2 actions): CTA disabled cho tới khi valid → enable khi đủ.
+  - **Form submit** (≥3 fields): CTA **luôn active** → tap → auto-scroll to first error.
+- Xem chi tiết: `design-system.md §8.8b`.
 
 ## 16. Radio Checkmark — Accessibility
 
@@ -160,10 +166,56 @@ Trước khi coi mockup là xong, PHẢI mở trên browser và kiểm tra:
 □ 8. Swipe state có hiện đầy đủ text + actions không?
 □ 9. Empty/no-result states có CTA không?
 □ 10. Spec notes table đầy đủ tokens + rules?
-□ 11. Sub-tabs dùng Segment Control (không underline)?
+□ 11. Sub-tabs dùng Segment Control trên NỀN TRẮNG (không toolbar)?
 □ 12. Filter chips có gradient fade affordance?
 □ 13. Toolbar có nút "Lưu" cho form dài?
 □ 14. Radio selected có checkmark ✓?
 □ 15. Touch targets ≥ 44×44px?
 □ 16. Calories nổi bật hơn P/C/F?
+□ 17. Category chips có giảm saturation (pastel-like)?
+□ 18. List cards có ⋮ more icon affordance?
+□ 19. Placeholder số dùng hint text (không "0")?
+□ 20. Delete blocked dialog có CTA actionable?
+□ 21. Step nav CTA disabled khi chưa valid?
 ```
+
+## 21. Category Chips — Giảm Saturation
+
+- Category chips (Thịt, Cá, Rau...) dùng màu **nhạt hơn 20-30%** so với base.
+- Text giữ màu gốc, background dùng `opacity: 0.12` hoặc tint nhẹ.
+- Light mode: bg rất nhạt (gần trắng), text/border màu gốc.
+- Dark mode: bg rất tối (gần card bg), text màu gốc sáng hơn.
+- Lý do: Nhiều chips saturated cùng lúc = nhiễu thị giác, cạnh tranh attention với content chính.
+
+## 22. Affordance Ngoài Swipe — ⋮ More Icon
+
+- Mọi list card có swipe actions → PHẢI thêm **⋮ (more) icon** ở góc phải card.
+- Size icon: 16-20px, nhưng hitbox 44×44px.
+- Tap ⋮ → hiện bottom sheet hoặc popup: [Sửa] + [Xóa].
+- Swipe vẫn giữ nguyên — ⋮ là backup affordance cho user không biết swipe.
+- Lý do: Swipe discoverable thấp (cần hint hoặc trải nghiệm trước).
+
+## 23. Placeholder Số — Hint Text thay "0"
+
+- Input số (calories, protein, gram...) **KHÔNG dùng placeholder "0"**.
+- Dùng hint text: "Nhập số" hoặc chỉ hiện suffix khi có value.
+- Placeholder color: `var(--text-tertiary)` — nhạt hơn rõ so với value thật.
+- Lý do: "0" dễ bị hiểu là giá trị thật → user bỏ qua → data sai.
+
+## 24. Quick-Add Macro Fields — Dot thay Border
+
+- Macro fields (Protein, Carbs, Fat) trong quick-add:
+  - **KHÔNG dùng left border màu đầy đủ** (quá trang trí cho data-entry form).
+  - Dùng **dot nhỏ 8px** hoặc **icon nhỏ** bên trái field label.
+  - Hoặc chỉ label text dùng semantic color, field border neutral.
+- Lý do: Giảm màu trên form → tăng clarity, focus vào data input.
+
+## 25. Dish Card Hierarchy — Calories Hero
+
+- Dish card trong list PHẢI có hierarchy rõ:
+  - **Dòng 1:** Tên món + loại badge — `16px/600`
+  - **Dòng 2:** Calories = **hero stat** — `20-24px/700`, color `var(--text-primary)`
+  - **Dòng 3:** P/C/F = secondary — `13-14px/400`, color `var(--text-secondary)`
+  - **Dòng 4:** Servings/source = tertiary — `12px/400`, color `var(--text-tertiary)`
+- Calories KHÔNG được cùng cấp visual với P/C/F.
+- Xem thêm: `design-system.md §3.6`.
