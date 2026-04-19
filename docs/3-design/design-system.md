@@ -159,7 +159,7 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 
 | Token | Value | Dùng cho |
 |-------|-------|----------|
-| `--radius-sm` | 8px | Input fields, small chips |
+| `--radius-sm` | 12px | Input fields, small chips |
 | `--radius-md` | 12px | Quick action buttons, sub-cards (streak), tags |
 | `--radius-lg` | 16px | **Cards** — component chính |
 | `--radius-xl` | 20px | Modal, bottom sheet |

@@ -359,7 +359,7 @@ const EMPTY_ERRORS: Step2Errors = {
       ion-input[fill],
       ion-select[fill] {
         margin-bottom: 8px;
-        --background: #fff;
+        --background: var(--bg-card, #fff);
         --border-radius: 12px;
         --border-color: #d1d1d6;
         --border-width: 1px;
