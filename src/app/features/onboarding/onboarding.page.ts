@@ -358,7 +358,14 @@ const EMPTY_ERRORS: Step2Errors = {
       }
       ion-input[fill],
       ion-select[fill] {
-        margin-bottom: 4px;
+        margin-bottom: 8px;
+        --background: #fff;
+        --border-radius: 12px;
+        --border-color: #d1d1d6;
+        --border-width: 1px;
+        --highlight-color-focused: var(--ion-color-primary);
+        --padding-start: 16px;
+        --padding-end: 16px;
       }
       ion-input.ion-invalid,
       ion-select.ion-invalid {
