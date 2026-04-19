@@ -42,12 +42,21 @@ export const GYM_TO_LEVEL: Record<GymExperience, FitnessLevel> = {
   over_2y: 'advanced',
 };
 
-/** PRD §6: Activity factors derived from gym experience */
-export const GYM_TO_ACTIVITY_FACTOR: Record<GymExperience, number> = {
-  never: 1.2,
-  under_6m: 1.375,
-  '6m_2y': 1.55,
-  over_2y: 1.725,
+/** Activity level options for TDEE calculation (independent of gym experience) */
+export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'heavy';
+
+export const ACTIVITY_FACTOR: Record<ActivityLevel, number> = {
+  sedentary: 1.2,
+  light: 1.375,
+  moderate: 1.55,
+  heavy: 1.725,
+};
+
+export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
+  sedentary: 'Ít vận động',
+  light: 'Nhẹ (1-3 ngày/tuần)',
+  moderate: 'Trung bình (3-5 ngày/tuần)',
+  heavy: 'Nặng (6-7 ngày/tuần)',
 };
 
 export const PROTEIN_MULTIPLIER: Record<Goal, number> = {
@@ -70,6 +79,7 @@ interface Step2Errors {
   weightKg: string;
   age: string;
   gender: string;
+  activityLevel: string;
   gymExperience: string;
 }
 
@@ -78,6 +88,7 @@ const EMPTY_ERRORS: Step2Errors = {
   weightKg: '',
   age: '',
   gender: '',
+  activityLevel: '',
   gymExperience: '',
 };
 
@@ -224,6 +235,27 @@ const EMPTY_ERRORS: Step2Errors = {
             </ion-select>
             @if (step2Errors().gender) {
               <div id="err-gender" class="field-error" role="alert">{{ step2Errors().gender }}</div>
+            }
+
+            <ion-select
+              label="Mức vận động"
+              labelPlacement="floating"
+              fill="outline"
+              [value]="activityLevel()"
+              (ionChange)="activityLevel.set($event.detail.value)"
+              [class.ion-invalid]="step2Errors().activityLevel"
+              [attr.aria-invalid]="step2Errors().activityLevel ? 'true' : null"
+              [attr.aria-describedby]="step2Errors().activityLevel ? 'err-activity' : null"
+            >
+              <ion-select-option value="sedentary">Ít vận động</ion-select-option>
+              <ion-select-option value="light">Nhẹ (1-3 ngày/tuần)</ion-select-option>
+              <ion-select-option value="moderate">Trung bình (3-5 ngày/tuần)</ion-select-option>
+              <ion-select-option value="heavy">Nặng (6-7 ngày/tuần)</ion-select-option>
+            </ion-select>
+            @if (step2Errors().activityLevel) {
+              <div id="err-activity" class="field-error" role="alert">
+                {{ step2Errors().activityLevel }}
+              </div>
             }
 
             <p class="section-label">Kinh nghiệm tập gym?</p>
@@ -454,6 +486,7 @@ export default class OnboardingPage {
   readonly weightKg = signal<number | null>(null);
   readonly age = signal<number | null>(null);
   readonly gender = signal<Gender | null>(null);
+  readonly activityLevel = signal<ActivityLevel | null>(null);
   readonly gymExperience = signal<GymExperience | null>(null);
   readonly step2Errors = signal<Step2Errors>({ ...EMPTY_ERRORS });
   readonly saveError = signal('');
@@ -509,7 +542,7 @@ export default class OnboardingPage {
       const age = this.age()!;
       const gym = this.gymExperience()!;
       const fitnessLevel = GYM_TO_LEVEL[gym];
-      const activityFactor = GYM_TO_ACTIVITY_FACTOR[gym];
+      const activityFactor = ACTIVITY_FACTOR[this.activityLevel()!];
 
       // Mifflin-St Jeor formula
       const bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + (gender === 'male' ? 5 : -161);
@@ -557,6 +590,7 @@ export default class OnboardingPage {
     if (!w || w < 30 || w > 200) errors.weightKg = 'Cân nặng phải từ 30–200 kg';
     if (!a || a < 13 || a > 120) errors.age = 'Tuổi phải từ 13–120';
     if (!this.gender()) errors.gender = 'Vui lòng chọn giới tính';
+    if (!this.activityLevel()) errors.activityLevel = 'Vui lòng chọn mức vận động';
     if (!this.gymExperience()) errors.gymExperience = 'Vui lòng chọn kinh nghiệm tập gym';
 
     return errors;
@@ -577,6 +611,7 @@ export default class OnboardingPage {
       'weightKg',
       'age',
       'gender',
+      'activityLevel',
       'gymExperience',
     ];
     const firstError = fieldOrder.find((f) => errors[f] !== '');
@@ -587,6 +622,7 @@ export default class OnboardingPage {
       weightKg: 'err-weight',
       age: 'err-age',
       gender: 'err-gender',
+      activityLevel: 'err-activity',
       gymExperience: '',
     };
 
