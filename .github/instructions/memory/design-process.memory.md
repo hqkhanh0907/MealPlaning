@@ -200,3 +200,14 @@ Mỗi lần so sánh mockup vs app, duyệt TỪNG element theo 8 thuộc tính:
 ### Bài học
 
 **KHÔNG BAO GIỜ** claim "mockup và app giống nhau" nếu chưa duyệt đủ 8 thuộc tính trên MỌI element. User CÓ MẮT — nếu lệch 1px user cũng thấy, đừng nói 20px.
+
+---
+
+## 7. Domain variable independence — Activity Level ≠ Gym Experience (2026-04-19)
+
+- ❌ **Sai**: Suy "Mức vận động" (activity factor) từ "Kinh nghiệm gym" (gym experience)
+- ✅ **Đúng**: Đây là 2 biến ĐỘC LẬP hoàn toàn
+  - Gym experience (never/under_6m/6m_2y/over_2y) → fitness_level → chọn chương trình tập
+  - Activity level (sedentary/light/moderate/heavy) → activity_factor (1.2–1.725) → tính TDEE
+  - Ví dụ: gym 5 năm (advanced) + ngồi văn phòng cả ngày = sedentary (1.2)
+- 💡 **Bài học**: Khi PRD thiếu field mà formula cần → thêm field mới, KHÔNG "thông minh" suy từ field khác. Correlation ≠ causation.
