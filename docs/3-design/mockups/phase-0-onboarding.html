@@ -142,18 +142,7 @@
   body.light .radio-item:hover { background: #e3f2fd; }
   body.dark  .radio-item:hover { background: #2e2e2e; }
 
-  .radio-circle {
-    width: 20px; height: 20px; border-radius: 50%;
-    border: 2px solid #999; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .radio-circle.selected { border-color: #2196f3; }
-  body.dark .radio-circle.selected { border-color: #42a5f5; }
-  .radio-circle.selected::after {
-    content: ''; width: 10px; height: 10px; border-radius: 50%;
-    background: #2196f3;
-  }
-  body.dark .radio-circle.selected::after { background: #42a5f5; }
+  /* Radio circles HIDDEN — highlight-only selection pattern (UX decision) */
 
   .radio-icon {
     width: 22px; height: 22px; flex-shrink: 0;
@@ -244,13 +233,11 @@
     width: 100%; padding: 14px; border: none; border-radius: 10px;
     font-size: 16px; font-weight: 500; color: #fff;
     cursor: pointer; margin-top: 24px;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
+    display: flex; align-items: center; justify-content: center;
   }
   body.light .btn-cta { background: #ff9800; }
   body.dark  .btn-cta { background: #ffb74d; color: #121212; }
   .btn-cta.disabled { opacity: 0.5; pointer-events: none; }
-
-  .btn-cta svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
   .button-row {
     display: flex; gap: 12px; margin-top: 24px;
@@ -261,12 +248,11 @@
     padding: 14px; border-radius: 10px;
     font-size: 16px; font-weight: 500;
     cursor: pointer; background: transparent;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
+    display: flex; align-items: center; justify-content: center;
   }
   body.light .btn-outline { border: 2px solid #2196f3; color: #2196f3; }
   body.dark  .btn-outline { border: 2px solid #42a5f5; color: #42a5f5; }
   .btn-outline.disabled { opacity: 0.5; pointer-events: none; }
-  .btn-outline svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
   /* =========================================================================
      SPEC NOTES — design annotation panel
@@ -320,28 +306,23 @@
 
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 14c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/></svg></div>
-          <div class="radio-circle"></div>
           <div class="radio-label">Giảm cân</div>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M2 12h3l2.5-3v6L5 12H2zm20 0h-3l-2.5-3v6l2.5-3h3zM9 12h6"/></svg></div>
-          <div class="radio-circle"></div>
           <div class="radio-label">Tăng cơ</div>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 12h14M8 7l4-4 4 4M8 17l4 4 4-4"/></svg></div>
-          <div class="radio-circle"></div>
           <div class="radio-label">Duy trì</div>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 2l3 6h6l-5 4 2 7-6-4-6 4 2-7-5-4h6z"/></svg></div>
-          <div class="radio-circle"></div>
           <div class="radio-label">Tăng sức mạnh</div>
         </div>
 
         <button class="btn-cta">
           Tiếp tục
-          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
       </div>
     </div>
@@ -352,7 +333,7 @@
        ===================================================================== -->
   <div class="screen-wrapper">
     <div class="screen-label">Bước 1 — Đã chọn</div>
-    <div class="screen-desc">"Giảm cân" selected, radio filled, item highlighted</div>
+    <div class="screen-desc">"Giảm cân" selected, item highlighted (no radio circle)</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
@@ -365,28 +346,23 @@
 
         <div class="radio-item selected">
           <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 14c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/></svg></div>
-          <div class="radio-circle selected"></div>
           <div class="radio-label"><strong>Giảm cân</strong></div>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M2 12h3l2.5-3v6L5 12H2zm20 0h-3l-2.5-3v6l2.5-3h3zM9 12h6"/></svg></div>
-          <div class="radio-circle"></div>
           <div class="radio-label">Tăng cơ</div>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 12h14M8 7l4-4 4 4M8 17l4 4 4-4"/></svg></div>
-          <div class="radio-circle"></div>
           <div class="radio-label">Duy trì</div>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 2l3 6h6l-5 4 2 7-6-4-6 4 2-7-5-4h6z"/></svg></div>
-          <div class="radio-circle"></div>
           <div class="radio-label">Tăng sức mạnh</div>
         </div>
 
         <button class="btn-cta">
           Tiếp tục
-          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
       </div>
     </div>
@@ -410,22 +386,18 @@
 
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 14c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/></svg></div>
-          <div class="radio-circle"></div>
           <div class="radio-label">Giảm cân</div>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M2 12h3l2.5-3v6L5 12H2zm20 0h-3l-2.5-3v6l2.5-3h3zM9 12h6"/></svg></div>
-          <div class="radio-circle"></div>
           <div class="radio-label">Tăng cơ</div>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 12h14M8 7l4-4 4 4M8 17l4 4 4-4"/></svg></div>
-          <div class="radio-circle"></div>
           <div class="radio-label">Duy trì</div>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 24 24"><path d="M12 2l3 6h6l-5 4 2 7-6-4-6 4 2-7-5-4h6z"/></svg></div>
-          <div class="radio-circle"></div>
           <div class="radio-label">Tăng sức mạnh</div>
         </div>
 
@@ -433,7 +405,6 @@
 
         <button class="btn-cta">
           Tiếp tục
-          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
       </div>
     </div>
@@ -488,30 +459,24 @@
 
         <p class="section-label">Kinh nghiệm tập gym?</p>
         <div class="radio-item">
-          <div class="radio-circle"></div>
           <div class="radio-label">Chưa bao giờ</div>
         </div>
         <div class="radio-item">
-          <div class="radio-circle"></div>
           <div class="radio-label">Dưới 6 tháng</div>
         </div>
         <div class="radio-item">
-          <div class="radio-circle"></div>
           <div class="radio-label">6 tháng — 2 năm</div>
         </div>
         <div class="radio-item">
-          <div class="radio-circle"></div>
           <div class="radio-label">Trên 2 năm</div>
         </div>
 
         <div class="button-row">
           <button class="btn-outline">
-            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Quay lại
           </button>
           <button class="btn-cta" style="margin-top:0">
             Hoàn tất
-            <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
           </button>
         </div>
       </div>
@@ -567,30 +532,24 @@
 
         <p class="section-label">Kinh nghiệm tập gym?</p>
         <div class="radio-item">
-          <div class="radio-circle"></div>
           <div class="radio-label">Chưa bao giờ</div>
         </div>
         <div class="radio-item">
-          <div class="radio-circle"></div>
           <div class="radio-label">Dưới 6 tháng</div>
         </div>
         <div class="radio-item selected">
-          <div class="radio-circle selected"></div>
           <div class="radio-label"><strong>6 tháng — 2 năm</strong></div>
         </div>
         <div class="radio-item">
-          <div class="radio-circle"></div>
           <div class="radio-label">Trên 2 năm</div>
         </div>
 
         <div class="button-row">
           <button class="btn-outline">
-            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Quay lại
           </button>
           <button class="btn-cta" style="margin-top:0">
             Hoàn tất
-            <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
           </button>
         </div>
       </div>
@@ -652,31 +611,25 @@
 
         <p class="section-label">Kinh nghiệm tập gym?</p>
         <div class="radio-item">
-          <div class="radio-circle"></div>
           <div class="radio-label">Chưa bao giờ</div>
         </div>
         <div class="radio-item">
-          <div class="radio-circle"></div>
           <div class="radio-label">Dưới 6 tháng</div>
         </div>
         <div class="radio-item">
-          <div class="radio-circle"></div>
           <div class="radio-label">6 tháng — 2 năm</div>
         </div>
         <div class="radio-item">
-          <div class="radio-circle"></div>
           <div class="radio-label">Trên 2 năm</div>
         </div>
         <div class="field-error">Vui lòng chọn kinh nghiệm gym</div>
 
         <div class="button-row">
           <button class="btn-outline">
-            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Quay lại
           </button>
           <button class="btn-cta" style="margin-top:0">
             Hoàn tất
-            <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
           </button>
         </div>
       </div>
@@ -732,18 +685,15 @@
 
         <p class="section-label">Kinh nghiệm tập gym?</p>
         <div class="radio-item selected">
-          <div class="radio-circle selected"></div>
           <div class="radio-label"><strong>6 tháng — 2 năm</strong></div>
         </div>
 
         <div class="button-row">
           <button class="btn-outline disabled">
-            <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Quay lại
           </button>
           <button class="btn-cta disabled" style="margin-top:0">
             Đang lưu...
-            <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
           </button>
         </div>
       </div>
@@ -778,7 +728,7 @@
     <tr><th>State</th><th>Step 1</th><th>Step 2</th></tr>
     <tr><td>Default</td><td>Screen 1: empty radio group</td><td>Screen 4: empty form fields</td></tr>
     <tr><td>Hover</td><td>Radio item bg → <code>#e3f2fd</code></td><td>Same on radio items</td></tr>
-    <tr><td>Active/Selected</td><td>Screen 2: filled radio, blue highlight</td><td>Screen 5: filled form + gym selected</td></tr>
+    <tr><td>Active/Selected</td><td>Screen 2: bg highlight, no radio circle</td><td>Screen 5: filled form + gym bg highlight</td></tr>
     <tr><td>Focus</td><td><code>tabindex="-1"</code> on heading for a11y</td><td>Focus first invalid field on error</td></tr>
     <tr><td>Disabled</td><td>—</td><td>Screen 7: buttons 50% opacity while saving</td></tr>
     <tr><td>Error</td><td>Screen 3: toast "Vui lòng chọn mục tiêu"</td><td>Screen 6: per-field errors + focus</td></tr>
