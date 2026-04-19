@@ -156,3 +156,47 @@ Step 2: Hỏi STYLE preference với ví dụ thực tế
 ### Bài học
 
 Mockup HTML ~80KB cho 5 screens × 2 modes là bình thường. Đừng cố minimize — user cần xem FULL detail.
+
+---
+
+## 6. Visual Comparison — PHẢI duyệt HỆ THỐNG, không chỉ "nổi bật"
+
+### Vấn đề
+
+So sánh mockup vs app chỉ kiểm tra font-size, font-weight, color → bỏ sót 3 lỗi rõ ràng:
+- ❌ Button height lệch 20px (56 vs 36) — hiển nhiên nhưng bỏ qua
+- ❌ Icon padding = 0px (sát viền) — vi phạm whitespace principle
+- ❌ Input padding = 0px (CSS generic `ion-item` scope quá rộng)
+
+### Nguyên nhân
+
+1. Chỉ so sánh "thuộc tính nổi bật" (text, color, font) mà KHÔNG có checklist spacing/layout
+2. Không kiểm tra `--padding-start`, `margin`, `height` trên MỌI element
+3. Tự tin vào kết quả sai → vi phạm P5 (kỹ lưỡng)
+
+### Giải pháp: Visual Comparison Checklist (BẮT BUỘC)
+
+Mỗi lần so sánh mockup vs app, duyệt TỪNG element theo 8 thuộc tính:
+
+```
+□ 1. Typography: font-size, font-weight, line-height, text-transform, color
+□ 2. Spacing: padding (all 4 sides), margin (all 4 sides), gap
+□ 3. Sizing: width, height, min-height, max-width
+□ 4. Layout: display, flex, alignment, position
+□ 5. Borders: border-width, border-radius, border-color
+□ 6. Background: background-color, gradient, opacity
+□ 7. Interactive states: hover, active, focus, disabled
+□ 8. Touch targets: min 44px height/width cho tappable elements
+```
+
+### Design Rules vi phạm
+
+| Issue | Rule vi phạm |
+|-------|-------------|
+| Button height khác nhau | Design Principle #3 (mobile-first, 44px+ targets) |
+| Padding = 0 | Design Principle #1 (whitespace > ornament) |
+| Generic CSS scope | R1 (Clean Code — scope CSS chính xác) |
+
+### Bài học
+
+**KHÔNG BAO GIỜ** claim "mockup và app giống nhau" nếu chưa duyệt đủ 8 thuộc tính trên MỌI element. User CÓ MẮT — nếu lệch 1px user cũng thấy, đừng nói 20px.
