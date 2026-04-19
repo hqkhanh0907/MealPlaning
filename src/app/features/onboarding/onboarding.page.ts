@@ -324,7 +324,7 @@ const EMPTY_ERRORS: Step2Errors = {
       }
       .goal-item,
       .gym-item {
-        --padding-start: 0;
+        --padding-start: 16px;
         --border-radius: 12px;
         --background: var(--bg-card);
         margin-bottom: 8px;
@@ -350,7 +350,7 @@ const EMPTY_ERRORS: Step2Errors = {
         margin-right: 8px;
       }
       ion-item {
-        --padding-start: 0;
+        --padding-start: 16px;
         margin-bottom: 4px;
       }
       ion-item.ion-invalid {
@@ -390,6 +390,9 @@ const EMPTY_ERRORS: Step2Errors = {
       }
       .button-row ion-button {
         flex: 1;
+        --height: 48px;
+        margin-top: 0;
+        margin-bottom: 0;
       }
       .onboarding-progress {
         --progress-background: rgba(255, 255, 255, 0.3);
