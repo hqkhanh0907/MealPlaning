@@ -41,8 +41,8 @@
               }
             ],
             "styles": [
-              "src/theme/variables.scss",
-              "src/global.scss"
+              "src/global.scss",
+              "src/theme/variables.scss"
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
@@ -126,8 +126,8 @@
               }
             ],
             "styles": [
-              "src/theme/variables.scss",
-              "src/global.scss"
+              "src/global.scss",
+              "src/theme/variables.scss"
             ],
             "scripts": []
           },

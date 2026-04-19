@@ -1148,3 +1148,24 @@ original_exercises, is_user_assigned, original_day_of_week, notes
 ### Bài học
 
 Luôn kiểm tra schema bằng `SELECT sql FROM sqlite_master WHERE name = 'table_name'` trước khi viết INSERT/SELECT.
+
+---
+
+## Ionic Theme CSS Load Order (Critical Bug)
+
+- ❌ `angular.json` styles: `["variables.scss", "global.scss"]` → Ionic core.css OVERWRITES our theme tokens
+- ✅ `angular.json` styles: `["global.scss", "variables.scss"]` → Our tokens come LAST, override Ionic defaults
+- 💡 Ionic 8's `@ionic/angular/css/core.css` (imported by global.scss) defines `:root { --ion-color-secondary: #0163aa }` which overrides custom `--ion-color-secondary: #ff9800` if loaded after
+- 🔍 Debug: `grep "ion-color-secondary" www/styles*.css` to check which value wins
+- ⚠️ This affects ALL Ionic color tokens, not just secondary — primary, tertiary, success, etc. are ALL at risk
+
+## SplashScreen.hide() Required
+
+- ❌ `capacitor.config.ts` has `launchAutoHide: false` but NO code calls `SplashScreen.hide()`
+- ✅ Added `SplashScreen.hide()` in `AppComponent` constructor via `afterNextRender()`
+- 💡 Without this, app shows splash screen forever on device
+
+## ion-radio labelPlacement
+
+- ❌ `labelPlacement="end"` on `ion-radio` inside `ion-item` → label text right-aligned (pushed to far right)
+- ✅ Add `justify="start"` alongside `labelPlacement="end"` → text left-aligned next to radio circle

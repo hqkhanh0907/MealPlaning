@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   IonHeader,
@@ -18,7 +18,15 @@ import {
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
-import { arrowForwardOutline, arrowBackOutline, checkmarkOutline } from 'ionicons/icons';
+import {
+  arrowForwardOutline,
+  arrowBackOutline,
+  checkmarkOutline,
+  bodyOutline,
+  barbellOutline,
+  scaleOutline,
+  trophyOutline,
+} from 'ionicons/icons';
 import { ProfileStore } from '../../core/stores/profile.store';
 import { UserProfile } from '../../core/models/user-profile.model';
 
@@ -26,28 +34,53 @@ type Goal = UserProfile['goal'];
 type Gender = UserProfile['gender'];
 type FitnessLevel = UserProfile['fitness_level'];
 
-/** Gym experience options mapped to fitness_level */
-type GymExperience = 'never' | 'under_6m' | '6m_2y' | 'over_2y';
+/** Gym experience options mapped to fitness_level + activity_factor */
+export type GymExperience = 'never' | 'under_6m' | '6m_2y' | 'over_2y';
 
-const GYM_TO_LEVEL: Record<GymExperience, FitnessLevel> = {
+export const GYM_TO_LEVEL: Record<GymExperience, FitnessLevel> = {
   never: 'beginner',
   under_6m: 'beginner',
   '6m_2y': 'intermediate',
   over_2y: 'advanced',
 };
 
-const PROTEIN_MULTIPLIER: Record<Goal, number> = {
+/** PRD §6: Activity factors derived from gym experience */
+export const GYM_TO_ACTIVITY_FACTOR: Record<GymExperience, number> = {
+  never: 1.2,
+  under_6m: 1.375,
+  '6m_2y': 1.55,
+  over_2y: 1.725,
+};
+
+export const PROTEIN_MULTIPLIER: Record<Goal, number> = {
   lose_weight: 2.2,
   gain_muscle: 2.2,
   maintain: 1.6,
   performance: 2.0,
 };
 
-const CALORIE_ADJUSTMENT: Record<Goal, number> = {
+export const CALORIE_ADJUSTMENT: Record<Goal, number> = {
   lose_weight: -500,
   gain_muscle: 300,
   maintain: 0,
   performance: 200,
+};
+
+/** Per-field error state for Step 2 */
+interface Step2Errors {
+  heightCm: string;
+  weightKg: string;
+  age: string;
+  gender: string;
+  gymExperience: string;
+}
+
+const EMPTY_ERRORS: Step2Errors = {
+  heightCm: '',
+  weightKg: '',
+  age: '',
+  gender: '',
+  gymExperience: '',
 };
 
 @Component({
@@ -55,186 +88,289 @@ const CALORIE_ADJUSTMENT: Record<Goal, number> = {
   template: `
     <ion-header>
       <ion-toolbar>
+        @if (step() === 2) {
+          <ion-button fill="clear" slot="start" (click)="goBack()" class="back-button">
+            <ion-icon slot="icon-only" name="arrow-back-outline" />
+          </ion-button>
+        }
         <ion-title>{{ step() === 1 ? 'Mục tiêu' : 'Thông tin' }}</ion-title>
       </ion-toolbar>
-      <ion-progress-bar [value]="step() / 2" />
+      <ion-progress-bar [value]="step() / 2" class="onboarding-progress" />
     </ion-header>
 
-    <ion-content class="ion-padding">
-      <!-- STEP 1: Goal Selection -->
-      @if (step() === 1) {
-        <div class="step-content">
-          <h1 class="step-title">Mục tiêu của bạn?</h1>
-          <p class="step-subtitle">Chọn 1 mục tiêu chính</p>
+    <ion-content>
+      <div class="page-container">
+        <!-- STEP 1: Goal Selection -->
+        @if (step() === 1) {
+          <div class="step-content">
+            <h1 #step1Heading class="step-title" tabindex="-1">Mục tiêu của bạn?</h1>
+            <p class="step-subtitle">Chọn 1 mục tiêu chính</p>
 
-          <ion-radio-group [value]="goal()" (ionChange)="goal.set($event.detail.value)">
-            <ion-item lines="none" class="goal-item">
-              <ion-radio value="lose_weight" labelPlacement="end"> 🏃 Giảm cân </ion-radio>
-            </ion-item>
-            <ion-item lines="none" class="goal-item">
-              <ion-radio value="gain_muscle" labelPlacement="end"> 💪 Tăng cơ </ion-radio>
-            </ion-item>
-            <ion-item lines="none" class="goal-item">
-              <ion-radio value="maintain" labelPlacement="end"> ⚖️ Duy trì </ion-radio>
-            </ion-item>
-            <ion-item lines="none" class="goal-item">
-              <ion-radio value="performance" labelPlacement="end"> 🏋️ Tăng sức mạnh </ion-radio>
-            </ion-item>
-          </ion-radio-group>
-
-          @if (step1Error()) {
-            <ion-text color="danger">
-              <p class="error-text">{{ step1Error() }}</p>
-            </ion-text>
-          }
-
-          <ion-button expand="block" class="cta-button" (click)="nextStep()">
-            Tiếp tục
-            <ion-icon slot="end" name="arrow-forward-outline" />
-          </ion-button>
-        </div>
-      }
-
-      <!-- STEP 2: Profile Info -->
-      @if (step() === 2) {
-        <div class="step-content">
-          <h1 class="step-title">Thông tin cơ bản</h1>
-          <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
-
-          <ion-item>
-            <ion-input
-              label="Chiều cao (cm)"
-              labelPlacement="floating"
-              type="number"
-              [value]="heightCm()"
-              (ionInput)="heightCm.set(+$event.detail.value!)"
-              min="130"
-              max="250"
-            />
-          </ion-item>
-
-          <ion-item>
-            <ion-input
-              label="Cân nặng (kg)"
-              labelPlacement="floating"
-              type="number"
-              [value]="weightKg()"
-              (ionInput)="weightKg.set(+$event.detail.value!)"
-              min="30"
-              max="200"
-            />
-          </ion-item>
-
-          <ion-item>
-            <ion-input
-              label="Tuổi"
-              labelPlacement="floating"
-              type="number"
-              [value]="age()"
-              (ionInput)="age.set(+$event.detail.value!)"
-              min="13"
-              max="120"
-            />
-          </ion-item>
-
-          <ion-item>
-            <ion-select
-              label="Giới tính"
-              labelPlacement="floating"
-              [value]="gender()"
-              (ionChange)="gender.set($event.detail.value)"
+            <ion-radio-group
+              [value]="goal()"
+              (ionChange)="onGoalChange($event.detail.value)"
+              aria-label="Chọn mục tiêu"
             >
-              <ion-select-option value="male">Nam</ion-select-option>
-              <ion-select-option value="female">Nữ</ion-select-option>
-            </ion-select>
-          </ion-item>
+              <ion-item lines="none" class="goal-item">
+                <ion-icon name="body-outline" slot="start" class="goal-icon" />
+                <ion-radio value="lose_weight" justify="start" labelPlacement="end"
+                  >Giảm cân</ion-radio
+                >
+              </ion-item>
+              <ion-item lines="none" class="goal-item">
+                <ion-icon name="barbell-outline" slot="start" class="goal-icon" />
+                <ion-radio value="gain_muscle" justify="start" labelPlacement="end"
+                  >Tăng cơ</ion-radio
+                >
+              </ion-item>
+              <ion-item lines="none" class="goal-item">
+                <ion-icon name="scale-outline" slot="start" class="goal-icon" />
+                <ion-radio value="maintain" justify="start" labelPlacement="end">Duy trì</ion-radio>
+              </ion-item>
+              <ion-item lines="none" class="goal-item">
+                <ion-icon name="trophy-outline" slot="start" class="goal-icon" />
+                <ion-radio value="performance" justify="start" labelPlacement="end"
+                  >Tăng sức mạnh</ion-radio
+                >
+              </ion-item>
+            </ion-radio-group>
 
-          <p class="section-label">Kinh nghiệm tập gym?</p>
-          <ion-radio-group
-            [value]="gymExperience()"
-            (ionChange)="gymExperience.set($event.detail.value)"
-          >
-            <ion-item lines="none">
-              <ion-radio value="never" labelPlacement="end"> Chưa bao giờ </ion-radio>
-            </ion-item>
-            <ion-item lines="none">
-              <ion-radio value="under_6m" labelPlacement="end"> Dưới 6 tháng </ion-radio>
-            </ion-item>
-            <ion-item lines="none">
-              <ion-radio value="6m_2y" labelPlacement="end"> 6 tháng — 2 năm </ion-radio>
-            </ion-item>
-            <ion-item lines="none">
-              <ion-radio value="over_2y" labelPlacement="end"> Trên 2 năm </ion-radio>
-            </ion-item>
-          </ion-radio-group>
+            @if (step1Error()) {
+              <div class="error-toast" role="alert" aria-live="assertive">
+                <ion-text color="danger">{{ step1Error() }}</ion-text>
+              </div>
+            }
 
-          @if (step2Error()) {
-            <ion-text color="danger">
-              <p class="error-text">{{ step2Error() }}</p>
-            </ion-text>
-          }
-
-          <div class="button-row">
-            <ion-button fill="outline" (click)="step.set(1)">
-              <ion-icon slot="start" name="arrow-back-outline" />
-              Quay lại
-            </ion-button>
-            <ion-button class="cta-button" (click)="complete()" [disabled]="saving()">
-              {{ saving() ? 'Đang lưu...' : 'Hoàn tất' }}
-              <ion-icon slot="end" name="checkmark-outline" />
+            <ion-button expand="block" color="secondary" class="cta-button" (click)="nextStep()">
+              Tiếp tục
+              <ion-icon slot="end" name="arrow-forward-outline" />
             </ion-button>
           </div>
-        </div>
-      }
+        }
+
+        <!-- STEP 2: Profile Info -->
+        @if (step() === 2) {
+          <div class="step-content">
+            <h1 #step2Heading class="step-title" tabindex="-1">Thông tin cơ bản</h1>
+            <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
+
+            <ion-item [class.ion-invalid]="step2Errors().heightCm">
+              <ion-input
+                #heightInput
+                label="Chiều cao (cm)"
+                labelPlacement="floating"
+                type="number"
+                [value]="heightCm() ?? ''"
+                (ionInput)="heightCm.set($event.detail.value ? +$event.detail.value : null)"
+                min="130"
+                max="250"
+                [attr.aria-invalid]="step2Errors().heightCm ? 'true' : null"
+                [attr.aria-describedby]="step2Errors().heightCm ? 'err-height' : null"
+              />
+            </ion-item>
+            @if (step2Errors().heightCm) {
+              <div id="err-height" class="field-error" role="alert">
+                {{ step2Errors().heightCm }}
+              </div>
+            }
+
+            <ion-item [class.ion-invalid]="step2Errors().weightKg">
+              <ion-input
+                #weightInput
+                label="Cân nặng (kg)"
+                labelPlacement="floating"
+                type="number"
+                [value]="weightKg() ?? ''"
+                (ionInput)="weightKg.set($event.detail.value ? +$event.detail.value : null)"
+                min="30"
+                max="200"
+                [attr.aria-invalid]="step2Errors().weightKg ? 'true' : null"
+                [attr.aria-describedby]="step2Errors().weightKg ? 'err-weight' : null"
+              />
+            </ion-item>
+            @if (step2Errors().weightKg) {
+              <div id="err-weight" class="field-error" role="alert">
+                {{ step2Errors().weightKg }}
+              </div>
+            }
+
+            <ion-item [class.ion-invalid]="step2Errors().age">
+              <ion-input
+                #ageInput
+                label="Tuổi"
+                labelPlacement="floating"
+                type="number"
+                [value]="age() ?? ''"
+                (ionInput)="age.set($event.detail.value ? +$event.detail.value : null)"
+                min="13"
+                max="120"
+                [attr.aria-invalid]="step2Errors().age ? 'true' : null"
+                [attr.aria-describedby]="step2Errors().age ? 'err-age' : null"
+              />
+            </ion-item>
+            @if (step2Errors().age) {
+              <div id="err-age" class="field-error" role="alert">{{ step2Errors().age }}</div>
+            }
+
+            <ion-item [class.ion-invalid]="step2Errors().gender">
+              <ion-select
+                label="Giới tính"
+                labelPlacement="floating"
+                [value]="gender()"
+                (ionChange)="gender.set($event.detail.value)"
+                [attr.aria-invalid]="step2Errors().gender ? 'true' : null"
+                [attr.aria-describedby]="step2Errors().gender ? 'err-gender' : null"
+              >
+                <ion-select-option value="male">Nam</ion-select-option>
+                <ion-select-option value="female">Nữ</ion-select-option>
+              </ion-select>
+            </ion-item>
+            @if (step2Errors().gender) {
+              <div id="err-gender" class="field-error" role="alert">{{ step2Errors().gender }}</div>
+            }
+
+            <p class="section-label">Kinh nghiệm tập gym?</p>
+            <ion-radio-group
+              [value]="gymExperience()"
+              (ionChange)="gymExperience.set($event.detail.value)"
+              aria-label="Kinh nghiệm tập gym"
+            >
+              <ion-item lines="none" class="gym-item">
+                <ion-radio value="never" justify="start" labelPlacement="end"
+                  >Chưa bao giờ</ion-radio
+                >
+              </ion-item>
+              <ion-item lines="none" class="gym-item">
+                <ion-radio value="under_6m" justify="start" labelPlacement="end"
+                  >Dưới 6 tháng</ion-radio
+                >
+              </ion-item>
+              <ion-item lines="none" class="gym-item">
+                <ion-radio value="6m_2y" justify="start" labelPlacement="end"
+                  >6 tháng — 2 năm</ion-radio
+                >
+              </ion-item>
+              <ion-item lines="none" class="gym-item">
+                <ion-radio value="over_2y" justify="start" labelPlacement="end"
+                  >Trên 2 năm</ion-radio
+                >
+              </ion-item>
+            </ion-radio-group>
+            @if (step2Errors().gymExperience) {
+              <div class="field-error" role="alert">{{ step2Errors().gymExperience }}</div>
+            }
+
+            @if (saveError()) {
+              <div class="error-toast" role="alert" aria-live="assertive">
+                <ion-text color="danger">{{ saveError() }}</ion-text>
+              </div>
+            }
+
+            <div class="button-row">
+              <ion-button fill="outline" (click)="goBack()" [disabled]="saving()">
+                <ion-icon slot="start" name="arrow-back-outline" />
+                Quay lại
+              </ion-button>
+              <ion-button
+                color="secondary"
+                class="cta-button"
+                (click)="complete()"
+                [disabled]="saving()"
+              >
+                {{ saving() ? 'Đang lưu...' : 'Hoàn tất' }}
+                <ion-icon slot="end" name="checkmark-outline" />
+              </ion-button>
+            </div>
+          </div>
+        }
+      </div>
     </ion-content>
   `,
   styles: [
     `
+      .page-container {
+        padding: 12px 16px 16px;
+      }
       .step-content {
         max-width: 428px;
         margin: 0 auto;
       }
       .step-title {
-        font-size: 22px;
-        font-weight: 700;
+        font: 700 22px/1.3 var(--ion-font-family);
+        color: var(--text-primary);
         margin-bottom: 4px;
+        outline: none;
       }
       .step-subtitle {
-        font-size: 14px;
-        color: var(--text-secondary);
-        margin-bottom: 20px;
-      }
-      .goal-item {
-        --padding-start: 0;
-        margin-bottom: 8px;
+        font: 500 16px/1.4 var(--ion-font-family);
+        color: var(--text-tertiary);
+        margin-bottom: 24px;
       }
       .section-label {
-        font-size: 14px;
-        font-weight: 500;
-        margin-top: 16px;
+        font: 500 14px/1.4 var(--ion-font-family);
+        color: var(--text-primary);
+        margin: 16px 0 8px;
+      }
+      .goal-item,
+      .gym-item {
+        --padding-start: 0;
+        --border-radius: 12px;
+        --background: var(--bg-card);
         margin-bottom: 8px;
       }
-      .error-text {
-        font-size: 13px;
+      .goal-item:hover,
+      .gym-item:hover {
+        --background: var(--primary-50, #e3f2fd);
+      }
+      .goal-icon {
+        color: var(--ion-color-primary);
+        font-size: 22px;
+        margin-right: 8px;
+      }
+      ion-item {
+        --padding-start: 0;
+        margin-bottom: 4px;
+      }
+      ion-item.ion-invalid {
+        --highlight-color-invalid: var(--ion-color-danger);
+      }
+      .field-error {
+        font: 400 12px/1.4 var(--ion-font-family);
+        color: var(--ion-color-danger);
+        padding-left: 4px;
+        margin-bottom: 8px;
+      }
+      .error-toast {
         margin-top: 8px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: rgba(var(--ion-color-danger-rgb), 0.08);
+        font-size: 13px;
       }
       .cta-button {
-        --background: var(--ion-color-secondary);
-        --color: #fff;
+        --border-radius: 10px;
         margin-top: 24px;
+        font-weight: 500;
+      }
+      .back-button {
+        --color: #fff;
+      }
+      ion-button[fill='outline'] {
+        --border-radius: 10px;
+        font-weight: 500;
       }
       .button-row {
         display: flex;
-        justify-content: space-between;
         gap: 12px;
         margin-top: 24px;
       }
       .button-row ion-button {
         flex: 1;
       }
-      ion-item {
-        --padding-start: 0;
-        margin-bottom: 4px;
+      .onboarding-progress {
+        --progress-background: rgba(255, 255, 255, 0.3);
+        --buffer-background: transparent;
+        height: 4px;
       }
     `,
   ],
@@ -260,6 +396,9 @@ export default class OnboardingPage {
   private readonly router = inject(Router);
   private readonly profileStore = inject(ProfileStore);
 
+  readonly step1Heading = viewChild<ElementRef>('step1Heading');
+  readonly step2Heading = viewChild<ElementRef>('step2Heading');
+
   // Wizard state
   readonly step = signal(1);
   readonly saving = signal(false);
@@ -269,15 +408,29 @@ export default class OnboardingPage {
   readonly step1Error = signal('');
 
   // Step 2
-  readonly heightCm = signal<number>(0);
-  readonly weightKg = signal<number>(0);
-  readonly age = signal<number>(0);
+  readonly heightCm = signal<number | null>(null);
+  readonly weightKg = signal<number | null>(null);
+  readonly age = signal<number | null>(null);
   readonly gender = signal<Gender | null>(null);
   readonly gymExperience = signal<GymExperience | null>(null);
-  readonly step2Error = signal('');
+  readonly step2Errors = signal<Step2Errors>({ ...EMPTY_ERRORS });
+  readonly saveError = signal('');
 
   constructor() {
-    addIcons({ arrowForwardOutline, arrowBackOutline, checkmarkOutline });
+    addIcons({
+      arrowForwardOutline,
+      arrowBackOutline,
+      checkmarkOutline,
+      bodyOutline,
+      barbellOutline,
+      scaleOutline,
+      trophyOutline,
+    });
+  }
+
+  onGoalChange(value: Goal): void {
+    this.goal.set(value);
+    this.step1Error.set('');
   }
 
   nextStep(): void {
@@ -287,67 +440,119 @@ export default class OnboardingPage {
     }
     this.step1Error.set('');
     this.step.set(2);
+    this.focusHeadingAfterRender('step2Heading');
+  }
+
+  goBack(): void {
+    this.step.set(1);
+    this.focusHeadingAfterRender('step1Heading');
   }
 
   async complete(): Promise<void> {
-    const error = this.validateStep2();
-    if (error) {
-      this.step2Error.set(error);
+    const errors = this.validateStep2();
+    const hasErrors = Object.values(errors).some((e) => e !== '');
+
+    this.step2Errors.set(errors);
+    if (hasErrors) {
+      this.focusFirstInvalidField(errors);
       return;
     }
-    this.step2Error.set('');
+
     this.saving.set(true);
+    this.saveError.set('');
 
-    const goal = this.goal()!;
-    const gender = this.gender()!;
-    const heightCm = this.heightCm();
-    const weightKg = this.weightKg();
-    const age = this.age();
-    const fitnessLevel = GYM_TO_LEVEL[this.gymExperience()!];
+    try {
+      const goal = this.goal()!;
+      const gender = this.gender()!;
+      const heightCm = this.heightCm()!;
+      const weightKg = this.weightKg()!;
+      const age = this.age()!;
+      const gym = this.gymExperience()!;
+      const fitnessLevel = GYM_TO_LEVEL[gym];
+      const activityFactor = GYM_TO_ACTIVITY_FACTOR[gym];
 
-    // Mifflin-St Jeor formula
-    const bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + (gender === 'male' ? 5 : -161);
+      // Mifflin-St Jeor formula
+      const bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + (gender === 'male' ? 5 : -161);
+      const tdee = Math.round(bmr * activityFactor);
+      const targetCalories = Math.round(tdee + CALORIE_ADJUSTMENT[goal]);
+      const targetProtein = Math.round(weightKg * PROTEIN_MULTIPLIER[goal]);
 
-    const activityFactor = 1.55;
-    const tdee = Math.round(bmr * activityFactor);
-    const targetCalories = Math.round(tdee + CALORIE_ADJUSTMENT[goal]);
-    const targetProtein = Math.round(weightKg * PROTEIN_MULTIPLIER[goal]);
+      await this.profileStore.saveOnboardingProfile({
+        height_cm: heightCm,
+        weight_kg: weightKg,
+        age,
+        gender,
+        goal,
+        fitness_level: fitnessLevel,
+        activity_factor: activityFactor,
+        bmr: Math.round(bmr),
+        tdee,
+        target_calories: targetCalories,
+        target_protein: targetProtein,
+        target_carbs: null,
+        target_fat: null,
+        theme: 'system',
+        notif_morning: 1,
+        notif_lunch: 1,
+        notif_evening: 1,
+        notif_weekly: 1,
+        onboarding_completed: 1,
+      });
 
-    await this.profileStore.saveOnboardingProfile({
-      height_cm: heightCm,
-      weight_kg: weightKg,
-      age,
-      gender,
-      goal,
-      fitness_level: fitnessLevel,
-      activity_factor: activityFactor,
-      bmr: Math.round(bmr),
-      tdee,
-      target_calories: targetCalories,
-      target_protein: targetProtein,
-      target_carbs: null,
-      target_fat: null,
-      theme: 'system',
-      notif_morning: 1,
-      notif_lunch: 1,
-      notif_evening: 1,
-      notif_weekly: 1,
-      onboarding_completed: 1,
-    });
-
-    void this.router.navigate(['/']);
+      void this.router.navigate(['/']);
+    } catch {
+      this.saveError.set('Lưu thất bại. Vui lòng thử lại.');
+    } finally {
+      this.saving.set(false);
+    }
   }
 
-  private validateStep2(): string {
+  private validateStep2(): Step2Errors {
+    const errors: Step2Errors = { ...EMPTY_ERRORS };
     const h = this.heightCm();
     const w = this.weightKg();
     const a = this.age();
 
-    if (!h || h < 130 || h > 250) return 'Chiều cao phải từ 130-250 cm';
-    if (!w || w < 30 || w > 200) return 'Cân nặng phải từ 30-200 kg';
-    if (!a || a < 13 || a > 120) return 'Tuổi phải từ 13-120';
-    if (!this.gender()) return 'Vui lòng chọn giới tính';
-    if (!this.gymExperience()) return 'Vui lòng chọn kinh nghiệm tập gym';
-    return '';
+    if (!h || h < 130 || h > 250) errors.heightCm = 'Chiều cao phải từ 130–250 cm';
+    if (!w || w < 30 || w > 200) errors.weightKg = 'Cân nặng phải từ 30–200 kg';
+    if (!a || a < 13 || a > 120) errors.age = 'Tuổi phải từ 13–120';
+    if (!this.gender()) errors.gender = 'Vui lòng chọn giới tính';
+    if (!this.gymExperience()) errors.gymExperience = 'Vui lòng chọn kinh nghiệm tập gym';
+
+    return errors;
+  }
+
+  private focusHeadingAfterRender(ref: 'step1Heading' | 'step2Heading'): void {
+    setTimeout(() => {
+      const heading = this[ref]();
+      if (heading) {
+        heading.nativeElement.focus();
+      }
+    });
+  }
+
+  private focusFirstInvalidField(errors: Step2Errors): void {
+    const fieldOrder: (keyof Step2Errors)[] = [
+      'heightCm',
+      'weightKg',
+      'age',
+      'gender',
+      'gymExperience',
+    ];
+    const firstError = fieldOrder.find((f) => errors[f] !== '');
+    if (!firstError) return;
+
+    const idMap: Record<keyof Step2Errors, string> = {
+      heightCm: 'err-height',
+      weightKg: 'err-weight',
+      age: 'err-age',
+      gender: 'err-gender',
+      gymExperience: '',
+    };
+
+    setTimeout(() => {
+      const errorEl = document.getElementById(idMap[firstError]);
+      errorEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
   }
 }
