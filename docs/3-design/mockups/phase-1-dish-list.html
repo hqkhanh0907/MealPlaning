@@ -85,20 +85,24 @@
      SUB-TABS
      ========================================================================= */
   .sub-tabs {
-    display: flex; flex-shrink: 0;
+    display: flex; flex-shrink: 0; padding: 4px 16px 8px;
+    gap: 4px;
   }
   body.light .sub-tabs { background: #2196F3; }
   body.dark  .sub-tabs { background: #1565C0; }
 
   .sub-tab {
-    flex: 1; text-align: center; padding: 10px 0 12px;
-    font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.6);
-    border-bottom: 2px solid transparent; cursor: pointer;
-    transition: all 0.2s;
+    flex: 1; text-align: center; padding: 8px 16px;
+    font-size: 14px; font-weight: 500; border-radius: 8px;
+    cursor: pointer; transition: all 0.2s; border: none;
+    color: rgba(255,255,255,0.6); background: transparent;
   }
   .sub-tab.active {
-    color: #fff;
-    border-bottom-color: #fff;
+    color: #2196F3; background: #fff;
+    font-weight: 600;
+  }
+  body.dark .sub-tab.active {
+    color: #42A5F5; background: #fff;
   }
 
   /* =========================================================================
@@ -133,12 +137,31 @@
   .search-text.placeholder { color: #999 !important; }
 
   .search-clear {
-    width: 20px; height: 20px; border-radius: 50%; display: flex;
+    min-width: 44px; min-height: 44px; display: flex;
     align-items: center; justify-content: center; cursor: pointer;
-    font-size: 12px; font-weight: 700; flex-shrink: 0;
+    flex-shrink: 0; margin: -12px -12px -12px 0;
   }
-  body.light .search-clear { background: #E8E8E8; color: #666; }
-  body.dark  .search-clear { background: #444; color: #999; }
+  .search-clear-dot {
+    width: 20px; height: 20px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  body.light .search-clear-dot { background: #E8E8E8; color: #666; }
+  body.dark  .search-clear-dot { background: #444; color: #999; }
+
+  .filter-chips-wrapper {
+    position: relative;
+  }
+  .filter-chips-wrapper::after {
+    content: ''; position: absolute; top: 0; right: 0;
+    width: 32px; height: 100%; pointer-events: none;
+  }
+  body.light .filter-chips-wrapper::after {
+    background: linear-gradient(to right, transparent, #F5F7FA);
+  }
+  body.dark .filter-chips-wrapper::after {
+    background: linear-gradient(to right, transparent, #121212);
+  }
 
   /* =========================================================================
      DISH CARDS
@@ -503,7 +526,7 @@
         <div class="search-bar" style="border-color: #2196F3;">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text">phở</span>
-          <div class="search-clear">✕</div>
+          <div class="search-clear"><span class="search-clear-dot">✕</span></div>
         </div>
 
         <div class="result-count">1 kết quả</div>
@@ -552,7 +575,7 @@
         <div class="search-bar" style="border-color: #2196F3;">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text">pizza</span>
-          <div class="search-clear">✕</div>
+          <div class="search-clear"><span class="search-clear-dot">✕</span></div>
         </div>
 
         <div class="empty-state">
@@ -736,7 +759,7 @@
     <tr><td><code>--bg-page</code></td><td>#F5F7FA / #121212</td><td>Content background</td></tr>
     <tr><td><code>--bg-card</code></td><td>#FFFFFF / #1E1E1E</td><td>Dish cards, search bar, dialog, tab bar</td></tr>
     <tr><td><code>--bg-elevated</code></td><td>#FFFFFF / #2E2E2E</td><td>FAB menu items, dialog box (dark)</td></tr>
-    <tr><td><code>--primary</code></td><td>#2196F3 / #42A5F5</td><td>Toolbar, active sub-tab, active tab, macro-cal color</td></tr>
+    <tr><td><code>--primary</code></td><td>#2196F3 / #42A5F5</td><td>Toolbar, segment control active text, active tab, macro-cal color</td></tr>
     <tr><td><code>--status-bar</code></td><td>#1976D2 / #0D47A1</td><td>Status bar background</td></tr>
     <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>FAB button, empty-state CTA</td></tr>
     <tr><td><code>--text-primary</code></td><td>#1A1A1A / #FFFFFF</td><td>Dish name, dialog title</td></tr>
@@ -756,7 +779,7 @@
     <tr><td><code>space-md</code></td><td>12px</td><td>Card gap, search margin-bottom, content top padding</td></tr>
     <tr><td><code>space-lg</code></td><td>16px</td><td>Page side padding, card padding, FAB offset</td></tr>
     <tr><td>Typography — Title</td><td>18px/500</td><td>Dialog title</td></tr>
-    <tr><td>Typography — Body</td><td>14px/500</td><td>Dish name, search text, sub-tab text, FAB menu label</td></tr>
+    <tr><td>Typography — Body</td><td>14px/500</td><td>Dish name, search text, segment control text, FAB menu label</td></tr>
     <tr><td>Typography — Caption</td><td>12px/400</td><td>Macro summary, result count</td></tr>
     <tr><td>Typography — Overline</td><td>11px/500</td><td>Type badge text, source badge, tab bar labels, servings</td></tr>
     <tr><td>Macro colors</td><td>Cal=#2196F3, P=#4CAF50, C=#FF9800, F=#F44336</td><td>Color-coded macro values in dish summary</td></tr>

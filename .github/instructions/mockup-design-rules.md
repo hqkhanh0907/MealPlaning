@@ -101,7 +101,51 @@ Mỗi file mockup PHẢI kết thúc bằng bảng Design Spec Notes gồm:
 - Business rules đặc biệt (delete rule, validation, interaction pattern)
 - Ghi rõ giá trị Light / Dark cho mỗi token
 
-## 13. Visual Review Checklist — SAU KHI tạo mockup
+## 13. Sub-tabs → Segment Control (BẮT BUỘC)
+
+- **KHÔNG dùng underline tabs** cho sub-tabs trong page.
+- Dùng **Segment Control** (ion-segment) — theo spec `phase-1-management.md`.
+- Visual: White pill trên primary background, text inactive = `rgba(255,255,255,0.6)`.
+- Xem chi tiết: `design-system.md §8g`.
+
+## 14. Filter Chips — Gradient Fade Affordance
+
+- Khi filter chips overflow (nhiều hơn viewport width):
+  - Item cuối bị cắt 30-50% → gợi ý thị giác rằng có thể cuộn.
+  - Thêm **gradient fade** mép phải trên `.filter-chips` wrapper.
+  - CSS: `mask-image: linear-gradient(to right, black calc(100% - 24px), transparent)`.
+
+## 15. Toolbar Save Button — Form dài
+
+- Mọi form Add/Edit có nội dung dài hơn 1 viewport → PHẢI có nút **"Lưu"** ở góc phải toolbar.
+- Nút text trắng, 16px/500, `margin-left: auto`.
+- Nút **KHÔNG bao giờ disable** — khi tap mà form invalid → auto-scroll to first error.
+
+## 16. Radio Checkmark — Accessibility
+
+- Radio items khi selected: background highlight + **checkmark ✓** (22px) ở góc phải.
+- Chỉ highlight alone → kém A11y cho người thị lực kém.
+- Checkmark color = `var(--ion-color-primary)`.
+
+## 17. Calorie Visual Hierarchy
+
+- Calories luôn lớn nhất: **24px / 700**.
+- Macros (P/C/F) nhỏ hơn: **16px / 600**.
+- Labels dưới số: 11-12px / 400.
+- Xem chi tiết: `design-system.md §3.6`.
+
+## 18. Bottom Sheet + Keyboard
+
+- Khi search/input trong bottom sheet được focus → sheet PHẢI expand lên **90% viewport height**.
+- Mockup thể hiện: 1 screen "sheet default" (50-60%) + 1 screen "sheet expanded with keyboard annotation".
+
+## 19. Touch Targets — Search Clear Button
+
+- Icon ✕ trong search bar: icon 20px nhưng **hitbox phải 44×44px**.
+- Dùng padding 12px quanh icon hoặc `min-width: 44px; min-height: 44px`.
+- Áp dụng cho MỌI icon button nhỏ (close, clear, remove).
+
+## 20. Visual Review Checklist — SAU KHI tạo mockup
 
 Trước khi coi mockup là xong, PHẢI mở trên browser và kiểm tra:
 
@@ -116,4 +160,10 @@ Trước khi coi mockup là xong, PHẢI mở trên browser và kiểm tra:
 □ 8. Swipe state có hiện đầy đủ text + actions không?
 □ 9. Empty/no-result states có CTA không?
 □ 10. Spec notes table đầy đủ tokens + rules?
+□ 11. Sub-tabs dùng Segment Control (không underline)?
+□ 12. Filter chips có gradient fade affordance?
+□ 13. Toolbar có nút "Lưu" cho form dài?
+□ 14. Radio selected có checkmark ✓?
+□ 15. Touch targets ≥ 44×44px?
+□ 16. Calories nổi bật hơn P/C/F?
 ```

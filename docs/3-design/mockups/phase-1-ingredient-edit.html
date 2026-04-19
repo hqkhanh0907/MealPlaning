@@ -89,6 +89,14 @@
     width: 22px; height: 22px; fill: none; stroke: #fff;
     stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
   }
+  .toolbar-save {
+    font-size: 16px; font-weight: 500; color: #fff;
+    background: none; border: none; cursor: pointer;
+    padding: 8px 4px; margin-left: auto;
+    min-width: 44px; min-height: 44px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .toolbar-save:active { opacity: 0.7; }
 
   /* =========================================================================
      CONTENT AREA
@@ -320,6 +328,7 @@
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm nguyên liệu</div>
+        <button class="toolbar-save">Lưu</button>
       </div>
       <div class="content">
         <!-- Name -->
@@ -435,6 +444,7 @@
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm nguyên liệu</div>
+        <button class="toolbar-save">Lưu</button>
       </div>
       <div class="content">
         <!-- Name — filled -->
@@ -547,6 +557,7 @@
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm nguyên liệu</div>
+        <button class="toolbar-save">Lưu</button>
       </div>
       <div class="content">
         <!-- Name -->
@@ -670,6 +681,7 @@
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Sửa nguyên liệu</div>
+        <button class="toolbar-save">Lưu</button>
       </div>
       <div class="content">
         <!-- Name — pre-filled -->
@@ -783,6 +795,7 @@
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm nguyên liệu</div>
+        <button class="toolbar-save">Lưu</button>
       </div>
       <div class="content">
         <!-- Name — error: empty -->
@@ -899,6 +912,7 @@
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm nguyên liệu</div>
+        <button class="toolbar-save">Lưu</button>
       </div>
       <div class="content">
         <!-- Name — disabled -->
@@ -1035,6 +1049,8 @@
     <tr><td>Conditional field</td><td>3px left accent bar (#2196F3)</td><td>grams_per_unit when "Đơn vị" selected</td></tr>
     <tr><td>Validation</td><td>Red border + 12px error text</td><td>Inline below each invalid field</td></tr>
     <tr><td>Nutrition grid</td><td>2×2 CSS grid</td><td>Protein, Carbs, Fat, Fiber in compact layout</td></tr>
+    <tr><td>Toolbar Save</td><td>16px/500, white, always active</td><td>auto-scroll to error on invalid</td></tr>
+    <tr><td>Error Strategy</td><td>Never disable Lưu button</td><td>tap → scrollIntoView() first error field</td></tr>
   </table>
 </div>
 

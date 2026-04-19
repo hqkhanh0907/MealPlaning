@@ -126,6 +126,25 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 | `number-md` | 22px | 700 | Streak count, badge, weight |
 | `number-sm` | 14px | 500 | Progress value (95/120g), macro |
 
+### 3.5 Numeric Display
+
+```css
+font-variant-numeric: tabular-nums;
+```
+
+**BẮT BUỘC** áp dụng cho MỌI element hiển thị số: calories, macros, weight, progress, streak count. Tabular numbers đảm bảo các chữ số có độ rộng bằng nhau → cột số thẳng hàng, không nhảy giật khi giá trị thay đổi.
+
+### 3.6 Calorie Visual Hierarchy
+
+Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi bật hơn** P/C/F:
+
+| Element | Size | Weight | Dùng cho |
+|---------|------|--------|----------|
+| Calories value | `24px` | `700` | Số kcal — luôn lớn nhất, đậm nhất |
+| Calories label | `12px` | `400` | "kcal" dưới số |
+| Macro (P/C/F) value | `16px` | `600` | Giá trị gram — nhỏ hơn calories |
+| Macro (P/C/F) label | `11px` | `400` | "Protein" / "Carbs" / "Fat" |
+
 ---
 
 ## 4. Spacing
@@ -317,7 +336,7 @@ Theo PRD F-12 (Dashboard Quick Actions):
 
 ### 8.7 Radio / Checkbox Items
 
-> **Rule:** Radio circles ẩn (`::part(container) { display: none }`). Selection thể hiện qua background change.
+> **Rule:** Radio circles ẩn (`::part(container) { display: none }`). Selection thể hiện qua background change + **checkmark icon**.
 
 | Property | Default | Selected |
 |----------|---------|----------|
@@ -327,6 +346,9 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Padding Start | `16px` | Giữ nguyên |
 | Margin Bottom | `8px` | Giữ nguyên |
 | Transition | — | `background 0.15s ease` |
+| **Checkmark** | Hidden | **✓ icon** (22px) ở góc phải, color `var(--ion-color-primary)` |
+
+> **A11y:** Highlight + checkmark cùng lúc → người lớn tuổi / thị lực kém nhận diện rõ ràng hơn chỉ highlight alone.
 
 **Icon trong radio items (nếu có):**
 | Property | Value |
@@ -346,6 +368,29 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Title Color | `#FFFFFF` | |
 | Height | `56px` | Android standard |
 | Back Button | Ionic default `chevron-back` | Color: white |
+
+**Toolbar Save Action (cho form dài):**
+
+| Property | Value | Notes |
+|----------|-------|-------|
+| Type | Text button | `"Lưu"` ở góc phải toolbar |
+| Color | `#FFFFFF` | Cùng màu với title |
+| Font | `16px / 500` | Medium weight |
+| Position | `margin-left: auto` | Căn phải |
+| Behavior | Luôn hiện (không disable) | Khi tap → validate → auto-scroll to first error nếu invalid |
+
+> **Rule:** Mọi form Add/Edit có scroll content > 1 viewport PHẢI có nút "Lưu" trên toolbar header. User không nên phải scroll xuống cuối chỉ để save.
+
+### 8.8b Form Error Strategy — Auto-scroll to Error
+
+> **KHÔNG disable nút Lưu** khi form invalid. Thay vào đó:
+
+1. Nút Lưu **luôn active** (cả header lẫn bottom)
+2. Khi user tap Lưu mà form invalid → `scrollIntoView()` đến field lỗi đầu tiên
+3. Field lỗi: border chuyển `var(--ion-color-danger)` + error text hiện bên dưới
+4. Optional: flash animation nhẹ (border pulse 2 lần) để thu hút chú ý
+
+**Lý do:** "Tại sao nút Lưu bị mờ?" gây confusion cho user hơn là "Bấm Lưu → thấy lỗi ở đâu".
 
 ---
 
@@ -412,6 +457,7 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Radio Item | 44px | Full width | |
 | Input Field | 44px | Full width | Ionic default ~56px — OK |
 | Icon Button | 44px | 44px | Padding quanh icon để đạt 44px |
+| **Search Clear (✕)** | **44px** | **44px** | **Icon 20px nhưng hitbox phải 44px** (padding: 12px) |
 | Tab Bar Item | 48px | Equal flex | Ionic default — OK |
 | Link/Text Button | 44px | — | Dùng padding để đạt min |
 
@@ -490,7 +536,87 @@ Theo PRD F-12 (Dashboard Quick Actions):
 
 ---
 
-## 8g. Onboarding-Specific Components
+## 8g. Segment Control (Sub-tabs)
+
+> **Rule:** Sub-tabs trong page PHẢI dùng `ion-segment` (Segmented Control), KHÔNG dùng underline tabs.
+> Theo spec `phase-1-management.md`: "Management page có segment control: Nguyên liệu | Món ăn"
+
+### Spec
+
+| Property | Value | Notes |
+|----------|-------|-------|
+| Component | `ion-segment` + `ion-segment-button` | Ionic native |
+| Background | `rgba(255,255,255,0.15)` trên toolbar | Nằm dưới toolbar, cùng dải màu primary |
+| Active indicator | White pill (`#FFFFFF`, radius 8px) | Text dark trên active pill |
+| Inactive text | `rgba(255,255,255,0.6)` | |
+| Active text | `--ion-color-primary` trên white bg | |
+| Font | `14px / 500` | Overline weight |
+| Padding | `4px` outer, `8px 16px` per button | |
+| Height | `36px` | Compact, below toolbar |
+| Mode | `md` | Material Design style |
+
+```
+┌─────────────────────────────────────┐  ← toolbar bg
+│  ┌──────────────┐ ┌──────────────┐  │
+│  │ Nguyên liệu  │ │  Món ăn      │  │  ← segment
+│  └──────────────┘ └──────────────┘  │
+└─────────────────────────────────────┘
+   ▲ active (white pill)   ▲ inactive (transparent)
+```
+
+---
+
+## 8h. Filter Chips (Horizontal Scroll)
+
+### Spec
+
+| Property | Value | Notes |
+|----------|-------|-------|
+| Layout | `display: flex; overflow-x: auto` | Horizontal scroll |
+| Gap | `8px` | Giữa chips |
+| Chip padding | `6px 14px` | |
+| Chip radius | `--radius-xs` (8px) | |
+| Font | `12px / 500` | Overline |
+| Default bg | `var(--bg-card)` | `#FFFFFF` / `#1E1E1E` |
+| Active bg | `var(--ion-color-primary)` | `#2196F3` / `#42A5F5` |
+| Active text | `#FFFFFF` / `#121212` | |
+
+### Scroll Affordance (BẮT BUỘC)
+
+Khi filter chips nhiều hơn viewport width:
+1. Item cuối cùng hiển thị trên màn hình bị cắt **30-50%** → gợi ý cuộn
+2. **Gradient fade** mép phải: `linear-gradient(to left, transparent, var(--bg-page) 24px)` overlay
+3. Ẩn scrollbar: `::-webkit-scrollbar { display: none }`
+
+---
+
+## 8i. Bottom Sheet
+
+### Spec cơ bản
+
+| Property | Value |
+|----------|-------|
+| Background | `var(--bg-elevated)` (`#FFFFFF` / `#2E2E2E`) |
+| Radius | `--radius-xl` (20px) top-left + top-right |
+| Handle | `40px × 4px`, centered, `var(--border)` color |
+| Backdrop | `rgba(0,0,0,0.5)` |
+| Animation | `300ms cubic-bezier(0.32, 0.72, 0, 1)` |
+
+### Keyboard Behavior (CRITICAL)
+
+> Khi input trong Bottom Sheet được focus → keyboard chiếm ~50% màn hình.
+
+| State | Sheet Height | Behavior |
+|-------|-------------|----------|
+| Default (no keyboard) | `50-60%` viewport | Nội dung fit trong sheet |
+| **Keyboard active** | **`90%` viewport** | Sheet mở rộng lên gần full-screen |
+| Search input focus | `90%` viewport | Đảm bảo kết quả search vẫn hiển thị phía dưới input |
+
+> **Rule:** Bottom sheet có search/input PHẢI expand lên `90%` khi keyboard bật. Không để user bị kẹt trong sheet nhỏ với keyboard che hết content.
+
+---
+
+## 8j. Onboarding-Specific Components
 
 ### Step Title
 

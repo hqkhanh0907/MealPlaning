@@ -162,6 +162,22 @@
   body.light .radio-item.selected { background: #e3f2fd; }
   body.dark  .radio-item.selected { background: #1a237e; }
 
+  /* Checkmark icon for selected radio items */
+  .radio-check {
+    width: 22px; height: 22px; flex-shrink: 0;
+    display: none; /* hidden by default */
+  }
+  .radio-item.selected .radio-check {
+    display: flex;
+    align-items: center; justify-content: center;
+  }
+  body.light .radio-check { color: #2196F3; }
+  body.dark  .radio-check { color: #42A5F5; }
+  .radio-check svg {
+    width: 22px; height: 22px; fill: none; stroke: currentColor;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+
   /* =========================================================================
      FORM INPUTS — floating label Ionic style
      ========================================================================= */
@@ -308,18 +324,22 @@
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 512 512"><circle cx="256" cy="56" r="40" /><path d="M199.3 295.6l-30.4 172.2a24 24 0 0047.1 8.3l21-119.9s5.2-32.5 17.5-32.5h3.1c12.5 0 17.5 32.5 17.5 32.5l21 119.9a24 24 0 0047.1-8.4l-30.4-172.2-4.9-29.7c-2.9-18.1-4.2-47.6.5-59.7 4-10.4 14.1-14.2 23.2-14.2H424a24 24 0 000-48H88a24 24 0 000 48h92.5c9.2 0 19.2 3.8 23.2 14.2 4.7 12.1 3.4 41.6.5 59.7z"/></svg></div>
           <div class="radio-label">Giảm cân</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 512 512"><path d="M48 256h416"/><rect x="384" y="128" width="32" height="256" rx="16" /><rect x="96" y="128" width="32" height="256" rx="16" /><rect x="32" y="192" width="16" height="128" rx="8" /><rect x="464" y="192" width="16" height="128" rx="8" /></svg></div>
           <div class="radio-label">Tăng cơ</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 512 512"><rect x="48" y="48" width="416" height="416" rx="96" /><path d="M388.9 151.6c-24.5-22.3-68.7-51.4-132.9-51.4s-108.5 29.1-132.9 51.4a34.7 34.7 0 00-3.1 48.1l33.3 39.2a26.1 26.1 0 0033.6 5.2c15.9-9.8 40.9-21.6 69.1-21.6s53.2 11.8 69.1 21.6a26.1 26.1 0 0033.6-5.2l33.3-39.2a34.7 34.7 0 00-3.1-48.1z"/></svg></div>
           <div class="radio-label">Duy trì</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 512 512"><path d="M176 464h160M256 464V336M384 224c0-50.6 0-134.6 0-160a16 16 0 00-16-16H144a16 16 0 00-16 16c0 30.6 0 129.2 0 160 0 64.3 83 112 128 112s128-47.7 128-112z"/><path d="M128 96H48v16c0 55.2 33.6 112 80 112M384 96h80v16c0 55.2-33.6 112-80 112"/></svg></div>
           <div class="radio-label">Tăng sức mạnh</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
 
         <button class="btn-cta">
@@ -348,18 +368,22 @@
         <div class="radio-item selected">
           <div class="radio-icon"><svg viewBox="0 0 512 512"><circle cx="256" cy="56" r="40" /><path d="M199.3 295.6l-30.4 172.2a24 24 0 0047.1 8.3l21-119.9s5.2-32.5 17.5-32.5h3.1c12.5 0 17.5 32.5 17.5 32.5l21 119.9a24 24 0 0047.1-8.4l-30.4-172.2-4.9-29.7c-2.9-18.1-4.2-47.6.5-59.7 4-10.4 14.1-14.2 23.2-14.2H424a24 24 0 000-48H88a24 24 0 000 48h92.5c9.2 0 19.2 3.8 23.2 14.2 4.7 12.1 3.4 41.6.5 59.7z"/></svg></div>
           <div class="radio-label"><strong>Giảm cân</strong></div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 512 512"><path d="M48 256h416"/><rect x="384" y="128" width="32" height="256" rx="16" /><rect x="96" y="128" width="32" height="256" rx="16" /><rect x="32" y="192" width="16" height="128" rx="8" /><rect x="464" y="192" width="16" height="128" rx="8" /></svg></div>
           <div class="radio-label">Tăng cơ</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 512 512"><rect x="48" y="48" width="416" height="416" rx="96" /><path d="M388.9 151.6c-24.5-22.3-68.7-51.4-132.9-51.4s-108.5 29.1-132.9 51.4a34.7 34.7 0 00-3.1 48.1l33.3 39.2a26.1 26.1 0 0033.6 5.2c15.9-9.8 40.9-21.6 69.1-21.6s53.2 11.8 69.1 21.6a26.1 26.1 0 0033.6-5.2l33.3-39.2a34.7 34.7 0 00-3.1-48.1z"/></svg></div>
           <div class="radio-label">Duy trì</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 512 512"><path d="M176 464h160M256 464V336M384 224c0-50.6 0-134.6 0-160a16 16 0 00-16-16H144a16 16 0 00-16 16c0 30.6 0 129.2 0 160 0 64.3 83 112 128 112s128-47.7 128-112z"/><path d="M128 96H48v16c0 55.2 33.6 112 80 112M384 96h80v16c0 55.2-33.6 112-80 112"/></svg></div>
           <div class="radio-label">Tăng sức mạnh</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
 
         <button class="btn-cta">
@@ -388,18 +412,22 @@
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 512 512"><circle cx="256" cy="56" r="40" /><path d="M199.3 295.6l-30.4 172.2a24 24 0 0047.1 8.3l21-119.9s5.2-32.5 17.5-32.5h3.1c12.5 0 17.5 32.5 17.5 32.5l21 119.9a24 24 0 0047.1-8.4l-30.4-172.2-4.9-29.7c-2.9-18.1-4.2-47.6.5-59.7 4-10.4 14.1-14.2 23.2-14.2H424a24 24 0 000-48H88a24 24 0 000 48h92.5c9.2 0 19.2 3.8 23.2 14.2 4.7 12.1 3.4 41.6.5 59.7z"/></svg></div>
           <div class="radio-label">Giảm cân</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 512 512"><path d="M48 256h416"/><rect x="384" y="128" width="32" height="256" rx="16" /><rect x="96" y="128" width="32" height="256" rx="16" /><rect x="32" y="192" width="16" height="128" rx="8" /><rect x="464" y="192" width="16" height="128" rx="8" /></svg></div>
           <div class="radio-label">Tăng cơ</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 512 512"><rect x="48" y="48" width="416" height="416" rx="96" /><path d="M388.9 151.6c-24.5-22.3-68.7-51.4-132.9-51.4s-108.5 29.1-132.9 51.4a34.7 34.7 0 00-3.1 48.1l33.3 39.2a26.1 26.1 0 0033.6 5.2c15.9-9.8 40.9-21.6 69.1-21.6s53.2 11.8 69.1 21.6a26.1 26.1 0 0033.6-5.2l33.3-39.2a34.7 34.7 0 00-3.1-48.1z"/></svg></div>
           <div class="radio-label">Duy trì</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-icon"><svg viewBox="0 0 512 512"><path d="M176 464h160M256 464V336M384 224c0-50.6 0-134.6 0-160a16 16 0 00-16-16H144a16 16 0 00-16 16c0 30.6 0 129.2 0 160 0 64.3 83 112 128 112s128-47.7 128-112z"/><path d="M128 96H48v16c0 55.2 33.6 112 80 112M384 96h80v16c0 55.2-33.6 112-80 112"/></svg></div>
           <div class="radio-label">Tăng sức mạnh</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
 
         <div class="error-toast" role="alert">⚠️ Vui lòng chọn mục tiêu trước khi tiếp tục</div>
@@ -470,15 +498,19 @@
         <p class="section-label">Kinh nghiệm tập gym?</p>
         <div class="radio-item">
           <div class="radio-label">Chưa bao giờ</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-label">Dưới 6 tháng</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-label">6 tháng — 2 năm</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-label">Trên 2 năm</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
 
         <div class="button-row">
@@ -552,15 +584,19 @@
         <p class="section-label">Kinh nghiệm tập gym?</p>
         <div class="radio-item">
           <div class="radio-label">Chưa bao giờ</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-label">Dưới 6 tháng</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item selected">
           <div class="radio-label"><strong>6 tháng — 2 năm</strong></div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-label">Trên 2 năm</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
 
         <div class="button-row">
@@ -642,15 +678,19 @@
         <p class="section-label">Kinh nghiệm tập gym?</p>
         <div class="radio-item">
           <div class="radio-label">Chưa bao giờ</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-label">Dưới 6 tháng</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-label">6 tháng — 2 năm</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
           <div class="radio-label">Trên 2 năm</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="field-error">Vui lòng chọn kinh nghiệm gym</div>
 
@@ -725,6 +765,7 @@
         <p class="section-label">Kinh nghiệm tập gym?</p>
         <div class="radio-item selected">
           <div class="radio-label"><strong>6 tháng — 2 năm</strong></div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
 
         <div class="button-row">
@@ -760,6 +801,7 @@
     <tr><td>Button radius</td><td colspan="2">10px</td><td>Custom (between sm/md)</td></tr>
     <tr><td>Progress bar</td><td colspan="2">4px, white track</td><td><code>ion-progress-bar</code></td></tr>
     <tr><td>Selected bg</td><td><code>#e3f2fd</code></td><td><code>#1a237e</code></td><td><code>--primary-50</code> / custom dark</td></tr>
+    <tr><td>radio-check</td><td colspan="2">22px, --primary color</td><td>Checkmark icon on selected radio items (A11y enhancement)</td></tr>
   </table>
 
   <h3 style="margin-top:16px">🔄 Interaction States (all 6)</h3>

@@ -89,6 +89,14 @@
     width: 22px; height: 22px; fill: none; stroke: #fff;
     stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
   }
+  .toolbar-save {
+    font-size: 16px; font-weight: 500; color: #fff;
+    background: none; border: none; cursor: pointer;
+    padding: 8px 4px; margin-left: auto;
+    min-width: 44px; min-height: 44px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .toolbar-save:active { opacity: 0.7; }
 
   /* =========================================================================
      CONTENT AREA
@@ -501,6 +509,7 @@
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm món ăn</div>
+        <button class="toolbar-save">Lưu</button>
       </div>
       <div class="content">
         <!-- Section: Basic info -->
@@ -580,6 +589,7 @@
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm món ăn</div>
+        <button class="toolbar-save">Lưu</button>
       </div>
       <div class="content" style="opacity: 0.3;">
         <div class="section-label" style="margin-top: 4px;">Thông tin cơ bản</div>
@@ -666,6 +676,7 @@
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm món ăn</div>
+        <button class="toolbar-save">Lưu</button>
       </div>
       <div class="content" style="opacity: 0.3;">
         <div class="section-label" style="margin-top: 4px;">Thông tin cơ bản</div>
@@ -725,6 +736,7 @@
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm món ăn</div>
+        <button class="toolbar-save">Lưu</button>
       </div>
       <div class="content">
         <div class="section-label" style="margin-top: 4px;">Thông tin cơ bản</div>
@@ -835,6 +847,7 @@
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Sửa món ăn</div>
+        <button class="toolbar-save">Lưu</button>
       </div>
       <div class="content">
         <div class="section-label" style="margin-top: 4px;">Thông tin cơ bản</div>
@@ -935,6 +948,7 @@
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm món ăn</div>
+        <button class="toolbar-save">Lưu</button>
       </div>
       <div class="content">
         <div class="section-label" style="margin-top: 4px;">Thông tin cơ bản</div>
@@ -1044,6 +1058,9 @@
     <tr><td>Validation</td><td>Red border + 12px error below</td><td>Name empty, servings out of range, no ingredients</td></tr>
     <tr><td>Phone frame</td><td>375×812px</td><td>No tab bar (push page)</td></tr>
     <tr><td>Disabled CTA</td><td>opacity: 0.5, pointer-events: none</td><td>When name empty or no ingredients</td></tr>
+    <tr><td>Toolbar Save</td><td>16px/500, white, always active</td><td>auto-scroll to error on invalid</td></tr>
+    <tr><td>Error Strategy</td><td>Never disable Lưu button</td><td>tap → scrollIntoView() first error field</td></tr>
+    <tr><td>Bottom Sheet</td><td>expands to 90% viewport</td><td>when keyboard active (search input focus)</td></tr>
   </table>
 </div>
 
