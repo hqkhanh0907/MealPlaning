@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HealthMate AI — Ingredient Edit Mockup (Phase 1)</title>
+<style>
+  /* =========================================================================
+     RESET & BASE
+     ========================================================================= */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: 24px;
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  body.light { background: #e0e0e0; color: #1a1a1a; }
+  body.dark  { background: #1a1a1a; color: #ffffff; }
+
+  h1.page-title { text-align: center; margin-bottom: 4px; font-size: 24px; font-weight: 700; }
+  .page-subtitle { text-align: center; margin-bottom: 20px; font-size: 14px; }
+  body.light .page-subtitle { color: #666; }
+  body.dark  .page-subtitle { color: #999; }
+
+  /* Theme toggle */
+  .theme-toggle { text-align: center; margin-bottom: 24px; }
+  .theme-toggle button {
+    padding: 8px 20px; border: 2px solid #2196F3; border-radius: 8px;
+    background: transparent; font-size: 14px; font-weight: 500;
+    cursor: pointer; margin: 0 4px; transition: all 0.2s;
+  }
+  body.light .theme-toggle button { color: #2196F3; }
+  body.dark  .theme-toggle button { color: #42a5f5; border-color: #42a5f5; }
+  body.light .theme-toggle button.active { background: #2196F3; color: #fff; }
+  body.dark  .theme-toggle button.active { background: #42a5f5; color: #121212; }
+
+  /* =========================================================================
+     PHONE FRAMES
+     ========================================================================= */
+  .screens-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(375px, 1fr));
+    gap: 32px; max-width: 1600px; margin: 0 auto;
+  }
+  .screen-wrapper { text-align: center; }
+  .screen-label { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .screen-desc { font-size: 12px; margin-bottom: 12px; }
+  body.light .screen-desc { color: #666; }
+  body.dark  .screen-desc { color: #999; }
+
+  .phone {
+    width: 375px; height: 812px;
+    margin: 0 auto; border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    position: relative; display: flex; flex-direction: column;
+  }
+  body.light .phone { border: 3px solid #c0c0c0; }
+  body.dark  .phone { border: 3px solid #444; }
+
+  /* Status bar */
+  .status-bar {
+    height: 28px; padding: 0 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0;
+  }
+  body.light .status-bar { background: #1976D2; }
+  body.dark  .status-bar { background: #0D47A1; }
+
+  /* =========================================================================
+     TOOLBAR
+     ========================================================================= */
+  .toolbar {
+    padding: 0 16px; height: 56px;
+    display: flex; align-items: center; gap: 8px;
+    color: #fff; position: relative; flex-shrink: 0;
+  }
+  body.light .toolbar { background: #2196F3; }
+  body.dark  .toolbar { background: #1565C0; }
+
+  .toolbar-title { font-size: 20px; font-weight: 500; flex: 1; }
+  .toolbar-back {
+    width: 32px; height: 32px; background: none; border: none;
+    color: #fff; font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .toolbar-back svg {
+    width: 22px; height: 22px; fill: none; stroke: #fff;
+    stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* =========================================================================
+     CONTENT AREA
+     ========================================================================= */
+  .content {
+    flex: 1; padding: 12px 16px 16px; overflow-y: auto;
+    text-align: left; /* override screen-wrapper center inheritance */
+  }
+  body.light .content { background: #F5F7FA; }
+  body.dark  .content { background: #121212; }
+
+  /* =========================================================================
+     SECTION LABELS
+     ========================================================================= */
+  .section-label {
+    font-size: 14px; font-weight: 500; line-height: 1.4;
+    margin-top: 16px; margin-bottom: 8px;
+  }
+  body.light .section-label { color: #1A1A1A; }
+  body.dark  .section-label { color: #fff; }
+
+  .section-hint {
+    font-size: 12px; font-weight: 400; margin-top: -4px; margin-bottom: 8px;
+  }
+  body.light .section-hint { color: #999; }
+  body.dark  .section-hint { color: #666; }
+
+  /* =========================================================================
+     FORM INPUTS — Apple-style floating label
+     ========================================================================= */
+  .form-field {
+    margin-bottom: 8px;
+  }
+  .input-wrapper {
+    position: relative; padding: 20px 16px 8px;
+    border: 1px solid; border-radius: 12px;
+    min-height: 56px;
+  }
+  body.light .input-wrapper { border-color: #d1d1d6; background: #fff; }
+  body.dark  .input-wrapper { border-color: #444; background: #1E1E1E; }
+
+  .input-wrapper.invalid { border-color: #F44336 !important; }
+  body.dark .input-wrapper.invalid { border-color: #EF5350 !important; }
+
+  .input-wrapper.disabled { opacity: 0.5; pointer-events: none; }
+
+  .input-label {
+    position: absolute; top: 6px; left: 16px;
+    font-size: 12px; font-weight: 400;
+  }
+  body.light .input-label { color: #666; }
+  body.dark  .input-label { color: #999; }
+  .input-label.invalid { }
+  body.light .input-label.invalid { color: #F44336; }
+  body.dark  .input-label.invalid { color: #EF5350; }
+
+  .input-value {
+    font-size: 16px; font-weight: 400; min-height: 24px;
+  }
+  body.light .input-value { color: #1A1A1A; }
+  body.dark  .input-value { color: #fff; }
+  .input-value.placeholder { }
+  body.light .input-value.placeholder { color: #999; }
+  body.dark  .input-value.placeholder { color: #666; }
+
+  /* Select field */
+  .select-wrapper {
+    position: relative; padding: 20px 16px 8px;
+    border: 1px solid; border-radius: 12px;
+    display: flex; align-items: flex-end; min-height: 56px;
+  }
+  body.light .select-wrapper { border-color: #d1d1d6; background: #fff; }
+  body.dark  .select-wrapper { border-color: #444; background: #1E1E1E; }
+  .select-wrapper.invalid { border-color: #F44336 !important; }
+  body.dark .select-wrapper.invalid { border-color: #EF5350 !important; }
+  .select-wrapper.disabled { opacity: 0.5; pointer-events: none; }
+
+  .select-arrow {
+    width: 16px; height: 16px; margin-left: auto; flex-shrink: 0;
+  }
+  body.light .select-arrow { color: #666; }
+  body.dark  .select-arrow { color: #999; }
+
+  /* =========================================================================
+     FIELD ERROR
+     ========================================================================= */
+  .field-error {
+    font-size: 12px; font-weight: 400; line-height: 1.4;
+    padding: 4px 4px 0; margin-bottom: 4px;
+  }
+  body.light .field-error { color: #F44336; }
+  body.dark  .field-error { color: #EF5350; }
+
+  /* =========================================================================
+     RADIO GROUP — inline horizontal for unit selection
+     ========================================================================= */
+  .radio-group {
+    display: flex; gap: 8px; margin-bottom: 8px;
+  }
+  .radio-item {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    gap: 6px; padding: 12px 8px; border-radius: 12px;
+    cursor: pointer; transition: all 0.2s; border: 1px solid;
+    font-size: 14px; font-weight: 400;
+  }
+  body.light .radio-item { background: #fff; border-color: #d1d1d6; color: #1A1A1A; }
+  body.dark  .radio-item { background: #1E1E1E; border-color: #444; color: #E0E0E0; }
+  body.light .radio-item.selected { background: #E3F2FD; border-color: #2196F3; color: #2196F3; font-weight: 500; }
+  body.dark  .radio-item.selected { background: rgba(66,165,245,0.15); border-color: #42A5F5; color: #42A5F5; font-weight: 500; }
+  .radio-item.disabled { opacity: 0.5; pointer-events: none; }
+
+  .radio-dot {
+    width: 18px; height: 18px; border-radius: 50%; border: 2px solid;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  body.light .radio-dot { border-color: #d1d1d6; }
+  body.dark  .radio-dot { border-color: #444; }
+  .radio-item.selected .radio-dot { border-color: currentColor; }
+  .radio-item.selected .radio-dot::after {
+    content: ''; width: 8px; height: 8px; border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* =========================================================================
+     NUTRITION GRID — 2×2 layout for macro fields
+     ========================================================================= */
+  .nutrition-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+
+  /* =========================================================================
+     BUTTONS
+     ========================================================================= */
+  .btn-cta {
+    width: 100%; padding: 14px; border: none; border-radius: 10px;
+    font-size: 16px; font-weight: 500; color: #fff;
+    cursor: pointer; margin-top: 24px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  body.light .btn-cta { background: #FF9800; }
+  body.dark  .btn-cta { background: #FFB74D; color: #121212; }
+  .btn-cta.disabled { opacity: 0.5; pointer-events: none; }
+
+  .btn-danger-text {
+    width: 100%; padding: 12px; border: none; background: transparent;
+    font-size: 14px; font-weight: 500; cursor: pointer;
+    text-align: center; margin-top: 8px;
+  }
+  body.light .btn-danger-text { color: #F44336; }
+  body.dark  .btn-danger-text { color: #EF5350; }
+
+  /* Loading spinner */
+  .spinner {
+    width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.8s linear infinite; flex-shrink: 0;
+  }
+  body.dark .spinner { border-color: rgba(18,18,18,0.3); border-top-color: #121212; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* =========================================================================
+     CONDITIONAL FIELD HIGHLIGHT
+     ========================================================================= */
+  .conditional-field {
+    position: relative;
+  }
+  .conditional-field::before {
+    content: ''; position: absolute; left: -8px; top: 0; bottom: 0;
+    width: 3px; border-radius: 2px;
+  }
+  body.light .conditional-field::before { background: #2196F3; }
+  body.dark  .conditional-field::before { background: #42A5F5; }
+  .conditional-hint {
+    font-size: 11px; font-weight: 400; margin-bottom: 8px; padding-left: 4px;
+  }
+  body.light .conditional-hint { color: #2196F3; }
+  body.dark  .conditional-hint { color: #42A5F5; }
+
+  /* =========================================================================
+     DESIGN SPEC NOTES
+     ========================================================================= */
+  .spec-notes {
+    max-width: 900px; margin: 48px auto 0; padding: 24px;
+    border-radius: 16px; font-size: 13px; line-height: 1.7;
+  }
+  body.light .spec-notes { background: #fff; border: 1px solid #E8E8E8; }
+  body.dark  .spec-notes { background: #1E1E1E; border: 1px solid #333; }
+  .spec-notes h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+  .spec-notes table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .spec-notes th, .spec-notes td {
+    text-align: left; padding: 6px 10px; font-size: 12px;
+    border-bottom: 1px solid;
+  }
+  body.light .spec-notes th, body.light .spec-notes td { border-bottom-color: #E8E8E8; }
+  body.dark  .spec-notes th, body.dark  .spec-notes td { border-bottom-color: #333; }
+  .spec-notes th { font-weight: 600; }
+  body.light .spec-notes th { color: #333; }
+  body.dark  .spec-notes th { color: #E0E0E0; }
+  .spec-notes code {
+    font-family: 'SF Mono', Menlo, monospace; font-size: 11px;
+    padding: 1px 5px; border-radius: 4px;
+  }
+  body.light .spec-notes code { background: #F5F7FA; color: #333; }
+  body.dark  .spec-notes code { background: #2E2E2E; color: #E0E0E0; }
+</style>
+</head>
+<body class="light">
+
+<h1 class="page-title">Phase 1 — Ingredient Add / Edit</h1>
+<p class="page-subtitle">F-01 Quản lý Nguyên liệu · Add, Edit, Piece unit, Validation, Saving</p>
+
+<div class="theme-toggle">
+  <button class="active" onclick="setTheme('light')">☀️ Light</button>
+  <button onclick="setTheme('dark')">🌙 Dark</button>
+</div>
+
+<div class="screens-grid">
+
+  <!-- ===================================================================
+       SCREEN 1: Add New — Empty Form
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">1. Thêm mới — form trống</div>
+    <div class="screen-desc">Push page, không có tab bar. Tất cả trường rỗng</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="toolbar-title">Thêm nguyên liệu</div>
+      </div>
+      <div class="content">
+        <!-- Name -->
+        <div class="form-field">
+          <div class="input-wrapper">
+            <div class="input-label">Tên nguyên liệu</div>
+            <div class="input-value placeholder">Nhập tên nguyên liệu</div>
+          </div>
+        </div>
+
+        <!-- Category -->
+        <div class="form-field">
+          <div class="select-wrapper">
+            <div>
+              <div class="input-label">Nhóm</div>
+              <div class="input-value placeholder">Chọn nhóm nguyên liệu</div>
+            </div>
+            <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        <!-- Nutrition section -->
+        <div class="section-label">Dinh dưỡng</div>
+        <div class="section-hint">Đơn vị chuẩn tính dinh dưỡng</div>
+
+        <!-- Basis unit radios -->
+        <div class="radio-group">
+          <div class="radio-item selected">
+            <div class="radio-dot"></div>
+            <span>100g</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>100ml</span>
+          </div>
+        </div>
+
+        <!-- Calories -->
+        <div class="form-field">
+          <div class="input-wrapper">
+            <div class="input-label">Calories (kcal)</div>
+            <div class="input-value placeholder">0</div>
+          </div>
+        </div>
+
+        <!-- Macro grid: 2×2 -->
+        <div class="nutrition-grid">
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Protein (g)</div>
+              <div class="input-value placeholder">0</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Carbs (g)</div>
+              <div class="input-value placeholder">0</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Fat (g)</div>
+              <div class="input-value placeholder">0</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Chất xơ (g)</div>
+              <div class="input-value placeholder">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry unit section -->
+        <div class="section-label">Đơn vị nhập liệu</div>
+        <div class="section-hint">Đơn vị mặc định khi thêm vào món ăn</div>
+
+        <div class="radio-group">
+          <div class="radio-item selected">
+            <div class="radio-dot"></div>
+            <span>Gram (g)</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>Mililít (ml)</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>Đơn vị</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <button class="btn-cta">Lưu nguyên liệu</button>
+
+        <!-- bottom spacer for scroll -->
+        <div style="height: 16px;"></div>
+      </div>
+      <!-- NO tab bar — this is a push page -->
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 2: Add New — Filled
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">2. Thêm mới — đã nhập</div>
+    <div class="screen-desc">Ức gà: 165 kcal, 31g protein, 0 carbs, 3.6g fat</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="toolbar-title">Thêm nguyên liệu</div>
+      </div>
+      <div class="content">
+        <!-- Name — filled -->
+        <div class="form-field">
+          <div class="input-wrapper">
+            <div class="input-label">Tên nguyên liệu</div>
+            <div class="input-value">Ức gà</div>
+          </div>
+        </div>
+
+        <!-- Category — selected -->
+        <div class="form-field">
+          <div class="select-wrapper">
+            <div>
+              <div class="input-label">Nhóm</div>
+              <div class="input-value">Thịt</div>
+            </div>
+            <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        <!-- Nutrition section -->
+        <div class="section-label">Dinh dưỡng</div>
+        <div class="section-hint">Đơn vị chuẩn tính dinh dưỡng</div>
+
+        <div class="radio-group">
+          <div class="radio-item selected">
+            <div class="radio-dot"></div>
+            <span>100g</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>100ml</span>
+          </div>
+        </div>
+
+        <!-- Calories — filled -->
+        <div class="form-field">
+          <div class="input-wrapper">
+            <div class="input-label">Calories (kcal)</div>
+            <div class="input-value">165</div>
+          </div>
+        </div>
+
+        <!-- Macro grid — filled -->
+        <div class="nutrition-grid">
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Protein (g)</div>
+              <div class="input-value">31</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Carbs (g)</div>
+              <div class="input-value">0</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Fat (g)</div>
+              <div class="input-value">3.6</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Chất xơ (g)</div>
+              <div class="input-value">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry unit -->
+        <div class="section-label">Đơn vị nhập liệu</div>
+        <div class="section-hint">Đơn vị mặc định khi thêm vào món ăn</div>
+
+        <div class="radio-group">
+          <div class="radio-item selected">
+            <div class="radio-dot"></div>
+            <span>Gram (g)</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>Mililít (ml)</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>Đơn vị</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <button class="btn-cta">Lưu nguyên liệu</button>
+
+        <div style="height: 16px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 3: Piece Unit — Conditional Field
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">3. Đơn vị "piece" — trường phụ</div>
+    <div class="screen-desc">Trứng gà: chọn Đơn vị → hiện "Gram mỗi đơn vị"</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="toolbar-title">Thêm nguyên liệu</div>
+      </div>
+      <div class="content">
+        <!-- Name -->
+        <div class="form-field">
+          <div class="input-wrapper">
+            <div class="input-label">Tên nguyên liệu</div>
+            <div class="input-value">Trứng gà</div>
+          </div>
+        </div>
+
+        <!-- Category -->
+        <div class="form-field">
+          <div class="select-wrapper">
+            <div>
+              <div class="input-label">Nhóm</div>
+              <div class="input-value">Trứng & Sữa</div>
+            </div>
+            <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        <!-- Nutrition section -->
+        <div class="section-label">Dinh dưỡng</div>
+        <div class="section-hint">Đơn vị chuẩn tính dinh dưỡng</div>
+
+        <div class="radio-group">
+          <div class="radio-item selected">
+            <div class="radio-dot"></div>
+            <span>100g</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>100ml</span>
+          </div>
+        </div>
+
+        <!-- Calories -->
+        <div class="form-field">
+          <div class="input-wrapper">
+            <div class="input-label">Calories (kcal)</div>
+            <div class="input-value">155</div>
+          </div>
+        </div>
+
+        <!-- Macro grid -->
+        <div class="nutrition-grid">
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Protein (g)</div>
+              <div class="input-value">13</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Carbs (g)</div>
+              <div class="input-value">1.1</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Fat (g)</div>
+              <div class="input-value">11</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Chất xơ (g)</div>
+              <div class="input-value">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry unit — "Đơn vị" selected -->
+        <div class="section-label">Đơn vị nhập liệu</div>
+        <div class="section-hint">Đơn vị mặc định khi thêm vào món ăn</div>
+
+        <div class="radio-group">
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>Gram (g)</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>Mililít (ml)</span>
+          </div>
+          <div class="radio-item selected">
+            <div class="radio-dot"></div>
+            <span>Đơn vị</span>
+          </div>
+        </div>
+
+        <!-- Conditional field: grams_per_unit -->
+        <div class="conditional-field">
+          <div class="conditional-hint">Xuất hiện khi chọn "Đơn vị" + đơn vị chuẩn = g</div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Gram mỗi đơn vị</div>
+              <div class="input-value">50</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <button class="btn-cta">Lưu nguyên liệu</button>
+
+        <div style="height: 16px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 4: Edit Existing
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">4. Sửa nguyên liệu</div>
+    <div class="screen-desc">Toolbar đổi thành "Sửa", có nút Xóa (text đỏ) ở cuối</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="toolbar-title">Sửa nguyên liệu</div>
+      </div>
+      <div class="content">
+        <!-- Name — pre-filled -->
+        <div class="form-field">
+          <div class="input-wrapper">
+            <div class="input-label">Tên nguyên liệu</div>
+            <div class="input-value">Cơm trắng</div>
+          </div>
+        </div>
+
+        <!-- Category — pre-selected -->
+        <div class="form-field">
+          <div class="select-wrapper">
+            <div>
+              <div class="input-label">Nhóm</div>
+              <div class="input-value">Ngũ cốc & Tinh bột</div>
+            </div>
+            <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        <!-- Nutrition section -->
+        <div class="section-label">Dinh dưỡng</div>
+        <div class="section-hint">Đơn vị chuẩn tính dinh dưỡng</div>
+
+        <div class="radio-group">
+          <div class="radio-item selected">
+            <div class="radio-dot"></div>
+            <span>100g</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>100ml</span>
+          </div>
+        </div>
+
+        <!-- Calories -->
+        <div class="form-field">
+          <div class="input-wrapper">
+            <div class="input-label">Calories (kcal)</div>
+            <div class="input-value">130</div>
+          </div>
+        </div>
+
+        <!-- Macro grid -->
+        <div class="nutrition-grid">
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Protein (g)</div>
+              <div class="input-value">2.7</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Carbs (g)</div>
+              <div class="input-value">28</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Fat (g)</div>
+              <div class="input-value">0.3</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Chất xơ (g)</div>
+              <div class="input-value">0.4</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry unit -->
+        <div class="section-label">Đơn vị nhập liệu</div>
+        <div class="section-hint">Đơn vị mặc định khi thêm vào món ăn</div>
+
+        <div class="radio-group">
+          <div class="radio-item selected">
+            <div class="radio-dot"></div>
+            <span>Gram (g)</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>Mililít (ml)</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>Đơn vị</span>
+          </div>
+        </div>
+
+        <!-- CTA — edit mode -->
+        <button class="btn-cta">Lưu thay đổi</button>
+        <button class="btn-danger-text">Xóa nguyên liệu</button>
+
+        <div style="height: 16px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 5: Validation Errors
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">5. Lỗi validation</div>
+    <div class="screen-desc">Name trống, category trống, calories trống + vượt max</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="toolbar-title">Thêm nguyên liệu</div>
+      </div>
+      <div class="content">
+        <!-- Name — error: empty -->
+        <div class="form-field">
+          <div class="input-wrapper invalid">
+            <div class="input-label invalid">Tên nguyên liệu</div>
+            <div class="input-value placeholder">Nhập tên nguyên liệu</div>
+          </div>
+          <div class="field-error">Vui lòng nhập tên nguyên liệu</div>
+        </div>
+
+        <!-- Category — error: not selected -->
+        <div class="form-field">
+          <div class="select-wrapper invalid">
+            <div>
+              <div class="input-label invalid">Nhóm</div>
+              <div class="input-value placeholder">Chọn nhóm nguyên liệu</div>
+            </div>
+            <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="field-error">Vui lòng chọn nhóm</div>
+        </div>
+
+        <!-- Nutrition section -->
+        <div class="section-label">Dinh dưỡng</div>
+        <div class="section-hint">Đơn vị chuẩn tính dinh dưỡng</div>
+
+        <div class="radio-group">
+          <div class="radio-item selected">
+            <div class="radio-dot"></div>
+            <span>100g</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>100ml</span>
+          </div>
+        </div>
+
+        <!-- Calories — error: empty -->
+        <div class="form-field">
+          <div class="input-wrapper invalid">
+            <div class="input-label invalid">Calories (kcal)</div>
+            <div class="input-value placeholder">0</div>
+          </div>
+          <div class="field-error">Vui lòng nhập calories</div>
+        </div>
+
+        <!-- Show another case: calories exceeds max -->
+        <div style="margin-top: 4px; padding: 10px 12px; border-radius: 8px; font-size: 12px; line-height: 1.5; margin-bottom: 8px;"
+             class="validation-example-box">
+          <div style="font-size: 11px; font-weight: 500; margin-bottom: 4px; opacity: 0.6;">↓ Ví dụ khác: giá trị vượt max</div>
+        </div>
+
+        <!-- Calories — error: exceeds max -->
+        <div class="form-field">
+          <div class="input-wrapper invalid">
+            <div class="input-label invalid">Calories (kcal)</div>
+            <div class="input-value">3000</div>
+          </div>
+          <div class="field-error">Calories tối đa 2000 kcal</div>
+        </div>
+
+        <!-- Macro grid — no errors (optional fields) -->
+        <div class="nutrition-grid">
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Protein (g)</div>
+              <div class="input-value placeholder">0</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper">
+              <div class="input-label">Carbs (g)</div>
+              <div class="input-value placeholder">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry unit -->
+        <div class="section-label">Đơn vị nhập liệu</div>
+        <div class="radio-group">
+          <div class="radio-item selected">
+            <div class="radio-dot"></div>
+            <span>Gram (g)</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>Mililít (ml)</span>
+          </div>
+          <div class="radio-item">
+            <div class="radio-dot"></div>
+            <span>Đơn vị</span>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <button class="btn-cta">Lưu nguyên liệu</button>
+
+        <div style="height: 16px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 6: Saving State
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">6. Đang lưu...</div>
+    <div class="screen-desc">Button disabled + spinner, tất cả input opacity 0.5</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back" style="opacity:0.5; pointer-events:none;">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="toolbar-title">Thêm nguyên liệu</div>
+      </div>
+      <div class="content">
+        <!-- Name — disabled -->
+        <div class="form-field">
+          <div class="input-wrapper disabled">
+            <div class="input-label">Tên nguyên liệu</div>
+            <div class="input-value">Bông cải xanh</div>
+          </div>
+        </div>
+
+        <!-- Category — disabled -->
+        <div class="form-field">
+          <div class="select-wrapper disabled">
+            <div>
+              <div class="input-label">Nhóm</div>
+              <div class="input-value">Rau củ</div>
+            </div>
+            <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        <!-- Nutrition section -->
+        <div class="section-label" style="opacity:0.5;">Dinh dưỡng</div>
+        <div class="section-hint" style="opacity:0.5;">Đơn vị chuẩn tính dinh dưỡng</div>
+
+        <div class="radio-group">
+          <div class="radio-item selected disabled">
+            <div class="radio-dot"></div>
+            <span>100g</span>
+          </div>
+          <div class="radio-item disabled">
+            <div class="radio-dot"></div>
+            <span>100ml</span>
+          </div>
+        </div>
+
+        <!-- Calories — disabled -->
+        <div class="form-field">
+          <div class="input-wrapper disabled">
+            <div class="input-label">Calories (kcal)</div>
+            <div class="input-value">34</div>
+          </div>
+        </div>
+
+        <!-- Macro grid — disabled -->
+        <div class="nutrition-grid">
+          <div class="form-field">
+            <div class="input-wrapper disabled">
+              <div class="input-label">Protein (g)</div>
+              <div class="input-value">2.8</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper disabled">
+              <div class="input-label">Carbs (g)</div>
+              <div class="input-value">7</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper disabled">
+              <div class="input-label">Fat (g)</div>
+              <div class="input-value">0.4</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <div class="input-wrapper disabled">
+              <div class="input-label">Chất xơ (g)</div>
+              <div class="input-value">2.6</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry unit — disabled -->
+        <div class="section-label" style="opacity:0.5;">Đơn vị nhập liệu</div>
+        <div class="radio-group">
+          <div class="radio-item selected disabled">
+            <div class="radio-dot"></div>
+            <span>Gram (g)</span>
+          </div>
+          <div class="radio-item disabled">
+            <div class="radio-dot"></div>
+            <span>Mililít (ml)</span>
+          </div>
+          <div class="radio-item disabled">
+            <div class="radio-dot"></div>
+            <span>Đơn vị</span>
+          </div>
+        </div>
+
+        <!-- CTA — loading state -->
+        <button class="btn-cta disabled">
+          <div class="spinner"></div>
+          Đang lưu...
+        </button>
+
+        <div style="height: 16px;"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /screens-grid -->
+
+<!-- ===================================================================
+     DESIGN SPEC NOTES
+     =================================================================== -->
+<div class="spec-notes">
+  <h2>📐 Design Spec Notes</h2>
+  <table>
+    <tr><th>Token</th><th>Value</th><th>Usage</th></tr>
+    <tr><td><code>--bg-page</code></td><td>#F5F7FA / #121212</td><td>Content area background</td></tr>
+    <tr><td><code>--bg-card</code></td><td>#FFFFFF / #1E1E1E</td><td>Input fields, select, radio items</td></tr>
+    <tr><td><code>--primary</code></td><td>#2196F3 / #42A5F5</td><td>Toolbar, selected radio highlight, conditional field accent</td></tr>
+    <tr><td><code>--status-bar</code></td><td>#1976D2 / #0D47A1</td><td>Status bar background</td></tr>
+    <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>Save button (primary CTA)</td></tr>
+    <tr><td><code>--text-primary</code></td><td>#1A1A1A / #FFFFFF</td><td>Input values, section labels</td></tr>
+    <tr><td><code>--text-tertiary</code></td><td>#666666 / #999999</td><td>Floating labels, select arrows</td></tr>
+    <tr><td><code>--text-disabled</code></td><td>#999999 / #666666</td><td>Placeholder text</td></tr>
+    <tr><td><code>--border</code></td><td>#d1d1d6 / #444444</td><td>Input borders, radio borders</td></tr>
+    <tr><td><code>--error</code></td><td>#F44336 / #EF5350</td><td>Invalid borders, error text, delete text button</td></tr>
+    <tr><td><code>radius-sm</code></td><td>12px</td><td>Input fields, select fields, radio items</td></tr>
+    <tr><td><code>radius-lg</code></td><td>16px</td><td>Spec notes container</td></tr>
+    <tr><td>Input height</td><td>~56px</td><td>min-height on input-wrapper and select-wrapper</td></tr>
+    <tr><td>Input padding</td><td>16px horizontal</td><td>Consistent with Apple-style floating label inputs</td></tr>
+    <tr><td>Margin bottom</td><td>8px</td><td>Between form fields</td></tr>
+    <tr><td><code>space-sm</code></td><td>8px</td><td>Radio group gap, nutrition grid gap, field margin</td></tr>
+    <tr><td><code>space-lg</code></td><td>16px</td><td>Section label margin-top, page side padding</td></tr>
+    <tr><td><code>space-xl</code></td><td>24px</td><td>CTA margin-top</td></tr>
+    <tr><td>Typography — Body</td><td>14px/400</td><td>Radio labels, section hint</td></tr>
+    <tr><td>Typography — Subtitle</td><td>16px/500</td><td>Input values</td></tr>
+    <tr><td>Typography — Caption</td><td>12px/400</td><td>Floating labels, error messages, conditional hints</td></tr>
+    <tr><td>Typography — Overline</td><td>11px/500</td><td>Conditional field accent hint</td></tr>
+    <tr><td>Phone frame</td><td>375×812px</td><td>iPhone-size frame (no tab bar — push page)</td></tr>
+    <tr><td>Disabled state</td><td>opacity: 0.5 + pointer-events: none</td><td>All inputs during saving</td></tr>
+    <tr><td>Conditional field</td><td>3px left accent bar (#2196F3)</td><td>grams_per_unit when "Đơn vị" selected</td></tr>
+    <tr><td>Validation</td><td>Red border + 12px error text</td><td>Inline below each invalid field</td></tr>
+    <tr><td>Nutrition grid</td><td>2×2 CSS grid</td><td>Protein, Carbs, Fat, Fiber in compact layout</td></tr>
+  </table>
+</div>
+
+<script>
+function setTheme(theme) {
+  document.body.className = theme;
+  document.querySelectorAll('.theme-toggle button').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.includes(theme === 'light' ? 'Light' : 'Dark'));
+  });
+}
+</script>
+
+</body>
+</html>

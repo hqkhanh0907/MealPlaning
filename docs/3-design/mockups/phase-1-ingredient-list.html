@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HealthMate AI — Ingredient List Mockup (Phase 1)</title>
+<style>
+  /* =========================================================================
+     RESET & BASE
+     ========================================================================= */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: 24px;
+    line-height: 1.6;
+    transition: background 0.3s, color 0.3s;
+  }
+  body.light { background: #e0e0e0; color: #1a1a1a; }
+  body.dark  { background: #1a1a1a; color: #ffffff; }
+
+  h1.page-title { text-align: center; margin-bottom: 4px; font-size: 24px; font-weight: 700; }
+  .page-subtitle { text-align: center; margin-bottom: 20px; font-size: 14px; }
+  body.light .page-subtitle { color: #666; }
+  body.dark  .page-subtitle { color: #999; }
+
+  /* Theme toggle */
+  .theme-toggle { text-align: center; margin-bottom: 24px; }
+  .theme-toggle button {
+    padding: 8px 20px; border: 2px solid #2196F3; border-radius: 8px;
+    background: transparent; font-size: 14px; font-weight: 500;
+    cursor: pointer; margin: 0 4px; transition: all 0.2s;
+  }
+  body.light .theme-toggle button { color: #2196F3; }
+  body.dark  .theme-toggle button { color: #42a5f5; border-color: #42a5f5; }
+  body.light .theme-toggle button.active { background: #2196F3; color: #fff; }
+  body.dark  .theme-toggle button.active { background: #42a5f5; color: #121212; }
+
+  /* =========================================================================
+     PHONE FRAMES
+     ========================================================================= */
+  .screens-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(375px, 1fr));
+    gap: 32px; max-width: 1600px; margin: 0 auto;
+  }
+  .screen-wrapper { text-align: center; }
+  .screen-label { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .screen-desc { font-size: 12px; margin-bottom: 12px; }
+  body.light .screen-desc { color: #666; }
+  body.dark  .screen-desc { color: #999; }
+
+  .phone {
+    width: 375px; height: 812px;
+    margin: 0 auto; border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    position: relative; display: flex; flex-direction: column;
+  }
+  body.light .phone { border: 3px solid #c0c0c0; }
+  body.dark  .phone { border: 3px solid #444; }
+
+  /* Status bar */
+  .status-bar {
+    height: 28px; padding: 0 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0;
+  }
+  body.light .status-bar { background: #1976D2; }
+  body.dark  .status-bar { background: #0D47A1; }
+
+  /* =========================================================================
+     TOOLBAR
+     ========================================================================= */
+  .toolbar {
+    padding: 0 16px; height: 56px;
+    display: flex; align-items: center; gap: 8px;
+    color: #fff; position: relative; flex-shrink: 0;
+  }
+  body.light .toolbar { background: #2196F3; }
+  body.dark  .toolbar { background: #1565C0; }
+
+  .toolbar-title { font-size: 20px; font-weight: 500; flex: 1; }
+
+  /* =========================================================================
+     SUB-TABS
+     ========================================================================= */
+  .sub-tabs {
+    display: flex; flex-shrink: 0;
+  }
+  body.light .sub-tabs { background: #2196F3; }
+  body.dark  .sub-tabs { background: #1565C0; }
+
+  .sub-tab {
+    flex: 1; text-align: center; padding: 10px 0 12px;
+    font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.6);
+    border-bottom: 2px solid transparent; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .sub-tab.active {
+    color: #fff;
+    border-bottom-color: #fff;
+  }
+
+  /* =========================================================================
+     CONTENT AREA
+     ========================================================================= */
+  .content {
+    flex: 1; padding: 12px 16px 80px; overflow-y: auto;
+    text-align: left;
+    /* padding-bottom: 80px = FAB 56px + 16px gap + 8px safe — ensures last item isn't hidden behind FAB */
+  }
+  body.light .content { background: #F5F7FA; }
+  body.dark  .content { background: #121212; }
+
+  /* =========================================================================
+     SEARCH BAR
+     ========================================================================= */
+  .search-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; border-radius: 12px; margin-bottom: 12px;
+    border: 1px solid;
+  }
+  body.light .search-bar { background: #fff; border-color: #E8E8E8; }
+  body.dark  .search-bar { background: #1E1E1E; border-color: #333; }
+  body.light .search-bar.focused { border-color: #2196F3; box-shadow: 0 0 0 2px rgba(33,150,243,0.12); }
+  body.dark  .search-bar.focused { border-color: #42A5F5; box-shadow: 0 0 0 2px rgba(66,165,245,0.15); }
+
+  .search-icon { width: 20px; height: 20px; flex-shrink: 0; }
+  body.light .search-icon { color: #999; }
+  body.dark  .search-icon { color: #666; }
+
+  .search-text { font-size: 14px; font-weight: 400; flex: 1; }
+  body.light .search-text { color: #1A1A1A; }
+  body.dark  .search-text { color: #fff; }
+  .search-text.placeholder { color: #999 !important; }
+
+  .search-clear {
+    width: 20px; height: 20px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; cursor: pointer;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  body.light .search-clear { background: #E8E8E8; color: #666; }
+  body.dark  .search-clear { background: #444; color: #999; }
+
+  /* =========================================================================
+     FILTER CHIPS
+     ========================================================================= */
+  .filter-chips {
+    display: flex; gap: 8px; overflow-x: auto; margin-bottom: 12px;
+    padding-bottom: 4px; -webkit-overflow-scrolling: touch;
+  }
+  .filter-chips::-webkit-scrollbar { display: none; }
+  .filter-chip {
+    flex-shrink: 0; padding: 6px 14px; border-radius: 8px;
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    border: 1px solid; white-space: nowrap; transition: all 0.2s;
+  }
+  body.light .filter-chip { background: #fff; border-color: #E8E8E8; color: #666; }
+  body.dark  .filter-chip { background: #1E1E1E; border-color: #333; color: #999; }
+  body.light .filter-chip.active { background: #2196F3; border-color: #2196F3; color: #fff; }
+  body.dark  .filter-chip.active { background: #42A5F5; border-color: #42A5F5; color: #121212; }
+
+  /* =========================================================================
+     INGREDIENT CARDS
+     ========================================================================= */
+  .ingredient-card {
+    padding: 14px 16px; border-radius: 16px; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px;
+    transition: all 0.2s;
+  }
+  body.light .ingredient-card { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  body.dark  .ingredient-card { background: #1E1E1E; }
+
+  .ingredient-info { flex: 1; min-width: 0; }
+
+  .ingredient-name {
+    font-size: 14px; font-weight: 500; line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  body.light .ingredient-name { color: #1A1A1A; }
+  body.dark  .ingredient-name { color: #fff; }
+
+  .ingredient-meta {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+
+  /* Category chips — small colored badges */
+  .category-chip {
+    display: inline-block; padding: 2px 8px; border-radius: 8px;
+    font-size: 11px; font-weight: 500; line-height: 1.4;
+  }
+  /* Category color palette */
+  .cat-thit         { background: #FFEBEE; color: #C62828; }
+  .cat-ca           { background: #E3F2FD; color: #1565C0; }
+  .cat-trung        { background: #FFF8E1; color: #F57F17; }
+  .cat-rau          { background: #E8F5E9; color: #2E7D32; }
+  .cat-ngu-coc      { background: #FFF3E0; color: #E65100; }
+  .cat-dau-hat      { background: #F3E5F5; color: #7B1FA2; }
+  .cat-dau-mo       { background: #FFFDE7; color: #F9A825; }
+  .cat-gia-vi       { background: #FCE4EC; color: #AD1457; }
+  .cat-nuoc-dung    { background: #E0F2F1; color: #00695C; }
+  .cat-trai-cay     { background: #FBE9E7; color: #BF360C; }
+  .cat-khac         { background: #ECEFF1; color: #546E7A; }
+  /* Dark mode category chips */
+  body.dark .cat-thit      { background: rgba(198,40,40,0.2);  color: #EF9A9A; }
+  body.dark .cat-ca        { background: rgba(21,101,192,0.2); color: #90CAF9; }
+  body.dark .cat-trung     { background: rgba(245,127,23,0.2); color: #FFE082; }
+  body.dark .cat-rau       { background: rgba(46,125,50,0.2);  color: #A5D6A7; }
+  body.dark .cat-ngu-coc   { background: rgba(230,81,0,0.2);   color: #FFCC80; }
+  body.dark .cat-dau-hat   { background: rgba(123,31,162,0.2); color: #CE93D8; }
+  body.dark .cat-dau-mo    { background: rgba(249,168,37,0.2); color: #FFF59D; }
+  body.dark .cat-gia-vi    { background: rgba(173,20,87,0.2);  color: #F48FB1; }
+  body.dark .cat-nuoc-dung { background: rgba(0,105,92,0.2);   color: #80CBC4; }
+  body.dark .cat-trai-cay  { background: rgba(191,54,12,0.2);  color: #FFAB91; }
+  body.dark .cat-khac      { background: rgba(84,110,122,0.2); color: #B0BEC5; }
+
+  .source-badge {
+    font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 4px;
+  }
+  body.light .source-badge { background: #E8E8E8; color: #666; }
+  body.dark  .source-badge { background: #333; color: #999; }
+
+  .ingredient-kcal {
+    font-size: 12px; font-weight: 400; text-align: right;
+    flex-shrink: 0; white-space: nowrap;
+  }
+  body.light .ingredient-kcal { color: #666; }
+  body.dark  .ingredient-kcal { color: #999; }
+  .ingredient-kcal strong {
+    font-size: 16px; font-weight: 700; display: block; line-height: 1.2;
+  }
+  body.light .ingredient-kcal strong { color: #1A1A1A; }
+  body.dark  .ingredient-kcal strong { color: #fff; }
+
+  /* =========================================================================
+     EMPTY STATE
+     ========================================================================= */
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 48px 24px; text-align: center;
+  }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+  body.light .empty-title { color: #333; }
+  body.dark  .empty-title { color: #E0E0E0; }
+  .empty-desc { font-size: 13px; margin-bottom: 20px; }
+  body.light .empty-desc { color: #999; }
+  body.dark  .empty-desc { color: #666; }
+
+  .btn-empty-cta {
+    padding: 12px 24px; border: none; border-radius: 10px;
+    font-size: 14px; font-weight: 500; color: #fff; cursor: pointer;
+  }
+  body.light .btn-empty-cta { background: #FF9800; }
+  body.dark  .btn-empty-cta { background: #FFB74D; color: #121212; }
+
+  /* =========================================================================
+     SWIPE ACTIONS (ion-item-sliding pattern)
+     ========================================================================= */
+  .swipe-container {
+    position: relative; overflow: hidden; border-radius: 16px; margin-bottom: 12px;
+  }
+  .swipe-card {
+    padding: 14px 16px; border-radius: 16px;
+    display: flex; align-items: center; gap: 12px;
+    position: relative; z-index: 2;
+    /* Shifted left to reveal actions */
+    transform: translateX(-140px);
+    transition: transform 0.3s;
+  }
+  body.light .swipe-card { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  body.dark  .swipe-card { background: #1E1E1E; }
+
+  .swipe-actions {
+    position: absolute; right: 0; top: 0; bottom: 0;
+    display: flex; z-index: 1;
+  }
+  .swipe-action-btn {
+    width: 70px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 4px;
+    border: none; cursor: pointer;
+    font-size: 11px; font-weight: 500; color: #fff;
+  }
+  .swipe-action-btn .swipe-icon { font-size: 18px; }
+  .swipe-action-edit { background: #2196F3; }
+  .swipe-action-delete { background: #F44336; }
+  body.dark .swipe-action-edit { background: #42A5F5; }
+  body.dark .swipe-action-delete { background: #EF5350; }
+
+  /* Hint arrow for swipe */
+  .swipe-hint {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; padding: 6px 12px; border-radius: 8px;
+    margin-top: 8px;
+  }
+  body.light .swipe-hint { background: #E3F2FD; color: #1565C0; }
+  body.dark  .swipe-hint { background: #1A237E; color: #90CAF9; }
+
+  /* =========================================================================
+     FAB
+     ========================================================================= */
+  .fab {
+    position: absolute; bottom: 72px; right: 16px;
+    width: 56px; height: 56px; border-radius: 9999px;
+    border: none; color: #fff; font-size: 28px; font-weight: 300;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+  }
+  body.light .fab { background: #FF9800; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  body.dark  .fab { background: #FFB74D; color: #121212; box-shadow: none; }
+
+  /* Scroll-to-top button — shown when user scrolls past ~200px */
+  .scroll-top-btn {
+    position: absolute; bottom: 136px; right: 16px;
+    width: 40px; height: 40px; border-radius: 9999px;
+    border: 1px solid; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 10; font-size: 18px;
+    transition: opacity 0.2s;
+  }
+  body.light .scroll-top-btn { background: #fff; border-color: #E8E8E8; color: #666; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  body.dark  .scroll-top-btn { background: #1E1E1E; border-color: #333; color: #999; }
+
+  /* =========================================================================
+     TAB BAR
+     ========================================================================= */
+  .tab-bar {
+    display: flex; height: 56px; flex-shrink: 0;
+    border-top: 1px solid;
+  }
+  body.light .tab-bar { background: #fff; border-top-color: #E8E8E8; }
+  body.dark  .tab-bar { background: #1E1E1E; border-top-color: #333; }
+
+  .tab-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px;
+    font-size: 11px; font-weight: 500; cursor: pointer;
+    color: #999; transition: color 0.2s;
+  }
+  .tab-item .tab-icon { font-size: 20px; line-height: 1; }
+  body.light .tab-item.active { color: #2196F3; }
+  body.dark  .tab-item.active { color: #42A5F5; }
+
+  /* =========================================================================
+     DIALOG OVERLAY
+     ========================================================================= */
+  .dialog-overlay {
+    position: absolute; inset: 0; z-index: 20;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .dialog-box {
+    width: 100%; max-width: 300px; padding: 24px;
+    border-radius: 16px;
+  }
+  body.light .dialog-box { background: #fff; }
+  body.dark  .dialog-box { background: #2E2E2E; }
+
+  .dialog-title { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+  body.light .dialog-title { color: #1A1A1A; }
+  body.dark  .dialog-title { color: #fff; }
+
+  .dialog-msg { font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
+  body.light .dialog-msg { color: #666; }
+  body.dark  .dialog-msg { color: #999; }
+
+  .dialog-actions { display: flex; justify-content: flex-end; gap: 12px; }
+  .dialog-btn {
+    padding: 8px 20px; border: none; border-radius: 8px;
+    font-size: 14px; font-weight: 500; cursor: pointer;
+  }
+  .dialog-btn-cancel { background: transparent; }
+  body.light .dialog-btn-cancel { color: #666; }
+  body.dark  .dialog-btn-cancel { color: #999; }
+  .dialog-btn-danger { color: #fff; }
+  body.light .dialog-btn-danger { background: #F44336; }
+  body.dark  .dialog-btn-danger { background: #EF5350; }
+  .dialog-btn-primary { color: #fff; }
+  body.light .dialog-btn-primary { background: #2196F3; }
+  body.dark  .dialog-btn-primary { background: #42A5F5; color: #121212; }
+
+  /* =========================================================================
+     DESIGN SPEC NOTES
+     ========================================================================= */
+  .spec-notes {
+    max-width: 900px; margin: 48px auto 0; padding: 24px;
+    border-radius: 16px; font-size: 13px; line-height: 1.7;
+  }
+  body.light .spec-notes { background: #fff; border: 1px solid #E8E8E8; }
+  body.dark  .spec-notes { background: #1E1E1E; border: 1px solid #333; }
+  .spec-notes h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+  .spec-notes table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .spec-notes th, .spec-notes td {
+    text-align: left; padding: 6px 10px; font-size: 12px;
+    border-bottom: 1px solid;
+  }
+  body.light .spec-notes th, body.light .spec-notes td { border-bottom-color: #E8E8E8; }
+  body.dark  .spec-notes th, body.dark  .spec-notes td { border-bottom-color: #333; }
+  .spec-notes th { font-weight: 600; }
+  body.light .spec-notes th { color: #333; }
+  body.dark  .spec-notes th { color: #E0E0E0; }
+  .spec-notes code {
+    font-family: 'SF Mono', Menlo, monospace; font-size: 11px;
+    padding: 1px 5px; border-radius: 4px;
+  }
+  body.light .spec-notes code { background: #F5F7FA; color: #333; }
+  body.dark  .spec-notes code { background: #2E2E2E; color: #E0E0E0; }
+</style>
+</head>
+<body class="light">
+
+<h1 class="page-title">Phase 1 — Ingredient List</h1>
+<p class="page-subtitle">F-01 Quản lý Nguyên liệu · List, Search, Filter, Empty, Delete</p>
+
+<div class="theme-toggle">
+  <button class="active" onclick="setTheme('light')">☀️ Light</button>
+  <button onclick="setTheme('dark')">🌙 Dark</button>
+</div>
+
+<div class="screens-grid">
+
+  <!-- ===================================================================
+       SCREEN 1: Ingredient List — With Data
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">1. Danh sách nguyên liệu</div>
+    <div class="screen-desc">Hiển thị tất cả nguyên liệu, sắp xếp theo tên</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <div class="toolbar-title">Quản lý</div>
+      </div>
+      <div class="sub-tabs">
+        <div class="sub-tab active">Nguyên liệu</div>
+        <div class="sub-tab">Món ăn</div>
+      </div>
+      <div class="content">
+        <!-- Search bar -->
+        <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="search-text placeholder">Tìm nguyên liệu...</span>
+        </div>
+
+        <!-- Ingredient cards -->
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Ức gà</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-thit">Thịt</span>
+              <span class="source-badge">seed</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>165</strong>kcal / 100g</div>
+        </div>
+
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Trứng gà</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-trung">Trứng & Sữa</span>
+              <span class="source-badge">seed</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>155</strong>kcal / 100g</div>
+        </div>
+
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Cơm trắng</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-ngu-coc">Ngũ cốc & Tinh bột</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>130</strong>kcal / 100g</div>
+        </div>
+
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Bông cải xanh</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-rau">Rau củ</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>34</strong>kcal / 100g</div>
+        </div>
+
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Dầu olive</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-dau-mo">Dầu & Mỡ</span>
+              <span class="source-badge">manual</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>884</strong>kcal / 100g</div>
+        </div>
+
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Nước mắm</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-nuoc-dung">Nước dùng & Nước chấm</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>35</strong>kcal / 100g</div>
+        </div>
+      </div>
+      <!-- Scroll-to-top (visible when scrolled down) -->
+      <button class="scroll-top-btn" title="Lên đầu trang">↑</button>
+      <!-- FAB -->
+      <button class="fab">+</button>
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
+        <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
+        <div class="tab-item active"><span class="tab-icon">🍳</span><span>Quản lý</span></div>
+        <div class="tab-item"><span class="tab-icon">💪</span><span>Tập luyện</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 2: Swipe Actions — Sửa / Xóa
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">2. Vuốt trái — Sửa / Xóa</div>
+    <div class="screen-desc">Vuốt trái trên card → hiện nút [Sửa] [Xóa]. Tap card → mở trang chỉnh sửa.</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <div class="toolbar-title">Quản lý</div>
+      </div>
+      <div class="sub-tabs">
+        <div class="sub-tab active">Nguyên liệu</div>
+        <div class="sub-tab">Món ăn</div>
+      </div>
+      <div class="content">
+        <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="search-text placeholder">Tìm nguyên liệu...</span>
+        </div>
+
+        <!-- Normal card (not swiped) -->
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Ức gà</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-thit">Thịt</span>
+              <span class="source-badge">seed</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>165</strong>kcal / 100g</div>
+        </div>
+
+        <!-- SWIPED card — revealing Edit + Delete -->
+        <div class="swipe-container">
+          <div class="swipe-actions">
+            <button class="swipe-action-btn swipe-action-edit">
+              <span class="swipe-icon">✏️</span>
+              <span>Sửa</span>
+            </button>
+            <button class="swipe-action-btn swipe-action-delete">
+              <span class="swipe-icon">🗑️</span>
+              <span>Xóa</span>
+            </button>
+          </div>
+          <div class="swipe-card">
+            <div class="ingredient-info">
+              <div class="ingredient-name">Trứng gà</div>
+              <div class="ingredient-meta">
+                <span class="category-chip cat-trung">Trứng & Sữa</span>
+                <span class="source-badge">seed</span>
+              </div>
+            </div>
+            <div class="ingredient-kcal"><strong>155</strong>kcal / 100g</div>
+          </div>
+        </div>
+
+        <!-- Normal card -->
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Cơm trắng</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-ngu-coc">Ngũ cốc & Tinh bột</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>130</strong>kcal / 100g</div>
+        </div>
+
+        <!-- Interaction hint -->
+        <div class="swipe-hint">
+          ← Vuốt trái trên card để Sửa hoặc Xóa
+        </div>
+
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Bông cải xanh</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-rau">Rau củ</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>34</strong>kcal / 100g</div>
+        </div>
+      </div>
+      <button class="scroll-top-btn" title="Lên đầu trang">↑</button>
+      <button class="fab">+</button>
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
+        <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
+        <div class="tab-item active"><span class="tab-icon">🍳</span><span>Quản lý</span></div>
+        <div class="tab-item"><span class="tab-icon">💪</span><span>Tập luyện</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 3: Tìm kiếm — có kết quả
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">3. Tìm kiếm — có kết quả</div>
+    <div class="screen-desc">Nhập "gà" → lọc danh sách theo keyword</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <div class="toolbar-title">Quản lý</div>
+      </div>
+      <div class="sub-tabs">
+        <div class="sub-tab active">Nguyên liệu</div>
+        <div class="sub-tab">Món ăn</div>
+      </div>
+      <div class="content">
+        <!-- Search bar — focused, with value -->
+        <div class="search-bar focused">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="search-text">gà</span>
+          <div class="search-clear">✕</div>
+        </div>
+
+        <!-- Filtered results -->
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Ức gà</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-thit">Thịt</span>
+              <span class="source-badge">seed</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>165</strong>kcal / 100g</div>
+        </div>
+
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Trứng gà</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-trung">Trứng & Sữa</span>
+              <span class="source-badge">seed</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>155</strong>kcal / 100g</div>
+        </div>
+
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Đùi gà</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-thit">Thịt</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>209</strong>kcal / 100g</div>
+        </div>
+
+        <!-- Result count hint -->
+        <div style="text-align:center; padding: 16px 0;">
+          <span style="font-size:12px; color:#999;">3 kết quả cho "gà"</span>
+        </div>
+      </div>
+      <button class="fab">+</button>
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
+        <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
+        <div class="tab-item active"><span class="tab-icon">🍳</span><span>Quản lý</span></div>
+        <div class="tab-item"><span class="tab-icon">💪</span><span>Tập luyện</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 4: Search — No Results
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">4. Tìm kiếm — không có kết quả</div>
+    <div class="screen-desc">Nhập "quinoa" → hiện empty state khuyến khích thêm mới</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <div class="toolbar-title">Quản lý</div>
+      </div>
+      <div class="sub-tabs">
+        <div class="sub-tab active">Nguyên liệu</div>
+        <div class="sub-tab">Món ăn</div>
+      </div>
+      <div class="content">
+        <!-- Search bar with query -->
+        <div class="search-bar focused">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="search-text">quinoa</span>
+          <div class="search-clear">✕</div>
+        </div>
+
+        <!-- Empty search state -->
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <div class="empty-title">Không tìm thấy nguyên liệu nào</div>
+          <div class="empty-desc">Thử từ khóa khác hoặc thêm mới</div>
+        </div>
+      </div>
+      <button class="fab">+</button>
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
+        <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
+        <div class="tab-item active"><span class="tab-icon">🍳</span><span>Quản lý</span></div>
+        <div class="tab-item"><span class="tab-icon">💪</span><span>Tập luyện</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 5: Empty State
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">5. Trạng thái trống</div>
+    <div class="screen-desc">Chưa có nguyên liệu nào — CTA thêm mới</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <div class="toolbar-title">Quản lý</div>
+      </div>
+      <div class="sub-tabs">
+        <div class="sub-tab active">Nguyên liệu</div>
+        <div class="sub-tab">Món ăn</div>
+      </div>
+      <div class="content">
+        <div class="empty-state" style="padding-top: 100px;">
+          <div class="empty-icon">🥗</div>
+          <div class="empty-title">Chưa có nguyên liệu nào</div>
+          <div class="empty-desc">Bắt đầu thêm nguyên liệu để quản lý dinh dưỡng</div>
+          <button class="btn-empty-cta">+ Thêm nguyên liệu đầu tiên</button>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
+        <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
+        <div class="tab-item active"><span class="tab-icon">🍳</span><span>Quản lý</span></div>
+        <div class="tab-item"><span class="tab-icon">💪</span><span>Tập luyện</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 6: Cannot Delete — Used in Dishes
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">6. Không thể xóa</div>
+    <div class="screen-desc">Nguyên liệu đang dùng trong món ăn → chặn xóa hoàn toàn</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <div class="toolbar-title">Quản lý</div>
+      </div>
+      <div class="sub-tabs">
+        <div class="sub-tab active">Nguyên liệu</div>
+        <div class="sub-tab">Món ăn</div>
+      </div>
+      <div class="content" style="position:relative;">
+        <!-- Search bar -->
+        <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="search-text placeholder">Tìm nguyên liệu...</span>
+        </div>
+
+        <!-- List (dimmed under dialog) -->
+        <div style="opacity: 0.3;">
+          <div class="ingredient-card">
+            <div class="ingredient-info">
+              <div class="ingredient-name">Ức gà</div>
+              <div class="ingredient-meta"><span class="category-chip cat-thit">Thịt</span></div>
+            </div>
+            <div class="ingredient-kcal"><strong>165</strong>kcal / 100g</div>
+          </div>
+          <div class="ingredient-card">
+            <div class="ingredient-info">
+              <div class="ingredient-name">Trứng gà</div>
+              <div class="ingredient-meta"><span class="category-chip cat-trung">Trứng & Sữa</span></div>
+            </div>
+            <div class="ingredient-kcal"><strong>155</strong>kcal / 100g</div>
+          </div>
+          <div class="ingredient-card">
+            <div class="ingredient-info">
+              <div class="ingredient-name">Cơm trắng</div>
+              <div class="ingredient-meta"><span class="category-chip cat-ngu-coc">Ngũ cốc & Tinh bột</span></div>
+            </div>
+            <div class="ingredient-kcal"><strong>130</strong>kcal / 100g</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dialog overlay -->
+      <div class="dialog-overlay">
+        <div class="dialog-box">
+          <div class="dialog-title">Không thể xóa</div>
+          <div class="dialog-msg"><strong>Ức gà</strong> đang được sử dụng trong <strong>3 món ăn</strong>. Hãy xóa khỏi các món trước khi xóa nguyên liệu này.</div>
+          <div class="dialog-actions">
+            <button class="dialog-btn dialog-btn-primary">Đã hiểu</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="fab" style="opacity:0.3;">+</button>
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
+        <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
+        <div class="tab-item active"><span class="tab-icon">🍳</span><span>Quản lý</span></div>
+        <div class="tab-item"><span class="tab-icon">💪</span><span>Tập luyện</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 7: Delete Confirm — Unused Ingredient
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">7. Xóa nguyên liệu (không dùng)</div>
+    <div class="screen-desc">Nguyên liệu chưa dùng trong món nào → cho phép xóa với confirm dialog</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <div class="toolbar-title">Quản lý</div>
+      </div>
+      <div class="sub-tabs">
+        <div class="sub-tab active">Nguyên liệu</div>
+        <div class="sub-tab">Món ăn</div>
+      </div>
+      <div class="content" style="position:relative;">
+        <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="search-text placeholder">Tìm nguyên liệu...</span>
+        </div>
+        <div style="opacity: 0.3;">
+          <div class="ingredient-card">
+            <div class="ingredient-info">
+              <div class="ingredient-name">Hạt chia</div>
+              <div class="ingredient-meta"><span class="category-chip cat-dau-hat">Đậu & Hạt</span></div>
+            </div>
+            <div class="ingredient-kcal"><strong>486</strong>kcal / 100g</div>
+          </div>
+          <div class="ingredient-card">
+            <div class="ingredient-info">
+              <div class="ingredient-name">Bơ lạt</div>
+              <div class="ingredient-meta"><span class="category-chip cat-dau-mo">Dầu & Mỡ</span></div>
+            </div>
+            <div class="ingredient-kcal"><strong>717</strong>kcal / 100g</div>
+          </div>
+        </div>
+      </div>
+      <!-- Dialog overlay — normal delete confirm -->
+      <div class="dialog-overlay">
+        <div class="dialog-box">
+          <div class="dialog-title">Xóa nguyên liệu?</div>
+          <div class="dialog-msg">Bạn có chắc muốn xóa <strong>Hạt chia</strong>? Thao tác này không thể hoàn tác.</div>
+          <div class="dialog-actions">
+            <button class="dialog-btn dialog-btn-cancel">Hủy</button>
+            <button class="dialog-btn dialog-btn-danger">Xóa</button>
+          </div>
+        </div>
+      </div>
+      <button class="fab" style="opacity:0.3;">+</button>
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
+        <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
+        <div class="tab-item active"><span class="tab-icon">🍳</span><span>Quản lý</span></div>
+        <div class="tab-item"><span class="tab-icon">💪</span><span>Tập luyện</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 8: Category Filter
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">8. Lọc theo nhóm</div>
+    <div class="screen-desc">Chip filter cuộn ngang — chọn "Rau củ" hiện nguyên liệu rau</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <div class="toolbar-title">Quản lý</div>
+      </div>
+      <div class="sub-tabs">
+        <div class="sub-tab active">Nguyên liệu</div>
+        <div class="sub-tab">Món ăn</div>
+      </div>
+      <div class="content">
+        <!-- Search bar -->
+        <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span class="search-text placeholder">Tìm nguyên liệu...</span>
+        </div>
+
+        <!-- Filter chips -->
+        <div class="filter-chips">
+          <div class="filter-chip">Tất cả</div>
+          <div class="filter-chip">Thịt</div>
+          <div class="filter-chip">Cá & Hải sản</div>
+          <div class="filter-chip active">Rau củ</div>
+          <div class="filter-chip">Trứng & Sữa</div>
+          <div class="filter-chip">Ngũ cốc</div>
+          <div class="filter-chip">Đậu & Hạt</div>
+          <div class="filter-chip">Gia vị</div>
+        </div>
+
+        <!-- Filtered list — Rau củ only -->
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Bông cải xanh</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-rau">Rau củ</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>34</strong>kcal / 100g</div>
+        </div>
+
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Cà chua</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-rau">Rau củ</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>18</strong>kcal / 100g</div>
+        </div>
+
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Cà rốt</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-rau">Rau củ</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>41</strong>kcal / 100g</div>
+        </div>
+
+        <div class="ingredient-card">
+          <div class="ingredient-info">
+            <div class="ingredient-name">Rau bina</div>
+            <div class="ingredient-meta">
+              <span class="category-chip cat-rau">Rau củ</span>
+            </div>
+          </div>
+          <div class="ingredient-kcal"><strong>23</strong>kcal / 100g</div>
+        </div>
+
+        <!-- Result count hint -->
+        <div style="text-align:center; padding: 12px 0;">
+          <span style="font-size:12px; color:#999;">4 nguyên liệu trong "Rau củ"</span>
+        </div>
+      </div>
+      <button class="fab">+</button>
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
+        <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
+        <div class="tab-item active"><span class="tab-icon">🍳</span><span>Quản lý</span></div>
+        <div class="tab-item"><span class="tab-icon">💪</span><span>Tập luyện</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /screens-grid -->
+
+<!-- ===================================================================
+     DESIGN SPEC NOTES
+     =================================================================== -->
+<div class="spec-notes">
+  <h2>📐 Design Spec Notes</h2>
+  <table>
+    <tr><th>Token</th><th>Value</th><th>Usage</th></tr>
+    <tr><td><code>--bg-page</code></td><td>#F5F7FA / #121212</td><td>Content area background</td></tr>
+    <tr><td><code>--bg-card</code></td><td>#FFFFFF / #1E1E1E</td><td>Ingredient cards, search bar, tab bar</td></tr>
+    <tr><td><code>--primary</code></td><td>#2196F3 / #42A5F5</td><td>Toolbar, active tab, active sub-tab, focused search border</td></tr>
+    <tr><td><code>--status-bar</code></td><td>#1976D2 / #0D47A1</td><td>Status bar background</td></tr>
+    <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>FAB, empty-state CTA button</td></tr>
+    <tr><td><code>--text-primary</code></td><td>#1A1A1A / #FFFFFF</td><td>Ingredient name, kcal number</td></tr>
+    <tr><td><code>--text-secondary</code></td><td>#333333 / #E0E0E0</td><td>Dialog message bold text</td></tr>
+    <tr><td><code>--text-tertiary</code></td><td>#666666 / #999999</td><td>Kcal caption, dialog message, search placeholder</td></tr>
+    <tr><td><code>--text-disabled</code></td><td>#999999 / #666666</td><td>Inactive tabs, result count hint</td></tr>
+    <tr><td><code>--border</code></td><td>#E8E8E8 / #333333</td><td>Search bar border, tab bar top border, card border (dark)</td></tr>
+    <tr><td><code>--error</code></td><td>#F44336 / #EF5350</td><td>Delete confirm dialog danger button (unused ingredient only)</td></tr>
+    <tr><td><code>--card-shadow</code></td><td>0 1px 4px rgba(0,0,0,0.08)</td><td>Ingredient cards (light only)</td></tr>
+    <tr><td><code>radius-xs</code></td><td>8px</td><td>Category chips, filter chips, dialog buttons</td></tr>
+    <tr><td><code>radius-sm</code></td><td>12px</td><td>Search bar, filter chip (inputs)</td></tr>
+    <tr><td><code>radius-lg</code></td><td>16px</td><td>Ingredient cards, dialog box, spec notes</td></tr>
+    <tr><td><code>radius-full</code></td><td>9999px</td><td>FAB button, scroll-to-top button</td></tr>
+    <tr><td><code>space-xs</code></td><td>4px</td><td>Chip internal gap, name-to-meta spacing</td></tr>
+    <tr><td><code>space-sm</code></td><td>8px</td><td>Filter chip gap, search icon gap</td></tr>
+    <tr><td><code>space-md</code></td><td>12px</td><td>Card gap, content top padding, card internal gap</td></tr>
+    <tr><td><code>space-lg</code></td><td>16px</td><td>Page side padding, card padding</td></tr>
+    <tr><td>Typography — Body</td><td>14px/400</td><td>Search placeholder, dialog message</td></tr>
+    <tr><td>Typography — Subtitle</td><td>16px/500</td><td>Kcal bold number</td></tr>
+    <tr><td>Typography — Overline</td><td>11px/500</td><td>Category chip text, tab label</td></tr>
+    <tr><td>Typography — Caption</td><td>12px/400</td><td>Kcal unit label, result count, source badge</td></tr>
+    <tr><td>Phone frame</td><td>375×812px</td><td>iPhone-size frame with tab bar</td></tr>
+    <tr><td>Tab bar</td><td>56px height</td><td>4 tabs, Quản lý active (#2196F3 / #42A5F5)</td></tr>
+    <tr><td>FAB</td><td>56px circle, bottom-right</td><td>16px from right edge, 72px from bottom (above tab bar)</td></tr>
+    <tr><td>Scroll-to-top</td><td>40px circle</td><td>Above FAB (bottom: 136px, right: 16px). Visible after scroll &gt;200px</td></tr>
+    <tr><td>Content padding-bottom</td><td>80px</td><td>56px FAB + 16px gap + 8px safe — last item never hidden</td></tr>
+    <tr><td colspan="3"><strong>🚫 Delete rule:</strong> Ingredient used in ≥1 dish → hard block (no delete). Dialog: "Không thể xóa" + [Đã hiểu]. Only unused ingredients show confirm dialog with [Xóa].</td></tr>
+    <tr><td colspan="3"><strong>👆 Interactions:</strong> Tap card → navigate to edit page. Swipe left (ion-item-sliding) → reveal [Sửa] + [Xóa] buttons. Sửa = blue (#2196F3), Xóa = red (#F44336). Each action button 70px wide.</td></tr>
+  </table>
+</div>
+
+<script>
+function setTheme(theme) {
+  document.body.className = theme;
+  document.querySelectorAll('.theme-toggle button').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.includes(theme === 'light' ? 'Light' : 'Dark'));
+  });
+}
+</script>
+
+</body>
+</html>

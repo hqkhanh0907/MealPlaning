@@ -78,14 +78,22 @@
   - [ ] Cards: no shadow in dark (flat bg)
   - [ ] Overlay: `rgba(0,0,0,0.5)` vẫn đủ dim
 
-## 10. Screen Numbering & Comments
+## 10. Text Alignment — Form content luôn căn trái
+
+- `.screen-wrapper { text-align: center }` dùng để center label/description BÊN NGOÀI phone frame.
+- **Nhưng nó kế thừa (inherit) vào trong phone** → tất cả section titles, form labels, hints bị center.
+- **Fix bắt buộc**: `.content { text-align: left; }` trong MỌI mockup.
+- Quy tắc UX: Form labels, section titles, input text, hints → LUÔN căn trái. Không ngoại lệ.
+- Chỉ center: empty state messages, dialog titles (vì dialog box nhỏ).
+
+## 11. Screen Numbering & Comments
 
 - Mỗi screen có HTML comment header: `<!-- SCREEN N: Title -->`
 - Label visible: `<div class="screen-label">N. Tiêu đề</div>`
 - Description: `<div class="screen-desc">Mô tả ngắn context/trigger</div>`
 - Đánh số tuần tự 1→N, không bỏ số.
 
-## 11. Spec Notes Table — BẮT BUỘC cuối mỗi mockup
+## 12. Spec Notes Table — BẮT BUỘC cuối mỗi mockup
 
 Mỗi file mockup PHẢI kết thúc bằng bảng Design Spec Notes gồm:
 - Tất cả design tokens đã dùng (color, radius, spacing, typography)
@@ -93,7 +101,7 @@ Mỗi file mockup PHẢI kết thúc bằng bảng Design Spec Notes gồm:
 - Business rules đặc biệt (delete rule, validation, interaction pattern)
 - Ghi rõ giá trị Light / Dark cho mỗi token
 
-## 12. Visual Review Checklist — SAU KHI tạo mockup
+## 13. Visual Review Checklist — SAU KHI tạo mockup
 
 Trước khi coi mockup là xong, PHẢI mở trên browser và kiểm tra:
 
