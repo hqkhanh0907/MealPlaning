@@ -133,7 +133,7 @@
      RADIO ITEMS — 12px radius, bg-card, left-aligned labels
      ========================================================================= */
   .radio-item {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: center; gap: 12px;
     padding: 12px 16px; border-radius: 12px;
     margin-bottom: 8px; cursor: pointer;
     transition: background 0.2s;
@@ -143,7 +143,35 @@
   body.light .radio-item:hover { background: #e3f2fd; }
   body.dark  .radio-item:hover { background: #2e2e2e; }
 
-  /* Radio circles HIDDEN — highlight-only selection pattern (UX decision) */
+  /* Radio circle — triple affordance: circle (left) + bg highlight + checkmark (right) */
+  .radio-circle {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    flex-shrink: 0;
+    position: relative;
+    box-sizing: border-box;
+  }
+  body.dark .radio-circle {
+    border-color: #555;
+  }
+  .radio-item.selected .radio-circle {
+    background: #2196F3;
+    border-color: #2196F3;
+  }
+  body.dark .radio-item.selected .radio-circle {
+    background: #42a5f5;
+    border-color: #42a5f5;
+  }
+  .radio-item.selected .radio-circle::after {
+    content: '';
+    width: 8px; height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
 
   .radio-icon {
     width: 22px; height: 22px; flex-shrink: 0;
@@ -296,7 +324,7 @@
 <body class="light">
 
 <h1 class="page-title">HealthMate AI — Onboarding Mockup</h1>
-<p class="page-subtitle">Phase 0 · 6 States · Light/Dark · Design System Compliant</p>
+<p class="page-subtitle">Phase 0 · 9 States · Light/Dark · Design System Compliant</p>
 
 <div class="theme-toggle">
   <button class="active" onclick="setTheme('light')">☀️ Light</button>
@@ -310,33 +338,37 @@
        ===================================================================== -->
   <div class="screen-wrapper">
     <div class="screen-label">Bước 1 — Default</div>
-    <div class="screen-desc">Chưa chọn mục tiêu, CTA disabled (opacity 0.5)</div>
+    <div class="screen-desc">Chưa chọn mục tiêu, CTA disabled (opacity 0.5). Radio circle trống ở bên trái.</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
         <div class="toolbar-title">Mục tiêu</div>
       </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div>
       <div class="content">
         <h2 class="step-title">Mục tiêu của bạn?</h2>
         <p class="step-subtitle">Chọn 1 mục tiêu chính</p>
 
         <div class="radio-item">
+          <span class="radio-circle"></span>
           <div class="radio-icon"><svg viewBox="0 0 512 512"><circle cx="256" cy="56" r="40" /><path d="M199.3 295.6l-30.4 172.2a24 24 0 0047.1 8.3l21-119.9s5.2-32.5 17.5-32.5h3.1c12.5 0 17.5 32.5 17.5 32.5l21 119.9a24 24 0 0047.1-8.4l-30.4-172.2-4.9-29.7c-2.9-18.1-4.2-47.6.5-59.7 4-10.4 14.1-14.2 23.2-14.2H424a24 24 0 000-48H88a24 24 0 000 48h92.5c9.2 0 19.2 3.8 23.2 14.2 4.7 12.1 3.4 41.6.5 59.7z"/></svg></div>
           <div class="radio-label">Giảm cân</div>
           <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
+          <span class="radio-circle"></span>
           <div class="radio-icon"><svg viewBox="0 0 512 512"><path d="M48 256h416"/><rect x="384" y="128" width="32" height="256" rx="16" /><rect x="96" y="128" width="32" height="256" rx="16" /><rect x="32" y="192" width="16" height="128" rx="8" /><rect x="464" y="192" width="16" height="128" rx="8" /></svg></div>
           <div class="radio-label">Tăng cơ</div>
           <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
+          <span class="radio-circle"></span>
           <div class="radio-icon"><svg viewBox="0 0 512 512"><rect x="48" y="48" width="416" height="416" rx="96" /><path d="M388.9 151.6c-24.5-22.3-68.7-51.4-132.9-51.4s-108.5 29.1-132.9 51.4a34.7 34.7 0 00-3.1 48.1l33.3 39.2a26.1 26.1 0 0033.6 5.2c15.9-9.8 40.9-21.6 69.1-21.6s53.2 11.8 69.1 21.6a26.1 26.1 0 0033.6-5.2l33.3-39.2a34.7 34.7 0 00-3.1-48.1z"/></svg></div>
           <div class="radio-label">Duy trì</div>
           <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
+          <span class="radio-circle"></span>
           <div class="radio-icon"><svg viewBox="0 0 512 512"><path d="M176 464h160M256 464V336M384 224c0-50.6 0-134.6 0-160a16 16 0 00-16-16H144a16 16 0 00-16 16c0 30.6 0 129.2 0 160 0 64.3 83 112 128 112s128-47.7 128-112z"/><path d="M128 96H48v16c0 55.2 33.6 112 80 112M384 96h80v16c0 55.2-33.6 112-80 112"/></svg></div>
           <div class="radio-label">Tăng sức mạnh</div>
           <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
@@ -354,33 +386,37 @@
        ===================================================================== -->
   <div class="screen-wrapper">
     <div class="screen-label">Bước 1 — Đã chọn</div>
-    <div class="screen-desc">"Giảm cân" selected, item highlighted (no radio circle)</div>
+    <div class="screen-desc">"Giảm cân" selected: radio circle filled (left) + bg highlight + checkmark ✓ (right)</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
         <div class="toolbar-title">Mục tiêu</div>
       </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div>
       <div class="content">
         <h2 class="step-title">Mục tiêu của bạn?</h2>
         <p class="step-subtitle">Chọn 1 mục tiêu chính</p>
 
         <div class="radio-item selected">
+          <span class="radio-circle"></span>
           <div class="radio-icon"><svg viewBox="0 0 512 512"><circle cx="256" cy="56" r="40" /><path d="M199.3 295.6l-30.4 172.2a24 24 0 0047.1 8.3l21-119.9s5.2-32.5 17.5-32.5h3.1c12.5 0 17.5 32.5 17.5 32.5l21 119.9a24 24 0 0047.1-8.4l-30.4-172.2-4.9-29.7c-2.9-18.1-4.2-47.6.5-59.7 4-10.4 14.1-14.2 23.2-14.2H424a24 24 0 000-48H88a24 24 0 000 48h92.5c9.2 0 19.2 3.8 23.2 14.2 4.7 12.1 3.4 41.6.5 59.7z"/></svg></div>
           <div class="radio-label"><strong>Giảm cân</strong></div>
           <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
+          <span class="radio-circle"></span>
           <div class="radio-icon"><svg viewBox="0 0 512 512"><path d="M48 256h416"/><rect x="384" y="128" width="32" height="256" rx="16" /><rect x="96" y="128" width="32" height="256" rx="16" /><rect x="32" y="192" width="16" height="128" rx="8" /><rect x="464" y="192" width="16" height="128" rx="8" /></svg></div>
           <div class="radio-label">Tăng cơ</div>
           <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
+          <span class="radio-circle"></span>
           <div class="radio-icon"><svg viewBox="0 0 512 512"><rect x="48" y="48" width="416" height="416" rx="96" /><path d="M388.9 151.6c-24.5-22.3-68.7-51.4-132.9-51.4s-108.5 29.1-132.9 51.4a34.7 34.7 0 00-3.1 48.1l33.3 39.2a26.1 26.1 0 0033.6 5.2c15.9-9.8 40.9-21.6 69.1-21.6s53.2 11.8 69.1 21.6a26.1 26.1 0 0033.6-5.2l33.3-39.2a34.7 34.7 0 00-3.1-48.1z"/></svg></div>
           <div class="radio-label">Duy trì</div>
           <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="radio-item">
+          <span class="radio-circle"></span>
           <div class="radio-icon"><svg viewBox="0 0 512 512"><path d="M176 464h160M256 464V336M384 224c0-50.6 0-134.6 0-160a16 16 0 00-16-16H144a16 16 0 00-16 16c0 30.6 0 129.2 0 160 0 64.3 83 112 128 112s128-47.7 128-112z"/><path d="M128 96H48v16c0 55.2 33.6 112 80 112M384 96h80v16c0 55.2-33.6 112-80 112"/></svg></div>
           <div class="radio-label">Tăng sức mạnh</div>
           <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
@@ -393,25 +429,23 @@
     </div>
   </div>
 
-  <!-- REMOVED: Step 1 Error State screen — no longer needed since CTA is disabled until selection -->
-
   <!-- =====================================================================
-       STEP 2: THÔNG TIN CƠ BẢN — Default (empty form)
+       STEP 2a: THÔNG TIN CƠ THỂ — Default (empty body info)
        ===================================================================== -->
   <div class="screen-wrapper">
-    <div class="screen-label">Bước 2 — Default</div>
-    <div class="screen-desc">Form trống, floating labels, progress 100%</div>
+    <div class="screen-label">Bước 2a — Default</div>
+    <div class="screen-desc">Form cơ thể trống, floating labels, progress 67%. CTA "Tiếp tục" luôn active.</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
         <button class="toolbar-back">
           <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </button>
-        <div class="toolbar-title">Thông tin</div>
+        <div class="toolbar-title">Thông tin cơ thể</div>
       </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:67%"></div></div>
       <div class="content">
-        <h2 class="step-title">Thông tin cơ bản</h2>
+        <h2 class="step-title">Thông tin cơ thể</h2>
         <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
 
         <div class="form-field">
@@ -441,6 +475,162 @@
             <div class="select-arrow">▾</div>
           </div>
         </div>
+
+        <div class="button-row">
+          <button class="btn-outline">
+            Quay lại
+          </button>
+          <button class="btn-cta" style="margin-top:0">
+            Tiếp tục
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       STEP 2a: FILLED STATE — valid body info
+       ===================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Bước 2a — Đã điền</div>
+    <div class="screen-desc">Form cơ thể hợp lệ, sẵn sàng sang bước tiếp</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="toolbar-title">Thông tin cơ thể</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:67%"></div></div>
+      <div class="content">
+        <h2 class="step-title">Thông tin cơ thể</h2>
+        <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
+
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Chiều cao (cm)</span>
+            <div class="input-value">175</div>
+          </div>
+        </div>
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Cân nặng (kg)</span>
+            <div class="input-value">70</div>
+          </div>
+        </div>
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Tuổi</span>
+            <div class="input-value">28</div>
+          </div>
+        </div>
+        <div class="form-field">
+          <div class="select-wrapper">
+            <div style="flex:1">
+              <span class="input-label">Giới tính</span>
+              <div class="input-value">Nam</div>
+            </div>
+            <div class="select-arrow">▾</div>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button class="btn-outline">
+            Quay lại
+          </button>
+          <button class="btn-cta" style="margin-top:0">
+            Tiếp tục
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       STEP 2a: ERROR STATE — per-field validation errors (body info)
+       ===================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Bước 2a — Lỗi validation</div>
+    <div class="screen-desc">Per-field errors trên thông tin cơ thể</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="toolbar-title">Thông tin cơ thể</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:67%"></div></div>
+      <div class="content">
+        <h2 class="step-title">Thông tin cơ thể</h2>
+        <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
+
+        <div class="form-field">
+          <div class="input-wrapper invalid">
+            <span class="input-label invalid">Chiều cao (cm)</span>
+            <div class="input-value">50</div>
+          </div>
+        </div>
+        <div class="field-error">Chiều cao phải từ 130–250 cm</div>
+
+        <div class="form-field">
+          <div class="input-wrapper invalid">
+            <span class="input-label invalid">Cân nặng (kg)</span>
+            <div class="input-value placeholder">&nbsp;</div>
+          </div>
+        </div>
+        <div class="field-error">Cân nặng phải từ 30–200 kg</div>
+
+        <div class="form-field">
+          <div class="input-wrapper">
+            <span class="input-label">Tuổi</span>
+            <div class="input-value">25</div>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <div class="select-wrapper invalid">
+            <div style="flex:1">
+              <span class="input-label invalid">Giới tính</span>
+              <div class="input-value placeholder">&nbsp;</div>
+            </div>
+            <div class="select-arrow">▾</div>
+          </div>
+        </div>
+        <div class="field-error">Vui lòng chọn giới tính</div>
+
+        <div class="button-row">
+          <button class="btn-outline">
+            Quay lại
+          </button>
+          <button class="btn-cta" style="margin-top:0">
+            Tiếp tục
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       STEP 2b: MỨC HOẠT ĐỘNG — Default (empty activity info)
+       ===================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">Bước 2b — Default</div>
+    <div class="screen-desc">Form hoạt động trống, progress 100%. CTA "Hoàn tất" luôn active.</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="toolbar-title">Mức hoạt động</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+      <div class="content">
+        <h2 class="step-title">Mức hoạt động</h2>
+        <p class="step-subtitle">Giúp chúng tôi tính nhu cầu calo phù hợp</p>
+
         <div class="form-field">
           <div class="select-wrapper">
             <div style="flex:1">
@@ -482,10 +672,10 @@
   </div>
 
   <!-- =====================================================================
-       STEP 2: FILLED STATE — valid form ready to submit
+       STEP 2b: FILLED STATE — valid activity info
        ===================================================================== -->
   <div class="screen-wrapper">
-    <div class="screen-label">Bước 2 — Đã điền</div>
+    <div class="screen-label">Bước 2b — Đã điền</div>
     <div class="screen-desc">Form hợp lệ, gym "6 tháng — 2 năm" selected</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
@@ -493,40 +683,13 @@
         <button class="toolbar-back">
           <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </button>
-        <div class="toolbar-title">Thông tin</div>
+        <div class="toolbar-title">Mức hoạt động</div>
       </div>
       <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
       <div class="content">
-        <h2 class="step-title">Thông tin cơ bản</h2>
-        <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
+        <h2 class="step-title">Mức hoạt động</h2>
+        <p class="step-subtitle">Giúp chúng tôi tính nhu cầu calo phù hợp</p>
 
-        <div class="form-field">
-          <div class="input-wrapper">
-            <span class="input-label">Chiều cao (cm)</span>
-            <div class="input-value">175</div>
-          </div>
-        </div>
-        <div class="form-field">
-          <div class="input-wrapper">
-            <span class="input-label">Cân nặng (kg)</span>
-            <div class="input-value">70</div>
-          </div>
-        </div>
-        <div class="form-field">
-          <div class="input-wrapper">
-            <span class="input-label">Tuổi</span>
-            <div class="input-value">28</div>
-          </div>
-        </div>
-        <div class="form-field">
-          <div class="select-wrapper">
-            <div style="flex:1">
-              <span class="input-label">Giới tính</span>
-              <div class="input-value">Nam</div>
-            </div>
-            <div class="select-arrow">▾</div>
-          </div>
-        </div>
         <div class="form-field">
           <div class="select-wrapper">
             <div style="flex:1">
@@ -568,10 +731,10 @@
   </div>
 
   <!-- =====================================================================
-       STEP 2: ERROR STATE — per-field validation errors
+       STEP 2b: ERROR STATE — per-field validation errors (activity)
        ===================================================================== -->
   <div class="screen-wrapper">
-    <div class="screen-label">Bước 2 — Lỗi validation</div>
+    <div class="screen-label">Bước 2b — Lỗi validation</div>
     <div class="screen-desc">Per-field errors + missing gym selection</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
@@ -579,46 +742,12 @@
         <button class="toolbar-back">
           <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </button>
-        <div class="toolbar-title">Thông tin</div>
+        <div class="toolbar-title">Mức hoạt động</div>
       </div>
       <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
       <div class="content">
-        <h2 class="step-title">Thông tin cơ bản</h2>
-        <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
-
-        <div class="form-field">
-          <div class="input-wrapper invalid">
-            <span class="input-label invalid">Chiều cao (cm)</span>
-            <div class="input-value">50</div>
-          </div>
-        </div>
-        <div class="field-error">Chiều cao phải từ 130–250 cm</div>
-
-        <div class="form-field">
-          <div class="input-wrapper invalid">
-            <span class="input-label invalid">Cân nặng (kg)</span>
-            <div class="input-value placeholder">&nbsp;</div>
-          </div>
-        </div>
-        <div class="field-error">Cân nặng phải từ 30–200 kg</div>
-
-        <div class="form-field">
-          <div class="input-wrapper">
-            <span class="input-label">Tuổi</span>
-            <div class="input-value">25</div>
-          </div>
-        </div>
-
-        <div class="form-field">
-          <div class="select-wrapper invalid">
-            <div style="flex:1">
-              <span class="input-label invalid">Giới tính</span>
-              <div class="input-value placeholder">&nbsp;</div>
-            </div>
-            <div class="select-arrow">▾</div>
-          </div>
-        </div>
-        <div class="field-error">Vui lòng chọn giới tính</div>
+        <h2 class="step-title">Mức hoạt động</h2>
+        <p class="step-subtitle">Giúp chúng tôi tính nhu cầu calo phù hợp</p>
 
         <div class="form-field">
           <div class="select-wrapper invalid">
@@ -663,10 +792,10 @@
   </div>
 
   <!-- =====================================================================
-       STEP 2: SAVING / DISABLED STATE
+       STEP 2b: SAVING / DISABLED STATE
        ===================================================================== -->
   <div class="screen-wrapper">
-    <div class="screen-label">Bước 2 — Đang lưu</div>
+    <div class="screen-label">Bước 2b — Đang lưu</div>
     <div class="screen-desc">Buttons disabled, text "Đang lưu..."</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
@@ -674,40 +803,13 @@
         <button class="toolbar-back">
           <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </button>
-        <div class="toolbar-title">Thông tin</div>
+        <div class="toolbar-title">Mức hoạt động</div>
       </div>
       <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
       <div class="content">
-        <h2 class="step-title">Thông tin cơ bản</h2>
-        <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
+        <h2 class="step-title">Mức hoạt động</h2>
+        <p class="step-subtitle">Giúp chúng tôi tính nhu cầu calo phù hợp</p>
 
-        <div class="form-field">
-          <div class="input-wrapper">
-            <span class="input-label">Chiều cao (cm)</span>
-            <div class="input-value">175</div>
-          </div>
-        </div>
-        <div class="form-field">
-          <div class="input-wrapper">
-            <span class="input-label">Cân nặng (kg)</span>
-            <div class="input-value">70</div>
-          </div>
-        </div>
-        <div class="form-field">
-          <div class="input-wrapper">
-            <span class="input-label">Tuổi</span>
-            <div class="input-value">28</div>
-          </div>
-        </div>
-        <div class="form-field">
-          <div class="select-wrapper">
-            <div style="flex:1">
-              <span class="input-label">Giới tính</span>
-              <div class="input-value">Nam</div>
-            </div>
-            <div class="select-arrow">▾</div>
-          </div>
-        </div>
         <div class="form-field">
           <div class="select-wrapper">
             <div style="flex:1">
@@ -758,17 +860,26 @@
     <tr><td>Progress bar</td><td colspan="2">4px, white track</td><td><code>ion-progress-bar</code></td></tr>
     <tr><td>Selected bg</td><td><code>#e3f2fd</code></td><td><code>#1a237e</code></td><td><code>--primary-50</code> / custom dark</td></tr>
     <tr><td>radio-check</td><td colspan="2">22px, --primary color</td><td>Checkmark icon on selected radio items (A11y enhancement)</td></tr>
+    <tr><td>radio-circle</td><td>18px, border <code>#ccc</code></td><td>18px, border <code>#555</code></td><td>Unselected: empty circle. Selected: filled <code>--primary</code> + 8px white dot center</td></tr>
   </table>
 
   <h3 style="margin-top:16px">🔄 Interaction States (all 6)</h3>
   <table>
-    <tr><th>State</th><th>Step 1</th><th>Step 2</th></tr>
-    <tr><td>Default</td><td>Screen 1: empty radio group, CTA disabled</td><td>Screen 3: empty form fields</td></tr>
-    <tr><td>Hover</td><td>Radio item bg → <code>#e3f2fd</code></td><td>Same on radio items</td></tr>
-    <tr><td>Active/Selected</td><td>Screen 2: bg highlight, CTA enabled</td><td>Screen 4: filled form + gym bg highlight</td></tr>
-    <tr><td>Focus</td><td><code>tabindex="-1"</code> on heading for a11y</td><td>Focus first invalid field on error</td></tr>
-    <tr><td>Disabled</td><td>Screen 1: CTA button 50% opacity until selection</td><td>Screen 6: buttons 50% opacity while saving</td></tr>
-    <tr><td>Error</td><td>— (prevented by disabled CTA)</td><td>Screen 5: per-field errors + focus</td></tr>
+    <tr><th>State</th><th>Step 1</th><th>Step 2a</th><th>Step 2b</th></tr>
+    <tr><td>Default</td><td>Screen 1: empty radio group, CTA disabled, radio circles empty</td><td>Screen 3: empty body info fields</td><td>Screen 6: empty activity fields</td></tr>
+    <tr><td>Hover</td><td>Radio item bg → <code>#e3f2fd</code></td><td>Same on inputs</td><td>Same on radio items</td></tr>
+    <tr><td>Active/Selected</td><td>Screen 2: radio circle filled + bg highlight + checkmark ✓, CTA enabled</td><td>Screen 4: filled body info</td><td>Screen 7: filled activity + gym highlight</td></tr>
+    <tr><td>Focus</td><td><code>tabindex="-1"</code> on heading for a11y</td><td>Focus first invalid field on error</td><td>Focus first invalid field on error</td></tr>
+    <tr><td>Disabled</td><td>Screen 1: CTA button 50% opacity until selection</td><td>—</td><td>Screen 9: buttons 50% opacity while saving</td></tr>
+    <tr><td>Error</td><td>— (prevented by disabled CTA)</td><td>Screen 5: per-field body errors + focus</td><td>Screen 8: per-field activity errors + focus</td></tr>
+  </table>
+
+  <h3 style="margin-top:16px">📊 Progress Bar (3-step)</h3>
+  <table>
+    <tr><th>Step</th><th>Progress</th><th>Toolbar Title</th><th>CTA</th></tr>
+    <tr><td>Step 1: Mục tiêu</td><td>33%</td><td>Mục tiêu</td><td>"Tiếp tục" (disabled until selection)</td></tr>
+    <tr><td>Step 2a: Thông tin cơ thể</td><td>67%</td><td>Thông tin cơ thể</td><td>"Tiếp tục" (always active)</td></tr>
+    <tr><td>Step 2b: Mức hoạt động</td><td>100%</td><td>Mức hoạt động</td><td>"Hoàn tất" (always active)</td></tr>
   </table>
 
   <h3 style="margin-top:16px">♿ Accessibility</h3>

@@ -11,15 +11,11 @@
 - Item cuối cùng PHẢI hiển thị đầy đủ trong frame. Không được bị cắt/tràn.
 - Nếu có FAB → item cuối cách đáy content ≥ 80px (FAB 56px + 16px gap + 8px safe).
 
-## 2. Swipe Actions — ion-item-sliding
+## 2. ~~Swipe Actions~~ — DEPRECATED (Removed in Review 3)
 
-- Pattern chuẩn Ionic: vuốt trái card → card dịch sang trái, lộ action buttons phía sau.
-- Đây là hành vi ĐÚNG: phần trái card bị ẩn khi dịch — giống real `ion-item-sliding`.
-- Mockup tĩnh: dùng `overflow: hidden` + `transform: translateX(-Xpx)` trên card là OK.
-  - Layer dưới (z-index: 1): action buttons `position: absolute; right: 0`
-  - Layer trên (z-index: 2): card dùng `transform: translateX(-140px)` để lộ 2 buttons
-- Action buttons: mỗi nút 70px wide, icon + label dọc. Sửa = `--primary` (#2196F3), Xóa = `--error` (#F44336).
-- **Mỗi mockup list PHẢI có 1 screen thể hiện swipe state** nếu list có Edit/Delete.
+> **KHÔNG dùng swipe actions.** Edit/Delete chỉ thông qua ⋮ more menu (xem Rule 22).
+> Lý do: Swipe discoverability thấp, ⋮ menu rõ ràng hơn cho mọi user.
+> Quyết định: Review 3 — user chọn bỏ swipe, chỉ giữ ⋮.
 
 ## 3. FAB (Floating Action Button)
 
@@ -51,8 +47,8 @@
 | Item đang được dùng (ingredient in dish, dish in meal plan) | "Không thể xóa" — info dialog | [Xem N món đang dùng] (--primary) — **actionable CTA** dẫn đến danh sách liên quan |
 | Item không dùng | "Xóa [tên]?" — confirm dialog | [Hủy] + [Xóa] (--error) |
 
-- Delete trigger: swipe left → nút [Xóa] đỏ.
-- KHÔNG cho phép xóa bằng long-press hoặc menu ẩn.
+- Delete trigger: tap ⋮ menu → chọn [Xóa] → dialog xác nhận.
+- KHÔNG dùng swipe để xóa (deprecated). KHÔNG cho phép xóa bằng long-press.
 - Dialog "không thể xóa" phải giúp user đi tiếp (xem món liên quan), KHÔNG chỉ acknowledge.
 
 ## 7. Annotations & Hints
@@ -163,20 +159,21 @@ Trước khi coi mockup là xong, PHẢI mở trên browser và kiểm tra:
 □ 5. Cards có vừa trong phone frame không? (item cuối hiện đầy đủ)
 □ 6. FAB có che nội dung không?
 □ 7. Dialog overlay có dim đúng background không?
-□ 8. Swipe state có hiện đầy đủ text + actions không?
+□ 8. List cards có ⋮ more icon (không swipe)?
 □ 9. Empty/no-result states có CTA không?
 □ 10. Spec notes table đầy đủ tokens + rules?
 □ 11. Sub-tabs dùng Segment Control trên NỀN TRẮNG (không toolbar)?
 □ 12. Filter chips có gradient fade affordance?
 □ 13. Toolbar có nút "Lưu" cho form dài?
-□ 14. Radio selected có checkmark ✓?
+□ 14. Radio selected có radio circle + checkmark ✓?
 □ 15. Touch targets ≥ 44×44px?
 □ 16. Calories nổi bật hơn P/C/F?
 □ 17. Category chips có giảm saturation (pastel-like)?
-□ 18. List cards có ⋮ more icon affordance?
-□ 19. Placeholder số dùng hint text (không "0")?
-□ 20. Delete blocked dialog có CTA actionable?
-□ 21. Step nav CTA disabled khi chưa valid?
+□ 18. Placeholder số dùng contextual hint (không "0", không generic)?
+□ 19. Delete blocked dialog có CTA actionable?
+□ 20. Step nav CTA disabled khi chưa valid?
+□ 21. Dark mode caption ≥ WCAG AA contrast?
+□ 22. FAB menu có sublabel giải thích?
 ```
 
 ## 21. Category Chips — Giảm Saturation
@@ -187,20 +184,29 @@ Trước khi coi mockup là xong, PHẢI mở trên browser và kiểm tra:
 - Dark mode: bg rất tối (gần card bg), text màu gốc sáng hơn.
 - Lý do: Nhiều chips saturated cùng lúc = nhiễu thị giác, cạnh tranh attention với content chính.
 
-## 22. Affordance Ngoài Swipe — ⋮ More Icon
+## 22. ⋮ More Menu — PRIMARY Edit/Delete Mechanism
 
-- Mọi list card có swipe actions → PHẢI thêm **⋮ (more) icon** ở góc phải card.
+- Mọi list card có edit/delete → PHẢI có **⋮ (more) icon** ở góc phải card.
 - Size icon: 16-20px, nhưng hitbox 44×44px.
-- Tap ⋮ → hiện bottom sheet hoặc popup: [Sửa] + [Xóa].
-- Swipe vẫn giữ nguyên — ⋮ là backup affordance cho user không biết swipe.
-- Lý do: Swipe discoverable thấp (cần hint hoặc trải nghiệm trước).
+- Tap ⋮ → hiện **bottom sheet** hoặc **popup menu**: [Sửa] + [Xóa].
+- Đây là cơ chế DUY NHẤT cho edit/delete (swipe đã deprecated — Rule 2).
+- ⋮ phải luôn visible, không ẩn sau gesture.
+- Interaction convention:
+  - **Tap card** = mở chi tiết / navigate to edit page
+  - **Tap ⋮** = menu actions (Sửa, Xóa)
+  - ~~Swipe~~ = removed
 
-## 23. Placeholder Số — Hint Text thay "0"
+## 23. Placeholder — Contextual Hint Examples
 
-- Input số (calories, protein, gram...) **KHÔNG dùng placeholder "0"**.
-- Dùng hint text: "Nhập số" hoặc chỉ hiện suffix khi có value.
+- Input số/text **KHÔNG dùng placeholder "0"** hoặc generic "Nhập số".
+- Dùng **contextual examples** phù hợp domain:
+  - Chiều cao → "Ví dụ: 165"
+  - Cân nặng → "Ví dụ: 60"
+  - Tên món → "Ví dụ: Cơm gà nướng"
+  - Calories → "Ví dụ: 350"
+  - Protein → "Ví dụ: 25"
 - Placeholder color: `var(--text-tertiary)` — nhạt hơn rõ so với value thật.
-- Lý do: "0" dễ bị hiểu là giá trị thật → user bỏ qua → data sai.
+- Lý do: "0" bị hiểu là giá trị thật. "Nhập số" quá trung tính. Ví dụ cụ thể giúp user hình dung giá trị hợp lý.
 
 ## 24. Quick-Add Macro Fields — Dot thay Border
 
@@ -219,3 +225,58 @@ Trước khi coi mockup là xong, PHẢI mở trên browser và kiểm tra:
   - **Dòng 4:** Servings/source = tertiary — `12px/400`, color `var(--text-tertiary)`
 - Calories KHÔNG được cùng cấp visual với P/C/F.
 - Xem thêm: `design-system.md §3.6`.
+
+## 26. Ingredient Edit — User-Friendly Wording
+
+- Section labels trong ingredient edit phải dùng **ngôn ngữ người dùng**, không technical:
+  - ~~"Đơn vị chuẩn tính dinh dưỡng"~~ → **"Tính dinh dưỡng theo"**
+  - ~~"Đơn vị nhập liệu"~~ → **"Khi thêm vào món, bạn muốn nhập bằng"**
+  - ~~"Gram mỗi đơn vị"~~ → **"1 đơn vị nặng bao nhiêu gram?"**
+- Thêm ví dụ inline giúp user hình dung:
+  - "Ví dụ: 1 quả trứng = 50g"
+  - "Ví dụ: 1 muỗng dầu = 15ml"
+- Khi chọn "Đơn vị" → auto-scroll + auto-focus tới field phụ.
+- Lý do: Cognitive load cao nhất trong app. Wording gần user giảm overwhelm.
+
+## 27. FAB Menu — Sublabels Giải Thích
+
+- Khi FAB mở speed-dial hoặc menu, mỗi option PHẢI có **sublabel** ngắn:
+  - **Tạo từ nguyên liệu** — "Tính dinh dưỡng tự động, quản lý chi tiết"
+  - **Nhập nhanh** — "Chỉ lưu macro/kcal, không có thành phần"
+- Sublabel: `12px/400`, `var(--text-secondary)`, dưới title.
+- Option chất lượng cao hơn ("Tạo từ nguyên liệu") đứng TRÊN và nổi bật hơn.
+- Warning sublabel ở "Nhập nhanh" giúp user hiểu hệ quả TRƯỚC khi chọn.
+
+## 28. Onboarding — Radio Circle + Checkmark
+
+- Radio selection items trong onboarding PHẢI có **triple affordance**:
+  1. **Radio circle** nhỏ (18px) ở bên trái card — unfilled khi chưa chọn, filled khi chọn
+  2. **Background highlight** — `var(--primary)` tint nhẹ
+  3. **Checkmark ✓** (22px) ở góc phải — hiện khi selected
+- Lý do: Chỉ highlight + checkmark chưa đủ rõ affordance cho user mới / lớn tuổi.
+
+## 29. Ingredient Picker — Recently Used
+
+- Bottom sheet chọn nguyên liệu (trong dish-edit) PHẢI có section **"Gần đây"** ở đầu:
+  - Hiện tối đa 5 nguyên liệu user đã dùng gần nhất
+  - Compact layout: chỉ tên + kcal, không card đầy đủ
+  - Phân tách với list chính bằng section header nhẹ
+- Nếu chưa có history → ẩn section này (không hiện "Gần đây" trống).
+- Lý do: User thường tạo món tương tự → giảm search lặp đi lặp lại.
+
+## 30. Ingredient Add Flow — "Thêm tiếp" Mode
+
+- Sau khi add 1 nguyên liệu vào món, bottom sheet **KHÔNG đóng**.
+- Hiện brief confirmation ("✓ Đã thêm [tên]") rồi quay về picker state:
+  - Search field reset
+  - Recently used cập nhật
+  - Button: [Thêm tiếp] (primary) + [Xong] (secondary/text)
+- User tap [Xong] → sheet đóng, quay về form món ăn.
+- Lý do: Với 5-8 nguyên liệu/món, đóng/mở sheet liên tục gây fatigue.
+
+## 31. Dark Mode — Caption Contrast
+
+- Caption/hint text (11-12px) trong dark mode PHẢI đạt WCAG AA contrast (≥4.5:1).
+- Tertiary text dark mode: tối thiểu `#AAAAAA` trên `#1E1E1E` background (ratio 4.78:1).
+- KHÔNG dùng `#999` cho text 11-12px trong dark mode (ratio chỉ 3.54:1 — FAIL AA).
+- Áp dụng: tab labels, result count, source badge, hint text, placeholder.

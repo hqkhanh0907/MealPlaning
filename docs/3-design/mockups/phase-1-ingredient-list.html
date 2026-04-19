@@ -21,7 +21,7 @@
   h1.page-title { text-align: center; margin-bottom: 4px; font-size: 24px; font-weight: 700; }
   .page-subtitle { text-align: center; margin-bottom: 20px; font-size: 14px; }
   body.light .page-subtitle { color: #666; }
-  body.dark  .page-subtitle { color: #999; }
+  body.dark  .page-subtitle { color: #AAAAAA; }
 
   /* Theme toggle */
   .theme-toggle { text-align: center; margin-bottom: 24px; }
@@ -47,7 +47,7 @@
   .screen-label { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
   .screen-desc { font-size: 12px; margin-bottom: 12px; }
   body.light .screen-desc { color: #666; }
-  body.dark  .screen-desc { color: #999; }
+  body.dark  .screen-desc { color: #AAAAAA; }
 
   .phone {
     width: 375px; height: 812px;
@@ -100,7 +100,7 @@
     background: transparent;
   }
   body.light .sub-tab { color: #666; }
-  body.dark  .sub-tab { color: #999; }
+  body.dark  .sub-tab { color: #AAAAAA; }
   .sub-tab.active {
     font-weight: 600;
   }
@@ -144,7 +144,8 @@
   .search-text { font-size: 14px; font-weight: 400; flex: 1; }
   body.light .search-text { color: #1A1A1A; }
   body.dark  .search-text { color: #fff; }
-  .search-text.placeholder { color: #999 !important; }
+  body.light .search-text.placeholder { color: #999 !important; }
+  body.dark  .search-text.placeholder { color: #AAAAAA !important; }
 
   .search-clear {
     min-width: 44px; min-height: 44px; display: flex;
@@ -157,7 +158,7 @@
     font-size: 12px; font-weight: 700;
   }
   body.light .search-clear-dot { background: #E8E8E8; color: #666; }
-  body.dark  .search-clear-dot { background: #444; color: #999; }
+  body.dark  .search-clear-dot { background: #444; color: #AAAAAA; }
 
   /* =========================================================================
      FILTER CHIPS
@@ -186,7 +187,7 @@
     border: 1px solid; white-space: nowrap; transition: all 0.2s;
   }
   body.light .filter-chip { background: #fff; border-color: #E8E8E8; color: #666; }
-  body.dark  .filter-chip { background: #1E1E1E; border-color: #333; color: #999; }
+  body.dark  .filter-chip { background: #1E1E1E; border-color: #333; color: #AAAAAA; }
   body.light .filter-chip.active { background: rgba(33,150,243,0.15); border-color: rgba(33,150,243,0.3); color: #1976D2; font-weight: 600; }
   body.dark  .filter-chip.active { background: rgba(66,165,245,0.15); border-color: rgba(66,165,245,0.3); color: #90CAF9; font-weight: 600; }
 
@@ -259,14 +260,14 @@
     font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 4px;
   }
   body.light .source-badge { background: #E8E8E8; color: #666; }
-  body.dark  .source-badge { background: #333; color: #999; }
+  body.dark  .source-badge { background: #333; color: #AAAAAA; }
 
   .ingredient-kcal {
     font-size: 12px; font-weight: 400; text-align: right;
     flex-shrink: 0; white-space: nowrap;
   }
   body.light .ingredient-kcal { color: #666; }
-  body.dark  .ingredient-kcal { color: #999; }
+  body.dark  .ingredient-kcal { color: #AAAAAA; }
   .ingredient-kcal strong {
     font-size: 16px; font-weight: 700; display: block; line-height: 1.2;
   }
@@ -296,48 +297,6 @@
   body.dark  .btn-empty-cta { background: #FFB74D; color: #121212; }
 
   /* =========================================================================
-     SWIPE ACTIONS (ion-item-sliding pattern)
-     ========================================================================= */
-  .swipe-container {
-    position: relative; overflow: hidden; border-radius: 16px; margin-bottom: 12px;
-  }
-  .swipe-card {
-    padding: 14px 16px; border-radius: 16px;
-    display: flex; align-items: center; gap: 12px;
-    position: relative; z-index: 2;
-    /* Shifted left to reveal actions */
-    transform: translateX(-140px);
-    transition: transform 0.3s;
-  }
-  body.light .swipe-card { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  body.dark  .swipe-card { background: #1E1E1E; }
-
-  .swipe-actions {
-    position: absolute; right: 0; top: 0; bottom: 0;
-    display: flex; z-index: 1;
-  }
-  .swipe-action-btn {
-    width: 70px; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 4px;
-    border: none; cursor: pointer;
-    font-size: 11px; font-weight: 500; color: #fff;
-  }
-  .swipe-action-btn .swipe-icon { font-size: 18px; }
-  .swipe-action-edit { background: #2196F3; }
-  .swipe-action-delete { background: #F44336; }
-  body.dark .swipe-action-edit { background: #42A5F5; }
-  body.dark .swipe-action-delete { background: #EF5350; }
-
-  /* Hint arrow for swipe */
-  .swipe-hint {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 11px; padding: 6px 12px; border-radius: 8px;
-    margin-top: 8px;
-  }
-  body.light .swipe-hint { background: #E3F2FD; color: #1565C0; }
-  body.dark  .swipe-hint { background: #1A237E; color: #90CAF9; }
-
-  /* =========================================================================
      FAB
      ========================================================================= */
   .fab {
@@ -359,7 +318,7 @@
     transition: opacity 0.2s;
   }
   body.light .scroll-top-btn { background: #fff; border-color: #E8E8E8; color: #666; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  body.dark  .scroll-top-btn { background: #1E1E1E; border-color: #333; color: #999; }
+  body.dark  .scroll-top-btn { background: #1E1E1E; border-color: #333; color: #AAAAAA; }
 
   /* =========================================================================
      TAB BAR
@@ -377,6 +336,7 @@
     font-size: 11px; font-weight: 500; cursor: pointer;
     color: #999; transition: color 0.2s;
   }
+  body.dark .tab-item { color: #AAAAAA; }
   .tab-item .tab-icon { font-size: 20px; line-height: 1; }
   body.light .tab-item.active { color: #2196F3; }
   body.dark  .tab-item.active { color: #42A5F5; }
@@ -403,7 +363,7 @@
 
   .dialog-msg { font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
   body.light .dialog-msg { color: #666; }
-  body.dark  .dialog-msg { color: #999; }
+  body.dark  .dialog-msg { color: #AAAAAA; }
 
   .dialog-actions { display: flex; justify-content: flex-end; gap: 12px; }
   .dialog-btn {
@@ -412,13 +372,18 @@
   }
   .dialog-btn-cancel { background: transparent; }
   body.light .dialog-btn-cancel { color: #666; }
-  body.dark  .dialog-btn-cancel { color: #999; }
+  body.dark  .dialog-btn-cancel { color: #AAAAAA; }
   .dialog-btn-danger { color: #fff; }
   body.light .dialog-btn-danger { background: #F44336; }
   body.dark  .dialog-btn-danger { background: #EF5350; }
   .dialog-btn-primary { color: #fff; }
   body.light .dialog-btn-primary { background: #2196F3; }
   body.dark  .dialog-btn-primary { background: #42A5F5; color: #121212; }
+
+  /* Result count hint */
+  .result-count-hint { font-size: 12px; }
+  body.light .result-count-hint { color: #999; }
+  body.dark  .result-count-hint { color: #AAAAAA; }
 
   /* =========================================================================
      DESIGN SPEC NOTES
@@ -451,7 +416,7 @@
 <body class="light">
 
 <h1 class="page-title">Phase 1 — Ingredient List</h1>
-<p class="page-subtitle">F-01 Quản lý Nguyên liệu · List, Search, Filter, Empty, Delete</p>
+<p class="page-subtitle">F-01 Quản lý Nguyên liệu · 7 screens · List, Search, Filter, Empty, Delete</p>
 
 <div class="theme-toggle">
   <button class="active" onclick="setTheme('light')">☀️ Light</button>
@@ -567,108 +532,10 @@
   </div>
 
   <!-- ===================================================================
-       SCREEN 2: Swipe Actions — Sửa / Xóa
+       SCREEN 2: Tìm kiếm — có kết quả
        =================================================================== -->
   <div class="screen-wrapper">
-    <div class="screen-label">2. Vuốt trái — Sửa / Xóa</div>
-    <div class="screen-desc">Vuốt trái trên card → hiện nút [Sửa] [Xóa]. Tap card → mở trang chỉnh sửa.</div>
-    <div class="phone">
-      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
-      <div class="toolbar">
-        <div class="toolbar-title">Quản lý</div>
-      </div>
-      <div class="content">
-        <div class="sub-tabs">
-          <div class="sub-tab active">Nguyên liệu</div>
-          <div class="sub-tab">Món ăn</div>
-        </div>
-        <div class="search-bar">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <span class="search-text placeholder">Tìm nguyên liệu...</span>
-        </div>
-
-        <!-- Normal card (not swiped) -->
-        <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
-          <div class="ingredient-info">
-            <div class="ingredient-name">Ức gà</div>
-            <div class="ingredient-meta">
-              <span class="category-chip cat-thit">Thịt</span>
-              <span class="source-badge">seed</span>
-            </div>
-          </div>
-          <div class="ingredient-kcal"><strong>165</strong>kcal / 100g</div>
-        </div>
-
-        <!-- SWIPED card — revealing Edit + Delete -->
-        <div class="swipe-container">
-          <div class="swipe-actions">
-            <button class="swipe-action-btn swipe-action-edit">
-              <span class="swipe-icon">✏️</span>
-              <span>Sửa</span>
-            </button>
-            <button class="swipe-action-btn swipe-action-delete">
-              <span class="swipe-icon">🗑️</span>
-              <span>Xóa</span>
-            </button>
-          </div>
-          <div class="swipe-card">
-            <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
-            <div class="ingredient-info">
-              <div class="ingredient-name">Trứng gà</div>
-              <div class="ingredient-meta">
-                <span class="category-chip cat-trung">Trứng & Sữa</span>
-                <span class="source-badge">seed</span>
-              </div>
-            </div>
-            <div class="ingredient-kcal"><strong>155</strong>kcal / 100g</div>
-          </div>
-        </div>
-
-        <!-- Normal card -->
-        <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
-          <div class="ingredient-info">
-            <div class="ingredient-name">Cơm trắng</div>
-            <div class="ingredient-meta">
-              <span class="category-chip cat-ngu-coc">Ngũ cốc & Tinh bột</span>
-            </div>
-          </div>
-          <div class="ingredient-kcal"><strong>130</strong>kcal / 100g</div>
-        </div>
-
-        <!-- Interaction hint -->
-        <div class="swipe-hint">
-          ← Vuốt trái trên card để Sửa hoặc Xóa
-        </div>
-
-        <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
-          <div class="ingredient-info">
-            <div class="ingredient-name">Bông cải xanh</div>
-            <div class="ingredient-meta">
-              <span class="category-chip cat-rau">Rau củ</span>
-            </div>
-          </div>
-          <div class="ingredient-kcal"><strong>34</strong>kcal / 100g</div>
-        </div>
-      </div>
-      <button class="scroll-top-btn" title="Lên đầu trang">↑</button>
-      <button class="fab">+</button>
-      <div class="tab-bar">
-        <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
-        <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
-        <div class="tab-item active"><span class="tab-icon">🍳</span><span>Quản lý</span></div>
-        <div class="tab-item"><span class="tab-icon">💪</span><span>Tập luyện</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================
-       SCREEN 3: Tìm kiếm — có kết quả
-       =================================================================== -->
-  <div class="screen-wrapper">
-    <div class="screen-label">3. Tìm kiếm — có kết quả</div>
+    <div class="screen-label">2. Tìm kiếm — có kết quả</div>
     <div class="screen-desc">Nhập "gà" → lọc danh sách theo keyword</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
@@ -725,7 +592,7 @@
 
         <!-- Result count hint -->
         <div style="text-align:center; padding: 16px 0;">
-          <span style="font-size:12px; color:#999;">3 kết quả cho "gà"</span>
+          <span class="result-count-hint">3 kết quả cho "gà"</span>
         </div>
       </div>
       <button class="fab">+</button>
@@ -739,10 +606,10 @@
   </div>
 
   <!-- ===================================================================
-       SCREEN 4: Search — No Results
+       SCREEN 3: Search — No Results
        =================================================================== -->
   <div class="screen-wrapper">
-    <div class="screen-label">4. Tìm kiếm — không có kết quả</div>
+    <div class="screen-label">3. Tìm kiếm — không có kết quả</div>
     <div class="screen-desc">Nhập "quinoa" → hiện empty state khuyến khích thêm mới</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
@@ -779,10 +646,10 @@
   </div>
 
   <!-- ===================================================================
-       SCREEN 5: Empty State
+       SCREEN 4: Empty State
        =================================================================== -->
   <div class="screen-wrapper">
-    <div class="screen-label">5. Trạng thái trống</div>
+    <div class="screen-label">4. Trạng thái trống</div>
     <div class="screen-desc">Chưa có nguyên liệu nào — CTA thêm mới</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
@@ -811,10 +678,10 @@
   </div>
 
   <!-- ===================================================================
-       SCREEN 6: Cannot Delete — Used in Dishes
+       SCREEN 5: Cannot Delete — Used in Dishes
        =================================================================== -->
   <div class="screen-wrapper">
-    <div class="screen-label">6. Không thể xóa</div>
+    <div class="screen-label">5. Không thể xóa</div>
     <div class="screen-desc">Nguyên liệu đang dùng trong món ăn → chặn xóa hoàn toàn</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
@@ -881,10 +748,10 @@
   </div>
 
   <!-- ===================================================================
-       SCREEN 7: Delete Confirm — Unused Ingredient
+       SCREEN 6: Delete Confirm — Unused Ingredient
        =================================================================== -->
   <div class="screen-wrapper">
-    <div class="screen-label">7. Xóa nguyên liệu (không dùng)</div>
+    <div class="screen-label">6. Xóa nguyên liệu (không dùng)</div>
     <div class="screen-desc">Nguyên liệu chưa dùng trong món nào → cho phép xóa với confirm dialog</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
@@ -939,10 +806,10 @@
   </div>
 
   <!-- ===================================================================
-       SCREEN 8: Category Filter
+       SCREEN 7: Category Filter
        =================================================================== -->
   <div class="screen-wrapper">
-    <div class="screen-label">8. Lọc theo nhóm</div>
+    <div class="screen-label">7. Lọc theo nhóm</div>
     <div class="screen-desc">Chip filter cuộn ngang — chọn "Rau củ" hiện nguyên liệu rau</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
@@ -1019,7 +886,7 @@
 
         <!-- Result count hint -->
         <div style="text-align:center; padding: 12px 0;">
-          <span style="font-size:12px; color:#999;">4 nguyên liệu trong "Rau củ"</span>
+          <span class="result-count-hint">4 nguyên liệu trong "Rau củ"</span>
         </div>
       </div>
       <button class="fab">+</button>
@@ -1048,7 +915,7 @@
     <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>FAB, empty-state CTA button</td></tr>
     <tr><td><code>--text-primary</code></td><td>#1A1A1A / #FFFFFF</td><td>Ingredient name, kcal number</td></tr>
     <tr><td><code>--text-secondary</code></td><td>#333333 / #E0E0E0</td><td>Dialog message bold text</td></tr>
-    <tr><td><code>--text-tertiary</code></td><td>#666666 / #999999</td><td>Kcal caption, dialog message, search placeholder</td></tr>
+    <tr><td><code>--text-tertiary</code></td><td>#666666 / #AAAAAA</td><td>Kcal caption, dialog message, search placeholder</td></tr>
     <tr><td><code>--text-disabled</code></td><td>#999999 / #666666</td><td>Inactive tabs, result count hint</td></tr>
     <tr><td><code>--border</code></td><td>#E8E8E8 / #333333</td><td>Search bar border, tab bar top border, card border (dark)</td></tr>
     <tr><td><code>--error</code></td><td>#F44336 / #EF5350</td><td>Delete confirm dialog danger button (unused ingredient only)</td></tr>
@@ -1071,7 +938,7 @@
     <tr><td>Scroll-to-top</td><td>40px circle</td><td>Above FAB (bottom: 136px, right: 16px). Visible after scroll &gt;200px</td></tr>
     <tr><td>Content padding-bottom</td><td>80px</td><td>56px FAB + 16px gap + 8px safe — last item never hidden</td></tr>
     <tr><td colspan="3"><strong>🚫 Delete rule:</strong> Ingredient used in ≥1 dish → hard block (no delete). Dialog: "Không thể xóa" + [Đóng] + [Xem N món đang dùng] (actionable CTA). Only unused ingredients show confirm dialog with [Xóa].</td></tr>
-    <tr><td colspan="3"><strong>👆 Interactions:</strong> Tap card → navigate to edit page. Swipe left (ion-item-sliding) → reveal [Sửa] + [Xóa] buttons. Sửa = blue (#2196F3), Xóa = red (#F44336). Each action button 70px wide. ⋮ more icon top-right of each card (44×44 hitbox) as backup affordance for edit/delete.</td></tr>
+    <tr><td colspan="3"><strong>👆 Interactions:</strong> Tap card → navigate to edit page. ⋮ more icon top-right of each card (44×44 hitbox) → popover menu with [Sửa] + [Xóa] options. This is the PRIMARY and ONLY mechanism for edit/delete actions.</td></tr>
   </table>
 </div>
 

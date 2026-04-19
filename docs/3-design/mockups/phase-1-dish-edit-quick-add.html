@@ -21,7 +21,7 @@
   h1.page-title { text-align: center; margin-bottom: 4px; font-size: 24px; font-weight: 700; }
   .page-subtitle { text-align: center; margin-bottom: 20px; font-size: 14px; }
   body.light .page-subtitle { color: #666; }
-  body.dark  .page-subtitle { color: #999; }
+  body.dark  .page-subtitle { color: #AAAAAA; }
 
   /* Theme toggle */
   .theme-toggle { text-align: center; margin-bottom: 24px; }
@@ -47,7 +47,7 @@
   .screen-label { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
   .screen-desc { font-size: 12px; margin-bottom: 12px; }
   body.light .screen-desc { color: #666; }
-  body.dark  .screen-desc { color: #999; }
+  body.dark  .screen-desc { color: #AAAAAA; }
 
   .phone {
     width: 375px; height: 812px;
@@ -154,7 +154,7 @@
     font-size: 12px; font-weight: 400;
   }
   body.light .input-label { color: #666; }
-  body.dark  .input-label { color: #999; }
+  body.dark  .input-label { color: #AAAAAA; }
   body.light .input-label.invalid { color: #F44336; }
   body.dark  .input-label.invalid { color: #EF5350; }
 
@@ -288,6 +288,14 @@
   }
   body.light .spec-notes code { background: #F5F7FA; color: #333; }
   body.dark  .spec-notes code { background: #2E2E2E; color: #E0E0E0; }
+
+  /* Variant label */
+  .variant-label {
+    font-size: 11px; font-weight: 500; margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  body.light .variant-label { color: #999; }
+  body.dark  .variant-label { color: #AAAAAA; }
 </style>
 </head>
 <body class="light">
@@ -328,14 +336,14 @@
         <div class="form-field">
           <div class="input-wrapper">
             <div class="input-label">Tên món ăn *</div>
-            <div class="input-value placeholder">Nhập tên món ăn</div>
+            <div class="input-value placeholder">Ví dụ: Cơm gà nướng</div>
           </div>
         </div>
 
         <div class="form-field">
           <div class="input-wrapper">
             <div class="input-label">Mô tả</div>
-            <div class="input-value placeholder">Mô tả ngắn (tùy chọn)</div>
+            <div class="input-value placeholder">Ví dụ: Món ăn trưa yêu thích</div>
           </div>
         </div>
 
@@ -347,7 +355,7 @@
           <div class="input-wrapper">
             <div class="input-label macro-cal-label">Calories *</div>
             <div class="input-with-suffix">
-              <div class="input-value placeholder macro-cal-value">Nhập số</div>
+              <div class="input-value placeholder macro-cal-value">Ví dụ: 450</div>
               <div class="input-suffix">kcal</div>
             </div>
           </div>
@@ -358,7 +366,7 @@
             <div class="input-wrapper">
               <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-prot"></span>Protein</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-sub-value">Nhập số</div>
+                <div class="input-value placeholder macro-sub-value">Ví dụ: 30</div>
                 <div class="input-suffix">g</div>
               </div>
             </div>
@@ -368,7 +376,7 @@
             <div class="input-wrapper">
               <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-carb"></span>Carbs</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-sub-value">Nhập số</div>
+                <div class="input-value placeholder macro-sub-value">Ví dụ: 55</div>
                 <div class="input-suffix">g</div>
               </div>
             </div>
@@ -378,7 +386,7 @@
             <div class="input-wrapper">
               <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-fat"></span>Fat</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-sub-value">Nhập số</div>
+                <div class="input-value placeholder macro-sub-value">Ví dụ: 15</div>
                 <div class="input-suffix">g</div>
               </div>
             </div>
@@ -502,7 +510,7 @@
         <div class="form-field">
           <div class="input-wrapper invalid">
             <div class="input-label invalid">Tên món ăn *</div>
-            <div class="input-value placeholder">Nhập tên món ăn</div>
+            <div class="input-value placeholder">Ví dụ: Cơm gà nướng</div>
           </div>
           <div class="field-error">Vui lòng nhập tên món ăn</div>
         </div>
@@ -510,7 +518,7 @@
         <div class="form-field">
           <div class="input-wrapper">
             <div class="input-label">Mô tả</div>
-            <div class="input-value placeholder">Mô tả ngắn (tùy chọn)</div>
+            <div class="input-value placeholder">Ví dụ: Món ăn trưa yêu thích</div>
           </div>
         </div>
 
@@ -534,7 +542,7 @@
             <div class="input-wrapper">
               <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-prot"></span>Protein</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-sub-value">Nhập số</div>
+                <div class="input-value placeholder macro-sub-value">Ví dụ: 30</div>
                 <div class="input-suffix">g</div>
               </div>
             </div>
@@ -544,7 +552,7 @@
             <div class="input-wrapper">
               <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-carb"></span>Carbs</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-sub-value">Nhập số</div>
+                <div class="input-value placeholder macro-sub-value">Ví dụ: 55</div>
                 <div class="input-suffix">g</div>
               </div>
             </div>
@@ -554,7 +562,7 @@
             <div class="input-wrapper">
               <div class="input-label macro-sub-label"><span class="macro-dot macro-dot-fat"></span>Fat</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-sub-value">Nhập số</div>
+                <div class="input-value placeholder macro-sub-value">Ví dụ: 15</div>
                 <div class="input-suffix">g</div>
               </div>
             </div>
@@ -563,12 +571,12 @@
 
         <!-- Second validation variant: calories empty -->
         <div style="margin-top: 20px; padding-top: 16px; border-top: 1px dashed #E8E8E8;">
-          <div style="font-size: 11px; font-weight: 500; color: #999; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Variant: Calories trống</div>
+          <div class="variant-label">Variant: Calories trống</div>
           <div class="form-field macro-field cal">
             <div class="input-wrapper invalid">
               <div class="input-label invalid macro-cal-label">Calories *</div>
               <div class="input-with-suffix">
-                <div class="input-value placeholder macro-cal-value">Nhập số</div>
+                <div class="input-value placeholder macro-cal-value">Ví dụ: 450</div>
                 <div class="input-suffix">kcal</div>
               </div>
             </div>
@@ -688,7 +696,7 @@
     <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>Save button, quick-add type badge accent</td></tr>
     <tr><td><code>--text-primary</code></td><td>#1A1A1A / #FFFFFF</td><td>Input values, section labels</td></tr>
     <tr><td><code>--text-secondary</code></td><td>#333333 / #E0E0E0</td><td>Not heavily used (empty state title)</td></tr>
-    <tr><td><code>--text-tertiary</code></td><td>#666666 / #999999</td><td>Input labels, input suffix, section hints</td></tr>
+    <tr><td><code>--text-tertiary</code></td><td>#666666 / #AAAAAA</td><td>Input labels, input suffix, section hints</td></tr>
     <tr><td><code>--text-disabled</code></td><td>#999999 / #666666</td><td>Placeholders, hints</td></tr>
     <tr><td><code>--error</code></td><td>#F44336 / #EF5350</td><td>Invalid field borders, error text, delete button</td></tr>
     <tr><td><code>radius-xs</code></td><td>8px</td><td>Type badge</td></tr>

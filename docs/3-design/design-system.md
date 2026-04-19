@@ -694,6 +694,22 @@ Khi filter chips nhiều hơn viewport width:
 | Fill Color | `#FFFFFF` |
 | Buffer | `transparent` |
 | Position | Below toolbar |
+| **Steps** | **3 steps** (Mục tiêu → Thông tin cơ thể → Mức hoạt động) |
+
+### Onboarding Steps Structure
+
+| Step | Title | Fields | CTA | CTA Rule |
+|------|-------|--------|-----|----------|
+| 1 | Mục tiêu của bạn | Radio cards (goal selection) | Tiếp tục | **Disabled** until selected (step nav context) |
+| 2a | Thông tin cơ thể | Chiều cao, cân nặng, tuổi, giới tính | Tiếp tục | **Always active** (form context) |
+| 2b | Mức hoạt động | Mức vận động, kinh nghiệm tập | Hoàn tất | **Always active** (form context) |
+
+### Radio Card Selection (Step 1)
+
+Triple affordance:
+1. **Radio circle** (18px, left) — unfilled #CCC border → filled #2196F3 + white dot
+2. **Background highlight** — `rgba(33, 150, 243, 0.08)` light / `rgba(66, 165, 245, 0.15)` dark
+3. **Checkmark ✓** (22px, right) — `var(--ion-color-primary)`
 
 ### Button Row (Step 2: Quay lại + Hoàn tất)
 
@@ -705,6 +721,58 @@ Khi filter chips nhiều hơn viewport width:
 | Button Margin | `0` (override Ionic defaults) |
 | "Quay lại" | `fill="outline"`, `text-transform: none` |
 | "Hoàn tất" | `color="secondary"` (CTA orange), `text-transform: none` |
+
+---
+
+## 8k. List Item Interaction Convention
+
+> **Swipe deprecated.** Edit/Delete chỉ qua ⋮ more menu.
+
+| Interaction | Action | Notes |
+|-------------|--------|-------|
+| **Tap card** | Navigate to detail/edit page | Primary interaction |
+| **Tap ⋮** | Open bottom sheet: [Sửa] + [Xóa] | Discoverable, accessible |
+| ~~Swipe left~~ | ~~Removed~~ | Deprecated — low discoverability |
+
+### ⋮ More Icon Spec
+
+| Property | Value |
+|----------|-------|
+| Icon | `⋮` (vertical ellipsis) |
+| Size | 16-20px visual, **44×44px** hitbox |
+| Position | Top-right corner of card |
+| Color | `var(--text-tertiary)` |
+
+### ⋮ Bottom Sheet Menu
+
+| Property | Value |
+|----------|-------|
+| Items | [Sửa] (icon: pencil, primary text) + [Xóa] (icon: trash, `--ion-color-danger`) |
+| Divider | 1px `var(--border-color)` between items |
+| Cancel | Tap outside / drag down to dismiss |
+
+## 8l. Ingredient Picker — Recently Used + "Thêm tiếp" Mode
+
+### Recently Used Section
+
+| Property | Value |
+|----------|-------|
+| Position | Top of picker, below search, before full list |
+| Header | "Gần đây" — 13px/600, `var(--text-tertiary)` |
+| Max items | 5 |
+| Item style | Compact row: name + kcal/100g, `padding: 8px 16px` |
+| Empty | Hide section entirely (no empty "Gần đây") |
+
+### "Thêm tiếp" Mode
+
+After adding an ingredient, bottom sheet stays open:
+
+1. Brief confirmation: "✓ Đã thêm [tên] — [amount]" (green, 2-3s)
+2. Search resets, Recently Used updates
+3. Two buttons at bottom:
+   - **[Xong]** — secondary/outline, closes sheet
+   - **[Thêm tiếp]** — primary/filled, keeps picker open
+4. User taps [Xong] → return to dish form with all added ingredients
 
 ---
 

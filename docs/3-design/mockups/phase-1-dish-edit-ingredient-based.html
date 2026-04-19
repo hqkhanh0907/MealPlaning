@@ -21,7 +21,7 @@
   h1.page-title { text-align: center; margin-bottom: 4px; font-size: 24px; font-weight: 700; }
   .page-subtitle { text-align: center; margin-bottom: 20px; font-size: 14px; }
   body.light .page-subtitle { color: #666; }
-  body.dark  .page-subtitle { color: #999; }
+  body.dark  .page-subtitle { color: #AAAAAA; }
 
   /* Theme toggle */
   .theme-toggle { text-align: center; margin-bottom: 24px; }
@@ -47,7 +47,7 @@
   .screen-label { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
   .screen-desc { font-size: 12px; margin-bottom: 12px; }
   body.light .screen-desc { color: #666; }
-  body.dark  .screen-desc { color: #999; }
+  body.dark  .screen-desc { color: #AAAAAA; }
 
   .phone {
     width: 375px; height: 812px;
@@ -146,7 +146,7 @@
     font-size: 12px; font-weight: 400;
   }
   body.light .input-label { color: #666; }
-  body.dark  .input-label { color: #999; }
+  body.dark  .input-label { color: #AAAAAA; }
   body.light .input-label.invalid { color: #F44336; }
   body.dark  .input-label.invalid { color: #EF5350; }
 
@@ -190,7 +190,7 @@
     font-size: 12px; font-weight: 400; margin-top: 2px;
   }
   body.light .ingredient-item-detail { color: #666; }
-  body.dark  .ingredient-item-detail { color: #999; }
+  body.dark  .ingredient-item-detail { color: #AAAAAA; }
 
   .ingredient-item-kcal {
     font-size: 13px; font-weight: 500; flex-shrink: 0;
@@ -255,7 +255,7 @@
     font-size: 13px; font-weight: 400; flex: 1;
   }
   body.light .nutrition-label { color: #666; }
-  body.dark  .nutrition-label { color: #999; }
+  body.dark  .nutrition-label { color: #AAAAAA; }
 
   .nutrition-value {
     font-size: 14px; font-weight: 600; flex-shrink: 0;
@@ -408,7 +408,7 @@
     font-size: 12px; font-weight: 400;
   }
   body.light .bs-item-kcal { color: #666; }
-  body.dark  .bs-item-kcal { color: #999; }
+  body.dark  .bs-item-kcal { color: #AAAAAA; }
 
   /* Amount entry bottom sheet */
   .bs-amount-header {
@@ -436,7 +436,7 @@
     font-size: 13px; font-weight: 400;
   }
   body.light .bs-preview { background: #F5F7FA; color: #666; }
-  body.dark  .bs-preview { background: #2E2E2E; color: #999; }
+  body.dark  .bs-preview { background: #2E2E2E; color: #AAAAAA; }
   .bs-preview strong { font-weight: 600; }
   body.light .bs-preview strong { color: #1A1A1A; }
   body.dark  .bs-preview strong { color: #fff; }
@@ -451,10 +451,74 @@
   }
   .bs-btn-cancel { background: transparent; }
   body.light .bs-btn-cancel { color: #666; border: 1px solid #E8E8E8; }
-  body.dark  .bs-btn-cancel { color: #999; border: 1px solid #333; }
+  body.dark  .bs-btn-cancel { color: #AAAAAA; border: 1px solid #333; }
   .bs-btn-add { color: #fff; }
   body.light .bs-btn-add { background: #2196F3; }
   body.dark  .bs-btn-add { background: #42A5F5; color: #121212; }
+
+  /* =========================================================================
+     RECENTLY USED SECTION IN PICKER
+     ========================================================================= */
+  .bs-section-header {
+    font-size: 13px; font-weight: 600; padding: 12px 16px 4px;
+  }
+  body.light .bs-section-header { color: #666; }
+  body.dark  .bs-section-header { color: #AAAAAA; }
+
+  .bs-recent-list {
+    margin-bottom: 4px;
+  }
+  .bs-recent-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px; cursor: pointer; border-bottom: 1px solid;
+  }
+  body.light .bs-recent-item { border-bottom-color: #E8E8E8; }
+  body.dark  .bs-recent-item { border-bottom-color: #333; }
+  .bs-recent-item:last-child { border-bottom: none; }
+
+  .bs-recent-name { font-size: 14px; font-weight: 400; }
+  body.light .bs-recent-name { color: #1A1A1A; }
+  body.dark  .bs-recent-name { color: #fff; }
+
+  .bs-recent-kcal { font-size: 12px; font-weight: 400; flex-shrink: 0; }
+  body.light .bs-recent-kcal { color: #666; }
+  body.dark  .bs-recent-kcal { color: #AAAAAA; }
+
+  /* =========================================================================
+     SUCCESS MESSAGE + FOOTER ACTIONS ("Thêm tiếp" mode)
+     ========================================================================= */
+  .bs-success-msg {
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 14px; border-radius: 10px; margin-bottom: 12px;
+    font-size: 14px; font-weight: 500; color: #4CAF50;
+  }
+  body.light .bs-success-msg { background: #E8F5E9; }
+  body.dark  .bs-success-msg { background: rgba(76,175,80,0.12); color: #66BB6A; }
+
+  .bs-success-icon { font-size: 16px; font-weight: 700; }
+
+  .bs-footer-actions {
+    display: flex; gap: 12px; margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid;
+  }
+  body.light .bs-footer-actions { border-top-color: #E8E8E8; }
+  body.dark  .bs-footer-actions { border-top-color: #333; }
+
+  .bs-btn-secondary {
+    flex: 1; padding: 12px; border-radius: 10px;
+    font-size: 14px; font-weight: 500; text-align: center;
+    cursor: pointer; background: transparent;
+  }
+  body.light .bs-btn-secondary { color: #666; border: 1px solid #E8E8E8; }
+  body.dark  .bs-btn-secondary { color: #AAAAAA; border: 1px solid #333; }
+
+  .bs-btn-primary {
+    flex: 1.5; padding: 12px; border-radius: 10px;
+    font-size: 14px; font-weight: 500; text-align: center;
+    cursor: pointer; border: none; color: #fff;
+  }
+  body.light .bs-btn-primary { background: #2196F3; }
+  body.dark  .bs-btn-primary { background: #42A5F5; color: #121212; }
 
   /* =========================================================================
      DESIGN SPEC NOTES
@@ -611,6 +675,26 @@
             <span class="bs-search-text placeholder">Tìm nguyên liệu...</span>
           </div>
 
+          <!-- Recently used -->
+          <div class="bs-section-header">Gần đây</div>
+          <div class="bs-recent-list">
+            <div class="bs-recent-item">
+              <span class="bs-recent-name">Ức gà</span>
+              <span class="bs-recent-kcal">165 kcal/100g</span>
+            </div>
+            <div class="bs-recent-item">
+              <span class="bs-recent-name">Cơm trắng</span>
+              <span class="bs-recent-kcal">130 kcal/100g</span>
+            </div>
+            <div class="bs-recent-item">
+              <span class="bs-recent-name">Trứng gà</span>
+              <span class="bs-recent-kcal">155 kcal/100g</span>
+            </div>
+          </div>
+
+          <!-- Full list -->
+          <div class="bs-section-header">Tất cả nguyên liệu</div>
+
           <div class="bs-list">
             <div class="bs-item">
               <div class="bs-item-info">
@@ -724,10 +808,107 @@
   </div>
 
   <!-- ===================================================================
-       SCREEN 4: Dish with ingredients added
+       SCREEN 4: "Thêm tiếp" mode — sheet stays open after adding
        =================================================================== -->
   <div class="screen-wrapper">
-    <div class="screen-label">4. Đã thêm nguyên liệu — sẵn sàng lưu</div>
+    <div class="screen-label">4. Thêm tiếp — sheet giữ mở</div>
+    <div class="screen-desc">Sau khi thêm nguyên liệu, hiện xác nhận + sẵn sàng thêm tiếp</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-back">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="toolbar-title">Thêm món ăn</div>
+        <button class="toolbar-save">Lưu</button>
+      </div>
+      <div class="content" style="opacity: 0.3;">
+        <div class="section-label" style="margin-top: 4px;">Thông tin cơ bản</div>
+        <div class="form-field">
+          <div class="input-wrapper">
+            <div class="input-label">Tên món ăn *</div>
+            <div class="input-value">Cơm gà xối mỡ</div>
+          </div>
+        </div>
+      </div>
+      <!-- Bottom sheet stays open -->
+      <div class="bottom-sheet-overlay">
+        <div class="bottom-sheet" style="max-height: 75%;">
+          <div class="bottom-sheet-handle"></div>
+
+          <!-- Success confirmation -->
+          <div class="bs-success-msg">
+            <span class="bs-success-icon">✓</span> Đã thêm "Ức gà" — 150g
+          </div>
+
+          <div class="bs-search">
+            <svg class="bs-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span class="bs-search-text placeholder">Tìm nguyên liệu...</span>
+          </div>
+
+          <!-- Recently used (updated after adding) -->
+          <div class="bs-section-header">Gần đây</div>
+          <div class="bs-recent-list">
+            <div class="bs-recent-item">
+              <span class="bs-recent-name">Ức gà</span>
+              <span class="bs-recent-kcal">165 kcal/100g</span>
+            </div>
+            <div class="bs-recent-item">
+              <span class="bs-recent-name">Cơm trắng</span>
+              <span class="bs-recent-kcal">130 kcal/100g</span>
+            </div>
+            <div class="bs-recent-item">
+              <span class="bs-recent-name">Trứng gà</span>
+              <span class="bs-recent-kcal">155 kcal/100g</span>
+            </div>
+          </div>
+
+          <div class="bs-section-header">Tất cả nguyên liệu</div>
+          <div class="bs-list" style="flex: 0 1 auto; max-height: 120px;">
+            <div class="bs-item">
+              <div class="bs-item-info">
+                <div class="bs-item-name">Cơm trắng</div>
+                <div class="bs-item-meta">
+                  <span class="category-chip cat-ngu-coc">Ngũ cốc</span>
+                  <span class="bs-item-kcal">130 kcal/100g</span>
+                </div>
+              </div>
+            </div>
+            <div class="bs-item">
+              <div class="bs-item-info">
+                <div class="bs-item-name">Dầu ăn</div>
+                <div class="bs-item-meta">
+                  <span class="category-chip cat-dau-mo">Dầu mỡ</span>
+                  <span class="bs-item-kcal">884 kcal/100g</span>
+                </div>
+              </div>
+            </div>
+            <div class="bs-item">
+              <div class="bs-item-info">
+                <div class="bs-item-name">Dưa leo</div>
+                <div class="bs-item-meta">
+                  <span class="category-chip cat-rau">Rau củ</span>
+                  <span class="bs-item-kcal">15 kcal/100g</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer actions -->
+          <div class="bs-footer-actions">
+            <button class="bs-btn bs-btn-secondary">Xong</button>
+            <button class="bs-btn bs-btn-primary">Thêm tiếp ▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 5: Dish with ingredients added
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">5. Đã thêm nguyên liệu — sẵn sàng lưu</div>
     <div class="screen-desc">4 nguyên liệu, tổng dinh dưỡng tự động tính, nút Lưu active</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
@@ -835,10 +1016,10 @@
   </div>
 
   <!-- ===================================================================
-       SCREEN 5: Edit existing dish
+       SCREEN 6: Edit existing dish
        =================================================================== -->
   <div class="screen-wrapper">
-    <div class="screen-label">5. Sửa món ăn — dữ liệu có sẵn</div>
+    <div class="screen-label">6. Sửa món ăn — dữ liệu có sẵn</div>
     <div class="screen-desc">Toolbar "Sửa món ăn", có nút Lưu thay đổi + Xóa</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
@@ -936,10 +1117,10 @@
   </div>
 
   <!-- ===================================================================
-       SCREEN 6: Validation errors
+       SCREEN 7: Validation errors
        =================================================================== -->
   <div class="screen-wrapper">
-    <div class="screen-label">6. Validation errors</div>
+    <div class="screen-label">7. Validation errors</div>
     <div class="screen-desc">Tên trống, không có nguyên liệu, servings = 0</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
@@ -1034,7 +1215,7 @@
     <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>Save button (CTA)</td></tr>
     <tr><td><code>--text-primary</code></td><td>#1A1A1A / #FFFFFF</td><td>Input values, ingredient name, bottom sheet title</td></tr>
     <tr><td><code>--text-secondary</code></td><td>#333333 / #E0E0E0</td><td>Section label (nutrition card title), preview strong text</td></tr>
-    <tr><td><code>--text-tertiary</code></td><td>#666666 / #999999</td><td>Input labels, ingredient detail, nutrition labels, preview text</td></tr>
+    <tr><td><code>--text-tertiary</code></td><td>#666666 / #AAAAAA</td><td>Input labels, ingredient detail, nutrition labels, preview text, section headers</td></tr>
     <tr><td><code>--text-disabled</code></td><td>#999999 / #666666</td><td>Placeholders, empty ingredient text, zero nutrition values</td></tr>
     <tr><td><code>--error</code></td><td>#F44336 / #EF5350</td><td>Invalid field borders, error text, delete btn, danger text btn</td></tr>
     <tr><td><code>--card-shadow</code></td><td>0 1px 4px rgba(0,0,0,0.08)</td><td>Ingredient items, nutrition card (light only)</td></tr>
@@ -1061,6 +1242,10 @@
     <tr><td>Toolbar Save</td><td>16px/500, white, always active</td><td>auto-scroll to error on invalid</td></tr>
     <tr><td>Error Strategy</td><td>Never disable Lưu button</td><td>tap → scrollIntoView() first error field</td></tr>
     <tr><td>Bottom Sheet</td><td>expands to 90% viewport</td><td>when keyboard active (search input focus)</td></tr>
+    <tr><td>Recently Used</td><td>Max 3–5 compact rows</td><td>"Gần đây" section header 13px/600, items: name + kcal/100g, tap → amount entry</td></tr>
+    <tr><td>"Thêm tiếp" mode</td><td>Sheet stays open after add</td><td>Success msg (green ✓), [Xong] secondary + [Thêm tiếp ▶] primary CTA, search resets</td></tr>
+    <tr><td><code>--success</code></td><td>#4CAF50 / #66BB6A</td><td>Success confirmation text/icon after adding ingredient</td></tr>
+    <tr><td>Section header (picker)</td><td>13px/600, tertiary color</td><td>"Gần đây", "Tất cả nguyên liệu" headers inside bottom sheet</td></tr>
   </table>
 </div>
 

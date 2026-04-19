@@ -21,7 +21,7 @@
   h1.page-title { text-align: center; margin-bottom: 4px; font-size: 24px; font-weight: 700; }
   .page-subtitle { text-align: center; margin-bottom: 20px; font-size: 14px; }
   body.light .page-subtitle { color: #666; }
-  body.dark  .page-subtitle { color: #999; }
+  body.dark  .page-subtitle { color: #AAAAAA; }
 
   /* Theme toggle */
   .theme-toggle { text-align: center; margin-bottom: 24px; }
@@ -47,7 +47,7 @@
   .screen-label { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
   .screen-desc { font-size: 12px; margin-bottom: 12px; }
   body.light .screen-desc { color: #666; }
-  body.dark  .screen-desc { color: #999; }
+  body.dark  .screen-desc { color: #AAAAAA; }
 
   .phone {
     width: 375px; height: 812px;
@@ -148,7 +148,7 @@
     font-size: 12px; font-weight: 400;
   }
   body.light .input-label { color: #666; }
-  body.dark  .input-label { color: #999; }
+  body.dark  .input-label { color: #AAAAAA; }
   .input-label.invalid { }
   body.light .input-label.invalid { color: #F44336; }
   body.dark  .input-label.invalid { color: #EF5350; }
@@ -178,7 +178,7 @@
     width: 16px; height: 16px; margin-left: auto; flex-shrink: 0;
   }
   body.light .select-arrow { color: #666; }
-  body.dark  .select-arrow { color: #999; }
+  body.dark  .select-arrow { color: #AAAAAA; }
 
   /* =========================================================================
      FIELD ERROR
@@ -301,6 +301,13 @@
   }
   body.light .spec-notes code { background: #F5F7FA; color: #333; }
   body.dark  .spec-notes code { background: #2E2E2E; color: #E0E0E0; }
+
+  /* Helper example text */
+  .helper-example {
+    font-size: 12px; font-style: italic; margin-top: -4px; margin-bottom: 8px;
+  }
+  body.light .helper-example { color: #999; }
+  body.dark  .helper-example { color: #AAAAAA; }
 </style>
 </head>
 <body class="light">
@@ -351,8 +358,7 @@
         </div>
 
         <!-- Nutrition section -->
-        <div class="section-label">Dinh dưỡng</div>
-        <div class="section-hint">Đơn vị chuẩn tính dinh dưỡng</div>
+        <div class="section-label">Tính dinh dưỡng theo</div>
 
         <!-- Basis unit radios -->
         <div class="radio-group">
@@ -370,7 +376,7 @@
         <div class="form-field">
           <div class="input-wrapper">
             <div class="input-label">Calories (kcal)</div>
-            <div class="input-value placeholder">Nhập số</div>
+            <div class="input-value placeholder">Ví dụ: 250</div>
           </div>
         </div>
 
@@ -379,32 +385,31 @@
           <div class="form-field">
             <div class="input-wrapper">
               <div class="input-label">Protein (g)</div>
-              <div class="input-value placeholder">Nhập số</div>
+              <div class="input-value placeholder">Ví dụ: 20</div>
             </div>
           </div>
           <div class="form-field">
             <div class="input-wrapper">
               <div class="input-label">Carbs (g)</div>
-              <div class="input-value placeholder">Nhập số</div>
+              <div class="input-value placeholder">Ví dụ: 30</div>
             </div>
           </div>
           <div class="form-field">
             <div class="input-wrapper">
               <div class="input-label">Fat (g)</div>
-              <div class="input-value placeholder">Nhập số</div>
+              <div class="input-value placeholder">Ví dụ: 10</div>
             </div>
           </div>
           <div class="form-field">
             <div class="input-wrapper">
               <div class="input-label">Chất xơ (g)</div>
-              <div class="input-value placeholder">Nhập số</div>
+              <div class="input-value placeholder">Ví dụ: 3</div>
             </div>
           </div>
         </div>
 
         <!-- Entry unit section -->
-        <div class="section-label">Đơn vị nhập liệu</div>
-        <div class="section-hint">Đơn vị mặc định khi thêm vào món ăn</div>
+        <div class="section-label">Khi thêm vào món, bạn muốn nhập bằng</div>
 
         <div class="radio-group">
           <div class="radio-item selected">
@@ -467,8 +472,7 @@
         </div>
 
         <!-- Nutrition section -->
-        <div class="section-label">Dinh dưỡng</div>
-        <div class="section-hint">Đơn vị chuẩn tính dinh dưỡng</div>
+        <div class="section-label">Tính dinh dưỡng theo</div>
 
         <div class="radio-group">
           <div class="radio-item selected">
@@ -518,8 +522,7 @@
         </div>
 
         <!-- Entry unit -->
-        <div class="section-label">Đơn vị nhập liệu</div>
-        <div class="section-hint">Đơn vị mặc định khi thêm vào món ăn</div>
+        <div class="section-label">Khi thêm vào món, bạn muốn nhập bằng</div>
 
         <div class="radio-group">
           <div class="radio-item selected">
@@ -549,7 +552,7 @@
        =================================================================== -->
   <div class="screen-wrapper">
     <div class="screen-label">3. Đơn vị "piece" — trường phụ</div>
-    <div class="screen-desc">Trứng gà: chọn Đơn vị → hiện "Gram mỗi đơn vị"</div>
+    <div class="screen-desc">Trứng gà: chọn Đơn vị → hiện "1 đơn vị nặng bao nhiêu gram?"</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
@@ -580,8 +583,7 @@
         </div>
 
         <!-- Nutrition section -->
-        <div class="section-label">Dinh dưỡng</div>
-        <div class="section-hint">Đơn vị chuẩn tính dinh dưỡng</div>
+        <div class="section-label">Tính dinh dưỡng theo</div>
 
         <div class="radio-group">
           <div class="radio-item selected">
@@ -631,8 +633,7 @@
         </div>
 
         <!-- Entry unit — "Đơn vị" selected -->
-        <div class="section-label">Đơn vị nhập liệu</div>
-        <div class="section-hint">Đơn vị mặc định khi thêm vào món ăn</div>
+        <div class="section-label">Khi thêm vào món, bạn muốn nhập bằng</div>
 
         <div class="radio-group">
           <div class="radio-item">
@@ -654,10 +655,11 @@
           <div class="conditional-hint">Xuất hiện khi chọn "Đơn vị" + đơn vị chuẩn = g</div>
           <div class="form-field">
             <div class="input-wrapper">
-              <div class="input-label">Gram mỗi đơn vị</div>
+              <div class="input-label">1 đơn vị nặng bao nhiêu gram?</div>
               <div class="input-value">50</div>
             </div>
           </div>
+          <div class="helper-example">Ví dụ: 1 quả trứng = 50g</div>
         </div>
 
         <!-- CTA -->
@@ -704,8 +706,7 @@
         </div>
 
         <!-- Nutrition section -->
-        <div class="section-label">Dinh dưỡng</div>
-        <div class="section-hint">Đơn vị chuẩn tính dinh dưỡng</div>
+        <div class="section-label">Tính dinh dưỡng theo</div>
 
         <div class="radio-group">
           <div class="radio-item selected">
@@ -755,8 +756,7 @@
         </div>
 
         <!-- Entry unit -->
-        <div class="section-label">Đơn vị nhập liệu</div>
-        <div class="section-hint">Đơn vị mặc định khi thêm vào món ăn</div>
+        <div class="section-label">Khi thêm vào món, bạn muốn nhập bằng</div>
 
         <div class="radio-group">
           <div class="radio-item selected">
@@ -820,8 +820,7 @@
         </div>
 
         <!-- Nutrition section -->
-        <div class="section-label">Dinh dưỡng</div>
-        <div class="section-hint">Đơn vị chuẩn tính dinh dưỡng</div>
+        <div class="section-label">Tính dinh dưỡng theo</div>
 
         <div class="radio-group">
           <div class="radio-item selected">
@@ -838,7 +837,7 @@
         <div class="form-field">
           <div class="input-wrapper invalid">
             <div class="input-label invalid">Calories (kcal)</div>
-            <div class="input-value placeholder">Nhập số</div>
+            <div class="input-value placeholder">Ví dụ: 250</div>
           </div>
           <div class="field-error">Vui lòng nhập calories</div>
         </div>
@@ -863,19 +862,19 @@
           <div class="form-field">
             <div class="input-wrapper">
               <div class="input-label">Protein (g)</div>
-              <div class="input-value placeholder">Nhập số</div>
+              <div class="input-value placeholder">Ví dụ: 20</div>
             </div>
           </div>
           <div class="form-field">
             <div class="input-wrapper">
               <div class="input-label">Carbs (g)</div>
-              <div class="input-value placeholder">Nhập số</div>
+              <div class="input-value placeholder">Ví dụ: 30</div>
             </div>
           </div>
         </div>
 
         <!-- Entry unit -->
-        <div class="section-label">Đơn vị nhập liệu</div>
+        <div class="section-label">Khi thêm vào món, bạn muốn nhập bằng</div>
         <div class="radio-group">
           <div class="radio-item selected">
             <div class="radio-dot"></div>
@@ -935,8 +934,7 @@
         </div>
 
         <!-- Nutrition section -->
-        <div class="section-label" style="opacity:0.5;">Dinh dưỡng</div>
-        <div class="section-hint" style="opacity:0.5;">Đơn vị chuẩn tính dinh dưỡng</div>
+        <div class="section-label" style="opacity:0.5;">Tính dinh dưỡng theo</div>
 
         <div class="radio-group">
           <div class="radio-item selected disabled">
@@ -986,7 +984,7 @@
         </div>
 
         <!-- Entry unit — disabled -->
-        <div class="section-label" style="opacity:0.5;">Đơn vị nhập liệu</div>
+        <div class="section-label" style="opacity:0.5;">Khi thêm vào món, bạn muốn nhập bằng</div>
         <div class="radio-group">
           <div class="radio-item selected disabled">
             <div class="radio-dot"></div>
@@ -1028,7 +1026,7 @@
     <tr><td><code>--status-bar</code></td><td>#1976D2 / #0D47A1</td><td>Status bar background</td></tr>
     <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>Save button (primary CTA)</td></tr>
     <tr><td><code>--text-primary</code></td><td>#1A1A1A / #FFFFFF</td><td>Input values, section labels</td></tr>
-    <tr><td><code>--text-tertiary</code></td><td>#666666 / #999999</td><td>Floating labels, select arrows</td></tr>
+    <tr><td><code>--text-tertiary</code></td><td>#666666 / #AAAAAA</td><td>Floating labels, select arrows</td></tr>
     <tr><td><code>--text-disabled</code></td><td>#999999 / #666666</td><td>Placeholder text</td></tr>
     <tr><td><code>--border</code></td><td>#d1d1d6 / #444444</td><td>Input borders, radio borders</td></tr>
     <tr><td><code>--error</code></td><td>#F44336 / #EF5350</td><td>Invalid borders, error text, delete text button</td></tr>
