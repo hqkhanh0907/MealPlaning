@@ -1,7 +1,7 @@
 # Design System — HealthMate AI
 
-**Version:** 1.1  
-**Date:** 2026-04-19  
+**Version:** 1.2  
+**Date:** 2026-04-20  
 **Status:** Active
 
 ---
@@ -49,6 +49,8 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 
 ### 2.3 Semantic Colors
 
+> **Color-blind note:** ~8% nam giới không phân biệt rõ đỏ/xanh lá. Khi hiển thị macros (Protein=xanh, Fat=đỏ) cạnh nhau, PHẢI kèm text label hoặc icon — KHÔNG dựa vào màu alone.
+
 | Vai trò | Light Mode | Dark Mode | Dùng cho |
 |---------|-----------|-----------|----------|
 | **Success** | `#4CAF50` | `#66BB6A` | Đạt mục tiêu, progress đủ, weight giảm |
@@ -58,16 +60,18 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 
 ### 2.4 Neutral Colors
 
+> **Rule: Tinted Neutrals.** Pure gray (`#E8E8E8`, `#999`) thiếu personality. Mọi neutral nên có **blue tint nhẹ** (chroma ~0.01, hue ~230) để cohesive với primary blue. Implementation dùng hex gần nhất.
+
 | Token | Light Mode | Dark Mode | Dùng cho |
 |-------|-----------|-----------|----------|
-| `--bg-page` | `#F5F7FA` | `#121212` | Page background |
-| `--bg-card` | `#FFFFFF` | `#1E1E1E` | Card background |
-| `--bg-elevated` | `#FFFFFF` | `#2E2E2E` | Modal, bottom sheet |
-| `--text-primary` | `#1A1A1A` | `#FFFFFF` | Heading, số liệu |
-| `--text-secondary` | `#333333` | `#E0E0E0` | Body text |
-| `--text-tertiary` | `#666666` | `#999999` | Subtitle, mô tả phụ |
-| `--text-disabled` | `#999999` | `#666666` | Disabled, placeholder |
-| `--border` | `#E8E8E8` | `#333333` | Divider, border |
+| `--bg-page` | `#F5F7FA` | `#121218` | Page background (đã tinted) |
+| `--bg-card` | `#FFFFFF` | `#1D1F26` | Card background |
+| `--bg-elevated` | `#FFFFFF` | `#2C2E36` | Modal, bottom sheet |
+| `--text-primary` | `#1A1A2E` | `#FFFFFF` | Heading, số liệu |
+| `--text-secondary` | `#2D3142` | `#E0E0E8` | Body text |
+| `--text-tertiary` | `#5F6575` | `#A8AAB4` | Subtitle, mô tả phụ (dark ≥4.78:1 on card bg) |
+| `--text-disabled` | `#939AAA` | `#5F6575` | Disabled, placeholder |
+| `--border` | `#E2E4EC` | `#333340` | Divider, border |
 
 ### 2.5 Dark Mode — AI Card
 
@@ -79,7 +83,7 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 | AI text color | `#1565C0` | `#90CAF9` |
 | Quick action bg | `#E3F2FD` | `#1A237E` |
 | Quick action text | `#1565C0` | `#90CAF9` |
-| Streak card bg | `#FFF8E1` | `#2E2E1E` |
+| Streak card bg | `#FFF8E1` | `#2C2E1E` |
 
 ---
 
@@ -94,7 +98,7 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 **Lý do chọn Roboto:**
 - Mặc định của Ionic/Material — zero conflict
 - Hỗ trợ tiếng Việt có dấu tốt (Google thiết kế cho đa ngôn ngữ)
-- Nhẹ nhất (~80KB cho 3 weights)
+- Nhẹ nhất (~100KB cho 4 weights: Regular, Medium, SemiBold, Bold)
 - Phù hợp tất cả persona
 
 ### 3.2 Font Weights
@@ -103,7 +107,8 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 |--------|-------|----------|
 | Regular | 400 | Body text, mô tả, caption |
 | Medium | 500 | Card title, subtitle, button, link |
-| Bold | 700 | Heading, số liệu lớn, streak number |
+| SemiBold | 600 | Macro values (P/C/F), dish card title, emphasis text |
+| Bold | 700 | Heading, số liệu lớn (calories), streak number |
 
 ### 3.3 Type Scale
 
@@ -117,6 +122,11 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 | `body-sm` | 13px | 400 | 1.5 | Chi tiết phụ, list item |
 | `caption` | 12px | 400 | 1.4 | Timestamp, meta info, link text |
 | `overline` | 11px | 500 | 1.3 | Tab label, tag, chip text |
+
+> **Note Typography:**
+> - `body-sm (13px)` và `body (14px)` chỉ khác 1px — dùng **weight/color** thay vì size để phân cấp khi cần.
+> - `overline (11px)` là minimum readable — chỉ dùng cho badges/chips nhỏ, KHÔNG cho body text. Tab labels ưu tiên dùng `caption (12px)` nếu có dấu tiếng Việt dài.
+> - Thêm `letter-spacing: 0.05em` cho `overline` để cải thiện readability ở 11px.
 
 ### 3.4 Number Typography
 
@@ -133,6 +143,15 @@ font-variant-numeric: tabular-nums;
 ```
 
 **BẮT BUỘC** áp dụng cho MỌI element hiển thị số: calories, macros, weight, progress, streak count. Tabular numbers đảm bảo các chữ số có độ rộng bằng nhau → cột số thẳng hàng, không nhảy giật khi giá trị thay đổi.
+
+Nếu app hiển thị phân số nguyên liệu (½, ¼), thêm:
+```css
+font-variant-numeric: tabular-nums diagonal-fractions;
+```
+
+### 3.7 Vertical Rhythm Baseline
+
+> Body text: `14px × 1.6 = 22.4px ≈ 24px`. Spacing values (4, 8, 12, 16, 24, 32) nên là bội số hoặc ước số của baseline `24px` để tạo nhịp thị giác nhất quán. Trong thực tế: 8px = ⅓, 12px = ½, 24px = 1×, 48px = 2×.
 
 ### 3.6 Calorie Visual Hierarchy
 
@@ -178,9 +197,8 @@ Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi 
 
 | Token | Value | Dùng cho |
 |-------|-------|----------|
-| `--radius-xs` | 8px | Small chips, tags |
-| `--radius-sm` | 12px | Input fields, select fields |
-| `--radius-md` | 12px | Quick action buttons, sub-cards (streak) |
+| `--radius-xs` | 8px | Small chips, tags, badges |
+| `--radius-sm` | 12px | Input fields, select fields, quick action buttons |
 | `--radius-lg` | 16px | **Cards** — component chính |
 | `--radius-xl` | 20px | Modal, bottom sheet |
 | `--radius-full` | 9999px | Avatar, circular icon, FAB |
@@ -198,19 +216,23 @@ Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi 
 
 | Token | Value | Dùng cho |
 |-------|-------|----------|
-| `--shadow-sm` | `0 1px 3px rgba(0,0,0,0.06)` | Subtle card (compact) |
-| `--shadow-md` | `0 1px 4px rgba(0,0,0,0.08)` | **Card mặc định** (light mode) |
+| `--shadow-sm` | `0 1px 3px rgba(0,0,0,0.06)` | **Tier Subtle**: list items, secondary cards |
+| `--shadow-md` | `0 1px 4px rgba(0,0,0,0.08)` | **Tier Prominent**: primary cards (light mode) |
 | `--shadow-lg` | `0 2px 8px rgba(0,0,0,0.12)` | Modal, bottom sheet, FAB |
-| Dark mode | **Không dùng shadow** | Dùng background elevation thay thế |
+| Dark mode | **Không dùng shadow** | Dùng background elevation thay thế (§6 Dark Mode) |
+
+> **Mapping → Card Tiers (§8.1):** Flat=no shadow, Subtle=`--shadow-sm`, Prominent=`--shadow-md`. Modals/sheets dùng `--shadow-lg`.
 
 ### Dark Mode Elevation
 
 | Level | Background | Dùng cho |
 |-------|-----------|----------|
-| Base | `#121212` | Page background |
-| Level 1 | `#1E1E1E` | Cards |
-| Level 2 | `#2E2E2E` | Modal, elevated components |
-| Level 3 | `#333333` | Dropdown, tooltip |
+| Base | `#121218` | Page background |
+| Level 1 | `#1D1F26` | Cards |
+| Level 2 | `#2C2E36` | Modal, elevated components |
+| Level 3 | `#333340` | Dropdown, tooltip |
+
+> **Note:** Dark mode dùng blue-tinted dark grays (hue ~230) thay vì pure neutral. Tạo visual connection với primary blue.
 
 ---
 
@@ -245,6 +267,20 @@ Theo PRD F-12 (Dashboard Quick Actions):
 
 ### 8.1 Cards
 
+#### Card Hierarchy (3 Tiers)
+
+> Không phải mọi content group đều cần card. Dùng spacing/typography thay card khi có thể.
+
+| Tier | Shadow | Border | Radius | Dùng cho |
+|------|--------|--------|--------|----------|
+| **Flat** (no card) | none | none | — | Inline sections, metadata rows, form field groups |
+| **Subtle** | `--shadow-sm` | optional `--border` | `--radius-lg` | List items, ingredient rows, secondary cards |
+| **Prominent** | `--shadow-md` | none | `--radius-lg` | Dashboard hero cards, primary content, AI card |
+
+> **Rule:** Khi mọi card cùng shadow level → flat hierarchy. Phân tầng shadow tạo **visual depth** giúp user biết đâu quan trọng.
+
+#### Card Base Spec
+
 ```
 ┌─────────────────────────────┐
 │ [16px padding]              │
@@ -254,26 +290,28 @@ Theo PRD F-12 (Dashboard Quick Actions):
 │ [16px padding]              │
 └─────────────────────────────┘
   radius: 16px
-  shadow: 0 1px 4px rgba(0,0,0,0.08)  (light)
-  background: #FFFFFF (light) / #1E1E1E (dark)
+  shadow: varies by tier (see above)
+  background: var(--bg-card)
   gap giữa cards: 12px
 ```
 
 ### 8.2 Buttons
 
-| Type | Background | Text Color | Radius | Padding |
-|------|-----------|------------|--------|---------|
-| Primary (CTA) | `#FF9800` | `#FFFFFF` | 10px | 10px 16px |
-| Secondary | `#E3F2FD` | `#2196F3` | 10px | 10px 16px |
-| Outline | transparent | `#2196F3` | 10px | 10px 16px |
-| Text/Link | transparent | `#2196F3` | — | 4px 8px |
+| Type | Background | Text Color | Radius | Padding | Min Height |
+|------|-----------|------------|--------|---------|------------|
+| Primary (CTA) | `#FF9800` / `#FFB74D` | `#FFFFFF` / `#121218` | `--radius-sm` (12px) | 10px 16px | **44px** |
+| Secondary | `#E3F2FD` / `#1A237E` | `#2196F3` / `#90CAF9` | `--radius-sm` (12px) | 10px 16px | **44px** |
+| Outline | transparent | `#2196F3` / `#64B5F6` | `--radius-sm` (12px) | 10px 16px | **44px** |
+| Text/Link | transparent | `#2196F3` / `#64B5F6` | — | 4px 8px | **44px** (via padding) |
+
+> **Rule:** Mọi button PHẢI có `min-height: 44px` (touch target §8c). Button radius dùng `--radius-sm` (12px) — trên 4px grid, nhất quán với input fields. Dark mode: CTA dùng `#FFB74D` (cam nhạt), text trên CTA dùng `var(--bg-page)`. Format: `light / dark`.
 
 ### 8.3 Progress Bars
 
 | Type | Height | Radius | Background (empty) | Fill color |
 |------|--------|--------|--------------------|------------|
-| Calo (main) | 14px | 7px | `#E8E8E8` / `#333` | Gradient `#2196F3 → #1976D2` |
-| Macro (sub) | 10px | 5px | `#E8E8E8` / `#333` | `#42A5F5` / `#64B5F6` |
+| Calo (main) | 14px | 7px | `var(--border)` | Gradient `#2196F3 → #1976D2` |
+| Macro (sub) | 10px | 5px | `var(--border)` | `#42A5F5` / `#64B5F6` |
 
 ### 8.4 AI Card
 
@@ -297,11 +335,11 @@ Theo PRD F-12 (Dashboard Quick Actions):
 │  🍽️ 8    │ │  🏋️ 5    │
 │ ngày log │ │ buổi tập │
 └──────────┘ └──────────┘
-  bg: #FFF8E1 (light) / #2E2E1E (dark)
-  radius: 12px
+  bg: #FFF8E1 (light) / var(--bg-elevated) (dark)
+  radius: var(--radius-sm) (12px)
   padding: 12px
   number: 22px/700, color: #FF9800 / #FFB74D
-  label: 11px/400, color: #999999
+  label: 11px/400, color: var(--text-tertiary)
 ```
 
 ### 8.6 Input Fields
@@ -312,8 +350,8 @@ Theo PRD F-12 (Dashboard Quick Actions):
 |----------|-------|-------|
 | Fill | `outline` | Viền 4 cạnh, floating label |
 | Label Placement | `floating` | Label animate lên khi focus/có value |
-| Background | `var(--bg-card)` | `#FFFFFF` light / `#1E1E1E` dark — dùng token |
-| Border Color | `#d1d1d6` (light) / `#444` (dark) | Apple system gray |
+| Background | `var(--bg-card)` | Token resolves to tinted values per mode |
+| Border Color | `#C8CBD4` (light) / `#444850` (dark) | Tinted neutral — không dùng Apple pure gray |
 | Border Width | `1px` | |
 | Border Radius | `--radius-sm` (12px) | Apple-style soft corners |
 | Height | Auto (~56px with floating label) | |
@@ -328,6 +366,19 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Error Text | `12px/400`, color `var(--ion-color-danger)` |
 | Error Position | Dưới input, `padding-left: 4px`, `margin-bottom: 8px` |
 | Accessibility | `role="alert"` + `aria-describedby` linking input → error |
+
+#### Error Message Templates (Vietnamese)
+
+> Mỗi error message phải trả lời: (1) Gì sai? (2) Tại sao? (3) Sửa thế nào?
+
+| Trường hợp | ❌ Sai | ✅ Đúng |
+|------------|--------|---------|
+| **Format sai** | "Giá trị không hợp lệ" | "Chiều cao cần từ 100 đến 250 cm. Ví dụ: 165" |
+| **Thiếu bắt buộc** | "Trường này bắt buộc" | "Vui lòng nhập tên món ăn" |
+| **Vượt giới hạn** | "Số quá lớn" | "Calories tối đa 9999 kcal" |
+| **Chưa chọn** | "Vui lòng chọn" | "Chọn mục tiêu để tiếp tục" |
+
+> **KHÔNG bao giờ** đổ lỗi user: ~~"Bạn nhập sai"~~ → "Cân nặng cần từ 30 đến 200 kg"
 
 **ion-select** dùng cùng spec, thêm:
 | Property | Value |
@@ -345,7 +396,7 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Border Radius | `--radius-sm` (12px) | Giữ nguyên |
 | Padding Start | `16px` | Giữ nguyên |
 | Margin Bottom | `8px` | Giữ nguyên |
-| Transition | — | `background 0.15s ease` |
+| Transition | — | `background 0.15s var(--ease-out-quart)` |
 | **Checkmark** | Hidden | **✓ icon** (22px) ở góc phải, color `var(--ion-color-primary)` |
 
 > **A11y:** Highlight + checkmark cùng lúc → người lớn tuổi / thị lực kém nhận diện rõ ràng hơn chỉ highlight alone.
@@ -421,9 +472,9 @@ Theo PRD F-12 (Dashboard Quick Actions):
 
 ## 8b. Interaction States
 
-> **BẮT BUỘC:** Mọi interactive element phải có đủ 6 states.
+> **BẮT BUỘC:** Mọi interactive element phải có đủ **8 states** (6 core + loading + success).
 
-### State Definitions
+### Core States (6)
 
 | State | CSS | Visual |
 |-------|-----|--------|
@@ -434,6 +485,13 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Disabled | `[disabled]` | `opacity: 0.5`, `pointer-events: none` |
 | Error | `.ion-invalid` | Border/text chuyển `var(--ion-color-danger)` |
 
+### Extended States (+2)
+
+| State | Spec | Dùng cho |
+|-------|------|----------|
+| Loading | Skeleton shimmer / inline spinner | Xem §Loading State bên dưới |
+| Success | Flash / toast / inline check | Xem §Success State bên dưới |
+
 ### Per-Component States
 
 | Component | Hover | Active | Focus | Disabled | Error |
@@ -443,6 +501,11 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Input (Outline) | — | — | Primary border | opacity 0.5 | Danger border + text |
 | Radio Item | bg tint nhẹ | — | Focus ring | opacity 0.5 | — |
 | Select | — | — | Primary border | opacity 0.5 | Danger border |
+| FAB | Shade CTA | Scale 0.95 | Focus ring | opacity 0.5 | — |
+| Segment Control | — | bg swap | Focus ring | opacity 0.5 | — |
+| Filter Chip | bg tint nhẹ | Scale 0.98 | Focus ring | opacity 0.5 | — |
+| Card (tappable) | shadow lift | Scale 0.99 | Focus ring | opacity 0.5 | — |
+| ⋮ More Menu | bg circle | — | Focus ring | opacity 0.5 | — |
 
 ### Loading State
 
@@ -451,6 +514,16 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Skeleton shimmer (`bg-muted animate-pulse`) | Card loading, list loading |
 | Inline spinner (ion-spinner) | Button action pending |
 | **KHÔNG dùng** centered full-page spinner | — |
+
+### Success State
+
+| Pattern | Dùng cho | Duration |
+|---------|----------|----------|
+| Button flash: `✓ Đã lưu` (green bg, white text) | Sau save thành công | 1.5s → navigate/reset |
+| Toast confirmation: specific message | Feedback nhẹ (thêm nguyên liệu, cập nhật) | 2-3s auto-dismiss |
+| Inline check: `✓` icon + green text | Validation passed (field-level) | Persistent until change |
+
+> **Rule:** Success feedback phải **specific** — "Đã lưu Cơm gà nướng" không phải "Thành công". Dùng verb + object.
 
 ### Empty State
 
@@ -542,22 +615,42 @@ Theo PRD F-12 (Dashboard Quick Actions):
 
 | Element | Property | Duration | Easing | Trigger |
 |---------|----------|----------|--------|---------|
-| Radio item select | `background` | `150ms` | `ease` | Click/tap |
+| Radio item select | `background` | `150ms` | `cubic-bezier(0.25, 1, 0.5, 1)` (ease-out-quart) | Click/tap |
 | Input label float | Built-in Ionic | ~200ms | ease-in-out | Focus/blur |
-| Button press | `transform` | `100ms` | `ease` | `:active` → scale(0.98) |
+| Button press | `transform` | `100ms` | `cubic-bezier(0.16, 1, 0.3, 1)` (ease-out-expo) | `:active` → scale(0.98) |
 | Page transition | Built-in Ionic | ~300ms | cubic-bezier | Navigation push/pop |
 | Skeleton shimmer | `background-position` | `1.5s` | `linear` | Infinite loop |
-| Bottom sheet | `transform` | `300ms` | `cubic-bezier(0.32, 0.72, 0, 1)` | Open/close |
+| Bottom sheet open | `transform` | `300ms` | `cubic-bezier(0.32, 0.72, 0, 1)` | Open |
+| Bottom sheet close | `transform` | `225ms` | `cubic-bezier(0.32, 0.72, 0, 1)` | Close (75% of open) |
+
+> **Exit Rule:** Exit animations = **75% of entrance duration**. Open 300ms → close 225ms. Enter 500ms → leave 375ms.
+
+### Easing Tokens
+
+```css
+--ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);    /* Default micro-interaction */
+--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);      /* Snappy feedback (button, toggle) */
+--ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);       /* State toggle (open ↔ close) */
+--ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);        /* Bottom sheet, drawer */
+```
+
+> **KHÔNG dùng `ease` generic.** Mỗi interaction type dùng curve phù hợp.
 
 ### Reduced Motion
 
 ```css
 @media (prefers-reduced-motion: reduce) {
+  /* Disable spatial movement */
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+
+  /* Preserve functional animations */
+  ion-progress-bar, .progress-bar { transition-duration: 200ms !important; }
+  ion-spinner { animation-duration: 1s !important; }
+  :focus-visible { transition-duration: 100ms !important; }
 }
 ```
 
-> **Rule:** Mọi animation PHẢI respect `prefers-reduced-motion`. Skeleton shimmer → static bg. Transitions → instant.
+> **Rule:** Mọi animation PHẢI respect `prefers-reduced-motion`. Skeleton shimmer → static bg. Transitions → instant. Nhưng **giữ lại** progress bars, spinners, focus indicators — đây là functional, không phải decorative.
 
 ---
 
@@ -572,11 +665,11 @@ Theo PRD F-12 (Dashboard Quick Actions):
 |----------|-------|-------|
 | Component | `ion-segment` + `ion-segment-button` | Ionic native |
 | **Position** | **Trong content area** (dưới toolbar) | KHÔNG nằm trên toolbar bg — giảm top chrome nặng |
-| Background | `var(--bg-page)` (`#F5F7FA` / `#121212`) | Nền page, không nền primary |
-| Container bg | `#E8E8E8` (light) / `#333` (dark) | Pill track background |
+| Background | `var(--bg-page)` (`#F5F7FA` / `#121218`) | Nền page, không nền primary |
+| Container bg | `#E2E4EC` (light) / `#333340` (dark) | Pill track background (tinted neutral) |
 | Active indicator | `var(--bg-card)` (white/dark card) pill, radius 8px | |
-| Inactive text | `var(--text-tertiary)` | `#666` / `#999` |
-| Active text | `var(--text-primary)`, `font-weight: 600` | `#1A1A1A` / `#FFF` |
+| Inactive text | `var(--text-tertiary)` | `#5F6575` / `#A8AAB4` (tinted) |
+| Active text | `var(--text-primary)`, `font-weight: 600` | `#1A1A2E` / `#FFF` |
 | Font | `14px / 500` (inactive), `14px / 600` (active) | |
 | Padding | `4px` outer (track), `8px 16px` per button | |
 | Height | `36px` | Compact |
@@ -614,9 +707,9 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Chip padding | `6px 14px` | |
 | Chip radius | `--radius-xs` (8px) | |
 | Font | `12px / 500` | Overline |
-| Default bg | `var(--bg-card)` | `#FFFFFF` / `#1E1E1E` |
+| Default bg | `var(--bg-card)` | Token (§2.4) |
 | Active bg | `var(--ion-color-primary)` | `#2196F3` / `#42A5F5` |
-| Active text | `#FFFFFF` / `#121212` | |
+| Active text | `#FFFFFF` / `var(--bg-page)` | |
 
 ### Scroll Affordance (BẮT BUỘC)
 
@@ -633,7 +726,7 @@ Khi filter chips nhiều hơn viewport width:
 
 | Property | Value |
 |----------|-------|
-| Background | `var(--bg-elevated)` (`#FFFFFF` / `#2E2E2E`) |
+| Background | `var(--bg-elevated)` (§2.4) |
 | Radius | `--radius-xl` (20px) top-left + top-right |
 | Handle | `40px × 4px`, centered, `var(--border)` color |
 | Backdrop | `rgba(0,0,0,0.5)` |
@@ -707,7 +800,7 @@ Khi filter chips nhiều hơn viewport width:
 ### Radio Card Selection (Step 1)
 
 Triple affordance:
-1. **Radio circle** (18px, left) — unfilled #CCC border → filled #2196F3 + white dot
+1. **Radio circle** (18px, left) — unfilled `var(--border)` border → filled #2196F3 + white dot
 2. **Background highlight** — `rgba(33, 150, 243, 0.08)` light / `rgba(66, 165, 245, 0.15)` dark
 3. **Checkmark ✓** (22px, right) — `var(--ion-color-primary)`
 
@@ -748,7 +841,7 @@ Triple affordance:
 | Property | Value |
 |----------|-------|
 | Items | [Sửa] (icon: pencil, primary text) + [Xóa] (icon: trash, `--ion-color-danger`) |
-| Divider | 1px `var(--border-color)` between items |
+| Divider | 1px `var(--border)` between items |
 | Cancel | Tap outside / drag down to dismiss |
 
 ## 8l. Ingredient Picker — Recently Used + "Thêm tiếp" Mode
@@ -823,9 +916,9 @@ After adding an ingredient, bottom sheet stays open:
   --ion-toolbar-background: #2196F3;
   --ion-tab-bar-background: #FFFFFF;
 
-  // Text
-  --ion-text-color: #1A1A1A;
-  --ion-text-color-rgb: 26, 26, 26;
+  // Text (tinted neutral)
+  --ion-text-color: #1A1A2E;
+  --ion-text-color-rgb: 26, 26, 46;
 
   // Font
   --ion-font-family: 'Roboto', sans-serif;
@@ -845,15 +938,16 @@ After adding an ingredient, bottom sheet stays open:
     --ion-color-secondary-shade: #FF9800;
     --ion-color-secondary-tint: #FFE0B2;
 
-    --ion-background-color: #121212;
-    --ion-card-background: #1E1E1E;
+    // Blue-tinted dark neutrals
+    --ion-background-color: #121218;
+    --ion-card-background: #1D1F26;
     --ion-toolbar-background: #1565C0;
-    --ion-tab-bar-background: #1E1E1E;
+    --ion-tab-bar-background: #1D1F26;
 
     --ion-text-color: #FFFFFF;
     --ion-text-color-rgb: 255, 255, 255;
 
-    --ion-border-color: #333333;
+    --ion-border-color: #333340;
   }
 }
 ```
@@ -870,6 +964,73 @@ HealthMate AI là **Android-only** app, không cần responsive cho tablet hay d
 | Design width | 375px (mockup reference) |
 | Max width | 428px (large Android phones) |
 | Orientation | Portrait only |
+
+### 10.1 Safe Areas (Android)
+
+> Android 10+ có gesture navigation bar, punch-hole camera, rounded corners. PHẢI handle safe areas.
+
+```css
+/* Viewport meta tag — BẮT BUỘC */
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+/* Safe area padding */
+ion-content {
+  --padding-top: env(safe-area-inset-top);
+  --padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Tab bar + FAB phải tránh gesture bar */
+ion-tab-bar {
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
+}
+
+.fab-button {
+  bottom: calc(72px + env(safe-area-inset-bottom));
+}
+
+/* Bottom sheet full-height tính safe area */
+.bottom-sheet-full {
+  max-height: calc(90vh - env(safe-area-inset-top));
+}
+```
+
+### 10.2 Dark Mode Typography Adjustment
+
+> Text trên dark background có perceived weight nhẹ hơn. Giảm font-weight nhẹ cho body text.
+
+```css
+@media (prefers-color-scheme: dark) {
+  body { font-weight: 350; }  /* Thay vì 400 — dark text nhìn mảnh hơn light */
+  .bold-text { font-weight: 600; }  /* Thay vì 700 */
+}
+```
+
+> **Optional:** Tăng `line-height` thêm 0.05-0.1 cho dark mode body text.
+
+### 10.3 Accessibility Labels (ARIA)
+
+> Mọi custom interactive component PHẢI có `aria-label` hoặc semantic label.
+
+| Component | `aria-label` | Notes |
+|-----------|-------------|-------|
+| FAB | `"Thêm mới"` | Luôn rõ action, không dùng `"+"` |
+| ⋮ More Menu | `"Tuỳ chọn cho [tên item]"` | Dynamic label theo context |
+| Segment Control | `ion-segment-button` tự có `value` | Ionic handles a11y nếu dùng đúng component |
+| Filter Chip (active) | `aria-pressed="true"` | Cho screen reader biết trạng thái |
+| Search Clear (✕) | `"Xóa tìm kiếm"` | Không dùng `"X"` |
+| Bottom sheet handle | `role="dialog" aria-label="[tiêu đề sheet]"` | Trap focus khi open |
+| Delete button (dialog) | `"Xóa [tên item]"` | Specific, không generic "Xóa" |
+
+### Focus Order
+
+> Khi push page hoặc open bottom sheet → focus PHẢI chuyển vào element đầu tiên có thể tương tác.
+
+| Scenario | Focus Target |
+|----------|-------------|
+| Push page | Page title `<h1 tabindex="-1">` |
+| Bottom sheet open | First input hoặc close handle |
+| Dialog open | Primary action button |
+| Page back/pop | Trigger element (card/button that opened page) |
 
 ---
 
@@ -889,5 +1050,6 @@ Tất cả mockup HTML dùng trong quá trình discussion:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.2 | 2026-04-20 | **Audit Rounds 1-10:** Fix tinted neutrals (#AAAAAA→#A8AAB4, #1A1A1A→#1A1A2E). Add SemiBold 600 weight. Add type scale notes (muddy pairs). Add easing tokens (no generic ease). Add card 3-tier hierarchy. Add success state pattern. Add error message templates. Add safe area §10.1. Add dark mode weight §10.2. Add vertical rhythm §3.7. Add diagonal-fractions §3.5. Update reduced motion (preserve functional). Update all Ionic dark vars (tinted). Fix button radius → --radius-sm (12px). Add 8 states (was 6). Add FAB/Segment/Filter/Card/Menu to per-component states. Add §10.3 ARIA labels + focus order. Fix shadow mapping → card tiers. Fix input/progress bar/segment tokens. Remove --radius-md (duplicate). |
 | 1.1 | 2026-04-19 | Add: Input/Select spec (8.6), Radio/Checkbox (8.7), Toolbar (8.8), Interaction States (8b), Touch Targets (8c), Text Transform (8d), Icon Rules (8e), Animations (8f), Onboarding Components (8g). Fix: `--radius-sm` 8→12px, add `--radius-xs` 8px. |
 | 1.0 | 2026-04-14 | Initial Design System — Color, Typography, Spacing, Components |

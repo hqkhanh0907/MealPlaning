@@ -45,7 +45,10 @@
 | Trường hợp | Dialog | Actions |
 |------------|--------|---------|
 | Item đang được dùng (ingredient in dish, dish in meal plan) | "Không thể xóa" — info dialog | [Xem N món đang dùng] (--primary) — **actionable CTA** dẫn đến danh sách liên quan |
-| Item không dùng | "Xóa [tên]?" — confirm dialog | [Hủy] + [Xóa] (--error) |
+| Item không dùng | "Xóa [tên]?" — confirm dialog | [Giữ lại] (outline) + [Xóa {tên}] (--error) |
+
+> **Wording rule:** KHÔNG dùng "Hủy" — mơ hồ. Dùng **"Giữ lại"** — mô tả rõ hậu quả. Cả 2 nút đều phải là verb + object.
+> **Undo pattern (future):** Cho low-risk delete (item không dùng), cân nhắc xóa ngay + undo toast (5s) thay vì confirm dialog.
 
 - Delete trigger: tap ⋮ menu → chọn [Xóa] → dialog xác nhận.
 - KHÔNG dùng swipe để xóa (deprecated). KHÔNG cho phép xóa bằng long-press.
@@ -67,10 +70,10 @@
 
 - Mỗi mockup PHẢI có toggle Light/Dark và render ĐÚNG cả 2.
 - Checklist dark mode:
-  - [ ] Background: `#121212` (page), `#1E1E1E` (card), `#2E2E2E` (dialog)
-  - [ ] Text contrast: primary text `#FFFFFF`, secondary `#E0E0E0`, tertiary `#999999`
+  - [ ] Background: `#121218` (page), `#1D1F26` (card), `#2C2E36` (dialog) — blue-tinted
+  - [ ] Text contrast: primary text `#FFFFFF`, secondary `#E0E0E8`, tertiary `#A8AAB4`
   - [ ] Primary color shift: `#2196F3` → `#42A5F5`
-  - [ ] CTA shift: `#FF9800` → `#FFB74D` (text dark `#121212`)
+  - [ ] CTA shift: `#FF9800` → `#FFB74D` (text dark `#121218`)
   - [ ] Error shift: `#F44336` → `#EF5350`
   - [ ] Cards: no shadow in dark (flat bg)
   - [ ] Overlay: `rgba(0,0,0,0.5)` vẫn đủ dim
@@ -103,7 +106,7 @@ Mỗi file mockup PHẢI kết thúc bằng bảng Design Spec Notes gồm:
 - **KHÔNG dùng underline tabs** cho sub-tabs trong page.
 - Dùng **Segment Control** (ion-segment) — theo spec `phase-1-management.md`.
 - **Vị trí: TRONG content area** (dưới toolbar), KHÔNG trên toolbar background.
-- Visual: pill track `#E8E8E8` (light) / `#333` (dark), active pill trắng, text inactive `#666`.
+- Visual: pill track `#E2E4EC` (light) / `#333340` (dark), active pill trắng, text inactive `var(--text-tertiary)`.
 - Lý do: Status bar + toolbar + segment cùng xanh = "nặng đầu". Segment trên nền page giảm visual weight.
 - Xem chi tiết: `design-system.md §8g`.
 
@@ -174,6 +177,12 @@ Trước khi coi mockup là xong, PHẢI mở trên browser và kiểm tra:
 □ 20. Step nav CTA disabled khi chưa valid?
 □ 21. Dark mode caption ≥ WCAG AA contrast?
 □ 22. FAB menu có sublabel giải thích?
+□ 23. Neutrals dùng blue-tinted (không pure gray)?
+□ 24. Easing dùng specific curves (không generic ease)?
+□ 25. Error messages có đủ 3 phần (gì/tại sao/sửa)?
+□ 26. Cards phân 3 tầng shadow (flat/subtle/prominent)?
+□ 27. Success feedback dùng verb+object cụ thể?
+□ 28. Cancel/dialog buttons mô tả hậu quả rõ ràng?
 ```
 
 ## 21. Category Chips — Giảm Saturation
@@ -277,6 +286,47 @@ Trước khi coi mockup là xong, PHẢI mở trên browser và kiểm tra:
 ## 31. Dark Mode — Caption Contrast
 
 - Caption/hint text (11-12px) trong dark mode PHẢI đạt WCAG AA contrast (≥4.5:1).
-- Tertiary text dark mode: tối thiểu `#AAAAAA` trên `#1E1E1E` background (ratio 4.78:1).
-- KHÔNG dùng `#999` cho text 11-12px trong dark mode (ratio chỉ 3.54:1 — FAIL AA).
+- Tertiary text dark mode: tối thiểu `#A8AAB4` trên `#1D1F26` background (ratio ≥4.5:1).
+- KHÔNG dùng `#999` hoặc untinted gray cho text 11-12px trong dark mode (ratio chỉ ~3.5:1 — FAIL AA).
 - Áp dụng: tab labels, result count, source badge, hint text, placeholder.
+
+## 32. Neutral Colors — Blue Tint
+
+- Mọi neutral (gray) phải có **blue tint nhẹ** cho cohesion với primary blue.
+- KHÔNG dùng pure gray (#E8E8E8, #999, #666, #333).
+- Dùng tinted values: `#E2E4EC` (border), `#5F6575` (tertiary text), `#333340` (dark border).
+- Xem chi tiết: `design-system.md §2.4`.
+
+## 33. Easing — Specific Curves Required
+
+- KHÔNG dùng `ease` generic. Mỗi interaction type dùng curve phù hợp:
+  - Micro (radio, toggle): `ease-out-quart` — `cubic-bezier(0.25, 1, 0.5, 1)`
+  - Snappy (button): `ease-out-expo` — `cubic-bezier(0.16, 1, 0.3, 1)`
+  - Sheet/drawer: `cubic-bezier(0.32, 0.72, 0, 1)`
+- Exit animations = **75% of entrance** duration.
+
+## 34. Error Messages — Specific + Vietnamese
+
+- Error text PHẢI trả lời: Gì sai? Tại sao? Sửa thế nào?
+- ~~"Giá trị không hợp lệ"~~ → "Chiều cao cần từ 100 đến 250 cm. Ví dụ: 165"
+- ~~"Bạn nhập sai"~~ → "Cân nặng cần từ 30 đến 200 kg"
+- KHÔNG đổ lỗi user.
+
+## 35. Card Hierarchy — 3 Tiers
+
+- **Flat** (no shadow/border): inline sections, metadata rows
+- **Subtle** (`--shadow-sm`): list items, secondary cards
+- **Prominent** (`--shadow-md`): dashboard hero, AI card, primary content
+- Khi mọi card cùng shadow → flat hierarchy → phân tầng để tạo depth.
+
+## 36. Success Feedback — Specific Verb+Object
+
+- Sau save: button flash "✓ Đã lưu [tên]" (green, 1.5s) → navigate.
+- Sau add: toast "✓ Đã thêm [tên]" (2-3s auto-dismiss).
+- KHÔNG dùng generic "Thành công" hay "Đã lưu" mà không nêu object.
+
+## 37. Cancel Buttons — "Giữ lại" thay "Hủy"
+
+- Delete confirm: [Giữ lại] + [Xóa {tên}].
+- KHÔNG dùng "Hủy" — mơ hồ, user không biết hủy gì.
+- Mỗi button trong dialog phải mô tả rõ hậu quả khi bấm.
