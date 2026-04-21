@@ -123,7 +123,7 @@
   body.dark  .step-subtitle { color: #939AAA; }
 
   .section-label {
-    font-size: 14px; font-weight: 500; line-height: 1.4;
+    font-size: 14px; font-weight: 600; line-height: 1.4;
     margin-top: 16px; margin-bottom: 8px;
   }
   body.light .section-label { color: #1A1A2E; }
@@ -219,8 +219,8 @@
   body.light .input-wrapper { border-color: #C8CBD4; background: #fff; }
   body.dark  .input-wrapper { border-color: #444850; background: #1D1F26; }
 
-  .input-wrapper.invalid { border-color: #f44336; }
-  body.dark .input-wrapper.invalid { border-color: #ef5350; }
+  .input-wrapper.invalid { border-color: #F44336; }
+  body.dark .input-wrapper.invalid { border-color: #EF5350; }
 
   .input-label {
     position: absolute; top: 6px; left: 16px;
@@ -228,8 +228,8 @@
   }
   body.light .input-label { color: #5F6575; }
   body.dark  .input-label { color: #939AAA; }
-  .input-label.invalid { color: #f44336; }
-  body.dark .input-label.invalid { color: #ef5350; }
+  .input-label.invalid { color: #F44336; }
+  body.dark .input-label.invalid { color: #EF5350; }
 
   .input-value {
     font-size: 16px; font-weight: 400; min-height: 24px;
@@ -245,7 +245,7 @@
   }
   body.light .select-wrapper { border-color: #C8CBD4; background: #fff; }
   body.dark  .select-wrapper { border-color: #444850; background: #1D1F26; }
-  .select-wrapper.invalid { border-color: #f44336; }
+  .select-wrapper.invalid { border-color: #F44336; }
 
   .select-arrow {
     width: 16px; height: 16px; margin-left: auto;
@@ -258,18 +258,18 @@
      ========================================================================= */
   .field-error {
     font-size: 12px; font-weight: 400; line-height: 1.4;
-    padding-left: 4px; margin-bottom: 8px;
+    padding: 4px 4px 0; margin-bottom: 4px;
   }
-  body.light .field-error { color: #f44336; }
-  body.dark  .field-error { color: #ef5350; }
+  body.light .field-error { color: #F44336; }
+  body.dark  .field-error { color: #EF5350; }
 
   /* Form-level error toast */
   .error-toast {
     margin-top: 8px; padding: 8px 12px; border-radius: 8px;
     font-size: 13px; line-height: 1.5;
   }
-  body.light .error-toast { background: rgba(244,67,54,0.08); color: #f44336; }
-  body.dark  .error-toast { background: rgba(239,83,80,0.12); color: #ef5350; }
+  body.light .error-toast { background: rgba(244,67,54,0.08); color: #F44336; }
+  body.dark  .error-toast { background: rgba(239,83,80,0.12); color: #EF5350; }
 
   /* =========================================================================
      BUTTONS — CTA orange, outline primary
@@ -860,18 +860,18 @@
   <h2>📐 Design Spec Notes</h2>
   <table>
     <tr><th>Token</th><th>Light</th><th>Dark</th><th>Source</th></tr>
-    <tr><td>Toolbar bg</td><td><code>#2196f3</code></td><td><code>#1565c0</code></td><td><code>--ion-toolbar-background</code></td></tr>
-    <tr><td>CTA button</td><td><code>#ff9800</code> orange</td><td><code>#ffb74d</code> light orange</td><td><code>--ion-color-secondary</code> via <code>color="secondary"</code></td></tr>
-    <tr><td>Page bg</td><td><code>#f5f7fa</code></td><td><code>#121218</code></td><td><code>--ion-background-color</code></td></tr>
+    <tr><td>Toolbar bg</td><td><code>#2196F3</code></td><td><code>#1565C0</code></td><td><code>--ion-toolbar-background</code></td></tr>
+    <tr><td>CTA button</td><td><code>#FF9800</code> orange</td><td><code>#FFB74D</code> light orange</td><td><code>--ion-color-secondary</code> via <code>color="secondary"</code></td></tr>
+    <tr><td>Page bg</td><td><code>#F5F7FA</code></td><td><code>#121218</code></td><td><code>--ion-background-color</code></td></tr>
     <tr><td>Card / Item bg</td><td><code>#fff</code></td><td><code>#1D1F26</code></td><td><code>--bg-card</code></td></tr>
     <tr><td>Title</td><td colspan="2">22px / 700 / 1.3</td><td>DS headline</td></tr>
     <tr><td>Subtitle</td><td colspan="2">16px / 500 / 1.4</td><td>DS subtitle</td></tr>
-    <tr><td>Section label</td><td colspan="2">14px / 500 / 1.4</td><td>DS section</td></tr>
-    <tr><td>Field error</td><td><code>#f44336</code> 12px</td><td><code>#ef5350</code> 12px</td><td><code>--ion-color-danger</code></td></tr>
+    <tr><td>Section label</td><td colspan="2">14px / 600 / 1.4</td><td>DS section</td></tr>
+    <tr><td>Field error</td><td><code>#F44336</code> 12px</td><td><code>#EF5350</code> 12px</td><td><code>--ion-color-danger</code></td></tr>
     <tr><td>Radio radius</td><td colspan="2">12px</td><td><code>--radius-sm</code></td></tr>
     <tr><td>Button radius</td><td colspan="2">12px</td><td><code>--radius-sm</code></td></tr>
     <tr><td>Progress bar</td><td colspan="2">4px, white track</td><td><code>ion-progress-bar</code></td></tr>
-    <tr><td>Selected bg</td><td><code>#e3f2fd</code></td><td><code>#1a237e</code></td><td><code>--primary-50</code> / custom dark</td></tr>
+    <tr><td>Selected bg</td><td><code>#E3F2FD</code></td><td><code>#1A237E</code></td><td><code>--primary-50</code> / custom dark</td></tr>
     <tr><td>radio-check</td><td colspan="2">22px, --primary color</td><td>Checkmark icon on selected radio items (A11y enhancement)</td></tr>
     <tr><td>radio-circle</td><td>18px, border <code>#C8CBD4</code></td><td>18px, border <code>#5F6575</code></td><td>Unselected: empty circle. Selected: filled <code>--primary</code> + 8px white dot center</td></tr>
   </table>
@@ -880,7 +880,7 @@
   <table>
     <tr><th>State</th><th>Step 1</th><th>Step 2a</th><th>Step 2b</th></tr>
     <tr><td>Default</td><td>Screen 1: empty radio group, CTA disabled, radio circles empty</td><td>Screen 3: empty body info fields</td><td>Screen 6: empty activity fields</td></tr>
-    <tr><td>Hover</td><td>Radio item bg → <code>#e3f2fd</code></td><td>Same on inputs</td><td>Same on radio items</td></tr>
+    <tr><td>Hover</td><td>Radio item bg → <code>#E3F2FD</code></td><td>Same on inputs</td><td>Same on radio items</td></tr>
     <tr><td>Active/Selected</td><td>Screen 2: radio circle filled + bg highlight + checkmark ✓, CTA enabled</td><td>Screen 4: filled body info</td><td>Screen 7: filled activity + gym highlight</td></tr>
     <tr><td>Focus</td><td><code>tabindex="-1"</code> on heading for a11y</td><td>Focus first invalid field on error</td><td>Focus first invalid field on error</td></tr>
     <tr><td>Disabled</td><td>Screen 1: CTA button 50% opacity until selection</td><td>—</td><td>Screen 9: buttons 50% opacity while saving</td></tr>

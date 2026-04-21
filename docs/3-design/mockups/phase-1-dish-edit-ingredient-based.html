@@ -112,7 +112,7 @@
      SECTION LABELS
      ========================================================================= */
   .section-label {
-    font-size: 14px; font-weight: 500; line-height: 1.4;
+    font-size: 14px; font-weight: 600; line-height: 1.4;
     margin-top: 16px; margin-bottom: 8px;
   }
   body.light .section-label { color: #1A1A2E; }
@@ -203,6 +203,7 @@
     border: none; cursor: pointer; font-size: 14px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
+    /* Implementation note: actual hitbox must be 44×44px (use transparent padding or hitSlop) */
   }
   body.light .ingredient-item-delete { background: #FFEBEE; color: #F44336; }
   body.dark  .ingredient-item-delete { background: rgba(244,67,54,0.15); color: #EF5350; }
@@ -1246,6 +1247,7 @@
     <tr><td>"Thêm tiếp" mode</td><td>Sheet stays open after add</td><td>Success msg (green ✓), [Xong] secondary + [Thêm tiếp ▶] primary CTA, search resets</td></tr>
     <tr><td><code>--success</code></td><td>#4CAF50 / #66BB6A</td><td>Success confirmation text/icon after adding ingredient</td></tr>
     <tr><td>Section header (picker)</td><td>13px/600, tertiary color</td><td>"Gần đây", "Tất cả nguyên liệu" headers inside bottom sheet</td></tr>
+    <tr><td colspan="3"><strong>♿ Accessibility:</strong> Error messages: <code>role="alert"</code> + <code>aria-live="assertive"</code>. Invalid fields: <code>aria-invalid="true"</code> + <code>aria-describedby="err-{field}"</code>. Bottom sheet: <code>role="dialog"</code> + <code>aria-modal="true"</code> + <code>aria-label="Chọn nguyên liệu"</code>. Delete buttons: <code>aria-label="Xóa {ingredient}"</code>. Focus trap inside bottom sheet when open.</td></tr>
   </table>
 </div>
 
