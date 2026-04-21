@@ -1,5 +1,6 @@
 // HealthMate AI — Design System Theme Variables
-// Source: docs/3-design/design-system.md
+// Source: docs/3-design/design-system.md v1.2
+// Rule: ALL neutrals use blue-tinted values (hue ~230, chroma ~0.01)
 
 // =============================================================================
 // LIGHT MODE
@@ -54,20 +55,20 @@
   --ion-color-danger-shade: #d32f2f;
   --ion-color-danger-tint: #ef5350;
 
-  // Medium
-  --ion-color-medium: #666666;
-  --ion-color-medium-rgb: 102, 102, 102;
+  // Medium (blue-tinted)
+  --ion-color-medium: #5f6575;
+  --ion-color-medium-rgb: 95, 101, 117;
   --ion-color-medium-contrast: #ffffff;
   --ion-color-medium-contrast-rgb: 255, 255, 255;
-  --ion-color-medium-shade: #555555;
-  --ion-color-medium-tint: #999999;
+  --ion-color-medium-shade: #4a4f5c;
+  --ion-color-medium-tint: #7a7f8d;
 
-  // Light
+  // Light (blue-tinted)
   --ion-color-light: #f5f7fa;
   --ion-color-light-rgb: 245, 247, 250;
-  --ion-color-light-contrast: #1a1a1a;
-  --ion-color-light-contrast-rgb: 26, 26, 26;
-  --ion-color-light-shade: #e8e8e8;
+  --ion-color-light-contrast: #1a1a2e;
+  --ion-color-light-contrast-rgb: 26, 26, 46;
+  --ion-color-light-shade: #e2e4ec;
   --ion-color-light-tint: #ffffff;
 
   // Background & Surfaces
@@ -77,18 +78,21 @@
   --ion-toolbar-background: #2196f3;
   --ion-toolbar-color: #ffffff;
   --ion-tab-bar-background: #ffffff;
-  --ion-tab-bar-color: #999999;
+  --ion-tab-bar-color: #5f6575;
   --ion-tab-bar-color-selected: #2196f3;
 
-  // Text
-  --ion-text-color: #1a1a1a;
-  --ion-text-color-rgb: 26, 26, 26;
+  // Text (blue-tinted neutrals per DS §2.4)
+  --ion-text-color: #1a1a2e;
+  --ion-text-color-rgb: 26, 26, 46;
+
+  // Border
+  --ion-border-color: #e2e4ec;
 
   // Font
   --ion-font-family: 'Roboto', sans-serif;
 
   // ==========================================================================
-  // App-specific Custom Properties
+  // App-specific Custom Properties (DS §2–§8)
   // ==========================================================================
 
   // Primary Scale
@@ -109,17 +113,21 @@
   --accent-300: #ffb74d;
   --accent-50: #fff8e1;
 
-  // Neutral
+  // Neutral (blue-tinted — DS §2.4)
   --bg-page: #f5f7fa;
   --bg-card: #ffffff;
   --bg-elevated: #ffffff;
-  --text-primary: #1a1a1a;
-  --text-secondary: #333333;
-  --text-tertiary: #666666;
-  --text-disabled: #999999;
-  --border-color: #e8e8e8;
+  --bg-muted: #e2e4ec;
+  --text-primary: #1a1a2e;
+  --text-secondary: #2d3142;
+  --text-tertiary: #5f6575;
+  --text-disabled: #939aaa;
+  --border-color: #e2e4ec;
 
-  // AI Card
+  // Input-specific border (DS §8.6 — darker than --border for field definition)
+  --input-border-color: #c8cbd4;
+
+  // AI Card (DS §2.5)
   --ai-card-bg: #e3f2fd;
   --ai-card-border: #bbdefb;
   --ai-avatar-bg: #2196f3;
@@ -133,29 +141,41 @@
   --quick-action-bg: #e3f2fd;
   --quick-action-text: #1565c0;
 
-  // Spacing
+  // Spacing (DS §4 — 4px grid)
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 12px;
   --space-lg: 16px;
-  --space-xl: 24px;
-  --space-2xl: 32px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
 
-  // Border Radius
-  --radius-sm: 8px;
-  --radius-md: 12px;
+  // Border Radius (DS §5)
+  --radius-micro: 4px;
+  --radius-xs: 8px;
+  --radius-sm: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-full: 9999px;
 
-  // Shadows (light mode only)
+  // Shadows — light mode only (DS §6)
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 1px 4px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+  // Focus Ring (DS §6)
+  --focus-ring: 0 0 0 2px rgba(33, 150, 243, 0.12);
+
+  // Easing (DS §8f)
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 // =============================================================================
-// DARK MODE
+// DARK MODE (blue-tinted dark neutrals — hue ~230)
 // =============================================================================
 
 @media (prefers-color-scheme: dark) {
@@ -166,9 +186,11 @@
     --ion-color-primary-shade: #2196f3;
     --ion-color-primary-tint: #64b5f6;
 
-    // Secondary — Lighter orange
+    // Secondary — Lighter orange; contrast is dark bg for text on CTA
     --ion-color-secondary: #ffb74d;
     --ion-color-secondary-rgb: 255, 183, 77;
+    --ion-color-secondary-contrast: #121218;
+    --ion-color-secondary-contrast-rgb: 18, 18, 24;
     --ion-color-secondary-shade: #ff9800;
     --ion-color-secondary-tint: #ffe0b2;
 
@@ -187,44 +209,48 @@
     --ion-color-danger-shade: #f44336;
     --ion-color-danger-tint: #e57373;
 
-    // Background & Surfaces
-    --ion-background-color: #121212;
-    --ion-background-color-rgb: 18, 18, 18;
-    --ion-card-background: #1e1e1e;
+    // Background & Surfaces (blue-tinted dark — DS §6 elevation)
+    --ion-background-color: #121218;
+    --ion-background-color-rgb: 18, 18, 24;
+    --ion-card-background: #1d1f26;
     --ion-toolbar-background: #1565c0;
     --ion-toolbar-color: #ffffff;
-    --ion-tab-bar-background: #1e1e1e;
-    --ion-tab-bar-color: #666666;
+    --ion-tab-bar-background: #1d1f26;
+    --ion-tab-bar-color: #a8aab4;
     --ion-tab-bar-color-selected: #42a5f5;
 
     // Text
     --ion-text-color: #ffffff;
     --ion-text-color-rgb: 255, 255, 255;
 
-    // Border
-    --ion-border-color: #333333;
+    // Border (blue-tinted)
+    --ion-border-color: #333340;
 
     // Item
-    --ion-item-background: #1e1e1e;
+    --ion-item-background: #1d1f26;
 
-    // App-specific overrides
-    --bg-page: #121212;
-    --bg-card: #1e1e1e;
-    --bg-elevated: #2e2e2e;
+    // App-specific overrides (blue-tinted dark neutrals)
+    --bg-page: #121218;
+    --bg-card: #1d1f26;
+    --bg-elevated: #2c2e36;
+    --bg-muted: #2c2e36;
     --text-primary: #ffffff;
-    --text-secondary: #e0e0e0;
-    --text-tertiary: #999999;
-    --text-disabled: #666666;
-    --border-color: #333333;
+    --text-secondary: #e0e0e8;
+    --text-tertiary: #a8aab4;
+    --text-disabled: #5f6575;
+    --border-color: #333340;
 
-    // AI Card (dark)
+    // Input-specific border (DS §8.6)
+    --input-border-color: #444850;
+
+    // AI Card (dark — DS §2.5)
     --ai-card-bg: #1a237e;
     --ai-card-border: #283593;
     --ai-avatar-bg: #42a5f5;
     --ai-text-color: #90caf9;
 
-    // Streak Card (dark)
-    --streak-card-bg: #2e2e1e;
+    // Streak Card (dark — uses bg-elevated)
+    --streak-card-bg: #2c2e36;
     --streak-number-color: #ffb74d;
 
     // Quick Action (dark)
@@ -235,5 +261,9 @@
     --shadow-sm: none;
     --shadow-md: none;
     --shadow-lg: none;
+    --shadow-xl: none;
+
+    // Focus Ring (dark — higher opacity)
+    --focus-ring: 0 0 0 2px rgba(66, 165, 245, 0.15);
   }
 }

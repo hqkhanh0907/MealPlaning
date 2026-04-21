@@ -37,8 +37,24 @@
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 /* @import '@ionic/angular/css/palettes/dark.system.css'; */
 
-// Onboarding: hide radio circles — highlight-only selection
-app-onboarding .goal-item ion-radio::part(container),
-app-onboarding .gym-item ion-radio::part(container) {
-  display: none;
+// Global ion-radio styling — match design system radio circle (DS §8.7)
+// Override Ionic defaults so radio circles render per mockup.
+// Radio circle: 18px, border-radius 50%, 2px border.
+ion-radio::part(container) {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #c8cbd4;
+  border-radius: 50%;
+}
+
+ion-radio::part(mark) {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+@media (prefers-color-scheme: dark) {
+  ion-radio::part(container) {
+    border-color: #5f6575;
+  }
 }
