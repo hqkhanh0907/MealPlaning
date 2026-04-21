@@ -1,6 +1,7 @@
 # Mockup Design Rules — HealthMate AI
 
-> Áp dụng BẮT BUỘC khi tạo/sửa mockup HTML. Rút ra từ visual review session 2026-04-19.
+> Áp dụng BẮT BUỘC khi tạo/sửa mockup HTML. Synced với `docs/3-design/design-system.md` v1.5 (2026-04-21).
+> Rút ra từ visual review sessions + 7 vòng design system audit.
 
 ---
 
@@ -70,13 +71,16 @@
 
 - Mỗi mockup PHẢI có toggle Light/Dark và render ĐÚNG cả 2.
 - Checklist dark mode:
-  - [ ] Background: `#121218` (page), `#1D1F26` (card), `#2C2E36` (dialog) — blue-tinted
-  - [ ] Text contrast: primary text `#FFFFFF`, secondary `#E0E0E8`, tertiary `#A8AAB4`
-  - [ ] Primary color shift: `#2196F3` → `#42A5F5`
-  - [ ] CTA shift: `#FF9800` → `#FFB74D` (text dark `#121218`)
-  - [ ] Error shift: `#F44336` → `#EF5350`
-  - [ ] Cards: no shadow in dark (flat bg)
+  - [ ] Background: `#121218` (page), `#1D1F26` (card), `#2C2E36` (elevated/dialog/muted)
+  - [ ] Text: primary `#FFFFFF`, secondary `#E0E0E8`, tertiary `#A8AAB4`, disabled `#5F6575`
+  - [ ] Placeholder text inside inputs: `#5F6575` (text-disabled) — NOT `#A8AAB4`
+  - [ ] Primary color: `#2196F3` → `#42A5F5`
+  - [ ] CTA: `#FF9800` → `#FFB74D` (text trên CTA: `#121218`)
+  - [ ] Error: `#F44336` → `#EF5350`
+  - [ ] Border: `#E2E4EC` → `#333340`. Input border: `#C8CBD4` → `#444850`
+  - [ ] Cards: NO shadow in dark — dùng bg elevation phân tầng
   - [ ] Overlay: `rgba(0,0,0,0.5)` vẫn đủ dim
+  - [ ] Shadows: disabled — mọi `box-shadow` phải `none` trong dark mode
 
 ## 10. Text Alignment — Form content luôn căn trái
 
@@ -183,6 +187,14 @@ Trước khi coi mockup là xong, PHẢI mở trên browser và kiểm tra:
 □ 26. Cards phân 3 tầng shadow (flat/subtle/prominent)?
 □ 27. Success feedback dùng verb+object cụ thể?
 □ 28. Cancel/dialog buttons mô tả hậu quả rõ ràng?
+□ 29. Font-weight chỉ dùng 400/500/600/700? (KHÔNG 300)
+□ 30. Placeholder inputs dùng text-disabled (KHÔNG text-tertiary)?
+□ 31. Dialog buttons min-height 44px?
+□ 32. Toast ở bottom: 136px (trên FAB)?
+□ 33. Z-index layering đúng thứ tự (fab=20 < sheet=30 < dialog=50)?
+□ 34. Border-radius chỉ dùng tokens (4/8/12/16/20/9999)?
+□ 35. Heading hierarchy sequential (h1→h2→h3)?
+□ 36. Dividers dùng var(--border), 1px, inset hoặc full-bleed?
 ```
 
 ## 21. Category Chips — Giảm Saturation
@@ -214,8 +226,8 @@ Trước khi coi mockup là xong, PHẢI mở trên browser và kiểm tra:
   - Tên món → "Ví dụ: Cơm gà nướng"
   - Calories → "Ví dụ: 350"
   - Protein → "Ví dụ: 25"
-- Placeholder color: `var(--text-tertiary)` — nhạt hơn rõ so với value thật.
-- Lý do: "0" bị hiểu là giá trị thật. "Nhập số" quá trung tính. Ví dụ cụ thể giúp user hình dung giá trị hợp lý.
+- Placeholder color: `var(--text-disabled)` (#939AAA light / #5F6575 dark) — KHÔNG dùng text-tertiary.
+- Lý do: "0" bị hiểu là giá trị thật. "Nhập số" quá trung tính. Ví dụ cụ thể giúp user hình dung giá trị hợp lý. Placeholder = disabled text vì nó biến mất khi user nhập.
 
 ## 24. Quick-Add Macro Fields — Dot thay Border
 
@@ -330,3 +342,117 @@ Trước khi coi mockup là xong, PHẢI mở trên browser và kiểm tra:
 - Delete confirm: [Giữ lại] + [Xóa {tên}].
 - KHÔNG dùng "Hủy" — mơ hồ, user không biết hủy gì.
 - Mỗi button trong dialog phải mô tả rõ hậu quả khi bấm.
+
+---
+
+## Rules 38–47: Từ Design System Audit v1.5
+
+> Phát hiện qua 7 vòng audit đối chiếu mockup ↔ design-system.md. Các rule này bổ sung cho Rules 1–37.
+
+## 38. Font-Weight — Chỉ 4 giá trị hợp lệ
+
+- **400** (Regular): body text, descriptions
+- **500** (Medium): labels, subtitles, tab labels
+- **600** (SemiBold): emphasis, field group titles
+- **700** (Bold): headings, numbers, display stats
+- ⛔ **300 (Light) và 800+ KHÔNG hợp lệ.** FAB "+" phải dùng 400, không phải 300.
+- Xem: `design-system.md §3.2`.
+
+## 39. Placeholder Color — text-disabled ONLY
+
+- Placeholder text inside inputs: `var(--text-disabled)` — `#939AAA` light / `#5F6575` dark.
+- ⛔ KHÔNG dùng `var(--text-tertiary)` cho placeholder.
+- ⚠️ Gotcha: Light `--text-tertiary` (`#5F6575`) = Dark `--text-disabled` (`#5F6575`) — cùng hex, khác ngữ nghĩa. Luôn dùng token name, không hardcode hex.
+- Xem: `design-system.md §2.4`.
+
+## 40. Dialog Button — Min-Height 44px
+
+- Tất cả dialog action buttons: `min-height: 44px` (touch target compliance).
+- Áp dụng cho cả "Giữ lại" (outline) và "Xóa" (destructive).
+- Xem: `design-system.md §8.9`, `§8c Touch Targets`.
+
+## 41. Search Bar Spec
+
+| Property | Light | Dark |
+|----------|-------|------|
+| Height | 44px | same |
+| Border-radius | 12px (`--radius-sm`) | same |
+| Border | `1px solid #C8CBD4` | `1px solid #444850` |
+| Background | `var(--bg-card)` | `var(--bg-card)` |
+| Padding | `10px 14px` | same |
+| Icon (🔍) | `var(--text-tertiary)` | `#A8AAB4` |
+| Placeholder | `var(--text-disabled)` | `#5F6575` |
+| Focus | Border → `var(--ion-color-primary)` | same |
+
+- ARIA: `role="searchbox"`, `aria-label="Tìm kiếm"`. Clear button: `aria-label="Xóa tìm kiếm"`.
+- Xem: `design-system.md §8.6b`.
+
+## 42. Toast Position — Above FAB
+
+- Toast vị trí: `bottom: 136px`, center horizontal.
+- Tính toán: FAB bottom (72px) + FAB size (56px) + gap (8px) = **136px**.
+- ⛔ KHÔNG dùng `bottom: 80px` — bị FAB che.
+- Xem: `design-system.md §8.11`.
+
+## 43. Z-Index Scale — 7 tầng
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| base | 0 | Normal content |
+| sticky | 10 | Sticky headers, filter bar |
+| fab | 20 | FAB, scroll-to-top |
+| sheet | 30 | Bottom sheet |
+| scrim | 40 | Overlay backdrop |
+| dialog | 50 | Confirm dialog |
+| toast | 60 | Toast notification |
+
+- Xem: `design-system.md §12`.
+
+## 44. Border Radius — Token Only
+
+- Tất cả `border-radius` PHẢI dùng token từ design system:
+  - `--radius-micro` (4px): progress bar track, tiny badges, accent bars
+  - `--radius-xs` (8px): chips, tags, filter chips, dialog buttons
+  - `--radius-sm` (12px): inputs, buttons, segment controls
+  - `--radius-lg` (16px): cards
+  - `--radius-xl` (20px): modal, bottom sheet (top corners)
+  - `--radius-full` (9999px): avatar, FAB
+- ⛔ Không dùng giá trị lẻ (6px, 10px, 14px).
+- Ngoại lệ: progress bar radius = height/2 (pill shape), handle 2px.
+- Xem: `design-system.md §5`.
+
+## 45. Heading Hierarchy — Sequential
+
+| HTML | Token | Size/Weight | Usage |
+|------|-------|-------------|-------|
+| h1 | `headline` | 22px/700 | Page title (1 per screen = toolbar title) |
+| h2 | `title` | 18px/500 | Card title, section title |
+| h3 | `subtitle` | 16px/500 | Sub-section header |
+| h4 | `body` | 14px/600 | Group label, field group title |
+
+- Heading levels PHẢI sequential (h1→h2→h3), không skip.
+- `aria-level` bắt buộc nếu visual heading khác semantic level.
+- Xem: `design-system.md §3.3`.
+
+## 46. Skeleton Shimmer — Loading State
+
+| Property | Light | Dark |
+|----------|-------|------|
+| Base color | `var(--bg-muted)` (#E2E4EC) | `var(--bg-muted)` (#2C2E36) |
+| Highlight | `#F5F7FA` | `#3A3C44` |
+| Animation | `pulse 1.5s ease-in-out infinite` | same |
+| Border-radius | Match target component (card=16px, text=4px) | same |
+| Reduced motion | Static `var(--bg-muted)`, no animation | same |
+
+- ⛔ KHÔNG dùng centered full-page spinner. Dùng skeleton shimmer cho card/list loading.
+- Xem: `design-system.md §8b Loading State`.
+
+## 47. Divider / Separator
+
+- Color: `var(--border)` — `#E2E4EC` light / `#333340` dark.
+- Height: `1px` hairline only.
+- **Inset divider** (margin 0 16px): giữa list items cùng group.
+- **Full-bleed divider** (margin 0): giữa sections khác nhau.
+- ⛔ KHÔNG dùng border trên card — card phân tách bằng shadow/elevation.
+- ARIA: `role="separator"` cho screen readers.
+- Xem: `design-system.md §8.12`.

@@ -324,7 +324,7 @@ Copilot là **Pragmatic Perfectionist**, KHÔNG phải Toxic Perfectionist:
 
 ## Design Context
 
-> Full design system: `docs/3-design/design-system.md` (v1.5). Mockup rules: `.github/instructions/mockup-design-rules.md`. Key rules summarized below.
+> Full design system: `docs/3-design/design-system.md` (v1.5). Mockup rules: `.github/instructions/mockup-design-rules.instruction.md`. Key rules summarized below.
 
 ### Platform & Stack
 
