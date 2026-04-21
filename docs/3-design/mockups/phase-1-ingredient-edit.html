@@ -1049,6 +1049,9 @@
     <tr><td>Nutrition grid</td><td>2×2 CSS grid</td><td>Protein, Carbs, Fat, Fiber in compact layout</td></tr>
     <tr><td>Toolbar Save</td><td>16px/500, white, always active</td><td>auto-scroll to error on invalid</td></tr>
     <tr><td>Error Strategy</td><td>Never disable Lưu button</td><td>tap → scrollIntoView() first error field</td></tr>
+    <tr><td>Easing — micro</td><td><code>cubic-bezier(0.25, 1, 0.5, 1)</code> 200ms</td><td>Radio select, conditional field reveal, input focus</td></tr>
+    <tr><td>Easing — snappy</td><td><code>cubic-bezier(0.16, 1, 0.3, 1)</code> 150ms</td><td>Save/delete button press, saving spinner</td></tr>
+    <tr><td>Tabular numbers</td><td><code>font-variant-numeric: tabular-nums</code></td><td>All nutrition input values (kcal, g) for aligned display</td></tr>
     <tr><td colspan="3"><strong>♿ Accessibility:</strong> Error messages: <code>role="alert"</code> + <code>aria-live="assertive"</code>. Invalid fields: <code>aria-invalid="true"</code> + <code>aria-describedby="err-{field}"</code>. Radio groups: <code>aria-label</code> on group container. Select: <code>aria-expanded</code>, <code>aria-haspopup="listbox"</code>. Focus: auto-focus first invalid field on submit error.</td></tr>
   </table>
 </div>

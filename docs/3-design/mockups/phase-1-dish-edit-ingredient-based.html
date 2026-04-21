@@ -194,6 +194,7 @@
 
   .ingredient-item-kcal {
     font-size: 13px; font-weight: 500; flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
   }
   body.light .ingredient-item-kcal { color: #2196F3; }
   body.dark  .ingredient-item-kcal { color: #42A5F5; }
@@ -260,6 +261,7 @@
 
   .nutrition-value {
     font-size: 14px; font-weight: 600; flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
   }
   .val-cal { }
   body.light .val-cal { color: #2196F3; }
@@ -1247,6 +1249,10 @@
     <tr><td>"Thêm tiếp" mode</td><td>Sheet stays open after add</td><td>Success msg (green ✓), [Xong] secondary + [Thêm tiếp ▶] primary CTA, search resets</td></tr>
     <tr><td><code>--success</code></td><td>#4CAF50 / #66BB6A</td><td>Success confirmation text/icon after adding ingredient</td></tr>
     <tr><td>Section header (picker)</td><td>13px/600, tertiary color</td><td>"Gần đây", "Tất cả nguyên liệu" headers inside bottom sheet</td></tr>
+    <tr><td>Easing — micro</td><td><code>cubic-bezier(0.25, 1, 0.5, 1)</code> 200ms</td><td>Input focus, delete button, success ✓ flash</td></tr>
+    <tr><td>Easing — sheet</td><td><code>cubic-bezier(0.32, 0.72, 0, 1)</code> 300ms</td><td>Bottom sheet open/expand. Exit: 225ms (75%)</td></tr>
+    <tr><td>Easing — snappy</td><td><code>cubic-bezier(0.16, 1, 0.3, 1)</code> 150ms</td><td>Save/delete button press, "Thêm" button</td></tr>
+    <tr><td>Tabular numbers</td><td><code>font-variant-numeric: tabular-nums</code></td><td>Ingredient kcal, amount values, nutrition summary (kcal, g)</td></tr>
     <tr><td colspan="3"><strong>♿ Accessibility:</strong> Error messages: <code>role="alert"</code> + <code>aria-live="assertive"</code>. Invalid fields: <code>aria-invalid="true"</code> + <code>aria-describedby="err-{field}"</code>. Bottom sheet: <code>role="dialog"</code> + <code>aria-modal="true"</code> + <code>aria-label="Chọn nguyên liệu"</code>. Delete buttons: <code>aria-label="Xóa {ingredient}"</code>. Focus trap inside bottom sheet when open.</td></tr>
   </table>
 </div>

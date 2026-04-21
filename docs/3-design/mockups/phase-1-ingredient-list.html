@@ -264,12 +264,12 @@
 
   .ingredient-kcal {
     font-size: 12px; font-weight: 400; text-align: right;
-    flex-shrink: 0; white-space: nowrap;
+    flex-shrink: 0; white-space: nowrap; font-variant-numeric: tabular-nums;
   }
   body.light .ingredient-kcal { color: #5F6575; }
   body.dark  .ingredient-kcal { color: #A8AAB4; }
   .ingredient-kcal strong {
-    font-size: 16px; font-weight: 600; display: block; line-height: 1.2;
+    font-size: 16px; font-weight: 600; display: block; line-height: 1.4;
   }
   body.light .ingredient-kcal strong { color: #1A1A2E; }
   body.dark  .ingredient-kcal strong { color: #fff; }
@@ -939,6 +939,9 @@
     <tr><td>Content padding-bottom</td><td>80px</td><td>56px FAB + 16px gap + 8px safe — last item never hidden</td></tr>
     <tr><td colspan="3"><strong>🚫 Delete rule:</strong> Ingredient used in ≥1 dish → hard block (no delete). Dialog: "Không thể xóa" + [Đóng] + [Xem N món đang dùng] (actionable CTA). Only unused ingredients show confirm dialog with [Xóa].</td></tr>
     <tr><td colspan="3"><strong>👆 Interactions:</strong> Tap card → navigate to edit page. ⋮ more icon top-right of each card (44×44 hitbox) → popover menu with [Sửa] + [Xóa] options. This is the PRIMARY and ONLY mechanism for edit/delete actions.</td></tr>
+    <tr><td>Easing — micro</td><td><code>cubic-bezier(0.25, 1, 0.5, 1)</code> 200ms</td><td>Filter chip select, search focus, dialog open</td></tr>
+    <tr><td>Easing — sheet</td><td><code>cubic-bezier(0.32, 0.72, 0, 1)</code> 300ms</td><td>Bottom sheet / popover menu open. Exit: 225ms (75%)</td></tr>
+    <tr><td>Tabular numbers</td><td><code>font-variant-numeric: tabular-nums</code></td><td>All numeric values (kcal, macro g) for consistent column alignment</td></tr>
     <tr><td colspan="3"><strong>♿ Accessibility:</strong> Delete dialog: <code>role="alertdialog"</code> + <code>aria-modal="true"</code> + <code>aria-labelledby</code>. ⋮ menu: <code>aria-haspopup="menu"</code> + <code>aria-expanded</code>. Filter chips: <code>role="radiogroup"</code> with <code>aria-checked</code>. Search: <code>role="search"</code> + <code>aria-label="Tìm nguyên liệu"</code>. List: <code>role="list"</code> with <code>role="listitem"</code>.</td></tr>
   </table>
 </div>
