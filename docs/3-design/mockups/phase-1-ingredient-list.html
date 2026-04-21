@@ -109,7 +109,7 @@
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
   }
   body.dark .sub-tab.active {
-    color: #FFF; background: #2A2A2A;
+    color: #FFF; background: #2C2E36;
     box-shadow: 0 1px 4px rgba(0,0,0,0.12);
   }
 
@@ -454,7 +454,7 @@
             <div class="ingredient-name">Ức gà</div>
             <div class="ingredient-meta">
               <span class="category-chip cat-thit">Thịt</span>
-              <span class="source-badge">seed</span>
+              <span class="source-badge">Có sẵn</span>
             </div>
           </div>
           <div class="ingredient-kcal"><strong>165</strong>kcal / 100g</div>
@@ -466,7 +466,7 @@
             <div class="ingredient-name">Trứng gà</div>
             <div class="ingredient-meta">
               <span class="category-chip cat-trung">Trứng & Sữa</span>
-              <span class="source-badge">seed</span>
+              <span class="source-badge">Có sẵn</span>
             </div>
           </div>
           <div class="ingredient-kcal"><strong>155</strong>kcal / 100g</div>
@@ -500,7 +500,7 @@
             <div class="ingredient-name">Dầu olive</div>
             <div class="ingredient-meta">
               <span class="category-chip cat-dau-mo">Dầu & Mỡ</span>
-              <span class="source-badge">manual</span>
+              <span class="source-badge">Tự tạo</span>
             </div>
           </div>
           <div class="ingredient-kcal"><strong>884</strong>kcal / 100g</div>
@@ -561,7 +561,7 @@
             <div class="ingredient-name">Ức gà</div>
             <div class="ingredient-meta">
               <span class="category-chip cat-thit">Thịt</span>
-              <span class="source-badge">seed</span>
+              <span class="source-badge">Có sẵn</span>
             </div>
           </div>
           <div class="ingredient-kcal"><strong>165</strong>kcal / 100g</div>
@@ -573,7 +573,7 @@
             <div class="ingredient-name">Trứng gà</div>
             <div class="ingredient-meta">
               <span class="category-chip cat-trung">Trứng & Sữa</span>
-              <span class="source-badge">seed</span>
+              <span class="source-badge">Có sẵn</span>
             </div>
           </div>
           <div class="ingredient-kcal"><strong>155</strong>kcal / 100g</div>
@@ -932,6 +932,7 @@
     <tr><td>Typography — Subtitle</td><td>16px/600</td><td>Kcal emphasis number</td></tr>
     <tr><td>Typography — Overline</td><td>11px/500</td><td>Category chip text, tab label</td></tr>
     <tr><td>Typography — Caption</td><td>12px/400</td><td>Kcal unit label, result count, source badge</td></tr>
+    <tr><td>Source badge labels</td><td>Vietnamese display</td><td>DB value → Display: <code>db</code> → "Có sẵn", <code>manual</code> → "Tự tạo", <code>ai</code> → "AI". Same mapping used in dish-list ("Có sẵn"/"Tự tạo")</td></tr>
     <tr><td>Phone frame</td><td>375×812px</td><td>iPhone-size frame with tab bar</td></tr>
     <tr><td>Tab bar</td><td>56px height</td><td>4 tabs, Quản lý active (#2196F3 / #42A5F5)</td></tr>
     <tr><td>FAB</td><td>56px circle, bottom-right</td><td>16px from right edge, 72px from bottom (above tab bar)</td></tr>
@@ -942,6 +943,7 @@
     <tr><td>Easing — micro</td><td><code>cubic-bezier(0.25, 1, 0.5, 1)</code> 200ms</td><td>Filter chip select, search focus, dialog open</td></tr>
     <tr><td>Easing — sheet</td><td><code>cubic-bezier(0.32, 0.72, 0, 1)</code> 300ms</td><td>Bottom sheet / popover menu open. Exit: 225ms (75%)</td></tr>
     <tr><td>Tabular numbers</td><td><code>font-variant-numeric: tabular-nums</code></td><td>All numeric values (kcal, macro g) for consistent column alignment</td></tr>
+    <tr><td colspan="3"><strong>⚠️ Icon placeholders:</strong> Tab bar emojis (🏠📅🍳💪) and empty state emojis (🥗🔍) are mockup placeholders. Implementation uses <code>IonIcon</code> from Ionicons: <code>home-outline</code>, <code>calendar-outline</code>, <code>restaurant-outline</code>, <code>fitness-outline</code>. Empty states use themed SVG illustrations.</td></tr>
     <tr><td colspan="3"><strong>♿ Accessibility:</strong> Delete dialog: <code>role="alertdialog"</code> + <code>aria-modal="true"</code> + <code>aria-labelledby</code>. ⋮ menu: <code>aria-haspopup="menu"</code> + <code>aria-expanded</code>. Filter chips: <code>role="radiogroup"</code> with <code>aria-checked</code>. Search: <code>role="search"</code> + <code>aria-label="Tìm nguyên liệu"</code>. List: <code>role="list"</code> with <code>role="listitem"</code>.</td></tr>
   </table>
 </div>

@@ -1253,6 +1253,8 @@
     <tr><td>Easing — micro</td><td><code>cubic-bezier(0.25, 1, 0.5, 1)</code> 200ms</td><td>Input focus, delete button, success ✓ flash</td></tr>
     <tr><td>Easing — sheet</td><td><code>cubic-bezier(0.32, 0.72, 0, 1)</code> 300ms</td><td>Bottom sheet open/expand. Exit: 225ms (75%)</td></tr>
     <tr><td>Easing — snappy</td><td><code>cubic-bezier(0.16, 1, 0.3, 1)</code> 150ms</td><td>Save/delete button press, "Thêm" button</td></tr>
+    <tr><td>Keyboard types</td><td><code>inputmode="decimal"</code></td><td>Amount input in ingredient picker. Triggers numeric keyboard on mobile</td></tr>
+    <tr><td>Post-save behavior</td><td>Pop page → list toast</td><td>Success: close push-page → show toast on dish-list "Đã tạo {name}" (new) / "Đã cập nhật {name}" (edit). Auto-dismiss 3s</td></tr>
     <tr><td>Tabular numbers</td><td><code>font-variant-numeric: tabular-nums</code></td><td>Ingredient kcal, amount values, nutrition summary (kcal, g)</td></tr>
     <tr><td colspan="3"><strong>♿ Accessibility:</strong> Error messages: <code>role="alert"</code> + <code>aria-live="assertive"</code>. Invalid fields: <code>aria-invalid="true"</code> + <code>aria-describedby="err-{field}"</code>. Bottom sheet: <code>role="dialog"</code> + <code>aria-modal="true"</code> + <code>aria-label="Chọn nguyên liệu"</code>. Delete buttons: <code>aria-label="Xóa {ingredient}"</code>. Focus trap inside bottom sheet when open.</td></tr>
   </table>

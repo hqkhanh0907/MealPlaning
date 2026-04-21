@@ -33,6 +33,8 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 | `--primary-600` | `#1E88E5` | Active states |
 | `--primary-500` | `#2196F3` | **Primary — toolbar, buttons, links, nav active** |
 | `--primary-400` | `#42A5F5` | Dark mode primary, progress bars |
+
+> **⚠️ Contrast note:** `--primary-500` (#2196F3) on white = **3.12:1** — passes AA for large text (≥18pt / ≥14pt bold) and icons only. For body-size primary text on white, use `--primary-700` (#1976D2, 5.58:1) instead. `--primary-400` (#42A5F5) on dark bg (#121218) = **7.05:1** — passes AA for all text sizes.
 | `--primary-300` | `#64B5F6` | Dark mode links, secondary blue |
 | `--primary-200` | `#90CAF9` | Dark mode AI text, light accents |
 | `--primary-100` | `#BBDEFB` | AI card border (light) |

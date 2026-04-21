@@ -107,7 +107,7 @@
   body.dark  .sub-tab { color: #A8AAB4; }
   .sub-tab.active { font-weight: 600; }
   body.light .sub-tab.active { color: #1A1A2E; background: #FFFFFF; }
-  body.dark  .sub-tab.active { color: #FFF; background: #2A2A2A; }
+  body.dark  .sub-tab.active { color: #FFF; background: #2C2E36; }
 
   /* =========================================================================
      CONTENT AREA
@@ -804,7 +804,7 @@
     <tr><td><code>--bg-elevated</code></td><td>#FFFFFF / #2C2E36</td><td>FAB menu items, dialog box (dark)</td></tr>
     <tr><td><code>--primary</code></td><td>#2196F3 / #42A5F5</td><td>Toolbar, active tab</td></tr>
     <tr><td><code>--segment-track</code></td><td>#E2E4EC / #333340</td><td>Segment control track background</td></tr>
-    <tr><td><code>--segment-active</code></td><td>#FFFFFF / #2A2A2A</td><td>Segment control active pill</td></tr>
+    <tr><td><code>--segment-active</code></td><td>#FFFFFF / #2C2E36</td><td>Segment control active pill</td></tr>
     <tr><td><code>--status-bar</code></td><td>#1976D2 / #0D47A1</td><td>Status bar background</td></tr>
     <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>FAB button, empty-state CTA</td></tr>
     <tr><td><code>--text-primary</code></td><td>#1A1A2E / #FFFFFF</td><td>Dish name, dialog title</td></tr>
@@ -828,6 +828,7 @@
     <tr><td>Typography — Hero</td><td>22px/700</td><td>Calories hero stat on dish card</td></tr>
     <tr><td>Typography — Caption</td><td>13px/400</td><td>P/C/F macro summary, result count</td></tr>
     <tr><td>Typography — Overline</td><td>11px/500</td><td>Type badge text, source badge, tab bar labels, servings</td></tr>
+    <tr><td>Source badge labels</td><td>Vietnamese display</td><td>DB value → Display: <code>db</code> → "Có sẵn", <code>custom</code> → "Tự tạo", <code>ai</code> → "AI". Same mapping used in ingredient-list</td></tr>
     <tr><td>Macro colors</td><td>Cal=#2196F3, P=#4CAF50, C=#FF9800, F=#F44336</td><td>Color-coded macro values in dish summary</td></tr>
     <tr><td>Type badge — Nguyên liệu</td><td>Blue bg + blue text</td><td>#E3F2FD/#1565C0 (light), rgba(33,150,243,0.2)/#90CAF9 (dark)</td></tr>
     <tr><td>Type badge — Nhập nhanh</td><td>Orange bg + orange text</td><td>#FFF3E0/#E65100 (light), rgba(255,152,0,0.2)/#FFB74D (dark)</td></tr>
@@ -838,6 +839,7 @@
     <tr><td>Easing — micro</td><td><code>cubic-bezier(0.25, 1, 0.5, 1)</code> 200ms</td><td>Segment pill slide, search focus, chip select</td></tr>
     <tr><td>Easing — sheet</td><td><code>cubic-bezier(0.32, 0.72, 0, 1)</code> 300ms</td><td>FAB menu open, dialog open. Exit: 225ms (75%)</td></tr>
     <tr><td>Tabular numbers</td><td><code>font-variant-numeric: tabular-nums</code></td><td>Calories hero, macro values, result count — consistent width digits</td></tr>
+    <tr><td colspan="3"><strong>⚠️ Icon placeholders:</strong> Tab bar emojis (🏠📅🍳💪) and empty state emojis (🍽️🔍) are mockup placeholders. Implementation uses <code>IonIcon</code> from Ionicons: <code>home-outline</code>, <code>calendar-outline</code>, <code>restaurant-outline</code>, <code>fitness-outline</code>. Empty states use themed SVG illustrations.</td></tr>
     <tr><td colspan="3"><strong>♿ Accessibility:</strong> Delete dialog: <code>role="alertdialog"</code> + <code>aria-modal="true"</code> + <code>aria-labelledby</code>. ⋮ menu: <code>aria-haspopup="menu"</code> + <code>aria-expanded</code>. Segment control: <code>role="tablist"</code> with <code>role="tab"</code> + <code>aria-selected</code>. Search: <code>role="search"</code> + <code>aria-label="Tìm món ăn"</code>. FAB: <code>aria-label="Tạo món ăn mới"</code> + <code>aria-expanded</code> for menu state.</td></tr>
   </table>
 </div>
