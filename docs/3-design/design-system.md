@@ -69,6 +69,7 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 | `--bg-page` | `#F5F7FA` | `#121218` | Page background (đã tinted) |
 | `--bg-card` | `#FFFFFF` | `#1D1F26` | Card background |
 | `--bg-elevated` | `#FFFFFF` | `#2C2E36` | Modal, bottom sheet |
+| `--bg-muted` | `#E2E4EC` | `#2C2E36` | Skeleton shimmer, disabled surfaces |
 | `--text-primary` | `#1A1A2E` | `#FFFFFF` | Heading, số liệu |
 | `--text-secondary` | `#2D3142` | `#E0E0E8` | Body text |
 | `--text-tertiary` | `#5F6575` | `#A8AAB4` | Subtitle, mô tả phụ (dark ≥4.78:1 on card bg) |
@@ -333,14 +334,14 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Secondary | `#E3F2FD` / `#1A237E` | `#2196F3` / `#90CAF9` | `--radius-sm` (12px) | 10px 16px | **44px** |
 | Outline | transparent | `#2196F3` / `#64B5F6` | `--radius-sm` (12px) | 10px 16px | **44px** |
 | Outline Dashed | transparent | `#2196F3` / `#42A5F5` | `--radius-sm` (12px) | 10px 16px | **44px** |
-| Dialog Action | varies | varies | `--radius-xs` (8px) | 10px 20px | — |
+| Dialog Action | varies | varies | `--radius-xs` (8px) | 10px 20px | **44px** |
 | Text/Link | transparent | `#2196F3` / `#64B5F6` | — | 4px 8px | **44px** (via padding) |
 
 > **Rule:** Mọi button PHẢI có `min-height: 44px` (touch target §8c). Button radius dùng `--radius-sm` (12px) — trên 4px grid, nhất quán với input fields. Dark mode: CTA dùng `#FFB74D` (cam nhạt), text trên CTA dùng `var(--bg-page)`. Format: `light / dark`.
 >
 > **Padding rationale:** Full-width CTA dùng `14px` (uniform) vì `14+14+16=44px` đạt touch target chính xác không cần `min-height` fallback. Inline CTA dùng `12px 24px` cho dáng ngang rộng hơn. Dialog buttons dùng `10px 20px` vì nằm trong container hẹp. Secondary/Outline giữ `10px 16px` kết hợp `min-height: 44px`.
 >
-> **Outline Dashed variant:** Dùng cho "Thêm nguyên liệu" / "Thêm item" buttons — `border: 1.5px dashed`. Đường nét đứt (dashed) tạo affordance "chỗ trống cần điền", phù hợp cho add/insert actions. Border width `1.5px` (thay vì 1px) đảm bảo dashed pattern rõ ràng ở 12px radius.
+> **Outline Dashed variant:** Dùng cho "Thêm nguyên liệu" / "Thêm item" buttons — `border: 1.5px dashed`. Light: `border-color: #2196F3`. Dark: `border-color: #42A5F5`. Đường nét đứt (dashed) tạo affordance "chỗ trống cần điền", phù hợp cho add/insert actions. Border width `1.5px` (thay vì 1px) đảm bảo dashed pattern rõ ràng ở 12px radius.
 
 ### 8.3 Progress Bars
 
@@ -420,6 +421,28 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Property | Value |
 |----------|-------|
 | Arrow | Ionic default dropdown arrow |
+
+### 8.7 Radio / Checkbox Items
+
+> **Rule:** Radio circles ẩn (`::part(container) { display: none }`). Selection thể hiện qua background change + **checkmark icon**.
+
+### 8.6b Search Bar
+
+| Property | Light | Dark | Notes |
+|----------|-------|------|-------|
+| Background | `var(--bg-card)` | `var(--bg-card)` | Same as card |
+| Border | `1px solid #C8CBD4` | `1px solid #444850` | Input-specific border |
+| Border Radius | `--radius-sm` (12px) | same | Matches input fields |
+| Height | `44px` | same | Touch target compliant |
+| Padding | `10px 14px` | same | Documented exception for search |
+| Icon (🔍) | `--text-tertiary` | `#A8AAB4` | Left-aligned, 20px |
+| Placeholder | `--text-disabled` | `#5F6575` | "Tìm kiếm..." text |
+| Input text | `--text-primary` | `#FFFFFF` | Active search text |
+| Font | `14px/400` | same | `body` token |
+| Clear button (×) | `--text-tertiary` | `#A8AAB4` | 16px, appears when text present |
+| Focus | Border → `var(--ion-color-primary)` | same | Standard input focus |
+
+> **A11y:** `role="searchbox"`, `aria-label="Tìm kiếm"`. Clear button: `aria-label="Xóa tìm kiếm"`.
 
 ### 8.7 Radio / Checkbox Items
 
@@ -554,7 +577,7 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Border radius | `12px` | `12px` | `--radius-sm` |
 | Padding | `12px 16px` | `12px 16px` | — |
 | Max width | `343px` (= 375 - 16×2) | same | Page width - padding |
-| Position | Bottom `80px`, center horizontal | same | Above FAB/tab bar |
+| Position | Bottom `136px`, center horizontal | same | Above FAB (72+56+8=136) |
 | Shadow | `--shadow-xl` | none | — |
 | Font | `14px/400` | same | `body` token |
 | Duration | `2–3s` auto-dismiss | same | — |
@@ -600,15 +623,25 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Segment Control | — | bg swap | Focus ring | opacity 0.5 | — |
 | Filter Chip | bg tint nhẹ | Scale 0.98 | Focus ring | opacity 0.5 | — |
 | Card (tappable) | shadow lift | Scale 0.99 | Focus ring | opacity 0.5 | — |
+| Text/Link Button | Underline | Scale 0.98 | Focus ring | opacity 0.5 | — |
 | ⋮ More Menu | bg circle | — | Focus ring | opacity 0.5 | — |
 
 ### Loading State
 
 | Pattern | Dùng cho |
 |---------|----------|
-| Skeleton shimmer (`bg-muted animate-pulse`) | Card loading, list loading |
+| Skeleton shimmer (`var(--bg-muted)` + `animate-pulse`) | Card loading, list loading |
 | Inline spinner (ion-spinner) | Button action pending |
 | **KHÔNG dùng** centered full-page spinner | — |
+
+**Skeleton Shimmer Detail:**
+| Property | Light | Dark |
+|----------|-------|------|
+| Base color | `var(--bg-muted)` (#E2E4EC) | `var(--bg-muted)` (#2C2E36) |
+| Highlight | `#F5F7FA` | `#3A3C44` |
+| Animation | `pulse 1.5s ease-in-out infinite` | same |
+| Border radius | Match target component (card = 16px, text = 4px) | same |
+| Reduced motion | Static `var(--bg-muted)`, no animation | same |
 
 ### Success State
 
@@ -1050,6 +1083,24 @@ HealthMate AI là **Android-only** app, không cần responsive cho tablet hay d
 | Max width | 428px (large Android phones) |
 | Orientation | Portrait only |
 
+### 10.0b Responsive Scaling (320px → 428px)
+
+> **Rule:** Layout dùng **fluid width** (percentage / flex) — KHÔNG cần breakpoints. Chỉ cần đảm bảo:
+
+| Element | Behavior at 320px | Behavior at 428px | Method |
+|---------|-------------------|-------------------|--------|
+| Page padding | 12px (giảm từ 16px) | 16px | `padding: max(12px, 4.27vw)` |
+| Card | Full width - padding | Full width - padding | `width: 100%` |
+| Grid (2-col) | Giữ 2-col, item nhỏ hơn | Item rộng hơn | `flex: 1 1 0` |
+| Long text | Line-clamp 1→2 nếu cần | Giữ nguyên | Ellipsis stays |
+| Tab bar labels | Vẫn hiện | Vẫn hiện | `11px` min không giảm |
+| FAB | Vẫn 56px | Vẫn 56px | Fixed size |
+| Dialog | `width: calc(100% - 32px)` | Max 343px | `max-width: 343px` |
+| Bottom sheet | `width: 100%` | `width: 100%` | Full viewport width |
+| Typography | Không thay đổi font-size | Không thay đổi | Fixed sizes |
+
+> **Không scale font-size** theo viewport — text giữ nguyên kích thước ở mọi width. Chỉ container widths fluid.
+
 ### 10.1 Safe Areas (Android)
 
 > Android 10+ có gesture navigation bar, punch-hole camera, rounded corners. PHẢI handle safe areas.
@@ -1205,6 +1256,7 @@ Tất cả mockup HTML dùng trong quá trình discussion:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.4 | 2026-04-21 | **Audit Round 6:** Add --bg-muted token (skeleton shimmer + disabled surfaces). Add §8.6b Search Bar component spec. Add §10.0b Responsive Scaling (320-428px) guidance. Add Text/Link button states to per-component table. Fix toast position 80→136px (above FAB). Fix Dialog Action min-height → 44px. Add Outline Dashed dark mode border colors. Expand skeleton shimmer spec (base/highlight/reduced-motion). Fix FAB font-weight 300→400 (2 mockups). Fix dialog-btn min-height → 44px (2 mockups). Fix accent bar radius 2→4px (ingredient-edit). |
 | 1.3 | 2026-04-21 | **Audit Rounds 1-5 (cross-system):** Fix 22× #939AAA→#5F6575 (light text-tertiary misuse). Fix 17× #333340/#E2E4EC→#2D3142/#E0E0E8 (text-secondary token swap). Fix 15× dark #5F6575→#A8AAB4 (dark text-tertiary misuse). Add --shadow-xl overlay token. Add --radius-micro (4px). Add radius prohibition rule. Add Focus Ring Shadow spec. Add §8.9 Confirm Dialog (ARIA). Add §8.10 Bottom Sheet (ARIA, keyboard). Add §8.11 Toast/Snackbar. Expand §8.2 Button table (7 variants + padding rationale). Expand §4.2 spacing exceptions. Add §12 Z-Index Scale. Add §13 Tab Bar. Add §14 Text Overflow & Truncation. Add §15 Number Formatting. Add --space-xl (20px) to scale. Add Status Bar spec. Fix segment padding 2→4px. Fix category chip padding 2→4px. Fix tab icon 20→24px. Fix radio selected weight 500→600. Consolidate §8i → §8.10 (deduplicate). Fix streak dark bg olive→blue-tinted. |
 | 1.2 | 2026-04-20 | **Audit Rounds 1-10:** Fix tinted neutrals (#AAAAAA→#A8AAB4, #1A1A1A→#1A1A2E). Add SemiBold 600 weight. Add type scale notes (muddy pairs). Add easing tokens (no generic ease). Add card 3-tier hierarchy. Add success state pattern. Add error message templates. Add safe area §10.1. Add dark mode weight §10.2. Add vertical rhythm §3.7. Add diagonal-fractions §3.5. Update reduced motion (preserve functional). Update all Ionic dark vars (tinted). Fix button radius → --radius-sm (12px). Add 8 states (was 6). Add FAB/Segment/Filter/Card/Menu to per-component states. Add §10.3 ARIA labels + focus order. Fix shadow mapping → card tiers. Fix input/progress bar/segment tokens. Remove --radius-md (duplicate). |
 | 1.1 | 2026-04-19 | Add: Input/Select spec (8.6), Radio/Checkbox (8.7), Toolbar (8.8), Interaction States (8b), Touch Targets (8c), Text Transform (8d), Icon Rules (8e), Animations (8f), Onboarding Components (8g). Fix: `--radius-sm` 8→12px, add `--radius-xs` 8px. |
