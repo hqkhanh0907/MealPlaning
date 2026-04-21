@@ -138,6 +138,17 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 > - `line-height: 1` chỉ dùng cho **icon-only elements** (tab icons, close/delete buttons, emoji placeholders) và **FAB "+" character**. Không dùng cho text content.
 > - `line-height: 1.3` dành cho display/headline (22–28px). `line-height: 1.4` cho labels/titles. `line-height: 1.5–1.6` cho body text dài. Xem bảng Type Scale ở trên.
 
+**Heading Hierarchy Mapping (HTML → Token):**
+| HTML | Token | Size | Usage |
+|------|-------|------|-------|
+| `h1` | `headline` | 22px/700 | Page title (1 per screen) |
+| `h2` | `title` | 18px/500 | Card title, section title |
+| `h3` | `subtitle` | 16px/500 | Sub-section header |
+| `h4` | `body` | 14px/600 | Group label, field group title |
+| — | `caption` | 12px/400 | NOT a heading — meta/timestamp only |
+
+> **Rule:** Heading levels PHẢI sequential (h1→h2→h3), không được skip. Mỗi screen chỉ có 1 `h1` (= toolbar title). `aria-level` attribute bắt buộc nếu visual heading khác semantic level.
+
 ### 3.4 Number Typography
 
 | Token | Size | Weight | Dùng cho |
@@ -422,10 +433,6 @@ Theo PRD F-12 (Dashboard Quick Actions):
 |----------|-------|
 | Arrow | Ionic default dropdown arrow |
 
-### 8.7 Radio / Checkbox Items
-
-> **Rule:** Radio circles ẩn (`::part(container) { display: none }`). Selection thể hiện qua background change + **checkmark icon**.
-
 ### 8.6b Search Bar
 
 | Property | Light | Dark | Notes |
@@ -585,6 +592,16 @@ Theo PRD F-12 (Dashboard Quick Actions):
 
 > **ARIA:** `role="status" aria-live="polite"`. Toast KHÔNG steal focus — user continues current task. Dismiss via swipe or timeout.
 > **Content:** Phải specific: "Đã lưu Cơm gà nướng" không phải "Thành công". Action link optional (e.g., "Hoàn tác").
+
+### 8.12 Divider / Separator
+
+| Property | Light | Dark | Notes |
+|----------|-------|------|-------|
+| Color | `var(--border)` (#E2E4EC) | `var(--border)` (#333340) | Standard divider |
+| Height | `1px` | `1px` | Hairline only |
+| Margin | `0` (full-bleed) or `0 16px` (inset) | same | Inset = content-aligned |
+
+> **Rule:** Dùng **inset divider** (margin 16px) giữa list items cùng group. Dùng **full-bleed divider** giữa sections khác nhau. KHÔNG dùng border trên card — card dùng shadow/elevation phân tách. `role="separator"` cho screen readers.
 
 ---
 
@@ -1256,6 +1273,7 @@ Tất cả mockup HTML dùng trong quá trình discussion:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.5 | 2026-04-21 | **Audit Round 7:** Add heading hierarchy mapping (h1-h4 → token). Add §8.12 Divider/Separator spec. Fix duplicate §8.7 header. Remove stale §8.7 fragment from §8.6b insertion. |
 | 1.4 | 2026-04-21 | **Audit Round 6:** Add --bg-muted token (skeleton shimmer + disabled surfaces). Add §8.6b Search Bar component spec. Add §10.0b Responsive Scaling (320-428px) guidance. Add Text/Link button states to per-component table. Fix toast position 80→136px (above FAB). Fix Dialog Action min-height → 44px. Add Outline Dashed dark mode border colors. Expand skeleton shimmer spec (base/highlight/reduced-motion). Fix FAB font-weight 300→400 (2 mockups). Fix dialog-btn min-height → 44px (2 mockups). Fix accent bar radius 2→4px (ingredient-edit). |
 | 1.3 | 2026-04-21 | **Audit Rounds 1-5 (cross-system):** Fix 22× #939AAA→#5F6575 (light text-tertiary misuse). Fix 17× #333340/#E2E4EC→#2D3142/#E0E0E8 (text-secondary token swap). Fix 15× dark #5F6575→#A8AAB4 (dark text-tertiary misuse). Add --shadow-xl overlay token. Add --radius-micro (4px). Add radius prohibition rule. Add Focus Ring Shadow spec. Add §8.9 Confirm Dialog (ARIA). Add §8.10 Bottom Sheet (ARIA, keyboard). Add §8.11 Toast/Snackbar. Expand §8.2 Button table (7 variants + padding rationale). Expand §4.2 spacing exceptions. Add §12 Z-Index Scale. Add §13 Tab Bar. Add §14 Text Overflow & Truncation. Add §15 Number Formatting. Add --space-xl (20px) to scale. Add Status Bar spec. Fix segment padding 2→4px. Fix category chip padding 2→4px. Fix tab icon 20→24px. Fix radio selected weight 500→600. Consolidate §8i → §8.10 (deduplicate). Fix streak dark bg olive→blue-tinted. |
 | 1.2 | 2026-04-20 | **Audit Rounds 1-10:** Fix tinted neutrals (#AAAAAA→#A8AAB4, #1A1A1A→#1A1A2E). Add SemiBold 600 weight. Add type scale notes (muddy pairs). Add easing tokens (no generic ease). Add card 3-tier hierarchy. Add success state pattern. Add error message templates. Add safe area §10.1. Add dark mode weight §10.2. Add vertical rhythm §3.7. Add diagonal-fractions §3.5. Update reduced motion (preserve functional). Update all Ionic dark vars (tinted). Fix button radius → --radius-sm (12px). Add 8 states (was 6). Add FAB/Segment/Filter/Card/Menu to per-component states. Add §10.3 ARIA labels + focus order. Fix shadow mapping → card tiers. Fix input/progress bar/segment tokens. Remove --radius-md (duplicate). |
