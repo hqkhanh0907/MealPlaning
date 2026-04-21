@@ -90,7 +90,7 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 | AI text color | `#1565C0` | `#90CAF9` |
 | Quick action bg | `#E3F2FD` | `#1A237E` |
 | Quick action text | `#1565C0` | `#90CAF9` |
-| Streak card bg | `#FFF8E1` | `#2C2E1E` |
+| Streak card bg | `#FFF8E1` | `#2C2E36` |
 
 ---
 
@@ -185,8 +185,9 @@ Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi 
 | `--space-sm` | 8px | Button padding, item gap nhỏ |
 | `--space-md` | 12px | Gap giữa cards, content padding top |
 | `--space-lg` | 16px | Page padding (trái/phải), card padding |
-| `--space-xl` | 24px | Section separator |
-| `--space-2xl` | 32px | Page top/bottom padding |
+| `--space-xl` | 20px | Form section padding, input wrapper |
+| `--space-2xl` | 24px | Section separator |
+| `--space-3xl` | 32px | Page top/bottom padding |
 
 ### 4.2 Component Spacing
 
@@ -204,7 +205,7 @@ Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi 
 | Streak row | 10px (gap) | — |
 | Progress group | — | 4px (label ↔ bar) |
 
-> **Spacing exceptions:** Giá trị 6px, 10px, 14px nằm ngoài 4px grid nhưng được phép cho **component-internal padding** nhằm đạt kích thước cụ thể (e.g. 14px → 44px button height, 6px → compact chip). Spacing GIỮA components vẫn bắt buộc tuân thủ 4px grid (4, 8, 12, 16, 24, 32, 48).
+> **Spacing exceptions:** Giá trị 6px, 10px, 14px nằm ngoài 4px grid nhưng được phép cho **component-internal padding** nhằm đạt kích thước cụ thể (e.g. 14px → 44px button height, 6px → compact chip). Spacing GIỮA components vẫn bắt buộc tuân thủ 4px grid (4, 8, 12, 16, 20, 24, 32, 48).
 
 ---
 
@@ -455,6 +456,13 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Height | `56px` | Android standard |
 | Back Button | Ionic default `chevron-back` | Color: white |
 
+**Status Bar (above toolbar):**
+| Property | Light | Dark | Notes |
+|----------|-------|------|-------|
+| Background | `#1976D2` | `#0D47A1` | `--ion-color-primary-shade` — one step darker than toolbar |
+| Text/Icons | White | White | System-controlled |
+| Height | OS-managed | OS-managed | env(safe-area-inset-top) |
+
 **Toolbar Save Action (cho form dài):**
 
 | Property | Value | Notes |
@@ -529,7 +537,7 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Overlay | `rgba(0,0,0,0.5)` | `rgba(0,0,0,0.5)` | Scrim |
 | Sheet bg | `--ion-background-color` | `#121218` | — |
 | Top radius | `20px` | `20px` | `--radius-xl` (top-left + top-right only) |
-| Handle | `36×4px`, `--border-color`, `border-radius: 2px` | same | Grab affordance |
+| Handle | `36×4px`, centered, `--border-color`, `border-radius: 2px` | same | Grab affordance |
 | Shadow | `--shadow-lg` | none | — |
 | Max height | `90vh` (default) or `50vh` (keyboard open) | same | §10.1 safe area |
 | Search input | Sticky top, `12px` padding below handle | same | — |
@@ -807,19 +815,9 @@ Khi filter chips nhiều hơn viewport width:
 
 ---
 
-## 8i. Bottom Sheet
+## 8i. Bottom Sheet — Keyboard Behavior (CRITICAL)
 
-### Spec cơ bản
-
-| Property | Value |
-|----------|-------|
-| Background | `var(--bg-elevated)` (§2.4) |
-| Radius | `--radius-xl` (20px) top-left + top-right |
-| Handle | `40px × 4px`, centered, `var(--border)` color |
-| Backdrop | `rgba(0,0,0,0.5)` |
-| Animation | `300ms cubic-bezier(0.32, 0.72, 0, 1)` |
-
-### Keyboard Behavior (CRITICAL)
+> Chi tiết visual spec → xem **§8.10**. Section này chỉ bổ sung keyboard behavior.
 
 > Khi input trong Bottom Sheet được focus → keyboard chiếm ~50% màn hình.
 
@@ -1133,10 +1131,81 @@ Tất cả mockup HTML dùng trong quá trình discussion:
 
 ---
 
+## 12. Z-Index Scale
+
+> Layered z-index tránh conflict khi nhiều overlay cùng active.
+
+| Token | Value | Dùng cho |
+|-------|-------|----------|
+| `--z-base` | `0` | Normal content flow |
+| `--z-sticky` | `10` | Sticky headers, fixed search bar |
+| `--z-fab` | `20` | FAB button |
+| `--z-sheet` | `30` | Bottom sheet, action sheet |
+| `--z-scrim` | `40` | Backdrop/overlay behind dialog |
+| `--z-dialog` | `50` | Confirm dialog, alert |
+| `--z-toast` | `60` | Toast/snackbar (hiện trên mọi thứ) |
+
+> **Rule:** Không dùng giá trị z-index ngoài scale. Nếu cần layer mới → thêm vào bảng, không dùng số lẻ (e.g., `z-index: 999`).
+
+---
+
+## 13. Tab Bar
+
+| Property | Light | Dark | Token/Source |
+|----------|-------|------|-------------|
+| Background | `#FFFFFF` | `#1D1F26` | `--ion-tab-bar-background` |
+| Height | `56px` | `56px` | Android standard |
+| Border top | `1px solid var(--border)` | same | Subtle separator |
+| Icon size | `24px` | `24px` | §8e |
+| Icon↔Label gap | `2px` | `2px` | Component-internal (tighter than 4px grid, acceptable for stacked icon+label) |
+| Label font | `11px/500` | same | `overline` token |
+| Active icon | `var(--ion-color-primary)` | `#42A5F5` | §7.1 |
+| Active label | `var(--ion-color-primary)` | `#42A5F5` | — |
+| Inactive icon | `var(--text-tertiary)` | `#A8AAB4` | §7.1 |
+| Inactive label | `var(--text-tertiary)` | `#A8AAB4` | — |
+| Safe area | `padding-bottom: env(safe-area-inset-bottom)` | same | §10.1 |
+
+> **Max tabs:** 4 (Dashboard, Calendar, Quản lý, Fitness). Settings via push page from Quản lý tab.
+> **ARIA:** Ionic `ion-tab-bar` + `ion-tab-button` provide `role="tablist"` + `role="tab"` natively.
+
+---
+
+## 14. Text Overflow & Truncation
+
+| Context | Strategy | Max Lines | Fallback |
+|---------|----------|-----------|----------|
+| Card title (dish/ingredient) | Ellipsis | 1 | `text-overflow: ellipsis; white-space: nowrap; overflow: hidden` |
+| Card subtitle/description | Line clamp | 2 | `-webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden` |
+| List item name | Ellipsis | 1 | Same as card title |
+| Bottom sheet search results | Ellipsis | 1 | Same |
+| Dialog message | Wrap | Unlimited | No truncation |
+| Form labels | Wrap | Unlimited | No truncation — labels phải đọc được đầy đủ |
+
+> **Rule:** KHÔNG truncate content user nhập (names, notes). Chỉ truncate content hiển thị trong list/card views. Detail view luôn hiển thị full content.
+
+---
+
+## 15. Number & Unit Formatting
+
+| Type | Format | Example | Notes |
+|------|--------|---------|-------|
+| Calories | Integer, no separator | `1850 kcal` | Dưới 10000, không cần chấm phân cách |
+| Macros | Integer | `95g` | Gram không có phần thập phân |
+| Weight (kg) | 1 decimal | `65,5 kg` | Dấu phẩy cho thập phân (Vietnamese locale) |
+| Height (cm) | Integer | `170 cm` | |
+| Percentage | Integer | `78%` | Không dùng thập phân |
+| Serving/amount | 1 decimal if needed | `1,5 phần` hoặc `150g` | |
+| `font-variant-numeric` | `tabular-nums` | — | BẮT BUỘC cho mọi số (§3.5) |
+
+> **Rule:** Dùng dấu phẩy `,` cho thập phân (Vietnamese standard). Dấu chấm `.` cho phân cách nghìn (nếu cần, e.g., `10.000`). Math.round() cho kcal/g — không hiển thị số lẻ.
+
+---
+
 ## Changelog
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.3 | 2026-04-21 | **Audit Rounds 1-5 (cross-system):** Fix 22× #939AAA→#5F6575 (light text-tertiary misuse). Fix 17× #333340/#E2E4EC→#2D3142/#E0E0E8 (text-secondary token swap). Fix 15× dark #5F6575→#A8AAB4 (dark text-tertiary misuse). Add --shadow-xl overlay token. Add --radius-micro (4px). Add radius prohibition rule. Add Focus Ring Shadow spec. Add §8.9 Confirm Dialog (ARIA). Add §8.10 Bottom Sheet (ARIA, keyboard). Add §8.11 Toast/Snackbar. Expand §8.2 Button table (7 variants + padding rationale). Expand §4.2 spacing exceptions. Add §12 Z-Index Scale. Add §13 Tab Bar. Add §14 Text Overflow & Truncation. Add §15 Number Formatting. Add --space-xl (20px) to scale. Add Status Bar spec. Fix segment padding 2→4px. Fix category chip padding 2→4px. Fix tab icon 20→24px. Fix radio selected weight 500→600. Consolidate §8i → §8.10 (deduplicate). Fix streak dark bg olive→blue-tinted. |
 | 1.2 | 2026-04-20 | **Audit Rounds 1-10:** Fix tinted neutrals (#AAAAAA→#A8AAB4, #1A1A1A→#1A1A2E). Add SemiBold 600 weight. Add type scale notes (muddy pairs). Add easing tokens (no generic ease). Add card 3-tier hierarchy. Add success state pattern. Add error message templates. Add safe area §10.1. Add dark mode weight §10.2. Add vertical rhythm §3.7. Add diagonal-fractions §3.5. Update reduced motion (preserve functional). Update all Ionic dark vars (tinted). Fix button radius → --radius-sm (12px). Add 8 states (was 6). Add FAB/Segment/Filter/Card/Menu to per-component states. Add §10.3 ARIA labels + focus order. Fix shadow mapping → card tiers. Fix input/progress bar/segment tokens. Remove --radius-md (duplicate). |
 | 1.1 | 2026-04-19 | Add: Input/Select spec (8.6), Radio/Checkbox (8.7), Toolbar (8.8), Interaction States (8b), Touch Targets (8c), Text Transform (8d), Icon Rules (8e), Animations (8f), Onboarding Components (8g). Fix: `--radius-sm` 8→12px, add `--radius-xs` 8px. |
 | 1.0 | 2026-04-14 | Initial Design System — Color, Typography, Spacing, Components |
