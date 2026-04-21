@@ -15,13 +15,13 @@
     line-height: 1.6;
     transition: background 0.3s, color 0.3s;
   }
-  body.light { background: #e0e0e0; color: #1a1a1a; }
-  body.dark  { background: #1a1a1a; color: #ffffff; }
+  body.light { background: #E2E4EC; color: #1A1A2E; }
+  body.dark  { background: #1A1A2E; color: #ffffff; }
 
   h1.page-title { text-align: center; margin-bottom: 4px; font-size: 24px; font-weight: 700; }
   .page-subtitle { text-align: center; margin-bottom: 20px; font-size: 14px; }
-  body.light .page-subtitle { color: #666; }
-  body.dark  .page-subtitle { color: #AAAAAA; }
+  body.light .page-subtitle { color: #5F6575; }
+  body.dark  .page-subtitle { color: #A8AAB4; }
 
   /* Theme toggle */
   .theme-toggle { text-align: center; margin-bottom: 24px; }
@@ -33,7 +33,7 @@
   body.light .theme-toggle button { color: #2196F3; }
   body.dark  .theme-toggle button { color: #42a5f5; border-color: #42a5f5; }
   body.light .theme-toggle button.active { background: #2196F3; color: #fff; }
-  body.dark  .theme-toggle button.active { background: #42a5f5; color: #121212; }
+  body.dark  .theme-toggle button.active { background: #42a5f5; color: #121218; }
 
   /* =========================================================================
      PHONE FRAMES
@@ -46,8 +46,8 @@
   .screen-wrapper { text-align: center; }
   .screen-label { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
   .screen-desc { font-size: 12px; margin-bottom: 12px; }
-  body.light .screen-desc { color: #666; }
-  body.dark  .screen-desc { color: #AAAAAA; }
+  body.light .screen-desc { color: #5F6575; }
+  body.dark  .screen-desc { color: #A8AAB4; }
 
   .phone {
     width: 375px; height: 812px;
@@ -56,8 +56,8 @@
     box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     position: relative; display: flex; flex-direction: column;
   }
-  body.light .phone { border: 3px solid #c0c0c0; }
-  body.dark  .phone { border: 3px solid #444; }
+  body.light .phone { border: 3px solid #C8CBD4; }
+  body.dark  .phone { border: 3px solid #444850; }
 
   /* Status bar */
   .status-bar {
@@ -86,11 +86,11 @@
      ========================================================================= */
   .sub-tabs {
     display: flex; padding: 2px; gap: 2px;
-    border-radius: 10px; height: 36px;
+    border-radius: 12px; height: 36px;
     margin-bottom: 12px;
   }
-  body.light .sub-tabs { background: #E8E8E8; }
-  body.dark  .sub-tabs { background: #333; }
+  body.light .sub-tabs { background: #E2E4EC; }
+  body.dark  .sub-tabs { background: #333340; }
 
   .sub-tab {
     flex: 1; text-align: center; padding: 0 16px;
@@ -99,18 +99,18 @@
     display: flex; align-items: center; justify-content: center;
     background: transparent;
   }
-  body.light .sub-tab { color: #666; }
-  body.dark  .sub-tab { color: #AAAAAA; }
+  body.light .sub-tab { color: #5F6575; }
+  body.dark  .sub-tab { color: #A8AAB4; }
   .sub-tab.active {
     font-weight: 600;
   }
   body.light .sub-tab.active {
-    color: #1A1A1A; background: #FFFFFF;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    color: #1A1A2E; background: #FFFFFF;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
   }
   body.dark .sub-tab.active {
     color: #FFF; background: #2A2A2A;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
   }
 
   /* =========================================================================
@@ -122,7 +122,7 @@
     /* padding-bottom: 80px = FAB 56px + 16px gap + 8px safe — ensures last item isn't hidden behind FAB */
   }
   body.light .content { background: #F5F7FA; }
-  body.dark  .content { background: #121212; }
+  body.dark  .content { background: #121218; }
 
   /* =========================================================================
      SEARCH BAR
@@ -132,20 +132,20 @@
     padding: 10px 14px; border-radius: 12px; margin-bottom: 12px;
     border: 1px solid;
   }
-  body.light .search-bar { background: #fff; border-color: #E8E8E8; }
-  body.dark  .search-bar { background: #1E1E1E; border-color: #333; }
+  body.light .search-bar { background: #fff; border-color: #E2E4EC; }
+  body.dark  .search-bar { background: #1D1F26; border-color: #333340; }
   body.light .search-bar.focused { border-color: #2196F3; box-shadow: 0 0 0 2px rgba(33,150,243,0.12); }
   body.dark  .search-bar.focused { border-color: #42A5F5; box-shadow: 0 0 0 2px rgba(66,165,245,0.15); }
 
   .search-icon { width: 20px; height: 20px; flex-shrink: 0; }
-  body.light .search-icon { color: #999; }
-  body.dark  .search-icon { color: #666; }
+  body.light .search-icon { color: #939AAA; }
+  body.dark  .search-icon { color: #5F6575; }
 
   .search-text { font-size: 14px; font-weight: 400; flex: 1; }
-  body.light .search-text { color: #1A1A1A; }
+  body.light .search-text { color: #1A1A2E; }
   body.dark  .search-text { color: #fff; }
-  body.light .search-text.placeholder { color: #999 !important; }
-  body.dark  .search-text.placeholder { color: #AAAAAA !important; }
+  body.light .search-text.placeholder { color: #939AAA !important; }
+  body.dark  .search-text.placeholder { color: #A8AAB4 !important; }
 
   .search-clear {
     min-width: 44px; min-height: 44px; display: flex;
@@ -155,10 +155,10 @@
   .search-clear-dot {
     width: 20px; height: 20px; border-radius: 50%; display: flex;
     align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700;
+    font-size: 12px; font-weight: 600;
   }
-  body.light .search-clear-dot { background: #E8E8E8; color: #666; }
-  body.dark  .search-clear-dot { background: #444; color: #AAAAAA; }
+  body.light .search-clear-dot { background: #E2E4EC; color: #5F6575; }
+  body.dark  .search-clear-dot { background: #444850; color: #A8AAB4; }
 
   /* =========================================================================
      FILTER CHIPS
@@ -179,15 +179,15 @@
     background: linear-gradient(to right, transparent, #F5F7FA);
   }
   body.dark .filter-chips-wrapper::after {
-    background: linear-gradient(to right, transparent, #121212);
+    background: linear-gradient(to right, transparent, #121218);
   }
   .filter-chip {
     flex-shrink: 0; padding: 6px 14px; border-radius: 8px;
     font-size: 12px; font-weight: 500; cursor: pointer;
     border: 1px solid; white-space: nowrap; transition: all 0.2s;
   }
-  body.light .filter-chip { background: #fff; border-color: #E8E8E8; color: #666; }
-  body.dark  .filter-chip { background: #1E1E1E; border-color: #333; color: #AAAAAA; }
+  body.light .filter-chip { background: #fff; border-color: #E2E4EC; color: #5F6575; }
+  body.dark  .filter-chip { background: #1D1F26; border-color: #333340; color: #A8AAB4; }
   body.light .filter-chip.active { background: rgba(33,150,243,0.15); border-color: rgba(33,150,243,0.3); color: #1976D2; font-weight: 600; }
   body.dark  .filter-chip.active { background: rgba(66,165,245,0.15); border-color: rgba(66,165,245,0.3); color: #90CAF9; font-weight: 600; }
 
@@ -208,18 +208,18 @@
     background: none; border: none; padding: 0;
     z-index: 1;
   }
-  body.light .card-more-btn { color: #999; }
-  body.dark  .card-more-btn { color: #666; }
+  body.light .card-more-btn { color: #939AAA; }
+  body.dark  .card-more-btn { color: #5F6575; }
   body.light .ingredient-card { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  body.dark  .ingredient-card { background: #1E1E1E; }
+  body.dark  .ingredient-card { background: #1D1F26; }
 
   .ingredient-info { flex: 1; min-width: 0; }
 
   .ingredient-name {
-    font-size: 14px; font-weight: 500; line-height: 1.3;
+    font-size: 14px; font-weight: 500; line-height: 1.4;
     margin-bottom: 4px;
   }
-  body.light .ingredient-name { color: #1A1A1A; }
+  body.light .ingredient-name { color: #1A1A2E; }
   body.dark  .ingredient-name { color: #fff; }
 
   .ingredient-meta {
@@ -259,19 +259,19 @@
   .source-badge {
     font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 4px;
   }
-  body.light .source-badge { background: #E8E8E8; color: #666; }
-  body.dark  .source-badge { background: #333; color: #AAAAAA; }
+  body.light .source-badge { background: #E2E4EC; color: #5F6575; }
+  body.dark  .source-badge { background: #333340; color: #A8AAB4; }
 
   .ingredient-kcal {
     font-size: 12px; font-weight: 400; text-align: right;
     flex-shrink: 0; white-space: nowrap;
   }
-  body.light .ingredient-kcal { color: #666; }
-  body.dark  .ingredient-kcal { color: #AAAAAA; }
+  body.light .ingredient-kcal { color: #5F6575; }
+  body.dark  .ingredient-kcal { color: #A8AAB4; }
   .ingredient-kcal strong {
     font-size: 16px; font-weight: 700; display: block; line-height: 1.2;
   }
-  body.light .ingredient-kcal strong { color: #1A1A1A; }
+  body.light .ingredient-kcal strong { color: #1A1A2E; }
   body.dark  .ingredient-kcal strong { color: #fff; }
 
   /* =========================================================================
@@ -283,18 +283,18 @@
   }
   .empty-icon { font-size: 48px; margin-bottom: 16px; }
   .empty-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
-  body.light .empty-title { color: #333; }
-  body.dark  .empty-title { color: #E0E0E0; }
+  body.light .empty-title { color: #333340; }
+  body.dark  .empty-title { color: #E2E4EC; }
   .empty-desc { font-size: 13px; margin-bottom: 20px; }
-  body.light .empty-desc { color: #999; }
-  body.dark  .empty-desc { color: #666; }
+  body.light .empty-desc { color: #939AAA; }
+  body.dark  .empty-desc { color: #5F6575; }
 
   .btn-empty-cta {
-    padding: 12px 24px; border: none; border-radius: 10px;
+    padding: 12px 24px; border: none; border-radius: 12px;
     font-size: 14px; font-weight: 500; color: #fff; cursor: pointer;
   }
   body.light .btn-empty-cta { background: #FF9800; }
-  body.dark  .btn-empty-cta { background: #FFB74D; color: #121212; }
+  body.dark  .btn-empty-cta { background: #FFB74D; color: #121218; }
 
   /* =========================================================================
      FAB
@@ -307,7 +307,7 @@
     z-index: 10;
   }
   body.light .fab { background: #FF9800; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
-  body.dark  .fab { background: #FFB74D; color: #121212; box-shadow: none; }
+  body.dark  .fab { background: #FFB74D; color: #121218; box-shadow: none; }
 
   /* Scroll-to-top button — shown when user scrolls past ~200px */
   .scroll-top-btn {
@@ -317,8 +317,8 @@
     cursor: pointer; z-index: 10; font-size: 18px;
     transition: opacity 0.2s;
   }
-  body.light .scroll-top-btn { background: #fff; border-color: #E8E8E8; color: #666; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  body.dark  .scroll-top-btn { background: #1E1E1E; border-color: #333; color: #AAAAAA; }
+  body.light .scroll-top-btn { background: #fff; border-color: #E2E4EC; color: #5F6575; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  body.dark  .scroll-top-btn { background: #1D1F26; border-color: #333340; color: #A8AAB4; }
 
   /* =========================================================================
      TAB BAR
@@ -327,16 +327,16 @@
     display: flex; height: 56px; flex-shrink: 0;
     border-top: 1px solid;
   }
-  body.light .tab-bar { background: #fff; border-top-color: #E8E8E8; }
-  body.dark  .tab-bar { background: #1E1E1E; border-top-color: #333; }
+  body.light .tab-bar { background: #fff; border-top-color: #E2E4EC; }
+  body.dark  .tab-bar { background: #1D1F26; border-top-color: #333340; }
 
   .tab-item {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 2px;
     font-size: 11px; font-weight: 500; cursor: pointer;
-    color: #999; transition: color 0.2s;
+    color: #939AAA; transition: color 0.2s;
   }
-  body.dark .tab-item { color: #AAAAAA; }
+  body.dark .tab-item { color: #A8AAB4; }
   .tab-item .tab-icon { font-size: 20px; line-height: 1; }
   body.light .tab-item.active { color: #2196F3; }
   body.dark  .tab-item.active { color: #42A5F5; }
@@ -355,15 +355,15 @@
     border-radius: 16px;
   }
   body.light .dialog-box { background: #fff; }
-  body.dark  .dialog-box { background: #2E2E2E; }
+  body.dark  .dialog-box { background: #2C2E36; }
 
   .dialog-title { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
-  body.light .dialog-title { color: #1A1A1A; }
+  body.light .dialog-title { color: #1A1A2E; }
   body.dark  .dialog-title { color: #fff; }
 
   .dialog-msg { font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
-  body.light .dialog-msg { color: #666; }
-  body.dark  .dialog-msg { color: #AAAAAA; }
+  body.light .dialog-msg { color: #5F6575; }
+  body.dark  .dialog-msg { color: #A8AAB4; }
 
   .dialog-actions { display: flex; justify-content: flex-end; gap: 12px; }
   .dialog-btn {
@@ -371,19 +371,19 @@
     font-size: 14px; font-weight: 500; cursor: pointer;
   }
   .dialog-btn-cancel { background: transparent; }
-  body.light .dialog-btn-cancel { color: #666; }
-  body.dark  .dialog-btn-cancel { color: #AAAAAA; }
+  body.light .dialog-btn-cancel { color: #5F6575; }
+  body.dark  .dialog-btn-cancel { color: #A8AAB4; }
   .dialog-btn-danger { color: #fff; }
   body.light .dialog-btn-danger { background: #F44336; }
   body.dark  .dialog-btn-danger { background: #EF5350; }
   .dialog-btn-primary { color: #fff; }
   body.light .dialog-btn-primary { background: #2196F3; }
-  body.dark  .dialog-btn-primary { background: #42A5F5; color: #121212; }
+  body.dark  .dialog-btn-primary { background: #42A5F5; color: #121218; }
 
   /* Result count hint */
   .result-count-hint { font-size: 12px; }
-  body.light .result-count-hint { color: #999; }
-  body.dark  .result-count-hint { color: #AAAAAA; }
+  body.light .result-count-hint { color: #939AAA; }
+  body.dark  .result-count-hint { color: #A8AAB4; }
 
   /* =========================================================================
      DESIGN SPEC NOTES
@@ -392,25 +392,25 @@
     max-width: 900px; margin: 48px auto 0; padding: 24px;
     border-radius: 16px; font-size: 13px; line-height: 1.7;
   }
-  body.light .spec-notes { background: #fff; border: 1px solid #E8E8E8; }
-  body.dark  .spec-notes { background: #1E1E1E; border: 1px solid #333; }
+  body.light .spec-notes { background: #fff; border: 1px solid #E2E4EC; }
+  body.dark  .spec-notes { background: #1D1F26; border: 1px solid #333340; }
   .spec-notes h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
   .spec-notes table { width: 100%; border-collapse: collapse; margin-top: 8px; }
   .spec-notes th, .spec-notes td {
     text-align: left; padding: 6px 10px; font-size: 12px;
     border-bottom: 1px solid;
   }
-  body.light .spec-notes th, body.light .spec-notes td { border-bottom-color: #E8E8E8; }
-  body.dark  .spec-notes th, body.dark  .spec-notes td { border-bottom-color: #333; }
+  body.light .spec-notes th, body.light .spec-notes td { border-bottom-color: #E2E4EC; }
+  body.dark  .spec-notes th, body.dark  .spec-notes td { border-bottom-color: #333340; }
   .spec-notes th { font-weight: 600; }
-  body.light .spec-notes th { color: #333; }
-  body.dark  .spec-notes th { color: #E0E0E0; }
+  body.light .spec-notes th { color: #333340; }
+  body.dark  .spec-notes th { color: #E2E4EC; }
   .spec-notes code {
     font-family: 'SF Mono', Menlo, monospace; font-size: 11px;
     padding: 1px 5px; border-radius: 4px;
   }
-  body.light .spec-notes code { background: #F5F7FA; color: #333; }
-  body.dark  .spec-notes code { background: #2E2E2E; color: #E0E0E0; }
+  body.light .spec-notes code { background: #F5F7FA; color: #333340; }
+  body.dark  .spec-notes code { background: #2C2E36; color: #E2E4EC; }
 </style>
 </head>
 <body class="light">
@@ -790,7 +790,7 @@
           <div class="dialog-title">Xóa nguyên liệu?</div>
           <div class="dialog-msg">Bạn có chắc muốn xóa <strong>Hạt chia</strong>? Thao tác này không thể hoàn tác.</div>
           <div class="dialog-actions">
-            <button class="dialog-btn dialog-btn-cancel">Hủy</button>
+            <button class="dialog-btn dialog-btn-cancel">Giữ lại</button>
             <button class="dialog-btn dialog-btn-danger">Xóa</button>
           </div>
         </div>
@@ -908,16 +908,16 @@
   <h2>📐 Design Spec Notes</h2>
   <table>
     <tr><th>Token</th><th>Value</th><th>Usage</th></tr>
-    <tr><td><code>--bg-page</code></td><td>#F5F7FA / #121212</td><td>Content area background</td></tr>
-    <tr><td><code>--bg-card</code></td><td>#FFFFFF / #1E1E1E</td><td>Ingredient cards, search bar, tab bar</td></tr>
+    <tr><td><code>--bg-page</code></td><td>#F5F7FA / #121218</td><td>Content area background</td></tr>
+    <tr><td><code>--bg-card</code></td><td>#FFFFFF / #1D1F26</td><td>Ingredient cards, search bar, tab bar</td></tr>
     <tr><td><code>--primary</code></td><td>#2196F3 / #42A5F5</td><td>Toolbar, active tab, segment control active text, focused search border</td></tr>
     <tr><td><code>--status-bar</code></td><td>#1976D2 / #0D47A1</td><td>Status bar background</td></tr>
     <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>FAB, empty-state CTA button</td></tr>
-    <tr><td><code>--text-primary</code></td><td>#1A1A1A / #FFFFFF</td><td>Ingredient name, kcal number</td></tr>
-    <tr><td><code>--text-secondary</code></td><td>#333333 / #E0E0E0</td><td>Dialog message bold text</td></tr>
-    <tr><td><code>--text-tertiary</code></td><td>#666666 / #AAAAAA</td><td>Kcal caption, dialog message, search placeholder</td></tr>
-    <tr><td><code>--text-disabled</code></td><td>#999999 / #666666</td><td>Inactive tabs, result count hint</td></tr>
-    <tr><td><code>--border</code></td><td>#E8E8E8 / #333333</td><td>Search bar border, tab bar top border, card border (dark)</td></tr>
+    <tr><td><code>--text-primary</code></td><td>#1A1A2E / #FFFFFF</td><td>Ingredient name, kcal number</td></tr>
+    <tr><td><code>--text-secondary</code></td><td>#333340 / #E2E4EC</td><td>Dialog message bold text</td></tr>
+    <tr><td><code>--text-tertiary</code></td><td>#5F6575 / #A8AAB4</td><td>Kcal caption, dialog message, search placeholder</td></tr>
+    <tr><td><code>--text-disabled</code></td><td>#939AAA / #5F6575</td><td>Inactive tabs, result count hint</td></tr>
+    <tr><td><code>--border</code></td><td>#E2E4EC / #333340</td><td>Search bar border, tab bar top border, card border (dark)</td></tr>
     <tr><td><code>--error</code></td><td>#F44336 / #EF5350</td><td>Delete confirm dialog danger button (unused ingredient only)</td></tr>
     <tr><td><code>--card-shadow</code></td><td>0 1px 4px rgba(0,0,0,0.08)</td><td>Ingredient cards (light only)</td></tr>
     <tr><td><code>radius-xs</code></td><td>8px</td><td>Category chips, filter chips, dialog buttons</td></tr>

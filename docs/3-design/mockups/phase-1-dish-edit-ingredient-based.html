@@ -15,13 +15,13 @@
     line-height: 1.6;
     transition: background 0.3s, color 0.3s;
   }
-  body.light { background: #e0e0e0; color: #1a1a1a; }
-  body.dark  { background: #1a1a1a; color: #ffffff; }
+  body.light { background: #E2E4EC; color: #1A1A2E; }
+  body.dark  { background: #1A1A2E; color: #ffffff; }
 
   h1.page-title { text-align: center; margin-bottom: 4px; font-size: 24px; font-weight: 700; }
   .page-subtitle { text-align: center; margin-bottom: 20px; font-size: 14px; }
-  body.light .page-subtitle { color: #666; }
-  body.dark  .page-subtitle { color: #AAAAAA; }
+  body.light .page-subtitle { color: #5F6575; }
+  body.dark  .page-subtitle { color: #A8AAB4; }
 
   /* Theme toggle */
   .theme-toggle { text-align: center; margin-bottom: 24px; }
@@ -33,7 +33,7 @@
   body.light .theme-toggle button { color: #2196F3; }
   body.dark  .theme-toggle button { color: #42a5f5; border-color: #42a5f5; }
   body.light .theme-toggle button.active { background: #2196F3; color: #fff; }
-  body.dark  .theme-toggle button.active { background: #42a5f5; color: #121212; }
+  body.dark  .theme-toggle button.active { background: #42a5f5; color: #121218; }
 
   /* =========================================================================
      PHONE FRAMES
@@ -46,8 +46,8 @@
   .screen-wrapper { text-align: center; }
   .screen-label { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
   .screen-desc { font-size: 12px; margin-bottom: 12px; }
-  body.light .screen-desc { color: #666; }
-  body.dark  .screen-desc { color: #AAAAAA; }
+  body.light .screen-desc { color: #5F6575; }
+  body.dark  .screen-desc { color: #A8AAB4; }
 
   .phone {
     width: 375px; height: 812px;
@@ -56,8 +56,8 @@
     box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     position: relative; display: flex; flex-direction: column;
   }
-  body.light .phone { border: 3px solid #c0c0c0; }
-  body.dark  .phone { border: 3px solid #444; }
+  body.light .phone { border: 3px solid #C8CBD4; }
+  body.dark  .phone { border: 3px solid #444850; }
 
   /* Status bar */
   .status-bar {
@@ -106,7 +106,7 @@
     text-align: left;
   }
   body.light .content { background: #F5F7FA; }
-  body.dark  .content { background: #121212; }
+  body.dark  .content { background: #121218; }
 
   /* =========================================================================
      SECTION LABELS
@@ -115,14 +115,14 @@
     font-size: 14px; font-weight: 500; line-height: 1.4;
     margin-top: 16px; margin-bottom: 8px;
   }
-  body.light .section-label { color: #1A1A1A; }
+  body.light .section-label { color: #1A1A2E; }
   body.dark  .section-label { color: #fff; }
 
   .section-hint {
     font-size: 12px; font-weight: 400; margin-top: -4px; margin-bottom: 8px;
   }
-  body.light .section-hint { color: #999; }
-  body.dark  .section-hint { color: #666; }
+  body.light .section-hint { color: #939AAA; }
+  body.dark  .section-hint { color: #5F6575; }
 
   /* =========================================================================
      FORM INPUTS — Apple-style floating label
@@ -135,8 +135,8 @@
     border: 1px solid; border-radius: 12px;
     min-height: 56px;
   }
-  body.light .input-wrapper { border-color: #d1d1d6; background: #fff; }
-  body.dark  .input-wrapper { border-color: #444; background: #1E1E1E; }
+  body.light .input-wrapper { border-color: #C8CBD4; background: #fff; }
+  body.dark  .input-wrapper { border-color: #444850; background: #1D1F26; }
 
   .input-wrapper.invalid { border-color: #F44336 !important; }
   body.dark .input-wrapper.invalid { border-color: #EF5350 !important; }
@@ -145,18 +145,18 @@
     position: absolute; top: 6px; left: 16px;
     font-size: 12px; font-weight: 400;
   }
-  body.light .input-label { color: #666; }
-  body.dark  .input-label { color: #AAAAAA; }
+  body.light .input-label { color: #5F6575; }
+  body.dark  .input-label { color: #A8AAB4; }
   body.light .input-label.invalid { color: #F44336; }
   body.dark  .input-label.invalid { color: #EF5350; }
 
   .input-value {
     font-size: 16px; font-weight: 400; min-height: 24px;
   }
-  body.light .input-value { color: #1A1A1A; }
+  body.light .input-value { color: #1A1A2E; }
   body.dark  .input-value { color: #fff; }
-  body.light .input-value.placeholder { color: #999; }
-  body.dark  .input-value.placeholder { color: #666; }
+  body.light .input-value.placeholder { color: #939AAA; }
+  body.dark  .input-value.placeholder { color: #5F6575; }
 
   /* =========================================================================
      FIELD ERROR
@@ -176,21 +176,21 @@
     padding: 12px 16px; border-radius: 12px; margin-bottom: 8px;
   }
   body.light .ingredient-item { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  body.dark  .ingredient-item { background: #1E1E1E; }
+  body.dark  .ingredient-item { background: #1D1F26; }
 
   .ingredient-item-info { flex: 1; min-width: 0; }
 
   .ingredient-item-name {
-    font-size: 14px; font-weight: 500; line-height: 1.3;
+    font-size: 14px; font-weight: 500; line-height: 1.4;
   }
-  body.light .ingredient-item-name { color: #1A1A1A; }
+  body.light .ingredient-item-name { color: #1A1A2E; }
   body.dark  .ingredient-item-name { color: #fff; }
 
   .ingredient-item-detail {
     font-size: 12px; font-weight: 400; margin-top: 2px;
   }
-  body.light .ingredient-item-detail { color: #666; }
-  body.dark  .ingredient-item-detail { color: #AAAAAA; }
+  body.light .ingredient-item-detail { color: #5F6575; }
+  body.dark  .ingredient-item-detail { color: #A8AAB4; }
 
   .ingredient-item-kcal {
     font-size: 13px; font-weight: 500; flex-shrink: 0;
@@ -226,13 +226,13 @@
     border-radius: 16px; padding: 16px; margin-top: 12px;
   }
   body.light .nutrition-card { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  body.dark  .nutrition-card { background: #1E1E1E; }
+  body.dark  .nutrition-card { background: #1D1F26; }
 
   .nutrition-card-title {
     font-size: 13px; font-weight: 500; margin-bottom: 12px;
   }
-  body.light .nutrition-card-title { color: #333; }
-  body.dark  .nutrition-card-title { color: #E0E0E0; }
+  body.light .nutrition-card-title { color: #333340; }
+  body.dark  .nutrition-card-title { color: #E2E4EC; }
 
   .nutrition-row {
     display: flex; align-items: center; gap: 8px;
@@ -241,7 +241,7 @@
   }
   .nutrition-row:last-child { border-bottom: none; }
   body.light .nutrition-row { border-bottom-color: #F5F7FA; }
-  body.dark  .nutrition-row { border-bottom-color: #2E2E2E; }
+  body.dark  .nutrition-row { border-bottom-color: #2C2E36; }
 
   .nutrition-dot {
     width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
@@ -254,8 +254,8 @@
   .nutrition-label {
     font-size: 13px; font-weight: 400; flex: 1;
   }
-  body.light .nutrition-label { color: #666; }
-  body.dark  .nutrition-label { color: #AAAAAA; }
+  body.light .nutrition-label { color: #5F6575; }
+  body.dark  .nutrition-label { color: #A8AAB4; }
 
   .nutrition-value {
     font-size: 14px; font-weight: 600; flex-shrink: 0;
@@ -276,20 +276,20 @@
   .nutrition-zero {
     font-size: 14px; font-weight: 600;
   }
-  body.light .nutrition-zero { color: #999; }
-  body.dark  .nutrition-zero { color: #666; }
+  body.light .nutrition-zero { color: #939AAA; }
+  body.dark  .nutrition-zero { color: #5F6575; }
 
   /* =========================================================================
      BUTTONS
      ========================================================================= */
   .btn-cta {
-    width: 100%; padding: 14px; border: none; border-radius: 10px;
+    width: 100%; padding: 14px; border: none; border-radius: 12px;
     font-size: 16px; font-weight: 500; color: #fff;
     cursor: pointer; margin-top: 24px;
     display: flex; align-items: center; justify-content: center; gap: 8px;
   }
   body.light .btn-cta { background: #FF9800; }
-  body.dark  .btn-cta { background: #FFB74D; color: #121212; }
+  body.dark  .btn-cta { background: #FFB74D; color: #121218; }
   .btn-cta.disabled { opacity: 0.5; pointer-events: none; }
 
   .btn-danger-text {
@@ -308,16 +308,16 @@
     border-radius: 12px; margin-bottom: 8px;
     border: 1px dashed;
   }
-  body.light .empty-ingredients { border-color: #E8E8E8; background: #FAFAFA; }
-  body.dark  .empty-ingredients { border-color: #333; background: #1A1A1A; }
+  body.light .empty-ingredients { border-color: #E2E4EC; background: #FAFAFA; }
+  body.dark  .empty-ingredients { border-color: #333340; background: #1A1A2E; }
 
   .empty-ingredients-icon { font-size: 32px; margin-bottom: 8px; }
 
   .empty-ingredients-text {
     font-size: 13px; font-weight: 400; margin-bottom: 12px;
   }
-  body.light .empty-ingredients-text { color: #999; }
-  body.dark  .empty-ingredients-text { color: #666; }
+  body.light .empty-ingredients-text { color: #939AAA; }
+  body.dark  .empty-ingredients-text { color: #5F6575; }
 
   /* =========================================================================
      BOTTOM SHEET
@@ -333,19 +333,19 @@
     display: flex; flex-direction: column;
   }
   body.light .bottom-sheet { background: #fff; }
-  body.dark  .bottom-sheet { background: #1E1E1E; }
+  body.dark  .bottom-sheet { background: #1D1F26; }
 
   .bottom-sheet-handle {
     width: 36px; height: 4px; border-radius: 2px;
     margin: 0 auto 12px;
   }
-  body.light .bottom-sheet-handle { background: #E8E8E8; }
-  body.dark  .bottom-sheet-handle { background: #444; }
+  body.light .bottom-sheet-handle { background: #E2E4EC; }
+  body.dark  .bottom-sheet-handle { background: #444850; }
 
   .bottom-sheet-title {
     font-size: 18px; font-weight: 500; margin-bottom: 12px;
   }
-  body.light .bottom-sheet-title { color: #1A1A1A; }
+  body.light .bottom-sheet-title { color: #1A1A2E; }
   body.dark  .bottom-sheet-title { color: #fff; }
 
   /* Search inside bottom sheet */
@@ -354,17 +354,17 @@
     padding: 10px 14px; border-radius: 12px; margin-bottom: 12px;
     border: 1px solid;
   }
-  body.light .bs-search { background: #F5F7FA; border-color: #E8E8E8; }
-  body.dark  .bs-search { background: #121212; border-color: #333; }
+  body.light .bs-search { background: #F5F7FA; border-color: #E2E4EC; }
+  body.dark  .bs-search { background: #121218; border-color: #333340; }
 
   .bs-search-icon { width: 18px; height: 18px; flex-shrink: 0; }
-  body.light .bs-search-icon { color: #999; }
-  body.dark  .bs-search-icon { color: #666; }
+  body.light .bs-search-icon { color: #939AAA; }
+  body.dark  .bs-search-icon { color: #5F6575; }
 
   .bs-search-text { font-size: 14px; }
-  body.light .bs-search-text { color: #1A1A1A; }
+  body.light .bs-search-text { color: #1A1A2E; }
   body.dark  .bs-search-text { color: #fff; }
-  .bs-search-text.placeholder { color: #999 !important; }
+  .bs-search-text.placeholder { color: #939AAA !important; }
 
   /* Ingredient picker list */
   .bs-list {
@@ -376,13 +376,13 @@
     cursor: pointer;
   }
   body.light .bs-item { border-bottom-color: #F5F7FA; }
-  body.dark  .bs-item { border-bottom-color: #2E2E2E; }
+  body.dark  .bs-item { border-bottom-color: #2C2E36; }
   .bs-item:last-child { border-bottom: none; }
 
   .bs-item-info { flex: 1; }
 
   .bs-item-name { font-size: 14px; font-weight: 500; }
-  body.light .bs-item-name { color: #1A1A1A; }
+  body.light .bs-item-name { color: #1A1A2E; }
   body.dark  .bs-item-name { color: #fff; }
 
   .bs-item-meta {
@@ -407,15 +407,15 @@
   .bs-item-kcal {
     font-size: 12px; font-weight: 400;
   }
-  body.light .bs-item-kcal { color: #666; }
-  body.dark  .bs-item-kcal { color: #AAAAAA; }
+  body.light .bs-item-kcal { color: #5F6575; }
+  body.dark  .bs-item-kcal { color: #A8AAB4; }
 
   /* Amount entry bottom sheet */
   .bs-amount-header {
     display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
   }
   .bs-amount-name { font-size: 16px; font-weight: 500; }
-  body.light .bs-amount-name { color: #1A1A1A; }
+  body.light .bs-amount-name { color: #1A1A2E; }
   body.dark  .bs-amount-name { color: #fff; }
 
   .bs-unit-group {
@@ -426,35 +426,35 @@
     font-size: 14px; font-weight: 500; text-align: center;
     cursor: pointer; border: 1px solid;
   }
-  body.light .bs-unit-btn { background: #fff; border-color: #d1d1d6; color: #1A1A1A; }
-  body.dark  .bs-unit-btn { background: #1E1E1E; border-color: #444; color: #E0E0E0; }
+  body.light .bs-unit-btn { background: #fff; border-color: #C8CBD4; color: #1A1A2E; }
+  body.dark  .bs-unit-btn { background: #1D1F26; border-color: #444850; color: #E2E4EC; }
   body.light .bs-unit-btn.selected { background: #E3F2FD; border-color: #2196F3; color: #2196F3; }
   body.dark  .bs-unit-btn.selected { background: rgba(66,165,245,0.15); border-color: #42A5F5; color: #42A5F5; }
 
   .bs-preview {
-    padding: 10px 14px; border-radius: 10px; margin-bottom: 16px;
+    padding: 10px 14px; border-radius: 12px; margin-bottom: 16px;
     font-size: 13px; font-weight: 400;
   }
-  body.light .bs-preview { background: #F5F7FA; color: #666; }
-  body.dark  .bs-preview { background: #2E2E2E; color: #AAAAAA; }
+  body.light .bs-preview { background: #F5F7FA; color: #5F6575; }
+  body.dark  .bs-preview { background: #2C2E36; color: #A8AAB4; }
   .bs-preview strong { font-weight: 600; }
-  body.light .bs-preview strong { color: #1A1A1A; }
+  body.light .bs-preview strong { color: #1A1A2E; }
   body.dark  .bs-preview strong { color: #fff; }
 
   .bs-actions {
     display: flex; gap: 12px;
   }
   .bs-btn {
-    flex: 1; padding: 12px; border-radius: 10px;
+    flex: 1; padding: 12px; border-radius: 12px;
     font-size: 14px; font-weight: 500; text-align: center;
     cursor: pointer; border: none;
   }
   .bs-btn-cancel { background: transparent; }
-  body.light .bs-btn-cancel { color: #666; border: 1px solid #E8E8E8; }
-  body.dark  .bs-btn-cancel { color: #AAAAAA; border: 1px solid #333; }
+  body.light .bs-btn-cancel { color: #5F6575; border: 1px solid #E2E4EC; }
+  body.dark  .bs-btn-cancel { color: #A8AAB4; border: 1px solid #333340; }
   .bs-btn-add { color: #fff; }
   body.light .bs-btn-add { background: #2196F3; }
-  body.dark  .bs-btn-add { background: #42A5F5; color: #121212; }
+  body.dark  .bs-btn-add { background: #42A5F5; color: #121218; }
 
   /* =========================================================================
      RECENTLY USED SECTION IN PICKER
@@ -462,8 +462,8 @@
   .bs-section-header {
     font-size: 13px; font-weight: 600; padding: 12px 16px 4px;
   }
-  body.light .bs-section-header { color: #666; }
-  body.dark  .bs-section-header { color: #AAAAAA; }
+  body.light .bs-section-header { color: #5F6575; }
+  body.dark  .bs-section-header { color: #A8AAB4; }
 
   .bs-recent-list {
     margin-bottom: 4px;
@@ -472,53 +472,53 @@
     display: flex; align-items: center; justify-content: space-between;
     padding: 8px 16px; cursor: pointer; border-bottom: 1px solid;
   }
-  body.light .bs-recent-item { border-bottom-color: #E8E8E8; }
-  body.dark  .bs-recent-item { border-bottom-color: #333; }
+  body.light .bs-recent-item { border-bottom-color: #E2E4EC; }
+  body.dark  .bs-recent-item { border-bottom-color: #333340; }
   .bs-recent-item:last-child { border-bottom: none; }
 
   .bs-recent-name { font-size: 14px; font-weight: 400; }
-  body.light .bs-recent-name { color: #1A1A1A; }
+  body.light .bs-recent-name { color: #1A1A2E; }
   body.dark  .bs-recent-name { color: #fff; }
 
   .bs-recent-kcal { font-size: 12px; font-weight: 400; flex-shrink: 0; }
-  body.light .bs-recent-kcal { color: #666; }
-  body.dark  .bs-recent-kcal { color: #AAAAAA; }
+  body.light .bs-recent-kcal { color: #5F6575; }
+  body.dark  .bs-recent-kcal { color: #A8AAB4; }
 
   /* =========================================================================
      SUCCESS MESSAGE + FOOTER ACTIONS ("Thêm tiếp" mode)
      ========================================================================= */
   .bs-success-msg {
     display: flex; align-items: center; gap: 6px;
-    padding: 10px 14px; border-radius: 10px; margin-bottom: 12px;
+    padding: 10px 14px; border-radius: 12px; margin-bottom: 12px;
     font-size: 14px; font-weight: 500; color: #4CAF50;
   }
   body.light .bs-success-msg { background: #E8F5E9; }
   body.dark  .bs-success-msg { background: rgba(76,175,80,0.12); color: #66BB6A; }
 
-  .bs-success-icon { font-size: 16px; font-weight: 700; }
+  .bs-success-icon { font-size: 16px; font-weight: 600; }
 
   .bs-footer-actions {
     display: flex; gap: 12px; margin-top: 12px; padding-top: 12px;
     border-top: 1px solid;
   }
-  body.light .bs-footer-actions { border-top-color: #E8E8E8; }
-  body.dark  .bs-footer-actions { border-top-color: #333; }
+  body.light .bs-footer-actions { border-top-color: #E2E4EC; }
+  body.dark  .bs-footer-actions { border-top-color: #333340; }
 
   .bs-btn-secondary {
-    flex: 1; padding: 12px; border-radius: 10px;
+    flex: 1; padding: 12px; border-radius: 12px;
     font-size: 14px; font-weight: 500; text-align: center;
     cursor: pointer; background: transparent;
   }
-  body.light .bs-btn-secondary { color: #666; border: 1px solid #E8E8E8; }
-  body.dark  .bs-btn-secondary { color: #AAAAAA; border: 1px solid #333; }
+  body.light .bs-btn-secondary { color: #5F6575; border: 1px solid #E2E4EC; }
+  body.dark  .bs-btn-secondary { color: #A8AAB4; border: 1px solid #333340; }
 
   .bs-btn-primary {
-    flex: 1.5; padding: 12px; border-radius: 10px;
+    flex: 1.5; padding: 12px; border-radius: 12px;
     font-size: 14px; font-weight: 500; text-align: center;
     cursor: pointer; border: none; color: #fff;
   }
   body.light .bs-btn-primary { background: #2196F3; }
-  body.dark  .bs-btn-primary { background: #42A5F5; color: #121212; }
+  body.dark  .bs-btn-primary { background: #42A5F5; color: #121218; }
 
   /* =========================================================================
      DESIGN SPEC NOTES
@@ -527,25 +527,25 @@
     max-width: 900px; margin: 48px auto 0; padding: 24px;
     border-radius: 16px; font-size: 13px; line-height: 1.7;
   }
-  body.light .spec-notes { background: #fff; border: 1px solid #E8E8E8; }
-  body.dark  .spec-notes { background: #1E1E1E; border: 1px solid #333; }
+  body.light .spec-notes { background: #fff; border: 1px solid #E2E4EC; }
+  body.dark  .spec-notes { background: #1D1F26; border: 1px solid #333340; }
   .spec-notes h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
   .spec-notes table { width: 100%; border-collapse: collapse; margin-top: 8px; }
   .spec-notes th, .spec-notes td {
     text-align: left; padding: 6px 10px; font-size: 12px;
     border-bottom: 1px solid;
   }
-  body.light .spec-notes th, body.light .spec-notes td { border-bottom-color: #E8E8E8; }
-  body.dark  .spec-notes th, body.dark  .spec-notes td { border-bottom-color: #333; }
+  body.light .spec-notes th, body.light .spec-notes td { border-bottom-color: #E2E4EC; }
+  body.dark  .spec-notes th, body.dark  .spec-notes td { border-bottom-color: #333340; }
   .spec-notes th { font-weight: 600; }
-  body.light .spec-notes th { color: #333; }
-  body.dark  .spec-notes th { color: #E0E0E0; }
+  body.light .spec-notes th { color: #333340; }
+  body.dark  .spec-notes th { color: #E2E4EC; }
   .spec-notes code {
     font-family: 'SF Mono', Menlo, monospace; font-size: 11px;
     padding: 1px 5px; border-radius: 4px;
   }
-  body.light .spec-notes code { background: #F5F7FA; color: #333; }
-  body.dark  .spec-notes code { background: #2E2E2E; color: #E0E0E0; }
+  body.light .spec-notes code { background: #F5F7FA; color: #333340; }
+  body.dark  .spec-notes code { background: #2C2E36; color: #E2E4EC; }
 </style>
 </head>
 <body class="light">
@@ -799,7 +799,7 @@
           </div>
 
           <div class="bs-actions">
-            <button class="bs-btn bs-btn-cancel">Hủy</button>
+            <button class="bs-btn bs-btn-cancel">Đóng</button>
             <button class="bs-btn bs-btn-add">Thêm</button>
           </div>
         </div>
@@ -1208,15 +1208,15 @@
   <h2>📐 Design Spec Notes — Dish Edit: Ingredient-based (F-02)</h2>
   <table>
     <tr><th>Token</th><th>Value</th><th>Usage</th></tr>
-    <tr><td><code>--bg-page</code></td><td>#F5F7FA / #121212</td><td>Content background, bs-search bg (light)</td></tr>
-    <tr><td><code>--bg-card</code></td><td>#FFFFFF / #1E1E1E</td><td>Input fields, ingredient items, nutrition card, bottom sheet</td></tr>
-    <tr><td><code>--bg-elevated</code></td><td>#FFFFFF / #2E2E2E</td><td>Nutrition preview, unit btn (dark hover)</td></tr>
+    <tr><td><code>--bg-page</code></td><td>#F5F7FA / #121218</td><td>Content background, bs-search bg (light)</td></tr>
+    <tr><td><code>--bg-card</code></td><td>#FFFFFF / #1D1F26</td><td>Input fields, ingredient items, nutrition card, bottom sheet</td></tr>
+    <tr><td><code>--bg-elevated</code></td><td>#FFFFFF / #2C2E36</td><td>Nutrition preview, unit btn (dark hover)</td></tr>
     <tr><td><code>--primary</code></td><td>#2196F3 / #42A5F5</td><td>Toolbar, outline btn, unit selected, ingredient kcal, macro-cal</td></tr>
     <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>Save button (CTA)</td></tr>
-    <tr><td><code>--text-primary</code></td><td>#1A1A1A / #FFFFFF</td><td>Input values, ingredient name, bottom sheet title</td></tr>
-    <tr><td><code>--text-secondary</code></td><td>#333333 / #E0E0E0</td><td>Section label (nutrition card title), preview strong text</td></tr>
-    <tr><td><code>--text-tertiary</code></td><td>#666666 / #AAAAAA</td><td>Input labels, ingredient detail, nutrition labels, preview text, section headers</td></tr>
-    <tr><td><code>--text-disabled</code></td><td>#999999 / #666666</td><td>Placeholders, empty ingredient text, zero nutrition values</td></tr>
+    <tr><td><code>--text-primary</code></td><td>#1A1A2E / #FFFFFF</td><td>Input values, ingredient name, bottom sheet title</td></tr>
+    <tr><td><code>--text-secondary</code></td><td>#333340 / #E2E4EC</td><td>Section label (nutrition card title), preview strong text</td></tr>
+    <tr><td><code>--text-tertiary</code></td><td>#5F6575 / #A8AAB4</td><td>Input labels, ingredient detail, nutrition labels, preview text, section headers</td></tr>
+    <tr><td><code>--text-disabled</code></td><td>#939AAA / #5F6575</td><td>Placeholders, empty ingredient text, zero nutrition values</td></tr>
     <tr><td><code>--error</code></td><td>#F44336 / #EF5350</td><td>Invalid field borders, error text, delete btn, danger text btn</td></tr>
     <tr><td><code>--card-shadow</code></td><td>0 1px 4px rgba(0,0,0,0.08)</td><td>Ingredient items, nutrition card (light only)</td></tr>
     <tr><td><code>radius-xs</code></td><td>8px</td><td>Category chips</td></tr>
