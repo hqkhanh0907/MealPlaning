@@ -104,7 +104,7 @@
     flex: 1; padding: 12px 16px 16px; overflow-y: auto;
     text-align: left;
   }
-  body.light .content { background: #f5f7fa; }
+  body.light .content { background: #F5F7FA; }
   body.dark  .content { background: #121218; }
 
   /* Typography — matches onboarding.page.ts styles */
@@ -140,7 +140,7 @@
   }
   body.light .radio-item { background: #fff; }
   body.dark  .radio-item { background: #1D1F26; }
-  body.light .radio-item:hover { background: #e3f2fd; }
+  body.light .radio-item:hover { background: #E3F2FD; }
   body.dark  .radio-item:hover { background: #2C2E36; }
 
   /* Radio circle — triple affordance: circle (left) + bg highlight + checkmark (right) */
@@ -187,7 +187,7 @@
   body.dark  .radio-label { color: #E2E4EC; }
 
   /* Selected item highlight */
-  body.light .radio-item.selected { background: #e3f2fd; }
+  body.light .radio-item.selected { background: #E3F2FD; }
   body.dark  .radio-item.selected { background: #1a237e; }
 
   /* Checkmark icon for selected radio items */
@@ -247,7 +247,8 @@
   }
   body.light .select-wrapper { border-color: #C8CBD4; background: #fff; }
   body.dark  .select-wrapper { border-color: #444850; background: #1D1F26; }
-  .select-wrapper.invalid { border-color: #F44336; }
+  .select-wrapper.invalid { border-color: #F44336 !important; }
+  body.dark .select-wrapper.invalid { border-color: #EF5350 !important; }
 
   .select-arrow {
     width: 16px; height: 16px; margin-left: auto;
@@ -282,8 +283,8 @@
     cursor: pointer; margin-top: 24px;
     display: flex; align-items: center; justify-content: center;
   }
-  body.light .btn-cta { background: #ff9800; }
-  body.dark  .btn-cta { background: #ffb74d; color: #121218; }
+  body.light .btn-cta { background: #FF9800; }
+  body.dark  .btn-cta { background: #FFB74D; color: #121218; }
   .btn-cta.disabled { opacity: 0.5; pointer-events: none; }
 
   .button-row {
@@ -316,8 +317,8 @@
   body.light .spec-notes th, body.light .spec-notes td { border-color: #ffe0b2; }
   body.dark  .spec-notes th, body.dark  .spec-notes td { border-color: #5a5020; }
   .spec-notes th { font-weight: 600; }
-  body.light .spec-notes th { color: #e65100; }
-  body.dark  .spec-notes th { color: #ffb74d; }
+  body.light .spec-notes th { color: #E65100; }
+  body.dark  .spec-notes th { color: #FFB74D; }
   .spec-notes code { font-family: 'Fira Code', monospace; font-size: 12px; padding: 1px 4px; border-radius: 3px; }
   body.light .spec-notes code { background: #fff8e1; }
   body.dark  .spec-notes code { background: #3e3e1e; }
