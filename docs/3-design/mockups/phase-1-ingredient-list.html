@@ -110,7 +110,7 @@
   }
   body.dark .sub-tab.active {
     color: #FFF; background: #2C2E36;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
   }
 
   /* =========================================================================
@@ -138,7 +138,7 @@
   body.dark  .search-bar.focused { border-color: #42A5F5; box-shadow: 0 0 0 2px rgba(66,165,245,0.15); }
 
   .search-icon { width: 20px; height: 20px; flex-shrink: 0; }
-  body.light .search-icon { color: #939AAA; }
+  body.light .search-icon { color: #5F6575; }
   body.dark  .search-icon { color: #5F6575; }
 
   .search-text { font-size: 14px; font-weight: 400; flex: 1; }
@@ -208,7 +208,7 @@
     background: none; border: none; padding: 0;
     z-index: 1;
   }
-  body.light .card-more-btn { color: #939AAA; }
+  body.light .card-more-btn { color: #5F6575; }
   body.dark  .card-more-btn { color: #5F6575; }
   body.light .ingredient-card { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
   body.dark  .ingredient-card { background: #1D1F26; }
@@ -283,10 +283,10 @@
   }
   .empty-icon { font-size: 48px; margin-bottom: 16px; }
   .empty-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
-  body.light .empty-title { color: #333340; }
-  body.dark  .empty-title { color: #E2E4EC; }
+  body.light .empty-title { color: #2D3142; }
+  body.dark  .empty-title { color: #E0E0E8; }
   .empty-desc { font-size: 13px; margin-bottom: 20px; }
-  body.light .empty-desc { color: #939AAA; }
+  body.light .empty-desc { color: #5F6575; }
   body.dark  .empty-desc { color: #5F6575; }
 
   .btn-empty-cta {
@@ -334,7 +334,7 @@
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 2px;
     font-size: 11px; font-weight: 500; cursor: pointer;
-    color: #939AAA; transition: color 0.2s;
+    color: #5F6575; transition: color 0.2s;
   }
   body.dark .tab-item { color: #A8AAB4; }
   .tab-item .tab-icon { font-size: 20px; line-height: 1; }
@@ -367,7 +367,7 @@
 
   .dialog-actions { display: flex; justify-content: flex-end; gap: 12px; }
   .dialog-btn {
-    padding: 8px 20px; border: none; border-radius: 8px;
+    padding: 10px 20px; border: none; border-radius: 8px;
     font-size: 14px; font-weight: 500; cursor: pointer;
   }
   .dialog-btn-cancel { background: transparent; }
@@ -382,7 +382,7 @@
 
   /* Result count hint */
   .result-count-hint { font-size: 12px; }
-  body.light .result-count-hint { color: #939AAA; }
+  body.light .result-count-hint { color: #5F6575; }
   body.dark  .result-count-hint { color: #A8AAB4; }
 
   /* =========================================================================
@@ -914,9 +914,10 @@
     <tr><td><code>--status-bar</code></td><td>#1976D2 / #0D47A1</td><td>Status bar background</td></tr>
     <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>FAB, empty-state CTA button</td></tr>
     <tr><td><code>--text-primary</code></td><td>#1A1A2E / #FFFFFF</td><td>Ingredient name, kcal number</td></tr>
-    <tr><td><code>--text-secondary</code></td><td>#333340 / #E2E4EC</td><td>Dialog message bold text</td></tr>
+    <tr><td><code>--text-secondary</code></td><td>#2D3142 / #E0E0E8</td><td>Dialog message bold text</td></tr>
     <tr><td><code>--text-tertiary</code></td><td>#5F6575 / #A8AAB4</td><td>Kcal caption, dialog message, search placeholder</td></tr>
-    <tr><td><code>--text-disabled</code></td><td>#939AAA / #5F6575</td><td>Inactive tabs, result count hint</td></tr>
+    <tr><td><code>--text-disabled</code></td><td>#939AAA / #5F6575</td><td>ONLY for disabled elements and input ::placeholder</td></tr>
+    <tr><td><code>--text-tertiary</code></td><td>#5F6575 / #A8AAB4</td><td>Search icon, ⋮ more button, empty-desc, inactive tabs, result count hint</td></tr>
     <tr><td><code>--border</code></td><td>#E2E4EC / #333340</td><td>Search bar border, tab bar top border, card border (dark)</td></tr>
     <tr><td><code>--error</code></td><td>#F44336 / #EF5350</td><td>Delete confirm dialog danger button (unused ingredient only)</td></tr>
     <tr><td><code>--card-shadow</code></td><td>0 1px 4px rgba(0,0,0,0.08)</td><td>Ingredient cards (light only)</td></tr>

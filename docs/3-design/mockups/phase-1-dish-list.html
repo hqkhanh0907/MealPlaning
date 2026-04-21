@@ -132,7 +132,7 @@
   body.dark  .search-bar { background: #1D1F26; border-color: #333340; }
 
   .search-icon { width: 20px; height: 20px; flex-shrink: 0; }
-  body.light .search-icon { color: #939AAA; }
+  body.light .search-icon { color: #5F6575; }
   body.dark  .search-icon { color: #5F6575; }
 
   .search-text { font-size: 14px; font-weight: 400; flex: 1; }
@@ -187,7 +187,7 @@
     border: none; background: none; padding: 0;
     font-family: inherit; letter-spacing: 1px;
   }
-  body.light .dish-more { color: #939AAA; }
+  body.light .dish-more { color: #5F6575; }
   body.dark  .dish-more { color: #5F6575; }
 
   .dish-header {
@@ -244,7 +244,7 @@
   .dish-servings {
     font-size: 12px; font-weight: 400;
   }
-  body.light .dish-servings { color: #939AAA; }
+  body.light .dish-servings { color: #5F6575; }
   body.dark  .dish-servings { color: #5F6575; }
 
   /* =========================================================================
@@ -256,10 +256,10 @@
   }
   .empty-icon { font-size: 48px; margin-bottom: 16px; }
   .empty-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
-  body.light .empty-title { color: #333340; }
-  body.dark  .empty-title { color: #E2E4EC; }
+  body.light .empty-title { color: #2D3142; }
+  body.dark  .empty-title { color: #E0E0E8; }
   .empty-desc { font-size: 13px; margin-bottom: 20px; }
-  body.light .empty-desc { color: #939AAA; }
+  body.light .empty-desc { color: #5F6575; }
   body.dark  .empty-desc { color: #5F6575; }
 
   .btn-empty-cta {
@@ -299,8 +299,8 @@
     white-space: nowrap; cursor: pointer;
     border: none;
   }
-  body.light .fab-menu-item { background: #fff; color: #1A1A2E; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
-  body.dark  .fab-menu-item { background: #2C2E36; color: #E2E4EC; }
+  body.light .fab-menu-item { background: #fff; color: #1A1A2E; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  body.dark  .fab-menu-item { background: #2C2E36; color: #E0E0E8; }
   .fab-menu-item .fab-menu-icon { font-size: 18px; flex-shrink: 0; }
   .fab-menu-item .fab-menu-label { font-size: 14px; }
   .fab-menu-text { display: flex; flex-direction: column; gap: 1px; }
@@ -333,7 +333,7 @@
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 2px;
     font-size: 11px; font-weight: 500; cursor: pointer;
-    color: #939AAA; transition: color 0.2s;
+    color: #5F6575; transition: color 0.2s;
   }
   .tab-item .tab-icon { font-size: 20px; line-height: 1; }
   body.light .tab-item.active { color: #2196F3; }
@@ -393,7 +393,7 @@
   .result-count {
     font-size: 12px; font-weight: 400; margin-bottom: 8px;
   }
-  body.light .result-count { color: #939AAA; }
+  body.light .result-count { color: #5F6575; }
   body.dark  .result-count { color: #5F6575; }
 
   /* =========================================================================
@@ -415,13 +415,13 @@
   body.dark  .spec-notes th, body.dark  .spec-notes td { border-bottom-color: #333340; }
   .spec-notes th { font-weight: 600; }
   body.light .spec-notes th { color: #333340; }
-  body.dark  .spec-notes th { color: #E2E4EC; }
+  body.dark  .spec-notes th { color: #E0E0E8; }
   .spec-notes code {
     font-family: 'SF Mono', Menlo, monospace; font-size: 11px;
     padding: 1px 5px; border-radius: 4px;
   }
   body.light .spec-notes code { background: #F5F7FA; color: #333340; }
-  body.dark  .spec-notes code { background: #2C2E36; color: #E2E4EC; }
+  body.dark  .spec-notes code { background: #2C2E36; color: #E0E0E8; }
 </style>
 </head>
 <body class="light">
@@ -808,9 +808,10 @@
     <tr><td><code>--status-bar</code></td><td>#1976D2 / #0D47A1</td><td>Status bar background</td></tr>
     <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>FAB button, empty-state CTA</td></tr>
     <tr><td><code>--text-primary</code></td><td>#1A1A2E / #FFFFFF</td><td>Dish name, dialog title</td></tr>
-    <tr><td><code>--text-secondary</code></td><td>#333340 / #E2E4EC</td><td>Dialog message bold, empty-title</td></tr>
+    <tr><td><code>--text-secondary</code></td><td>#2D3142 / #E0E0E8</td><td>Dialog message bold, empty-title</td></tr>
     <tr><td><code>--text-tertiary</code></td><td>#5F6575 / #A8AAB4</td><td>Macro summary, servings, dialog message, kcal captions</td></tr>
-    <tr><td><code>--text-disabled</code></td><td>#939AAA / #5F6575</td><td>Inactive tabs (light), search placeholder, empty-desc, result count</td></tr>
+    <tr><td><code>--text-disabled</code></td><td>#939AAA / #5F6575</td><td>Search placeholder</td></tr>
+    <tr><td><code>--text-tertiary</code></td><td>#5F6575 / #A8AAB4</td><td>Search icon, ⋮ more, servings info, empty-desc, inactive tabs, result count</td></tr>
     <tr><td><code>--border</code></td><td>#E2E4EC / #333340</td><td>Search bar, tab bar top border, source badge bg (light)</td></tr>
     <tr><td><code>--error</code></td><td>#F44336 / #EF5350</td><td>Delete dialog danger button</td></tr>
     <tr><td><code>--success</code></td><td>#4CAF50 / #66BB6A</td><td>Protein macro color</td></tr>

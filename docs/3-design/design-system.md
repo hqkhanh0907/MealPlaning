@@ -72,8 +72,13 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 | `--text-primary` | `#1A1A2E` | `#FFFFFF` | Heading, số liệu |
 | `--text-secondary` | `#2D3142` | `#E0E0E8` | Body text |
 | `--text-tertiary` | `#5F6575` | `#A8AAB4` | Subtitle, mô tả phụ (dark ≥4.78:1 on card bg) |
-| `--text-disabled` | `#939AAA` | `#5F6575` | Disabled, placeholder |
+| `--text-disabled` | `#939AAA` | `#5F6575` | Disabled elements, input placeholder text ONLY |
 | `--border` | `#E2E4EC` | `#333340` | Divider, border |
+
+> **⚠️ Token Usage — text-tertiary vs text-disabled:**
+> - `--text-tertiary` (#5F6575 light / #A8AAB4 dark): Subtitles, hints, section descriptions, search icons, ⋮ more icons, inactive tabs, meta info, result counts, empty state descriptions, input suffixes (kcal, g). Contrast ≥4.5:1 on white — WCAG AA safe.
+> - `--text-disabled` (#939AAA light / #5F6575 dark): **ONLY** for actual `[disabled]` elements and `::placeholder` text inside inputs. Contrast ~3.5:1 on white — acceptable ONLY for placeholder text per WCAG exception.
+> - **KHÔNG dùng** `#939AAA` trong dark mode CSS rules. Giá trị này không tồn tại trong dark palette. Dark mode disabled = `#5F6575`, dark mode tertiary = `#A8AAB4`.
 
 ### 2.5 Dark Mode — AI Card
 
@@ -129,6 +134,8 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 > - `body-sm (13px)` và `body (14px)` chỉ khác 1px — dùng **weight/color** thay vì size để phân cấp khi cần.
 > - `overline (11px)` là minimum readable — chỉ dùng cho badges/chips nhỏ, KHÔNG cho body text. Tab labels ưu tiên dùng `caption (12px)` nếu có dấu tiếng Việt dài.
 > - Thêm `letter-spacing: 0.05em` cho `overline` để cải thiện readability ở 11px.
+> - `line-height: 1` chỉ dùng cho **icon-only elements** (tab icons, close/delete buttons, emoji placeholders) và **FAB "+" character**. Không dùng cho text content.
+> - `line-height: 1.3` dành cho display/headline (22–28px). `line-height: 1.4` cho labels/titles. `line-height: 1.5–1.6` cho body text dài. Xem bảng Type Scale ở trên.
 
 ### 3.4 Number Typography
 
@@ -151,11 +158,11 @@ Nếu app hiển thị phân số nguyên liệu (½, ¼), thêm:
 font-variant-numeric: tabular-nums diagonal-fractions;
 ```
 
-### 3.7 Vertical Rhythm Baseline
+### 3.6 Vertical Rhythm Baseline
 
 > Body text: `14px × 1.6 = 22.4px ≈ 24px`. Spacing values (4, 8, 12, 16, 24, 32) nên là bội số hoặc ước số của baseline `24px` để tạo nhịp thị giác nhất quán. Trong thực tế: 8px = ⅓, 12px = ½, 24px = 1×, 48px = 2×.
 
-### 3.6 Calorie Visual Hierarchy
+### 3.7 Calorie Visual Hierarchy
 
 Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi bật hơn** P/C/F:
 
@@ -188,10 +195,16 @@ Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi 
 | Page content | 16px (trái/phải), 12px (trên) | — |
 | Card | 16px | 12px (giữa cards) |
 | Card inner content | — | 10px (giữa sections) |
-| Button | 10px (vertical), 16px (horizontal) | — |
+| Button (full-width CTA) | 14px | — |
+| Button (inline) | 10px–12px (vertical), 16px–24px (horizontal) | — |
+| Search bar | 10px 14px | — |
+| Filter chip | 6px 14px | 8px (giữa chips) |
+| Micro badge | 1px 6px | — |
 | Quick action grid | 8px (gap) | — |
 | Streak row | 10px (gap) | — |
 | Progress group | — | 4px (label ↔ bar) |
+
+> **Spacing exceptions:** Giá trị 6px, 10px, 14px nằm ngoài 4px grid nhưng được phép cho **component-internal padding** nhằm đạt kích thước cụ thể (e.g. 14px → 44px button height, 6px → compact chip). Spacing GIỮA components vẫn bắt buộc tuân thủ 4px grid (4, 8, 12, 16, 24, 32, 48).
 
 ---
 
@@ -199,18 +212,21 @@ Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi 
 
 | Token | Value | Dùng cho |
 |-------|-------|----------|
-| `--radius-xs` | 8px | Small chips, tags, badges |
+| `--radius-micro` | 4px | Progress bar track, tiny badges, inline tags |
+| `--radius-xs` | 8px | Small chips, category tags, filter chips |
 | `--radius-sm` | 12px | Input fields, select fields, quick action buttons |
 | `--radius-lg` | 16px | **Cards** — component chính |
-| `--radius-xl` | 20px | Modal, bottom sheet |
+| `--radius-xl` | 20px | Modal, bottom sheet (top corners only) |
 | `--radius-full` | 9999px | Avatar, circular icon, FAB |
+
+> **Rule:** Luôn dùng token. Không dùng giá trị lẻ (6px, 10px, 14px). Progress bar radius = height/2 (pill shape) là ngoại lệ.
 
 ### Progress Bar Radius
 
 | Element | Height | Radius |
 |---------|--------|--------|
-| Calo bar (lớn) | 14px | 7px |
-| Macro bar (nhỏ) | 10px | 5px |
+| Calo bar (lớn) | 14px | 7px (= height/2) |
+| Macro bar (nhỏ) | 10px | 5px (= height/2) |
 
 ---
 
@@ -220,10 +236,20 @@ Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi 
 |-------|-------|----------|
 | `--shadow-sm` | `0 1px 3px rgba(0,0,0,0.06)` | **Tier Subtle**: list items, secondary cards |
 | `--shadow-md` | `0 1px 4px rgba(0,0,0,0.08)` | **Tier Prominent**: primary cards (light mode) |
-| `--shadow-lg` | `0 2px 8px rgba(0,0,0,0.12)` | Modal, bottom sheet, FAB |
+| `--shadow-lg` | `0 2px 8px rgba(0,0,0,0.12)` | Bottom sheet handle area, elevated menus |
+| `--shadow-xl` | `0 8px 32px rgba(0,0,0,0.2)` | **Overlay**: confirm dialog, toast, FAB |
 | Dark mode | **Không dùng shadow** | Dùng background elevation thay thế (§6 Dark Mode) |
 
-> **Mapping → Card Tiers (§8.1):** Flat=no shadow, Subtle=`--shadow-sm`, Prominent=`--shadow-md`. Modals/sheets dùng `--shadow-lg`.
+> **Mapping → Card Tiers (§8.1):** Flat=no shadow, Subtle=`--shadow-sm`, Prominent=`--shadow-md`. Bottom sheets/menus dùng `--shadow-lg`. Overlays (dialog, toast, FAB) dùng `--shadow-xl`.
+
+### Focus Ring Shadow
+
+| Token | Value | Dùng cho |
+|-------|-------|----------|
+| `--focus-ring` (light) | `0 0 0 2px rgba(33,150,243,0.12)` | Focus-visible ring on interactive elements |
+| `--focus-ring` (dark) | `0 0 0 2px rgba(66,165,245,0.15)` | Focus-visible ring, higher opacity for dark bg |
+
+> **Note:** Focus rings use box-shadow (not outline) cho border-radius compatibility. Chỉ hiện trên `:focus-visible`, không trên `:focus`.
 
 ### Dark Mode Elevation
 
@@ -301,12 +327,19 @@ Theo PRD F-12 (Dashboard Quick Actions):
 
 | Type | Background | Text Color | Radius | Padding | Min Height |
 |------|-----------|------------|--------|---------|------------|
-| Primary (CTA) | `#FF9800` / `#FFB74D` | `#FFFFFF` / `#121218` | `--radius-sm` (12px) | 10px 16px | **44px** |
+| Primary CTA (full-width) | `#FF9800` / `#FFB74D` | `#FFFFFF` / `#121218` | `--radius-sm` (12px) | **14px** | **44px** |
+| Primary CTA (inline) | `#FF9800` / `#FFB74D` | `#FFFFFF` / `#121218` | `--radius-sm` (12px) | 12px 24px | **44px** |
 | Secondary | `#E3F2FD` / `#1A237E` | `#2196F3` / `#90CAF9` | `--radius-sm` (12px) | 10px 16px | **44px** |
 | Outline | transparent | `#2196F3` / `#64B5F6` | `--radius-sm` (12px) | 10px 16px | **44px** |
+| Outline Dashed | transparent | `#2196F3` / `#42A5F5` | `--radius-sm` (12px) | 10px 16px | **44px** |
+| Dialog Action | varies | varies | `--radius-xs` (8px) | 10px 20px | — |
 | Text/Link | transparent | `#2196F3` / `#64B5F6` | — | 4px 8px | **44px** (via padding) |
 
 > **Rule:** Mọi button PHẢI có `min-height: 44px` (touch target §8c). Button radius dùng `--radius-sm` (12px) — trên 4px grid, nhất quán với input fields. Dark mode: CTA dùng `#FFB74D` (cam nhạt), text trên CTA dùng `var(--bg-page)`. Format: `light / dark`.
+>
+> **Padding rationale:** Full-width CTA dùng `14px` (uniform) vì `14+14+16=44px` đạt touch target chính xác không cần `min-height` fallback. Inline CTA dùng `12px 24px` cho dáng ngang rộng hơn. Dialog buttons dùng `10px 20px` vì nằm trong container hẹp. Secondary/Outline giữ `10px 16px` kết hợp `min-height: 44px`.
+>
+> **Outline Dashed variant:** Dùng cho "Thêm nguyên liệu" / "Thêm item" buttons — `border: 1.5px dashed`. Đường nét đứt (dashed) tạo affordance "chỗ trống cần điền", phù hợp cho add/insert actions. Border width `1.5px` (thay vì 1px) đảm bảo dashed pattern rõ ràng ở 12px radius.
 
 ### 8.3 Progress Bars
 
@@ -353,7 +386,7 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Fill | `outline` | Viền 4 cạnh, floating label |
 | Label Placement | `floating` | Label animate lên khi focus/có value |
 | Background | `var(--bg-card)` | Token resolves to tinted values per mode |
-| Border Color | `#C8CBD4` (light) / `#444850` (dark) | Tinted neutral — không dùng Apple pure gray |
+| Border Color | `#C8CBD4` (light) / `#444850` (dark) | Input-specific border (darker than `--border` for better field definition) |
 | Border Width | `1px` | |
 | Border Radius | `--radius-sm` (12px) | Apple-style soft corners |
 | Height | Auto (~56px with floating label) | |
@@ -469,6 +502,58 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | State | Visual | Behavior |
 |-------|--------|----------|
 | **Đang lưu** | `opacity: 0.5` + spinner + "Đang lưu..." | Disable tất cả interactions |
+
+---
+
+### 8.9 Confirm Dialog
+
+| Property | Light | Dark | Token/Source |
+|----------|-------|------|-------------|
+| Overlay | `rgba(0,0,0,0.5)` | `rgba(0,0,0,0.5)` | Scrim |
+| Box bg | `#FFFFFF` | `#2C2E36` | Level 2 elevation |
+| Border radius | `16px` | `16px` | `--radius-lg` |
+| Padding | `24px` | `24px` | — |
+| Max width | `300px` | `300px` | — |
+| Shadow | `--shadow-xl` | none | — |
+| Title | `18px/500`, `--text-primary` | same | — |
+| Message | `14px/400`, `--text-secondary`, `line-height: 1.5` | same | — |
+| Primary button | `ion-color-danger` (destructive) hoặc `ion-color-primary` | same | — |
+| Secondary button | Outline style, "Giữ lại" (not "Hủy") | same | Rule 37 |
+
+> **ARIA:** `role="alertdialog" aria-labelledby="dialog-title" aria-describedby="dialog-message"`. Focus trap: primary action focused on open, Tab cycles within dialog.
+
+### 8.10 Bottom Sheet
+
+| Property | Light | Dark | Token/Source |
+|----------|-------|------|-------------|
+| Overlay | `rgba(0,0,0,0.5)` | `rgba(0,0,0,0.5)` | Scrim |
+| Sheet bg | `--ion-background-color` | `#121218` | — |
+| Top radius | `20px` | `20px` | `--radius-xl` (top-left + top-right only) |
+| Handle | `36×4px`, `--border-color`, `border-radius: 2px` | same | Grab affordance |
+| Shadow | `--shadow-lg` | none | — |
+| Max height | `90vh` (default) or `50vh` (keyboard open) | same | §10.1 safe area |
+| Search input | Sticky top, `12px` padding below handle | same | — |
+
+> **ARIA:** `role="dialog" aria-label="[tiêu đề sheet]"`. Focus trap khi open. Swipe-down to dismiss.
+> **Keyboard:** Khi input focus → sheet height giảm, content scrollable. Xem §10.1.
+
+### 8.11 Toast / Snackbar
+
+| Property | Light | Dark | Token/Source |
+|----------|-------|------|-------------|
+| Background | `#2C2E36` | `#E2E4EC` | Inverted surface |
+| Text color | `#FFFFFF` | `#1A1A2E` | Inverted text |
+| Border radius | `12px` | `12px` | `--radius-sm` |
+| Padding | `12px 16px` | `12px 16px` | — |
+| Max width | `343px` (= 375 - 16×2) | same | Page width - padding |
+| Position | Bottom `80px`, center horizontal | same | Above FAB/tab bar |
+| Shadow | `--shadow-xl` | none | — |
+| Font | `14px/400` | same | `body` token |
+| Duration | `2–3s` auto-dismiss | same | — |
+| Animation | Slide up 8px + fade in, 200ms ease-out | same | §8f |
+
+> **ARIA:** `role="status" aria-live="polite"`. Toast KHÔNG steal focus — user continues current task. Dismiss via swipe or timeout.
+> **Content:** Phải specific: "Đã lưu Cơm gà nướng" không phải "Thành công". Action link optional (e.g., "Hoàn tác").
 
 ---
 

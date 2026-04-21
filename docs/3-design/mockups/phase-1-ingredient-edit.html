@@ -121,7 +121,7 @@
   .section-hint {
     font-size: 12px; font-weight: 400; margin-top: -4px; margin-bottom: 8px;
   }
-  body.light .section-hint { color: #939AAA; }
+  body.light .section-hint { color: #5F6575; }
   body.dark  .section-hint { color: #5F6575; }
 
   /* =========================================================================
@@ -155,6 +155,7 @@
 
   .input-value {
     font-size: 16px; font-weight: 400; min-height: 24px;
+    font-variant-numeric: tabular-nums;
   }
   body.light .input-value { color: #1A1A2E; }
   body.dark  .input-value { color: #fff; }
@@ -203,7 +204,7 @@
     font-size: 14px; font-weight: 400;
   }
   body.light .radio-item { background: #fff; border-color: #C8CBD4; color: #1A1A2E; }
-  body.dark  .radio-item { background: #1D1F26; border-color: #444850; color: #E2E4EC; }
+  body.dark  .radio-item { background: #1D1F26; border-color: #444850; color: #E0E0E8; }
   body.light .radio-item.selected { background: #E3F2FD; border-color: #2196F3; color: #2196F3; font-weight: 500; }
   body.dark  .radio-item.selected { background: rgba(66,165,245,0.15); border-color: #42A5F5; color: #42A5F5; font-weight: 500; }
   .radio-item.disabled { opacity: 0.5; pointer-events: none; }
@@ -306,7 +307,7 @@
   .helper-example {
     font-size: 12px; font-style: italic; margin-top: -4px; margin-bottom: 8px;
   }
-  body.light .helper-example { color: #939AAA; }
+  body.light .helper-example { color: #5F6575; }
   body.dark  .helper-example { color: #A8AAB4; }
 </style>
 </head>
@@ -1026,8 +1027,8 @@
     <tr><td><code>--status-bar</code></td><td>#1976D2 / #0D47A1</td><td>Status bar background</td></tr>
     <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>Save button (primary CTA)</td></tr>
     <tr><td><code>--text-primary</code></td><td>#1A1A2E / #FFFFFF</td><td>Input values, section labels</td></tr>
-    <tr><td><code>--text-tertiary</code></td><td>#5F6575 / #A8AAB4</td><td>Floating labels, select arrows</td></tr>
-    <tr><td><code>--text-disabled</code></td><td>#939AAA / #5F6575</td><td>Placeholder text</td></tr>
+    <tr><td><code>--text-tertiary</code></td><td>#5F6575 / #A8AAB4</td><td>Section hints, helper examples, floating labels, select arrows</td></tr>
+    <tr><td><code>--text-disabled</code></td><td>#939AAA / #5F6575</td><td>Input ::placeholder text only</td></tr>
     <tr><td><code>--border</code></td><td>#C8CBD4 / #444850</td><td>Input borders, radio borders</td></tr>
     <tr><td><code>--error</code></td><td>#F44336 / #EF5350</td><td>Invalid borders, error text, delete text button</td></tr>
     <tr><td><code>radius-sm</code></td><td>12px</td><td>Input fields, select fields, radio items</td></tr>
