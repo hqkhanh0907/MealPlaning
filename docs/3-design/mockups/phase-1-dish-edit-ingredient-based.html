@@ -568,11 +568,11 @@
        =================================================================== -->
   <div class="screen-wrapper">
     <div class="screen-label">1. Thêm mới — form trống</div>
-    <div class="screen-desc">Push page, không có tab bar. Chưa thêm nguyên liệu nào</div>
+    <div class="screen-desc">Push page, không có tab bar. Chưa thêm nguyên liệu nào. CTA luôn active — tap → scroll to first error</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
-        <button class="toolbar-back">
+        <button class="toolbar-back" aria-label="Quay lại">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm món ăn</div>
@@ -638,7 +638,7 @@
           </div>
         </div>
 
-        <button class="btn-cta disabled">Lưu món ăn</button>
+        <button class="btn-cta">Lưu món ăn</button>
       </div>
     </div>
   </div>
@@ -652,7 +652,7 @@
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
-        <button class="toolbar-back">
+        <button class="toolbar-back" aria-label="Quay lại">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm món ăn</div>
@@ -668,8 +668,8 @@
         </div>
       </div>
       <!-- Bottom sheet -->
-      <div class="bottom-sheet-overlay">
-        <div class="bottom-sheet">
+      <div class="bottom-sheet-overlay" role="presentation">
+        <div class="bottom-sheet" role="dialog" aria-modal="true" aria-label="Chọn nguyên liệu">
           <div class="bottom-sheet-handle"></div>
           <div class="bottom-sheet-title">Chọn nguyên liệu</div>
 
@@ -759,7 +759,7 @@
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
-        <button class="toolbar-back">
+        <button class="toolbar-back" aria-label="Quay lại">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm món ăn</div>
@@ -775,8 +775,8 @@
         </div>
       </div>
       <!-- Amount bottom sheet -->
-      <div class="bottom-sheet-overlay">
-        <div class="bottom-sheet">
+      <div class="bottom-sheet-overlay" role="presentation">
+        <div class="bottom-sheet" role="dialog" aria-modal="true" aria-label="Nhập số lượng nguyên liệu">
           <div class="bottom-sheet-handle"></div>
 
           <div class="bs-amount-header">
@@ -819,7 +819,7 @@
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
-        <button class="toolbar-back">
+        <button class="toolbar-back" aria-label="Quay lại">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm món ăn</div>
@@ -835,8 +835,8 @@
         </div>
       </div>
       <!-- Bottom sheet stays open -->
-      <div class="bottom-sheet-overlay">
-        <div class="bottom-sheet" style="max-height: 75%;">
+      <div class="bottom-sheet-overlay" role="presentation">
+        <div class="bottom-sheet" role="dialog" aria-modal="true" aria-label="Nhập số lượng" style="max-height: 75%;">
           <div class="bottom-sheet-handle"></div>
 
           <!-- Success confirmation -->
@@ -916,7 +916,7 @@
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
-        <button class="toolbar-back">
+        <button class="toolbar-back" aria-label="Quay lại">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm món ăn</div>
@@ -955,7 +955,7 @@
             <div class="ingredient-item-detail">200g</div>
           </div>
           <div class="ingredient-item-kcal">260 kcal</div>
-          <button class="ingredient-item-delete">✕</button>
+          <button class="ingredient-item-delete" aria-label="Xóa Cơm trắng">✕</button>
         </div>
 
         <div class="ingredient-item">
@@ -964,7 +964,7 @@
             <div class="ingredient-item-detail">150g</div>
           </div>
           <div class="ingredient-item-kcal">247 kcal</div>
-          <button class="ingredient-item-delete">✕</button>
+          <button class="ingredient-item-delete" aria-label="Xóa Ức gà">✕</button>
         </div>
 
         <div class="ingredient-item">
@@ -973,7 +973,7 @@
             <div class="ingredient-item-detail">15g</div>
           </div>
           <div class="ingredient-item-kcal">132 kcal</div>
-          <button class="ingredient-item-delete">✕</button>
+          <button class="ingredient-item-delete" aria-label="Xóa Dầu ăn">✕</button>
         </div>
 
         <div class="ingredient-item">
@@ -982,7 +982,7 @@
             <div class="ingredient-item-detail">50g</div>
           </div>
           <div class="ingredient-item-kcal">8 kcal</div>
-          <button class="ingredient-item-delete">✕</button>
+          <button class="ingredient-item-delete" aria-label="Xóa Dưa leo">✕</button>
         </div>
 
         <button class="btn-outline" style="margin-top: 4px;">+ Thêm nguyên liệu</button>
@@ -1027,7 +1027,7 @@
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
-        <button class="toolbar-back">
+        <button class="toolbar-back" aria-label="Quay lại">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Sửa món ăn</div>
@@ -1065,7 +1065,7 @@
             <div class="ingredient-item-detail">200g</div>
           </div>
           <div class="ingredient-item-kcal">218 kcal</div>
-          <button class="ingredient-item-delete">✕</button>
+          <button class="ingredient-item-delete" aria-label="Xóa Phở tươi">✕</button>
         </div>
 
         <div class="ingredient-item">
@@ -1074,7 +1074,7 @@
             <div class="ingredient-item-detail">120g</div>
           </div>
           <div class="ingredient-item-kcal">198 kcal</div>
-          <button class="ingredient-item-delete">✕</button>
+          <button class="ingredient-item-delete" aria-label="Xóa Thịt bò">✕</button>
         </div>
 
         <div class="ingredient-item">
@@ -1083,7 +1083,7 @@
             <div class="ingredient-item-detail">300ml</div>
           </div>
           <div class="ingredient-item-kcal">72 kcal</div>
-          <button class="ingredient-item-delete">✕</button>
+          <button class="ingredient-item-delete" aria-label="Xóa Nước dùng bò">✕</button>
         </div>
 
         <button class="btn-outline" style="margin-top: 4px;">+ Thêm nguyên liệu</button>
@@ -1128,7 +1128,7 @@
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
-        <button class="toolbar-back">
+        <button class="toolbar-back" aria-label="Quay lại">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Thêm món ăn</div>
@@ -1197,7 +1197,7 @@
           </div>
         </div>
 
-        <button class="btn-cta disabled">Lưu món ăn</button>
+        <button class="btn-cta">Lưu món ăn</button>
       </div>
     </div>
   </div>
@@ -1242,7 +1242,7 @@
     <tr><td>Typography — Caption</td><td>12px/400</td><td>Input labels, error messages, ingredient detail, bs-item kcal</td></tr>
     <tr><td>Validation</td><td>Red border + 12px error below</td><td>Name empty, servings out of range, no ingredients</td></tr>
     <tr><td>Phone frame</td><td>375×812px</td><td>No tab bar (push page)</td></tr>
-    <tr><td>Disabled CTA</td><td>opacity: 0.5, pointer-events: none</td><td>When name empty or no ingredients</td></tr>
+    <tr><td>CTA Loading State</td><td>opacity: 0.5, pointer-events: none, spinner</td><td>Only during async save operation (Đang lưu...)</td></tr>
     <tr><td>Toolbar Save</td><td>16px/500, white, always active</td><td>auto-scroll to error on invalid</td></tr>
     <tr><td>Error Strategy</td><td>Never disable Lưu button</td><td>tap → scrollIntoView() first error field</td></tr>
     <tr><td>Bottom Sheet</td><td>expands to 90% viewport</td><td>when keyboard active (search input focus)</td></tr>

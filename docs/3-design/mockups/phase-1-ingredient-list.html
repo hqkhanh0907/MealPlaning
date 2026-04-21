@@ -518,9 +518,9 @@
         </div>
       </div>
       <!-- Scroll-to-top (visible when scrolled down) -->
-      <button class="scroll-top-btn" title="Lên đầu trang">↑</button>
+      <button class="scroll-top-btn" title="Lên đầu trang" aria-label="Lên đầu trang">↑</button>
       <!-- FAB -->
-      <button class="fab">+</button>
+      <button class="fab" aria-label="Thêm nguyên liệu mới">+</button>
       <!-- Tab bar -->
       <div class="tab-bar">
         <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
@@ -551,7 +551,7 @@
         <div class="search-bar focused">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text">gà</span>
-          <div class="search-clear"><span class="search-clear-dot">✕</span></div>
+          <div class="search-clear" role="button" aria-label="Xóa tìm kiếm"><span class="search-clear-dot">✕</span></div>
         </div>
 
         <!-- Filtered results -->
@@ -595,7 +595,7 @@
           <span class="result-count-hint">3 kết quả cho "gà"</span>
         </div>
       </div>
-      <button class="fab">+</button>
+      <button class="fab" aria-label="Thêm nguyên liệu mới">+</button>
       <div class="tab-bar">
         <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
         <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
@@ -625,7 +625,7 @@
         <div class="search-bar focused">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text">quinoa</span>
-          <div class="search-clear"><span class="search-clear-dot">✕</span></div>
+          <div class="search-clear" role="button" aria-label="Xóa tìm kiếm"><span class="search-clear-dot">✕</span></div>
         </div>
 
         <!-- Empty search state -->
@@ -635,7 +635,7 @@
           <div class="empty-desc">Thử từ khóa khác hoặc thêm mới</div>
         </div>
       </div>
-      <button class="fab">+</button>
+      <button class="fab" aria-label="Thêm nguyên liệu mới">+</button>
       <div class="tab-bar">
         <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
         <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
@@ -726,8 +726,8 @@
       </div>
 
       <!-- Dialog overlay -->
-      <div class="dialog-overlay">
-        <div class="dialog-box">
+      <div class="dialog-overlay" role="presentation">
+        <div class="dialog-box" role="alertdialog" aria-modal="true">
           <div class="dialog-title">Không thể xóa</div>
           <div class="dialog-message"><strong>Ức gà</strong> đang được sử dụng trong <strong>3 món ăn</strong>. Hãy xóa khỏi các món trước khi xóa nguyên liệu này.</div>
           <div class="dialog-actions" style="justify-content: space-between;">
@@ -737,7 +737,7 @@
         </div>
       </div>
 
-      <button class="fab" style="opacity:0.3;">+</button>
+      <button class="fab" style="opacity:0.3;" aria-label="Thêm nguyên liệu mới" aria-disabled="true">+</button>
       <div class="tab-bar">
         <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
         <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
@@ -785,8 +785,8 @@
         </div>
       </div>
       <!-- Dialog overlay — normal delete confirm -->
-      <div class="dialog-overlay">
-        <div class="dialog-box">
+      <div class="dialog-overlay" role="presentation">
+        <div class="dialog-box" role="alertdialog" aria-modal="true">
           <div class="dialog-title">Xóa nguyên liệu?</div>
           <div class="dialog-message">Bạn có chắc muốn xóa <strong>Hạt chia</strong>? Thao tác này không thể hoàn tác.</div>
           <div class="dialog-actions">
@@ -795,7 +795,7 @@
           </div>
         </div>
       </div>
-      <button class="fab" style="opacity:0.3;">+</button>
+      <button class="fab" style="opacity:0.3;" aria-label="Thêm nguyên liệu mới" aria-disabled="true">+</button>
       <div class="tab-bar">
         <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
         <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
@@ -889,7 +889,7 @@
           <span class="result-count-hint">4 nguyên liệu trong "Rau củ"</span>
         </div>
       </div>
-      <button class="fab">+</button>
+      <button class="fab" aria-label="Thêm nguyên liệu mới">+</button>
       <div class="tab-bar">
         <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
         <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>

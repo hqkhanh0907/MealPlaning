@@ -315,11 +315,11 @@
        =================================================================== -->
   <div class="screen-wrapper">
     <div class="screen-label">1. Nhập nhanh — form trống</div>
-    <div class="screen-desc">Push page, nhập tên + dinh dưỡng trực tiếp, không nguyên liệu</div>
+    <div class="screen-desc">Push page, nhập tên + dinh dưỡng trực tiếp, không nguyên liệu. CTA luôn active — tap → scroll to first error</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
-        <button class="toolbar-back">
+        <button class="toolbar-back" aria-label="Quay lại">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Nhập nhanh</div>
@@ -393,7 +393,7 @@
           </div>
         </div>
 
-        <button class="btn-cta disabled">Lưu món ăn</button>
+        <button class="btn-cta">Lưu món ăn</button>
       </div>
     </div>
   </div>
@@ -407,7 +407,7 @@
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
-        <button class="toolbar-back">
+        <button class="toolbar-back" aria-label="Quay lại">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Nhập nhanh</div>
@@ -493,7 +493,7 @@
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
-        <button class="toolbar-back">
+        <button class="toolbar-back" aria-label="Quay lại">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Nhập nhanh</div>
@@ -584,7 +584,7 @@
           </div>
         </div>
 
-        <button class="btn-cta disabled">Lưu món ăn</button>
+        <button class="btn-cta">Lưu món ăn</button>
       </div>
     </div>
   </div>
@@ -598,7 +598,7 @@
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
-        <button class="toolbar-back">
+        <button class="toolbar-back" aria-label="Quay lại">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="toolbar-title">Sửa món ăn</div>
@@ -720,7 +720,7 @@
     <tr><td>Typography — Overline</td><td>11px/500</td><td>Type badge text, variant label</td></tr>
     <tr><td>Validation — Quick Add</td><td>name required, cal required 0–5000</td><td>P/C/F optional 0–500. Red border + 12px error below field</td></tr>
     <tr><td>Phone frame</td><td>375×812px</td><td>No tab bar (push page)</td></tr>
-    <tr><td>Disabled CTA</td><td>opacity: 0.5, pointer-events: none</td><td>When name or calories empty/invalid</td></tr>
+    <tr><td>CTA Loading State</td><td>opacity: 0.5, pointer-events: none, spinner</td><td>Only during async save operation (Đang lưu...)</td></tr>
     <tr><td>Toolbar Save</td><td>16px/500, white, always active</td><td>auto-scroll to error on invalid</td></tr>
     <tr><td>Error Strategy</td><td>Never disable Lưu button</td><td>tap → scrollIntoView() first error field</td></tr>
     <tr><td>Calorie hierarchy</td><td>Cal: 24px/700, P/C/F: 16px/600</td><td>Cal label 12px/400, macro labels 11px/400</td></tr>
