@@ -324,47 +324,100 @@ Copilot là **Pragmatic Perfectionist**, KHÔNG phải Toxic Perfectionist:
 
 ## Design Context
 
-> Full design system in `.impeccable.md`. Key rules summarized here.
+> Full design system: `docs/3-design/design-system.md` (v1.5). Mockup rules: `.github/instructions/mockup-design-rules.md`. Key rules summarized below.
 
-### Brand: Clean · Smart · Motivating
+### Platform & Stack
 
-Approachable, encouraging, never clinical. The app is a knowledgeable friend, not a strict dietitian. Users should feel **calm and organized**.
+- **Android-only** (Ionic 8 + Angular 20 + Capacitor)
+- Design width: **375px** portrait, min 320px, max 428px
+- Phone frame: 375×812px
 
-### 5 Design Principles
+### 4 Design Principles
 
-1. **Clarity over decoration** — 3-second comprehension test. Whitespace > ornament.
-2. **Data with empathy** — Progress, not judgment. Never red for "you ate too much."
-3. **Mobile-first, touch-native** — 44px+ targets, bottom actions, safe areas.
-4. **Semantic everything** — Tokens only, no raw colors. Dark mode = first-class.
-5. **Accessible by default** — WCAG 2.1 AA, focus rings, reduced motion, Vietnamese diacritics.
+| Nguyên tắc | Mô tả |
+|------------|-------|
+| **Đơn giản** | UI dễ hiểu cho Persona Lan (tech savvy 2/5) |
+| **Data-friendly** | Số liệu (calo, macro, weight) rõ ràng cho Persona Hùng |
+| **Offline-aware** | Trạng thái offline rõ ràng (toast + banner + disable AI) |
+| **Dark mode first** | Mọi component phải có dark variant |
 
-### Critical Color Rules
+### Color System — Material Blue
 
-- `--primary` (Emerald-600) = **3.77:1 on white** → large text/icons ONLY, not body text
-- Use `--primary-emphasis` (Emerald-700) for small primary text
-- `--muted-foreground` (Slate-600) = 7.58:1 → safe for all caption text
-- Domain colors (protein/fat/carbs) are for nutrition context only, not UI chrome
+- **Primary:** `#2196F3` (light) / `#42A5F5` (dark)
+- **CTA/Accent:** `#FF9800` (light) / `#FFB74D` (dark)
+- **Neutrals:** Blue-tinted (NOT pure gray). `--bg-page` `#F5F7FA`/`#121218`, `--bg-card` `#FFFFFF`/`#1D1F26`
 
-### Typography Rules
+**Critical token distinction:**
+- `--text-tertiary` (`#5F6575`/`#A8AAB4`): Subtitles, hints, icons, meta. Contrast ≥4.5:1 — WCAG AA safe.
+- `--text-disabled` (`#939AAA`/`#5F6575`): **ONLY** for `[disabled]` elements and `::placeholder`. Never for visible content text.
+- ⚠️ Light `--text-tertiary` hex = Dark `--text-disabled` hex (`#5F6575`). Semantics differ — always use token names, not raw hex.
 
-- Font: Geist Variable. Vietnamese body text needs `leading-relaxed` minimum (diacritics).
-- 🎯 Migrate `font-bold` → `font-semibold`. Bold only for display numbers ≥24px.
-- Sizes: `text-xs` = 12px, `text-sm` = 14px (body), `text-base` = 16px. Min readable: `text-xs`. Micro `text-[10px]` for badges only.
-- ⚠️ `src/styles/tokens.css` is DEAD CODE (not imported). Do NOT reference its values.
+### Typography
 
-### Interaction States (ALL 6 required)
+- **Font:** `Roboto` only. **Icons:** Ionicons only (mockups use emoji placeholders per Rule 34).
+- **Type scale:** display(28/700), headline(22/700), title(18/500), subtitle(16/500), body(14/400), body-sm(13/400), caption(12/400), overline(11/500)
+- **Valid weights:** 400, 500, 600, 700. No 300 or 800.
+- **Headings:** h1=headline(22/700), h2=title(18/500), h3=subtitle(16/500), h4=body(14/600). Sequential only, 1 h1 per screen.
+- **Line-height:** ≥1.5 for body text (Vietnamese diacritics). 1.2–1.3 for display/headline. `line-height: 1` only for icon-only elements.
+- **Numbers:** `font-variant-numeric: tabular-nums` for all data columns/values.
 
-Every interactive element: default → hover → active → focus-visible → disabled → error.
+### Spacing (4px Grid)
 
-- Loading: Skeleton shimmer (`bg-muted animate-pulse`), NOT centered spinner
-- Empty: EmptyState component (icon + encouraging message + CTA)
-- Disabled: `disabled:opacity-50 disabled:pointer-events-none` + explain WHY
-- Errors: `text-destructive text-xs` + `role="alert"` + `aria-describedby`
+- **Scale:** 4, 8, 12, 16, 20, 24, 32px. Between-component spacing MUST follow grid.
+- **Exceptions:** 6px, 10px, 14px allowed for component-internal padding only (e.g., 14px→44px button height, 10px 14px→search bar).
+- **Page padding:** 16px horizontal, 12px top.
+
+### Border Radius Tokens
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--radius-micro` | 4px | Progress bar track, tiny badges |
+| `--radius-xs` | 8px | Chips, tags, filter chips, dialog buttons |
+| `--radius-sm` | 12px | Inputs, buttons, segment controls |
+| `--radius-lg` | 16px | Cards |
+| `--radius-xl` | 20px | Modal, bottom sheet (top corners) |
+| `--radius-full` | 9999px | Avatar, FAB |
+
+> **Rule:** Always use tokens. No arbitrary values (6px, 10px, 14px).
+
+### Shadows (Light Mode Only)
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--shadow-sm` | `0 1px 3px rgba(0,0,0,0.06)` | List items |
+| `--shadow-md` | `0 1px 4px rgba(0,0,0,0.08)` | Primary cards |
+| `--shadow-lg` | `0 2px 8px rgba(0,0,0,0.12)` | Bottom sheets, menus |
+| `--shadow-xl` | `0 8px 32px rgba(0,0,0,0.2)` | Dialog, toast, FAB |
+
+> **Dark mode:** NO shadows — use background elevation (`--bg-card`, `--bg-elevated`).
+
+### Z-Index Scale
+
+base=0, sticky=10, fab=20, sheet=30, scrim=40, dialog=50, toast=60
+
+### Interaction States (ALL 8 required)
+
+Every interactive element: default → ~~hover~~ → active/pressed → focus-visible → disabled → error → **loading** → **success**.
+
+- **Active/Pressed:** `opacity` reduce or `scale(0.98)`. No hover on mobile — hover only for desktop testing.
+- **Focus Visible:** `2px solid var(--ion-color-primary)`, offset 2px. Box-shadow ring, not outline.
+- **Disabled:** `opacity: 0.5`, `pointer-events: none` + **explain WHY** disabled (aria-label/tooltip).
+- **Error:** Border/text → `var(--ion-color-danger)` + `role="alert"` + `aria-describedby`.
+- **Loading:** Skeleton shimmer (`var(--bg-muted)` + pulse animation), NOT centered spinner.
+- **Success:** Specific feedback — "Đã lưu Cơm gà nướng" not "Thành công". Toast 2-3s auto-dismiss.
+- **Empty:** EmptyState component (48px icon + encouraging message + optional CTA).
+
+### Touch Targets
+
+- Minimum **44px** height/width for all interactive elements.
+- Minimum **8px** gap between touch targets.
+- Dialog action buttons: `min-height: 44px`.
 
 ### Copy Tone
 
-- State facts neutrally → suggest action positively → never blame the user
-- Numbers: `Math.round()`, no decimals for kcal/g, unit: `kcal` / `g` / `kg`
+- State facts neutrally → suggest action positively → never blame the user.
+- Numbers: `Math.round()`, no decimals for kcal/g. Units: `kcal` / `g` / `kg`.
+- Vietnamese locale: use `.` as thousands separator, `,` as decimal.
 
 <!-- GSD Configuration — managed by get-shit-done installer -->
 
