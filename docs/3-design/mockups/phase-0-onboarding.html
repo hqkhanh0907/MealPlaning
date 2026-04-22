@@ -256,6 +256,25 @@
   body.light .select-arrow { color: #5F6575; }
   body.dark  .select-arrow { color: #A8AAB4; }
 
+  /* Segment control (binary choice, §8.8) */
+  .segment-control {
+    display: flex; padding: 4px; border-radius: 12px;
+    gap: 4px;
+  }
+  body.light .segment-control { background: #EEF1F6; }
+  body.dark  .segment-control { background: #2A2D35; }
+  .segment-control.invalid { box-shadow: 0 0 0 1px #F44336 inset; }
+  body.dark .segment-control.invalid { box-shadow: 0 0 0 1px #EF5350 inset; }
+  .segment-button {
+    flex: 1; min-height: 44px; border: 0; background: transparent;
+    font-size: 14px; font-weight: 500; border-radius: 8px;
+    cursor: pointer; transition: background .15s, color .15s;
+  }
+  body.light .segment-button { color: #5F6575; }
+  body.dark  .segment-button { color: #A8AAB4; }
+  body.light .segment-button.selected { background: #fff; color: #2196F3; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  body.dark  .segment-button.selected { background: #1D1F26; color: #42A5F5; }
+
   /* =========================================================================
      FIELD ERROR — 12px, danger color
      ========================================================================= */
@@ -470,12 +489,10 @@
           </div>
         </div>
         <div class="form-field">
-          <div class="select-wrapper">
-            <div style="flex:1">
-              <span class="input-label">Giới tính</span>
-              <div class="input-value placeholder">&nbsp;</div>
-            </div>
-            <div class="select-arrow">▾</div>
+          <span class="section-label" style="margin-top:0">Giới tính</span>
+          <div class="segment-control" role="radiogroup" aria-label="Giới tính">
+            <button class="segment-button" role="radio" aria-checked="false">Nam</button>
+            <button class="segment-button" role="radio" aria-checked="false">Nữ</button>
           </div>
         </div>
 
@@ -529,12 +546,10 @@
           </div>
         </div>
         <div class="form-field">
-          <div class="select-wrapper">
-            <div style="flex:1">
-              <span class="input-label">Giới tính</span>
-              <div class="input-value">Nam</div>
-            </div>
-            <div class="select-arrow">▾</div>
+          <span class="section-label" style="margin-top:0">Giới tính</span>
+          <div class="segment-control" role="radiogroup" aria-label="Giới tính">
+            <button class="segment-button selected" role="radio" aria-checked="true">Nam</button>
+            <button class="segment-button" role="radio" aria-checked="false">Nữ</button>
           </div>
         </div>
 
@@ -593,12 +608,10 @@
         </div>
 
         <div class="form-field">
-          <div class="select-wrapper invalid">
-            <div style="flex:1">
-              <span class="input-label invalid">Giới tính</span>
-              <div class="input-value placeholder">&nbsp;</div>
-            </div>
-            <div class="select-arrow">▾</div>
+          <span class="section-label" style="margin-top:0">Giới tính</span>
+          <div class="segment-control invalid" role="radiogroup" aria-label="Giới tính" aria-invalid="true">
+            <button class="segment-button" role="radio" aria-checked="false">Nam</button>
+            <button class="segment-button" role="radio" aria-checked="false">Nữ</button>
           </div>
         </div>
         <div class="field-error">Vui lòng chọn giới tính</div>
@@ -634,14 +647,26 @@
         <h2 class="step-title">Mức hoạt động</h2>
         <p class="step-subtitle">Giúp chúng tôi tính nhu cầu calo phù hợp</p>
 
-        <div class="form-field">
-          <div class="select-wrapper">
-            <div style="flex:1">
-              <span class="input-label">Mức vận động</span>
-              <div class="input-value placeholder">&nbsp;</div>
-            </div>
-            <div class="select-arrow">▾</div>
-          </div>
+        <p class="section-label" style="margin-top:0">Mức vận động</p>
+        <div class="radio-item">
+          <span class="radio-circle"></span>
+          <div class="radio-label">Ít vận động (ngồi nhiều)</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="radio-item">
+          <span class="radio-circle"></span>
+          <div class="radio-label">Nhẹ (1-3 ngày/tuần)</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="radio-item">
+          <span class="radio-circle"></span>
+          <div class="radio-label">Trung bình (3-5 ngày/tuần)</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="radio-item">
+          <span class="radio-circle"></span>
+          <div class="radio-label">Nặng (6-7 ngày/tuần)</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
 
         <p class="section-label">Kinh nghiệm tập gym?</p>
@@ -683,7 +708,7 @@
        ===================================================================== -->
   <div class="screen-wrapper">
     <div class="screen-label">Bước 2b — Đã điền</div>
-    <div class="screen-desc">Form hợp lệ, gym "6 tháng — 2 năm" selected</div>
+    <div class="screen-desc">Mức "Trung bình" + gym "6 tháng — 2 năm" selected</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
@@ -697,14 +722,26 @@
         <h2 class="step-title">Mức hoạt động</h2>
         <p class="step-subtitle">Giúp chúng tôi tính nhu cầu calo phù hợp</p>
 
-        <div class="form-field">
-          <div class="select-wrapper">
-            <div style="flex:1">
-              <span class="input-label">Mức vận động</span>
-              <div class="input-value">Trung bình (3-5 ngày/tuần)</div>
-            </div>
-            <div class="select-arrow">▾</div>
-          </div>
+        <p class="section-label" style="margin-top:0">Mức vận động</p>
+        <div class="radio-item">
+          <span class="radio-circle"></span>
+          <div class="radio-label">Ít vận động (ngồi nhiều)</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="radio-item">
+          <span class="radio-circle"></span>
+          <div class="radio-label">Nhẹ (1-3 ngày/tuần)</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="radio-item selected">
+          <span class="radio-circle"></span>
+          <div class="radio-label"><strong>Trung bình (3-5 ngày/tuần)</strong></div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="radio-item">
+          <span class="radio-circle"></span>
+          <div class="radio-label">Nặng (6-7 ngày/tuần)</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
 
         <p class="section-label">Kinh nghiệm tập gym?</p>
@@ -760,14 +797,26 @@
         <h2 class="step-title">Mức hoạt động</h2>
         <p class="step-subtitle">Giúp chúng tôi tính nhu cầu calo phù hợp</p>
 
-        <div class="form-field">
-          <div class="select-wrapper invalid">
-            <div style="flex:1">
-              <span class="input-label invalid">Mức vận động</span>
-              <div class="input-value placeholder">&nbsp;</div>
-            </div>
-            <div class="select-arrow">▾</div>
-          </div>
+        <p class="section-label" style="margin-top:0">Mức vận động</p>
+        <div class="radio-item">
+          <span class="radio-circle"></span>
+          <div class="radio-label">Ít vận động (ngồi nhiều)</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="radio-item">
+          <span class="radio-circle"></span>
+          <div class="radio-label">Nhẹ (1-3 ngày/tuần)</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="radio-item">
+          <span class="radio-circle"></span>
+          <div class="radio-label">Trung bình (3-5 ngày/tuần)</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+        </div>
+        <div class="radio-item">
+          <span class="radio-circle"></span>
+          <div class="radio-label">Nặng (6-7 ngày/tuần)</div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
         <div class="field-error">Vui lòng chọn mức vận động</div>
 
@@ -825,14 +874,11 @@
         <h2 class="step-title">Mức hoạt động</h2>
         <p class="step-subtitle">Giúp chúng tôi tính nhu cầu calo phù hợp</p>
 
-        <div class="form-field">
-          <div class="select-wrapper">
-            <div style="flex:1">
-              <span class="input-label">Mức vận động</span>
-              <div class="input-value">Trung bình (3-5 ngày/tuần)</div>
-            </div>
-            <div class="select-arrow">▾</div>
-          </div>
+        <p class="section-label" style="margin-top:0">Mức vận động</p>
+        <div class="radio-item selected">
+          <span class="radio-circle"></span>
+          <div class="radio-label"><strong>Trung bình (3-5 ngày/tuần)</strong></div>
+          <span class="radio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
         </div>
 
         <p class="section-label">Kinh nghiệm tập gym?</p>

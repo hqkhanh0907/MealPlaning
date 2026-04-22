@@ -428,10 +428,125 @@ Theo PRD F-12 (Dashboard Quick Actions):
 
 > **KHÔNG bao giờ** đổ lỗi user: ~~"Bạn nhập sai"~~ → "Cân nặng cần từ 30 đến 200 kg"
 
-**ion-select** dùng cùng spec, thêm:
+**`ion-select` / custom select trigger (closed state) — REVISED 1.4**
+
 | Property | Value |
 |----------|-------|
-| Arrow | Ionic default dropdown arrow |
+| Wrapper padding | `20px` top / `16px` horizontal / `8px` bottom (compensate floating label + arrow area) |
+| Arrow icon | Custom SVG `chevron-down` — `viewBox="0 0 24 24"`, `polyline "6 9 12 15 18 9"`, stroke-width `2`, stroke-linecap/linejoin `round`, size `16×16px`, color `var(--text-tertiary)` (light) / `#A8AAB4` (dark) |
+| Arrow position | Right `16px`, vertical-center via `align-items: center` on `.select-wrapper` |
+| Interface (open state) | **MUST use `BottomSheetPicker` (§8.6c.1) via custom component.** Do NOT use `ion-select interface="alert" \| "popover" \| "action-sheet"` or native HTML `<select>` — they break design tokens on Android (Material radio `#009688` leaks through). Xem §8.6c Decision Tree. |
+| ion-select override | Nếu unavoidable phải dùng `ion-select`: `interface="action-sheet"` + override `--background`, `--color`, `--border-radius` theo tokens §8.10. Phải ghi nhận deviation. |
+
+### 8.6c Selection Pattern Decision Tree — NEW 1.4
+
+> **Rule name:** Selection Pattern Decision Tree
+> **When to use:** Mọi form field kiểu **single-select** (giới tính, nhóm, đơn vị, mức độ, danh mục, v.v.). Áp dụng cho toàn bộ phase.
+
+**Decision matrix (bắt buộc):**
+
+| N options | Label length | List source | Pattern | Reference |
+|-----------|--------------|-------------|---------|-----------|
+| `N = 2` (binary) | `≤ 20 chars` | Static | **Segment control** | §8.8 |
+| `N = 3–5` | `≤ 28 chars` hoặc cần description phụ | Static | **Radio cards inline** | §8.7 |
+| `N = 6–15` | bất kỳ | Static | **BottomSheetPicker** (no search) | §8.6c.1 |
+| `N ≥ 16` | bất kỳ | Static hoặc dynamic (API) | **BottomSheetPicker** (với search) | §8.6c.1 + §8l |
+
+**Behavior (cấp component):**
+- Tap trigger → open pattern tương ứng
+- Segment control / Radio: single tap commit + optional inline confirmation
+- BottomSheetPicker: tap option → auto close sheet + commit
+
+**Constraints:**
+- Threshold cứng: 5 và 15. KHÔNG override tùy hứng. Muốn đổi threshold phải update §8.6c trước.
+- Trong 1 page stack, các fields tương đương N phải dùng cùng pattern (consistency rule).
+- Error state:
+  - Segment control: wrapper border `var(--ion-color-danger)` + `.field-error` text dưới
+  - Radio cards: group-level `.field-error` text dưới group
+  - BottomSheetPicker: trigger field border `var(--ion-color-danger)` + `.field-error` dưới
+
+**Do:**
+- ✅ Đếm N tại thời điểm design → tra matrix → chọn pattern.
+- ✅ Gọi `BottomSheetPicker.open({ title, options, value })` thay vì `<select>` thuần khi N ≥ 6.
+- ✅ Dùng segment control cho binary choices (Nam/Nữ, Bật/Tắt, Ngày/Đêm).
+- ✅ Giữ pattern nhất quán giữa các mockup cùng class N.
+
+**Don't:**
+- ❌ KHÔNG dùng HTML `<select>` thuần — rơi về Android AlertDialog phá design system.
+- ❌ KHÔNG dùng `ion-select interface="alert"` (cùng vấn đề).
+- ❌ KHÔNG mix 2 patterns khác nhau cho cùng class N trong cùng 1 page.
+- ❌ KHÔNG dùng BottomSheetPicker cho `N ≤ 5` (2-tap cost quá cao cho ít options).
+- ❌ KHÔNG mount nested sheet (sheet trong sheet) — dùng push page thay vì.
+
+### 8.6c.1 BottomSheetPicker Component — NEW 1.4
+
+> **Rule name:** BottomSheetPicker
+> **When to use:** Single-select với `N ≥ 6`. Inherit: §8.10 (Bottom Sheet base) + §8.7 (Radio Items).
+
+**Anatomy:**
+
+| Zone | Spec | Token |
+|------|------|-------|
+| Scrim | `rgba(0,0,0,0.5)` | §8.10 |
+| Sheet bg | `var(--bg-card)` light / `#1D1F26` dark | §8.10 |
+| Top radius | `20px` top-left + top-right (bottom square) | `--radius-xl` |
+| Handle | `36×4px`, centered, margin `8px 0 12px`, `var(--border)`, radius `2px` | §8.10 |
+| Title | `16px/600`, `var(--text-primary)`, padding `0 16px 12px`, text-align left | — |
+| Search input (optional, auto-on khi `N ≥ 16`) | Sticky top below title, `44px` height, `--radius-sm`, padding `10px 14px` | §8.6b |
+| Option row | `min-height: 56px`, padding `12px 16px`, tap area full row, `display: flex`, `align-items: center`, `gap: 12px` | — |
+| Option label | `14px/400` default, **`14px/600`** selected, `var(--text-primary)`, `flex: 1` | — |
+| Option description (optional) | `12px/400`, `var(--text-tertiary)`, below label | — |
+| Option checkmark | `22px` ✓ icon (stroke), right `16px`, color `var(--ion-color-primary)`, show only on `[aria-selected="true"]` | §8.7 |
+| Selected row bg | `rgba(var(--ion-color-primary-rgb), 0.08)` | §8.7 |
+| Divider | `1px` `var(--border)` hairline, inset `16px`, giữa options | §8.12 |
+| Max height | `70vh` (no-search) / `90vh` (with-search, keyboard-aware §10.1) | — |
+| Safe area | `padding-bottom: env(safe-area-inset-bottom)` | §10.1 |
+| Shadow | `--shadow-lg` (light), không shadow (dark) | §7 |
+
+**Behavior:**
+
+| Action | Result |
+|--------|--------|
+| Tap trigger (select closed state) | Sheet animate in: `transform translateY(100% → 0)`, `300ms` `--ease-sheet` |
+| Tap option | Update value → sheet animate out `225ms` → emit `valueChange` → trigger field blur |
+| Tap scrim | Dismiss without change, animate out `225ms` → emit `dismissed` |
+| Swipe down on handle/header | Dismiss without change (Ionic `ion-modal` native) |
+| Android back button | Dismiss without change |
+| Open without value | Focus first option |
+| Open with value | Auto-scroll to selected option + focus selected |
+| Search input (when enabled) | Live filter options by `label.includes(query)`, case-insensitive, debounce `150ms` |
+
+**States:**
+
+| State | Visual |
+|-------|--------|
+| Loading (async options) | Skeleton rows × 5, `56px` each, shimmer `var(--bg-muted)` + `animate-pulse` |
+| Empty (N=0 or 0 search results) | `EmptyState` (48px icon + "Không có lựa chọn") |
+| Error (async load fail) | Banner đỏ top sheet + retry button |
+
+**Accessibility:**
+- `role="dialog"` + `aria-modal="true"` + `aria-labelledby="sheet-title-id"`
+- Focus trap: Tab cycles within sheet
+- Selected option: `aria-selected="true"`, others `aria-selected="false"`
+- ESC key dismiss (web testing only; Android back handled natively)
+- Scrim: `role="presentation"` — không steal focus từ screen reader
+
+**Do:**
+- ✅ Luôn show checkmark ✓ trên selected — đừng rely vào bg tint alone (a11y §8.7).
+- ✅ Title phải cụ thể: "Chọn nhóm nguyên liệu" không phải "Chọn".
+- ✅ Nếu options có icon, dùng `22px` primary color, đặt TRƯỚC label (gap `12px`).
+
+**Don't:**
+- ❌ KHÔNG dùng sheet cho `N ≤ 5` (vi phạm §8.6c decision tree).
+- ❌ KHÔNG mount nested sheet (sheet-trong-sheet) — dùng push page thay vì.
+- ❌ KHÔNG dùng sheet `100vh` trừ khi có search input + keyboard trigger `§10.1`.
+
+### 8.6d Date / Time Picker — TODO
+
+> **Status:** Deferred to Phase 1 weight log kickoff.
+> **Owner:** Designer.
+> **Blocked by:** none.
+> Spec sẽ được thêm khi bắt đầu Phase 1 feature weight log / meal time scheduling.
 
 ### 8.6b Search Bar
 

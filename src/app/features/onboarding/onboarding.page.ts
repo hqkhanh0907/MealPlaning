@@ -49,7 +49,7 @@ export const ACTIVITY_FACTOR: Record<ActivityLevel, number> = {
 };
 
 export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
-  sedentary: 'Ít vận động',
+  sedentary: 'Ít vận động (ngồi nhiều)',
   light: 'Nhẹ (1-3 ngày/tuần)',
   moderate: 'Trung bình (3-5 ngày/tuần)',
   heavy: 'Nặng (6-7 ngày/tuần)',
@@ -284,28 +284,37 @@ const EMPTY_2B: Step2bErrors = { activityLevel: '', gymExperience: '' };
             </div>
 
             <div class="form-field">
-              <div class="select-wrapper" [class.invalid]="step2aErrors().gender">
-                <div class="select-inner">
-                  <label
-                    for="field-gender"
-                    class="input-label"
-                    [class.invalid]="step2aErrors().gender"
-                    >Giới tính</label
-                  >
-                  <select
-                    #genderSelect
-                    id="field-gender"
-                    class="select-native"
-                    (change)="onGenderChange(genderSelect.value)"
-                    [attr.aria-invalid]="step2aErrors().gender ? 'true' : null"
-                    [attr.aria-describedby]="step2aErrors().gender ? 'err-gender' : null"
-                  >
-                    <option value="" [selected]="!gender()"></option>
-                    <option value="male" [selected]="gender() === 'male'">Nam</option>
-                    <option value="female" [selected]="gender() === 'female'">Nữ</option>
-                  </select>
-                </div>
-                <span class="select-arrow">▾</span>
+              <span class="section-label segment-label" [class.invalid]="step2aErrors().gender"
+                >Giới tính</span
+              >
+              <div
+                class="segment-control"
+                [class.invalid]="step2aErrors().gender"
+                role="radiogroup"
+                aria-label="Giới tính"
+                [attr.aria-invalid]="step2aErrors().gender ? 'true' : null"
+                [attr.aria-describedby]="step2aErrors().gender ? 'err-gender' : null"
+              >
+                <button
+                  type="button"
+                  class="segment-button"
+                  [class.selected]="gender() === 'male'"
+                  role="radio"
+                  [attr.aria-checked]="gender() === 'male'"
+                  (click)="onGenderChange('male')"
+                >
+                  Nam
+                </button>
+                <button
+                  type="button"
+                  class="segment-button"
+                  [class.selected]="gender() === 'female'"
+                  role="radio"
+                  [attr.aria-checked]="gender() === 'female'"
+                  (click)="onGenderChange('female')"
+                >
+                  Nữ
+                </button>
               </div>
               @if (step2aErrors().gender) {
                 <div id="err-gender" class="field-error" role="alert">
@@ -331,46 +340,37 @@ const EMPTY_2B: Step2bErrors = { activityLevel: '', gymExperience: '' };
             <h1 #step2bHeading class="step-title" tabindex="-1">Mức hoạt động</h1>
             <p class="step-subtitle">Giúp chúng tôi tính nhu cầu calo phù hợp</p>
 
-            <div class="form-field">
-              <div class="select-wrapper" [class.invalid]="step2bErrors().activityLevel">
-                <div class="select-inner">
-                  <label
-                    for="field-activity"
-                    class="input-label"
-                    [class.invalid]="step2bErrors().activityLevel"
-                    >Mức vận động</label
-                  >
-                  <select
-                    #activitySelect
-                    id="field-activity"
-                    class="select-native"
-                    (change)="onActivityChange(activitySelect.value)"
-                    [attr.aria-invalid]="step2bErrors().activityLevel ? 'true' : null"
-                    [attr.aria-describedby]="step2bErrors().activityLevel ? 'err-activity' : null"
-                  >
-                    <option value="" [selected]="!activityLevel()"></option>
-                    <option value="sedentary" [selected]="activityLevel() === 'sedentary'">
-                      Ít vận động
-                    </option>
-                    <option value="light" [selected]="activityLevel() === 'light'">
-                      Nhẹ (1-3 ngày/tuần)
-                    </option>
-                    <option value="moderate" [selected]="activityLevel() === 'moderate'">
-                      Trung bình (3-5 ngày/tuần)
-                    </option>
-                    <option value="heavy" [selected]="activityLevel() === 'heavy'">
-                      Nặng (6-7 ngày/tuần)
-                    </option>
-                  </select>
-                </div>
-                <span class="select-arrow">▾</span>
-              </div>
-              @if (step2bErrors().activityLevel) {
-                <div id="err-activity" class="field-error" role="alert">
-                  {{ step2bErrors().activityLevel }}
+            <p class="section-label" style="margin-top:0">Mức vận động</p>
+            <div
+              role="radiogroup"
+              aria-label="Mức vận động"
+              [attr.aria-invalid]="step2bErrors().activityLevel ? 'true' : null"
+              [attr.aria-describedby]="step2bErrors().activityLevel ? 'err-activity' : null"
+            >
+              @for (level of activityLevels; track level) {
+                <div
+                  class="radio-item"
+                  [class.selected]="activityLevel() === level"
+                  (click)="onActivityChange(level)"
+                  role="radio"
+                  tabindex="0"
+                  [attr.aria-checked]="activityLevel() === level"
+                  (keydown.enter)="onActivityChange(level)"
+                  (keydown.space)="onActivityChange(level); $event.preventDefault()"
+                >
+                  <span class="radio-circle"></span>
+                  <span class="radio-label">{{ ACTIVITY_LABEL_MAP[level] }}</span>
+                  @if (activityLevel() === level) {
+                    <ion-icon name="checkmark" class="check-icon" />
+                  }
                 </div>
               }
             </div>
+            @if (step2bErrors().activityLevel) {
+              <div id="err-activity" class="field-error" role="alert">
+                {{ step2bErrors().activityLevel }}
+              </div>
+            }
 
             <p class="section-label">Kinh nghiệm tập gym?</p>
             <div role="radiogroup" aria-label="Kinh nghiệm tập gym">
@@ -649,62 +649,79 @@ const EMPTY_2B: Step2bErrors = { activityLevel: '', gymExperience: '' };
         margin: 0;
       }
 
-      /* SELECT — matches mockup .select-wrapper exactly */
-      .select-wrapper {
-        position: relative;
-        padding: 20px 16px 8px;
-        border: 1px solid var(--input-border-color);
-        border-radius: var(--radius-sm);
-        min-height: 56px;
-        background: var(--bg-card);
-        box-sizing: border-box;
-        display: flex;
-        align-items: center;
-      }
-      .select-wrapper.invalid {
-        border-color: var(--ion-color-danger);
-      }
-      .select-inner {
-        flex: 1;
-      }
-      .select-native {
-        font: 400 16px/1.5 var(--ion-font-family);
-        color: var(--text-primary);
-        border: none;
-        outline: none;
-        background: transparent;
-        width: 100%;
-        padding: 0;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-      }
-      .select-native option {
-        color: var(--text-primary);
-        background: var(--bg-card);
-      }
-      .select-arrow {
-        font-size: 16px;
-        color: var(--text-tertiary);
-        margin-left: 8px;
-        flex-shrink: 0;
-      }
       @media (prefers-color-scheme: dark) {
-        .input-wrapper,
-        .select-wrapper {
+        .input-wrapper {
           background: var(--bg-card);
           border-color: #444850;
         }
-        .input-wrapper.invalid,
-        .select-wrapper.invalid {
+        .input-wrapper.invalid {
           border-color: #ef5350;
         }
-        .input-native,
-        .select-native {
+        .input-native {
           color: #fff;
         }
         .input-label.invalid {
           color: #ef5350;
+        }
+      }
+
+      /* SEGMENT CONTROL — §8.8, binary choice (Nam/Nữ) */
+      .segment-label {
+        display: block;
+        margin: 0 0 8px;
+      }
+      .segment-label.invalid {
+        color: var(--ion-color-danger);
+      }
+      .segment-control {
+        display: flex;
+        gap: 4px;
+        padding: 4px;
+        background: #eef1f6;
+        border-radius: var(--radius-sm);
+        box-sizing: border-box;
+      }
+      .segment-control.invalid {
+        box-shadow: 0 0 0 1px var(--ion-color-danger) inset;
+      }
+      .segment-button {
+        flex: 1;
+        min-height: 44px;
+        border: 0;
+        background: transparent;
+        font: 500 14px/1.4 var(--ion-font-family);
+        color: var(--text-tertiary);
+        border-radius: 8px;
+        cursor: pointer;
+        transition:
+          background 0.15s ease,
+          color 0.15s ease,
+          box-shadow 0.15s ease;
+      }
+      .segment-button.selected {
+        background: #fff;
+        color: var(--ion-color-primary);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        font-weight: 600;
+      }
+      .segment-button:focus-visible {
+        outline: 2px solid var(--ion-color-primary);
+        outline-offset: 2px;
+      }
+      @media (prefers-color-scheme: dark) {
+        .segment-control {
+          background: #2a2d35;
+        }
+        .segment-control.invalid {
+          box-shadow: 0 0 0 1px #ef5350 inset;
+        }
+        .segment-button {
+          color: #a8aab4;
+        }
+        .segment-button.selected {
+          background: #1d1f26;
+          color: #42a5f5;
+          box-shadow: none;
         }
       }
 
@@ -849,6 +866,11 @@ export default class OnboardingPage {
   readonly step2bErrors = signal<Step2bErrors>({ ...EMPTY_2B });
   readonly saveError = signal('');
 
+  /** Activity level options rendered as radio cards (§8.6c: N=4 → radio) */
+  readonly activityLevels: readonly ActivityLevel[] = ['sedentary', 'light', 'moderate', 'heavy'];
+  /** Expose label map to template */
+  readonly ACTIVITY_LABEL_MAP = ACTIVITY_LABEL;
+
   constructor() {
     addIcons({
       arrowBackOutline,
@@ -860,14 +882,14 @@ export default class OnboardingPage {
     });
   }
 
-  /** Type-safe handler for native gender select */
-  onGenderChange(value: string): void {
-    this.gender.set((value || null) as Gender | null);
+  /** Set gender from segment control */
+  onGenderChange(value: Gender): void {
+    this.gender.set(value);
   }
 
-  /** Type-safe handler for native activity select */
-  onActivityChange(value: string): void {
-    this.activityLevel.set((value || null) as ActivityLevel | null);
+  /** Set activity level from radio card */
+  onActivityChange(value: ActivityLevel): void {
+    this.activityLevel.set(value);
   }
 
   /** Step 1 → Step 2a (CTA disabled prevents calling without goal) */
