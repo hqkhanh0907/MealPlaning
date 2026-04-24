@@ -11,7 +11,23 @@ export class UserProfileRepository {
     return this.db.getOne<UserProfile>('SELECT * FROM user_profile LIMIT 1');
   }
 
+  /**
+   * Insert the singleton user_profile row.
+   *
+   * Idempotent by design: if a profile already exists, the existing row is
+   * returned unchanged. To replace profile values, call {@link update}.
+   * This prevents duplicate rows when onboarding is accidentally re-run
+   * (e.g. navigation race, WebView restore, or legacy migration edge cases).
+   */
   async insert(data: Omit<UserProfile, 'id' | 'created_at' | 'updated_at'>): Promise<UserProfile> {
+    const existing = await this.getProfile();
+    if (existing) {
+      console.warn(
+        '[UserProfileRepository] insert() called but profile already exists; returning existing row',
+      );
+      return existing;
+    }
+
     const id = uuidv4();
     await this.db.execute(
       `INSERT INTO user_profile (
