@@ -49,9 +49,9 @@
 
 | # | Acceptance criterion | Phase 1 | Phase 1.5 | Task ref |
 |---|----------------------|:-------:|:---------:|----------|
-| 1 | Tạo món bằng 3 cách (Ingredient / Quick Add / AI) | 2/3 (Ingredient + Quick Add) | 3/3 (AI Auto-fill) | §5.6 |
+| 1 | Tạo món bằng 2 cách (Ingredient-based / AI Auto-fill) | 1/2 (Ingredient-based) | 2/2 (AI Auto-fill) | §5.6 |
 | 2 | Dinh dưỡng tự tính đúng từ nguyên liệu × khối lượng | ✅ | — | §5.3 `dish_ingredient` logic |
-| 3 | Quick Add lưu dinh dưỡng trực tiếp | ✅ | — | §5.6 edit modal |
+| 3 | AI Auto-fill lưu dish + dish_ingredient sau khi user confirm (xem RULE-DISH-TOTAL) | — | ✅ | §5.6 AI flow |
 | 4 | Xóa món: confirm dialog nếu đang dùng trong kế hoạch ăn | ⚠️ Partial* | — | §5.5 `<app-confirm-dialog>` |
 
 > *Partial*: Phase 1 chưa có Calendar flow nên `planned_dish` chưa được user tạo thực tế. Phase 1 chỉ implement generic confirm + repository/DB guard khi phù hợp. Full planned_dish-aware UX/message sẽ hoàn tất ở Phase 2.

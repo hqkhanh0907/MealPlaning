@@ -208,9 +208,9 @@
     font-size: 11px; font-weight: 500; line-height: 1.4;
   }
   .type-ingredient { background: #E3F2FD; color: #1565C0; }
-  .type-quick      { background: #FFF3E0; color: #E65100; }
+  .type-ai         { background: #FFF3E0; color: #E65100; }
   body.dark .type-ingredient { background: rgba(33,150,243,0.2); color: #90CAF9; }
-  body.dark .type-quick      { background: rgba(255,152,0,0.2); color: #FFB74D; }
+  body.dark .type-ai         { background: rgba(255,152,0,0.2); color: #FFB74D; }
 
   .source-badge {
     font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 4px;
@@ -502,18 +502,18 @@
           <div class="dish-servings">1 phần · <span class="source-badge">Có sẵn</span></div>
         </div>
 
-        <!-- Dish 4 — Quick type -->
+        <!-- Dish 4 — AI autofill type -->
         <div class="dish-card">
           <div class="dish-more" aria-label="Tùy chọn">⋮</div>
           <div class="dish-header">
-            <span class="dish-name">Sandwich nhanh</span>
-            <span class="type-badge type-quick">Nhập nhanh</span>
+            <span class="dish-name">Salad ức gà</span>
+            <span class="type-badge type-ai">AI tự điền</span>
           </div>
           <div class="dish-calories">350 kcal</div>
           <div class="dish-macros">
-            <span class="macro-p">P: 15g</span> · <span class="macro-c">C: 40g</span> · <span class="macro-f">F: 12g</span>
+            <span class="macro-p">P: 32g</span> · <span class="macro-c">C: 18g</span> · <span class="macro-f">F: 14g</span>
           </div>
-          <div class="dish-servings">1 phần</div>
+          <div class="dish-servings">1 phần · <span class="source-badge">AI</span></div>
         </div>
       </div>
       <!-- FAB -->
@@ -722,7 +722,7 @@
        =================================================================== -->
   <div class="screen-wrapper">
     <div class="screen-label">6. FAB mở rộng — chọn cách tạo</div>
-    <div class="screen-desc">Tap FAB → hiện 2 tùy chọn với sublabel: Tạo từ nguyên liệu (primary) / Nhập nhanh</div>
+    <div class="screen-desc">Tap FAB → hiện 2 tùy chọn với sublabel: Tạo từ nguyên liệu (primary) / AI tự điền</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
@@ -773,10 +773,10 @@
           </span>
         </button>
         <button class="fab-menu-item">
-          <span class="fab-menu-icon">⚡</span>
+          <span class="fab-menu-icon">✨</span>
           <span class="fab-menu-text">
-            <span class="fab-menu-label">Nhập nhanh</span>
-            <span class="fab-menu-sublabel">Chỉ lưu macro/kcal, không có thành phần</span>
+            <span class="fab-menu-label">AI tự điền</span>
+            <span class="fab-menu-sublabel">Quét ảnh hoặc mô tả món, AI tự điền dinh dưỡng</span>
           </span>
         </button>
       </div>
@@ -832,7 +832,7 @@
     <tr><td>Source badge labels</td><td>Vietnamese display</td><td>DB value → Display: <code>db</code> → "Có sẵn", <code>custom</code> → "Tự tạo", <code>ai</code> → "AI". Same mapping used in ingredient-list</td></tr>
     <tr><td>Macro colors</td><td>Cal=#2196F3, P=#4CAF50, C=#FF9800, F=#F44336</td><td>Color-coded macro values in dish summary</td></tr>
     <tr><td>Type badge — Nguyên liệu</td><td>Blue bg + blue text</td><td>#E3F2FD/#1565C0 (light), rgba(33,150,243,0.2)/#90CAF9 (dark)</td></tr>
-    <tr><td>Type badge — Nhập nhanh</td><td>Orange bg + orange text</td><td>#FFF3E0/#E65100 (light), rgba(255,152,0,0.2)/#FFB74D (dark)</td></tr>
+    <tr><td>Type badge — AI tự điền</td><td>Orange bg + orange text</td><td>#FFF3E0/#E65100 (light), rgba(255,152,0,0.2)/#FFB74D (dark). Class: <code>.type-ai</code>. Áp dụng cho dish có <code>type='ai_autofill'</code> (sau C-02 đã loại bỏ Quick Add).</td></tr>
     <tr><td>FAB menu</td><td>Popup above FAB</td><td>Semi-transparent overlay + 2 items with sublabels + rotated X FAB. "Tạo từ nguyên liệu" = primary (top, 600 weight)</td></tr>
     <tr><td>Phone frame</td><td>375×812px</td><td>iPhone-size frame with tab bar</td></tr>
     <tr><td>Tab bar</td><td>56px height, 4 tabs</td><td>"Quản lý" active (#2196F3 / #42A5F5)</td></tr>

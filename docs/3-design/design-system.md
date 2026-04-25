@@ -1302,15 +1302,23 @@ ion-tab-bar {
 
 ---
 
-## 11. Mockup Files
+## 11. Mockup & Exploration Files
 
-Tất cả mockup HTML dùng trong quá trình discussion:
+Các mockup HTML từng dùng trong quá trình thảo luận DS đã được tách thành 2 nhóm:
 
-| File | Nội dung | Quyết định |
-|------|----------|-----------|
-| `mockups/color-palette.html` | So sánh 3 blue shades + accent colors | Material Blue + Orange/Green dual accent |
-| `mockups/typography.html` | So sánh Inter vs Roboto vs Nunito | Roboto |
-| `mockups/spacing.html` | So sánh Compact vs Standard vs Spacious | Standard (16px) |
+### 11.1. Exploration (KHÔNG phải spec) — `docs/3-design/explorations/`
+
+| File | Nội dung | Quyết định đã chốt |
+|------|----------|---------------------|
+| `explorations/color-palette.html` | So sánh 3 blue shades + accent colors | Material Blue + Orange/Green dual accent |
+| `explorations/typography.html` | So sánh Inter vs Roboto vs Nunito | Roboto |
+| `explorations/spacing.html` | So sánh Compact vs Standard vs Spacious | Standard (4px grid, base = 16px) |
+
+> Các file trên chỉ giữ lại để tham khảo lịch sử ra quyết định. Source of truth thực tế là chính tài liệu này (§1–§10) và `src/theme/variables.scss`.
+
+### 11.2. Screen Mockups (Spec) — `docs/3-design/mockups/`
+
+Xem `docs/3-design/mockups/README.md` để biết danh sách hiện có và trạng thái implementation.
 
 ---
 
