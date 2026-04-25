@@ -27,7 +27,7 @@ Copilot trong dự án này: **cực kỳ khó tính, khắt khe, kỹ lưỡng*
 4. Xác nhận hiểu biết → đề xuất approach + trade-off
 5. Chờ user approve → MỚI code
 
-**Auto skill selection** — TỰ ĐỘNG chọn skills phù hợp khi phân tích/implement. User KHÔNG cần liệt kê. Ví dụ: `brainstorming` cho feature mới, `context7` cho tra cứu docs, `shadcn-ui` cho UI components, `react-vite-best-practices` cho code patterns.
+**Auto skill selection** — TỰ ĐỘNG chọn skills phù hợp khi phân tích/implement. User KHÔNG cần liệt kê. Ví dụ: `brainstorming` cho feature mới, `context7` cho tra cứu docs Angular/Ionic/Capacitor, `systematic-debugging` cho bug khó, `test-driven-development` cho feature có business logic.
 
 **Ngoại lệ** (không cần hỏi): Bug rõ ràng 100% | User nói "tự động làm hết" | Hotfix production | Task đơn giản (fix typo)
 
@@ -37,155 +37,191 @@ Khi cần hỏi user trong autopilot: **chỉ output text thuần (KHÔNG gọi 
 
 ## Commands
 
+> ⚠️ **Verify-first rule**: Chỉ dùng commands có thực trong `package.json`. Nếu cần command mới — thêm script vào `package.json` PR riêng, không invent command.
+
 ```bash
-npm run dev              # Dev server at localhost:3000
-npm run build            # Production build (Vite)
-npm run lint             # TypeScript type-check + ESLint
-npm run lint:fix         # Auto-fix ESLint issues
-npm run format           # Prettier format src/
-npm run test             # Run all tests (Vitest)
-npm run test:watch       # Watch mode
-npm run test:coverage    # Coverage report (target: 100%)
+# Install
+npm install
 
-# Run a single test file
-npx vitest run src/__tests__/dishStore.test.ts
-# Run tests matching a pattern
-npx vitest run -t "should update meal type"
+# Dev / build (Angular CLI)
+npm start                 # ng serve (Angular dev server, default http://localhost:4200)
+npm run build             # ng build (production tùy config)
+npm run watch             # ng build --watch --configuration development
 
-# Android (Capacitor)
-npm run android:sync     # Build + sync to Android project
-npm run android:run      # Build + sync + run on device/emulator
+# Quality gates
+npm run lint              # ng lint (ESLint 9 flat config)
+npm run lint:fix          # ng lint --fix
+npm run format            # prettier --write "src/**/*.{ts,html,scss,json}"
+npm run format:check      # prettier --check "src/**/*.{ts,html,scss,json}"
+npm test                  # ng test (Karma + Jasmine, watch mode default)
 
-# SonarQube (requires Docker)
-docker compose up -d     # Start SonarQube at localhost:9000
-npm run sonar            # Run analysis
+# Test ở chế độ CI (single-run, headless)
+npm test -- --watch=false --browsers=ChromeHeadless
 
-# Bundle analysis
-npm run analyze          # Generates stats.html treemap
+# Android (Capacitor — KHÔNG có npm wrapper, dùng raw commands)
+npx cap add android                              # 1 lần đầu
+npx cap sync android                             # sync sau mỗi build web
+npx cap run android                              # run trên device/emulator
+cd android && ./gradlew assembleDebug            # build APK debug
+cd android && ./gradlew assembleRelease          # build APK release
+
+# Husky (auto-installed by `npm run prepare`)
+# - pre-commit: npx lint-staged
+# - commit-msg: npx commitlint --edit
 ```
+
+**Commands KHÔNG TỒN TẠI** (đừng dùng dù docs cũ có nhắc): `npm run dev`, `npm run vitest`, `npm run android:sync`, `npm run android:run`, `npm run sonar`, `npm run test:coverage`, `npm run analyze`, `npm run e2e`. Verify lại trong `package.json` trước khi gọi bất kỳ script nào.
 
 ## Architecture
 
-**Offline-first mobile meal planning app** — React 19 + Vite 6, deployed to Android via Capacitor 8. Vietnamese-language UI, backed by in-browser SQLite (sql.js WASM).
+**Offline-first Android meal planning app** — Angular 20 (standalone components + Signals) + Ionic 8 + Capacitor 8.3, deployed to Android. Vietnamese-language UI. Local-first SQLite với hai implementation:
+- **Web/test**: `sql.js` WASM (persist base64 vào `localStorage`).
+- **Native (Android)**: `@capacitor-community/sqlite` 8.1 (file thật + WAL + `PRAGMA user_version`).
 
-### Navigation Model
+Stack switch ở runtime qua `Capacitor.isNativePlatform()` trong `core/services/database/database.provider.ts`.
 
-The app uses a **stack-based navigation** managed by `useNavigationStore` (Zustand):
+### Bootstrap & Init Order (`src/main.ts` + `database.provider.ts`)
 
-- **5 main tabs**: `calendar`, `library`, `ai-analysis`, `fitness`, `dashboard`
-- **Full-screen pages**: Opened via `pushPage()` onto a `pageStack` (max depth 2). Rendered by `PageStackOverlay` in `App.tsx`. Hides bottom nav when active.
-- **Sub-tabs**: Rendered inline within tab panels (NOT via pushPage).
-- **Bottom sheets**: Mounted as components, never replace a page.
+`bootstrapApplication(AppComponent, ...)` providers:
+1. `IonicRouteStrategy` + `provideIonicAngular()`
+2. `provideRouter(routes, withPreloading(PreloadAllModules))`
+3. `provideDatabaseService()` — gồm `APP_INITIALIZER` chạy:
+   1. `db.initialize()` — chạy `SCHEMA_DDL` + migrations (idempotent, `IF NOT EXISTS` + `PRAGMA user_version`).
+   2. (Native only) `LegacySqlJsMigrator` — import `user_profile` cũ từ `localStorage` build sql.js trước đó. Bọc timeout 3s, lỗi → `console.warn` (non-fatal).
+   3. `profileStore.loadProfile()` — set signal trước khi router activate.
 
-**Rule**: Never render a full-screen page inline or add/remove tabs beyond what the spec defines.
+`AppComponent` gọi `SplashScreen.hide()` trong `afterNextRender()` (splash configured `launchAutoHide: false`).
 
-### Data Layer
+### Layered Architecture (BẮT BUỘC tuân thủ)
 
 ```
-Zustand stores (in-memory) ←→ SQLite (sql.js WASM, persistence)
+Component / Page (standalone, OnPush, signals)
+   ↓ inject()
+Store (Angular Signals — signal/computed/effect)
+   ↓ inject()
+Repository (typed model, async, parameterized SQL)
+   ↓ inject()
+DatabaseService (abstract)
+   ↓ runtime switch
+WebDatabaseService (sql.js)  ←→  NativeDatabaseService (@capacitor-community/sqlite)
 ```
 
-- Each store has a `loadAll(db: DatabaseService)` method to hydrate from SQLite on startup.
-- State updates are **optimistic** — update the store immediately, persist to DB separately via `useAutoSync` hook.
-- `DatabaseService` interface: `execute()`, `query<T>()`, `queryOne<T>()`, `transaction()`, `exportBinary()`, `importBinary()`.
-- Schema version 4 with migrations in `src/services/schema.ts`.
-- DB column names are `snake_case`; TypeScript properties are `camelCase`. Conversion helpers: `snakeToCamel()`, `camelToSnake()`, `rowToType<T>()`, `typeToRow<T>()`.
+**Rule cấm vi phạm**:
+- Component/Page KHÔNG gọi `DatabaseService` trực tiếp.
+- Repository KHÔNG biết platform (sql.js vs Capacitor) — chỉ phụ thuộc abstract `DatabaseService`.
+- KHÔNG hard-code SQL trong page/component.
+- KHÔNG dùng `localStorage` ở layer khác (chỉ `WebDatabaseService` + `LegacySqlJsMigrator` được phép).
 
-### Localized Data Pattern
+### Routing Model
 
-Text fields in the database use `_vi`/`_en` suffixes:
+Top-level (`app.routes.ts`):
+- `/onboarding` — wizard 2 bước, set `onboarding_completed = 1` khi xong.
+- `/settings` — push page (KHÔNG phải tab).
+- `/tabs` — IonTabs wrapper (`canActivate: [onboardingGuard]`).
 
-```sql
-name_vi TEXT NOT NULL, name_en TEXT
-```
+Tabs (`tabs/tabs.routes.ts`) — 4 tab tiếng Việt:
+- `dashboard` (Tổng quan) | `calendar` (Lịch ăn) | `management` (Quản lý) | `fitness` (Tập luyện).
 
-In TypeScript, these become `{ vi: string, en?: string }` objects. Always include `name.vi` as required.
+`onboardingGuard` redirect `/onboarding` nếu `profileStore.isOnboardingComplete() === false`.
 
-### Key Stores
+### Database Layer Conventions
 
-| Store                | Persistence       | Purpose                                        |
-| -------------------- | ----------------- | ---------------------------------------------- |
-| `navigationStore`    | Memory only       | Tab/page stack, scroll positions               |
-| `dishStore`          | SQLite            | Recipes with ingredient lists                  |
-| `ingredientStore`    | SQLite            | Food items + nutrition per 100g                |
-| `dayPlanStore`       | SQLite            | Daily meal plans (breakfast/lunch/dinner)      |
-| `fitnessStore`       | Zustand `persist` | Workouts, training plans, weight logs          |
-| `appOnboardingStore` | Zustand `persist` | First-run state                                |
-| `uiStore`            | Memory only       | Modal visibility, selected date, sub-tab state |
+- Schema DDL ở `src/app/core/services/database/schema.ts`. `SCHEMA_VERSION = 1`. 18 bảng, snake_case columns, UUID v4 PK.
+- Migrations: `IF NOT EXISTS` cho table mới; với schema thay đổi structural → bump `SCHEMA_VERSION`, thêm block trong `applyMigrations()` với guard `if (currentVersion < N)`. Test trên cả Web (clear localStorage) lẫn Native.
+- Boolean lưu `INTEGER 0/1`. Enum lưu `TEXT` + `CHECK (col IN (...))`. Timestamp dùng `TEXT` ISO 8601 + default `datetime('now')`.
+- TẤT CẢ query phải parameterized (`?` placeholders + params array). Build SQL động (như `UserProfileRepository.update()`) phải whitelist column names khớp typed interface — nếu không sẽ là SQL injection vector khi mở rộng `Partial<T>`.
+- Foreign keys ON ở cả native (`PRAGMA foreign_keys=ON` per-connection) — KHÔNG tắt trong query.
 
-### Form Validation
+### Feature Specs & Phase Discipline
 
-Forms use **React Hook Form + Zod** (`@hookform/resolvers`). Schemas live in `src/schemas/`.
+Specs sống ở `docs/2-requirements/prd.md` (acceptance criteria), `docs/3-design/data-model.md` (ERD), `docs/3-design/design-system.md` (tokens), `docs/3-design/mockups/*.html` (HTML mockups). Phase plan ở `docs/5-development/development-plan.md` + `docs/5-development/phase-X-*.md`.
 
-Numeric fields use `z.preprocess()` to coerce empty strings to `undefined` before validation:
+Khi implement feature: **đọc spec phase tương ứng TRƯỚC**, không vượt scope phase, không thêm tab/sub-tab ngoài spec. Nếu spec mơ hồ hoặc mâu thuẫn → hỏi user; nếu PRD ⇄ schema mâu thuẫn → ưu tiên schema thực tế và flag mismatch.
 
-```typescript
-z.preprocess(val => (val === '' || val === undefined || val === null ? undefined : Number(val)), z.number().min(0));
-```
-
-### Feature Specs
-
-Design specs live in `docs/3-design/`. When implementing any feature, **read the corresponding spec first** and implement exactly what it describes. Do not add tabs, sub-tabs, or navigation flows beyond what the spec defines. If the spec is ambiguous or missing, ask the user.
+**State hiện tại**: Phase 0 done (scaffold + onboarding + DB layer + tabs skeleton). Phase 1 (CRUD F-01 ingredient + F-02 dish + Vietnamese seed) chưa start. Page `dashboard/calendar/management/fitness/settings` là placeholder "Coming soon".
 
 ## Conventions
 
 ### Styling
 
-- **Tailwind CSS v4** + **shadcn/ui** (style: `base-nova`, icons: `lucide-react`)
-- shadcn/ui components in `src/components/ui/` — add new ones via `npx shadcn@latest add <component>`
-- Path alias: `@/` → `src/`
+- **Ionic CSS custom properties** + SCSS. Không Tailwind, không shadcn. Tokens trong `src/theme/variables.scss` + `docs/3-design/design-system.md`.
+- Dark mode: `@media (prefers-color-scheme: dark)`.
+- Icons: Ionicons. Đăng ký qua `addIcons({...})` trong constructor + dùng `<ion-icon name="...">` trong template.
+- Imports: import từng standalone component Ionic riêng (`IonButton`, `IonContent`, `IonIcon`...) — KHÔNG `IonicModule`.
 
-### Formatting
+### TypeScript / Angular
 
-- Prettier: single quotes, semicolons, trailing commas, 120 char width, `arrowParens: "avoid"`
-- ESLint: `no-explicit-any` is an error. `no-console` is a warning (except in `src/utils/logger.ts`). Unused vars prefixed with `_` are allowed.
-- **Never use `eslint-disable`** — fix the underlying issue instead.
+- TypeScript strict, ESLint cấm `any` (`'@typescript-eslint/no-explicit-any': 'error'`). Dùng `unknown` + type guard hoặc generic.
+- Standalone components ONLY. KHÔNG `NgModule`.
+- Inject services qua `inject()`, KHÔNG constructor parameter injection.
+- `ChangeDetectionStrategy.OnPush` mặc định cho mọi component mới.
+- Signals-first: `signal()`, `computed()`, `effect()`. KHÔNG kéo thêm state lib (NgRx, Akita, ...).
+- Component/page lazy: `loadComponent` / `loadChildren` qua `*.routes.ts` export default `Routes`.
+- Sử dụng signal API mới của Angular 20 (`input()`, `output()`, `model()`) cho component mới; legacy `@Input/@Output` được chấp nhận trong code cũ chưa migrate.
+- Naming: snake_case columns DB, camelCase TypeScript, kebab-case file, PascalCase class.
+- ID: `uuidv4()` từ `uuid` package. KHÔNG `Math.random()`, KHÔNG autoincrement.
+- Timestamp: SQL `datetime('now')` server-side; TypeScript đọc ra `string` ISO.
+- Async navigate: `void this.router.navigate(...)` để rõ ý intentional fire-and-forget.
 
-### i18n
+### Formatting / Lint Rules (verified từ `eslint.config.js` + Prettier 3.8)
 
-The app uses i18next with Vietnamese as the only UI language (`src/locales/vi.json`).
+- ESLint: `no-explicit-any: error`, `no-console: warn` (allow `warn` + `error`). Unused vars prefix `_` được phép.
+- `console.info` phải có `// eslint-disable-next-line no-console` + lý do rõ.
+- **TRÁNH** `eslint-disable` toàn cục — chỉ disable per-line khi không có cách sửa khác và phải comment lý do.
+- Prettier: single quotes, semicolons, trailing commas. Chạy `npm run format` trước khi commit.
 
-**Every `t('key')` call must have a corresponding entry in `vi.json`.** This includes:
+### Vietnamese Strings
 
-- Dynamic keys like ``t(`namespace.${variable}`)`` — all possible values of `variable` must have entries.
-- Pluralized keys using `_zero`, `_one`, `_other` suffixes for `t('key', { count })`.
+V1 chỉ tiếng Việt. Hardcode trực tiếp trong template Angular (KHÔNG dùng i18next, KHÔNG có `vi.json`). Mọi enum/label hiển thị nằm cạnh nơi dùng. Khi thêm i18n thật trong tương lai → đề xuất ADR riêng.
 
 ### Testing
 
-- **Framework**: Vitest + React Testing Library + `@testing-library/jest-dom`
-- **Setup**: `src/__tests__/setup.ts` initializes i18n with Vietnamese translations
-- **Coverage target**: 100% for new code. Coverage config excludes `components/ui/`, `locales/`, `lib/utils.ts`, and test files.
-- **Store tests**: Reset state in `beforeEach` via `useXxxStore.setState(...)`.
-- **Component tests**: Mock Zustand stores and database services, test user-facing behavior.
-- **E2E**: WebdriverIO + Appium for Android device testing (`npm run e2e`).
+- **Framework**: Karma + Jasmine (chạy qua `ng test`). KHÔNG Vitest, KHÔNG React Testing Library.
+- **Spec layout**: file `*.spec.ts` cùng folder với source.
+- **DB-aware tests**: mock abstract `DatabaseService` qua `TestBed.configureTestingModule({ providers: [{ provide: DatabaseService, useValue: stub }] })`. Tham khảo `src/app/core/services/database/native-database.service.spec.ts` và `src/app/core/repositories/user-profile.repository.spec.ts`.
+- **Component tests**: kiểm hành vi UI (signal state, click, render conditional), KHÔNG test internal Ionic.
+- **CI run**: `npm test -- --watch=false --browsers=ChromeHeadless`.
+- **Coverage target**: tối thiểu 70% cho code mới (chưa enforce trong `karma.conf.js` — hiện baseline rất thấp). Tests bắt buộc cho: schema migration, repository CRUD, service tính toán (BMR/TDEE/calo), guard logic.
+- **E2E**: WebdriverIO + Appium tồn tại trong `e2e/` + workflow `.github/workflows/e2e.yml` (job `e2e` chạy thủ công qua `workflow_dispatch`). KHÔNG có `npm run e2e` script — gọi qua workflow hoặc raw `npx wdio run e2e/wdio.conf.ts`.
 
-### Multi-Step Forms (React Hook Form + Zod)
+### Forms
 
-- **Never call `form.trigger()` without arguments** in a multi-step form — it validates the entire schema including unfilled future steps.
-- Always use `form.trigger([...STEP_FIELDS['currentStep']])` to validate only the current step's fields.
-- `superRefine` cross-field validators don't run with field-level triggers — implement cross-field checks manually via `form.setError()`.
-- Validation failures must always show feedback (inline errors or scroll to first error). Never silently `return`.
+V1 dùng Angular Reactive Forms + signal-based state (xem `features/onboarding/onboarding.page.ts` làm reference). KHÔNG React Hook Form. Validation: kết hợp `Validators` built-in + custom validator function. Phase 1.5+ có thể dùng `zod` (đã là dependency) cho validate AI response runtime — schema đặt trong `core/schemas/`.
+
+### Error / Logging / Config
+
+- Wrap thrown error: `throw new Error('<Service>: <op> failed: <reason>')`. KHÔNG nuốt error bằng `catch {}` trừ non-critical (vd: localStorage quota dev) — và phải `console.warn` lý do rõ.
+- Log levels: `console.warn` cho recoverable, `console.error` cho fatal/init failure. KHÔNG `console.log`.
+- Config qua `src/environments/environment*.ts`. KHÔNG đọc `process.env` trong code app (web không có).
+- Platform check qua `Capacitor.isNativePlatform()`. Production flag qua `environment.production`.
+
+### Security
+
+- Gemini API key (Phase 1.5+): `environment.geminiApiKey` hiện rỗng. Theo decision D3 sẽ obfuscate trong APK release. Khi implement: tạo `core/services/ai/gemini.service.ts`, validate key non-empty trong service init, KHÔNG đưa key vào env file commit.
+- DB queries: parameterized only. Build SQL động: whitelist column names theo `keyof Model`.
+- Onboarding `insert()` đã idempotent (check existing row trước insert) — pattern này áp dụng cho mọi singleton repository.
 
 ### Quality Gates
 
-Every code change must pass:
+Mọi PR / commit phải pass:
 
-1. `npm run lint` — 0 errors, no `eslint-disable`
-2. `npm run test` — 0 new failures, coverage ≥ 100% for new code
-3. `npm run build` — clean production build
-4. `npm run test:coverage && npm run sonar` — SonarQube 0 issues. Nếu còn → fix → lặp từ bước 1. **KHÔNG commit khi SonarQube còn issue.**
-5. Spec cross-check — verify against `docs/3-design/`
+1. `npm run lint` — 0 errors. `eslint-disable` chỉ per-line + có lý do.
+2. `npm run format:check` — clean.
+3. `npm test -- --watch=false --browsers=ChromeHeadless` — 0 fail.
+4. `npm run build` — production build OK.
+5. Nếu đụng schema → bump `SCHEMA_VERSION` + migration block + spec.
+6. Nếu đụng Capacitor plugin/native → `npx cap sync android` + smoke test trên emulator/device.
+7. Spec cross-check — đối chiếu với `docs/2-requirements/prd.md` (acceptance) + `docs/3-design/mockups/` (UI) + phase doc.
+8. Commit message theo Conventional Commits (commitlint enforce qua Husky).
 
-**SonarQube setup** (nếu server chưa chạy):
-```
-docker compose up -d sonarqube  # chờ status="UP"
-npm run test:coverage && npm run sonar
-```
+> ⚠️ CI workflow `.github/workflows/e2e.yml` job `test-and-build` HIỆN không chạy `lint` + `format:check`, và dùng Node 20 (project yêu cầu Node 22). Local phải tự chạy. Đề xuất sửa CI là technical debt high-priority.
 
-**Emulator verify** (cho mọi UI/code change — Capacitor project):
+**Emulator verify** (cho UI/native change):
 ```
-npx cap sync android → cd android && ./gradlew assembleDebug
-adb -s emulator-5556 install -r app-debug.apk → CDP test → screenshot
+npm run build
+npx cap sync android
+cd android && ./gradlew assembleDebug
+# install lên emulator/device đã setup, smoke test luồng đụng tới
 ```
 
 ### /team Pipeline & Sub-Agent Rules
@@ -245,9 +281,8 @@ Copilot MUST operate as a **Pragmatic Senior Perfectionist** — combining relen
 #### Khi thực hiện Quality Gates:
 
 - `npm run lint` → 0 errors, **KHÔNG BAO GIỜ** dùng `eslint-disable`.
-- `npm run test` → 0 failures, coverage = 100% cho code mới.
+- `npm test -- --watch=false --browsers=ChromeHeadless` → 0 failures. Mục tiêu coverage cho code mới: ≥70%; KHÔNG để regression giảm coverage repository/service hiện có (xem Quality Gates ở section Conventions).
 - `npm run build` → clean build, không warning.
-- `npm run test:coverage && npm run sonar` → SonarQube scan 0 issues. Nếu còn issues → fix → chạy lại toàn bộ pipeline.
 - Mỗi lần sửa code → chạy lại TOÀN BỘ quality gates trước khi coi là xong.
 - Nếu fix bug sinh ra bug mới → lập tức ghi nhận, phân tích, và sửa ngay — KHÔNG bỏ qua.
 
@@ -269,9 +304,9 @@ Khi xảy ra **BẤT KỲ** tình huống nào sau đây trong session:
 | --------------------------------------------------- | ----------------------------------------------- |
 | **Retry > 2 lần** cho cùng 1 vấn đề                 | Build fail 3 lần vì sai config                  |
 | **Sai approach** phải đổi hướng                     | Dùng adb tap → fail → chuyển sang CDP           |
-| **Gotcha/trap** mất > 10 phút                       | React input `.value` không trigger state update |
+| **Gotcha/trap** mất > 10 phút                       | sql.js `db.run()` vs `db.exec()` semantic khác nhau |
 | **Workaround** cho tool/platform limitation         | WebSocket cần `suppress_origin=True`            |
-| **Pattern mới** phát hiện ra có giá trị tái sử dụng | Cross-store sync pattern giữa 2 Zustand stores  |
+| **Pattern mới** phát hiện ra có giá trị tái sử dụng | Cross-store sync pattern giữa 2 Angular Signals stores |
 | **Debug technique** hiệu quả                        | CDP Runtime.evaluate thay vì adb tap            |
 | **Config/setup** dễ quên                            | Package name đúng, port forwarding command      |
 
