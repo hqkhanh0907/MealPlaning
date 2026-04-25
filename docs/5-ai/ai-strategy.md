@@ -158,7 +158,9 @@ Trả JSON:
 }
 ```
 
-**Post-processing:** Tương tự Image Analysis — match DB → hỏi user ingredient mới → tạo dish.
+**Post-processing:** Tương tự Image Analysis — match DB → hỏi user ingredient mới → tạo dish (`type = 'ai_autofill'`, `source = 'ai'`) + dish_ingredient rows.
+
+> **Lưu ý kiến trúc (RULE-DISH-TOTAL-04):** AI auto-fill **CHỈ** trả về danh sách ingredient + amount. App **không bao giờ** persist total nutrition do AI tự sinh ra. Total nutrition của dish được tính derived từ `dish_with_totals` VIEW dựa trên ingredient nutrition canonical trong DB (tham khảo `docs/4-architecture/business-rules.md`). Nếu prompt tương lai có trường `total_*` thì phải bị strip khi lưu.
 
 ---
 

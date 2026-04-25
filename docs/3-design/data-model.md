@@ -185,28 +185,21 @@ Rule provenance cho `ingredient`:
 
 ### 4.2 dish
 
-Món ăn — ingredient-based, quick add, hoặc AI auto-fill (F-02). Các seeded dishes của Phase 1 được lưu như dish rows bình thường và cho phép user sửa trực tiếp record gốc.
+Món ăn — ingredient-based hoặc AI auto-fill (F-02). Total nutrition KHÔNG được persist trên `dish`; đọc từ VIEW `dish_with_totals` (xem 4.2b). Các seeded dishes của Phase 1 được lưu như dish rows bình thường và cho phép user sửa trực tiếp record gốc.
 
 ```sql
 CREATE TABLE dish (
   id                TEXT PRIMARY KEY,
   name              TEXT NOT NULL,                -- "Phở bò"
   description       TEXT,
-  
-  -- Loại món
-  type              TEXT NOT NULL CHECK (type IN ('ingredient_based', 'quick', 'ai_autofill')),
+
+  -- Loại món (Quick Add đã loại khỏi V1)
+  type              TEXT NOT NULL CHECK (type IN ('ingredient_based', 'ai_autofill')),
   source            TEXT NOT NULL DEFAULT 'custom' CHECK (source IN ('db', 'custom', 'ai')),
-  
-  -- Tổng dinh dưỡng (auto-calculated cho ingredient-based, manual cho quick)
-  total_calories    REAL NOT NULL,
-  total_protein     REAL NOT NULL DEFAULT 0,
-  total_carbs       REAL NOT NULL DEFAULT 0,
-  total_fat         REAL NOT NULL DEFAULT 0,
-  total_fiber       REAL NOT NULL DEFAULT 0,
-  
+
   servings          REAL NOT NULL DEFAULT 1,      -- Số phần ăn
   image_url         TEXT,                         -- Ảnh (local path hoặc null)
-  
+
   created_at        TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at        TEXT
 );
@@ -216,13 +209,43 @@ CREATE INDEX idx_dish_name ON dish(name);
 
 Rule provenance cho `dish`:
 - Seed dish insert từ `dishes.json` phải dùng `source = 'db'`
-- User tạo quick/ingredient-based dish mới dùng `source = 'custom'`
+- User tạo ingredient-based dish mới dùng `source = 'custom'`
 - AI auto-fill saved dish dùng `source = 'ai'`
 - Nếu user sửa một seed dish gốc, record đó đổi `source` từ `db` sang `custom`
 
+**Total nutrition rule (RULE-DISH-TOTAL):**
+- `total_calories / total_protein / total_carbs / total_fat / total_fiber` là **derived** — single source of truth là VIEW `dish_with_totals`.
+- Repository **MUST** đọc total từ VIEW, không tự SUM trong code application layer.
+- UI form (chưa save) có thể dùng helper `computeDishTotalsPreview()` để hiển thị realtime; preview này KHÔNG persist và KHÔNG được dùng làm authoritative source ở bất cứ nơi nào downstream.
+
+### 4.2b dish_with_totals (VIEW)
+
+VIEW SQL — single source of truth cho dish-level macros. JOIN `dish` ↔ `dish_ingredient` ↔ `ingredient`, nhân `normalized_amount / nutrition_basis_quantity`, SUM theo dish.
+
+```sql
+CREATE VIEW dish_with_totals AS
+SELECT
+  d.id, d.name, d.description, d.type, d.servings, d.image_url,
+  d.created_at, d.updated_at,
+  COALESCE(SUM(i.calories * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_calories,
+  COALESCE(SUM(i.protein  * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_protein,
+  COALESCE(SUM(i.carbs    * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_carbs,
+  COALESCE(SUM(i.fat      * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_fat,
+  COALESCE(SUM(i.fiber    * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_fiber
+FROM dish d
+LEFT JOIN dish_ingredient di ON di.dish_id = d.id
+LEFT JOIN ingredient i ON i.id = di.ingredient_id
+GROUP BY d.id;
+```
+
+Lưu ý:
+- `LEFT JOIN` để dish chưa có ingredient nào vẫn xuất hiện với total = 0 (nhưng theo validation, dish bắt buộc ≥ 1 ingredient nên trạng thái này chỉ tồn tại transient trong form chưa save).
+- Khi `ingredient` thay đổi nutrition (calories/protein/...), VIEW phản ánh ngay lập tức cho mọi dish sử dụng — đây là behavior **mong muốn** (đảm bảo zero drift).
+- Nếu cần snapshot lịch sử (ví dụ planned_dish ăn ngày cũ giữ nguyên macro), snapshot ở tầng `planned_dish` chứ không phải `dish`.
+
 ### 4.3 dish_ingredient
 
-Bảng trung gian: món ăn ↔ nguyên liệu (khối lượng). `ingredient_id` có thể trỏ tới ingredient thường hoặc composite ingredient đã curate sẵn.
+Bảng trung gian: món ăn ↔ nguyên liệu (khối lượng). Lưu user input gốc (`amount_value` + `amount_unit`) **và** `normalized_amount` (đã convert về basis unit của ingredient). Macro snapshot đã bị DROP — total nutrition được compute on-the-fly qua VIEW `dish_with_totals`.
 
 ```sql
 CREATE TABLE dish_ingredient (
@@ -231,46 +254,27 @@ CREATE TABLE dish_ingredient (
   ingredient_id     TEXT NOT NULL REFERENCES ingredient(id) ON DELETE RESTRICT,
   amount_value      REAL NOT NULL,                -- 150, 300, 2...
   amount_unit       TEXT NOT NULL CHECK (amount_unit IN ('g', 'ml', 'piece')),
-  normalized_amount REAL NOT NULL,                -- Đã convert về basis unit của ingredient
-  
-  -- Dinh dưỡng đã tính (normalized_amount × nutrition / nutrition_basis_quantity)
-  calories          REAL NOT NULL,
-  protein           REAL NOT NULL DEFAULT 0,
-  carbs             REAL NOT NULL DEFAULT 0,
-  fat               REAL NOT NULL DEFAULT 0,
-  fiber             REAL NOT NULL DEFAULT 0,
-  
+  normalized_amount REAL NOT NULL,                -- Đã convert về basis unit của ingredient (g hoặc ml)
+
   UNIQUE(dish_id, ingredient_id)
 );
 
 CREATE INDEX idx_dish_ingredient_dish ON dish_ingredient(dish_id);
 ```
 
-**Normalization formula:**
+**Normalization formula (compute lúc insert/update):**
 ```
-Step 1: Convert user input to base unit (g or ml)
-  if amount_unit == 'piece':
-    REJECT nếu ingredient thiếu grams_per_unit (hoặc ml_per_unit cho liquid)
-    base_amount = amount_value × grams_per_unit  (hoặc ml_per_unit)
-  if amount_unit == 'g' hoặc 'ml':
-    base_amount = amount_value
-
-Step 2: normalized_amount = base_amount  (lưu cả user input gốc + normalized)
-
-Step 3: Calculate macro
-  ratio = base_amount / ingredient.nutrition_basis_quantity  (= 100)
-  calories = ingredient.calories × ratio
-  protein  = ingredient.protein  × ratio
-  carbs    = ingredient.carbs    × ratio
-  fat      = ingredient.fat      × ratio
-  fiber    = ingredient.fiber    × ratio
+if amount_unit == 'piece':
+  REJECT nếu ingredient thiếu grams_per_unit (solid) hoặc ml_per_unit (liquid)
+  normalized_amount = amount_value × (grams_per_unit hoặc ml_per_unit)
+else:  // 'g' hoặc 'ml'
+  normalized_amount = amount_value
 ```
 
 **Rules:**
-- Lưu **cả** `amount_value + amount_unit` (user input gốc) **và** `normalized_amount` (đã convert về g/ml) + macro đã tính
-- `piece` chỉ hợp lệ khi ingredient có `grams_per_unit` (solid) hoặc `ml_per_unit` (liquid). Nếu thiếu → **reject input**, yêu cầu user chọn g hoặc ml
-- Macro được tính tại thời điểm insert/update `dish_ingredient`, không on-the-fly
-- Khi ingredient nutrition thay đổi → dish_ingredient macro **KHÔNG auto-recalculate** (snapshot tại thời điểm nhập)
+- Lưu **cả** `amount_value + amount_unit` (user input gốc) **và** `normalized_amount` (g/ml). KHÔNG lưu macro snapshot.
+- `piece` chỉ hợp lệ khi ingredient có `grams_per_unit` (solid) hoặc `ml_per_unit` (liquid). Nếu thiếu → **reject input**, yêu cầu user chọn g hoặc ml.
+- Khi ingredient nutrition thay đổi → total của dish **AUTO** cập nhật (vì derived qua VIEW). Đây là behavior cố ý — single source of truth.
 
 ### 4.4 day_plan
 

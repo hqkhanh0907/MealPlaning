@@ -105,15 +105,16 @@ Ingredient {
 
 ### F-02: Quản lý Món ăn
 
-**Mô tả:** CRUD món ăn. Mỗi món gồm danh sách nguyên liệu (với khối lượng) → tự tính dinh dưỡng tổng. Hỗ trợ thêm nhanh và AI auto-fill nguyên liệu.
+**Mô tả:** CRUD món ăn. Mỗi món gồm danh sách nguyên liệu (với khối lượng) → dinh dưỡng tổng được **tính derived** từ nguyên liệu (single source of truth: SQL VIEW `dish_with_totals`). Không có cơ chế nhập tay total.
 
-**3 cách thêm món:**
+**2 cách thêm món (V1):**
 
 | Cách | Mô tả | Khi nào dùng |
 |------|-------|-------------|
 | **Ingredient-based** | Chọn nguyên liệu + nhập số lượng theo unit hợp lệ (`g`, `ml`, `piece`) → tự tính nutrition | Muốn chính xác, tự chọn |
-| **Quick Add** | Nhập trực tiếp tên + tổng calo/protein/carbs/fat | Muốn nhanh, không cần chi tiết |
 | **🤖 AI Auto-fill** | Nhập tên món → bấm AI → AI trả về nguyên liệu + khối lượng thông dụng → User confirm | Muốn chính xác nhưng không biết nguyên liệu |
+
+> **Quick Add đã bị loại bỏ khỏi V1.** Mọi món ăn đều phải có danh sách `dish_ingredient`; total nutrition luôn derived từ ingredient (xem `docs/4-architecture/business-rules.md` — RULE-DISH-TOTAL).
 
 **AI Auto-fill Flow:**
 
@@ -149,18 +150,18 @@ Dish {
   id: string
   name: string                       // "Cơm gà xối mỡ"
   description?: string
-  type: 'ingredient_based' | 'quick' | 'ai_autofill'
+  type: 'ingredient_based' | 'ai_autofill'
   source: 'db' | 'custom' | 'ai'
-  ingredients: DishIngredient[]      // Nếu ingredient-based
-  total_calories: number             // Auto-calculated hoặc manual
-  total_protein: number
-  total_carbs: number
-  total_fat: number
-  total_fiber: number
+  ingredients: DishIngredient[]      // Bắt buộc — không có dish nào không có ingredient
   servings: number                   // Số phần ăn
   image_url?: string                 // Ảnh món ăn (optional)
   created_at: timestamp
 }
+
+// Total nutrition (calories/protein/carbs/fat/fiber) KHÔNG được lưu trên Dish.
+// Đọc từ VIEW dish_with_totals — derived realtime từ dish_ingredient + ingredient.
+// UI có thể dùng helper computeDishTotalsPreview() khi form chưa save (preview only,
+// không persist).
 
 DishIngredient {
   ingredient_id: string
@@ -183,24 +184,14 @@ DishIngredient {
 |-------|:--------:|-----|-----|---------|-------|
 | `dish.name` | ✅ | 1 char | 150 chars | — | — |
 | `dish.servings` | ✅ | 0.5 | 20 | 1 | — |
+| `dish.ingredients` | ✅ | 1 item | — | — | Phải có ít nhất 1 dish_ingredient (không cho lưu dish rỗng) |
 | `dish_ingredient.amount_value` | ✅ | 0.1 | 10000 | — | — |
 
-**Validation rules — Quick Add (Phase 1):**
-
-| Field | Required | Min | Max | Default | Notes |
-|-------|:--------:|-----|-----|---------|-------|
-| `name` | ✅ | 1 char | 150 chars | — | — |
-| `calories` | ✅ | 0 | 5000 | — | — |
-| `protein` | — | 0 | 500 | 0 | — |
-| `carbs` | — | 0 | 500 | 0 | — |
-| `fat` | — | 0 | 500 | 0 | — |
-
 **Tiêu chí chấp nhận:**
-- [ ] Ingredient-based: chọn nguyên liệu, nhập số lượng theo unit hợp lệ, tự tính tổng
-- [ ] Quick add: nhập trực tiếp số liệu dinh dưỡng
+- [ ] Ingredient-based: chọn nguyên liệu, nhập số lượng theo unit hợp lệ, tổng nutrition derived realtime từ VIEW
 - [ ] AI Auto-fill: nhập tên → AI trả về nguyên liệu → user confirm → lưu
 - [ ] AI Auto-fill: nguyên liệu mới → hỏi user có lưu vào DB chung không
-- [ ] Hiển thị tổng nutrition mỗi món
+- [ ] Hiển thị tổng nutrition mỗi món (đọc từ `dish_with_totals`)
 - [ ] Tìm kiếm món ăn theo tên
 - [ ] App ship sẵn 20 món Việt curated dưới dạng `1 serving` templates để user có dữ liệu nền ngay từ lần mở đầu tiên
 

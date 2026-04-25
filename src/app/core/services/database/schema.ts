@@ -66,30 +66,36 @@ export const SCHEMA_DDL: string[] = [
   `CREATE TABLE IF NOT EXISTS ingredient (
     id                TEXT PRIMARY KEY,
     name              TEXT NOT NULL,
-    group_name        TEXT,
+    category          TEXT NOT NULL CHECK (category IN (
+                        'Thịt', 'Cá & Hải sản', 'Trứng & Sữa', 'Rau củ',
+                        'Ngũ cốc & Tinh bột', 'Đậu & Hạt', 'Dầu & Mỡ',
+                        'Gia vị', 'Nước dùng & Nước chấm', 'Trái cây', 'Khác'
+                      )),
+    nutrition_basis_unit     TEXT NOT NULL CHECK (nutrition_basis_unit IN ('g', 'ml')),
+    nutrition_basis_quantity REAL NOT NULL DEFAULT 100,
     calories          REAL NOT NULL,
     protein           REAL NOT NULL DEFAULT 0,
     carbs             REAL NOT NULL DEFAULT 0,
     fat               REAL NOT NULL DEFAULT 0,
     fiber             REAL NOT NULL DEFAULT 0,
+    default_entry_unit TEXT NOT NULL CHECK (default_entry_unit IN ('g', 'ml', 'piece')),
+    grams_per_unit    REAL,
+    ml_per_unit       REAL,
     source            TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('manual', 'ai', 'db')),
     created_at        TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at        TEXT
   )`,
 
   `CREATE INDEX IF NOT EXISTS idx_ingredient_name ON ingredient(name)`,
-  `CREATE INDEX IF NOT EXISTS idx_ingredient_group ON ingredient(group_name)`,
+  `CREATE INDEX IF NOT EXISTS idx_ingredient_category ON ingredient(category)`,
 
+  // dish: total_* DROPPED — derived via VIEW dish_with_totals.
+  // 'quick' DROPPED from type enum (Quick Add removed from V1).
   `CREATE TABLE IF NOT EXISTS dish (
     id                TEXT PRIMARY KEY,
     name              TEXT NOT NULL,
     description       TEXT,
-    type              TEXT NOT NULL CHECK (type IN ('ingredient_based', 'quick', 'ai_autofill')),
-    total_calories    REAL NOT NULL,
-    total_protein     REAL NOT NULL DEFAULT 0,
-    total_carbs       REAL NOT NULL DEFAULT 0,
-    total_fat         REAL NOT NULL DEFAULT 0,
-    total_fiber       REAL NOT NULL DEFAULT 0,
+    type              TEXT NOT NULL CHECK (type IN ('ingredient_based', 'ai_autofill')),
     servings          REAL NOT NULL DEFAULT 1,
     image_url         TEXT,
     created_at        TEXT NOT NULL DEFAULT (datetime('now')),
@@ -98,20 +104,44 @@ export const SCHEMA_DDL: string[] = [
 
   `CREATE INDEX IF NOT EXISTS idx_dish_name ON dish(name)`,
 
+  // dish_ingredient: store user input (amount_value + amount_unit) AND
+  // normalized_amount in basis unit. Macro snapshot DROPPED — totals computed
+  // on-the-fly via VIEW dish_with_totals (single source of truth).
   `CREATE TABLE IF NOT EXISTS dish_ingredient (
     id                TEXT PRIMARY KEY,
     dish_id           TEXT NOT NULL REFERENCES dish(id) ON DELETE CASCADE,
     ingredient_id     TEXT NOT NULL REFERENCES ingredient(id) ON DELETE RESTRICT,
-    amount_grams      REAL NOT NULL,
-    calories          REAL NOT NULL,
-    protein           REAL NOT NULL DEFAULT 0,
-    carbs             REAL NOT NULL DEFAULT 0,
-    fat               REAL NOT NULL DEFAULT 0,
-    fiber             REAL NOT NULL DEFAULT 0,
+    amount_value      REAL NOT NULL,
+    amount_unit       TEXT NOT NULL CHECK (amount_unit IN ('g', 'ml', 'piece')),
+    normalized_amount REAL NOT NULL,
     UNIQUE(dish_id, ingredient_id)
   )`,
 
   `CREATE INDEX IF NOT EXISTS idx_dish_ingredient_dish ON dish_ingredient(dish_id)`,
+
+  // VIEW dish_with_totals — single source of truth for dish-level macros.
+  // Multiplier = normalized_amount / nutrition_basis_quantity, applied to
+  // each macro per ingredient, then SUM grouped by dish.
+  // Repositories MUST read totals from this view; never persist totals on `dish`.
+  `CREATE VIEW IF NOT EXISTS dish_with_totals AS
+    SELECT
+      d.id,
+      d.name,
+      d.description,
+      d.type,
+      d.servings,
+      d.image_url,
+      d.created_at,
+      d.updated_at,
+      COALESCE(SUM(i.calories * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_calories,
+      COALESCE(SUM(i.protein  * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_protein,
+      COALESCE(SUM(i.carbs    * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_carbs,
+      COALESCE(SUM(i.fat      * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_fat,
+      COALESCE(SUM(i.fiber    * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_fiber
+    FROM dish d
+    LEFT JOIN dish_ingredient di ON di.dish_id = d.id
+    LEFT JOIN ingredient i ON i.id = di.ingredient_id
+    GROUP BY d.id`,
 
   `CREATE TABLE IF NOT EXISTS day_plan (
     id                TEXT PRIMARY KEY,
