@@ -18,6 +18,7 @@ import {
   createOutline,
   ellipsisVertical,
   nutritionOutline,
+  restaurantOutline,
   searchOutline,
   settingsOutline,
   sparklesOutline,
@@ -106,9 +107,19 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
           } @else if (filteredIngredients().length === 0) {
             <app-empty-state
               [icon]="ingredientStore.searchQuery().trim() ? 'search-outline' : 'nutrition-outline'"
-              [title]="ingredientStore.searchQuery().trim() ? 'Không tìm thấy nguyên liệu nào' : 'Chưa có nguyên liệu nào'"
-              [description]="ingredientStore.searchQuery().trim() ? 'Thử từ khóa khác hoặc thêm nguyên liệu mới.' : 'Bắt đầu thêm nguyên liệu để quản lý dinh dưỡng.'"
-              [actionLabel]="ingredientStore.searchQuery().trim() ? null : '+ Thêm nguyên liệu đầu tiên'"
+              [title]="
+                ingredientStore.searchQuery().trim()
+                  ? 'Không tìm thấy nguyên liệu nào'
+                  : 'Chưa có nguyên liệu nào'
+              "
+              [description]="
+                ingredientStore.searchQuery().trim()
+                  ? 'Thử từ khóa khác hoặc thêm nguyên liệu mới.'
+                  : 'Bắt đầu thêm nguyên liệu để quản lý dinh dưỡng.'
+              "
+              [actionLabel]="
+                ingredientStore.searchQuery().trim() ? null : '+ Thêm nguyên liệu đầu tiên'
+              "
               (action)="openCreateIngredient()"
             />
           } @else {
@@ -135,16 +146,24 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
                       <div class="item-card__heading">
                         <h3>{{ ingredient.name }}</h3>
                         <div class="badge-row">
-                          <span class="badge badge--category" [ngClass]="ingredientCategoryClass(ingredient.category)">
+                          <span
+                            class="badge badge--category"
+                            [ngClass]="ingredientCategoryClass(ingredient.category)"
+                          >
                             {{ ingredient.category }}
                           </span>
-                          <span class="badge badge--source">{{ ingredientSourceLabel(ingredient.source) }}</span>
+                          <span class="badge badge--source">{{
+                            ingredientSourceLabel(ingredient.source)
+                          }}</span>
                         </div>
                       </div>
 
                       <div class="item-card__metric">
                         <strong>{{ formatNumber(ingredient.calories) }}</strong>
-                        <span>kcal / {{ ingredient.nutrition_basis_quantity }}{{ ingredient.nutrition_basis_unit }}</span>
+                        <span
+                          >kcal / {{ ingredient.nutrition_basis_quantity
+                          }}{{ ingredient.nutrition_basis_unit }}</span
+                        >
                       </div>
                     </div>
                   </button>
@@ -170,9 +189,15 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
             <p class="state-text">Đang tải món ăn...</p>
           } @else if (filteredDishes().length === 0) {
             <app-empty-state
-              [icon]="dishStore.searchQuery().trim() ? 'search-outline' : 'nutrition-outline'"
-              [title]="dishStore.searchQuery().trim() ? 'Không tìm thấy món ăn nào' : 'Chưa có món ăn nào'"
-              [description]="dishStore.searchQuery().trim() ? 'Thử tên món khác hoặc thêm món ăn mới.' : 'Thêm món ăn đầu tiên để bắt đầu lập kế hoạch bữa ăn.'"
+              [icon]="dishStore.searchQuery().trim() ? 'search-outline' : 'restaurant-outline'"
+              [title]="
+                dishStore.searchQuery().trim() ? 'Không tìm thấy món ăn nào' : 'Chưa có món ăn nào'
+              "
+              [description]="
+                dishStore.searchQuery().trim()
+                  ? 'Thử tên món khác hoặc thêm món ăn mới.'
+                  : 'Thêm món ăn đầu tiên để bắt đầu lập kế hoạch bữa ăn.'
+              "
               [actionLabel]="dishStore.searchQuery().trim() ? null : '+ Thêm món ăn đầu tiên'"
               (action)="openCreateDish()"
             />
@@ -199,18 +224,27 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
                     <div class="item-card__heading item-card__heading--dish">
                       <h3>{{ dish.name }}</h3>
                       <div class="badge-row">
-                        <span class="badge" [ngClass]="dishTypeClass(dish.type)">{{ dishTypeLabel(dish.type) }}</span>
+                        <span class="badge" [ngClass]="dishTypeClass(dish.type)">{{
+                          dishTypeLabel(dish.type)
+                        }}</span>
                       </div>
                     </div>
 
                     <div class="dish-calories">{{ formatNumber(dish.total_calories) }} kcal</div>
                     <p class="dish-macros">
-                      <span class="macro macro--protein">P: {{ formatNumber(dish.total_protein) }}g</span>
-                      <span class="macro macro--carbs">C: {{ formatNumber(dish.total_carbs) }}g</span>
+                      <span class="macro macro--protein"
+                        >P: {{ formatNumber(dish.total_protein) }}g</span
+                      >
+                      <span class="macro macro--carbs"
+                        >C: {{ formatNumber(dish.total_carbs) }}g</span
+                      >
                       <span class="macro macro--fat">F: {{ formatNumber(dish.total_fat) }}g</span>
                     </p>
                     <p class="item-card__detail item-card__detail--dish">
-                      {{ formatNumber(dish.servings) }} phần · <span class="badge badge--source-inline">{{ dishSourceLabel(dish.source) }}</span>
+                      {{ formatNumber(dish.servings) }} phần ·
+                      <span class="badge badge--source-inline">{{
+                        dishSourceLabel(dish.source)
+                      }}</span>
                     </p>
                   </button>
                 </article>
@@ -227,16 +261,29 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
           <button
             class="fab"
             type="button"
-            [attr.aria-label]="tab() === 'dishes' ? (fabMenuOpen() ? 'Đóng menu tạo món' : 'Mở menu tạo món') : 'Thêm mới'"
+            [attr.aria-label]="
+              tab() === 'dishes'
+                ? fabMenuOpen()
+                  ? 'Đóng menu tạo món'
+                  : 'Mở menu tạo món'
+                : 'Thêm mới'
+            "
             (click)="openCreateAction()"
           >
-            <ion-icon [name]="tab() === 'dishes' && fabMenuOpen() ? 'close-outline' : 'add-outline'" />
+            <ion-icon
+              [name]="tab() === 'dishes' && fabMenuOpen() ? 'close-outline' : 'add-outline'"
+            />
           </button>
         }
 
         @if (tab() === 'dishes' && fabMenuOpen()) {
           <div class="fab-menu-backdrop" role="presentation" (click)="closeFabMenu()">
-            <div class="fab-menu" tabindex="-1" (click)="$event.stopPropagation()" (keydown.escape)="closeFabMenu()">
+            <div
+              class="fab-menu"
+              tabindex="-1"
+              (click)="$event.stopPropagation()"
+              (keydown.escape)="closeFabMenu()"
+            >
               <button
                 type="button"
                 class="fab-menu-item fab-menu-item--primary"
@@ -258,7 +305,9 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
                 <ion-icon class="fab-menu-icon" name="sparkles-outline" />
                 <span class="fab-menu-text">
                   <span class="fab-menu-label">AI tự điền</span>
-                  <span class="fab-menu-sublabel">Nhập tên món để AI gợi ý nguyên liệu và khối lượng</span>
+                  <span class="fab-menu-sublabel"
+                    >Nhập tên món để AI gợi ý nguyên liệu và khối lượng</span
+                  >
                 </span>
               </button>
             </div>
@@ -327,7 +376,11 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
           >
             <section class="options-sheet">
               <h2>Tuỳ chọn cho {{ activeIngredient.name }}</h2>
-              <button type="button" class="options-sheet__action" (click)="handleIngredientEditOption()">
+              <button
+                type="button"
+                class="options-sheet__action"
+                (click)="handleIngredientEditOption()"
+              >
                 <ion-icon name="create-outline" />
                 <span>Sửa</span>
               </button>
@@ -339,7 +392,13 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
                 <ion-icon name="trash-outline" />
                 <span>Xóa</span>
               </button>
-              <button type="button" class="options-sheet__cancel" (click)="closeIngredientOptions()">Đóng</button>
+              <button
+                type="button"
+                class="options-sheet__cancel"
+                (click)="closeIngredientOptions()"
+              >
+                Đóng
+              </button>
             </section>
           </div>
         }
@@ -360,11 +419,17 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
                 <ion-icon name="create-outline" />
                 <span>Sửa</span>
               </button>
-              <button type="button" class="options-sheet__action options-sheet__action--danger" (click)="handleDishDeleteOption()">
+              <button
+                type="button"
+                class="options-sheet__action options-sheet__action--danger"
+                (click)="handleDishDeleteOption()"
+              >
                 <ion-icon name="trash-outline" />
                 <span>Xóa</span>
               </button>
-              <button type="button" class="options-sheet__cancel" (click)="closeDishOptions()">Đóng</button>
+              <button type="button" class="options-sheet__cancel" (click)="closeDishOptions()">
+                Đóng
+              </button>
             </section>
           </div>
         }
@@ -742,7 +807,6 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
     .macro--fat {
       color: var(--ion-color-danger);
     }
-
   `,
   imports: [
     IonHeader,
@@ -809,20 +873,33 @@ export default class ManagementPage {
   readonly filteredDishes = computed(() => this.dishStore.dishes());
 
   readonly showIngredientResultHint = computed(() => {
-    return this.ingredientStore.searchQuery().trim().length > 0 || this.activeIngredientFilter() !== 'Tất cả';
+    return (
+      this.ingredientStore.searchQuery().trim().length > 0 ||
+      this.activeIngredientFilter() !== 'Tất cả'
+    );
   });
 
   readonly showIngredientSearch = computed(() => {
-    return this.ingredientStore.searchQuery().trim().length > 0 || this.ingredientStore.loading() || this.ingredientStore.ingredients().length > 0;
+    return (
+      this.ingredientStore.searchQuery().trim().length > 0 ||
+      this.ingredientStore.loading() ||
+      this.ingredientStore.ingredients().length > 0
+    );
   });
 
   readonly showIngredientFilters = computed(() => {
-    return this.ingredientStore.searchQuery().trim().length === 0 &&
-      (this.ingredientStore.loading() || this.ingredientStore.ingredients().length > 0);
+    return (
+      this.ingredientStore.searchQuery().trim().length === 0 &&
+      (this.ingredientStore.loading() || this.ingredientStore.ingredients().length > 0)
+    );
   });
 
   readonly showDishSearch = computed(() => {
-    return this.dishStore.searchQuery().trim().length > 0 || this.dishStore.loading() || this.dishStore.dishes().length > 0;
+    return (
+      this.dishStore.searchQuery().trim().length > 0 ||
+      this.dishStore.loading() ||
+      this.dishStore.dishes().length > 0
+    );
   });
 
   readonly ingredientResultHint = computed(() => {
@@ -858,21 +935,35 @@ export default class ManagementPage {
   });
 
   readonly hideFab = computed(() => {
-    if (this.editOverlayOpen() || this.pendingIngredientDeleteId() !== null || this.pendingDishDeleteId() !== null) {
+    if (
+      this.editOverlayOpen() ||
+      this.pendingIngredientDeleteId() !== null ||
+      this.pendingDishDeleteId() !== null
+    ) {
       return true;
     }
 
-    if (this.ingredientOptionsItem() !== null || this.dishOptionsItem() !== null || this.fabMenuOpen()) {
+    if (
+      this.ingredientOptionsItem() !== null ||
+      this.dishOptionsItem() !== null ||
+      this.fabMenuOpen()
+    ) {
       return true;
     }
 
     if (this.tab() === 'ingredients') {
-      return !this.ingredientStore.loading() &&
+      return (
+        !this.ingredientStore.loading() &&
         this.filteredIngredients().length === 0 &&
-        this.ingredientStore.searchQuery().trim().length === 0;
+        this.ingredientStore.searchQuery().trim().length === 0
+      );
     }
 
-    return !this.dishStore.loading() && this.filteredDishes().length === 0 && this.dishStore.searchQuery().trim().length === 0;
+    return (
+      !this.dishStore.loading() &&
+      this.filteredDishes().length === 0 &&
+      this.dishStore.searchQuery().trim().length === 0
+    );
   });
 
   readonly ingredientDeleteBlocked = computed(() => this.ingredientDeleteReferenceCount() > 0);
@@ -898,10 +989,14 @@ export default class ManagementPage {
   });
 
   readonly dishDeleteBlocked = computed(() => this.dishDeleteReferenceCount() > 0);
-  readonly dishDeleteDialogTitle = computed(() => (this.dishDeleteBlocked() ? 'Không thể xóa' : 'Xóa món ăn?'));
+  readonly dishDeleteDialogTitle = computed(() =>
+    this.dishDeleteBlocked() ? 'Không thể xóa' : 'Xóa món ăn?',
+  );
   readonly dishDeleteCancelLabel = computed(() => (this.dishDeleteBlocked() ? 'Đóng' : 'Giữ lại'));
   readonly dishDeleteConfirmAriaLabel = computed(() =>
-    this.dishDeleteBlocked() ? `Đóng hộp thoại món ${this.pendingDishDeleteName()}` : `Xóa món ${this.pendingDishDeleteName()}`,
+    this.dishDeleteBlocked()
+      ? `Đóng hộp thoại món ${this.pendingDishDeleteName()}`
+      : `Xóa món ${this.pendingDishDeleteName()}`,
   );
   readonly dishDeleteMessage = computed(() => {
     if (this.dishDeleteBlocked()) {
@@ -949,6 +1044,7 @@ export default class ManagementPage {
       addOutline,
       closeOutline,
       nutritionOutline,
+      restaurantOutline,
       searchOutline,
       ellipsisVertical,
       createOutline,
@@ -1351,7 +1447,7 @@ export default class ManagementPage {
 
   ingredientCategoryClass(category: string): string {
     const categoryMap: Record<string, string> = {
-      'Thịt': 'badge--category-cat-thit',
+      Thịt: 'badge--category-cat-thit',
       'Cá & Hải sản': 'badge--category-cat-ca',
       'Trứng & Sữa': 'badge--category-cat-trung',
       'Rau củ': 'badge--category-cat-rau',
@@ -1361,7 +1457,7 @@ export default class ManagementPage {
       'Gia vị': 'badge--category-cat-gia-vi',
       'Nước dùng & Nước chấm': 'badge--category-cat-nuoc-dung',
       'Trái cây': 'badge--category-cat-trai-cay',
-      'Khác': 'badge--category-cat-khac',
+      Khác: 'badge--category-cat-khac',
     };
 
     return categoryMap[category] ?? 'badge--category-cat-khac';
