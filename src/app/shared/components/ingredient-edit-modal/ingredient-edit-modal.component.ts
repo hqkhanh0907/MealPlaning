@@ -151,6 +151,7 @@ export interface IngredientEditFormValue {
                 id="ingr-field-2"
                 class="input-native"
                 type="number"
+                inputmode="decimal"
                 [(ngModel)]="form.calories"
                 min="0"
                 step="0.1"
@@ -167,6 +168,7 @@ export interface IngredientEditFormValue {
                   id="ingr-field-3"
                   class="input-native"
                   type="number"
+                  inputmode="decimal"
                   [(ngModel)]="form.protein"
                   min="0"
                   step="0.1"
@@ -178,6 +180,7 @@ export interface IngredientEditFormValue {
                   id="ingr-field-4"
                   class="input-native"
                   type="number"
+                  inputmode="decimal"
                   [(ngModel)]="form.carbs"
                   min="0"
                   step="0.1"
@@ -189,6 +192,7 @@ export interface IngredientEditFormValue {
                   id="ingr-field-5"
                   class="input-native"
                   type="number"
+                  inputmode="decimal"
                   [(ngModel)]="form.fat"
                   min="0"
                   step="0.1"
@@ -200,6 +204,7 @@ export interface IngredientEditFormValue {
                   id="ingr-field-6"
                   class="input-native"
                   type="number"
+                  inputmode="decimal"
                   [(ngModel)]="form.fiber"
                   min="0"
                   step="0.1"
@@ -244,9 +249,11 @@ export interface IngredientEditFormValue {
 
                     <div class="unit-grid">
                       <div class="input-wrapper">
-                        <label class="input-label" for="ingr-field-7">Hiển thị</label>
+                        <label class="input-label" [attr.for]="'ingr-unit-display-' + unit.local_id"
+                          >Hiển thị</label
+                        >
                         <input
-                          id="ingr-field-7"
+                          [id]="'ingr-unit-display-' + unit.local_id"
                           class="input-native"
                           [ngModel]="unit.display_label"
                           (ngModelChange)="
@@ -256,13 +263,14 @@ export interface IngredientEditFormValue {
                         />
                       </div>
                       <div class="input-wrapper">
-                        <label class="input-label" for="ingr-field-8"
+                        <label class="input-label" [attr.for]="'ingr-unit-factor-' + unit.local_id"
                           >1 đơn vị = ? {{ form.nutrition_basis_unit }}</label
                         >
                         <input
-                          id="ingr-field-8"
+                          [id]="'ingr-unit-factor-' + unit.local_id"
                           class="input-native"
                           type="number"
+                          inputmode="decimal"
                           [ngModel]="unit.factor_to_basis"
                           (ngModelChange)="
                             updateUnit(unit.local_id, 'factor_to_basis', normalizeNumber($event, 0))
@@ -321,6 +329,7 @@ export interface IngredientEditFormValue {
                 id="ingr-field-9"
                 class="input-native"
                 type="number"
+                inputmode="decimal"
                 [ngModel]="form.density_g_per_ml"
                 (ngModelChange)="onDensityChange($event)"
                 min="0"

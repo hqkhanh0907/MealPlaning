@@ -92,7 +92,7 @@
 .form-content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -157,5 +157,5 @@
   color: var(--ion-color-danger);
   font-size: 12px;
   line-height: 1.4;
-  margin-top: -4px;
+  margin-top: -8px;
 }

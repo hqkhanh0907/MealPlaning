@@ -87,12 +87,14 @@ export interface DishEditFormValue {
 
             <div class="input-wrapper">
               <label class="input-label" for="dish-field-2">Mô tả</label>
-              <input
+              <textarea
                 id="dish-field-2"
                 class="input-native"
+                rows="2"
+                style="resize: none;"
                 [(ngModel)]="form.description"
                 placeholder="Mô tả ngắn (tùy chọn)"
-              />
+              ></textarea>
             </div>
 
             <div
@@ -109,6 +111,7 @@ export interface DishEditFormValue {
                 id="dish-field-3"
                 class="input-native"
                 type="number"
+                inputmode="decimal"
                 [(ngModel)]="form.servings"
                 min="0.5"
                 max="20"
@@ -150,12 +153,21 @@ export interface DishEditFormValue {
                     </div>
 
                     <div class="ingredient-item__grid">
-                      <div class="input-wrapper">
-                        <label class="input-label" for="dish-field-4">Số lượng</label>
+                      <div
+                        class="input-wrapper"
+                        [class.invalid]="showErrors && !(item.amount_value > 0)"
+                      >
+                        <label
+                          class="input-label"
+                          [attr.for]="'dish-amount-' + item.local_id"
+                          [class.invalid]="showErrors && !(item.amount_value > 0)"
+                          >Số lượng</label
+                        >
                         <input
-                          id="dish-field-4"
+                          [id]="'dish-amount-' + item.local_id"
                           class="input-native"
                           type="number"
+                          inputmode="decimal"
                           [ngModel]="item.amount_value"
                           (ngModelChange)="updateAmount(item.local_id, $event)"
                           min="0.1"
@@ -165,10 +177,12 @@ export interface DishEditFormValue {
                       </div>
 
                       <div class="input-wrapper">
-                        <label class="input-label" for="dish-field-5">Đơn vị</label>
+                        <label class="input-label" [attr.for]="'dish-unit-' + item.local_id"
+                          >Đơn vị</label
+                        >
                         <button
                           type="button"
-                          id="dish-field-5"
+                          [id]="'dish-unit-' + item.local_id"
                           class="picker-trigger--floating"
                           (click)="openUnitPicker(item.local_id)"
                         >
