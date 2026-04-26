@@ -1,0 +1,31 @@
+[
+  {
+    "calories": 92.44,
+    "carbs": 22.34,
+    "category": "composite",
+    "default_unit_id": "tbsp",
+    "density_g_per_ml": 1.05,
+    "derived_from": {
+      "component_ingredient_ids": [
+        "7c4e8b1a-0002-4000-8000-000000000001",
+        "7c4e8b1a-0002-4000-8000-000000000003",
+        "7c4e8b1a-0002-4000-8000-000000000007",
+        "7c4e8b1a-0002-4000-8000-00000000000a"
+      ],
+      "composite_recipe_id": "c0114c01-0001-4000-8000-000000000001",
+      "yield_total_g": 262.5
+    },
+    "fat": 0.03,
+    "fiber": 0.12,
+    "id": "c0114c01-0001-4000-8000-000000000001",
+    "is_approximate": true,
+    "name_en": "Nước chấm chua ngọt (base)",
+    "name_vi": "Nước chấm chua ngọt (base)",
+    "notes": "Standard Northern/Central ratio; macros approximated.",
+    "nutrition_basis_quantity": 100,
+    "nutrition_basis_unit": "ml",
+    "protein": 1.52,
+    "source": "derived",
+    "source_citation": "sources/wikipedia-vi.md#nuoc-cham-chua-ngot"
+  }
+]

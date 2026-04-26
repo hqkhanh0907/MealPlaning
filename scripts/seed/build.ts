@@ -12,6 +12,7 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { buildCompositesToDisk } from './build-composites';
 import { buildIngredientsToDisk } from './build-ingredients';
 import { VI_COMPOSITES } from './curated/vi-composites';
 import { VI_DISHES } from './curated/vi-dishes';
@@ -31,4 +32,7 @@ console.log(
   `  [§5.2.2] wrote ${ingredients.length} ingredients, ${ingredient_units.length} ingredient_units`,
 );
 
-console.log('  status: §5.2.2 wired; §5.2.3-5.2.4 pending.');
+const composites = buildCompositesToDisk(outDir);
+console.log(`  [§5.2.3] wrote ${composites.length} composites`);
+
+console.log('  status: §5.2.2-5.2.3 wired; §5.2.4 (dishes + validate) pending.');
