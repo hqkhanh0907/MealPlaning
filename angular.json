@@ -42,7 +42,8 @@
             ],
             "styles": [
               "src/global.scss",
-              "src/theme/variables.scss"
+              "src/theme/variables.scss",
+              "src/theme/form-modal.scss"
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
@@ -127,7 +128,8 @@
             ],
             "styles": [
               "src/global.scss",
-              "src/theme/variables.scss"
+              "src/theme/variables.scss",
+              "src/theme/form-modal.scss"
             ],
             "scripts": []
           },

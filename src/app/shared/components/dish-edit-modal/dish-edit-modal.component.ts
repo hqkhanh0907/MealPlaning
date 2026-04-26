@@ -15,7 +15,10 @@ import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline, chevronDownOutline, closeOutline } from 'ionicons/icons';
 import type { IngredientListItem } from '../../../core/repositories/ingredient.repository';
-import { BottomSheetPickerComponent, type PickerOption } from '../bottom-sheet-picker/bottom-sheet-picker.component';
+import {
+  BottomSheetPickerComponent,
+  type PickerOption,
+} from '../bottom-sheet-picker/bottom-sheet-picker.component';
 
 export interface DishIngredientFormItem {
   local_id: string;
@@ -41,11 +44,21 @@ export interface DishEditFormValue {
       <div class="overlay">
         <section class="modal" role="dialog" aria-modal="true" aria-labelledby="dish-modal-title">
           <div class="modal-toolbar">
-            <button type="button" class="toolbar-icon-button" (click)="dismissed.emit()" aria-label="Quay lại">
+            <button
+              type="button"
+              class="toolbar-icon-button"
+              (click)="dismissed.emit()"
+              aria-label="Quay lại"
+            >
               <ion-icon name="chevron-back-outline" />
             </button>
             <h2 id="dish-modal-title">{{ title }}</h2>
-            <button type="button" class="toolbar-save-button" [disabled]="saving" (click)="submit()">
+            <button
+              type="button"
+              class="toolbar-save-button"
+              [disabled]="saving"
+              (click)="submit()"
+            >
               {{ saving ? 'Đang lưu...' : 'Lưu' }}
             </button>
           </div>
@@ -53,7 +66,10 @@ export interface DishEditFormValue {
           <div class="form-content">
             <div class="section-label">Thông tin cơ bản</div>
 
-            <label class="field field--full" [class.field--invalid]="showErrors && !form.name.trim()">
+            <label
+              class="field field--full"
+              [class.field--invalid]="showErrors && !form.name.trim()"
+            >
               <span>Tên món ăn</span>
               <input #nameInput [(ngModel)]="form.name" placeholder="Ví dụ: Cơm trứng" />
             </label>
@@ -82,7 +98,9 @@ export interface DishEditFormValue {
             @if (form.items.length === 0) {
               <div class="ingredient-empty" [class.invalid]="showErrors && form.items.length === 0">
                 <div class="ingredient-empty-title">Chưa có nguyên liệu nào</div>
-                <button type="button" class="btn-outline" (click)="openIngredientPicker()">+ Thêm nguyên liệu đầu tiên</button>
+                <button type="button" class="btn-outline" (click)="openIngredientPicker()">
+                  + Thêm nguyên liệu đầu tiên
+                </button>
               </div>
             } @else {
               <div class="ingredient-list">
@@ -90,7 +108,9 @@ export interface DishEditFormValue {
                   <article class="ingredient-item">
                     <div class="ingredient-item__row">
                       <div class="ingredient-item__info">
-                        <div class="ingredient-item__name">{{ ingredientName(item.ingredient_id) }}</div>
+                        <div class="ingredient-item__name">
+                          {{ ingredientName(item.ingredient_id) }}
+                        </div>
                         <div class="ingredient-item__detail">{{ ingredientDetail(item) }}</div>
                       </div>
                       <button
@@ -118,7 +138,11 @@ export interface DishEditFormValue {
 
                       <div class="field">
                         <span>Đơn vị</span>
-                        <button type="button" class="picker-trigger" (click)="openUnitPicker(item.local_id)">
+                        <button
+                          type="button"
+                          class="picker-trigger"
+                          (click)="openUnitPicker(item.local_id)"
+                        >
                           <span>{{ unitLabel(item) }}</span>
                           <ion-icon name="chevron-down-outline" aria-hidden="true" />
                         </button>
@@ -128,7 +152,9 @@ export interface DishEditFormValue {
                 }
               </div>
 
-              <button type="button" class="btn-outline" (click)="openIngredientPicker()">+ Thêm nguyên liệu</button>
+              <button type="button" class="btn-outline" (click)="openIngredientPicker()">
+                + Thêm nguyên liệu
+              </button>
             }
 
             @if (showErrors && form.items.length === 0) {
@@ -136,11 +162,15 @@ export interface DishEditFormValue {
             }
 
             <div class="section-label">Tổng dinh dưỡng (1 phần)</div>
-            <p class="section-hint">Dinh dưỡng được tính tự động từ danh sách nguyên liệu hiện tại.</p>
+            <p class="section-hint">
+              Dinh dưỡng được tính tự động từ danh sách nguyên liệu hiện tại.
+            </p>
             <div class="nutrition-card">
               <div class="nutrition-row">
                 <span class="nutrition-label">Calories</span>
-                <strong class="nutrition-value">{{ formatNumber(previewTotals.calories) }} kcal</strong>
+                <strong class="nutrition-value"
+                  >{{ formatNumber(previewTotals.calories) }} kcal</strong
+                >
               </div>
               <div class="nutrition-row">
                 <span class="nutrition-label">Protein</span>
@@ -165,7 +195,9 @@ export interface DishEditFormValue {
             </button>
 
             @if (allowDelete) {
-              <button type="button" class="btn-danger-text" (click)="deleteRequested.emit()">Xóa món ăn</button>
+              <button type="button" class="btn-danger-text" (click)="deleteRequested.emit()">
+                Xóa món ăn
+              </button>
             }
           </div>
 
@@ -189,60 +221,12 @@ export interface DishEditFormValue {
     }
   `,
   styles: `
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(18, 18, 24, 0.52);
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      padding: env(safe-area-inset-top, 0px) 0 0;
-      z-index: var(--z-sheet);
-    }
+    /* Shared modal scaffolding (overlay, .modal, .modal-toolbar, .form-content,
+       .section-label, .section-hint, .field, .picker-trigger, .btn-outline,
+       .btn-danger-text, .btn-cta, .field-error) lives in
+       src/theme/form-modal.scss to keep this component under the 4 kB
+       anyComponentStyle budget. */
 
-    .modal {
-      width: 100%;
-      max-width: min(100vw, 520px);
-      height: min(100vh - env(safe-area-inset-top, 0px), 100%);
-      max-height: min(100vh - env(safe-area-inset-top, 0px), 100%);
-      overflow: auto;
-      background: var(--bg-page);
-      border-radius: 0;
-      padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
-      box-shadow: none;
-    }
-
-    .modal-toolbar {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-height: 56px;
-      margin: 0 -16px 16px;
-      padding: 0 16px;
-      background: var(--primary-500);
-      color: #fff;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .modal-toolbar {
-        background: var(--primary-800, #1565c0);
-      }
-    }
-
-    .modal-toolbar h2 {
-      margin: 0;
-      flex: 1;
-      color: #fff;
-      font-size: 20px;
-      font-weight: 500;
-      line-height: 1.3;
-    }
-
-    .toolbar-icon-button,
-    .toolbar-save-button,
     .icon-button {
       min-width: 44px;
       min-height: 44px;
@@ -251,10 +235,6 @@ export interface DishEditFormValue {
       color: #fff;
       font-size: 16px;
       font-weight: 500;
-    }
-
-    .toolbar-icon-button,
-    .icon-button {
       width: 44px;
       padding: 0;
       display: inline-flex;
@@ -262,93 +242,19 @@ export interface DishEditFormValue {
       justify-content: center;
     }
 
-    .toolbar-icon-button ion-icon,
     .icon-button ion-icon {
       font-size: 22px;
-    }
-
-    .toolbar-save-button[disabled] {
-      opacity: 0.6;
     }
 
     .icon-button--danger {
       color: var(--ion-color-danger);
     }
 
-    .form-content {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    .section-label {
-      color: var(--text-primary);
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 1.4;
-      margin-top: 4px;
-    }
-
-    .section-hint,
     .ingredient-item__detail {
       color: var(--text-tertiary);
       font-size: 13px;
       line-height: 1.5;
       margin: 0;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .field--invalid {
-      color: var(--ion-color-danger);
-    }
-
-    .field input,
-    .picker-trigger {
-      min-height: 44px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--input-border-color);
-      padding: 10px 12px;
-      font: inherit;
-      background: var(--bg-page);
-      color: var(--text-primary);
-      outline: none;
-      box-shadow: none;
-    }
-
-    .field input:focus,
-    .picker-trigger:focus {
-      border-color: var(--primary-500);
-      box-shadow: 0 0 0 1px rgba(var(--ion-color-primary-rgb), 0.18);
-    }
-
-    .field--invalid input,
-    .field--invalid .picker-trigger,
-    .field--invalid input:focus,
-    .field--invalid .picker-trigger:focus {
-      border-color: var(--ion-color-danger);
-      box-shadow: 0 0 0 1px rgba(var(--ion-color-danger-rgb), 0.12);
-    }
-
-    .picker-trigger {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      text-align: left;
-    }
-
-    .picker-trigger ion-icon {
-      color: var(--text-tertiary);
-      font-size: 16px;
-      flex-shrink: 0;
     }
 
     .ingredient-empty,
@@ -426,49 +332,10 @@ export interface DishEditFormValue {
       font-weight: 600;
     }
 
-    .btn-outline,
-    .btn-danger-text,
-    .btn-cta {
-      min-height: 44px;
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-    }
-
+    /* Dashed variant of the shared .btn-outline used inside dish ingredient list */
     .btn-outline {
-      padding: 10px 16px;
-      border: 1px dashed rgba(var(--ion-color-primary-rgb), 0.5);
-      background: transparent;
-      color: var(--primary-700);
-      font-weight: 500;
-    }
-
-    .btn-danger-text {
-      border: none;
-      background: transparent;
-      color: var(--ion-color-danger);
-      font-weight: 500;
-      padding: 0;
-    }
-
-    .btn-cta {
-      width: 100%;
-      border: none;
-      background: var(--ion-color-secondary);
-      color: var(--ion-color-secondary-contrast);
-      font-weight: 600;
-      padding: 14px 16px;
-      margin-top: 4px;
-    }
-
-    .btn-cta:disabled {
-      opacity: 0.6;
-    }
-
-    .field-error {
-      color: var(--ion-color-danger);
-      font-size: 12px;
-      line-height: 1.4;
-      margin-top: -4px;
+      border-style: dashed;
+      border-color: rgba(var(--ion-color-primary-rgb), 0.5);
     }
 
     @media (max-width: 480px) {
@@ -511,7 +378,9 @@ export class DishEditModalComponent implements OnChanges {
       this.showErrors = false;
       queueMicrotask(() => {
         window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
-        document.querySelector('.modal')?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+        document
+          .querySelector('.modal')
+          ?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
       });
     }
   }
@@ -526,22 +395,41 @@ export class DishEditModalComponent implements OnChanges {
 
   get unitOptions(): PickerOption[] {
     const item = this.form.items.find((candidate) => candidate.local_id === this.activeUnitRowId);
-    const ingredient = item ? this.ingredients.find((candidate) => candidate.id === item.ingredient_id) : null;
+    const ingredient = item
+      ? this.ingredients.find((candidate) => candidate.id === item.ingredient_id)
+      : null;
     return (ingredient?.units ?? []).map((unit) => ({
       value: unit.unit_id,
-      label: unit.is_approximate === 1 ? `≈ ${unit.display_label || unit.short_name_vi}` : (unit.display_label || unit.short_name_vi),
-      description: unit.is_approximate === 1 ? 'Đơn vị ước lượng' : `1 ${unit.display_label || unit.short_name_vi} ≈ ${this.formatNumber(unit.factor_to_basis)}${ingredient?.nutrition_basis_unit ?? ''}`,
+      label:
+        unit.is_approximate === 1
+          ? `≈ ${unit.display_label || unit.short_name_vi}`
+          : unit.display_label || unit.short_name_vi,
+      description:
+        unit.is_approximate === 1
+          ? 'Đơn vị ước lượng'
+          : `1 ${unit.display_label || unit.short_name_vi} ≈ ${this.formatNumber(unit.factor_to_basis)}${ingredient?.nutrition_basis_unit ?? ''}`,
     }));
   }
 
   get activeUnitValue(): string | null {
-    return this.form.items.find((candidate) => candidate.local_id === this.activeUnitRowId)?.unit_id ?? null;
+    return (
+      this.form.items.find((candidate) => candidate.local_id === this.activeUnitRowId)?.unit_id ??
+      null
+    );
   }
 
-  get previewTotals(): { calories: number; protein: number; carbs: number; fat: number; fiber: number } {
+  get previewTotals(): {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    fiber: number;
+  } {
     return this.form.items.reduce(
       (totals, item) => {
-        const ingredient = this.ingredients.find((candidate) => candidate.id === item.ingredient_id);
+        const ingredient = this.ingredients.find(
+          (candidate) => candidate.id === item.ingredient_id,
+        );
         const unit = ingredient?.units.find((candidate) => candidate.unit_id === item.unit_id);
         if (!ingredient || !unit || item.amount_value <= 0) {
           return totals;
@@ -576,7 +464,8 @@ export class DishEditModalComponent implements OnChanges {
       return;
     }
 
-    const defaultUnit = ingredient.units.find((unit) => unit.is_default === 1) ?? ingredient.units[0];
+    const defaultUnit =
+      ingredient.units.find((unit) => unit.is_default === 1) ?? ingredient.units[0];
     if (!defaultUnit) {
       return;
     }
@@ -605,7 +494,9 @@ export class DishEditModalComponent implements OnChanges {
   updateAmount(localId: string, value: string | number): void {
     const parsed = Number(value);
     this.form.items = this.form.items.map((item) =>
-      item.local_id === localId ? { ...item, amount_value: Number.isFinite(parsed) ? parsed : 0 } : item,
+      item.local_id === localId
+        ? { ...item, amount_value: Number.isFinite(parsed) ? parsed : 0 }
+        : item,
     );
   }
 
@@ -614,7 +505,9 @@ export class DishEditModalComponent implements OnChanges {
   }
 
   ingredientName(ingredientId: string): string {
-    return this.ingredients.find((ingredient) => ingredient.id === ingredientId)?.name ?? 'Nguyên liệu';
+    return (
+      this.ingredients.find((ingredient) => ingredient.id === ingredientId)?.name ?? 'Nguyên liệu'
+    );
   }
 
   unitLabel(item: DishIngredientFormItem): string {
@@ -688,9 +581,7 @@ export class DishEditModalComponent implements OnChanges {
     );
   }
 
-  private findUnit(
-    item: DishIngredientFormItem,
-  ): IngredientListItem['units'][number] | undefined {
+  private findUnit(item: DishIngredientFormItem): IngredientListItem['units'][number] | undefined {
     return this.ingredients
       .find((candidate) => candidate.id === item.ingredient_id)
       ?.units.find((candidate) => candidate.unit_id === item.unit_id);

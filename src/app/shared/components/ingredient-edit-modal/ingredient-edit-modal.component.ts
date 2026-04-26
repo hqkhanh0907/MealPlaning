@@ -17,7 +17,10 @@ import { chevronBackOutline, chevronDownOutline } from 'ionicons/icons';
 import { INGREDIENT_CATEGORIES } from '../../../core/models/management.constants';
 import type { UnitModel } from '../../../core/models/management.model';
 import type { NutritionBasisUnit } from '../../../core/models/management.types';
-import { BottomSheetPickerComponent, type PickerOption } from '../bottom-sheet-picker/bottom-sheet-picker.component';
+import {
+  BottomSheetPickerComponent,
+  type PickerOption,
+} from '../bottom-sheet-picker/bottom-sheet-picker.component';
 
 export interface IngredientEditUnitFormValue {
   local_id: string;
@@ -50,19 +53,37 @@ export interface IngredientEditFormValue {
   template: `
     @if (isOpen) {
       <div class="overlay">
-        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="ingredient-modal-title">
+        <section
+          class="modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ingredient-modal-title"
+        >
           <div class="modal-toolbar">
-            <button type="button" class="toolbar-icon-button" (click)="dismissed.emit()" aria-label="Quay lại">
+            <button
+              type="button"
+              class="toolbar-icon-button"
+              (click)="dismissed.emit()"
+              aria-label="Quay lại"
+            >
               <ion-icon name="chevron-back-outline" />
             </button>
             <h2 id="ingredient-modal-title">{{ title }}</h2>
-            <button type="button" class="toolbar-save-button" [disabled]="saving" (click)="submit()">
+            <button
+              type="button"
+              class="toolbar-save-button"
+              [disabled]="saving"
+              (click)="submit()"
+            >
               {{ saving ? 'Đang lưu...' : 'Lưu' }}
             </button>
           </div>
 
           <div class="form-content">
-            <label class="field field--full" [class.field--invalid]="showErrors && !form.name.trim()">
+            <label
+              class="field field--full"
+              [class.field--invalid]="showErrors && !form.name.trim()"
+            >
               <span>Tên nguyên liệu</span>
               <input #nameInput [(ngModel)]="form.name" placeholder="Ví dụ: Trứng gà" />
             </label>
@@ -70,7 +91,10 @@ export interface IngredientEditFormValue {
               <div class="field-error">Vui lòng nhập tên nguyên liệu</div>
             }
 
-            <div class="field field--full" [class.field--invalid]="showErrors && !form.category.trim()">
+            <div
+              class="field field--full"
+              [class.field--invalid]="showErrors && !form.category.trim()"
+            >
               <span>Nhóm</span>
               <button type="button" class="picker-trigger" (click)="openCategoryPicker()">
                 <span>{{ form.category || 'Chọn nhóm nguyên liệu' }}</span>
@@ -101,7 +125,10 @@ export interface IngredientEditFormValue {
               </button>
             </div>
 
-            <label class="field field--full" [class.field--invalid]="showErrors && form.calories < 0">
+            <label
+              class="field field--full"
+              [class.field--invalid]="showErrors && form.calories < 0"
+            >
               <span>Calories (kcal)</span>
               <input type="number" [(ngModel)]="form.calories" min="0" step="0.1" />
             </label>
@@ -129,7 +156,9 @@ export interface IngredientEditFormValue {
             </div>
 
             <div class="section-label">Đơn vị có thể nhập khi thêm vào món</div>
-            <p class="section-hint">Mỗi nguyên liệu cần ít nhất 1 đơn vị hợp lệ và đúng 1 đơn vị mặc định.</p>
+            <p class="section-hint">
+              Mỗi nguyên liệu cần ít nhất 1 đơn vị hợp lệ và đúng 1 đơn vị mặc định.
+            </p>
 
             @if (form.units.length === 0) {
               <div class="unit-empty" [class.invalid]="showErrors && unitErrors.length > 0">
@@ -137,7 +166,9 @@ export interface IngredientEditFormValue {
                 <div class="unit-empty-copy">
                   Thêm đơn vị quen thuộc như quả, g, ml hoặc đơn vị riêng của nguyên liệu này.
                 </div>
-                <button type="button" class="btn-outline" (click)="openUnitPicker()">+ Thêm đơn vị đầu tiên</button>
+                <button type="button" class="btn-outline" (click)="openUnitPicker()">
+                  + Thêm đơn vị đầu tiên
+                </button>
               </div>
             } @else {
               <div class="unit-list" [class.invalid]="showErrors && unitErrors.length > 0">
@@ -149,7 +180,11 @@ export interface IngredientEditFormValue {
                         @if (unit.is_default) {
                           <span class="unit-badge badge-default">mặc định</span>
                         }
-                        <span class="unit-badge" [class.badge-approx]="unit.is_approximate" [class.badge-exact]="!unit.is_approximate">
+                        <span
+                          class="unit-badge"
+                          [class.badge-approx]="unit.is_approximate"
+                          [class.badge-exact]="!unit.is_approximate"
+                        >
                           {{ unit.is_approximate ? 'ước lượng' : 'chuẩn' }}
                         </span>
                       </div>
@@ -160,7 +195,9 @@ export interface IngredientEditFormValue {
                         <span>Hiển thị</span>
                         <input
                           [ngModel]="unit.display_label"
-                          (ngModelChange)="updateUnit(unit.local_id, 'display_label', normalizeText($event))"
+                          (ngModelChange)="
+                            updateUnit(unit.local_id, 'display_label', normalizeText($event))
+                          "
                           [placeholder]="unit.short_name_vi"
                         />
                       </label>
@@ -169,7 +206,9 @@ export interface IngredientEditFormValue {
                         <input
                           type="number"
                           [ngModel]="unit.factor_to_basis"
-                          (ngModelChange)="updateUnit(unit.local_id, 'factor_to_basis', normalizeNumber($event, 0))"
+                          (ngModelChange)="
+                            updateUnit(unit.local_id, 'factor_to_basis', normalizeNumber($event, 0))
+                          "
                           min="0.001"
                           step="0.001"
                         />
@@ -181,13 +220,27 @@ export interface IngredientEditFormValue {
                     </div>
 
                     <div class="unit-actions">
-                      <button type="button" class="unit-action" (click)="markDefault(unit.local_id)">Đặt mặc định</button>
-                      <button type="button" class="unit-action unit-action--danger" (click)="removeUnit(unit.local_id)">Xóa</button>
+                      <button
+                        type="button"
+                        class="unit-action"
+                        (click)="markDefault(unit.local_id)"
+                      >
+                        Đặt mặc định
+                      </button>
+                      <button
+                        type="button"
+                        class="unit-action unit-action--danger"
+                        (click)="removeUnit(unit.local_id)"
+                      >
+                        Xóa
+                      </button>
                     </div>
                   </article>
                 }
               </div>
-              <button type="button" class="btn-outline" (click)="openUnitPicker()">+ Thêm đơn vị</button>
+              <button type="button" class="btn-outline" (click)="openUnitPicker()">
+                + Thêm đơn vị
+              </button>
             }
 
             @if (showErrors && unitErrors.length > 0) {
@@ -199,13 +252,20 @@ export interface IngredientEditFormValue {
             <div class="info-card">
               <div class="info-card-title">Quy đổi g ↔ ml (tùy chọn)</div>
               <div class="info-card-copy">
-                Chỉ nhập mật độ khi cần quy đổi giữa g và ml. Nếu chưa có quy đổi phù hợp, app sẽ báo không thể dùng đơn vị đó.
+                Chỉ nhập mật độ khi cần quy đổi giữa g và ml. Nếu chưa có quy đổi phù hợp, app sẽ
+                báo không thể dùng đơn vị đó.
               </div>
             </div>
 
             <label class="field field--full">
               <span>Mật độ (g/ml) — tùy chọn</span>
-              <input type="number" [ngModel]="form.density_g_per_ml" (ngModelChange)="onDensityChange($event)" min="0" step="0.001" />
+              <input
+                type="number"
+                [ngModel]="form.density_g_per_ml"
+                (ngModelChange)="onDensityChange($event)"
+                min="0"
+                step="0.001"
+              />
             </label>
 
             <button type="button" class="btn-cta" [disabled]="saving" (click)="submit()">
@@ -213,7 +273,9 @@ export interface IngredientEditFormValue {
             </button>
 
             @if (allowDelete) {
-              <button type="button" class="btn-danger-text" (click)="deleteRequested.emit()">Xóa nguyên liệu</button>
+              <button type="button" class="btn-danger-text" (click)="deleteRequested.emit()">
+                Xóa nguyên liệu
+              </button>
             }
           </div>
 
@@ -237,154 +299,12 @@ export interface IngredientEditFormValue {
     }
   `,
   styles: `
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(18, 18, 24, 0.52);
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      padding: env(safe-area-inset-top, 0px) 0 0;
-      z-index: var(--z-sheet);
-    }
+    /* Shared modal scaffolding (overlay, .modal, .modal-toolbar, .form-content,
+       .section-label, .section-hint, .field, .picker-trigger, .btn-outline,
+       .btn-danger-text, .btn-cta, .field-error) lives in
+       src/theme/form-modal.scss to keep this component under the 4 kB
+       anyComponentStyle budget. */
 
-    .modal {
-      width: 100%;
-      max-width: min(100vw, 520px);
-      height: min(100vh - env(safe-area-inset-top, 0px), 100%);
-      max-height: min(100vh - env(safe-area-inset-top, 0px), 100%);
-      overflow: auto;
-      background: var(--bg-page);
-      border-radius: 0;
-      padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
-      box-shadow: none;
-    }
-
-    .modal-toolbar {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-height: 56px;
-      margin: 0 -16px 16px;
-      padding: 0 16px;
-      background: var(--primary-500);
-      color: #fff;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .modal-toolbar {
-        background: var(--primary-800, #1565c0);
-      }
-    }
-
-    .modal-toolbar h2 {
-      margin: 0;
-      flex: 1;
-      color: #fff;
-      font-size: 20px;
-      font-weight: 500;
-      line-height: 1.3;
-    }
-
-    .toolbar-icon-button,
-    .toolbar-save-button {
-      min-width: 44px;
-      min-height: 44px;
-      border: none;
-      background: transparent;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 500;
-    }
-
-    .toolbar-icon-button {
-      width: 44px;
-      padding: 0;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .toolbar-icon-button ion-icon {
-      font-size: 22px;
-    }
-
-    .toolbar-save-button[disabled] {
-      opacity: 0.6;
-    }
-
-    .form-content {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    .section-label {
-      color: var(--text-primary);
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 1.4;
-      margin-top: 8px;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .field--invalid {
-      color: var(--ion-color-danger);
-    }
-
-    .field input,
-    .picker-trigger {
-      min-height: 44px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--input-border-color);
-      padding: 10px 12px;
-      font: inherit;
-      background: var(--bg-page);
-      color: var(--text-primary);
-      outline: none;
-      box-shadow: none;
-    }
-
-    .field input:focus,
-    .picker-trigger:focus {
-      border-color: var(--primary-500);
-      box-shadow: 0 0 0 1px rgba(var(--ion-color-primary-rgb), 0.18);
-    }
-
-    .field--invalid input,
-    .field--invalid .picker-trigger,
-    .field--invalid input:focus,
-    .field--invalid .picker-trigger:focus {
-      border-color: var(--ion-color-danger);
-      box-shadow: 0 0 0 1px rgba(var(--ion-color-danger-rgb), 0.12);
-    }
-
-    .picker-trigger {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      text-align: left;
-    }
-
-    .picker-trigger ion-icon {
-      color: var(--text-tertiary);
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-
-    .section-hint,
     .info-card-copy,
     .unit-meta {
       color: var(--text-tertiary);
@@ -512,17 +432,10 @@ export interface IngredientEditFormValue {
       margin-top: 12px;
     }
 
-    .unit-action,
-    .btn-outline,
-    .btn-danger-text,
-    .btn-cta {
+    .unit-action {
       min-height: 44px;
       border-radius: var(--radius-sm);
       font-size: 14px;
-    }
-
-    .unit-action,
-    .btn-outline {
       padding: 10px 16px;
       border: 1px solid rgba(var(--ion-color-primary-rgb), 0.32);
       background: transparent;
@@ -530,34 +443,12 @@ export interface IngredientEditFormValue {
       font-weight: 500;
     }
 
-    .unit-action--danger,
-    .btn-danger-text {
+    .unit-action--danger {
       border: none;
       background: transparent;
       color: var(--ion-color-danger);
       font-weight: 500;
       padding: 0;
-    }
-
-    .btn-cta {
-      width: 100%;
-      border: none;
-      background: var(--ion-color-secondary);
-      color: var(--ion-color-secondary-contrast);
-      font-weight: 600;
-      padding: 14px 16px;
-      margin-top: 4px;
-    }
-
-    .btn-cta:disabled {
-      opacity: 0.6;
-    }
-
-    .field-error {
-      color: var(--ion-color-danger);
-      font-size: 12px;
-      line-height: 1.4;
-      margin-top: -4px;
     }
 
     @media (max-width: 480px) {
@@ -607,7 +498,9 @@ export class IngredientEditModalComponent implements OnChanges {
       this.showErrors = false;
       queueMicrotask(() => {
         window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
-        document.querySelector('.modal')?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+        document
+          .querySelector('.modal')
+          ?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
       });
     }
   }
@@ -632,7 +525,10 @@ export class IngredientEditModalComponent implements OnChanges {
     if (this.form.units.length === 0) {
       errors.push('Cần ít nhất 1 đơn vị hợp lệ.');
     }
-    if (this.form.units.length > 0 && this.form.units.filter((unit) => unit.is_default).length !== 1) {
+    if (
+      this.form.units.length > 0 &&
+      this.form.units.filter((unit) => unit.is_default).length !== 1
+    ) {
       errors.push('Chọn đúng 1 đơn vị mặc định trước khi lưu.');
     }
     if (this.form.units.some((unit) => unit.factor_to_basis <= 0)) {
@@ -706,7 +602,11 @@ export class IngredientEditModalComponent implements OnChanges {
     this.form.density_g_per_ml = Number(value);
   }
 
-  updateUnit(localId: string, field: 'display_label' | 'factor_to_basis', value: string | number): void {
+  updateUnit(
+    localId: string,
+    field: 'display_label' | 'factor_to_basis',
+    value: string | number,
+  ): void {
     this.form.units = this.form.units.map((unit) =>
       unit.local_id === localId ? { ...unit, [field]: value } : unit,
     );
@@ -728,7 +628,9 @@ export class IngredientEditModalComponent implements OnChanges {
   }
 
   unitTitle(unit: IngredientEditUnitFormValue): string {
-    return unit.is_approximate ? `≈ ${unit.display_label || unit.short_name_vi}` : unit.display_label || unit.short_name_vi;
+    return unit.is_approximate
+      ? `≈ ${unit.display_label || unit.short_name_vi}`
+      : unit.display_label || unit.short_name_vi;
   }
 
   unitExample(unit: IngredientEditUnitFormValue): string {
@@ -755,7 +657,12 @@ export class IngredientEditModalComponent implements OnChanges {
   }
 
   private isValid(): boolean {
-    return this.form.name.trim().length > 0 && this.form.category.trim().length > 0 && this.form.calories >= 0 && this.unitErrors.length === 0;
+    return (
+      this.form.name.trim().length > 0 &&
+      this.form.category.trim().length > 0 &&
+      this.form.calories >= 0 &&
+      this.unitErrors.length === 0
+    );
   }
 
   private focusFirstInvalidField(): void {
@@ -782,16 +689,26 @@ export class IngredientEditModalComponent implements OnChanges {
   }
 
   private getSuggestedFactor(unit: UnitModel): number {
-    if (this.form.nutrition_basis_unit === 'g' && unit.unit_type === 'mass' && unit.base_factor_g !== null) {
+    if (
+      this.form.nutrition_basis_unit === 'g' &&
+      unit.unit_type === 'mass' &&
+      unit.base_factor_g !== null
+    ) {
       return unit.base_factor_g;
     }
-    if (this.form.nutrition_basis_unit === 'ml' && unit.unit_type === 'volume' && unit.base_factor_ml !== null) {
+    if (
+      this.form.nutrition_basis_unit === 'ml' &&
+      unit.unit_type === 'volume' &&
+      unit.base_factor_ml !== null
+    ) {
       return unit.base_factor_ml;
     }
     return 1;
   }
 
   private formatNumber(value: number): string {
-    return Number.isInteger(value) ? String(value) : value.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+    return Number.isInteger(value)
+      ? String(value)
+      : value.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
   }
 }

@@ -1,0 +1,210 @@
+/*
+ * Shared styles for full-screen form modals (ingredient-edit, dish-edit, ...)
+ * ----------------------------------------------------------------------------
+ * Extracted from per-component inline styles to keep each component below the
+ * Angular `anyComponentStyle` 4 kB warning budget. Rules listed here are
+ * intentionally generic to the modal pattern (overlay + sticky toolbar +
+ * stacked form fields + primary CTA).
+ *
+ * Component-specific rules (segmented controls, ingredient rows, unit cards,
+ * etc.) still live in the component's `styles:` block.
+ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 18, 24, 0.52);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: env(safe-area-inset-top, 0px) 0 0;
+  z-index: var(--z-sheet);
+}
+
+.modal {
+  width: 100%;
+  max-width: min(100vw, 520px);
+  height: min(100vh - env(safe-area-inset-top, 0px), 100%);
+  max-height: min(100vh - env(safe-area-inset-top, 0px), 100%);
+  overflow: auto;
+  background: var(--bg-page);
+  border-radius: 0;
+  padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  box-shadow: none;
+}
+
+.modal-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 56px;
+  margin: 0 -16px 16px;
+  padding: 0 16px;
+  background: var(--primary-500);
+  color: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .modal-toolbar {
+    background: var(--primary-800, #1565c0);
+  }
+}
+
+.modal-toolbar h2 {
+  margin: 0;
+  flex: 1;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.toolbar-icon-button,
+.toolbar-save-button {
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.toolbar-icon-button {
+  width: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-icon-button ion-icon {
+  font-size: 22px;
+}
+
+.toolbar-save-button[disabled] {
+  opacity: 0.6;
+}
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.section-label {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 8px;
+}
+
+.section-hint {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.field--invalid {
+  color: var(--ion-color-danger);
+}
+
+.field input,
+.picker-trigger {
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--input-border-color);
+  padding: 10px 12px;
+  font: inherit;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  outline: none;
+  box-shadow: none;
+}
+
+.field input:focus,
+.picker-trigger:focus {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 1px rgba(var(--ion-color-primary-rgb), 0.18);
+}
+
+.field--invalid input,
+.field--invalid .picker-trigger,
+.field--invalid input:focus,
+.field--invalid .picker-trigger:focus {
+  border-color: var(--ion-color-danger);
+  box-shadow: 0 0 0 1px rgba(var(--ion-color-danger-rgb), 0.12);
+}
+
+.picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+}
+
+.picker-trigger ion-icon {
+  color: var(--text-tertiary);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.btn-outline,
+.btn-danger-text,
+.btn-cta {
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+}
+
+.btn-outline {
+  padding: 10px 16px;
+  background: transparent;
+  color: var(--primary-700);
+  font-weight: 500;
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.32);
+}
+
+.btn-danger-text {
+  border: none;
+  background: transparent;
+  color: var(--ion-color-danger);
+  font-weight: 500;
+  padding: 0;
+}
+
+.btn-cta {
+  width: 100%;
+  border: none;
+  background: var(--ion-color-secondary);
+  color: var(--ion-color-secondary-contrast);
+  font-weight: 600;
+  padding: 14px 16px;
+  margin-top: 4px;
+}
+
+.btn-cta:disabled {
+  opacity: 0.6;
+}
+
+.field-error {
+  color: var(--ion-color-danger);
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: -4px;
+}
