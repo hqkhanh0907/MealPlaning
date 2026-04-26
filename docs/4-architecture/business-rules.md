@@ -41,23 +41,39 @@ Tài liệu này tập trung các invariant nghiệp vụ mà mọi tầng (UI, 
 
 Áp dụng cho: F-02 khi insert/update `dish_ingredient`.
 
-### RULE-DI-NORM-01: amount_unit hợp lệ
+### RULE-DI-NORM-01: `unit_id` phải hợp lệ và được resolve về canonical basis
 
-- `amount_unit ∈ {'g', 'ml', 'piece'}`.
-- `'piece'` chỉ hợp lệ khi ingredient có `grams_per_unit` (solid, basis = 'g') hoặc `ml_per_unit` (liquid, basis = 'ml').
-- Nếu thiếu metadata → **reject** input ở tầng repository, throw `InvalidDishIngredientUnitError`. UI phải catch và yêu cầu user chuyển sang g/ml.
+- `dish_ingredient` không còn dùng `amount_unit`; thay bằng `unit_id` tham chiếu `unit(id)`.
+- Mọi insert/update `dish_ingredient` **PHẢI** đi qua một resolver thống nhất: `resolveUnit(ingredient, unit, amountValue, ingredientUnit?)`.
+- Output của resolver là `normalized_amount` cùng dimension với `ingredient.nutrition_basis_unit`.
 
-### RULE-DI-NORM-02: normalized_amount tính lúc insert/update
+### RULE-DI-NORM-02: Thứ tự ưu tiên khi resolve conversion
 
-```
-if amount_unit == 'piece':
-  normalized_amount = amount_value × (grams_per_unit | ml_per_unit)
-else:  # 'g' | 'ml'
-  normalized_amount = amount_value
-```
+1. Nếu unit cùng dimension với basis:
+   - dùng global factor (`g`, `kg`, `ml`, `l`, `tbsp`, `tsp`, `cup`) hoặc curated `ingredient_unit.factor_to_basis` phù hợp.
+2. Nếu unit là ingredient-specific (`piece`, `clove`, `bunch`, `slice`, `pinch`, ...):
+   - bắt buộc dùng `ingredient_unit.factor_to_basis`.
+3. Nếu unit khác dimension với basis:
+   - ưu tiên `ingredient_unit.factor_to_basis`
+   - nếu không có thì dùng `ingredient.density_g_per_ml`
+   - nếu vẫn không có → **reject** input ở tầng repository với `InvalidDishIngredientUnitError`.
 
-- Lưu **cả** `amount_value` + `amount_unit` (user input) **và** `normalized_amount` (basis unit).
+### RULE-DI-NORM-03: Không silent convert giữa `g` và `ml`
+
+- Không được tự suy đoán mass ↔ volume khi thiếu curated factor hoặc `density_g_per_ml` đáng tin.
+- Không được fallback sang 1:1 giữa `g` và `ml`.
+
+### RULE-DI-NORM-04: Approximate unit được phép nhưng phải gắn cờ rõ
+
+- Unit có `unit.is_approximate = 1` (VD `pinch`) được phép dùng trong Phase 1.
+- UI phải hiển thị dấu `≈` hoặc nhãn `ước lượng`.
+- Approximate unit vẫn phải resolve ra `normalized_amount`; không được bỏ qua khỏi phép tính macro.
+
+### RULE-DI-NORM-05: Dual-write giữ nguyên, macro snapshot vẫn cấm
+
+- Lưu **cả** `amount_value` + `unit_id` (user input) **và** `normalized_amount` (basis unit).
 - Không lưu macro snapshot trong `dish_ingredient` (đã DROP — tính qua VIEW).
+- `normalized_amount` là input duy nhất cho `dish_with_totals` VIEW.
 
 ---
 

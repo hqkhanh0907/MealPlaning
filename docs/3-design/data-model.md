@@ -138,9 +138,62 @@ CREATE TABLE weight_log (
 
 ## 4. Tables — Nhóm Nutrition (F-01, F-02, F-03, F-04)
 
+### 4.0a unit
+
+Registry toàn cục cho các đơn vị mà hệ thống hiểu. Unit chỉ phục vụ nhập liệu / hiển thị / conversion, KHÔNG phải nutrition source of truth.
+
+```sql
+CREATE TABLE unit (
+  id              TEXT PRIMARY KEY,                -- 'g', 'kg', 'ml', 'l', 'tbsp', 'tsp', 'cup', 'piece', 'clove', 'bunch', 'slice', 'pinch'
+  display_name_vi TEXT NOT NULL,
+  display_name_en TEXT NOT NULL,
+  short_name_vi   TEXT NOT NULL,
+  unit_type       TEXT NOT NULL CHECK (unit_type IN ('mass', 'volume', 'count', 'cooking')),
+  is_global       INTEGER NOT NULL DEFAULT 1,     -- 1 = factor cố định toàn cục; 0 = phụ thuộc ingredient
+  base_factor_g   REAL,                           -- chỉ dùng cho global mass unit
+  base_factor_ml  REAL,                           -- chỉ dùng cho global volume unit
+  is_approximate  INTEGER NOT NULL DEFAULT 0,     -- 1 = đơn vị mang tính ước lượng (VD `pinch`)
+  display_order   INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX idx_unit_type ON unit(unit_type);
+```
+
+Rules:
+- `g`, `kg` là global mass units.
+- `ml`, `l`, `tbsp`, `tsp`, `cup` là global volume units.
+- `piece`, `clove`, `bunch`, `slice`, `pinch` có thể là ingredient-specific trong cách convert về basis.
+- `is_approximate = 1` dùng cho unit ước lượng; UI phải hiển thị dấu `≈` hoặc nhãn `ước lượng`.
+
+### 4.0b ingredient_unit
+
+Bảng junction khai báo ingredient nào dùng được unit nào, với factor convert về basis canonical của ingredient đó.
+
+```sql
+CREATE TABLE ingredient_unit (
+  ingredient_id   TEXT NOT NULL REFERENCES ingredient(id) ON DELETE CASCADE,
+  unit_id         TEXT NOT NULL REFERENCES unit(id),
+  factor_to_basis REAL NOT NULL,                  -- 1 unit = ? basis unit của ingredient
+  is_default      INTEGER NOT NULL DEFAULT 0,
+  display_label   TEXT,                           -- override label hiển thị, VD `quả`, `tép`, `củ`
+  PRIMARY KEY (ingredient_id, unit_id)
+);
+
+CREATE INDEX idx_ingredient_unit_ingredient ON ingredient_unit(ingredient_id);
+CREATE UNIQUE INDEX idx_ingredient_unit_default
+  ON ingredient_unit(ingredient_id) WHERE is_default = 1;
+```
+
+Rules:
+- Mỗi ingredient phải có ít nhất 1 row trong `ingredient_unit`.
+- Mỗi ingredient chỉ được có đúng 1 unit `is_default = 1`.
+- `factor_to_basis > 0`.
+- `factor_to_basis` luôn được hiểu theo `nutrition_basis_unit` hiện tại của ingredient.
+- `ingredient_unit` KHÔNG lưu nutrition snapshot theo unit.
+
 ### 4.1 ingredient
 
-Nguyên liệu với thông tin dinh dưỡng canonical theo `100g` hoặc `100ml` (F-01). `piece` chỉ là entry unit có conversion rõ ràng. Phase 1 cho phép một số ingredient được curate dưới dạng **composite ingredient** cho broth/sauce/base để giữ seed dataset gọn.
+Nguyên liệu với thông tin dinh dưỡng canonical theo `100g` hoặc `100ml` (F-01). Nutrition source of truth chỉ nằm ở `ingredient`; unit system chỉ convert về basis này. Phase 1 cho phép một số ingredient được curate dưới dạng **composite ingredient** cho broth/sauce/base để giữ seed dataset gọn.
 
 ```sql
 CREATE TABLE ingredient (
@@ -148,7 +201,7 @@ CREATE TABLE ingredient (
   name              TEXT NOT NULL,                -- "Ức gà"
   category          TEXT NOT NULL CHECK (category IN ('Thịt', 'Cá & Hải sản', 'Trứng & Sữa', 'Rau củ', 'Ngũ cốc & Tinh bột', 'Đậu & Hạt', 'Dầu & Mỡ', 'Gia vị', 'Nước dùng & Nước chấm', 'Trái cây', 'Khác')),
   
-  -- Canonical nutrition basis
+  -- Canonical nutrition basis (authoritative)
   nutrition_basis_unit TEXT NOT NULL CHECK (nutrition_basis_unit IN ('g', 'ml')),
   nutrition_basis_quantity REAL NOT NULL DEFAULT 100,
 
@@ -159,10 +212,8 @@ CREATE TABLE ingredient (
   fat               REAL NOT NULL DEFAULT 0,      -- g
   fiber             REAL NOT NULL DEFAULT 0,      -- g
 
-  -- Entry/display unit
-  default_entry_unit TEXT NOT NULL CHECK (default_entry_unit IN ('g', 'ml', 'piece')),
-  grams_per_unit    REAL,                         -- dùng khi default_entry_unit = 'piece' và basis là 'g'
-  ml_per_unit       REAL,                         -- dùng khi default_entry_unit = 'piece' và basis là 'ml'
+  -- Optional bridge mass <-> volume. Chỉ dùng nếu có nguồn đáng tin.
+  density_g_per_ml  REAL,
   
   -- Nguồn dữ liệu
   source            TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('manual', 'ai', 'db')),
@@ -174,6 +225,11 @@ CREATE TABLE ingredient (
 CREATE INDEX idx_ingredient_name ON ingredient(name);
 CREATE INDEX idx_ingredient_category ON ingredient(category);
 ```
+
+Rules:
+- Mỗi ingredient chỉ có đúng 1 nutrition basis authoritative: `100g` hoặc `100ml`.
+- `density_g_per_ml` là optional. Nếu có, chỉ dùng làm bridge khi cần convert khác dimension và không có curated `factor_to_basis` phù hợp hơn.
+- Scope nutrient của redesign này vẫn là `calories`, `protein`, `carbs`, `fat`, `fiber`. `sugar` / `sodium` chưa được thêm vào schema Phase 1 này.
 
 Rule provenance cho `ingredient`:
 - Seed ingredient insert từ `ingredients.json` phải dùng `source = 'db'`
@@ -245,7 +301,7 @@ Lưu ý:
 
 ### 4.3 dish_ingredient
 
-Bảng trung gian: món ăn ↔ nguyên liệu (khối lượng). Lưu user input gốc (`amount_value` + `amount_unit`) **và** `normalized_amount` (đã convert về basis unit của ingredient). Macro snapshot đã bị DROP — total nutrition được compute on-the-fly qua VIEW `dish_with_totals`.
+Bảng trung gian: món ăn ↔ nguyên liệu (khối lượng). Lưu user input gốc (`amount_value` + `unit_id`) **và** `normalized_amount` (đã convert về basis unit của ingredient). Macro snapshot đã bị DROP — total nutrition được compute on-the-fly qua VIEW `dish_with_totals`.
 
 ```sql
 CREATE TABLE dish_ingredient (
@@ -253,7 +309,7 @@ CREATE TABLE dish_ingredient (
   dish_id           TEXT NOT NULL REFERENCES dish(id) ON DELETE CASCADE,
   ingredient_id     TEXT NOT NULL REFERENCES ingredient(id) ON DELETE RESTRICT,
   amount_value      REAL NOT NULL,                -- 150, 300, 2...
-  amount_unit       TEXT NOT NULL CHECK (amount_unit IN ('g', 'ml', 'piece')),
+  unit_id           TEXT NOT NULL REFERENCES unit(id),
   normalized_amount REAL NOT NULL,                -- Đã convert về basis unit của ingredient (g hoặc ml)
 
   UNIQUE(dish_id, ingredient_id)
@@ -264,16 +320,23 @@ CREATE INDEX idx_dish_ingredient_dish ON dish_ingredient(dish_id);
 
 **Normalization formula (compute lúc insert/update):**
 ```
-if amount_unit == 'piece':
-  REJECT nếu ingredient thiếu grams_per_unit (solid) hoặc ml_per_unit (liquid)
-  normalized_amount = amount_value × (grams_per_unit hoặc ml_per_unit)
-else:  // 'g' hoặc 'ml'
-  normalized_amount = amount_value
+resolveUnit(ingredient_id, unit_id, amount_value):
+  1. Lookup ingredient.nutrition_basis_unit
+  2. Lookup unit registry + ingredient_unit (nếu có)
+  3. Nếu unit cùng dimension với basis:
+       - dùng global factor hoặc ingredient_unit.factor_to_basis phù hợp
+  4. Nếu unit khác dimension với basis:
+       - ưu tiên ingredient_unit.factor_to_basis
+       - nếu không có thì dùng ingredient.density_g_per_ml
+       - nếu vẫn không có thì REJECT
+  5. Trả normalized_amount cùng dimension với nutrition_basis_unit
 ```
 
 **Rules:**
-- Lưu **cả** `amount_value + amount_unit` (user input gốc) **và** `normalized_amount` (g/ml). KHÔNG lưu macro snapshot.
-- `piece` chỉ hợp lệ khi ingredient có `grams_per_unit` (solid) hoặc `ml_per_unit` (liquid). Nếu thiếu → **reject input**, yêu cầu user chọn g hoặc ml.
+- Lưu **cả** `amount_value + unit_id` (user input gốc) **và** `normalized_amount` (g/ml). KHÔNG lưu macro snapshot.
+- `normalized_amount` luôn phải cùng dimension với `ingredient.nutrition_basis_unit`.
+- Không được silent convert giữa `g` và `ml` nếu thiếu curated factor hoặc `density_g_per_ml`.
+- Unit có `is_approximate = 1` (VD `pinch`) vẫn được phép dùng trong Phase 1, nhưng UI phải hiển thị dấu `≈` hoặc nhãn `ước lượng`.
 - Khi ingredient nutrition thay đổi → total của dish **AUTO** cập nhật (vì derived qua VIEW). Đây là behavior cố ý — single source of truth.
 
 ### 4.4 day_plan

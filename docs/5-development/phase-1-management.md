@@ -141,29 +141,37 @@ Dev-plan Q7 chọn "full 4 levels" cho V1 — nhưng đó là roadmap-level. **P
 - Canonical nutrition basis chỉ có:
   - `100g` cho nguyên liệu rắn
   - `100ml` cho nguyên liệu lỏng
-- Phase 1 chỉ support entry units:
-  - `g`
-  - `ml`
-  - `piece`
-- `piece` chỉ hợp lệ nếu có conversion rõ ràng:
-  - `grams_per_unit`
-  - hoặc `ml_per_unit`
+- Mỗi ingredient chỉ có đúng 1 nutrition basis authoritative (`100g` hoặc `100ml`)
+- Phase 1 support unit registry với 2 nhóm:
+  - Global units: `g`, `kg`, `ml`, `l`, `tbsp`, `tsp`, `cup`
+  - Ingredient-specific / cooking units: `piece`, `clove`, `bunch`, `slice`, `pinch`, ...
+- Unit ước lượng được phép trong Phase 1 nếu có factor rõ ràng:
+  - UI phải hiển thị `≈` hoặc nhãn `ước lượng`
+- Nếu unit khác dimension với basis:
+  - ưu tiên `ingredient_unit.factor_to_basis`
+  - nếu không có thì dùng `density_g_per_ml`
+  - nếu vẫn không có thì reject
 
 **Hệ quả cho implementation:**
 - Không cho mỗi ingredient có một nutrition basis riêng kiểu `per_egg`, `per_tbsp`, `per_bowl`
-- UI có thể cho user nhập `piece`, nhưng data layer phải normalize sang canonical basis (`g` hoặc `ml`) trước khi tính macro
+- UI có thể cho user nhập nhiều unit thân thiện, nhưng data layer phải normalize sang canonical basis (`g` hoặc `ml`) trước khi tính macro
 - Ingredient metadata cần lưu:
   - `category`
   - `nutrition_basis_unit`
   - `nutrition_basis_quantity` (=100)
-  - `default_entry_unit`
-  - `grams_per_unit?`
-  - `ml_per_unit?`
+  - `density_g_per_ml?`
+- Unit metadata được tách khỏi ingredient:
+  - `unit`
+  - `ingredient_unit[]`
+  - `is_default`
+  - `display_label`
+  - `factor_to_basis`
 
 Ví dụ:
-- Ức gà: basis `100g`, default entry `g`
-- Trứng gà: basis `100g`, default entry `piece`, `grams_per_unit = 50`
-- Sữa tươi: basis `100ml`, default entry `ml`
+- Ức gà: basis `100g`, allowed units `g`, `kg`
+- Trứng gà: basis `100g`, default unit `piece/quả`, `factor_to_basis = 50`
+- Sữa tươi: basis `100ml`, allowed units `ml`, `l`, `cup`
+- Dầu olive: basis có thể là `100ml` hoặc `100g` tùy nguồn authority; nếu user nhập unit khác dimension với basis thì phải có curated factor hoặc `density_g_per_ml`
 
 ### 4.4 Seed Data là One-time Build, không Runtime
 
@@ -228,8 +236,10 @@ Seed data sinh **tại build time** (script), KHÔNG gọi external nutrition AP
 - Tất cả ingredient phải có:
   - `category`
   - canonical nutrition basis (`100g` hoặc `100ml`)
-  - default entry unit (`g` / `ml` / `piece`)
-  - conversion data nếu default unit là `piece`
+  - ít nhất 1 unit hợp lệ trong `ingredient_unit`
+  - đúng 1 default unit
+  - factor conversion rõ ràng cho các unit không cùng dimension với basis, hoặc `density_g_per_ml` nếu dùng fallback
+  - marker `is_approximate` cho unit ước lượng nếu có
 - Mỗi dish seed phải có baseline ingredient list + amount cho `1 serving`; user sửa **trực tiếp** record seed gốc, không tạo bản copy ở Phase 1
 - Composite ingredient vẫn phải tuân thủ canonical nutrition rule ở §4.3 và được quản lý như một ingredient bình thường trong DB
 
@@ -274,7 +284,7 @@ Note:
 - Dish seed load từ artifact phải insert với `source = 'db'`
 - Nếu `DishRepository.update` sửa một seeded dish hiện có (`source = 'db'`) thì record đó phải flip sang `source = 'custom'`
 - `countReferences(dishId)` ở Phase 1 chủ yếu để support generic confirm + future-proof cho Phase 2
-- **DishIngredient normalization:** `bulkInsert` phải tính `normalized_amount` + macro theo công thức ở `data-model.md §4.3`. REJECT input nếu `amount_unit = 'piece'` mà ingredient thiếu `grams_per_unit`/`ml_per_unit`
+- **DishIngredient normalization:** `bulkInsert` phải gọi resolver thống nhất để tính `normalized_amount` theo công thức ở `data-model.md §4.3`. Thứ tự ưu tiên: `ingredient_unit.factor_to_basis` → `density_g_per_ml` → reject. Không được silent convert giữa `g` và `ml`. Unit ước lượng vẫn được phép nhưng phải giữ marker hiển thị rõ ở UI
 
 **Unit tests:** CRUD mỗi repo + transactional insert dish.
 
@@ -343,7 +353,9 @@ management/
 - [ ] Sửa ingredient → persist sau reload
 - [ ] Xóa ingredient không dùng trong món → OK
 - [ ] Xóa ingredient đang dùng trong món → confirm dialog hoặc RESTRICT error
-- [ ] Ingredient có default unit `piece` (VD trứng) tính macro đúng qua conversion
+- [ ] Ingredient có unit ingredient-specific (VD trứng = `piece/quả`) tính macro đúng qua conversion
+- [ ] Unit ước lượng (VD `pinch`) hiển thị `≈` / `ước lượng` đúng và vẫn tính vào macro
+- [ ] Cross-dimension conversion dùng đúng thứ tự: curated factor → density → reject
 - [ ] Tìm kiếm ingredient real-time
 - [ ] Tạo dish ingredient-based → calo/macro tự tính đúng
 - [ ] Tạo dish quick-add → data persist

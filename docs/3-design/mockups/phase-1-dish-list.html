@@ -172,7 +172,7 @@
      DISH CARDS
      ========================================================================= */
   .dish-card {
-    padding: 14px 16px; border-radius: 16px; margin-bottom: 12px;
+    padding: 14px 64px 14px 16px; border-radius: 16px; margin-bottom: 12px;
     transition: all 0.2s; position: relative;
   }
   body.light .dish-card { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
@@ -180,7 +180,7 @@
 
   /* ⋮ More icon — top-right of card */
   .dish-more {
-    position: absolute; top: 4px; right: 4px;
+    position: absolute; top: 8px; right: 8px;
     min-width: 44px; min-height: 44px;
     display: flex; align-items: center; justify-content: center;
     font-size: 18px; cursor: pointer; line-height: 1;
@@ -192,7 +192,7 @@
 
   .dish-header {
     display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
-    flex-wrap: wrap; padding-right: 36px;
+    flex-wrap: wrap; padding-right: 12px;
   }
 
   /* Line 1: Dish name — 16px/600 */
@@ -289,21 +289,21 @@
   }
   .fab-menu {
     position: absolute; bottom: 136px; right: 16px;
-    display: flex; flex-direction: column; gap: 8px;
+    display: flex; flex-direction: column; gap: 8px; align-items: stretch;
     z-index: 20;
   }
   .fab-menu-item {
     display: flex; align-items: center; gap: 10px;
     padding: 12px 16px; border-radius: 12px;
     font-size: 14px; font-weight: 500;
-    white-space: nowrap; cursor: pointer;
+    width: 272px; max-width: 272px; white-space: normal; cursor: pointer;
     border: none;
   }
   body.light .fab-menu-item { background: #fff; color: #1A1A2E; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
   body.dark  .fab-menu-item { background: #2C2E36; color: #E0E0E8; }
   .fab-menu-item .fab-menu-icon { font-size: 18px; flex-shrink: 0; }
   .fab-menu-item .fab-menu-label { font-size: 14px; }
-  .fab-menu-text { display: flex; flex-direction: column; gap: 1px; }
+  .fab-menu-text { display: flex; flex-direction: column; gap: 2px; text-align: left; }
   .fab-menu-sublabel { font-size: 11px; font-weight: 400; white-space: normal; }
   body.light .fab-menu-sublabel { color: rgba(0,0,0,0.45); }
   body.dark  .fab-menu-sublabel { color: rgba(255,255,255,0.5); }
@@ -376,7 +376,7 @@
     font-size: 14px; font-weight: 500; cursor: pointer;
   }
   .dialog-btn-cancel {
-    background: transparent;
+    background: transparent; border: 1px solid rgba(95,101,117,0.24);
   }
   body.light .dialog-btn-cancel { color: #5F6575; }
   body.dark  .dialog-btn-cancel { color: #A8AAB4; }
@@ -455,14 +455,14 @@
       </div>
       <div class="content">
         <!-- Search -->
-        <div class="search-bar">
+        <div class="search-bar" role="search" aria-label="Tìm món ăn">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text placeholder">Tìm món ăn...</span>
         </div>
 
         <!-- Dish 1 -->
         <div class="dish-card">
-          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
+          <button class="dish-more" type="button" aria-label="Tùy chọn cho Phở bò" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="dish-header">
             <span class="dish-name">Phở bò</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
@@ -476,7 +476,7 @@
 
         <!-- Dish 2 -->
         <div class="dish-card">
-          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
+          <button class="dish-more" type="button" aria-label="Tùy chọn cho Cơm gà xối mỡ" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="dish-header">
             <span class="dish-name">Cơm gà xối mỡ</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
@@ -490,7 +490,7 @@
 
         <!-- Dish 3 -->
         <div class="dish-card">
-          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
+          <button class="dish-more" type="button" aria-label="Tùy chọn cho Bún chả" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="dish-header">
             <span class="dish-name">Bún chả</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
@@ -504,7 +504,7 @@
 
         <!-- Dish 4 — AI autofill type -->
         <div class="dish-card">
-          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
+          <button class="dish-more" type="button" aria-label="Tùy chọn cho Salad ức gà" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="dish-header">
             <span class="dish-name">Salad ức gà</span>
             <span class="type-badge type-ai">AI tự điền</span>
@@ -546,7 +546,7 @@
         </div>
       </div>
       <div class="content">
-        <div class="search-bar" style="border-color: #2196F3;">
+        <div class="search-bar" role="search" aria-label="Tìm món ăn" style="border-color: #2196F3;">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text">phở</span>
           <div class="search-clear" role="button" aria-label="Xóa tìm kiếm"><span class="search-clear-dot">✕</span></div>
@@ -555,7 +555,7 @@
         <div class="result-count">1 kết quả</div>
 
         <div class="dish-card">
-          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
+          <button class="dish-more" type="button" aria-label="Tùy chọn cho Phở bò" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="dish-header">
             <span class="dish-name">Phở bò</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
@@ -595,7 +595,7 @@
         </div>
       </div>
       <div class="content">
-        <div class="search-bar" style="border-color: #2196F3;">
+        <div class="search-bar" role="search" aria-label="Tìm món ăn" style="border-color: #2196F3;">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text">pizza</span>
           <div class="search-clear" role="button" aria-label="Xóa tìm kiếm"><span class="search-clear-dot">✕</span></div>
@@ -635,14 +635,13 @@
         </div>
       </div>
       <div class="content">
-        <div class="empty-state" style="padding-top: 100px;">
+        <div class="empty-state" style="padding-top: 88px;">
           <div class="empty-icon">🍽️</div>
           <div class="empty-title">Chưa có món ăn nào</div>
           <div class="empty-desc">Thêm món ăn đầu tiên để bắt đầu lập kế hoạch bữa ăn</div>
           <button class="btn-empty-cta">+ Thêm món ăn đầu tiên</button>
         </div>
       </div>
-      <button class="fab" aria-label="Tạo món ăn mới">+</button>
       <div class="tab-bar">
         <div class="tab-item"><span class="tab-icon">🏠</span>Tổng quan</div>
         <div class="tab-item"><span class="tab-icon">📅</span>Lịch ăn</div>
@@ -670,12 +669,12 @@
         </div>
       </div>
       <div class="content" style="opacity: 0.3;">
-        <div class="search-bar">
+        <div class="search-bar" role="search" aria-label="Tìm món ăn">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text placeholder">Tìm món ăn...</span>
         </div>
         <div class="dish-card">
-          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
+          <button class="dish-more" type="button" aria-label="Tùy chọn cho Phở bò" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="dish-header">
             <span class="dish-name">Phở bò</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
@@ -686,7 +685,7 @@
           </div>
         </div>
         <div class="dish-card">
-          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
+          <button class="dish-more" type="button" aria-label="Tùy chọn cho Cơm gà xối mỡ" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="dish-header">
             <span class="dish-name">Cơm gà xối mỡ</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
@@ -699,12 +698,12 @@
       </div>
       <!-- Dialog -->
       <div class="dialog-overlay" role="presentation">
-        <div class="dialog-box" role="alertdialog" aria-modal="true">
-          <div class="dialog-title">Xóa món ăn?</div>
-          <div class="dialog-message">Phở bò sẽ bị xóa vĩnh viễn. Bạn không thể hoàn tác thao tác này.</div>
+        <div class="dialog-box" role="alertdialog" aria-modal="true" aria-labelledby="dish-delete-title" aria-describedby="dish-delete-message">
+          <div class="dialog-title" id="dish-delete-title">Xóa món ăn?</div>
+          <div class="dialog-message" id="dish-delete-message">Phở bò sẽ bị xóa vĩnh viễn. Bạn không thể hoàn tác thao tác này.</div>
           <div class="dialog-actions">
             <button class="dialog-btn dialog-btn-cancel">Giữ lại</button>
-            <button class="dialog-btn dialog-btn-danger">Xóa</button>
+            <button class="dialog-btn dialog-btn-danger" aria-label="Xóa món Phở bò">Xóa</button>
           </div>
         </div>
       </div>
@@ -735,12 +734,12 @@
         </div>
       </div>
       <div class="content" style="opacity: 0.4;">
-        <div class="search-bar">
+        <div class="search-bar" role="search" aria-label="Tìm món ăn">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text placeholder">Tìm món ăn...</span>
         </div>
         <div class="dish-card">
-          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
+          <button class="dish-more" type="button" aria-label="Tùy chọn cho Phở bò" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="dish-header">
             <span class="dish-name">Phở bò</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
@@ -751,7 +750,7 @@
           </div>
         </div>
         <div class="dish-card">
-          <div class="dish-more" aria-label="Tùy chọn">⋮</div>
+          <button class="dish-more" type="button" aria-label="Tùy chọn cho Cơm gà xối mỡ" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="dish-header">
             <span class="dish-name">Cơm gà xối mỡ</span>
             <span class="type-badge type-ingredient">Nguyên liệu</span>
@@ -765,22 +764,22 @@
       <!-- FAB overlay + menu -->
       <div class="fab-overlay"></div>
       <div class="fab-menu">
-        <button class="fab-menu-item fab-menu-item-primary">
+        <button class="fab-menu-item fab-menu-item-primary" aria-label="Tạo món từ nguyên liệu">
           <span class="fab-menu-icon">📝</span>
           <span class="fab-menu-text">
             <span class="fab-menu-label">Tạo từ nguyên liệu</span>
             <span class="fab-menu-sublabel">Tính dinh dưỡng tự động, quản lý chi tiết</span>
           </span>
         </button>
-        <button class="fab-menu-item">
+        <button class="fab-menu-item" aria-label="AI tự điền từ tên món">
           <span class="fab-menu-icon">✨</span>
           <span class="fab-menu-text">
             <span class="fab-menu-label">AI tự điền</span>
-            <span class="fab-menu-sublabel">Quét ảnh hoặc mô tả món, AI tự điền dinh dưỡng</span>
+            <span class="fab-menu-sublabel">Nhập tên món để AI gợi ý nguyên liệu và khối lượng</span>
           </span>
         </button>
       </div>
-      <button class="fab-expanded" aria-label="Đóng menu" aria-expanded="true">+</button>
+      <button class="fab-expanded" aria-label="Đóng menu tạo món ăn" aria-expanded="true">+</button>
       <div class="tab-bar">
         <div class="tab-item"><span class="tab-icon">🏠</span>Tổng quan</div>
         <div class="tab-item"><span class="tab-icon">📅</span>Lịch ăn</div>
@@ -842,7 +841,7 @@
     <tr><td>Easing — sheet</td><td><code>cubic-bezier(0.32, 0.72, 0, 1)</code> 300ms</td><td>FAB menu open, dialog open. Exit: 225ms (75%)</td></tr>
     <tr><td>Tabular numbers</td><td><code>font-variant-numeric: tabular-nums</code></td><td>Calories hero, macro values, result count — consistent width digits</td></tr>
     <tr><td colspan="3"><strong>⚠️ Icon placeholders:</strong> Tab bar emojis (🏠📅🍳💪) and empty state emojis (🍽️🔍) are mockup placeholders. Implementation uses <code>IonIcon</code> from Ionicons: <code>home-outline</code>, <code>calendar-outline</code>, <code>restaurant-outline</code>, <code>fitness-outline</code>. Empty states use themed SVG illustrations.</td></tr>
-    <tr><td colspan="3"><strong>♿ Accessibility:</strong> Delete dialog: <code>role="alertdialog"</code> + <code>aria-modal="true"</code> + <code>aria-labelledby</code>. ⋮ menu: <code>aria-haspopup="menu"</code> + <code>aria-expanded</code>. Segment control: <code>role="tablist"</code> with <code>role="tab"</code> + <code>aria-selected</code>. Search: <code>role="search"</code> + <code>aria-label="Tìm món ăn"</code>. FAB: <code>aria-label="Tạo món ăn mới"</code> + <code>aria-expanded</code> for menu state.</td></tr>
+    <tr><td colspan="3"><strong>♿ Accessibility:</strong> Delete dialog: <code>role="alertdialog"</code> + <code>aria-modal="true"</code> + <code>aria-labelledby</code> + <code>aria-describedby</code>. ⋮ menu: <code>aria-haspopup="menu"</code> + dynamic <code>aria-label="Tùy chọn cho [tên món]"</code>. Segment control: <code>role="tablist"</code> with <code>role="tab"</code> + <code>aria-selected</code>. Search: <code>role="search"</code> + <code>aria-label="Tìm món ăn"</code>. FAB: <code>aria-label="Tạo món ăn mới"</code> + <code>aria-expanded</code> for menu state. Delete CTA dùng label cụ thể kiểu <code>"Xóa món Phở bò"</code>.</td></tr>
   </table>
 </div>
 

@@ -40,7 +40,7 @@ Tài liệu này mô tả chi tiết **13 features** của HealthMate AI V1, bao
 | Chức năng | Mô tả |
 |-----------|-------|
 | **Xem danh sách** | Hiển thị tất cả nguyên liệu, hỗ trợ tìm kiếm, sắp xếp theo tên/nhóm |
-| **Thêm thủ công** | Form nhập: tên, category, calories/protein/carbs/fat/fiber + nutrition basis (`100g` hoặc `100ml`) + default entry unit (`g` / `ml` / `piece`) |
+| **Thêm thủ công** | Form nhập: tên, category, calories/protein/carbs/fat/fiber + nutrition basis (`100g` hoặc `100ml`) + danh sách unit hợp lệ (`ingredient_unit[]`) + default unit |
 | **Sửa** | Chỉnh sửa thông tin nguyên liệu đã thêm |
 | **Xóa** | Xóa nguyên liệu (confirm dialog nếu đang dùng trong món ăn) |
 | **AI Lookup** | Nhập tên nguyên liệu → AI tra cứu thông tin dinh dưỡng → user confirm |
@@ -60,17 +60,25 @@ Ingredient {
   carbs: number                   // 0
   fat: number                     // 3.6
   fiber: number                   // 0
-  default_entry_unit: 'g' | 'ml' | 'piece'
-  grams_per_unit?: number         // VD trứng gà: 50
-  ml_per_unit?: number
+  density_g_per_ml?: number       // Optional bridge giữa g và ml khi có nguồn đáng tin
+  units: IngredientUnit[]         // Danh sách unit có thể nhập cho ingredient này
   source: 'manual' | 'ai' | 'db' // Nguồn dữ liệu
   created_at: timestamp
   updated_at: timestamp
 }
+
+IngredientUnit {
+  unit_id: string                 // 'g', 'tbsp', 'piece', 'clove'...
+  display_label?: string          // "quả", "tép", "củ"
+  factor_to_basis: number         // 1 unit = ? basis unit của ingredient
+  is_default: boolean
+  is_approximate?: boolean
+}
 ```
 
-> Rule: macro values luôn canonical theo `100g` hoặc `100ml`. `piece` chỉ là entry/display unit có conversion rõ ràng.
+> Rule: macro values luôn canonical theo `100g` hoặc `100ml`. Unit nhập liệu chỉ là layer conversion về canonical basis. Nếu unit khác dimension với basis thì phải có `ingredient_unit.factor_to_basis` hoặc `density_g_per_ml`; nếu không thì reject.
 > Phase 1 cho phép một số `Ingredient` đóng vai trò **composite ingredient** cho nước dùng / nước chấm / base canh nếu cần để giữ seed dataset gọn và nhất quán.
+> Approximate unit (VD `pinch`, `bunch`) được phép trong Phase 1 nhưng UI phải hiển thị dấu `≈` / nhãn `ước lượng`.
 > `Ingredient.source` dùng để phân biệt provenance: seed mặc định = `db`, user tự tạo/sửa ingredient = `manual`, AI lookup tạo ingredient = `ai`. Khi user sửa một seed ingredient, record đó đổi từ `db` sang `manual`. Khi user sửa một AI-lookup ingredient, record đó đổi từ `ai` sang `manual`.
 > **AI Lookup duplicate handling:** Trước khi insert, app kiểm tra tên ingredient trùng/gần giống trong DB. Nếu trùng → cảnh báo user + cho chọn: cập nhật ingredient cũ hoặc tạo mới.
 
@@ -91,8 +99,10 @@ Ingredient {
 | `carbs` | — | 0 | 100 | 0 | g per 100g/ml |
 | `fat` | — | 0 | 100 | 0 | g per 100g/ml |
 | `fiber` | — | 0 | 100 | 0 | g per 100g/ml |
-| `grams_per_unit` | Khi piece | 1 | 5000 | — | Bắt buộc nếu default_entry_unit = piece (solid) |
-| `ml_per_unit` | Khi piece | 1 | 5000 | — | Bắt buộc nếu default_entry_unit = piece (liquid) |
+| `density_g_per_ml` | Optional | 0.001 | 10 | — | Chỉ dùng làm fallback bridge giữa g và ml khi có nguồn đáng tin |
+| `units[]` | ✅ | 1 item | — | — | Phải có ít nhất 1 unit hợp lệ; đúng 1 unit default |
+| `units[].factor_to_basis` | ✅ | 0.001 | 100000 | — | 1 unit = ? basis unit của ingredient |
+| `units[].is_approximate` | — | — | — | false | Nếu true, UI phải hiển thị `≈` / `ước lượng` |
 
 **Ingredient categories chuẩn (Phase 1):**
 
@@ -111,7 +121,7 @@ Ingredient {
 
 | Cách | Mô tả | Khi nào dùng |
 |------|-------|-------------|
-| **Ingredient-based** | Chọn nguyên liệu + nhập số lượng theo unit hợp lệ (`g`, `ml`, `piece`) → tự tính nutrition | Muốn chính xác, tự chọn |
+| **Ingredient-based** | Chọn nguyên liệu + nhập số lượng theo unit hợp lệ của từng ingredient (`g`, `tbsp`, `piece`, `clove`, `pinch`...) → tự tính nutrition | Muốn chính xác, tự chọn |
 | **🤖 AI Auto-fill** | Nhập tên món → bấm AI → AI trả về nguyên liệu + khối lượng thông dụng → User confirm | Muốn chính xác nhưng không biết nguyên liệu |
 
 > **Quick Add đã bị loại bỏ khỏi V1.** Mọi món ăn đều phải có danh sách `dish_ingredient`; total nutrition luôn derived từ ingredient (xem `docs/4-architecture/business-rules.md` — RULE-DISH-TOTAL).
@@ -166,7 +176,7 @@ Dish {
 DishIngredient {
   ingredient_id: string
   amount_value: number               // 150, 2, 300...
-  amount_unit: 'g' | 'ml' | 'piece'
+  unit_id: string                    // 'g', 'tbsp', 'piece', 'clove', ...
   normalized_amount: number          // Đã convert về basis unit của ingredient
   normalized_unit: 'g' | 'ml'
 }

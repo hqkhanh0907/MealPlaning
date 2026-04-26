@@ -10,7 +10,7 @@ export class ProfileStore {
   readonly profile = signal<UserProfile | null>(null);
 
   /** Whether onboarding has been completed */
-  readonly isOnboardingComplete = () => !!this.profile()?.onboarding_completed;
+  readonly isOnboardingComplete = (): boolean => !!this.profile()?.onboarding_completed;
 
   /** Load profile from database. Called once at app startup. */
   async loadProfile(): Promise<void> {

@@ -34,6 +34,10 @@ import { homeOutline, calendarOutline, restaurantOutline, barbellOutline } from 
         --color: var(--ion-tab-bar-color);
         --color-selected: var(--ion-tab-bar-color-selected);
       }
+
+      :host-context(body.edit-overlay-open) ion-tab-bar {
+        display: none;
+      }
     `,
   ],
   imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel],

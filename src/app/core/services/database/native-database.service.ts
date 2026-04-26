@@ -16,9 +16,14 @@ import {
 } from '@capacitor-community/sqlite';
 import { DatabaseService } from './database.service';
 import { SCHEMA_DDL, SCHEMA_VERSION } from './schema';
+import {
+  shouldResetLegacyManagementSchema,
+  type ManagementSchemaSnapshot,
+} from './schema-compatibility';
 import { environment } from '../../../../environments/environment';
+import { MigrationRunner } from './migration-runner';
+import { MIGRATION_REGISTRY } from './migrations';
 
-// Capacitor SQLite requires a non-"-" database filename; strip the `.db` it appends.
 const DB_NAME = environment.dbName.replace(/\.db$/, '');
 const DB_ENCRYPTED = false;
 const DB_MODE = 'no-encryption';
@@ -29,19 +34,18 @@ type SqlParam = Primitive | Uint8Array;
 
 @Injectable()
 export class NativeDatabaseService extends DatabaseService {
-  private readonly sqlite = new SQLiteConnection(CapacitorSQLite);
+  private sqlite = new SQLiteConnection(CapacitorSQLite);
   private db: SQLiteDBConnection | null = null;
   private initPromise: Promise<void> | null = null;
+  private transactionDepth = 0;
 
   override initialize(): Promise<void> {
-    // Cache the in-flight promise so concurrent callers share the same work.
     this.initPromise ??= this.doInitialize();
     return this.initPromise;
   }
 
   private async doInitialize(): Promise<void> {
     try {
-      // A prior connection may still be registered after a soft-reload.
       const isConn = (await this.sqlite.isConnection(DB_NAME, DB_READONLY)).result === true;
       this.db = isConn
         ? await this.sqlite.retrieveConnection(DB_NAME, DB_READONLY)
@@ -54,22 +58,18 @@ export class NativeDatabaseService extends DatabaseService {
           );
 
       await this.db.open();
-
-      // Safe pragmas — FK must be on per-connection; WAL gives better
-      // concurrent read/write on mobile. PRAGMA journal_mode cannot run
-      // inside a transaction, so we disable the implicit transaction wrap.
-      await this.db.execute('PRAGMA foreign_keys = ON;', /* transaction */ false);
+      await this.db.execute('PRAGMA foreign_keys = ON;', false);
       try {
-        await this.db.execute('PRAGMA journal_mode = WAL;', /* transaction */ false);
+        await this.db.execute('PRAGMA journal_mode = WAL;', false);
       } catch (err) {
-        // Non-fatal — some emulators disallow WAL; fall back silently.
         console.warn('[NativeDatabaseService] WAL not enabled:', err);
       }
 
+      await this.resetLegacyManagementSchemaIfNeeded();
       await this.applySchema();
-      await this.applyMigrations();
+      await new MigrationRunner(this, MIGRATION_REGISTRY).run();
     } catch (err) {
-      this.initPromise = null; // allow retry
+      this.initPromise = null;
       console.error('[NativeDatabaseService] initialize failed', err);
       throw new Error(
         `Native database initialization failed: ${err instanceof Error ? err.message : String(err)}`,
@@ -78,7 +78,6 @@ export class NativeDatabaseService extends DatabaseService {
   }
 
   private async applySchema(): Promise<void> {
-    // SCHEMA_DDL uses IF NOT EXISTS so this is idempotent.
     const statements = SCHEMA_DDL.map((ddl) => ({ statement: ddl, values: [] as SqlParam[] }));
     const res = await this.db!.executeSet(statements);
     if ((res.changes?.changes ?? 0) < 0) {
@@ -86,19 +85,63 @@ export class NativeDatabaseService extends DatabaseService {
     }
   }
 
-  private async applyMigrations(): Promise<void> {
-    const [{ user_version = 0 } = { user_version: 0 }] =
-      (await this.db!.query('PRAGMA user_version;')).values ?? [];
-    if (user_version >= SCHEMA_VERSION) return;
+  private async resetLegacyManagementSchemaIfNeeded(): Promise<void> {
+    const snapshot = await this.readManagementSchemaSnapshot();
+    if (!shouldResetLegacyManagementSchema(snapshot)) {
+      return;
+    }
 
-    // Baseline (v1): schema already applied by applySchema(); just stamp version.
-    // Future deltas: add conditional blocks here.
-    await this.db!.execute(`PRAGMA user_version = ${SCHEMA_VERSION};`);
+    console.warn('[NativeDatabaseService] resetting legacy management schema before applying v1');
+    await this.db!.execute('DROP VIEW IF EXISTS dish_with_totals;', false);
+    await this.db!.execute('DROP TABLE IF EXISTS dish_ingredient;', false);
+    await this.db!.execute('DROP TABLE IF EXISTS dish;', false);
+    await this.db!.execute('DROP TABLE IF EXISTS ingredient;', false);
+  }
+
+  private async readManagementSchemaSnapshot(): Promise<ManagementSchemaSnapshot> {
+    const [{ user_version = 0 } = { user_version: 0 }] =
+      await this.query<{ user_version: number }>('PRAGMA user_version;');
+
+    return {
+      userVersion: user_version,
+      ingredientColumns: await this.readTableColumns('ingredient'),
+      dishColumns: await this.readTableColumns('dish'),
+      dishIngredientColumns: await this.readTableColumns('dish_ingredient'),
+    };
+  }
+
+  private async readTableColumns(tableName: string): Promise<string[]> {
+    const rows = await this.query<{ name?: string }>(`PRAGMA table_info(${tableName});`);
+    return rows.map((row) => row.name).filter((name): name is string => typeof name === 'string');
   }
 
   override async execute(sql: string, params?: unknown[]): Promise<void> {
     this.ensureDb();
-    await this.db!.run(sql, (params as SqlParam[]) ?? [], /* transaction */ true);
+    await this.db!.run(sql, (params as SqlParam[]) ?? [], this.transactionDepth === 0);
+  }
+
+  override async withTransaction<T>(callback: () => Promise<T>): Promise<T> {
+    this.ensureDb();
+    const isOuterTransaction = this.transactionDepth === 0;
+    if (isOuterTransaction) {
+      await this.db!.execute('BEGIN TRANSACTION;');
+    }
+
+    this.transactionDepth += 1;
+    try {
+      const result = await callback();
+      this.transactionDepth -= 1;
+      if (isOuterTransaction) {
+        await this.db!.execute('COMMIT;');
+      }
+      return result;
+    } catch (error) {
+      this.transactionDepth = Math.max(0, this.transactionDepth - 1);
+      if (isOuterTransaction) {
+        await this.db!.execute('ROLLBACK;');
+      }
+      throw error;
+    }
   }
 
   override async query<T>(sql: string, params?: unknown[]): Promise<T[]> {

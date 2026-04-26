@@ -21,6 +21,11 @@ export abstract class DatabaseService {
   abstract execute(sql: string, params?: unknown[]): Promise<void>;
 
   /**
+   * Run multiple statements atomically when the underlying engine supports it.
+   */
+  abstract withTransaction<T>(callback: () => Promise<T>): Promise<T>;
+
+  /**
    * Query rows and return them as an array of T.
    * Returns empty array if no rows match.
    */

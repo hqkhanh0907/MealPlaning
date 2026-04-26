@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import initSqlJs, { type Database as SqlJsDatabase } from 'sql.js';
 import { DatabaseService } from './database.service';
-import { SCHEMA_DDL } from './schema';
 import { environment } from '../../../../environments/environment';
+import { MigrationRunner } from './migration-runner';
+import { MIGRATION_REGISTRY } from './migrations';
 
 /**
  * Web implementation of DatabaseService using sql.js (WASM).
@@ -28,11 +29,9 @@ export class WebDatabaseService extends DatabaseService {
         this.db = new SQL.Database();
       }
 
-      // Enable foreign keys and run schema
+      // Enable foreign keys and run schema migrations
       this.db.run('PRAGMA foreign_keys = ON;');
-      for (const ddl of SCHEMA_DDL) {
-        this.db.run(ddl);
-      }
+      await new MigrationRunner(this, MIGRATION_REGISTRY).run();
 
       this.persist();
     } catch (error) {
@@ -47,6 +46,20 @@ export class WebDatabaseService extends DatabaseService {
     this.ensureDb();
     this.db!.run(sql, params as (string | number | null | Uint8Array)[]);
     this.persist();
+  }
+
+  override async withTransaction<T>(callback: () => Promise<T>): Promise<T> {
+    this.ensureDb();
+    this.db!.run('BEGIN');
+    try {
+      const result = await callback();
+      this.db!.run('COMMIT');
+      this.persist();
+      return result;
+    } catch (error) {
+      this.db!.run('ROLLBACK');
+      throw error;
+    }
   }
 
   override async query<T>(sql: string, params?: unknown[]): Promise<T[]> {

@@ -164,7 +164,7 @@
      FILTER CHIPS
      ========================================================================= */
   .filter-chips {
-    display: flex; gap: 8px; overflow-x: auto; margin-bottom: 12px;
+    display: flex; gap: 8px; overflow-x: auto; margin-bottom: 16px;
     padding-bottom: 4px; -webkit-overflow-scrolling: touch;
   }
   .filter-chips::-webkit-scrollbar { display: none; }
@@ -195,13 +195,13 @@
      INGREDIENT CARDS
      ========================================================================= */
   .ingredient-card {
-    padding: 14px 16px; border-radius: 16px; margin-bottom: 12px;
+    padding: 14px 64px 14px 16px; border-radius: 16px; margin-bottom: 12px;
     display: flex; align-items: center; gap: 12px;
     transition: all 0.2s; position: relative;
   }
 
   .card-more-btn {
-    position: absolute; top: 2px; right: 2px;
+    position: absolute; top: 8px; right: 8px;
     width: 44px; height: 44px;
     display: flex; align-items: center; justify-content: center;
     font-size: 18px; line-height: 1; cursor: pointer;
@@ -213,7 +213,7 @@
   body.light .ingredient-card { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
   body.dark  .ingredient-card { background: #1D1F26; }
 
-  .ingredient-info { flex: 1; min-width: 0; }
+  .ingredient-info { flex: 1; min-width: 0; padding-right: 4px; }
 
   .ingredient-name {
     font-size: 14px; font-weight: 500; line-height: 1.4;
@@ -264,7 +264,7 @@
 
   .ingredient-kcal {
     font-size: 12px; font-weight: 400; text-align: right;
-    flex-shrink: 0; white-space: nowrap; font-variant-numeric: tabular-nums;
+    flex-shrink: 0; min-width: 68px; white-space: nowrap; font-variant-numeric: tabular-nums;
   }
   body.light .ingredient-kcal { color: #5F6575; }
   body.dark  .ingredient-kcal { color: #A8AAB4; }
@@ -370,7 +370,7 @@
     padding: 10px 20px; border: none; border-radius: 8px; min-height: 44px;
     font-size: 14px; font-weight: 500; cursor: pointer;
   }
-  .dialog-btn-cancel { background: transparent; }
+  .dialog-btn-cancel { background: transparent; border: 1px solid rgba(95,101,117,0.24); }
   body.light .dialog-btn-cancel { color: #5F6575; }
   body.dark  .dialog-btn-cancel { color: #A8AAB4; }
   .dialog-btn-danger { color: #fff; }
@@ -442,14 +442,14 @@
           <div class="sub-tab">Món ăn</div>
         </div>
         <!-- Search bar -->
-        <div class="search-bar">
+        <div class="search-bar" role="search" aria-label="Tìm nguyên liệu">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text placeholder">Tìm nguyên liệu...</span>
         </div>
 
         <!-- Ingredient cards -->
         <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
+          <button class="card-more-btn" aria-label="Tùy chọn cho Ức gà" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Ức gà</div>
             <div class="ingredient-meta">
@@ -461,7 +461,7 @@
         </div>
 
         <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
+          <button class="card-more-btn" aria-label="Tùy chọn cho Trứng gà" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Trứng gà</div>
             <div class="ingredient-meta">
@@ -473,7 +473,7 @@
         </div>
 
         <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
+          <button class="card-more-btn" aria-label="Tùy chọn cho Cơm trắng" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Cơm trắng</div>
             <div class="ingredient-meta">
@@ -484,7 +484,7 @@
         </div>
 
         <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
+          <button class="card-more-btn" aria-label="Tùy chọn cho Bông cải xanh" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Bông cải xanh</div>
             <div class="ingredient-meta">
@@ -495,7 +495,7 @@
         </div>
 
         <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
+          <button class="card-more-btn" aria-label="Tùy chọn cho Dầu olive" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Dầu olive</div>
             <div class="ingredient-meta">
@@ -507,7 +507,7 @@
         </div>
 
         <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
+          <button class="card-more-btn" aria-label="Tùy chọn cho Nước mắm" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Nước mắm</div>
             <div class="ingredient-meta">
@@ -548,7 +548,7 @@
           <div class="sub-tab">Món ăn</div>
         </div>
         <!-- Search bar — focused, with value -->
-        <div class="search-bar focused">
+        <div class="search-bar focused" role="search" aria-label="Tìm nguyên liệu">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text">gà</span>
           <div class="search-clear" role="button" aria-label="Xóa tìm kiếm"><span class="search-clear-dot">✕</span></div>
@@ -556,7 +556,7 @@
 
         <!-- Filtered results -->
         <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
+          <button class="card-more-btn" aria-label="Tùy chọn cho Ức gà" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Ức gà</div>
             <div class="ingredient-meta">
@@ -568,7 +568,7 @@
         </div>
 
         <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
+          <button class="card-more-btn" aria-label="Tùy chọn cho Trứng gà" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Trứng gà</div>
             <div class="ingredient-meta">
@@ -580,7 +580,7 @@
         </div>
 
         <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
+          <button class="card-more-btn" aria-label="Tùy chọn cho Đùi gà" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Đùi gà</div>
             <div class="ingredient-meta">
@@ -622,7 +622,7 @@
           <div class="sub-tab">Món ăn</div>
         </div>
         <!-- Search bar with query -->
-        <div class="search-bar focused">
+        <div class="search-bar focused" role="search" aria-label="Tìm nguyên liệu">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text">quinoa</span>
           <div class="search-clear" role="button" aria-label="Xóa tìm kiếm"><span class="search-clear-dot">✕</span></div>
@@ -661,7 +661,7 @@
           <div class="sub-tab active">Nguyên liệu</div>
           <div class="sub-tab">Món ăn</div>
         </div>
-        <div class="empty-state" style="padding-top: 100px;">
+        <div class="empty-state" style="padding-top: 88px;">
           <div class="empty-icon">🥗</div>
           <div class="empty-title">Chưa có nguyên liệu nào</div>
           <div class="empty-desc">Bắt đầu thêm nguyên liệu để quản lý dinh dưỡng</div>
@@ -694,7 +694,7 @@
           <div class="sub-tab">Món ăn</div>
         </div>
         <!-- Search bar -->
-        <div class="search-bar">
+        <div class="search-bar" role="search" aria-label="Tìm nguyên liệu">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text placeholder">Tìm nguyên liệu...</span>
         </div>
@@ -727,12 +727,12 @@
 
       <!-- Dialog overlay -->
       <div class="dialog-overlay" role="presentation">
-        <div class="dialog-box" role="alertdialog" aria-modal="true">
-          <div class="dialog-title">Không thể xóa</div>
-          <div class="dialog-message"><strong>Ức gà</strong> đang được sử dụng trong <strong>3 món ăn</strong>. Hãy xóa khỏi các món trước khi xóa nguyên liệu này.</div>
-          <div class="dialog-actions" style="justify-content: space-between;">
+        <div class="dialog-box" role="alertdialog" aria-modal="true" aria-labelledby="ingredient-blocked-title" aria-describedby="ingredient-blocked-message">
+          <div class="dialog-title" id="ingredient-blocked-title">Không thể xóa</div>
+          <div class="dialog-message" id="ingredient-blocked-message"><strong>Ức gà</strong> đang được sử dụng trong <strong>3 món ăn</strong>. Hãy xóa khỏi các món trước khi xóa nguyên liệu này.</div>
+          <div class="dialog-actions" style="justify-content: space-between; gap: 16px;">
             <button class="dialog-btn dialog-btn-cancel">Đóng</button>
-            <button class="dialog-btn dialog-btn-primary">Xem 3 món đang dùng</button>
+            <button class="dialog-btn dialog-btn-primary" aria-label="Xem 3 món đang dùng Ức gà">Xem 3 món đang dùng</button>
           </div>
         </div>
       </div>
@@ -763,7 +763,7 @@
           <div class="sub-tab active">Nguyên liệu</div>
           <div class="sub-tab">Món ăn</div>
         </div>
-        <div class="search-bar">
+        <div class="search-bar" role="search" aria-label="Tìm nguyên liệu">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text placeholder">Tìm nguyên liệu...</span>
         </div>
@@ -786,12 +786,12 @@
       </div>
       <!-- Dialog overlay — normal delete confirm -->
       <div class="dialog-overlay" role="presentation">
-        <div class="dialog-box" role="alertdialog" aria-modal="true">
-          <div class="dialog-title">Xóa nguyên liệu?</div>
-          <div class="dialog-message">Bạn có chắc muốn xóa <strong>Hạt chia</strong>? Thao tác này không thể hoàn tác.</div>
+        <div class="dialog-box" role="alertdialog" aria-modal="true" aria-labelledby="ingredient-delete-title" aria-describedby="ingredient-delete-message">
+          <div class="dialog-title" id="ingredient-delete-title">Xóa nguyên liệu?</div>
+          <div class="dialog-message" id="ingredient-delete-message">Bạn có chắc muốn xóa <strong>Hạt chia</strong>? Thao tác này không thể hoàn tác.</div>
           <div class="dialog-actions">
             <button class="dialog-btn dialog-btn-cancel">Giữ lại</button>
-            <button class="dialog-btn dialog-btn-danger">Xóa</button>
+            <button class="dialog-btn dialog-btn-danger" aria-label="Xóa nguyên liệu Hạt chia">Xóa</button>
           </div>
         </div>
       </div>
@@ -822,26 +822,26 @@
           <div class="sub-tab">Món ăn</div>
         </div>
         <!-- Search bar -->
-        <div class="search-bar">
+        <div class="search-bar" role="search" aria-label="Tìm nguyên liệu">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text placeholder">Tìm nguyên liệu...</span>
         </div>
 
         <!-- Filter chips -->
-        <div class="filter-chips-wrapper"><div class="filter-chips">
-          <div class="filter-chip">Tất cả</div>
-          <div class="filter-chip">Thịt</div>
-          <div class="filter-chip">Cá & Hải sản</div>
-          <div class="filter-chip active">Rau củ</div>
-          <div class="filter-chip">Trứng & Sữa</div>
-          <div class="filter-chip">Ngũ cốc</div>
-          <div class="filter-chip">Đậu & Hạt</div>
-          <div class="filter-chip">Gia vị</div>
+        <div class="filter-chips-wrapper"><div class="filter-chips" role="group" aria-label="Lọc theo nhóm nguyên liệu">
+          <button class="filter-chip" type="button" aria-pressed="false">Tất cả</button>
+          <button class="filter-chip" type="button" aria-pressed="false">Thịt</button>
+          <button class="filter-chip" type="button" aria-pressed="false">Cá & Hải sản</button>
+          <button class="filter-chip active" type="button" aria-pressed="true">Rau củ</button>
+          <button class="filter-chip" type="button" aria-pressed="false">Trứng & Sữa</button>
+          <button class="filter-chip" type="button" aria-pressed="false">Ngũ cốc</button>
+          <button class="filter-chip" type="button" aria-pressed="false">Đậu & Hạt</button>
+          <button class="filter-chip" type="button" aria-pressed="false">Gia vị</button>
         </div></div>
 
         <!-- Filtered list — Rau củ only -->
         <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
+          <button class="card-more-btn" aria-label="Tùy chọn cho Bông cải xanh" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Bông cải xanh</div>
             <div class="ingredient-meta">
@@ -852,7 +852,7 @@
         </div>
 
         <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
+          <button class="card-more-btn" aria-label="Tùy chọn cho Cà chua" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Cà chua</div>
             <div class="ingredient-meta">
@@ -863,7 +863,7 @@
         </div>
 
         <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
+          <button class="card-more-btn" aria-label="Tùy chọn cho Cà rốt" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Cà rốt</div>
             <div class="ingredient-meta">
@@ -874,7 +874,7 @@
         </div>
 
         <div class="ingredient-card">
-          <button class="card-more-btn" aria-label="Thêm tùy chọn">⋮</button>
+          <button class="card-more-btn" aria-label="Tùy chọn cho Rau bina" aria-haspopup="menu" aria-expanded="false">⋮</button>
           <div class="ingredient-info">
             <div class="ingredient-name">Rau bina</div>
             <div class="ingredient-meta">
@@ -946,7 +946,7 @@
     <tr><td>Easing — sheet</td><td><code>cubic-bezier(0.32, 0.72, 0, 1)</code> 300ms</td><td>Bottom sheet / popover menu open. Exit: 225ms (75%)</td></tr>
     <tr><td>Tabular numbers</td><td><code>font-variant-numeric: tabular-nums</code></td><td>All numeric values (kcal, macro g) for consistent column alignment</td></tr>
     <tr><td colspan="3"><strong>⚠️ Icon placeholders:</strong> Tab bar emojis (🏠📅🍳💪) and empty state emojis (🥗🔍) are mockup placeholders. Implementation uses <code>IonIcon</code> from Ionicons: <code>home-outline</code>, <code>calendar-outline</code>, <code>restaurant-outline</code>, <code>fitness-outline</code>. Empty states use themed SVG illustrations.</td></tr>
-    <tr><td colspan="3"><strong>♿ Accessibility:</strong> Delete dialog: <code>role="alertdialog"</code> + <code>aria-modal="true"</code> + <code>aria-labelledby</code>. ⋮ menu: <code>aria-haspopup="menu"</code> + <code>aria-expanded</code>. Filter chips: <code>role="radiogroup"</code> with <code>aria-checked</code>. Search: <code>role="search"</code> + <code>aria-label="Tìm nguyên liệu"</code>. List: <code>role="list"</code> with <code>role="listitem"</code>.</td></tr>
+    <tr><td colspan="3"><strong>♿ Accessibility:</strong> Delete dialog: <code>role="alertdialog"</code> + <code>aria-modal="true"</code> + <code>aria-labelledby</code> + <code>aria-describedby</code>. ⋮ menu: dynamic <code>aria-label="Tùy chọn cho [tên nguyên liệu]"</code> + <code>aria-haspopup="menu"</code> + <code>aria-expanded</code>. Filter chips dùng <code>button</code> + <code>aria-pressed</code> để thể hiện trạng thái active. Search: <code>role="search"</code> + <code>aria-label="Tìm nguyên liệu"</code>. List: <code>role="list"</code> with <code>role="listitem"</code>. Delete CTA dùng label cụ thể kiểu <code>"Xóa nguyên liệu Hạt chia"</code>.</td></tr>
   </table>
 </div>
 

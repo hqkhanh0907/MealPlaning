@@ -12,7 +12,7 @@
  * Source: docs/3-design/data-model.md
  */
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 3;
 
 /**
  * Array of DDL statements. Each string is a single CREATE TABLE / CREATE INDEX.
@@ -331,6 +331,227 @@ export const SCHEMA_DDL: string[] = [
     updated_at        TEXT NOT NULL DEFAULT (datetime('now'))
   )`,
 
-  // Seed db_version if not exists
-  `INSERT OR IGNORE INTO app_config (key, value) VALUES ('db_version', '1')`,
+  `CREATE INDEX IF NOT EXISTS idx_app_config_key ON app_config(key)`,
 ];
+
+export function buildInitialSchemaMigration(): { version: number; statements: readonly string[] } {
+  return {
+    version: 1,
+    statements: SCHEMA_DDL,
+  };
+}
+
+export const NUTRITION_UNITS_MIGRATION_DDL: readonly string[] = [
+  `CREATE TABLE IF NOT EXISTS unit (
+    id              TEXT PRIMARY KEY,
+    display_name_vi TEXT NOT NULL,
+    display_name_en TEXT NOT NULL,
+    short_name_vi   TEXT NOT NULL,
+    unit_type       TEXT NOT NULL CHECK (unit_type IN ('mass', 'volume', 'count', 'cooking')),
+    is_global       INTEGER NOT NULL DEFAULT 1,
+    base_factor_g   REAL,
+    base_factor_ml  REAL,
+    is_approximate  INTEGER NOT NULL DEFAULT 0,
+    display_order   INTEGER NOT NULL DEFAULT 0
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_unit_type ON unit(unit_type)`,
+  `CREATE TABLE IF NOT EXISTS ingredient_unit (
+    ingredient_id   TEXT NOT NULL REFERENCES ingredient(id) ON DELETE CASCADE,
+    unit_id         TEXT NOT NULL REFERENCES unit(id),
+    factor_to_basis REAL NOT NULL,
+    is_default      INTEGER NOT NULL DEFAULT 0,
+    display_label   TEXT,
+    PRIMARY KEY (ingredient_id, unit_id)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_ingredient_unit_ingredient ON ingredient_unit(ingredient_id)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_ingredient_unit_default ON ingredient_unit(ingredient_id) WHERE is_default = 1`,
+  `ALTER TABLE ingredient ADD COLUMN density_g_per_ml REAL`,
+  `ALTER TABLE dish ADD COLUMN source TEXT NOT NULL DEFAULT 'custom' CHECK (source IN ('db', 'custom', 'ai'))`,
+  `ALTER TABLE dish_ingredient ADD COLUMN unit_id TEXT REFERENCES unit(id)`,
+  `INSERT OR IGNORE INTO unit (id, display_name_vi, display_name_en, short_name_vi, unit_type, is_global, base_factor_g, base_factor_ml, is_approximate, display_order) VALUES
+    ('g', 'gram', 'gram', 'g', 'mass', 1, 1, NULL, 0, 1),
+    ('kg', 'kilogram', 'kilogram', 'kg', 'mass', 1, 1000, NULL, 0, 2),
+    ('ml', 'mililit', 'milliliter', 'ml', 'volume', 1, NULL, 1, 0, 3),
+    ('l', 'lít', 'liter', 'l', 'volume', 1, NULL, 1000, 0, 4),
+    ('tbsp', 'muỗng canh', 'tablespoon', 'tbsp', 'volume', 1, NULL, 15, 0, 5),
+    ('tsp', 'muỗng cà phê', 'teaspoon', 'tsp', 'volume', 1, NULL, 5, 0, 6),
+    ('cup', 'cốc', 'cup', 'cốc', 'volume', 1, NULL, 240, 0, 7),
+    ('piece', 'cái', 'piece', 'cái', 'count', 0, NULL, NULL, 0, 8),
+    ('clove', 'tép', 'clove', 'tép', 'count', 0, NULL, NULL, 0, 9),
+    ('bunch', 'bó', 'bunch', 'bó', 'count', 0, NULL, NULL, 0, 10),
+    ('slice', 'lát', 'slice', 'lát', 'count', 0, NULL, NULL, 0, 11),
+    ('pinch', 'nhúm', 'pinch', 'nhúm', 'cooking', 0, NULL, NULL, 1, 12)`,
+  `UPDATE dish
+   SET source = CASE WHEN type = 'ai_autofill' THEN 'ai' ELSE 'custom' END
+   WHERE source IS NULL OR source = ''`,
+  `UPDATE dish_ingredient
+   SET unit_id = CASE amount_unit
+      WHEN 'g' THEN 'g'
+      WHEN 'ml' THEN 'ml'
+      WHEN 'piece' THEN 'piece'
+      ELSE unit_id
+   END
+   WHERE unit_id IS NULL`,
+  `INSERT OR IGNORE INTO ingredient_unit (ingredient_id, unit_id, factor_to_basis, is_default, display_label)
+   SELECT id, 'g', 1,
+          CASE WHEN default_entry_unit = 'g' THEN 1 ELSE 0 END,
+          NULL
+   FROM ingredient
+   WHERE nutrition_basis_unit = 'g'`,
+  `INSERT OR IGNORE INTO ingredient_unit (ingredient_id, unit_id, factor_to_basis, is_default, display_label)
+   SELECT id, 'ml', 1,
+          CASE WHEN default_entry_unit = 'ml' THEN 1 ELSE 0 END,
+          NULL
+   FROM ingredient
+   WHERE nutrition_basis_unit = 'ml'`,
+  `INSERT OR IGNORE INTO ingredient_unit (ingredient_id, unit_id, factor_to_basis, is_default, display_label)
+   SELECT id, 'piece',
+          CASE
+            WHEN nutrition_basis_unit = 'g' THEN COALESCE(grams_per_unit, 1)
+            WHEN nutrition_basis_unit = 'ml' THEN COALESCE(ml_per_unit, 1)
+            ELSE 1
+          END,
+          CASE WHEN default_entry_unit = 'piece' THEN 1 ELSE 0 END,
+          NULL
+   FROM ingredient
+   WHERE grams_per_unit IS NOT NULL OR ml_per_unit IS NOT NULL`,
+  `UPDATE ingredient
+   SET density_g_per_ml = NULL
+   WHERE density_g_per_ml IS NULL`,
+  `DROP VIEW IF EXISTS dish_with_totals`,
+  `CREATE VIEW IF NOT EXISTS dish_with_totals AS
+    SELECT
+      d.id,
+      d.name,
+      d.description,
+      d.type,
+      d.source,
+      d.servings,
+      d.image_url,
+      d.created_at,
+      d.updated_at,
+      COALESCE(SUM(i.calories * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_calories,
+      COALESCE(SUM(i.protein  * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_protein,
+      COALESCE(SUM(i.carbs    * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_carbs,
+      COALESCE(SUM(i.fat      * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_fat,
+      COALESCE(SUM(i.fiber    * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_fiber
+    FROM dish d
+    LEFT JOIN dish_ingredient di ON di.dish_id = d.id
+    LEFT JOIN ingredient i ON i.id = di.ingredient_id
+    GROUP BY d.id`,
+];
+
+export function buildNutritionUnitsMigration(): { version: number; statements: readonly string[] } {
+  return {
+    version: 2,
+    statements: NUTRITION_UNITS_MIGRATION_DDL,
+  };
+}
+
+export const NUTRITION_SCHEMA_FINALIZATION_MIGRATION_DDL: readonly string[] = [
+  `PRAGMA foreign_keys = OFF`,
+  `DROP VIEW IF EXISTS dish_with_totals`,
+  `CREATE TABLE IF NOT EXISTS ingredient_v3 (
+    id                TEXT PRIMARY KEY,
+    name              TEXT NOT NULL,
+    category          TEXT NOT NULL CHECK (category IN (
+                        'Thịt', 'Cá & Hải sản', 'Trứng & Sữa', 'Rau củ',
+                        'Ngũ cốc & Tinh bột', 'Đậu & Hạt', 'Dầu & Mỡ',
+                        'Gia vị', 'Nước dùng & Nước chấm', 'Trái cây', 'Khác'
+                      )),
+    nutrition_basis_unit     TEXT NOT NULL CHECK (nutrition_basis_unit IN ('g', 'ml')),
+    nutrition_basis_quantity REAL NOT NULL DEFAULT 100,
+    calories          REAL NOT NULL,
+    protein           REAL NOT NULL DEFAULT 0,
+    carbs             REAL NOT NULL DEFAULT 0,
+    fat               REAL NOT NULL DEFAULT 0,
+    fiber             REAL NOT NULL DEFAULT 0,
+    density_g_per_ml  REAL,
+    source            TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('manual', 'ai', 'db')),
+    created_at        TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at        TEXT
+  )`,
+  `INSERT INTO ingredient_v3 (
+    id, name, category, nutrition_basis_unit, nutrition_basis_quantity,
+    calories, protein, carbs, fat, fiber, density_g_per_ml, source, created_at, updated_at
+  )
+  SELECT
+    id, name, category, nutrition_basis_unit, nutrition_basis_quantity,
+    calories, protein, carbs, fat, fiber, density_g_per_ml, source, created_at, updated_at
+  FROM ingredient`,
+  `CREATE TABLE IF NOT EXISTS ingredient_unit_v3 (
+    ingredient_id   TEXT NOT NULL REFERENCES ingredient(id) ON DELETE CASCADE,
+    unit_id         TEXT NOT NULL REFERENCES unit(id),
+    factor_to_basis REAL NOT NULL,
+    is_default      INTEGER NOT NULL DEFAULT 0,
+    display_label   TEXT,
+    PRIMARY KEY (ingredient_id, unit_id)
+  )`,
+  `INSERT INTO ingredient_unit_v3 (ingredient_id, unit_id, factor_to_basis, is_default, display_label)
+   SELECT ingredient_id, unit_id, factor_to_basis, is_default, display_label
+   FROM ingredient_unit`,
+  `CREATE TABLE IF NOT EXISTS dish_ingredient_v3 (
+    id                TEXT PRIMARY KEY,
+    dish_id           TEXT NOT NULL REFERENCES dish(id) ON DELETE CASCADE,
+    ingredient_id     TEXT NOT NULL REFERENCES ingredient(id) ON DELETE RESTRICT,
+    amount_value      REAL NOT NULL,
+    unit_id           TEXT NOT NULL REFERENCES unit(id),
+    normalized_amount REAL NOT NULL,
+    UNIQUE(dish_id, ingredient_id)
+  )`,
+  `INSERT INTO dish_ingredient_v3 (
+    id, dish_id, ingredient_id, amount_value, unit_id, normalized_amount
+  )
+  SELECT
+    id,
+    dish_id,
+    ingredient_id,
+    amount_value,
+    COALESCE(unit_id, CASE amount_unit
+      WHEN 'g' THEN 'g'
+      WHEN 'ml' THEN 'ml'
+      WHEN 'piece' THEN 'piece'
+      ELSE 'g'
+    END),
+    normalized_amount
+  FROM dish_ingredient`,
+  `DROP TABLE ingredient_unit`,
+  `DROP TABLE dish_ingredient`,
+  `DROP TABLE ingredient`,
+  `ALTER TABLE ingredient_v3 RENAME TO ingredient`,
+  `ALTER TABLE ingredient_unit_v3 RENAME TO ingredient_unit`,
+  `ALTER TABLE dish_ingredient_v3 RENAME TO dish_ingredient`,
+  `CREATE INDEX IF NOT EXISTS idx_ingredient_name ON ingredient(name)`,
+  `CREATE INDEX IF NOT EXISTS idx_ingredient_category ON ingredient(category)`,
+  `CREATE INDEX IF NOT EXISTS idx_ingredient_unit_ingredient ON ingredient_unit(ingredient_id)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_ingredient_unit_default ON ingredient_unit(ingredient_id) WHERE is_default = 1`,
+  `CREATE INDEX IF NOT EXISTS idx_dish_ingredient_dish ON dish_ingredient(dish_id)`,
+  `CREATE VIEW IF NOT EXISTS dish_with_totals AS
+    SELECT
+      d.id,
+      d.name,
+      d.description,
+      d.type,
+      d.source,
+      d.servings,
+      d.image_url,
+      d.created_at,
+      d.updated_at,
+      COALESCE(SUM(i.calories * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_calories,
+      COALESCE(SUM(i.protein  * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_protein,
+      COALESCE(SUM(i.carbs    * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_carbs,
+      COALESCE(SUM(i.fat      * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_fat,
+      COALESCE(SUM(i.fiber    * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_fiber
+    FROM dish d
+    LEFT JOIN dish_ingredient di ON di.dish_id = d.id
+    LEFT JOIN ingredient i ON i.id = di.ingredient_id
+    GROUP BY d.id`,
+  `PRAGMA foreign_keys = ON`,
+];
+
+export function buildNutritionSchemaFinalizationMigration(): { version: number; statements: readonly string[] } {
+  return {
+    version: 3,
+    statements: NUTRITION_SCHEMA_FINALIZATION_MIGRATION_DDL,
+  };
+}

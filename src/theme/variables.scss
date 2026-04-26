@@ -95,6 +95,15 @@
   // App-specific Custom Properties (DS §2–§8)
   // ==========================================================================
 
+  // Z-index scale (DS §12)
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-fab: 20;
+  --z-sheet: 30;
+  --z-scrim: 40;
+  --z-dialog: 50;
+  --z-toast: 60;
+
   // Primary Scale
   --primary-900: #0d47a1;
   --primary-800: #1565c0;

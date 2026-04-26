@@ -22,31 +22,16 @@ import {
   checkmark,
 } from 'ionicons/icons';
 import { ProfileStore } from '../../core/stores/profile.store';
-import { UserProfile } from '../../core/models/user-profile.model';
-
-type Goal = UserProfile['goal'];
-type Gender = UserProfile['gender'];
-type FitnessLevel = UserProfile['fitness_level'];
-
-/** Gym experience options mapped to fitness_level + activity_factor */
-export type GymExperience = 'never' | 'under_6m' | '6m_2y' | 'over_2y';
-
-export const GYM_TO_LEVEL: Record<GymExperience, FitnessLevel> = {
-  never: 'beginner',
-  under_6m: 'beginner',
-  '6m_2y': 'intermediate',
-  over_2y: 'advanced',
-};
-
-/** Activity level options for TDEE calculation (independent of gym experience) */
-export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'heavy';
-
-export const ACTIVITY_FACTOR: Record<ActivityLevel, number> = {
-  sedentary: 1.2,
-  light: 1.375,
-  moderate: 1.55,
-  heavy: 1.725,
-};
+import { ActivityLevel, Gender, Goal, GymExperience } from '../../core/models/user-profile.types';
+import {
+  calculateBmr,
+  calculateTargetCalories,
+  calculateTargetProtein,
+  calculateTdee,
+  deriveFitnessLevel,
+  getActivityFactor,
+} from './onboarding-calculation';
+import { EMPTY_2A, EMPTY_2B, Step2aErrors, Step2bErrors, validateStep2a, validateStep2b } from './onboarding-validation';
 
 export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
   sedentary: 'Ít vận động (ngồi nhiều)',
@@ -54,37 +39,6 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
   moderate: 'Trung bình (3-5 ngày/tuần)',
   heavy: 'Nặng (6-7 ngày/tuần)',
 };
-
-export const PROTEIN_MULTIPLIER: Record<Goal, number> = {
-  lose_weight: 2.2,
-  gain_muscle: 2.2,
-  maintain: 1.6,
-  performance: 2.0,
-};
-
-export const CALORIE_ADJUSTMENT: Record<Goal, number> = {
-  lose_weight: -500,
-  gain_muscle: 300,
-  maintain: 0,
-  performance: 200,
-};
-
-/** Per-field error state for Step 2a (body info) */
-interface Step2aErrors {
-  heightCm: string;
-  weightKg: string;
-  age: string;
-  gender: string;
-}
-
-/** Per-field error state for Step 2b (activity info) */
-interface Step2bErrors {
-  activityLevel: string;
-  gymExperience: string;
-}
-
-const EMPTY_2A: Step2aErrors = { heightCm: '', weightKg: '', age: '', gender: '' };
-const EMPTY_2B: Step2bErrors = { activityLevel: '', gymExperience: '' };
 
 @Component({
   selector: 'app-onboarding',
@@ -901,7 +855,12 @@ export default class OnboardingPage {
 
   /** Step 2a → Step 2b (validate body info first) */
   nextFromStep2a(): void {
-    const errors = this.validateStep2a();
+    const errors = validateStep2a({
+      heightCm: this.heightCm(),
+      weightKg: this.weightKg(),
+      age: this.age(),
+      gender: this.gender(),
+    });
     this.step2aErrors.set(errors);
     if (Object.values(errors).some((e) => e !== '')) {
       this.focusFirstInvalidField2a(errors);
@@ -922,7 +881,10 @@ export default class OnboardingPage {
   }
 
   async complete(): Promise<void> {
-    const errors = this.validateStep2b();
+    const errors = validateStep2b({
+      activityLevel: this.activityLevel(),
+      gymExperience: this.gymExperience(),
+    });
     this.step2bErrors.set(errors);
     if (Object.values(errors).some((e) => e !== '')) {
       this.focusFirstInvalidField2b(errors);
@@ -939,14 +901,12 @@ export default class OnboardingPage {
       const weightKg = this.weightKg()!;
       const age = this.age()!;
       const gym = this.gymExperience()!;
-      const fitnessLevel = GYM_TO_LEVEL[gym];
-      const activityFactor = ACTIVITY_FACTOR[this.activityLevel()!];
-
-      // Mifflin-St Jeor formula
-      const bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + (gender === 'male' ? 5 : -161);
-      const tdee = Math.round(bmr * activityFactor);
-      const targetCalories = Math.round(tdee + CALORIE_ADJUSTMENT[goal]);
-      const targetProtein = Math.round(weightKg * PROTEIN_MULTIPLIER[goal]);
+      const activityLevel = this.activityLevel()!;
+      const fitnessLevel = deriveFitnessLevel(gym);
+      const bmr = calculateBmr({ weightKg, heightCm, age, gender });
+      const tdee = calculateTdee(bmr, activityLevel);
+      const targetCalories = calculateTargetCalories(tdee, goal);
+      const targetProtein = calculateTargetProtein(weightKg, goal);
 
       await this.profileStore.saveOnboardingProfile({
         height_cm: heightCm,
@@ -955,8 +915,8 @@ export default class OnboardingPage {
         gender,
         goal,
         fitness_level: fitnessLevel,
-        activity_factor: activityFactor,
-        bmr: Math.round(bmr),
+        activity_factor: getActivityFactor(activityLevel),
+        bmr,
         tdee,
         target_calories: targetCalories,
         target_protein: targetProtein,
@@ -976,33 +936,6 @@ export default class OnboardingPage {
     } finally {
       this.saving.set(false);
     }
-  }
-
-  // ===========================================================================
-  // VALIDATION
-  // ===========================================================================
-
-  private validateStep2a(): Step2aErrors {
-    const errors: Step2aErrors = { ...EMPTY_2A };
-    const h = this.heightCm();
-    const w = this.weightKg();
-    const a = this.age();
-
-    if (!h || h < 130 || h > 250) errors.heightCm = 'Chiều cao phải từ 130–250 cm';
-    if (!w || w < 30 || w > 200) errors.weightKg = 'Cân nặng phải từ 30–200 kg';
-    if (!a || a < 13 || a > 120) errors.age = 'Tuổi phải từ 13–120';
-    if (!this.gender()) errors.gender = 'Vui lòng chọn giới tính';
-
-    return errors;
-  }
-
-  private validateStep2b(): Step2bErrors {
-    const errors: Step2bErrors = { ...EMPTY_2B };
-
-    if (!this.activityLevel()) errors.activityLevel = 'Vui lòng chọn mức vận động';
-    if (!this.gymExperience()) errors.gymExperience = 'Vui lòng chọn kinh nghiệm gym';
-
-    return errors;
   }
 
   // ===========================================================================

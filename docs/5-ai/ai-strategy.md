@@ -100,7 +100,8 @@ Trả JSON theo schema:
         {
           "name": string,      // Tên nguyên liệu (match DB nếu có)
           "amount_value": number,
-          "amount_unit": "g" | "ml" | "piece",
+          "unit_id": string,
+          "display_unit": string,   // Ví dụ: "g", "ml", "quả", "muỗng canh"
           "is_in_db": boolean  // true nếu match được với DB
         }
       ],
@@ -151,7 +152,8 @@ Trả JSON:
     {
       "name": string,          // Ưu tiên match DB
       "amount_value": number,
-      "amount_unit": "g" | "ml" | "piece",
+      "unit_id": string,
+      "display_unit": string,  // Ví dụ: "g", "ml", "quả", "muỗng canh"
       "is_in_db": boolean
     }
   ]
@@ -428,7 +430,13 @@ Tra cứu thông tin dinh dưỡng canonical cho nguyên liệu "{ingredient_nam
 Rules về basis:
 - Nguyên liệu rắn: trả nutrition theo `100g`
 - Nguyên liệu lỏng: trả nutrition theo `100ml`
-- `piece` chỉ được dùng làm default entry unit nếu có conversion rõ ràng sang `g` hoặc `ml`
+- Mỗi ingredient chỉ có 1 nutrition basis authoritative
+- AI phải trả danh sách `units[]` có thể nhập cho ingredient
+- Nếu có unit khác dimension với basis:
+  - ưu tiên factor curated trong `ingredient_unit`
+  - nếu không có thì mới dùng `density_g_per_ml`
+  - nếu vẫn không có thì không được bịa; loại unit đó khỏi output hoặc giảm confidence
+- Unit ước lượng (`pinch`, `bunch`, ...) được phép nếu có factor rõ ràng; phải gắn cờ approximate
 
 Trả JSON:
 {
@@ -441,9 +449,16 @@ Trả JSON:
   "carbs": number,
   "fat": number,
   "fiber": number,
-  "default_entry_unit": "g" | "ml" | "piece",
-  "grams_per_unit": number | null,
-  "ml_per_unit": number | null,
+  "density_g_per_ml": number | null,
+  "units": [
+    {
+      "unit_id": string,
+      "display_label": string | null,
+      "factor_to_basis": number,
+      "is_default": boolean,
+      "is_approximate": boolean
+    }
+  ],
   "confidence": "high" | "medium" | "low",  // Độ tin cậy của AI
   "note": string               // Ghi chú nếu cần (VD: "đã nấu chín", "raw")
 }
@@ -452,7 +467,8 @@ Rules:
 - Nếu tên mơ hồ (VD "thịt") → confidence: "low" + note yêu cầu rõ
 - Phase 1 ưu tiên USDA làm nutrition authority chính ở mức ingredient-level
 - Nguồn phụ tiếng Việt chỉ dùng để hỗ trợ naming/alias hoặc fill gap sau khi review thủ công
-- Nếu không xác định chắc conversion cho `piece` → default_entry_unit phải là `g` hoặc `ml`
+- Không được bịa `density_g_per_ml` hoặc `factor_to_basis`
+- Nếu không xác định chắc conversion cho một unit → bỏ unit đó khỏi `units[]` hoặc hạ confidence
 - KHÔNG được bịa số — nếu không chắc, confidence: "low"
 ```
 

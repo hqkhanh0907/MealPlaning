@@ -58,3 +58,145 @@ ion-radio::part(mark) {
     border-color: #5f6575;
   }
 }
+
+app-management .fab {
+  position: fixed;
+  right: 16px;
+  bottom: 72px;
+  z-index: var(--z-fab);
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--ion-color-secondary);
+  color: var(--ion-color-secondary-contrast);
+  box-shadow: var(--shadow-xl);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+app-management .fab ion-icon {
+  font-size: 24px;
+}
+
+app-management .fab-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sheet);
+  background: rgba(18, 18, 24, 0.16);
+}
+
+app-management .fab-menu {
+  position: fixed;
+  right: 16px;
+  bottom: 136px;
+  z-index: var(--z-scrim);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(280px, calc(100vw - 32px));
+}
+
+app-management .fab-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  text-align: left;
+  box-shadow: var(--shadow-md);
+}
+
+app-management .fab-menu-item--primary .fab-menu-label {
+  font-weight: 600;
+}
+
+app-management .fab-menu-icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+app-management .fab-menu-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+app-management .fab-menu-label {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+app-management .fab-menu-sublabel {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}
+
+app-management .options-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sheet);
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+  background: rgba(18, 18, 24, 0.32);
+}
+
+app-management .options-sheet {
+  width: min(100%, 343px);
+  margin: 0 auto;
+  padding: 16px;
+  border-radius: var(--radius-xl) var(--radius-xl) 16px 16px;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-lg);
+}
+
+app-management .options-sheet h2 {
+  margin: 0 0 12px;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+app-management .options-sheet__action,
+app-management .options-sheet__cancel {
+  width: 100%;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+app-management .options-sheet__action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-primary);
+}
+
+app-management .options-sheet__action--danger {
+  color: var(--ion-color-danger);
+  border-color: rgba(244, 67, 54, 0.24);
+}
+
+app-management .options-sheet__cancel {
+  margin-top: 4px;
+  border: 1px solid rgba(95, 101, 117, 0.24);
+  background: transparent;
+  color: var(--text-secondary);
+}
