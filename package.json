@@ -10,6 +10,7 @@
     "check:form-pattern": "node scripts/check-form-input-pattern.mjs",
     "seed:build": "tsx scripts/seed/build.ts",
     "seed:typecheck": "tsc -p tsconfig.seed.json",
+    "seed:test": "node --import tsx --test scripts/seed/__tests__/*.test.ts",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",

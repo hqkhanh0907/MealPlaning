@@ -1,6 +1,26 @@
 # Citation source: Wikipedia Vietnamese (and other open sources)
 
-Used as a fallback when Bảng thành phần dinh dưỡng thực phẩm Việt Nam (VDDT)
+## Anchors used by `vi-ingredients.ts`
+
+- `#nuoc-mam` — Nước mắm (fish sauce, ~35°N grade), macro avg.
+- `#muoi` — Muối (table salt).
+- `#duong` — Đường trắng (granulated sugar).
+- `#dau-an` — Dầu ăn thực vật (generic blended cooking oil).
+- `#hanh-tim` — Hành tím (shallot, raw).
+- `#hanh-la` — Hành lá (scallion / green onion, raw).
+- `#toi` — Tỏi (garlic, raw).
+- `#gung` — Gừng (ginger root, raw).
+- `#sa` — Sả (lemongrass, raw stalk).
+- `#ot` — Ớt tươi (fresh chili pepper, mixed cultivars).
+- `#tieu` — Tiêu đen xay (ground black pepper).
+- `#bot-ngot` — Bột ngọt (MSG, monosodium glutamate).
+- `#uc-ga` — Ức gà sống (raw chicken breast).
+- `#banh-pho` — Bánh phở tươi (fresh phở rice noodles).
+
+Each anchor must reference the relevant Wikipedia VI page or, where Wikipedia
+lacks per-100 data, fall back to USDA FoodData Central / standard reference
+values. Refine entries marked `is_approximate: true` whenever a primary VN
+source becomes available.
 does not list per-100 g/ml macro for an ingredient, or for items not in the
 Vietnamese food composition table (e.g. internationally common ingredients).
 

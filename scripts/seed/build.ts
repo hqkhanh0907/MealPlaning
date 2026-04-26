@@ -1,26 +1,34 @@
 /**
  * Phase 1 §5.2 — Seed build orchestrator.
  *
- * In §5.2.1 this script just smoke-tests that the curated TS modules load
- * cleanly and reports the inventory. Real emission to JSON happens in
- * §5.2.2 (build-ingredients), §5.2.3 (build-composites), §5.2.4 (build-dishes
- * + validate-seed).
+ * Steps wired so far:
+ *   §5.2.2 build-ingredients.ts    — atomic ingredients + ingredient_units
+ *   §5.2.3 build-composites.ts     — TODO
+ *   §5.2.4 build-dishes.ts         — TODO
+ *   §5.2.4 validate-seed.ts        — TODO
+ *
+ * Output: src/assets/seed/*.json (committed to repo).
  */
-import { VI_INGREDIENTS } from './curated/vi-ingredients';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { buildIngredientsToDisk } from './build-ingredients';
 import { VI_COMPOSITES } from './curated/vi-composites';
 import { VI_DISHES } from './curated/vi-dishes';
+import { VI_INGREDIENTS } from './curated/vi-ingredients';
 
-function main(): void {
-  // eslint-disable-next-line no-console
-  console.log('§5.2 seed build pipeline');
-  // eslint-disable-next-line no-console
-  console.log(
-    `  curated atomic ingredients: ${VI_INGREDIENTS.length}\n` +
-      `  curated composite recipes:  ${VI_COMPOSITES.length}\n` +
-      `  curated dishes:             ${VI_DISHES.length}`,
-  );
-  // eslint-disable-next-line no-console
-  console.log('  status: §5.2.1 scaffolding complete; emit steps wired in §5.2.2-5.2.4.');
-}
+const here = dirname(fileURLToPath(import.meta.url));
+const outDir = resolve(here, '../../src/assets/seed');
 
-main();
+console.log('§5.2 seed build pipeline');
+console.log(`  curated atomic ingredients: ${VI_INGREDIENTS.length}`);
+console.log(`  curated composite recipes:  ${VI_COMPOSITES.length}`);
+console.log(`  curated dishes:             ${VI_DISHES.length}`);
+console.log(`  outDir:                     ${outDir}`);
+
+const { ingredients, ingredient_units } = buildIngredientsToDisk(outDir);
+console.log(
+  `  [§5.2.2] wrote ${ingredients.length} ingredients, ${ingredient_units.length} ingredient_units`,
+);
+
+console.log('  status: §5.2.2 wired; §5.2.3-5.2.4 pending.');

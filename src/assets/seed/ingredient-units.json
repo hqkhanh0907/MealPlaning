@@ -1,0 +1,86 @@
+[
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000001",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "tbsp"
+  },
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000002",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "tsp"
+  },
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000003",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "tsp"
+  },
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000004",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "tbsp"
+  },
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000005",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "g"
+  },
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000006",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "g"
+  },
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000007",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "g"
+  },
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000008",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "g"
+  },
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000009",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "g"
+  },
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000000a",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "g"
+  },
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000000b",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "tsp"
+  },
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000000c",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "tsp"
+  },
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000101",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "g"
+  },
+  {
+    "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000102",
+    "is_default": true,
+    "quantity_per_unit": 1,
+    "unit_id": "g"
+  }
+]
