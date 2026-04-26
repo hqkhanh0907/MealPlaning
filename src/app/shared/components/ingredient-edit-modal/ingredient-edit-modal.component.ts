@@ -80,23 +80,38 @@ export interface IngredientEditFormValue {
           </div>
 
           <div class="form-content">
-            <label
-              class="field field--full"
-              [class.field--invalid]="showErrors && !form.name.trim()"
-            >
-              <span>Tên nguyên liệu</span>
-              <input #nameInput [(ngModel)]="form.name" placeholder="Ví dụ: Trứng gà" />
-            </label>
+            <div class="input-wrapper" [class.invalid]="showErrors && !form.name.trim()">
+              <label
+                class="input-label"
+                for="ingr-field-1"
+                [class.invalid]="showErrors && !form.name.trim()"
+                >Tên nguyên liệu</label
+              >
+              <input
+                id="ingr-field-1"
+                class="input-native"
+                #nameInput
+                [(ngModel)]="form.name"
+                placeholder="Ví dụ: Trứng gà"
+              />
+            </div>
             @if (showErrors && !form.name.trim()) {
               <div class="field-error">Vui lòng nhập tên nguyên liệu</div>
             }
 
-            <div
-              class="field field--full"
-              [class.field--invalid]="showErrors && !form.category.trim()"
-            >
-              <span>Nhóm</span>
-              <button type="button" class="picker-trigger" (click)="openCategoryPicker()">
+            <div class="input-wrapper" [class.invalid]="showErrors && !form.category.trim()">
+              <label
+                class="input-label"
+                for="ingr-field-10"
+                [class.invalid]="showErrors && !form.category.trim()"
+                >Nhóm</label
+              >
+              <button
+                type="button"
+                id="ingr-field-10"
+                class="picker-trigger--floating"
+                (click)="openCategoryPicker()"
+              >
                 <span>{{ form.category || 'Chọn nhóm nguyên liệu' }}</span>
                 <ion-icon name="chevron-down-outline" aria-hidden="true" />
               </button>
@@ -125,34 +140,71 @@ export interface IngredientEditFormValue {
               </button>
             </div>
 
-            <label
-              class="field field--full"
-              [class.field--invalid]="showErrors && form.calories < 0"
-            >
-              <span>Calories (kcal)</span>
-              <input type="number" [(ngModel)]="form.calories" min="0" step="0.1" />
-            </label>
+            <div class="input-wrapper" [class.invalid]="showErrors && form.calories < 0">
+              <label
+                class="input-label"
+                for="ingr-field-2"
+                [class.invalid]="showErrors && form.calories < 0"
+                >Calories (kcal)</label
+              >
+              <input
+                id="ingr-field-2"
+                class="input-native"
+                type="number"
+                [(ngModel)]="form.calories"
+                min="0"
+                step="0.1"
+              />
+            </div>
             @if (showErrors && form.calories < 0) {
               <div class="field-error">Calories không được nhỏ hơn 0</div>
             }
 
             <div class="nutrition-grid">
-              <label class="field">
-                <span>Protein (g)</span>
-                <input type="number" [(ngModel)]="form.protein" min="0" step="0.1" />
-              </label>
-              <label class="field">
-                <span>Carbs (g)</span>
-                <input type="number" [(ngModel)]="form.carbs" min="0" step="0.1" />
-              </label>
-              <label class="field">
-                <span>Fat (g)</span>
-                <input type="number" [(ngModel)]="form.fat" min="0" step="0.1" />
-              </label>
-              <label class="field">
-                <span>Chất xơ (g)</span>
-                <input type="number" [(ngModel)]="form.fiber" min="0" step="0.1" />
-              </label>
+              <div class="input-wrapper">
+                <label class="input-label" for="ingr-field-3">Protein (g)</label>
+                <input
+                  id="ingr-field-3"
+                  class="input-native"
+                  type="number"
+                  [(ngModel)]="form.protein"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+              <div class="input-wrapper">
+                <label class="input-label" for="ingr-field-4">Carbs (g)</label>
+                <input
+                  id="ingr-field-4"
+                  class="input-native"
+                  type="number"
+                  [(ngModel)]="form.carbs"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+              <div class="input-wrapper">
+                <label class="input-label" for="ingr-field-5">Fat (g)</label>
+                <input
+                  id="ingr-field-5"
+                  class="input-native"
+                  type="number"
+                  [(ngModel)]="form.fat"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+              <div class="input-wrapper">
+                <label class="input-label" for="ingr-field-6">Chất xơ (g)</label>
+                <input
+                  id="ingr-field-6"
+                  class="input-native"
+                  type="number"
+                  [(ngModel)]="form.fiber"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
             </div>
 
             <div class="section-label">Đơn vị có thể nhập khi thêm vào món</div>
@@ -191,19 +243,25 @@ export interface IngredientEditFormValue {
                     </div>
 
                     <div class="unit-grid">
-                      <label class="field">
-                        <span>Hiển thị</span>
+                      <div class="input-wrapper">
+                        <label class="input-label" for="ingr-field-7">Hiển thị</label>
                         <input
+                          id="ingr-field-7"
+                          class="input-native"
                           [ngModel]="unit.display_label"
                           (ngModelChange)="
                             updateUnit(unit.local_id, 'display_label', normalizeText($event))
                           "
                           [placeholder]="unit.short_name_vi"
                         />
-                      </label>
-                      <label class="field">
-                        <span>1 đơn vị = ? {{ form.nutrition_basis_unit }}</span>
+                      </div>
+                      <div class="input-wrapper">
+                        <label class="input-label" for="ingr-field-8"
+                          >1 đơn vị = ? {{ form.nutrition_basis_unit }}</label
+                        >
                         <input
+                          id="ingr-field-8"
+                          class="input-native"
                           type="number"
                           [ngModel]="unit.factor_to_basis"
                           (ngModelChange)="
@@ -212,7 +270,7 @@ export interface IngredientEditFormValue {
                           min="0.001"
                           step="0.001"
                         />
-                      </label>
+                      </div>
                     </div>
 
                     <div class="unit-meta">
@@ -257,16 +315,18 @@ export interface IngredientEditFormValue {
               </div>
             </div>
 
-            <label class="field field--full">
-              <span>Mật độ (g/ml) — tùy chọn</span>
+            <div class="input-wrapper">
+              <label class="input-label" for="ingr-field-9">Mật độ (g/ml) — tùy chọn</label>
               <input
+                id="ingr-field-9"
+                class="input-native"
                 type="number"
                 [ngModel]="form.density_g_per_ml"
                 (ngModelChange)="onDensityChange($event)"
                 min="0"
                 step="0.001"
               />
-            </label>
+            </div>
 
             <button type="button" class="btn-cta" [disabled]="saving" (click)="submit()">
               {{ saving ? 'Đang lưu...' : saveLabel }}

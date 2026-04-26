@@ -31,7 +31,14 @@ import {
   deriveFitnessLevel,
   getActivityFactor,
 } from './onboarding-calculation';
-import { EMPTY_2A, EMPTY_2B, Step2aErrors, Step2bErrors, validateStep2a, validateStep2b } from './onboarding-validation';
+import {
+  EMPTY_2A,
+  EMPTY_2B,
+  Step2aErrors,
+  Step2bErrors,
+  validateStep2a,
+  validateStep2b,
+} from './onboarding-validation';
 
 export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
   sedentary: 'Ít vận động (ngồi nhiều)',
@@ -556,68 +563,9 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
         flex-shrink: 0;
       }
 
-      /* ====================================================================
-         FORM FIELDS — native inputs matching mockup exactly:
-         .input-wrapper: border 1px solid, padding 20px 16px 8px, radius 12px
-         .input-label: absolute top 6px left 16px, font 12px/400
-         ==================================================================== */
-      .form-field {
-        margin-bottom: 16px;
-      }
-      .input-wrapper {
-        position: relative;
-        padding: 20px 16px 8px;
-        border: 1px solid var(--input-border-color);
-        border-radius: var(--radius-sm);
-        min-height: 56px;
-        background: var(--bg-card);
-        box-sizing: border-box;
-      }
-      .input-wrapper.invalid {
-        border-color: var(--ion-color-danger);
-      }
-      .input-label {
-        position: absolute;
-        top: 6px;
-        left: 16px;
-        font: 400 12px/1.4 var(--ion-font-family);
-        color: var(--text-tertiary);
-      }
-      .input-label.invalid {
-        color: var(--ion-color-danger);
-      }
-      .input-native {
-        font: 400 16px/1.5 var(--ion-font-family);
-        color: var(--text-primary);
-        font-variant-numeric: tabular-nums;
-        border: none;
-        outline: none;
-        background: transparent;
-        width: 100%;
-        padding: 0;
-        -moz-appearance: textfield;
-      }
-      .input-native::-webkit-outer-spin-button,
-      .input-native::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        .input-wrapper {
-          background: var(--bg-card);
-          border-color: #444850;
-        }
-        .input-wrapper.invalid {
-          border-color: #ef5350;
-        }
-        .input-native {
-          color: #fff;
-        }
-        .input-label.invalid {
-          color: #ef5350;
-        }
-      }
+      /* Form field styles (.input-wrapper, .input-label, .input-native,
+         .picker-trigger--floating) live in src/theme/form-field.scss —
+         the canonical floating-label pattern. See CLAUDE.md "Form Inputs". */
 
       /* SEGMENT CONTROL — §8.8, binary choice (Nam/Nữ) */
       .segment-label {

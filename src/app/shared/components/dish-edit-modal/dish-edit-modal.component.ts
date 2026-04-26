@@ -66,29 +66,55 @@ export interface DishEditFormValue {
           <div class="form-content">
             <div class="section-label">Thông tin cơ bản</div>
 
-            <label
-              class="field field--full"
-              [class.field--invalid]="showErrors && !form.name.trim()"
-            >
-              <span>Tên món ăn</span>
-              <input #nameInput [(ngModel)]="form.name" placeholder="Ví dụ: Cơm trứng" />
-            </label>
+            <div class="input-wrapper" [class.invalid]="showErrors && !form.name.trim()">
+              <label
+                class="input-label"
+                for="dish-field-1"
+                [class.invalid]="showErrors && !form.name.trim()"
+                >Tên món ăn</label
+              >
+              <input
+                id="dish-field-1"
+                class="input-native"
+                #nameInput
+                [(ngModel)]="form.name"
+                placeholder="Ví dụ: Cơm trứng"
+              />
+            </div>
             @if (showErrors && !form.name.trim()) {
               <div class="field-error">Vui lòng nhập tên món ăn</div>
             }
 
-            <label class="field field--full">
-              <span>Mô tả</span>
-              <input [(ngModel)]="form.description" placeholder="Mô tả ngắn (tùy chọn)" />
-            </label>
+            <div class="input-wrapper">
+              <label class="input-label" for="dish-field-2">Mô tả</label>
+              <input
+                id="dish-field-2"
+                class="input-native"
+                [(ngModel)]="form.description"
+                placeholder="Mô tả ngắn (tùy chọn)"
+              />
+            </div>
 
-            <label
-              class="field field--full"
-              [class.field--invalid]="showErrors && (form.servings < 0.5 || form.servings > 20)"
+            <div
+              class="input-wrapper"
+              [class.invalid]="showErrors && (form.servings < 0.5 || form.servings > 20)"
             >
-              <span>Số phần ăn</span>
-              <input type="number" [(ngModel)]="form.servings" min="0.5" max="20" step="0.5" />
-            </label>
+              <label
+                class="input-label"
+                for="dish-field-3"
+                [class.invalid]="showErrors && (form.servings < 0.5 || form.servings > 20)"
+                >Số phần ăn</label
+              >
+              <input
+                id="dish-field-3"
+                class="input-native"
+                type="number"
+                [(ngModel)]="form.servings"
+                min="0.5"
+                max="20"
+                step="0.5"
+              />
+            </div>
             @if (showErrors && (form.servings < 0.5 || form.servings > 20)) {
               <div class="field-error">Số phần ăn cần nằm trong khoảng 0.5 đến 20.</div>
             }
@@ -124,9 +150,11 @@ export interface DishEditFormValue {
                     </div>
 
                     <div class="ingredient-item__grid">
-                      <label class="field">
-                        <span>Số lượng</span>
+                      <div class="input-wrapper">
+                        <label class="input-label" for="dish-field-4">Số lượng</label>
                         <input
+                          id="dish-field-4"
+                          class="input-native"
                           type="number"
                           [ngModel]="item.amount_value"
                           (ngModelChange)="updateAmount(item.local_id, $event)"
@@ -134,13 +162,14 @@ export interface DishEditFormValue {
                           max="10000"
                           step="0.1"
                         />
-                      </label>
+                      </div>
 
-                      <div class="field">
-                        <span>Đơn vị</span>
+                      <div class="input-wrapper">
+                        <label class="input-label" for="dish-field-5">Đơn vị</label>
                         <button
                           type="button"
-                          class="picker-trigger"
+                          id="dish-field-5"
+                          class="picker-trigger--floating"
                           (click)="openUnitPicker(item.local_id)"
                         >
                           <span>{{ unitLabel(item) }}</span>

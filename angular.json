@@ -44,6 +44,7 @@
               "src/global.scss",
               "src/theme/variables.scss",
               "src/theme/form-modal.scss",
+              "src/theme/form-field.scss",
               "src/theme/list-card.scss"
             ],
             "scripts": [],
@@ -131,6 +132,7 @@
               "src/global.scss",
               "src/theme/variables.scss",
               "src/theme/form-modal.scss",
+              "src/theme/form-field.scss",
               "src/theme/list-card.scss"
             ],
             "scripts": []

@@ -58,6 +58,26 @@ src/app/
 - **Icons:** Use `addIcons()` from ionicons in component constructor + `IonIcon` in template.
 - **Imports:** Ionic standalone components imported individually (e.g., `IonButton`, `IonContent`).
 
+### Form Inputs (MANDATORY)
+ALL text/number/select inputs across the app MUST use the canonical floating-label pattern defined in `src/theme/form-field.scss`. See `docs/3-design/design-system.md` §8.6.
+
+Required markup:
+```html
+<div class="input-wrapper" [class.invalid]="hasError">
+  <label class="input-label" [class.invalid]="hasError">Label</label>
+  <input class="input-native" type="..." />
+</div>
+```
+
+For select-like triggers, use `<button class="picker-trigger--floating">` inside the same `.input-wrapper`.
+
+DO NOT:
+- Create alternative input patterns (`.field > input`, `ion-item` wrappers, custom `.form-row`, stacked `<label><span/><input/></label>`).
+- Inline input styles in component `.ts` files.
+- Use `ion-input` standalone without the wrapper.
+
+If a deviation is genuinely needed, update §8.6 first AND get explicit user approval — never silently add a new pattern. The Node guard at `scripts/check-form-input-pattern.mjs` runs on `npm run check:form-pattern` and is wired into `npm run build`.
+
 ### Key Conventions
 - Vietnamese labels in UI (Tổng quan, Lịch ăn, Quản lý, Tập luyện, Cài đặt)
 - UUID v4 for all primary keys

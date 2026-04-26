@@ -111,58 +111,9 @@
   margin: 0;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-
-.field--invalid {
-  color: var(--ion-color-danger);
-}
-
-.field input,
-.picker-trigger {
-  min-height: 44px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--input-border-color);
-  padding: 10px 12px;
-  font: inherit;
-  background: var(--bg-page);
-  color: var(--text-primary);
-  outline: none;
-  box-shadow: none;
-}
-
-.field input:focus,
-.picker-trigger:focus {
-  border-color: var(--primary-500);
-  box-shadow: 0 0 0 1px rgba(var(--ion-color-primary-rgb), 0.18);
-}
-
-.field--invalid input,
-.field--invalid .picker-trigger,
-.field--invalid input:focus,
-.field--invalid .picker-trigger:focus {
-  border-color: var(--ion-color-danger);
-  box-shadow: 0 0 0 1px rgba(var(--ion-color-danger-rgb), 0.12);
-}
-
-.picker-trigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  text-align: left;
-}
-
-.picker-trigger ion-icon {
-  color: var(--text-tertiary);
-  font-size: 16px;
-  flex-shrink: 0;
-}
+/* Form field styles (.input-wrapper, .input-label, .input-native,
+   .picker-trigger--floating) live in src/theme/form-field.scss —
+   the single canonical floating-label pattern for ALL inputs. */
 
 .btn-outline,
 .btn-danger-text,

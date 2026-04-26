@@ -17,18 +17,18 @@ describe('IngredientEditModalComponent', () => {
   });
 
   it('renders category options', () => {
-    const text = fixture.nativeElement.textContent;
-    expect(text).toContain('Trứng & Sữa');
-    expect(text).toContain('Rau củ');
+    const categories = component.categoryOptions.map((o) => o.label).join(' ');
+    expect(categories).toContain('Trứng & Sữa');
+    expect(categories).toContain('Rau củ');
   });
 
-  it('emits dismissed when cancel is clicked', () => {
+  it('emits dismissed when back button is clicked', () => {
     let closed = false;
     component.dismissed.subscribe(() => {
       closed = true;
     });
 
-    const button = fixture.nativeElement.querySelector('.modal-cancel') as HTMLButtonElement;
+    const button = fixture.nativeElement.querySelector('.toolbar-icon-button') as HTMLButtonElement;
     button.click();
 
     expect(closed).toBeTrue();
@@ -45,17 +45,32 @@ describe('IngredientEditModalComponent', () => {
     component.form.nutrition_basis_unit = 'g';
     component.form.calories = 155;
     component.form.protein = 13;
+    component.form.units = [
+      {
+        local_id: 'u1',
+        unit_id: 'unit-g',
+        factor_to_basis: 1,
+        is_default: true,
+        display_label: 'g',
+        is_approximate: false,
+        short_name_vi: 'g',
+      },
+    ];
     fixture.detectChanges();
 
-    const saveButton = fixture.nativeElement.querySelector('.modal-save') as HTMLButtonElement;
+    const saveButton = fixture.nativeElement.querySelector(
+      '.toolbar-save-button',
+    ) as HTMLButtonElement;
     saveButton.click();
 
-    expect(payload).toEqual(jasmine.objectContaining({
-      name: 'Trứng gà',
-      category: 'Trứng & Sữa',
-      nutrition_basis_unit: 'g',
-      calories: 155,
-      protein: 13,
-    }));
+    expect(payload).toEqual(
+      jasmine.objectContaining({
+        name: 'Trứng gà',
+        category: 'Trứng & Sữa',
+        nutrition_basis_unit: 'g',
+        calories: 155,
+        protein: 13,
+      }),
+    );
   });
 });

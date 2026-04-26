@@ -415,6 +415,44 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Error Position | Dưới input, `padding-left: 4px`, `margin-bottom: 8px` |
 | Accessibility | `role="alert"` + `aria-describedby` linking input → error |
 
+#### 8.6.1 Implementation Reference (CANONICAL)
+
+> **Source of truth:** `src/theme/form-field.scss`. ALL inputs MUST use these classes — không tạo pattern thay thế.
+
+**Required markup:**
+```html
+<div class="input-wrapper" [class.invalid]="hasError">
+  <label class="input-label" [class.invalid]="hasError">Tên trường</label>
+  <input class="input-native" type="text" />
+</div>
+```
+
+**Cho select-like triggers:**
+```html
+<div class="input-wrapper" [class.invalid]="hasError">
+  <label class="input-label" [class.invalid]="hasError">Nhóm</label>
+  <button type="button" class="picker-trigger--floating" (click)="openPicker()">
+    <span>{{ value || 'Placeholder' }}</span>
+    <ion-icon name="chevron-down-outline" aria-hidden="true" />
+  </button>
+</div>
+```
+
+**Cấm:**
+- `<label class="field"><span/><input/></label>` (deprecated stacked pattern)
+- `ion-item` wrapping inputs
+- Inline input styles trong component `.ts`
+- Custom `.form-row`, `.field-row`, etc.
+
+**Verified compliance:** onboarding (Phase 0), ingredient-edit-modal, dish-edit-modal (Phase 1).
+
+**Multi-layer guards (LLM enforcement):**
+1. `src/theme/form-field.scss` header comment + canonical CSS.
+2. `CLAUDE.md` "Form Inputs (MANDATORY)" section.
+3. Design-system §8.6.1 (this section).
+4. Skill `mealplaning-phase1-management-implementation` pitfall note.
+5. `scripts/check-form-input-pattern.mjs` Node guard wired into `npm run build`.
+
 #### Error Message Templates (Vietnamese)
 
 > Mỗi error message phải trả lời: (1) Gì sai? (2) Tại sao? (3) Sửa thế nào?
