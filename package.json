@@ -8,6 +8,8 @@
     "start": "ng serve",
     "build": "npm run check:form-pattern && ng build",
     "check:form-pattern": "node scripts/check-form-input-pattern.mjs",
+    "seed:build": "tsx scripts/seed/build.ts",
+    "seed:typecheck": "tsc -p tsconfig.seed.json",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
@@ -81,6 +83,7 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.0",
     "typescript-eslint": "^8.58.2"
   },
