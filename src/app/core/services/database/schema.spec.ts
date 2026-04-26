@@ -1,6 +1,7 @@
 import { DatabaseService } from './database.service';
 import {
   buildInitialSchemaMigration,
+  buildMealTagMigration,
   buildNutritionSchemaFinalizationMigration,
   buildNutritionUnitsMigration,
 } from './schema';
@@ -25,7 +26,11 @@ describe('buildNutritionUnitsMigration', () => {
     const migration = buildNutritionUnitsMigration();
 
     expect(migration.version).toBe(2);
-    expect(migration.statements.some((statement: string) => statement.includes('CREATE TABLE IF NOT EXISTS unit'))).toBeTrue();
+    expect(
+      migration.statements.some((statement: string) =>
+        statement.includes('CREATE TABLE IF NOT EXISTS unit'),
+      ),
+    ).toBeTrue();
     expect(
       migration.statements.some((statement: string) =>
         statement.includes('CREATE TABLE IF NOT EXISTS ingredient_unit'),
@@ -44,9 +49,42 @@ describe('buildNutritionSchemaFinalizationMigration', () => {
     const migration = buildNutritionSchemaFinalizationMigration();
 
     expect(migration.version).toBe(3);
-    expect(migration.statements.some((statement: string) => statement.includes('CREATE TABLE IF NOT EXISTS ingredient_v3'))).toBeTrue();
-    expect(migration.statements.some((statement: string) => statement.includes('DROP TABLE ingredient'))).toBeTrue();
-    expect(migration.statements.some((statement: string) => statement.includes('ALTER TABLE ingredient_v3 RENAME TO ingredient'))).toBeTrue();
+    expect(
+      migration.statements.some((statement: string) =>
+        statement.includes('CREATE TABLE IF NOT EXISTS ingredient_v3'),
+      ),
+    ).toBeTrue();
+    expect(
+      migration.statements.some((statement: string) => statement.includes('DROP TABLE ingredient')),
+    ).toBeTrue();
+    expect(
+      migration.statements.some((statement: string) =>
+        statement.includes('ALTER TABLE ingredient_v3 RENAME TO ingredient'),
+      ),
+    ).toBeTrue();
+  });
+});
+
+describe('buildMealTagMigration', () => {
+  it('builds a V4 migration that adds dish.meal_tag with CHECK constraint and index', () => {
+    const migration = buildMealTagMigration();
+
+    expect(migration.version).toBe(4);
+    expect(
+      migration.statements.some((statement: string) =>
+        statement.includes('ALTER TABLE dish ADD COLUMN meal_tag'),
+      ),
+    ).toBeTrue();
+    expect(
+      migration.statements.some((statement: string) =>
+        statement.includes("CHECK (meal_tag IN ('breakfast', 'lunch', 'dinner'))"),
+      ),
+    ).toBeTrue();
+    expect(
+      migration.statements.some((statement: string) =>
+        statement.includes('CREATE INDEX IF NOT EXISTS idx_dish_meal_tag ON dish(meal_tag)'),
+      ),
+    ).toBeTrue();
   });
 });
 
@@ -67,7 +105,9 @@ describe('schema migration compatibility smoke test', () => {
 
     expect(db.execute.calls.count()).toBe(migration.statements.length);
     expect(db.execute.calls.first().args[0]).toContain('CREATE TABLE IF NOT EXISTS user_profile');
-    expect(db.execute.calls.mostRecent().args[0]).toContain('CREATE INDEX IF NOT EXISTS idx_app_config_key');
+    expect(db.execute.calls.mostRecent().args[0]).toContain(
+      'CREATE INDEX IF NOT EXISTS idx_app_config_key',
+    );
   });
 
   it('can replay the generated V2 migration sequentially without custom branching', async () => {
@@ -79,7 +119,9 @@ describe('schema migration compatibility smoke test', () => {
 
     expect(db.execute.calls.count()).toBe(migration.statements.length);
     expect(db.execute.calls.first().args[0]).toContain('CREATE TABLE IF NOT EXISTS unit');
-    expect(db.execute.calls.mostRecent().args[0]).toContain('CREATE VIEW IF NOT EXISTS dish_with_totals');
+    expect(db.execute.calls.mostRecent().args[0]).toContain(
+      'CREATE VIEW IF NOT EXISTS dish_with_totals',
+    );
   });
 
   it('can replay the generated V3 migration sequentially without custom branching', async () => {

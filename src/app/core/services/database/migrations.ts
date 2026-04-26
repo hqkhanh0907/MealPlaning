@@ -1,5 +1,6 @@
 import {
   buildInitialSchemaMigration,
+  buildMealTagMigration,
   buildNutritionSchemaFinalizationMigration,
   buildNutritionUnitsMigration,
   SCHEMA_VERSION,
@@ -10,6 +11,7 @@ export const MIGRATION_REGISTRY: readonly Migration[] = [
   buildInitialSchemaMigration(),
   buildNutritionUnitsMigration(),
   buildNutritionSchemaFinalizationMigration(),
+  buildMealTagMigration(),
 ].sort((left, right) => left.version - right.version);
 
 if (MIGRATION_REGISTRY[MIGRATION_REGISTRY.length - 1]?.version !== SCHEMA_VERSION) {

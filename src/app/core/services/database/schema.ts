@@ -12,7 +12,7 @@
  * Source: docs/3-design/data-model.md
  */
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 /**
  * Array of DDL statements. Each string is a single CREATE TABLE / CREATE INDEX.
@@ -549,9 +549,54 @@ export const NUTRITION_SCHEMA_FINALIZATION_MIGRATION_DDL: readonly string[] = [
   `PRAGMA foreign_keys = ON`,
 ];
 
-export function buildNutritionSchemaFinalizationMigration(): { version: number; statements: readonly string[] } {
+export function buildNutritionSchemaFinalizationMigration(): {
+  version: number;
+  statements: readonly string[];
+} {
   return {
     version: 3,
     statements: NUTRITION_SCHEMA_FINALIZATION_MIGRATION_DDL,
+  };
+}
+
+/**
+ * V4 — Phase 1 seed grouping. Adds nullable `dish.meal_tag` so the curated
+ * Vietnamese seed (6 breakfast / 7 lunch / 7 dinner) can be queried by meal
+ * slot. Existing rows keep `meal_tag = NULL`; user-created dishes may also
+ * leave it null. CHECK constraint enforces the allowed slot values.
+ *
+ * Also rebuilds `dish_with_totals` so the view exposes the new column.
+ */
+export const MEAL_TAG_MIGRATION_DDL: readonly string[] = [
+  `ALTER TABLE dish ADD COLUMN meal_tag TEXT CHECK (meal_tag IN ('breakfast', 'lunch', 'dinner'))`,
+  `CREATE INDEX IF NOT EXISTS idx_dish_meal_tag ON dish(meal_tag)`,
+  `DROP VIEW IF EXISTS dish_with_totals`,
+  `CREATE VIEW IF NOT EXISTS dish_with_totals AS
+    SELECT
+      d.id,
+      d.name,
+      d.description,
+      d.type,
+      d.source,
+      d.servings,
+      d.image_url,
+      d.meal_tag,
+      d.created_at,
+      d.updated_at,
+      COALESCE(SUM(i.calories * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_calories,
+      COALESCE(SUM(i.protein  * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_protein,
+      COALESCE(SUM(i.carbs    * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_carbs,
+      COALESCE(SUM(i.fat      * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_fat,
+      COALESCE(SUM(i.fiber    * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_fiber
+    FROM dish d
+    LEFT JOIN dish_ingredient di ON di.dish_id = d.id
+    LEFT JOIN ingredient i ON i.id = di.ingredient_id
+    GROUP BY d.id`,
+];
+
+export function buildMealTagMigration(): { version: number; statements: readonly string[] } {
+  return {
+    version: 4,
+    statements: MEAL_TAG_MIGRATION_DDL,
   };
 }

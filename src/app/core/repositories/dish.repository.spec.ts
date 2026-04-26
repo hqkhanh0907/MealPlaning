@@ -52,11 +52,10 @@ describe('DishRepository', () => {
     });
     db.query.and.resolveTo([]);
 
-    dishIngredientRepository = jasmine.createSpyObj<DishIngredientRepository>('DishIngredientRepository', [
-      'listByDish',
-      'bulkInsert',
-      'deleteByDish',
-    ]);
+    dishIngredientRepository = jasmine.createSpyObj<DishIngredientRepository>(
+      'DishIngredientRepository',
+      ['listByDish', 'bulkInsert', 'deleteByDish'],
+    );
     dishIngredientRepository.listByDish.and.resolveTo([]);
     dishIngredientRepository.bulkInsert.and.resolveTo();
     dishIngredientRepository.deleteByDish.and.resolveTo();
@@ -95,5 +94,20 @@ describe('DishRepository', () => {
       'SELECT COUNT(*) AS ref_count FROM planned_dish WHERE dish_id = ?',
       ['dish-1'],
     );
+  });
+
+  it('persists meal_tag when provided and defaults to null otherwise', async () => {
+    await repo.insert(createInput, ingredientItems);
+    const insertArgsNoTag = db.execute.calls.mostRecent().args;
+    const sqlNoTag = insertArgsNoTag[0] as string;
+    const paramsNoTag = insertArgsNoTag[1] as readonly unknown[];
+    expect(sqlNoTag).toContain('meal_tag');
+    expect(paramsNoTag[paramsNoTag.length - 1]).toBeNull();
+
+    db.execute.calls.reset();
+    await repo.insert({ ...createInput, meal_tag: 'breakfast' }, ingredientItems);
+    const insertArgsWithTag = db.execute.calls.mostRecent().args;
+    const paramsWithTag = insertArgsWithTag[1] as readonly unknown[];
+    expect(paramsWithTag[paramsWithTag.length - 1]).toBe('breakfast');
   });
 });

@@ -256,11 +256,16 @@ CREATE TABLE dish (
   servings          REAL NOT NULL DEFAULT 1,      -- Số phần ăn
   image_url         TEXT,                         -- Ảnh (local path hoặc null)
 
+  -- Phase 1 seed grouping (V4). NULL cho user-created/AI dishes; seeded
+  -- Vietnamese dishes phân loại theo bữa (6 sáng / 7 trưa / 7 tối).
+  meal_tag          TEXT CHECK (meal_tag IN ('breakfast', 'lunch', 'dinner')),
+
   created_at        TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at        TEXT
 );
 
 CREATE INDEX idx_dish_name ON dish(name);
+CREATE INDEX idx_dish_meal_tag ON dish(meal_tag);
 ```
 
 Rule provenance cho `dish`:
@@ -281,7 +286,7 @@ VIEW SQL — single source of truth cho dish-level macros. JOIN `dish` ↔ `dish
 ```sql
 CREATE VIEW dish_with_totals AS
 SELECT
-  d.id, d.name, d.description, d.type, d.servings, d.image_url,
+  d.id, d.name, d.description, d.type, d.source, d.servings, d.image_url, d.meal_tag,
   d.created_at, d.updated_at,
   COALESCE(SUM(i.calories * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_calories,
   COALESCE(SUM(i.protein  * di.normalized_amount / i.nutrition_basis_quantity), 0) AS total_protein,

@@ -16,6 +16,7 @@ describe('DishStore', () => {
     source: 'custom',
     servings: 1,
     image_url: null,
+    meal_tag: null,
     created_at: '2026-04-26T00:00:00Z',
     updated_at: null,
     total_calories: 320,

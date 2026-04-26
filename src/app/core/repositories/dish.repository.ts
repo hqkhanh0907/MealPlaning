@@ -1,9 +1,12 @@
 import { inject, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import type { DishIngredientModel, DishModel } from '../models/management.model';
-import type { DishSource, DishType } from '../models/management.types';
+import type { DishSource, DishType, MealTag } from '../models/management.types';
 import { DatabaseService } from '../services/database/database.service';
-import { DishIngredientRepository, type CreateDishIngredientInput } from './dish-ingredient.repository';
+import {
+  DishIngredientRepository,
+  type CreateDishIngredientInput,
+} from './dish-ingredient.repository';
 
 export interface DishListItem extends DishModel {
   total_calories: number;
@@ -24,6 +27,7 @@ export interface CreateDishInput {
   source: DishSource;
   servings: number;
   image_url: string | null;
+  meal_tag?: MealTag | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -45,7 +49,9 @@ export class DishRepository {
   }
 
   async getById(id: string): Promise<DishWithIngredients | null> {
-    const dish = await this.db.getOne<DishListItem>('SELECT * FROM dish_with_totals WHERE id = ?', [id]);
+    const dish = await this.db.getOne<DishListItem>('SELECT * FROM dish_with_totals WHERE id = ?', [
+      id,
+    ]);
     if (!dish) {
       return null;
     }
@@ -57,7 +63,10 @@ export class DishRepository {
     };
   }
 
-  async insert(data: CreateDishInput, ingredients: CreateDishIngredientInput[]): Promise<DishWithIngredients> {
+  async insert(
+    data: CreateDishInput,
+    ingredients: CreateDishIngredientInput[],
+  ): Promise<DishWithIngredients> {
     if (ingredients.length === 0) {
       throw new Error('Dish must contain at least one ingredient.');
     }
@@ -67,9 +76,18 @@ export class DishRepository {
     await this.db.withTransaction(async () => {
       await this.db.execute(
         `INSERT INTO dish (
-          id, name, description, type, source, servings, image_url
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [dishId, data.name, data.description, data.type, data.source, data.servings, data.image_url],
+          id, name, description, type, source, servings, image_url, meal_tag
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          dishId,
+          data.name,
+          data.description,
+          data.type,
+          data.source,
+          data.servings,
+          data.image_url,
+          data.meal_tag ?? null,
+        ],
       );
 
       await this.dishIngredientRepository.bulkInsert(dishId, ingredients);
@@ -78,7 +96,11 @@ export class DishRepository {
     return (await this.getById(dishId)) as DishWithIngredients;
   }
 
-  async update(id: string, data: CreateDishInput, ingredients: CreateDishIngredientInput[]): Promise<DishWithIngredients> {
+  async update(
+    id: string,
+    data: CreateDishInput,
+    ingredients: CreateDishIngredientInput[],
+  ): Promise<DishWithIngredients> {
     if (ingredients.length === 0) {
       throw new Error('Dish must contain at least one ingredient.');
     }
@@ -93,9 +115,18 @@ export class DishRepository {
     await this.db.withTransaction(async () => {
       await this.db.execute(
         `UPDATE dish
-         SET name = ?, description = ?, type = ?, source = ?, servings = ?, image_url = ?, updated_at = datetime('now')
+         SET name = ?, description = ?, type = ?, source = ?, servings = ?, image_url = ?, meal_tag = ?, updated_at = datetime('now')
          WHERE id = ?`,
-        [data.name, data.description, data.type, nextSource, data.servings, data.image_url, id],
+        [
+          data.name,
+          data.description,
+          data.type,
+          nextSource,
+          data.servings,
+          data.image_url,
+          data.meal_tag ?? null,
+          id,
+        ],
       );
 
       await this.dishIngredientRepository.deleteByDish(id);

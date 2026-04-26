@@ -2,6 +2,7 @@ import type {
   DishSource,
   DishType,
   IngredientSource,
+  MealTag,
   NutritionBasisUnit,
   UnitType,
 } from './management.types';
@@ -53,6 +54,7 @@ export interface DishModel {
   source: DishSource;
   servings: number;
   image_url: string | null;
+  meal_tag: MealTag | null;
   created_at: string;
   updated_at: string | null;
 }
