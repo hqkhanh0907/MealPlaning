@@ -203,36 +203,33 @@ Seed data sinh **tại build time** (script), KHÔNG gọi external nutrition AP
 
 ### 5.2 Vietnamese Core Seed Pipeline
 
+> **Revision history:** v1 (2026-04-18) ship 20 món + USDA. v2 (2026-04-26) **skip USDA**, dùng nguồn VN; tách build pipeline thành 4 step; composite = nested recipe; thêm `seed_artifact` table cho idempotency; seed dishes ship `is_favorite=false`. Quyết định v2 chốt qua discussion 5 câu hỏi với user. Full draft + acceptance criteria: `docs/5-development/_drafts/phase-1-section-5.2-update.md`.
+
 **Seed strategy đã chốt:**
 - Ship **20 món Việt curated**
   - `6` món sáng
   - `7` món trưa
   - `7` món tối
-- Mỗi dish seed là **template mặc định `1 serving`**
+- Mỗi dish seed là **template mặc định `1 serving`**, `is_favorite = false`
 - Không seed snack dishes
-- Ingredient seed = tập nguyên liệu liên quan trực tiếp tới 20 món này
-- External datasets chỉ dùng để **bootstrap/discovery**, không phải authority cuối cùng
+- Ingredient seed = tập nguyên liệu cover 20 món + Vietnamese kitchen staples (nước mắm, muối, đường, dầu ăn, hành tím, hành lá, tỏi, gừng, sả, ớt, tiêu, bột ngọt) — **không giới hạn count**, emerge từ recipes
+- Pipeline **fully offline** — không network, không API key, không `.cache/`
 
 **Danh sách 20 món đã chốt:**
 - **Sáng (6):** Phở bò, Phở gà, Bún thịt nướng, Bánh mì ốp la, Cháo gà, Miến gà
 - **Trưa (7):** Cơm gà luộc, Cơm thịt kho trứng, Cơm cá kho tộ, Cơm bò xào rau củ, Cơm tôm rim, Cơm đậu hũ sốt cà chua, Cơm thịt heo luộc rau luộc
 - **Tối (7):** Bún chả, Cơm gà kho gừng, Cơm thịt heo nạc rang sả, Cơm canh chua cá, Cơm bò xào hành tây, Cơm tôm xào rau củ, Cơm đậu hũ thịt bằm
 
-**Bootstrap references (tham khảo ban đầu):**
-- TheMealDB: recipe/dish discovery + ingredient list gợi ý
-- Open Food Facts: packaged-food aliases khi cần
-
-**Nutrition authority đã chốt:**
-- **USDA FoodData Central** là authority chính cho canonical macro ingredient-level
-- Tên tiếng Việt, alias, meal grouping, và dish composition được curate thủ công ở local seed
-- Khi USDA thiếu coverage/không match tốt với ingredient Việt, chỉ cho phép dùng nguồn phụ sau khi review thủ công và normalize về canonical rule ở §4.3
-- TheMealDB và Open Food Facts không phải macro authority cuối cùng của Phase 1
+**Nutrition authority đã chốt (v2):**
+- Authority chính = **"Bảng thành phần dinh dưỡng thực phẩm Việt Nam"** (Viện Dinh Dưỡng, ấn bản 2017+)
+- Fallback = **Wikipedia VI** + manual curation (yêu cầu `notes` giải thích)
+- Citations committed vào `scripts/seed/curated/sources/{vien-dinh-duong.md, wikipedia-vi.md}` — mỗi ingredient phải có `source_citation` trỏ tới row/page/URL cụ thể
+- USDA FDC, TheMealDB, Open Food Facts **không** dùng trong Phase 1 (deferred)
 
 **Curation rules:**
-- Mỗi ingredient trong seed phải xuất hiện trong ít nhất 1 món seeded
-- Chỉ cho phép orphan ingredient nếu là staple bắt buộc (ví dụ: nước mắm, muối, đường, dầu ăn, hành, tỏi)
-- Ưu tiên bộ món chia sẻ ingredient nền để dataset gọn và usable ngay
-- Với món có phần phức tạp như nước dùng / nước chấm / base canh, Phase 1 cho phép dùng **composite ingredient** đã curate sẵn (VD `Nước dùng phở`, `Nước chấm bún chả`, `Base canh chua`)
+- Mỗi atomic ingredient trong seed phải xuất hiện trong ≥1 món seeded HOẶC nằm trong staple whitelist
+- Composite ingredients (`Nước dùng phở`, `Nước chấm bún chả`, `Base canh chua`, `Nước chấm gỏi cuốn`, ...) = **nested recipe**, macro derived bằng cách sum components × quantity tại build time, lưu vào DB như ingredient thường (`category='composite'`)
+- Cấm composite chứa composite (V1 chỉ 1 tầng nesting)
 - Tất cả ingredient phải có:
   - `category`
   - canonical nutrition basis (`100g` hoặc `100ml`)
@@ -240,29 +237,53 @@ Seed data sinh **tại build time** (script), KHÔNG gọi external nutrition AP
   - đúng 1 default unit
   - factor conversion rõ ràng cho các unit không cùng dimension với basis, hoặc `density_g_per_ml` nếu dùng fallback
   - marker `is_approximate` cho unit ước lượng nếu có
-- Mỗi dish seed phải có baseline ingredient list + amount cho `1 serving`; user sửa **trực tiếp** record seed gốc, không tạo bản copy ở Phase 1
-- Composite ingredient vẫn phải tuân thủ canonical nutrition rule ở §4.3 và được quản lý như một ingredient bình thường trong DB
+  - `source_citation` non-empty
+- Mỗi dish seed phải có:
+  - `meal_tag` set (`breakfast`/`lunch`/`dinner`) — V4 column, build script reject nếu null
+  - `is_favorite = false` — không default favorite cho seed
+  - baseline ingredient list + amount cho `1 serving`
+  - user sửa **trực tiếp** record seed gốc (không clone)
 
-**Script:** `scripts/seed/build-vietnamese-core.ts`
-- Input:
-  - curated local source cho 20 món
-  - curated local source cho ingredient nutrition + unit metadata, trong đó macro lấy USDA làm nguồn authority chính
-- Output:
-  - `src/assets/seed/ingredients.json`
-  - `src/assets/seed/dishes.json`
+**Build pipeline (4 Node scripts, 1 npm command `npm run seed:build`):**
+```
+scripts/seed/
+├── build-ingredients.ts      ← Step 1: emit ingredients.json từ vi-ingredients.ts
+├── build-composites.ts       ← Step 2: nested-recipe sum → composites.json
+├── build-dishes.ts           ← Step 3: emit dishes.json (20 dishes, 6/7/7)
+├── validate-seed.ts          ← Step 4: cross-ref + schema + distribution check
+└── curated/
+    ├── vi-ingredients.ts     ← atomic (UUID + macro per 100g/ml + citation)
+    ├── vi-composites.ts      ← composite recipes (UUID + components[])
+    ├── vi-dishes.ts          ← 20 dishes (UUID + meal_tag + ingredients[])
+    └── sources/{vien-dinh-duong.md, wikipedia-vi.md}
+```
+- Output: `src/assets/seed/{ingredients.json, composites.json, dishes.json}`
+- Determinism: re-run produces byte-identical JSON; CI runs `git diff --exit-code`
+- 15 acceptance criteria (AC1–AC15) liệt kê đầy đủ trong draft v2
 
-**App load logic:**
-- Sau migration V1: check `ingredient` và `dish`
-- Nếu DB fresh:
-  - load `ingredients.json` → bulk insert ingredients
-  - load `dishes.json` → insert dishes (`servings = 1`) + dish_ingredient
-- Nếu DB đã tồn tại:
-  - **không overwrite** ingredient/dish seed mà user đã sửa
-  - **không tự thêm lại** seed đã bị xóa hoặc seed mới phát sinh ở version sau
-  - seed loader Phase 1 không được mutate record hiện có chỉ để đồng bộ lại seed artifact
-- Mỗi ingredient/dish có UUID v4 ổn định trong seed artifact hoặc generate tại build step
+**App load logic (SeedLoaderService + V5 migration):**
+- V5 thêm table `seed_artifact (artifact_id PK, artifact_type, seed_version, inserted_at, fingerprint_hash)` + index `idx_seed_artifact_type`
+- Loader algorithm:
+  1. Đọc `ingredients.json` + `composites.json` + `dishes.json`
+  2. Mỗi record: nếu `seed_artifact.artifact_id` đã tồn tại → SKIP; ngược lại INSERT vào `ingredient`/`dish` + INSERT tracker (transactional)
+  3. **Không UPDATE** record hiện có
+- Properties đảm bảo: fresh install → seed đầy đủ; user xóa Phở bò → tracker giữ UUID → loader không re-add; Phase 1.5 ship seed mới → chỉ UUID mới được insert; user sửa Cà chua → loader skip giữ edit; `pm clear` reset hết → behave như fresh install
+- Composites flow vào table `ingredient` chung (UI thấy "Nước dùng phở" như 1 ingredient)
+- Mỗi UUID v4 frozen trong `vi-*.ts` (không regenerate giữa các build)
 
-**Exit:** App fresh install → Management tab hiển thị ingredient set liên quan tới 20 món Việt core và 20 dish seeds usable ngay dưới dạng `1 serving` templates.
+**Execution sub-steps (cho §6):**
+```
+5.2.1  Curated scaffolding (vi-{ingredients,composites,dishes}.ts + sources/)
+5.2.2  build-ingredients.ts + AC1–AC5 tests
+5.2.3  build-composites.ts (nested-recipe sum) + AC6–AC9 tests
+5.2.4  build-dishes.ts + validate-seed.ts + AC10–AC15 tests
+5.2.5  V5 migration: seed_artifact table
+5.2.6  SeedLoaderService + unit tests (idempotency, fresh, re-run, post-delete)
+5.2.7  App bootstrap integration (gọi loader sau migration)
+5.2.8  Emulator smoke test: fresh install → Quản lý tab show 20 dish + ingredients
+```
+
+**Exit:** App fresh install → Management tab hiển thị ingredient set (atomic + composite) liên quan tới 20 món Việt core, 20 dish seeds usable ngay dưới dạng `1 serving` templates với `meal_tag` đúng phân bố 6/7/7 và `is_favorite=false`. Re-run loader trên DB đã có data → 0 mutation.
 
 ### 5.3 Data Layer — Repositories
 
@@ -372,7 +393,15 @@ management/
 1. Migration runner + V1 migration     (§5.1)  ← load-bearing, blocks §5.3+
    └─► Tests: migration-runner.spec.ts
 2. Vietnamese core seed pipeline       (§5.2)  ← parallel with #3 sau khi #1 xong
-   └─► ingredients.json + dishes.json committed
+   ├─► 5.2.1 curated scaffolding (vi-{ingredients,composites,dishes}.ts + sources/)
+   ├─► 5.2.2 build-ingredients.ts                    (AC1–AC5)
+   ├─► 5.2.3 build-composites.ts                     (AC6–AC9)
+   ├─► 5.2.4 build-dishes.ts + validate-seed.ts      (AC10–AC15)
+   ├─► 5.2.5 V5 migration: seed_artifact table
+   ├─► 5.2.6 SeedLoaderService + unit tests
+   ├─► 5.2.7 App bootstrap integration
+   └─► 5.2.8 Emulator smoke test
+        Output: src/assets/seed/{ingredients,composites,dishes}.json committed
 3. Repositories                        (§5.3)
    └─► Tests: *.repository.spec.ts
 4. Stores                              (§5.4)
@@ -431,3 +460,4 @@ Phase 1 **DONE** khi **tất cả** items sau pass:
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-04-18 | Initial Phase 1 plan — scope, PRD matrix, 7-task breakdown, exit criteria |
+| 1.1 | 2026-04-26 | §5.2 v2: skip USDA, dùng nguồn VN (Viện Dinh Dưỡng + Wikipedia VI); split build pipeline thành 4 step (ingredients/composites/dishes/validate); composite = nested recipe sum tại build time; thêm `seed_artifact` table (V5) + SeedLoaderService idempotency; seed dishes ship `is_favorite=false`; §6 thêm 8 sub-step 5.2.1–5.2.8. Quyết định chốt qua discussion 5 câu hỏi với user. Full draft: `_drafts/phase-1-section-5.2-update.md`. |
