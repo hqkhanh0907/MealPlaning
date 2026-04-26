@@ -45,7 +45,8 @@
               "src/theme/variables.scss",
               "src/theme/form-modal.scss",
               "src/theme/form-field.scss",
-              "src/theme/list-card.scss"
+              "src/theme/list-card.scss",
+              "src/theme/button-row.scss"
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
@@ -133,7 +134,8 @@
               "src/theme/variables.scss",
               "src/theme/form-modal.scss",
               "src/theme/form-field.scss",
-              "src/theme/list-card.scss"
+              "src/theme/list-card.scss",
+              "src/theme/button-row.scss"
             ],
             "scripts": []
           },

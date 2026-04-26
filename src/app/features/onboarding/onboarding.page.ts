@@ -285,10 +285,14 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
             </div>
 
             <div class="button-row">
-              <ion-button fill="outline" class="btn-outline" (click)="goBack()">
+              <ion-button fill="outline" class="btn-row btn-row--secondary" (click)="goBack()">
                 Quay lại
               </ion-button>
-              <ion-button color="secondary" class="cta-button row-cta" (click)="nextFromStep2a()">
+              <ion-button
+                color="secondary"
+                class="btn-row btn-row--primary"
+                (click)="nextFromStep2a()"
+              >
                 Tiếp tục
               </ion-button>
             </div>
@@ -413,7 +417,7 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
             <div class="button-row">
               <ion-button
                 fill="outline"
-                class="btn-outline"
+                class="btn-row btn-row--secondary"
                 [disabled]="saving()"
                 (click)="goBack()"
               >
@@ -421,7 +425,7 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
               </ion-button>
               <ion-button
                 color="secondary"
-                class="cta-button row-cta"
+                class="btn-row btn-row--primary"
                 [disabled]="saving()"
                 (click)="complete()"
               >
@@ -662,31 +666,9 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
         text-transform: none;
         height: 48px;
       }
-      .cta-button.row-cta {
-        margin-top: 0;
-      }
-      .btn-outline {
-        --border-radius: var(--radius-sm);
-        --padding-top: 14px;
-        --padding-bottom: 14px;
-        font-size: 16px;
-        font-weight: 500;
-        text-transform: none;
-        height: 48px;
-      }
 
-      /* ====================================================================
-         BUTTON ROW — flex row, gap 12px, margin-top 24px
-         ==================================================================== */
-      .button-row {
-        display: flex;
-        gap: 12px;
-        margin-top: 24px;
-      }
-      .button-row ion-button {
-        flex: 1;
-        margin: 0;
-      }
+      /* NOTE: .button-row + .btn-row (--primary/--secondary) live in
+         src/theme/button-row.scss — shared across onboarding + Phase 1. */
 
       /* ====================================================================
          TOOLBAR — title centered (mockup spec), back button white, progress bar

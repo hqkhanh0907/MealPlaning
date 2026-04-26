@@ -1,0 +1,64 @@
+/* ============================================================================
+   BUTTON ROW — shared CTA pair (Quay lại / Tiếp tục) used in onboarding,
+   form modals, and Phase 1 management flows.
+   Design system §8.5: 48px height, 12px gap, 14px vertical padding,
+   16px font size, weight 500, no text-transform, var(--radius-sm).
+
+   Both buttons MUST render identical box geometry regardless of fill mode:
+     - fill="solid"   (color="secondary"  — primary action)
+     - fill="outline" (color="primary"    — secondary action)
+
+   Usage:
+     <div class="button-row">
+       <ion-button fill="outline" class="btn-row btn-row--secondary">Quay lại</ion-button>
+       <ion-button color="secondary" class="btn-row btn-row--primary">Tiếp tục</ion-button>
+     </div>
+   ============================================================================ */
+
+.button-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.button-row > ion-button,
+.button-row .btn-row {
+  flex: 1;
+  margin: 0;
+
+  /* Identical box across solid + outline fills */
+  --border-radius: var(--radius-sm);
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --border-width: 1px; /* solid normally 0 — keep parity with outline */
+
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: none;
+}
+
+/* Force shadow DOM .button-native to identical box —
+   without this, outline + solid render different intrinsic heights
+   because Ionic adds extra padding for outline borders. */
+.button-row > ion-button::part(native),
+.button-row .btn-row::part(native) {
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  padding-top: 0;
+  padding-bottom: 0;
+  contain: strict;
+}
+
+/* Stack vertically on very narrow screens — preserves 48px height */
+@media (max-width: 320px) {
+  .button-row {
+    flex-direction: column;
+  }
+}
