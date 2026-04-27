@@ -8,7 +8,6 @@ import {
   signal,
 } from '@angular/core';
 
-import { FormsModule } from '@angular/forms';
 import {
   IonContent,
   IonHeader,
@@ -36,7 +35,7 @@ export interface PickerOption {
   selector: 'app-bottom-sheet-picker',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, IonModal, IonHeader, IonToolbar, IonContent, IonIcon, IonSearchbar],
+  imports: [IonModal, IonHeader, IonToolbar, IonContent, IonIcon, IonSearchbar],
   template: `
     <ion-modal
       [isOpen]="isOpen()"

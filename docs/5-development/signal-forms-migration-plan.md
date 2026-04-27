@@ -245,12 +245,29 @@ sẵn từ B0, rollback chỉ là đổi 1 file template + 1 file logic.
 
 Same as B2 nhưng nested ingredient lines.
 
-### Phase B4 — Migrate onboarding
+### Phase B4 — Migrate onboarding ✅ DONE 2026-04-27
 
 Lớn nhất nhưng đơn giản (flat fields, multi-step). Wizard state vẫn ở
 component, chỉ value+validation vào Signal Forms.
 
-### Phase B5 — Cleanup
+**Implemented:**
+- Step 2a inputs (height/weight/age) migrated từ `[value]+(input)` →
+  `[formField]="step2aForm.<field>"`.
+- Schema mới `onboarding-step2a-form.schema.ts` — heightCm 130-250,
+  weightKg 30-300, age 10-100, gender required.
+- Live validation: `showStep2aErrors` signal gate + `effect()` re-run
+  `validateStep2a()` mỗi keystroke sau lần submit đầu (Phase 1 pattern).
+- Gender segment (button group, không phải `<input>`) cập nhật via
+  `step2aFormSignal.update()` — KHÔNG dùng `[formField]` vì không phải
+  native form control.
+- Step 1 (goal radio) + Step 2b (activity/gym radio cards) KHÔNG migrate
+  — chỉ là click handlers, không có form input.
+- `step="0.1"` cho height/weight để khớp Phase 1.
+
+Verified: lint clean, 145/145 tests, prod build OK, APK install
+emulator-5554 — live validation confirmed visually.
+
+### Phase B5 — Cleanup ✅ DONE 2026-04-27
 
 - Xóa `FormsModule`/`ReactiveFormsModule` imports.
 - Update `copilot-instructions.md` + `architecture.md` §9 đổi "signals-native
