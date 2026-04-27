@@ -8,8 +8,10 @@ import {
   Output,
   SimpleChanges,
   ViewChild,
+  signal,
+  untracked,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormField, form } from '@angular/forms/signals';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline, chevronDownOutline } from 'ionicons/icons';
@@ -21,34 +23,39 @@ import {
   type PickerOption,
 } from '../bottom-sheet-picker/bottom-sheet-picker.component';
 import { FormFieldComponent } from '../../forms';
+import { ingredientFormSchema } from '../../forms/schemas/ingredient-form.schema';
+import type {
+  IngredientEditFormValue,
+  IngredientEditUnitFormValue,
+} from './ingredient-edit-modal.types';
 
-export interface IngredientEditUnitFormValue {
-  local_id: string;
-  unit_id: string;
-  factor_to_basis: number;
-  is_default: boolean;
-  display_label: string;
-  is_approximate: boolean;
-  short_name_vi: string;
-}
+export type {
+  IngredientEditFormValue,
+  IngredientEditUnitFormValue,
+} from './ingredient-edit-modal.types';
 
-export interface IngredientEditFormValue {
-  name: string;
-  category: string;
-  nutrition_basis_unit: NutritionBasisUnit;
-  calories: number | null;
-  protein: number | null;
-  carbs: number | null;
-  fat: number | null;
-  fiber: number | null;
-  density_g_per_ml: number | null;
-  units: IngredientEditUnitFormValue[];
-}
+const emptyForm = (): IngredientEditFormValue => ({
+  name: '',
+  category: '',
+  nutrition_basis_unit: 'g',
+  calories: null,
+  protein: null,
+  carbs: null,
+  fat: null,
+  fiber: null,
+  density_g_per_ml: null,
+  units: [],
+});
+
+const cloneForm = (value: IngredientEditFormValue): IngredientEditFormValue => ({
+  ...value,
+  units: value.units.map((unit) => ({ ...unit })),
+});
 
 @Component({
   selector: 'app-ingredient-edit-modal',
   standalone: true,
-  imports: [FormsModule, IonIcon, BottomSheetPickerComponent, FormFieldComponent],
+  imports: [FormField, IonIcon, BottomSheetPickerComponent, FormFieldComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (isOpen) {
@@ -84,16 +91,16 @@ export interface IngredientEditFormValue {
               label="Tên nguyên liệu"
               inputId="ingr-field-name"
               errorId="err-ingr-name"
-              [invalid]="showErrors && !form.name.trim()"
+              [invalid]="showErrors && !nameValid()"
               errorMessage="Vui lòng nhập tên nguyên liệu"
             >
               <input
                 id="ingr-field-name"
                 class="input-native"
                 #nameInput
-                [(ngModel)]="form.name"
-                [attr.aria-invalid]="showErrors && !form.name.trim() ? 'true' : null"
-                [attr.aria-describedby]="showErrors && !form.name.trim() ? 'err-ingr-name' : null"
+                [formField]="ingredientForm.name"
+                [attr.aria-invalid]="showErrors && !nameValid() ? 'true' : null"
+                [attr.aria-describedby]="showErrors && !nameValid() ? 'err-ingr-name' : null"
               />
             </app-form-field>
 
@@ -101,7 +108,7 @@ export interface IngredientEditFormValue {
               label="Nhóm"
               inputId="ingr-field-category"
               errorId="err-ingr-category"
-              [invalid]="showErrors && !form.category.trim()"
+              [invalid]="showErrors && !categoryValid()"
               errorMessage="Vui lòng chọn nhóm nguyên liệu"
             >
               <button
@@ -109,12 +116,12 @@ export interface IngredientEditFormValue {
                 id="ingr-field-category"
                 class="picker-trigger--floating"
                 (click)="openCategoryPicker()"
-                [attr.aria-invalid]="showErrors && !form.category.trim() ? 'true' : null"
+                [attr.aria-invalid]="showErrors && !categoryValid() ? 'true' : null"
                 [attr.aria-describedby]="
-                  showErrors && !form.category.trim() ? 'err-ingr-category' : null
+                  showErrors && !categoryValid() ? 'err-ingr-category' : null
                 "
               >
-                <span>{{ form.category || 'Chọn nhóm nguyên liệu' }}</span>
+                <span>{{ formSignal().category || 'Chọn nhóm nguyên liệu' }}</span>
                 <ion-icon name="chevron-down-outline" aria-hidden="true" />
               </button>
             </app-form-field>
@@ -124,7 +131,7 @@ export interface IngredientEditFormValue {
               <button
                 type="button"
                 class="segment-button"
-                [class.selected]="form.nutrition_basis_unit === 'g'"
+                [class.selected]="formSignal().nutrition_basis_unit === 'g'"
                 (click)="setBasisUnit('g')"
               >
                 100g
@@ -132,7 +139,7 @@ export interface IngredientEditFormValue {
               <button
                 type="button"
                 class="segment-button"
-                [class.selected]="form.nutrition_basis_unit === 'ml'"
+                [class.selected]="formSignal().nutrition_basis_unit === 'ml'"
                 (click)="setBasisUnit('ml')"
               >
                 100ml
@@ -143,7 +150,7 @@ export interface IngredientEditFormValue {
               label="Calories (kcal)"
               inputId="ingr-field-calories"
               errorId="err-ingr-calories"
-              [invalid]="showErrors && isNegative(form.calories)"
+              [invalid]="showErrors && isNegative(formSignal().calories)"
               errorMessage="Calories không được nhỏ hơn 0"
             >
               <input
@@ -151,13 +158,13 @@ export interface IngredientEditFormValue {
                 class="input-native"
                 type="number"
                 inputmode="decimal"
-                [ngModel]="form.calories"
-                (ngModelChange)="onNutritionChange('calories', $event)"
-                min="0"
+                [formField]="ingredientForm.calories"
                 step="0.1"
-                [attr.aria-invalid]="showErrors && isNegative(form.calories) ? 'true' : null"
+                [attr.aria-invalid]="
+                  showErrors && isNegative(formSignal().calories) ? 'true' : null
+                "
                 [attr.aria-describedby]="
-                  showErrors && isNegative(form.calories) ? 'err-ingr-calories' : null
+                  showErrors && isNegative(formSignal().calories) ? 'err-ingr-calories' : null
                 "
               />
             </app-form-field>
@@ -169,9 +176,7 @@ export interface IngredientEditFormValue {
                   class="input-native"
                   type="number"
                   inputmode="decimal"
-                  [ngModel]="form.protein"
-                  (ngModelChange)="onNutritionChange('protein', $event)"
-                  min="0"
+                  [formField]="ingredientForm.protein"
                   step="0.1"
                 />
               </app-form-field>
@@ -181,9 +186,7 @@ export interface IngredientEditFormValue {
                   class="input-native"
                   type="number"
                   inputmode="decimal"
-                  [ngModel]="form.carbs"
-                  (ngModelChange)="onNutritionChange('carbs', $event)"
-                  min="0"
+                  [formField]="ingredientForm.carbs"
                   step="0.1"
                 />
               </app-form-field>
@@ -193,9 +196,7 @@ export interface IngredientEditFormValue {
                   class="input-native"
                   type="number"
                   inputmode="decimal"
-                  [ngModel]="form.fat"
-                  (ngModelChange)="onNutritionChange('fat', $event)"
-                  min="0"
+                  [formField]="ingredientForm.fat"
                   step="0.1"
                 />
               </app-form-field>
@@ -205,9 +206,7 @@ export interface IngredientEditFormValue {
                   class="input-native"
                   type="number"
                   inputmode="decimal"
-                  [ngModel]="form.fiber"
-                  (ngModelChange)="onNutritionChange('fiber', $event)"
-                  min="0"
+                  [formField]="ingredientForm.fiber"
                   step="0.1"
                 />
               </app-form-field>
@@ -218,8 +217,8 @@ export interface IngredientEditFormValue {
               Mỗi nguyên liệu cần ít nhất 1 đơn vị hợp lệ và đúng 1 đơn vị mặc định.
             </p>
 
-            @if (form.units.length === 0) {
-              <div class="unit-empty" [class.invalid]="showErrors && unitErrors.length > 0">
+            @if (formSignal().units.length === 0) {
+              <div class="unit-empty" [class.invalid]="showErrors && unitErrors().length > 0">
                 <div class="unit-empty-title">Chưa có đơn vị nào</div>
                 <div class="unit-empty-copy">
                   Thêm đơn vị quen thuộc như quả, g, ml hoặc đơn vị riêng của nguyên liệu này.
@@ -229,8 +228,8 @@ export interface IngredientEditFormValue {
                 </button>
               </div>
             } @else {
-              <div class="unit-list" [class.invalid]="showErrors && unitErrors.length > 0">
-                @for (unit of form.units; track unit.local_id) {
+              <div class="unit-list" [class.invalid]="showErrors && unitErrors().length > 0">
+                @for (unit of formSignal().units; track unit.local_id; let i = $index) {
                   <article class="unit-card">
                     <div class="unit-card__top">
                       <div class="unit-card__title">{{ unitTitle(unit) }}</div>
@@ -256,15 +255,12 @@ export interface IngredientEditFormValue {
                         <input
                           [id]="'ingr-unit-display-' + unit.local_id"
                           class="input-native"
-                          [ngModel]="unit.display_label"
-                          (ngModelChange)="
-                            updateUnit(unit.local_id, 'display_label', normalizeText($event))
-                          "
+                          [formField]="ingredientForm.units[i].display_label"
                           [placeholder]="unit.short_name_vi"
                         />
                       </app-form-field>
                       <app-form-field
-                        [label]="'1 đơn vị = ? ' + form.nutrition_basis_unit"
+                        [label]="'1 đơn vị = ? ' + formSignal().nutrition_basis_unit"
                         [inputId]="'ingr-unit-factor-' + unit.local_id"
                       >
                         <input
@@ -272,11 +268,7 @@ export interface IngredientEditFormValue {
                           class="input-native"
                           type="number"
                           inputmode="decimal"
-                          [ngModel]="unit.factor_to_basis"
-                          (ngModelChange)="
-                            updateUnit(unit.local_id, 'factor_to_basis', normalizeNumber($event, 0))
-                          "
-                          min="0.001"
+                          [formField]="ingredientForm.units[i].factor_to_basis"
                           step="0.001"
                         />
                       </app-form-field>
@@ -310,8 +302,8 @@ export interface IngredientEditFormValue {
               </button>
             }
 
-            @if (showErrors && unitErrors.length > 0) {
-              @for (error of unitErrors; track error) {
+            @if (showErrors && unitErrors().length > 0) {
+              @for (error of unitErrors(); track error) {
                 <div class="field-error">{{ error }}</div>
               }
             }
@@ -330,9 +322,7 @@ export interface IngredientEditFormValue {
                 class="input-native"
                 type="number"
                 inputmode="decimal"
-                [ngModel]="form.density_g_per_ml"
-                (ngModelChange)="onDensityChange($event)"
-                min="0"
+                [formField]="ingredientForm.density_g_per_ml"
                 step="0.001"
               />
             </app-form-field>
@@ -351,7 +341,7 @@ export interface IngredientEditFormValue {
           <app-bottom-sheet-picker
             #categoryPicker
             title="Chọn nhóm nguyên liệu"
-            [value]="form.category"
+            [value]="formSignal().category"
             [options]="categoryOptions"
             (valueChange)="onCategorySelected($event)"
           />
@@ -515,18 +505,7 @@ export class IngredientEditModalComponent implements OnChanges {
   @Input() saving = false;
   @Input() allowDelete = false;
   @Input() availableUnits: UnitModel[] = [];
-  @Input() form: IngredientEditFormValue = {
-    name: '',
-    category: '',
-    nutrition_basis_unit: 'g',
-    calories: null,
-    protein: null,
-    carbs: null,
-    fat: null,
-    fiber: null,
-    density_g_per_ml: null,
-    units: [],
-  };
+  @Input() form: IngredientEditFormValue = emptyForm();
   @Output() dismissed = new EventEmitter<void>();
   @Output() submitted = new EventEmitter<IngredientEditFormValue>();
   @Output() deleteRequested = new EventEmitter<void>();
@@ -534,13 +513,27 @@ export class IngredientEditModalComponent implements OnChanges {
   readonly categories = INGREDIENT_CATEGORIES;
   showErrors = false;
 
+  /**
+   * Internal writable signal mirroring the @Input `form` object. Signal Forms
+   * binds against this; ngOnChanges keeps it in sync with the parent.
+   */
+  protected readonly formSignal = signal<IngredientEditFormValue>(emptyForm());
+
+  /** Signal Forms FieldTree built from {@link formSignal} + schema. */
+  protected readonly ingredientForm = form(this.formSignal, ingredientFormSchema);
+
   constructor() {
     addIcons({ chevronBackOutline, chevronDownOutline });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['form']) {
+      this.formSignal.set(cloneForm(this.form));
+    }
     if (changes['isOpen']?.currentValue) {
       this.showErrors = false;
+      // Re-mirror the parent's form when reopening even if reference unchanged.
+      this.formSignal.set(cloneForm(this.form));
       queueMicrotask(() => {
         window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
         document
@@ -555,7 +548,7 @@ export class IngredientEditModalComponent implements OnChanges {
   }
 
   get unitOptions(): PickerOption[] {
-    const usedIds = new Set(this.form.units.map((unit) => unit.unit_id));
+    const usedIds = new Set(this.formSignal().units.map((unit) => unit.unit_id));
     return this.availableUnits
       .filter((unit) => !usedIds.has(unit.id))
       .map((unit) => ({
@@ -565,18 +558,24 @@ export class IngredientEditModalComponent implements OnChanges {
       }));
   }
 
-  get unitErrors(): string[] {
+  protected nameValid(): boolean {
+    return this.formSignal().name.trim().length > 0;
+  }
+
+  protected categoryValid(): boolean {
+    return this.formSignal().category.trim().length > 0;
+  }
+
+  protected unitErrors(): string[] {
     const errors: string[] = [];
-    if (this.form.units.length === 0) {
+    const units = this.formSignal().units;
+    if (units.length === 0) {
       errors.push('Cần ít nhất 1 đơn vị hợp lệ.');
     }
-    if (
-      this.form.units.length > 0 &&
-      this.form.units.filter((unit) => unit.is_default).length !== 1
-    ) {
+    if (units.length > 0 && units.filter((unit) => unit.is_default).length !== 1) {
       errors.push('Chọn đúng 1 đơn vị mặc định trước khi lưu.');
     }
-    if (this.form.units.some((unit) => unit.factor_to_basis <= 0)) {
+    if (units.some((unit) => unit.factor_to_basis <= 0)) {
       errors.push('Mỗi đơn vị cần có quy đổi lớn hơn 0.');
     }
     return errors;
@@ -591,7 +590,7 @@ export class IngredientEditModalComponent implements OnChanges {
   }
 
   onCategorySelected(category: string): void {
-    this.form.category = category;
+    this.formSignal.update((v) => ({ ...v, category }));
   }
 
   onUnitSelected(unitId: string): void {
@@ -601,91 +600,66 @@ export class IngredientEditModalComponent implements OnChanges {
     }
 
     const factor = this.getSuggestedFactor(unit);
-    this.form.units = [
-      ...this.form.units,
-      {
-        local_id: `${unit.id}-${crypto.randomUUID()}`,
-        unit_id: unit.id,
-        factor_to_basis: factor,
-        is_default: this.form.units.length === 0,
-        display_label: unit.short_name_vi,
-        is_approximate: unit.is_approximate === 1,
-        short_name_vi: unit.short_name_vi,
-      },
-    ];
+    this.formSignal.update((v) => ({
+      ...v,
+      units: [
+        ...v.units,
+        {
+          local_id: `${unit.id}-${crypto.randomUUID()}`,
+          unit_id: unit.id,
+          factor_to_basis: factor,
+          is_default: v.units.length === 0,
+          display_label: unit.short_name_vi,
+          is_approximate: unit.is_approximate === 1,
+          short_name_vi: unit.short_name_vi,
+        },
+      ],
+    }));
   }
 
   setBasisUnit(unit: NutritionBasisUnit): void {
-    this.form.nutrition_basis_unit = unit;
-    this.form.units = this.form.units.map((item) => {
-      const definition = this.availableUnits.find((candidate) => candidate.id === item.unit_id);
-      if (!definition) {
-        return item;
-      }
-      const suggestedFactor = this.getSuggestedFactor(definition);
-      const usesGlobalDefault =
-        (unit === 'g' && definition.unit_type === 'mass' && definition.base_factor_g !== null) ||
-        (unit === 'ml' && definition.unit_type === 'volume' && definition.base_factor_ml !== null);
-      return usesGlobalDefault ? { ...item, factor_to_basis: suggestedFactor } : item;
-    });
-  }
-
-  normalizeText(value: unknown): string {
-    return typeof value === 'string' ? value.trim() : '';
-  }
-
-  normalizeNumber(value: unknown, fallback: number | null): number {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : (fallback ?? 0);
-  }
-
-  onDensityChange(value: string | number | null): void {
-    if (value === null || value === '' || Number.isNaN(Number(value))) {
-      this.form.density_g_per_ml = null;
-      return;
-    }
-    this.form.density_g_per_ml = Number(value);
+    this.formSignal.update((v) => ({
+      ...v,
+      nutrition_basis_unit: unit,
+      units: v.units.map((item) => {
+        const definition = this.availableUnits.find((c) => c.id === item.unit_id);
+        if (!definition) {
+          return item;
+        }
+        const usesGlobalDefault =
+          (unit === 'g' && definition.unit_type === 'mass' && definition.base_factor_g !== null) ||
+          (unit === 'ml' &&
+            definition.unit_type === 'volume' &&
+            definition.base_factor_ml !== null);
+        return usesGlobalDefault
+          ? { ...item, factor_to_basis: this.getSuggestedFactor(definition, unit) }
+          : item;
+      }),
+    }));
   }
 
   isNegative(value: number | null): boolean {
     return value !== null && value < 0;
   }
 
-  onNutritionChange(
-    field: 'calories' | 'protein' | 'carbs' | 'fat' | 'fiber',
-    value: string | number | null,
-  ): void {
-    if (value === null || value === '' || value === undefined) {
-      this.form[field] = null;
-      return;
-    }
-    const parsed = typeof value === 'number' ? value : Number(value);
-    this.form[field] = Number.isFinite(parsed) ? parsed : null;
-  }
-
-  updateUnit(
-    localId: string,
-    field: 'display_label' | 'factor_to_basis',
-    value: string | number,
-  ): void {
-    this.form.units = this.form.units.map((unit) =>
-      unit.local_id === localId ? { ...unit, [field]: value } : unit,
-    );
-  }
-
   markDefault(localId: string): void {
-    this.form.units = this.form.units.map((unit) => ({
-      ...unit,
-      is_default: unit.local_id === localId,
+    this.formSignal.update((v) => ({
+      ...v,
+      units: v.units.map((unit) => ({
+        ...unit,
+        is_default: unit.local_id === localId,
+      })),
     }));
   }
 
   removeUnit(localId: string): void {
-    const nextUnits = this.form.units.filter((unit) => unit.local_id !== localId);
-    if (nextUnits.length === 1) {
-      nextUnits[0] = { ...nextUnits[0], is_default: true };
-    }
-    this.form.units = nextUnits;
+    this.formSignal.update((v) => {
+      const nextUnits = v.units.filter((unit) => unit.local_id !== localId);
+      if (nextUnits.length === 1) {
+        nextUnits[0] = { ...nextUnits[0], is_default: true };
+      }
+      return { ...v, units: nextUnits };
+    });
   }
 
   unitTitle(unit: IngredientEditUnitFormValue): string {
@@ -696,7 +670,7 @@ export class IngredientEditModalComponent implements OnChanges {
 
   unitExample(unit: IngredientEditUnitFormValue): string {
     const label = unit.display_label || unit.short_name_vi;
-    return `Hiển thị: ${label} · 1 ${label} ≈ ${this.formatNumber(unit.factor_to_basis)}${this.form.nutrition_basis_unit}`;
+    return `Hiển thị: ${label} · 1 ${label} ≈ ${this.formatNumber(unit.factor_to_basis)}${this.formSignal().nutrition_basis_unit}`;
   }
 
   submit(): void {
@@ -706,16 +680,17 @@ export class IngredientEditModalComponent implements OnChanges {
       return;
     }
 
+    const value = untracked(() => this.formSignal());
     this.submitted.emit({
-      ...this.form,
-      name: this.form.name.trim(),
-      category: this.form.category.trim(),
-      calories: this.form.calories ?? 0,
-      protein: this.form.protein ?? 0,
-      carbs: this.form.carbs ?? 0,
-      fat: this.form.fat ?? 0,
-      fiber: this.form.fiber ?? 0,
-      units: this.form.units.map((unit) => ({
+      ...value,
+      name: value.name.trim(),
+      category: value.category.trim(),
+      calories: value.calories ?? 0,
+      protein: value.protein ?? 0,
+      carbs: value.carbs ?? 0,
+      fat: value.fat ?? 0,
+      fiber: value.fiber ?? 0,
+      units: value.units.map((unit) => ({
         ...unit,
         display_label: unit.display_label.trim(),
       })),
@@ -724,26 +699,27 @@ export class IngredientEditModalComponent implements OnChanges {
 
   private isValid(): boolean {
     return (
-      this.form.name.trim().length > 0 &&
-      this.form.category.trim().length > 0 &&
-      !this.isNegative(this.form.calories) &&
-      this.unitErrors.length === 0
+      this.nameValid() &&
+      this.categoryValid() &&
+      !this.isNegative(this.formSignal().calories) &&
+      this.unitErrors().length === 0
     );
   }
 
   private focusFirstInvalidField(): void {
-    const firstErrorSelector = !this.form.name.trim()
+    const v = this.formSignal();
+    const firstErrorSelector = !v.name.trim()
       ? 'input'
-      : !this.form.category.trim()
+      : !v.category.trim()
         ? '.picker-trigger'
-        : this.isNegative(this.form.calories)
+        : this.isNegative(v.calories)
           ? 'input[type="number"]'
-          : this.unitErrors.length > 0
+          : this.unitErrors().length > 0
             ? '.unit-empty, .unit-list'
             : null;
 
     setTimeout(() => {
-      if (!this.form.name.trim()) {
+      if (!this.formSignal().name.trim()) {
         this.nameInput?.nativeElement.focus();
       }
 
@@ -754,19 +730,12 @@ export class IngredientEditModalComponent implements OnChanges {
     });
   }
 
-  private getSuggestedFactor(unit: UnitModel): number {
-    if (
-      this.form.nutrition_basis_unit === 'g' &&
-      unit.unit_type === 'mass' &&
-      unit.base_factor_g !== null
-    ) {
+  private getSuggestedFactor(unit: UnitModel, basis?: NutritionBasisUnit): number {
+    const b = basis ?? this.formSignal().nutrition_basis_unit;
+    if (b === 'g' && unit.unit_type === 'mass' && unit.base_factor_g !== null) {
       return unit.base_factor_g;
     }
-    if (
-      this.form.nutrition_basis_unit === 'ml' &&
-      unit.unit_type === 'volume' &&
-      unit.base_factor_ml !== null
-    ) {
+    if (b === 'ml' && unit.unit_type === 'volume' && unit.base_factor_ml !== null) {
       return unit.base_factor_ml;
     }
     return 1;

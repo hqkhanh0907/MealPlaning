@@ -40,22 +40,28 @@ describe('IngredientEditModalComponent', () => {
       payload = value;
     });
 
-    component.form.name = 'Trứng gà';
-    component.form.category = 'Trứng & Sữa';
-    component.form.nutrition_basis_unit = 'g';
-    component.form.calories = 155;
-    component.form.protein = 13;
-    component.form.units = [
-      {
-        local_id: 'u1',
-        unit_id: 'unit-g',
-        factor_to_basis: 1,
-        is_default: true,
-        display_label: 'g',
-        is_approximate: false,
-        short_name_vi: 'g',
-      },
-    ];
+    fixture.componentRef.setInput('form', {
+      name: 'Trứng gà',
+      category: 'Trứng & Sữa',
+      nutrition_basis_unit: 'g',
+      calories: 155,
+      protein: 13,
+      carbs: null,
+      fat: null,
+      fiber: null,
+      density_g_per_ml: null,
+      units: [
+        {
+          local_id: 'u1',
+          unit_id: 'unit-g',
+          factor_to_basis: 1,
+          is_default: true,
+          display_label: 'g',
+          is_approximate: false,
+          short_name_vi: 'g',
+        },
+      ],
+    });
     fixture.detectChanges();
 
     const saveButton = fixture.nativeElement.querySelector(
