@@ -602,6 +602,7 @@ export function buildMealTagMigration(): { version: number; statements: readonly
 }
 
 export const SEED_ARTIFACT_MIGRATION_DDL: readonly string[] = [
+  `ALTER TABLE dish ADD COLUMN is_favorite INTEGER NOT NULL DEFAULT 0`,
   `CREATE TABLE IF NOT EXISTS seed_artifact (
     artifact_id      TEXT PRIMARY KEY,
     artifact_type    TEXT NOT NULL CHECK (artifact_type IN ('ingredient', 'dish')),

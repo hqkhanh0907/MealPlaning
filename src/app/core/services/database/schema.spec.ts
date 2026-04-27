@@ -96,6 +96,11 @@ describe('buildSeedArtifactMigration', () => {
     expect(migration.version).toBe(5);
     expect(
       migration.statements.some((statement: string) =>
+        statement.includes('ALTER TABLE dish ADD COLUMN is_favorite INTEGER NOT NULL DEFAULT 0'),
+      ),
+    ).toBeTrue();
+    expect(
+      migration.statements.some((statement: string) =>
         statement.includes('CREATE TABLE IF NOT EXISTS seed_artifact'),
       ),
     ).toBeTrue();
