@@ -1,99 +1,112 @@
 // HealthMate AI — Design System Theme Variables
-// Source: docs/3-design/design-system.md v1.2
-// Rule: ALL neutrals use blue-tinted values (hue ~230, chroma ~0.01)
+// Source: docs/3-design/design-system.md v2.0 (Sage Wellness)
+// Palette: Sage primary + Coral CTA + warm neutrals (hue ~30°, low chroma)
+// Migration: từ Material Blue (v1.x) sang Lifesum Sage Wellness (v2.0)
 
 // =============================================================================
 // LIGHT MODE
 // =============================================================================
 
 :root {
-  // Primary — Material Blue
-  --ion-color-primary: #2196f3;
-  --ion-color-primary-rgb: 33, 150, 243;
+  // ---------------------------------------------------------------------------
+  // Primary — Sage (DS §2.1)
+  // ---------------------------------------------------------------------------
+  --ion-color-primary: #6f8b6e;
+  --ion-color-primary-rgb: 111, 139, 110;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #1976d2;
-  --ion-color-primary-tint: #42a5f5;
+  --ion-color-primary-shade: #5a745a;
+  --ion-color-primary-tint: #8aa086;
 
-  // Secondary — Action Accent Orange
-  --ion-color-secondary: #ff9800;
-  --ion-color-secondary-rgb: 255, 152, 0;
+  // ---------------------------------------------------------------------------
+  // Secondary — Coral CTA (DS §2.2) — primary call-to-action color
+  // ---------------------------------------------------------------------------
+  --ion-color-secondary: #d97757;
+  --ion-color-secondary-rgb: 217, 119, 87;
   --ion-color-secondary-contrast: #ffffff;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #f57c00;
-  --ion-color-secondary-tint: #ffb74d;
+  --ion-color-secondary-shade: #c26344;
+  --ion-color-secondary-tint: #e8a287;
 
-  // Tertiary
-  --ion-color-tertiary: #7c4dff;
-  --ion-color-tertiary-rgb: 124, 77, 255;
+  // ---------------------------------------------------------------------------
+  // Tertiary — Plum (rare accent, e.g. dark-mode AI gradient)
+  // ---------------------------------------------------------------------------
+  --ion-color-tertiary: #8a6a8c;
+  --ion-color-tertiary-rgb: 138, 106, 140;
   --ion-color-tertiary-contrast: #ffffff;
   --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #6200ea;
-  --ion-color-tertiary-tint: #b388ff;
+  --ion-color-tertiary-shade: #6e5470;
+  --ion-color-tertiary-tint: #a288a4;
 
-  // Success — Green
-  --ion-color-success: #4caf50;
-  --ion-color-success-rgb: 76, 175, 80;
+  // ---------------------------------------------------------------------------
+  // Semantic colors (Sage-tuned saturation, low chroma)
+  // ---------------------------------------------------------------------------
+  --ion-color-success: #6f8b6e;
+  --ion-color-success-rgb: 111, 139, 110;
   --ion-color-success-contrast: #ffffff;
   --ion-color-success-contrast-rgb: 255, 255, 255;
-  --ion-color-success-shade: #388e3c;
-  --ion-color-success-tint: #66bb6a;
+  --ion-color-success-shade: #5a745a;
+  --ion-color-success-tint: #8aa086;
 
-  // Warning — Yellow
-  --ion-color-warning: #ffc107;
-  --ion-color-warning-rgb: 255, 193, 7;
-  --ion-color-warning-contrast: #000000;
-  --ion-color-warning-contrast-rgb: 0, 0, 0;
-  --ion-color-warning-shade: #ffa000;
-  --ion-color-warning-tint: #ffd54f;
+  --ion-color-warning: #d9a857;
+  --ion-color-warning-rgb: 217, 168, 87;
+  --ion-color-warning-contrast: #1c1a17;
+  --ion-color-warning-contrast-rgb: 28, 26, 23;
+  --ion-color-warning-shade: #b88e44;
+  --ion-color-warning-tint: #e3bb7a;
 
-  // Danger — Red
-  --ion-color-danger: #f44336;
-  --ion-color-danger-rgb: 244, 67, 54;
+  --ion-color-danger: #c2493e;
+  --ion-color-danger-rgb: 194, 73, 62;
   --ion-color-danger-contrast: #ffffff;
   --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-shade: #d32f2f;
-  --ion-color-danger-tint: #ef5350;
+  --ion-color-danger-shade: #a23a31;
+  --ion-color-danger-tint: #d06b62;
 
-  // Medium (blue-tinted)
-  --ion-color-medium: #5f6575;
-  --ion-color-medium-rgb: 95, 101, 117;
+  // ---------------------------------------------------------------------------
+  // Medium / Light (warm neutrals — DS §2.4)
+  // ---------------------------------------------------------------------------
+  --ion-color-medium: #80776a;
+  --ion-color-medium-rgb: 128, 119, 106;
   --ion-color-medium-contrast: #ffffff;
   --ion-color-medium-contrast-rgb: 255, 255, 255;
-  --ion-color-medium-shade: #4a4f5c;
-  --ion-color-medium-tint: #7a7f8d;
+  --ion-color-medium-shade: #6a6258;
+  --ion-color-medium-tint: #9a9286;
 
-  // Light (blue-tinted)
-  --ion-color-light: #f5f7fa;
-  --ion-color-light-rgb: 245, 247, 250;
-  --ion-color-light-contrast: #1a1a2e;
-  --ion-color-light-contrast-rgb: 26, 26, 46;
-  --ion-color-light-shade: #e2e4ec;
-  --ion-color-light-tint: #ffffff;
+  --ion-color-light: #f2f2ee;
+  --ion-color-light-rgb: 242, 242, 238;
+  --ion-color-light-contrast: #1c1a17;
+  --ion-color-light-contrast-rgb: 28, 26, 23;
+  --ion-color-light-shade: #e5e1d6;
+  --ion-color-light-tint: #fafaf7;
 
-  // Background & Surfaces
-  --ion-background-color: #f5f7fa;
-  --ion-background-color-rgb: 245, 247, 250;
+  // ---------------------------------------------------------------------------
+  // Background & Surfaces (warm hue ~30°, very low chroma)
+  // ---------------------------------------------------------------------------
+  --ion-background-color: #fafaf7;
+  --ion-background-color-rgb: 250, 250, 247;
   --ion-card-background: #ffffff;
-  --ion-toolbar-background: #2196f3;
-  --ion-toolbar-color: #ffffff;
+  --ion-toolbar-background: #fafaf7;
+  --ion-toolbar-color: #1c1a17;
   --ion-tab-bar-background: #ffffff;
-  --ion-tab-bar-color: #5f6575;
-  --ion-tab-bar-color-selected: #2196f3;
+  --ion-tab-bar-color: #80776a;
+  --ion-tab-bar-color-selected: #6f8b6e;
 
-  // Text (blue-tinted neutrals per DS §2.4)
-  --ion-text-color: #1a1a2e;
-  --ion-text-color-rgb: 26, 26, 46;
+  // Text (warm dark — hue ~30°, near black)
+  --ion-text-color: #1c1a17;
+  --ion-text-color-rgb: 28, 26, 23;
 
   // Border
-  --ion-border-color: #e2e4ec;
+  --ion-border-color: #e8e3d9;
 
-  // Font
-  --ion-font-family: 'Roboto', sans-serif;
+  // Font — Inter for UI, Fraunces for display headings
+  --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   // ==========================================================================
   // App-specific Custom Properties (DS §2–§8)
   // ==========================================================================
+
+  // Display font (DS §3.1) — used for h1, hero metrics
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
 
   // Z-index scale (DS §12)
   --z-base: 0;
@@ -104,51 +117,58 @@
   --z-dialog: 50;
   --z-toast: 60;
 
-  // Primary Scale
-  --primary-900: #0d47a1;
-  --primary-800: #1565c0;
-  --primary-700: #1976d2;
-  --primary-600: #1e88e5;
-  --primary-500: #2196f3;
-  --primary-400: #42a5f5;
-  --primary-300: #64b5f6;
-  --primary-200: #90caf9;
-  --primary-100: #bbdefb;
-  --primary-50: #e3f2fd;
+  // Sage Scale (replaces v1 --primary-*)
+  --primary-900: #1f2820;
+  --primary-800: #324033;
+  --primary-700: #455b45;
+  --primary-600: #5a745a;
+  --primary-500: #6f8b6e;
+  --primary-400: #8aa086;
+  --primary-300: #a8b7a5;
+  --primary-200: #c8d2c5;
+  --primary-100: #e5eae3;
+  --primary-50: #f2f4f1;
 
-  // Accent Scale
-  --accent-700: #f57c00;
-  --accent-500: #ff9800;
-  --accent-300: #ffb74d;
-  --accent-50: #fff8e1;
+  // Coral Scale (CTA + accent)
+  --accent-700: #9a4f36;
+  --accent-600: #c26344;
+  --accent-500: #d97757;
+  --accent-300: #e8a287;
+  --accent-100: #f8ddd2;
+  --accent-50: #fcf1ed;
 
-  // Neutral (blue-tinted — DS §2.4)
-  --bg-page: #f5f7fa;
+  // Neutral (warm — DS §2.4)
+  --bg-page: #fafaf7;
   --bg-card: #ffffff;
-  --bg-elevated: #ffffff;
-  --bg-muted: #e2e4ec;
-  --text-primary: #1a1a2e;
-  --text-secondary: #2d3142;
-  --text-tertiary: #5f6575;
-  --text-disabled: #939aaa;
-  --border-color: #e2e4ec;
+  --bg-elevated: #f2f2ee;
+  --bg-muted: #e8e3d9;
+  --text-primary: #1c1a17;
+  --text-secondary: #4a453e;
+  --text-tertiary: #80776a;
+  --text-disabled: #b5ac9c;
+  --border-color: #e8e3d9;
 
-  // Input-specific border (DS §8.6 — darker than --border for field definition)
-  --input-border-color: #c8cbd4;
+  // Input-specific border (DS §8.6 — slightly darker than --border-color)
+  --input-border-color: #d4ccbc;
 
-  // AI Card (DS §2.5)
-  --ai-card-bg: #e3f2fd;
-  --ai-card-border: #bbdefb;
-  --ai-avatar-bg: #2196f3;
-  --ai-text-color: #1565c0;
+  // Macro nutrient palette (DS §2.6)
+  --macro-protein: #6f8b6e; // sage
+  --macro-carbs: #c99b6e; // warm amber
+  --macro-fat: #d97757; // coral
 
-  // Streak Card
-  --streak-card-bg: #fff8e1;
-  --streak-number-color: #ff9800;
+  // AI Card (DS §2.5) — sage tint
+  --ai-card-bg: #f2f4f1;
+  --ai-card-border: #c8d2c5;
+  --ai-avatar-bg: #6f8b6e;
+  --ai-text-color: #455b45;
 
-  // Quick Action
-  --quick-action-bg: #e3f2fd;
-  --quick-action-text: #1565c0;
+  // Streak Card — coral tint
+  --streak-card-bg: #fcf1ed;
+  --streak-number-color: #d97757;
+
+  // Quick Action — sage tint
+  --quick-action-bg: #f2f4f1;
+  --quick-action-text: #455b45;
 
   // Spacing (DS §4 — 4px grid)
   --space-xs: 4px;
@@ -163,18 +183,19 @@
   --radius-micro: 4px;
   --radius-xs: 8px;
   --radius-sm: 12px;
+  --radius-md: 14px; // NEW v2 — fixes pre-existing missing token used by global.scss .fab-menu-item
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-full: 9999px;
 
-  // Shadows — light mode only (DS §6)
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 1px 4px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.12);
-  --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.2);
+  // Shadows (DS §6) — warm hue ~30°, low chroma; subtle depth
+  --shadow-sm: 0 1px 2px rgba(60, 45, 25, 0.04);
+  --shadow-md: 0 2px 8px rgba(60, 45, 25, 0.06);
+  --shadow-lg: 0 8px 24px rgba(60, 45, 25, 0.1);
+  --shadow-xl: 0 16px 48px rgba(60, 45, 25, 0.14);
 
-  // Focus Ring (DS §6)
-  --focus-ring: 0 0 0 2px rgba(33, 150, 243, 0.12);
+  // Focus Ring (DS §6) — sage
+  --focus-ring: 0 0 0 2px rgba(111, 139, 110, 0.18);
 
   // Easing (DS §8f)
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
@@ -184,95 +205,101 @@
 }
 
 // =============================================================================
-// DARK MODE (blue-tinted dark neutrals — hue ~230)
+// DARK MODE — warm charcoal (hue ~30°, NOT cool blue-grey)
 // =============================================================================
 
 @media (prefers-color-scheme: dark) {
   :root {
-    // Primary — Lighter blue for dark backgrounds
-    --ion-color-primary: #42a5f5;
-    --ion-color-primary-rgb: 66, 165, 245;
-    --ion-color-primary-shade: #2196f3;
-    --ion-color-primary-tint: #64b5f6;
+    // Primary — sage stays recognizable on dark
+    --ion-color-primary: #8aa086;
+    --ion-color-primary-rgb: 138, 160, 134;
+    --ion-color-primary-contrast: #1c1a17;
+    --ion-color-primary-contrast-rgb: 28, 26, 23;
+    --ion-color-primary-shade: #6f8b6e;
+    --ion-color-primary-tint: #a8b7a5;
 
-    // Secondary — Lighter orange; contrast is dark bg for text on CTA
-    --ion-color-secondary: #ffb74d;
-    --ion-color-secondary-rgb: 255, 183, 77;
-    --ion-color-secondary-contrast: #121218;
-    --ion-color-secondary-contrast-rgb: 18, 18, 24;
-    --ion-color-secondary-shade: #ff9800;
-    --ion-color-secondary-tint: #ffe0b2;
+    // Secondary — coral lighter for dark bg
+    --ion-color-secondary: #e8a287;
+    --ion-color-secondary-rgb: 232, 162, 135;
+    --ion-color-secondary-contrast: #1c1a17;
+    --ion-color-secondary-contrast-rgb: 28, 26, 23;
+    --ion-color-secondary-shade: #d97757;
+    --ion-color-secondary-tint: #f0bea8;
 
-    // Success
-    --ion-color-success: #66bb6a;
-    --ion-color-success-shade: #4caf50;
-    --ion-color-success-tint: #81c784;
+    // Semantic
+    --ion-color-success: #8aa086;
+    --ion-color-success-shade: #6f8b6e;
+    --ion-color-success-tint: #a8b7a5;
 
-    // Warning
-    --ion-color-warning: #ffd54f;
-    --ion-color-warning-shade: #ffc107;
-    --ion-color-warning-tint: #ffe082;
+    --ion-color-warning: #e3bb7a;
+    --ion-color-warning-shade: #d9a857;
+    --ion-color-warning-tint: #ecca97;
 
-    // Danger
-    --ion-color-danger: #ef5350;
-    --ion-color-danger-shade: #f44336;
-    --ion-color-danger-tint: #e57373;
+    --ion-color-danger: #d06b62;
+    --ion-color-danger-rgb: 208, 107, 98;
+    --ion-color-danger-shade: #c2493e;
+    --ion-color-danger-tint: #d98980;
 
-    // Background & Surfaces (blue-tinted dark — DS §6 elevation)
-    --ion-background-color: #121218;
-    --ion-background-color-rgb: 18, 18, 24;
-    --ion-card-background: #1d1f26;
-    --ion-toolbar-background: #1565c0;
-    --ion-toolbar-color: #ffffff;
-    --ion-tab-bar-background: #1d1f26;
-    --ion-tab-bar-color: #a8aab4;
-    --ion-tab-bar-color-selected: #42a5f5;
+    // Background & Surfaces — warm charcoal
+    --ion-background-color: #1c1a17;
+    --ion-background-color-rgb: 28, 26, 23;
+    --ion-card-background: #28251f;
+    --ion-toolbar-background: #1c1a17;
+    --ion-toolbar-color: #f5f1e8;
+    --ion-tab-bar-background: #28251f;
+    --ion-tab-bar-color: #918876;
+    --ion-tab-bar-color-selected: #8aa086;
 
     // Text
-    --ion-text-color: #ffffff;
-    --ion-text-color-rgb: 255, 255, 255;
+    --ion-text-color: #f5f1e8;
+    --ion-text-color-rgb: 245, 241, 232;
 
-    // Border (blue-tinted)
-    --ion-border-color: #333340;
+    // Border
+    --ion-border-color: #3e3a33;
 
     // Item
-    --ion-item-background: #1d1f26;
+    --ion-item-background: #28251f;
 
-    // App-specific overrides (blue-tinted dark neutrals)
-    --bg-page: #121218;
-    --bg-card: #1d1f26;
-    --bg-elevated: #2c2e36;
-    --bg-muted: #2c2e36;
-    --text-primary: #ffffff;
-    --text-secondary: #e0e0e8;
-    --text-tertiary: #a8aab4;
-    --text-disabled: #5f6575;
-    --border-color: #333340;
+    // App-specific overrides (warm charcoal neutrals)
+    --bg-page: #1c1a17;
+    --bg-card: #28251f;
+    --bg-elevated: #34302a;
+    --bg-muted: #34302a;
+    --text-primary: #f5f1e8;
+    --text-secondary: #c9c2b4;
+    --text-tertiary: #918876;
+    --text-disabled: #5e574c;
+    --border-color: #3e3a33;
 
-    // Input-specific border (DS §8.6)
-    --input-border-color: #444850;
+    // Input-specific border
+    --input-border-color: #4a463e;
+
+    // Macro (slightly brighter for dark bg)
+    --macro-protein: #8aa086;
+    --macro-carbs: #d4af85;
+    --macro-fat: #e8a287;
 
     // AI Card (dark — DS §2.5)
-    --ai-card-bg: #1a237e;
-    --ai-card-border: #283593;
-    --ai-avatar-bg: #42a5f5;
-    --ai-text-color: #90caf9;
+    --ai-card-bg: #2c3a2e;
+    --ai-card-border: #455b45;
+    --ai-avatar-bg: #8aa086;
+    --ai-text-color: #c8d2c5;
 
-    // Streak Card (dark — uses bg-elevated)
-    --streak-card-bg: #2c2e36;
-    --streak-number-color: #ffb74d;
+    // Streak Card (dark — coral tint on elevated)
+    --streak-card-bg: #3a2d26;
+    --streak-number-color: #e8a287;
 
     // Quick Action (dark)
-    --quick-action-bg: #1a237e;
-    --quick-action-text: #90caf9;
+    --quick-action-bg: #2c3a2e;
+    --quick-action-text: #c8d2c5;
 
-    // Shadows — disabled in dark mode, use elevation instead
+    // Shadows — disabled in dark mode (use elevation surface instead)
     --shadow-sm: none;
     --shadow-md: none;
     --shadow-lg: none;
     --shadow-xl: none;
 
     // Focus Ring (dark — higher opacity)
-    --focus-ring: 0 0 0 2px rgba(66, 165, 245, 0.15);
+    --focus-ring: 0 0 0 2px rgba(138, 160, 134, 0.28);
   }
 }

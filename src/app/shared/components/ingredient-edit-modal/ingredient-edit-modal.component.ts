@@ -458,8 +458,8 @@ const cloneForm = (value: IngredientEditFormValue): IngredientEditFormValue => (
     }
 
     .badge-approx {
-      background: rgba(255, 193, 7, 0.16);
-      color: #b26a00;
+      background: rgba(var(--ion-color-warning-rgb, 217, 168, 87), 0.18);
+      color: var(--ion-color-warning-shade);
     }
 
     .unit-actions {

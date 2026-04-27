@@ -17,7 +17,9 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
           <h2 id="dialog-title" class="dialog-title">{{ title }}</h2>
           <p id="dialog-message" class="dialog-message">{{ message }}</p>
           <div class="dialog-actions">
-            <button class="dialog-btn-cancel" type="button" (click)="cancelled.emit()">{{ cancelLabel }}</button>
+            <button class="dialog-btn-cancel" type="button" (click)="cancelled.emit()">
+              {{ cancelLabel }}
+            </button>
             <button
               [class.dialog-btn-primary]="confirmVariant === 'primary'"
               [class.dialog-btn-danger]="confirmVariant === 'danger'"
@@ -95,15 +97,16 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
     .dialog-btn-danger,
     .dialog-btn-primary {
       border: none;
-      color: #ffffff;
+      color: var(--ion-color-primary-contrast);
     }
 
     .dialog-btn-danger {
-      background: var(--ion-color-danger, #d32f2f);
+      background: var(--ion-color-danger);
     }
 
     .dialog-btn-primary {
-      background: var(--ion-color-primary, #2196f3);
+      background: var(--ion-color-secondary);
+      color: var(--ion-color-secondary-contrast);
     }
 
     .dialog-btn-danger:disabled,

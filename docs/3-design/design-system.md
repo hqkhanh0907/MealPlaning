@@ -1,97 +1,141 @@
 # Design System — HealthMate AI
 
-**Version:** 1.2  
-**Date:** 2026-04-20  
-**Status:** Active
+**Version:** 2.0 (Sage Wellness)  
+**Date:** 2026-04-27  
+**Status:** Active  
+**Previous:** 1.x — Material Blue (deprecated). Migration notes ở §16 Changelog.
 
 ---
 
 ## 1. Tổng quan
 
-Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, tối ưu cho Android. Tất cả quyết định thiết kế đều đã được so sánh mockup HTML và lựa chọn qua discussion.
+Design System của HealthMate AI dựa trên **Ionic 8 + Angular 21**, tối ưu cho Android. Visual direction: **Lifesum Sage Wellness** — wellness-grade, tinh tế, warm neutral, low chroma — không phải Material Blue đại trà. Mọi quyết định màu / typography / spacing đã được khảo sát qua 12 direction explorations và mockup HTML 5 màn (xem §11).
 
 ### Nguyên tắc thiết kế
 
 | Nguyên tắc | Mô tả |
 |------------|-------|
-| **Đơn giản** | UI phải dễ hiểu cho Persona Lan (tech savvy 2/5) |
-| **Data-friendly** | Hiển thị số liệu (calo, macro, weight) rõ ràng cho Persona Hùng |
-| **Offline-aware** | Mọi trạng thái offline đều rõ ràng (toast + banner + disable AI) |
-| **Dark mode first** | Mọi component đều phải có dark variant |
+| **Wellness, không clinical** | Warm hue (~30°), low chroma. Tránh blue saturated, tránh pure gray. |
+| **Đơn giản** | UI dễ hiểu cho Persona Lan (tech savvy 2/5). Layout nhiều khoảng trắng. |
+| **Data-friendly** | Số liệu (calo, macro, weight) dùng `Fraunces` display + `Inter` tabular-nums. |
+| **Offline-aware** | Mọi trạng thái offline rõ ràng (toast + banner + disable AI). |
+| **Dark mode first** | Mọi component đều phải có dark variant (warm charcoal, không blue-grey). |
+| **Tinted warm neutrals** | Mọi neutral đều tinted warm (hue ~30°), không pure gray. |
 
 ---
 
 ## 2. Color Palette
 
-### 2.1 Primary — Material Blue
+> **Source palette:** Sage Wellness (direction 03). Reference: `docs/3-design/explorations/2026-color-directions/03-sage-suite/`.
+
+### 2.1 Primary — Sage
+
+Sage là màu chủ đạo của brand: gợi cảm giác wellness, trầm, tự nhiên. Dùng cho navigation active, link, primary state, selected state, success.
 
 | Token | Hex | Dùng cho |
 |-------|-----|----------|
-| `--primary-900` | `#0D47A1` | Status bar (dark) |
-| `--primary-800` | `#1565C0` | Toolbar dark mode, header hover |
-| `--primary-700` | `#1976D2` | Status bar (light) |
-| `--primary-600` | `#1E88E5` | Active states |
-| `--primary-500` | `#2196F3` | **Primary — toolbar, buttons, links, nav active** |
-| `--primary-400` | `#42A5F5` | Dark mode primary, progress bars |
+| `--primary-900` | `#1F2820` | Status bar (dark mode darkest) |
+| `--primary-800` | `#324033` | Surface depth (dark mode) |
+| `--primary-700` | `#455B45` | AI text dark mode, sage on dark |
+| `--primary-600` | `#5A745A` | Hover/pressed primary |
+| `--primary-500` | `#6F8B6E` | **Primary — nav active, link, selected, success** |
+| `--primary-400` | `#8AA086` | Dark mode primary (lighter for contrast) |
+| `--primary-300` | `#A8B7A5` | Dark mode AI text |
+| `--primary-200` | `#C8D2C5` | AI card border (light), divider on sage surface |
+| `--primary-100` | `#E5EAE3` | AI card hint background |
+| `--primary-50`  | `#F2F4F1` | AI card background, quick action bg (light) |
 
-> **⚠️ Contrast note:** `--primary-500` (#2196F3) on white = **3.12:1** — passes AA for large text (≥18pt / ≥14pt bold) and icons only. For body-size primary text on white, use `--primary-700` (#1976D2, 5.58:1) instead. `--primary-400` (#42A5F5) on dark bg (#121218) = **7.05:1** — passes AA for all text sizes.
-| `--primary-300` | `#64B5F6` | Dark mode links, secondary blue |
-| `--primary-200` | `#90CAF9` | Dark mode AI text, light accents |
-| `--primary-100` | `#BBDEFB` | AI card border (light) |
-| `--primary-50` | `#E3F2FD` | AI card background, quick action bg (light) |
+> **Contrast:** `--primary-500` (#6F8B6E) trên white = **4.06:1** — pass WCAG AA cho text 18pt+ và icons. Cho body-size primary text trên white, dùng `--primary-600` (#5A745A, 5.45:1) hoặc `--primary-700` (#455B45, 8.25:1). `--primary-400` trên charcoal `#1C1A17` = **6.3:1** — pass AA all text sizes.
 
-### 2.2 Action Accent — Orange
+### 2.2 Secondary — Coral CTA
+
+Coral là **màu CTA chính** (form submit, FAB, save, primary action). Lý do tách Coral khỏi Sage: wellness app cần điểm nhấn ấm để CTA nổi bật trên surface sage/cream — sage làm CTA sẽ chìm.
 
 | Token | Hex | Dùng cho |
 |-------|-----|----------|
-| `--accent-700` | `#F57C00` | Orange hover/pressed |
-| `--accent-500` | `#FF9800` | **CTA buttons, streak 🔥, AI buttons, FAB** |
-| `--accent-300` | `#FFB74D` | Dark mode streak, light orange |
-| `--accent-50` | `#FFF8E1` | Streak card background (light) |
+| `--accent-700` | `#9A4F36` | Coral pressed state |
+| `--accent-600` | `#C26344` | Coral hover state, CTA on light surface (text) |
+| `--accent-500` | `#D97757` | **CTA fill — submit, FAB, save**, streak number |
+| `--accent-300` | `#E8A287` | Dark mode CTA fill |
+| `--accent-100` | `#F8DDD2` | Streak/AI badge bg |
+| `--accent-50`  | `#FCF1ED` | Streak card background (light) |
+
+> **Rule:** Coral KHÔNG được dùng cho body text (saturation cao quá ở 14px). Chỉ dùng cho fill button, badge, accent number lớn (≥18px), icon CTA.
 
 ### 2.3 Semantic Colors
 
-> **Color-blind note:** ~8% nam giới không phân biệt rõ đỏ/xanh lá. Khi hiển thị macros (Protein=xanh, Fat=đỏ) cạnh nhau, PHẢI kèm text label hoặc icon — KHÔNG dựa vào màu alone.
+> **Color-blind note:** ~8% nam giới không phân biệt rõ đỏ/xanh lá. Khi hiển thị macros (Protein=sage, Fat=coral) cạnh nhau, PHẢI kèm text label hoặc icon — KHÔNG dựa vào màu alone.
 
 | Vai trò | Light Mode | Dark Mode | Dùng cho |
 |---------|-----------|-----------|----------|
-| **Success** | `#4CAF50` | `#66BB6A` | Đạt mục tiêu, progress đủ, weight giảm |
-| **Warning** | `#FFC107` | `#FFD54F` | Thiếu macro, gần giới hạn |
-| **Error** | `#F44336` | `#EF5350` | Vượt calo, lỗi hệ thống |
-| **Info** | `#2196F3` | `#42A5F5` | Thông báo, gợi ý |
+| **Success** | `#6F8B6E` (sage) | `#8AA086` | Đạt mục tiêu, progress đủ, weight giảm |
+| **Warning** | `#D9A857` (warm gold) | `#E3BB7A` | Thiếu macro, gần giới hạn, approx badge |
+| **Danger**  | `#C2493E` (warm cherry) | `#D06B62` | Vượt calo, lỗi hệ thống, destructive |
+| **Info**    | `#5A8A7A` (teal-sage) | `#A4C4B8` | Thông báo, hint phụ (rarely used) |
 
-### 2.4 Neutral Colors
+> Toàn bộ semantic colors đều low-chroma, hue gần với palette chính → tổng thể harmonious. KHÔNG dùng Material `#F44336` / `#4CAF50` / `#FFC107` — quá saturated, phá tone Sage.
 
-> **Rule: Tinted Neutrals.** Pure gray (`#E8E8E8`, `#999`) thiếu personality. Mọi neutral nên có **blue tint nhẹ** (chroma ~0.01, hue ~230) để cohesive với primary blue. Implementation dùng hex gần nhất.
+### 2.4 Neutral Colors — Warm Tinted
+
+> **Rule: Warm Tinted Neutrals.** Pure gray (`#E8E8E8`, `#999`) thiếu personality và clash với palette warm. Mọi neutral đều tinted warm (hue ~30°, chroma ~0.005–0.015). Background light là warm cream `#FAFAF7`, dark là warm charcoal `#1C1A17` — **không** blue-grey `#121218`.
 
 | Token | Light Mode | Dark Mode | Dùng cho |
 |-------|-----------|-----------|----------|
-| `--bg-page` | `#F5F7FA` | `#121218` | Page background (đã tinted) |
-| `--bg-card` | `#FFFFFF` | `#1D1F26` | Card background |
-| `--bg-elevated` | `#FFFFFF` | `#2C2E36` | Modal, bottom sheet |
-| `--bg-muted` | `#E2E4EC` | `#2C2E36` | Skeleton shimmer, disabled surfaces |
-| `--text-primary` | `#1A1A2E` | `#FFFFFF` | Heading, số liệu |
-| `--text-secondary` | `#2D3142` | `#E0E0E8` | Body text |
-| `--text-tertiary` | `#5F6575` | `#A8AAB4` | Subtitle, mô tả phụ (dark ≥4.78:1 on card bg) |
-| `--text-disabled` | `#939AAA` | `#5F6575` | Disabled elements, input placeholder text ONLY |
-| `--border` | `#E2E4EC` | `#333340` | Divider, border |
+| `--bg-page` | `#FAFAF7` | `#1C1A17` | Page background (warm cream / warm charcoal) |
+| `--bg-card` | `#FFFFFF` | `#28251F` | Card background |
+| `--bg-elevated` | `#F2F2EE` | `#34302A` | Modal, bottom sheet, segment selected |
+| `--bg-muted` | `#E8E3D9` | `#34302A` | Skeleton shimmer, disabled surfaces, search bg |
+| `--text-primary` | `#1C1A17` | `#F5F1E8` | Heading, số liệu |
+| `--text-secondary` | `#4A453E` | `#C9C2B4` | Body text |
+| `--text-tertiary` | `#80776A` | `#918876` | Subtitle, mô tả phụ |
+| `--text-disabled` | `#B5AC9C` | `#5E574C` | Disabled, ::placeholder ONLY |
+| `--border-color` | `#E8E3D9` | `#3E3A33` | Divider, card border |
+| `--input-border-color` | `#D4CCBC` | `#4A463E` | Input field border (slightly darker) |
 
 > **⚠️ Token Usage — text-tertiary vs text-disabled:**
-> - `--text-tertiary` (#5F6575 light / #A8AAB4 dark): Subtitles, hints, section descriptions, search icons, ⋮ more icons, inactive tabs, meta info, result counts, empty state descriptions, input suffixes (kcal, g). Contrast ≥4.5:1 on white — WCAG AA safe.
-> - `--text-disabled` (#939AAA light / #5F6575 dark): **ONLY** for actual `[disabled]` elements and `::placeholder` text inside inputs. Contrast ~3.5:1 on white — acceptable ONLY for placeholder text per WCAG exception.
-> - **KHÔNG dùng** `#939AAA` trong dark mode CSS rules. Giá trị này không tồn tại trong dark palette. Dark mode disabled = `#5F6575`, dark mode tertiary = `#A8AAB4`.
+> - `--text-tertiary` (#80776A light / #918876 dark): Subtitles, hints, section descriptions, search icons, ⋮ more icons, inactive tabs, meta info, result counts, empty state descriptions, input suffixes (kcal, g). Contrast ≥4.5:1 — WCAG AA safe.
+> - `--text-disabled` (#B5AC9C light / #5E574C dark): **ONLY** cho actual `[disabled]` elements và `::placeholder`. Contrast ~3:1 — chỉ acceptable cho placeholder per WCAG exception.
 
-### 2.5 Dark Mode — AI Card
+### 2.5 AI Card & Surfaces
 
 | Element | Light Mode | Dark Mode |
 |---------|-----------|-----------|
-| AI card bg | `#E3F2FD` | `#1A237E` |
-| AI card border | `#BBDEFB` | `#283593` |
-| AI avatar bg | `#2196F3` | `#42A5F5` |
-| AI text color | `#1565C0` | `#90CAF9` |
-| Quick action bg | `#E3F2FD` | `#1A237E` |
-| Quick action text | `#1565C0` | `#90CAF9` |
-| Streak card bg | `#FFF8E1` | `#2C2E36` |
+| AI card bg | `#F2F4F1` (`--ai-card-bg`) | `#2C3A2E` |
+| AI card border | `#C8D2C5` (`--ai-card-border`) | `#455B45` |
+| AI avatar bg | `#6F8B6E` | `#8AA086` |
+| AI text color | `#455B45` | `#C8D2C5` |
+| Quick action bg | `#F2F4F1` | `#2C3A2E` |
+| Quick action text | `#455B45` | `#C8D2C5` |
+| Streak card bg | `#FCF1ED` | `#3A2D26` |
+| Streak number color | `#D97757` | `#E8A287` |
+
+### 2.6 Macro Nutrient Palette
+
+| Macro | Light | Dark | Token |
+|-------|-------|------|-------|
+| Protein | `#6F8B6E` (sage) | `#8AA086` | `--macro-protein` |
+| Carbs   | `#C99B6E` (warm amber) | `#D4AF85` | `--macro-carbs` |
+| Fat     | `#D97757` (coral) | `#E8A287` | `--macro-fat` |
+
+Cả 3 cùng hue family ấm (~30–80°) → biểu đồ stacked nhìn cohesive thay vì rời rạc như Material RYB.
+
+### 2.7 Data-Viz / Category Badges
+
+10 hue spread quanh color wheel, low chroma, low saturation để các badge category không "chọi" nhau hoặc át primary brand. Định nghĩa trong `src/theme/list-card.scss`. Bg = color @ 10% alpha (light) / 18% alpha (dark).
+
+| Category | Light hex | Tone |
+|----------|-----------|------|
+| thit (thịt) | `#A85544` | terracotta |
+| ca (cá) | `#4A7A8A` | slate blue |
+| trung (trứng) | `#B07A3E` | warm amber |
+| rau | `#6F8B6E` | sage (= primary) |
+| ngu-coc | `#A66638` | burnt sienna |
+| dau-hat | `#8A6A8C` | muted plum |
+| dau-mo | `#C9A847` | golden |
+| gia-vi | `#B04A6A` | muted rose |
+| nuoc-dung | `#5A8A7A` | teal-sage |
+| trai-cay | `#C2493E` | cherry (= danger) |
+| khac | `#80776A` | warm medium |
 
 ---
 
@@ -100,14 +144,22 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Material Design**, t�
 ### 3.1 Font Family
 
 ```scss
---font-family: 'Roboto', sans-serif;
+--ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+--font-display:    'Fraunces', Georgia, 'Times New Roman', serif;
 ```
 
-**Lý do chọn Roboto:**
-- Mặc định của Ionic/Material — zero conflict
-- Hỗ trợ tiếng Việt có dấu tốt (Google thiết kế cho đa ngôn ngữ)
-- Nhẹ nhất (~100KB cho 4 weights: Regular, Medium, SemiBold, Bold)
-- Phù hợp tất cả persona
+**Inter** — UI body font (replaces Roboto từ v1.x):
+- Tabular numerals (kcal, gram, weight) hiển thị thẳng cột
+- 4 weights: 400 / 500 / 600 / 700
+- Hỗ trợ tiếng Việt có dấu, hinted tốt cho Android
+- Industry standard cho modern wellness app (Lifesum, MyFitnessPal premium, Oura)
+
+**Fraunces** — display serif cho hero metric, h1, onboarding step title:
+- Variable optical-size (opsz 9..144) — render đẹp ở mọi kích thước
+- Mang cảm giác "premium editorial" đặc trưng wellness app cao cấp
+- Chỉ dùng cho display headings (≥24px), KHÔNG dùng cho body/UI
+
+Loading: Google Fonts CDN preconnect + display=swap (xem `src/index.html`).
 
 ### 3.2 Font Weights
 
@@ -247,11 +299,13 @@ Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi 
 
 | Token | Value | Dùng cho |
 |-------|-------|----------|
-| `--shadow-sm` | `0 1px 3px rgba(0,0,0,0.06)` | **Tier Subtle**: list items, secondary cards |
-| `--shadow-md` | `0 1px 4px rgba(0,0,0,0.08)` | **Tier Prominent**: primary cards (light mode) |
-| `--shadow-lg` | `0 2px 8px rgba(0,0,0,0.12)` | Bottom sheet handle area, elevated menus |
-| `--shadow-xl` | `0 8px 32px rgba(0,0,0,0.2)` | **Overlay**: confirm dialog, toast, FAB |
+| `--shadow-sm` | `0 1px 2px rgba(60, 40, 20, 0.04)` | **Tier Subtle**: list items, secondary cards |
+| `--shadow-md` | `0 2px 8px rgba(60, 40, 20, 0.06)` | **Tier Prominent**: primary cards (light mode) |
+| `--shadow-lg` | `0 4px 16px rgba(60, 40, 20, 0.08)` | Bottom sheet handle area, elevated menus |
+| `--shadow-xl` | `0 12px 32px rgba(60, 40, 20, 0.12)` | **Overlay**: confirm dialog, toast, FAB |
 | Dark mode | **Không dùng shadow** | Dùng background elevation thay thế (§6 Dark Mode) |
+
+> **Warm shadow:** rgba dùng warm-tinted dark `(60, 40, 20)` thay vì pure black `(0,0,0)` — match warm neutrals và tránh cảm giác "card cắt giấy" lạnh.
 
 > **Mapping → Card Tiers (§8.1):** Flat=no shadow, Subtle=`--shadow-sm`, Prominent=`--shadow-md`. Bottom sheets/menus dùng `--shadow-lg`. Overlays (dialog, toast, FAB) dùng `--shadow-xl`.
 
@@ -259,8 +313,8 @@ Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi 
 
 | Token | Value | Dùng cho |
 |-------|-------|----------|
-| `--focus-ring` (light) | `0 0 0 2px rgba(33,150,243,0.12)` | Focus-visible ring on interactive elements |
-| `--focus-ring` (dark) | `0 0 0 2px rgba(66,165,245,0.15)` | Focus-visible ring, higher opacity for dark bg |
+| `--focus-ring` (light) | `0 0 0 3px rgba(111, 139, 110, 0.20)` | Focus-visible ring (sage halo) |
+| `--focus-ring` (dark) | `0 0 0 3px rgba(138, 160, 134, 0.28)` | Focus-visible ring, dark bg |
 
 > **Note:** Focus rings use box-shadow (not outline) cho border-radius compatibility. Chỉ hiện trên `:focus-visible`, không trên `:focus`.
 
@@ -268,12 +322,12 @@ Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi 
 
 | Level | Background | Dùng cho |
 |-------|-----------|----------|
-| Base | `#121218` | Page background |
-| Level 1 | `#1D1F26` | Cards |
-| Level 2 | `#2C2E36` | Modal, elevated components |
-| Level 3 | `#333340` | Dropdown, tooltip |
+| Base    | `#1C1A17` | Page background (warm charcoal) |
+| Level 1 | `#28251F` | Cards |
+| Level 2 | `#34302A` | Modal, elevated components |
+| Level 3 | `#3E3A33` | Dropdown, tooltip, border |
 
-> **Note:** Dark mode dùng blue-tinted dark grays (hue ~230) thay vì pure neutral. Tạo visual connection với primary blue.
+> **Note:** Dark mode dùng warm-tinted charcoal (hue ~30°) thay vì blue-grey (hue ~230° như v1). Tạo visual connection với palette warm và tone xuyên suốt.
 
 ---
 
@@ -1213,86 +1267,106 @@ After adding an ingredient, bottom sheet stays open:
 
 ## 9. Ionic Theme Variables
 
+> **Source of truth:** `src/theme/variables.scss`. Đoạn dưới là **trích yếu** — khi sửa palette luôn sửa file gốc trước, sau đó update doc này.
+
 ### 9.1 Light Mode (`variables.scss`)
 
 ```scss
 :root {
-  // Primary
-  --ion-color-primary: #2196F3;
-  --ion-color-primary-rgb: 33, 150, 243;
-  --ion-color-primary-contrast: #ffffff;
-  --ion-color-primary-shade: #1976D2;
-  --ion-color-primary-tint: #42A5F5;
+  // Primary — Sage
+  --ion-color-primary: #6F8B6E;
+  --ion-color-primary-rgb: 111, 139, 110;
+  --ion-color-primary-contrast: #FFFFFF;
+  --ion-color-primary-shade: #5A745A;
+  --ion-color-primary-tint: #8AA086;
 
-  // Secondary (Action Accent)
-  --ion-color-secondary: #FF9800;
-  --ion-color-secondary-rgb: 255, 152, 0;
-  --ion-color-secondary-contrast: #ffffff;
-  --ion-color-secondary-shade: #F57C00;
-  --ion-color-secondary-tint: #FFB74D;
+  // Secondary — Coral CTA
+  --ion-color-secondary: #D97757;
+  --ion-color-secondary-rgb: 217, 119, 87;
+  --ion-color-secondary-contrast: #FFFFFF;
+  --ion-color-secondary-shade: #C26344;
+  --ion-color-secondary-tint: #E8A287;
 
-  // Success
-  --ion-color-success: #4CAF50;
-  --ion-color-success-rgb: 76, 175, 80;
-  --ion-color-success-contrast: #ffffff;
-  --ion-color-success-shade: #388E3C;
-  --ion-color-success-tint: #66BB6A;
+  // Success (= Sage)
+  --ion-color-success: #6F8B6E;
+  --ion-color-success-rgb: 111, 139, 110;
+  --ion-color-success-contrast: #FFFFFF;
+  --ion-color-success-shade: #5A745A;
+  --ion-color-success-tint: #8AA086;
 
-  // Warning
-  --ion-color-warning: #FFC107;
-  --ion-color-warning-rgb: 255, 193, 7;
-  --ion-color-warning-contrast: #000000;
-  --ion-color-warning-shade: #FFA000;
-  --ion-color-warning-tint: #FFD54F;
+  // Warning — warm gold
+  --ion-color-warning: #D9A857;
+  --ion-color-warning-rgb: 217, 168, 87;
+  --ion-color-warning-contrast: #1C1A17;
+  --ion-color-warning-shade: #B58E47;
+  --ion-color-warning-tint: #E3BB7A;
 
-  // Danger
-  --ion-color-danger: #F44336;
-  --ion-color-danger-rgb: 244, 67, 54;
-  --ion-color-danger-contrast: #ffffff;
-  --ion-color-danger-shade: #D32F2F;
-  --ion-color-danger-tint: #EF5350;
+  // Danger — warm cherry
+  --ion-color-danger: #C2493E;
+  --ion-color-danger-rgb: 194, 73, 62;
+  --ion-color-danger-contrast: #FFFFFF;
+  --ion-color-danger-shade: #A33C33;
+  --ion-color-danger-tint: #D06B62;
 
-  // Background
-  --ion-background-color: #F5F7FA;
+  // Background — warm cream
+  --ion-background-color: #FAFAF7;
   --ion-card-background: #FFFFFF;
-  --ion-toolbar-background: #2196F3;
+  --ion-toolbar-background: #FAFAF7;   // toolbar transparent (không primary fill)
   --ion-tab-bar-background: #FFFFFF;
 
-  // Text (tinted neutral)
-  --ion-text-color: #1A1A2E;
-  --ion-text-color-rgb: 26, 26, 46;
+  // Text — warm charcoal
+  --ion-text-color: #1C1A17;
+  --ion-text-color-rgb: 28, 26, 23;
 
   // Font
-  --ion-font-family: 'Roboto', sans-serif;
+  --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display:    'Fraunces', Georgia, serif;
 }
 ```
+
+> **Toolbar đổi pattern:** v1 dùng `--ion-toolbar-background = primary` (Material-style filled bar). v2 dùng cream bg + sage text → editorial, ít visual noise. Header KHÔNG còn fill primary blue.
 
 ### 9.2 Dark Mode
 
 ```scss
 @media (prefers-color-scheme: dark) {
   :root {
-    --ion-color-primary: #42A5F5;
-    --ion-color-primary-shade: #2196F3;
-    --ion-color-primary-tint: #64B5F6;
+    --ion-color-primary: #8AA086;          // lighter sage cho contrast trên charcoal
+    --ion-color-primary-rgb: 138, 160, 134;
+    --ion-color-primary-shade: #6F8B6E;
+    --ion-color-primary-tint: #A8B7A5;
 
-    --ion-color-secondary: #FFB74D;
-    --ion-color-secondary-shade: #FF9800;
-    --ion-color-secondary-tint: #FFE0B2;
+    --ion-color-secondary: #E8A287;        // lighter coral
+    --ion-color-secondary-rgb: 232, 162, 135;
+    --ion-color-secondary-shade: #D97757;
+    --ion-color-secondary-tint: #F0BBA6;
 
-    // Blue-tinted dark neutrals
-    --ion-background-color: #121218;
-    --ion-card-background: #1D1F26;
-    --ion-toolbar-background: #1565C0;
-    --ion-tab-bar-background: #1D1F26;
+    --ion-color-warning: #E3BB7A;
+    --ion-color-danger:  #D06B62;
 
-    --ion-text-color: #FFFFFF;
-    --ion-text-color-rgb: 255, 255, 255;
+    // Warm charcoal neutrals (KHÔNG blue-tinted)
+    --ion-background-color: #1C1A17;
+    --ion-card-background: #28251F;
+    --ion-toolbar-background: #1C1A17;
+    --ion-tab-bar-background: #28251F;
 
-    --ion-border-color: #333340;
+    --ion-text-color: #F5F1E8;
+    --ion-text-color-rgb: 245, 241, 232;
+
+    --ion-border-color: #3E3A33;
   }
 }
 ```
+
+### 9.3 Removed / Renamed Tokens (v1 → v2)
+
+| v1 token | v2 status |
+|----------|-----------|
+| `--ion-toolbar-background: #2196F3` | Changed → `#FAFAF7` (cream, no fill) |
+| `--border` (without `-color`) | Renamed → `--border-color` (Ionic standard) |
+| Material `#F44336/#4CAF50/#FFC107/#2196F3` | Replaced with warm semantics (§2.3) |
+| Pure blue-grey `#121218 / #1D1F26 / #2C2E36` | Replaced with warm charcoal `#1C1A17 / #28251F / #34302A` |
+| `'Roboto'` font | Replaced with `'Inter'` + display `'Fraunces'` |
 
 ---
 
@@ -1495,3 +1569,40 @@ Xem `docs/3-design/mockups/README.md` để biết danh sách hiện có và tr�
 | 1.2 | 2026-04-20 | **Audit Rounds 1-10:** Fix tinted neutrals (#AAAAAA→#A8AAB4, #1A1A1A→#1A1A2E). Add SemiBold 600 weight. Add type scale notes (muddy pairs). Add easing tokens (no generic ease). Add card 3-tier hierarchy. Add success state pattern. Add error message templates. Add safe area §10.1. Add dark mode weight §10.2. Add vertical rhythm §3.7. Add diagonal-fractions §3.5. Update reduced motion (preserve functional). Update all Ionic dark vars (tinted). Fix button radius → --radius-sm (12px). Add 8 states (was 6). Add FAB/Segment/Filter/Card/Menu to per-component states. Add §10.3 ARIA labels + focus order. Fix shadow mapping → card tiers. Fix input/progress bar/segment tokens. Remove --radius-md (duplicate). |
 | 1.1 | 2026-04-19 | Add: Input/Select spec (8.6), Radio/Checkbox (8.7), Toolbar (8.8), Interaction States (8b), Touch Targets (8c), Text Transform (8d), Icon Rules (8e), Animations (8f), Onboarding Components (8g). Fix: `--radius-sm` 8→12px, add `--radius-xs` 8px. |
 | 1.0 | 2026-04-14 | Initial Design System — Color, Typography, Spacing, Components |
+
+---
+
+## 16. Changelog
+
+### v2.0 — 2026-04-27 (Sage Wellness rewrite)
+
+Major color system rewrite: từ Material Blue + Orange (v1.x) sang Sage Wellness + Coral (direction 03 of 12 explorations).
+
+**Breaking changes:**
+- Primary: Material Blue `#2196F3` → Sage `#6F8B6E`
+- CTA: Orange `#FF9800` → Coral `#D97757`
+- Background light: `#F5F7FA` blue-tint → `#FAFAF7` warm cream
+- Background dark: `#121218` blue-grey → `#1C1A17` warm charcoal
+- Toolbar: filled primary → cream/charcoal transparent (no fill)
+- Font UI: `Roboto` → `Inter`
+- Font display: (none) → `Fraunces` (added for h1, hero metric, onboarding step title)
+- Semantic colors: Material saturated → low-chroma warm equivalents
+- All neutrals retinted from blue-grey (hue ~230°) to warm (hue ~30°)
+- Shadow rgba: `(0,0,0)` → `(60,40,20)` warm dark
+- `--border` token renamed to `--border-color` (Ionic standard)
+- Added: `--font-display`, `--input-border-color` token, `--macro-protein/carbs/fat`, full sage 50–900 scale, full coral 50–700 scale
+- Fixed: `--radius-md` token (consumed at `global.scss:110` but undefined trong v1)
+- Removed: AI card dark navy `#1A237E` → sage `#2C3A2E`
+
+**Non-breaking:**
+- Spacing scale (§4) unchanged
+- Border-radius scale (§5) unchanged
+- Component layouts (§8) unchanged — only token references swap
+- Form-field canonical pattern (§8.6) unchanged structurally
+- 11-color category badge palette (§2.7) revamped to warm low-chroma
+
+**Migration:**
+No feature flag — in-place rewrite. Apps cần `npx cap sync android` + rebuild APK để thấy thay đổi. Không có data migration. SCSS token references tiếp tục work; hex hardcode được tìm và replace trong `bottom-sheet-picker`, `confirm-dialog`, `onboarding`, `ingredient-edit-modal`, `global.scss`.
+
+### v1.2 — 2026-04-20 (final pre-rewrite)
+- Material Blue + Orange palette (deprecated by v2.0)

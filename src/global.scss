@@ -43,7 +43,7 @@
 ion-radio::part(container) {
   width: 18px;
   height: 18px;
-  border: 2px solid #c8cbd4;
+  border: 2px solid var(--input-border-color);
   border-radius: 50%;
 }
 
@@ -55,7 +55,7 @@ ion-radio::part(mark) {
 
 @media (prefers-color-scheme: dark) {
   ion-radio::part(container) {
-    border-color: #5f6575;
+    border-color: var(--input-border-color);
   }
 }
 
@@ -74,7 +74,9 @@ app-management .fab {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 app-management .fab ion-icon {

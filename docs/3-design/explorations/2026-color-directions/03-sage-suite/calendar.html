@@ -1,0 +1,160 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"/>
+<title>Sage Suite — Lịch ăn</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_tokens.css">
+<style>
+.hdr{padding:8px 22px 0;display:flex;justify-content:space-between;align-items:center}
+.hdr .month{font-family:var(--font-display);font-size:24px;font-style:italic;font-weight:500;letter-spacing:-0.015em;margin:0;color:var(--ink-1);display:flex;align-items:center;gap:6px}
+.hdr .month svg{width:14px;height:14px;color:var(--ink-2)}
+.hdr-actions{display:flex;gap:8px}
+.hdr-icon{width:38px;height:38px;border-radius:99px;background:var(--bg-card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-1);box-shadow:var(--sh-xs)}
+.hdr-icon svg{width:16px;height:16px}
+
+.week{padding:14px 22px 8px;display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.day{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0 10px;border-radius:var(--r-md);cursor:pointer;position:relative}
+.day .dow{font-size:10px;font-weight:600;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase}
+.day .num{font-family:var(--font-display);font-size:18px;font-weight:500;color:var(--ink-1);font-variant-numeric:tabular-nums}
+.day .dot{width:4px;height:4px;border-radius:99px;background:var(--primary);margin-top:2px}
+.day.act{background:var(--ink-1);color:#FFF}
+.day.act .dow{color:rgba(255,252,246,.6)}
+.day.act .num{color:#FFFCF6}
+.day.act .dot{background:var(--accent)}
+
+.summary{margin:8px 22px 4px;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 16px;display:flex;justify-content:space-around;box-shadow:var(--sh-xs)}
+.summary .it{text-align:center}
+.summary .it .v{font-family:var(--font-display);font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink-1);letter-spacing:-0.01em}
+.summary .it .l{font-size:10px;color:var(--ink-2);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.summary .div{width:1px;background:var(--line)}
+
+.timeline{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;padding:10px 22px 180px;display:flex;flex-direction:column;gap:12px}
+
+.slot{display:flex;gap:14px;align-items:flex-start}
+.slot-time{width:48px;flex-shrink:0;text-align:right;padding-top:14px}
+.slot-time .h{font-family:var(--font-display);font-size:15px;font-weight:500;color:var(--ink-1);font-variant-numeric:tabular-nums;line-height:1}
+.slot-time .m{font-size:9px;color:var(--ink-3);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+
+.slot-body{flex:1;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--sh-xs);position:relative}
+.slot-body::before{content:"";position:absolute;left:-7px;top:18px;width:12px;height:12px;border-radius:99px;background:var(--bg-card);border:2px solid var(--primary)}
+.slot-body .lbl{font-size:10px;color:var(--primary-deep);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:0 0 4px}
+.slot-body h4{font-family:var(--font-body);font-size:14px;font-weight:600;margin:0;color:var(--ink-1);line-height:1.3}
+.slot-body .meta{display:flex;gap:10px;margin-top:8px;font-size:11px;color:var(--ink-2)}
+.slot-body .meta .kcal{font-family:var(--font-mono);color:var(--ink-1);font-weight:600;font-variant-numeric:tabular-nums}
+.slot-body .meta span{display:flex;align-items:center;gap:4px}
+
+.slot-body.empty{background:transparent;border-style:dashed;border-color:var(--line-strong);box-shadow:none;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.slot-body.empty::before{background:var(--bg-page);border-color:var(--line-strong)}
+.slot-body.empty .name{font-size:13px;color:var(--ink-3);font-style:italic}
+.slot-body.empty .add{width:32px;height:32px;border-radius:99px;background:var(--primary-soft);color:var(--primary-deep);display:flex;align-items:center;justify-content:center;border:0}
+.slot-body.empty .add svg{width:14px;height:14px;stroke-width:2.5}
+
+.slot-body.ai{background:linear-gradient(135deg,#EFE4D0 0%,#FFFCF6 100%);border-color:rgba(184,153,104,.25)}
+.slot-body.ai::before{background:var(--ai);border-color:var(--ai)}
+.slot-body.ai .lbl{color:var(--ai-ink)}
+.scroll::-webkit-scrollbar,.list::-webkit-scrollbar,.timeline::-webkit-scrollbar,.sheet::-webkit-scrollbar{display:none}
+</style></head><body>
+
+<div class="head">
+<p class="tag">03 · Sage Wellness Suite</p>
+<h1>Lịch ăn — Calendar</h1>
+<p>Week selector + timeline view với slot AI suggest. Test palette ở scale time-based UI.</p>
+</div>
+
+<div class="suite-nav">
+<a href="dashboard.html">Tổng quan</a>
+<a href="dish-list.html">Quản lý món</a>
+<a href="dish-detail.html">Chi tiết món</a>
+<a href="calendar.html" class="act">Lịch ăn</a>
+<a href="onboarding.html">Onboarding</a>
+<a href="index.html" style="background:transparent;border-color:rgba(255,255,255,.2);color:rgba(229,222,208,.6)">← Suite home</a>
+</div>
+
+<div style="position:relative"><div class="notch"></div><div class="phone"><div class="app">
+<div class="sb"><span>9:41</span><span class="r">●●● 84%</span></div>
+
+<div class="hdr">
+  <h2 class="month">Tháng 4, 2026 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></h2>
+  <div class="hdr-actions">
+    <button class="hdr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
+    <button class="hdr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg></button>
+  </div>
+</div>
+
+<div class="week">
+  <div class="day"><span class="dow">T2</span><span class="num">21</span><span class="dot"></span></div>
+  <div class="day"><span class="dow">T3</span><span class="num">22</span><span class="dot"></span></div>
+  <div class="day"><span class="dow">T4</span><span class="num">23</span><span class="dot"></span></div>
+  <div class="day"><span class="dow">T5</span><span class="num">24</span><span class="dot"></span></div>
+  <div class="day act"><span class="dow">T6</span><span class="num">25</span><span class="dot"></span></div>
+  <div class="day"><span class="dow">T7</span><span class="num">26</span></div>
+  <div class="day"><span class="dow">CN</span><span class="num">27</span></div>
+</div>
+
+<div class="summary">
+  <div class="it"><div class="v">1.452</div><div class="l">kcal</div></div>
+  <div class="div"></div>
+  <div class="it"><div class="v">3</div><div class="l">/ 4 bữa</div></div>
+  <div class="div"></div>
+  <div class="it"><div class="v">68g</div><div class="l">protein</div></div>
+  <div class="div"></div>
+  <div class="it"><div class="v">1,8L</div><div class="l">nước</div></div>
+</div>
+
+<div class="timeline">
+
+  <div class="slot">
+    <div class="slot-time"><div class="h">07:00</div><div class="m">Sáng</div></div>
+    <div class="slot-body">
+      <p class="lbl">Đã ăn · Sáng</p>
+      <h4>Phở bò + cà phê đen</h4>
+      <div class="meta"><span class="kcal">512 kcal</span><span>· P 32g · C 58g · F 12g</span></div>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-time"><div class="h">12:30</div><div class="m">Trưa</div></div>
+    <div class="slot-body">
+      <p class="lbl">Đã ăn · Trưa</p>
+      <h4>Cơm gà xối mỡ + canh chua</h4>
+      <div class="meta"><span class="kcal">680 kcal</span><span>· P 35g · C 65g · F 18g</span></div>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-time"><div class="h">15:30</div><div class="m">Phụ</div></div>
+    <div class="slot-body">
+      <p class="lbl">Đã ăn · Bữa phụ</p>
+      <h4>Sữa chua Hy Lạp + chuối</h4>
+      <div class="meta"><span class="kcal">260 kcal</span><span>· P 12g · C 32g · F 4g</span></div>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-time"><div class="h">19:00</div><div class="m">Tối</div></div>
+    <div class="slot-body ai">
+      <p class="lbl">Gemini đề xuất · Tối</p>
+      <h4>Cá hồi áp chảo + rau hấp</h4>
+      <div class="meta"><span class="kcal">540 kcal</span><span>· Vừa đủ kcal còn lại</span></div>
+    </div>
+  </div>
+
+  <div class="slot">
+    <div class="slot-time"><div class="h">21:30</div><div class="m">Khuya</div></div>
+    <div class="slot-body empty">
+      <span class="name">Chưa lên kế hoạch...</span>
+      <button class="add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+  </div>
+
+</div>
+
+<button class="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Thêm bữa</button>
+
+<nav class="tabbar">
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1Z"/></svg>Tổng quan</span>
+<span class="tab act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Lịch ăn</span>
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14h12v6H6zM7 14a4 4 0 0 1-2-7 4 4 0 0 1 7-2 4 4 0 0 1 7 2 4 4 0 0 1-2 7"/></svg>Quản lý</span>
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5M3 7l4-4M21 17l-4 4M9 3 3 9M21 15l-6 6M4 13l3 3M17 7l3 3"/></svg>Tập luyện</span>
+</nav>
+
+</div></div></div>
+</body></html>

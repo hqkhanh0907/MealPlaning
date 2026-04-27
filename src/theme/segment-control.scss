@@ -69,10 +69,10 @@
 
 @media (prefers-color-scheme: dark) {
   .segment-control.invalid {
-    box-shadow: 0 0 0 1px #ef5350 inset;
+    box-shadow: 0 0 0 1px var(--ion-color-danger) inset;
   }
   .segment-button.selected {
-    /* var(--bg-card) trong dark = #1d1f26; var(--shadow-md) = none */
-    color: #42a5f5;
+    /* var(--bg-card) trong dark = warm charcoal; var(--shadow-md) = none */
+    color: var(--ion-color-primary);
   }
 }

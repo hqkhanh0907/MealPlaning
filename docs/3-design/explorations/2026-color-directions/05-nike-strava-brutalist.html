@@ -1,0 +1,111 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"/>
+<title>Brutalist Performance — Nike · Strava</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#1A1A1A;color:#E5E5E5;min-height:100vh;padding:48px 20px 64px;display:flex;flex-direction:column;align-items:center;gap:24px}
+.head{max-width:560px;text-align:center}.tag{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#DFFF00;margin:0 0 8px;font-weight:800}
+.t{font-family:'Archivo';font-size:34px;font-weight:900;margin:0 0 6px;letter-spacing:-0.03em;text-transform:uppercase;font-style:italic}.s{font-size:14px;opacity:.7;margin:0;line-height:1.5}
+.ref{display:inline-block;margin-top:10px;font-size:11px;padding:4px 12px;border-radius:0;background:#DFFF00;color:#000;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.notch{position:absolute;top:18px;left:50%;transform:translateX(-50%);width:120px;height:32px;background:#000;border-radius:18px;z-index:50}
+.phone{width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;box-shadow:0 0 0 12px #1a1a1d,0 0 0 13px #2a2a2d,0 40px 80px -20px rgba(0,0,0,.7)}
+.swatches{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:560px}
+.sw{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);padding:8px 12px;border-radius:0}
+.sw-c{width:22px;height:22px;border-radius:0;border:1px solid rgba(255,255,255,.15)}
+.sw b{font-size:11px;font-weight:700}.sw span{font-size:10px;opacity:.6;font-family:ui-monospace,Menlo,monospace}
+.sw-m{display:flex;flex-direction:column;line-height:1.2}
+
+.app{height:100%;background:#0A0A0A;color:#FAFAFA;display:flex;flex-direction:column;position:relative;font-family:'Inter'}
+.sb{display:flex;justify-content:space-between;padding:18px 28px 8px;font-size:14px;font-weight:700;font-family:'Archivo'}
+.hdr{padding:20px 22px 0;display:flex;justify-content:space-between;align-items:flex-end}
+.hdr h1{font-family:'Archivo';font-size:48px;font-weight:900;letter-spacing:-0.04em;margin:0;text-transform:uppercase;line-height:.9;font-style:italic}
+.hdr h1 em{color:#DFFF00;font-style:italic;not-italic;display:block}
+.hdr .meta{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#5C5C5C;font-weight:700}
+.seg{padding:18px 22px 8px;display:flex;gap:12px;border-bottom:2px solid #1A1A1A}
+.seg span{font-family:'Archivo';font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#5C5C5C;font-weight:800;cursor:pointer;padding-bottom:14px;position:relative;font-style:italic}
+.seg span.act{color:#FAFAFA}
+.seg span.act::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:4px;background:#DFFF00}
+.search{margin:14px 22px 8px;background:#0A0A0A;border:2px solid #1A1A1A;border-radius:0;padding:14px;display:flex;align-items:center;gap:10px;color:#5C5C5C;font-size:13px;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+.search svg{width:16px;height:16px;color:#DFFF00}
+.list{flex:1;overflow:hidden;padding:8px 22px 140px;display:flex;flex-direction:column;gap:10px}
+.card{background:#141414;border:0;border-radius:0;padding:20px;position:relative;border-left:4px solid #1A1A1A}
+.card.featured{background:#DFFF00;color:#000;border-left:0}
+.card.featured .more,.card.featured .lbl,.card.featured .kcal,.card.featured .dn,.card.featured .mc .v,.card.featured .mc .k,.card.featured .foot{color:#000}
+.card.featured .lbl{background:#000;color:#DFFF00;white-space:nowrap}
+.row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.dn{font-family:'Archivo';font-size:22px;font-weight:900;letter-spacing:-0.02em;color:#FAFAFA;margin:0;text-transform:uppercase;line-height:1;font-style:italic}
+.lbl{font-family:'Archivo';font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#000;font-weight:800;background:#DFFF00;padding:4px 8px;border-radius:0}
+.lbl.ai{background:#FF3D00;color:#FFF}
+.more{position:absolute;top:18px;right:50px;background:transparent;border:0;width:24px;height:24px;color:#5C5C5C;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.more svg{width:18px;height:18px}
+.kcal{font-family:'Archivo';font-size:72px;font-weight:900;letter-spacing:-0.06em;font-variant-numeric:tabular-nums;color:#FAFAFA;line-height:.85;margin:14px 0 0;font-style:italic;display:flex;align-items:flex-end;gap:8px}
+.kcal sub{font-family:'Archivo';font-size:12px;font-weight:800;color:#5C5C5C;letter-spacing:.16em;text-transform:uppercase;font-style:normal;padding-bottom:8px}
+.macros{display:flex;gap:24px;margin-top:14px;border-top:2px solid #1A1A1A;padding-top:14px}
+.card.featured .macros{border-top-color:rgba(0,0,0,.15)}
+.mc{display:flex;flex-direction:column;gap:2px}
+.mc .k{font-family:'Archivo';font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#5C5C5C;font-weight:800}
+.mc .v{font-family:'Archivo';font-size:18px;font-weight:900;font-variant-numeric:tabular-nums;color:#FAFAFA;letter-spacing:-0.02em}
+.foot{display:flex;justify-content:space-between;font-size:9px;color:#5C5C5C;margin-top:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:800;font-family:'Archivo'}
+
+.fab{position:absolute;right:20px;bottom:104px;background:#DFFF00;color:#000;border:0;height:64px;padding:0 28px;border-radius:0;display:flex;align-items:center;gap:10px;font-family:'Archivo';font-size:16px;font-weight:900;letter-spacing:.06em;cursor:pointer;text-transform:uppercase;font-style:italic;clip-path:polygon(8% 0,100% 0,92% 100%,0 100%)}
+.fab svg{width:20px;height:20px;color:#000;stroke-width:3}
+.tabbar{position:absolute;bottom:0;left:0;right:0;background:#0A0A0A;border-top:2px solid #1A1A1A;display:flex;justify-content:space-around;padding:12px 16px 28px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:5px;color:#3F3F3F;font-family:'Archivo';font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;cursor:pointer;font-style:italic}
+.tab svg{width:22px;height:22px}
+.tab.act{color:#DFFF00}
+</style></head><body>
+
+<div class="head"><p class="tag">05 · Brutalist Performance</p><h1 class="t">Nike Run · Strava · WHOOP</h1><p class="s">Black canvas, volt yellow accent, italic Archivo black khổng lồ, hard edges không bo, asymmetric clip-path FAB. Cảm giác athletic-aggressive cho gymbros / runners.</p><span class="ref">Ref: nike.com · strava.com</span></div>
+
+<div style="position:relative"><div class="notch"></div><div class="phone"><div class="app">
+<div class="sb"><span>9:41</span><span>●●● 84%</span></div>
+<div class="hdr"><h1>QUẢN<br>LÝ <em>MÓN.</em></h1><span class="meta">04<br>MÓN</span></div>
+<div class="seg"><span>NGUYÊN LIỆU</span><span class="act">MÓN ĂN</span></div>
+<div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span>Tìm món...</span></div>
+<div class="list">
+
+  <div class="card featured">
+    <button class="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+    <div class="row1"><h3 class="dn">PHỞ BÒ</h3><span class="lbl">NGUYÊN LIỆU</span></div>
+    <div class="kcal">488 <sub>KCAL</sub></div>
+    <div class="macros"><div class="mc"><span class="k">PRO</span><span class="v">28G</span></div><div class="mc"><span class="k">CARB</span><span class="v">52G</span></div><div class="mc"><span class="k">FAT</span><span class="v">12G</span></div></div>
+    <div class="foot"><span>1 PHẦN</span><span>CÓ SẴN</span></div>
+  </div>
+
+  <div class="card">
+    <button class="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+    <div class="row1"><h3 class="dn">CƠM GÀ</h3><span class="lbl">NGUYÊN LIỆU</span></div>
+    <div class="kcal">580 <sub>KCAL</sub></div>
+    <div class="macros"><div class="mc"><span class="k">PRO</span><span class="v">35G</span></div><div class="mc"><span class="k">CARB</span><span class="v">65G</span></div><div class="mc"><span class="k">FAT</span><span class="v">18G</span></div></div>
+    <div class="foot"><span>1 PHẦN</span><span>CÓ SẴN</span></div>
+  </div>
+
+  <div class="card">
+    <button class="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+    <div class="row1"><h3 class="dn">SALAD ỨC GÀ</h3><span class="lbl ai">AI</span></div>
+    <div class="kcal">350 <sub>KCAL</sub></div>
+    <div class="macros"><div class="mc"><span class="k">PRO</span><span class="v">32G</span></div><div class="mc"><span class="k">CARB</span><span class="v">18G</span></div><div class="mc"><span class="k">FAT</span><span class="v">14G</span></div></div>
+    <div class="foot"><span>1 PHẦN</span><span>AI</span></div>
+  </div>
+
+</div>
+
+<button class="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>THÊM</button>
+
+<nav class="tabbar">
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1Z"/></svg>Home</span>
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Lịch</span>
+<span class="tab act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14h12v6H6zM7 14a4 4 0 0 1-2-7 4 4 0 0 1 7-2 4 4 0 0 1 7 2 4 4 0 0 1-2 7"/></svg>Món</span>
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5M3 7l4-4M21 17l-4 4M9 3 3 9M21 15l-6 6M4 13l3 3M17 7l3 3"/></svg>Tập</span>
+</nav>
+
+</div></div></div>
+
+<div class="swatches">
+<div class="sw"><div class="sw-c" style="background:#0A0A0A"></div><div class="sw-m"><b>Black</b><span>#0A0A0A</span></div></div>
+<div class="sw"><div class="sw-c" style="background:#141414"></div><div class="sw-m"><b>Card</b><span>#141414</span></div></div>
+<div class="sw"><div class="sw-c" style="background:#DFFF00"></div><div class="sw-m"><b>Volt</b><span>#DFFF00</span></div></div>
+<div class="sw"><div class="sw-c" style="background:#FF3D00"></div><div class="sw-m"><b>Hot</b><span>#FF3D00</span></div></div>
+<div class="sw"><div class="sw-c" style="background:#5C5C5C"></div><div class="sw-m"><b>Muted</b><span>#5C5C5C</span></div></div>
+</div>
+</body></html>

@@ -1,0 +1,117 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"/>
+<title>Liquid Glass — Apple Health iOS 26</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:#F2F1F4;color:#1C1C1E;min-height:100vh;padding:48px 20px 64px;display:flex;flex-direction:column;align-items:center;gap:24px}
+.head{max-width:560px;text-align:center}.tag{font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.55;margin:0 0 8px}
+.t{font-size:30px;font-weight:600;margin:0 0 6px;letter-spacing:-0.025em}.s{font-size:14px;opacity:.7;margin:0;line-height:1.5}
+.ref{display:inline-block;margin-top:10px;font-size:11px;padding:4px 12px;border-radius:99px;background:rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.1)}
+.notch{position:absolute;top:18px;left:50%;transform:translateX(-50%);width:120px;height:32px;background:#000;border-radius:18px;z-index:50}
+.phone{width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;box-shadow:0 0 0 12px #1a1a1d,0 0 0 13px #2a2a2d,0 40px 80px -20px rgba(0,0,0,.5)}
+.swatches{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:560px}
+.sw{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.08);padding:8px 12px;border-radius:10px}
+.sw-c{width:22px;height:22px;border-radius:6px;border:1px solid rgba(0,0,0,.1)}
+.sw b{font-size:11px;font-weight:600}.sw span{font-size:10px;opacity:.6;font-family:ui-monospace,Menlo,monospace}
+.sw-m{display:flex;flex-direction:column;line-height:1.2}
+
+.app{height:100%;color:#1C1C1E;display:flex;flex-direction:column;position:relative;overflow:hidden;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255,200,170,.5) 0%, transparent 45%),
+    radial-gradient(circle at 100% 30%, rgba(190,200,255,.55) 0%, transparent 50%),
+    radial-gradient(circle at 50% 100%, rgba(180,240,210,.4) 0%, transparent 55%),
+    radial-gradient(circle at 0% 80%, rgba(240,200,240,.4) 0%, transparent 50%),
+    #FAFAF8;
+}
+.sb{display:flex;justify-content:space-between;padding:18px 28px 8px;font-size:14px;font-weight:600}
+.sb .r{font-family:ui-monospace,Menlo;font-size:11px;opacity:.55}
+.hdr{padding:14px 22px 10px;display:flex;justify-content:space-between;align-items:flex-end}
+.hdr h1{font-size:32px;font-weight:700;letter-spacing:-0.03em;margin:0}
+.hdr .sub{font-size:12px;opacity:.6;font-variant-numeric:tabular-nums}
+.glass-pane{background:rgba(255,255,255,.55);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border:1px solid rgba(255,255,255,.7);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 4px 16px rgba(0,0,0,.05),0 12px 32px rgba(0,0,0,.04)}
+.seg{margin:6px 22px;padding:4px;border-radius:12px;display:flex;gap:0}
+.seg span{flex:1;text-align:center;font-size:13px;padding:8px 12px;border-radius:9px;color:#48484A;font-weight:500;cursor:pointer}
+.seg span.act{background:rgba(255,255,255,.85);color:#1C1C1E;box-shadow:0 1px 2px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.04);font-weight:600}
+.search{margin:10px 22px;padding:13px 16px;border-radius:14px;display:flex;align-items:center;gap:10px;color:#48484A;font-size:14px}
+.search svg{width:16px;height:16px}
+.list{flex:1;overflow:hidden;padding:6px 22px 140px;display:flex;flex-direction:column;gap:10px}
+.card{padding:18px;border-radius:22px;position:relative}
+.row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.dn{font-size:17px;font-weight:600;letter-spacing:-0.015em;margin:0}
+.lbl{font-size:11px;color:#007AFF;font-weight:600;background:rgba(0,122,255,.1);padding:4px 10px;border-radius:99px;backdrop-filter:blur(8px);white-space:nowrap}
+.lbl.ai{color:#FF6482;background:rgba(255,100,130,.12)}
+.more{position:absolute;top:14px;right:14px;background:rgba(0,0,0,.04);border:0;width:32px;height:32px;border-radius:99px;color:#48484A;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.more svg{width:18px;height:18px}
+.kcal{font-size:40px;font-weight:700;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;line-height:1;margin:14px 0 0;display:flex;align-items:baseline;gap:6px}
+.kcal sub{font-size:13px;font-weight:500;opacity:.5}
+.macros{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.mc{padding:10px;border-radius:12px;display:flex;flex-direction:column;gap:2px;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.5)}
+.mc.p{background:rgba(180,220,255,.4)}
+.mc.c{background:rgba(255,220,180,.4)}
+.mc.f{background:rgba(255,200,200,.4)}
+.mc .k{font-size:10px;font-weight:600;opacity:.6}
+.mc .v{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+.foot{margin-top:12px;display:flex;justify-content:space-between;font-size:12px;opacity:.6}
+
+.fab{position:absolute;right:20px;bottom:104px;background:rgba(28,28,30,.85);backdrop-filter:blur(20px);color:#FFF;border:1px solid rgba(255,255,255,.15);height:56px;padding:0 22px;border-radius:99px;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 12px 32px rgba(0,0,0,.2);font-family:inherit}
+.fab svg{width:18px;height:18px}
+.tabbar{position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,.6);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-top:1px solid rgba(255,255,255,.7);display:flex;justify-content:space-around;padding:10px 16px 28px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:4px;color:#8E8E93;font-size:10px;font-weight:500;cursor:pointer}
+.tab svg{width:24px;height:24px}
+.tab.act{color:#007AFF}
+</style></head><body>
+
+<div class="head"><p class="tag">04 · Liquid Glass</p><h1 class="t">Apple Health iOS 26 · visionOS</h1><p class="s">Mesh gradient pastel canvas, glass blur cards với inner highlight, multi-tonal pastel macros, dynamic depth. Cảm giác Apple cao cấp, mềm mại, có chiều sâu thật.</p><span class="ref">Ref: iOS 26 Liquid Glass · visionOS</span></div>
+
+<div style="position:relative"><div class="notch"></div><div class="phone"><div class="app">
+<div class="sb"><span>9:41</span><span class="r">●●● 84%</span></div>
+<div class="hdr"><h1>Quản lý</h1><span class="sub">4 món</span></div>
+<div class="seg glass-pane"><span>Nguyên liệu</span><span class="act">Món ăn</span></div>
+<div class="search glass-pane"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span>Tìm món ăn...</span></div>
+<div class="list">
+
+  <div class="card glass-pane">
+    <button class="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+    <div class="row1"><h3 class="dn">Phở bò</h3><span class="lbl">Nguyên liệu</span></div>
+    <div class="kcal">488 <sub>kcal</sub></div>
+    <div class="macros"><div class="mc p"><span class="k">PROTEIN</span><span class="v">28g</span></div><div class="mc c"><span class="k">CARBS</span><span class="v">52g</span></div><div class="mc f"><span class="k">FAT</span><span class="v">12g</span></div></div>
+    <div class="foot"><span>1 phần</span><span>Có sẵn</span></div>
+  </div>
+
+  <div class="card glass-pane">
+    <button class="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+    <div class="row1"><h3 class="dn">Cơm gà xối mỡ</h3><span class="lbl">Nguyên liệu</span></div>
+    <div class="kcal">580 <sub>kcal</sub></div>
+    <div class="macros"><div class="mc p"><span class="k">PROTEIN</span><span class="v">35g</span></div><div class="mc c"><span class="k">CARBS</span><span class="v">65g</span></div><div class="mc f"><span class="k">FAT</span><span class="v">18g</span></div></div>
+    <div class="foot"><span>1 phần</span><span>Có sẵn</span></div>
+  </div>
+
+  <div class="card glass-pane">
+    <button class="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+    <div class="row1"><h3 class="dn">Salad ức gà</h3><span class="lbl ai">AI tự điền</span></div>
+    <div class="kcal">350 <sub>kcal</sub></div>
+    <div class="macros"><div class="mc p"><span class="k">PROTEIN</span><span class="v">32g</span></div><div class="mc c"><span class="k">CARBS</span><span class="v">18g</span></div><div class="mc f"><span class="k">FAT</span><span class="v">14g</span></div></div>
+    <div class="foot"><span>1 phần</span><span>AI</span></div>
+  </div>
+
+</div>
+
+<button class="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>Tạo món</button>
+
+<nav class="tabbar">
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1Z"/></svg>Tổng quan</span>
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Lịch ăn</span>
+<span class="tab act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14h12v6H6zM7 14a4 4 0 0 1-2-7 4 4 0 0 1 7-2 4 4 0 0 1 7 2 4 4 0 0 1-2 7"/></svg>Quản lý</span>
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5M3 7l4-4M21 17l-4 4M9 3 3 9M21 15l-6 6M4 13l3 3M17 7l3 3"/></svg>Tập luyện</span>
+</nav>
+
+</div></div></div>
+
+<div class="swatches">
+<div class="sw"><div class="sw-c" style="background:#FAFAF8"></div><div class="sw-m"><b>Base</b><span>#FAFAF8</span></div></div>
+<div class="sw"><div class="sw-c" style="background:linear-gradient(135deg,#FFC8AA,#BEC8FF,#B4F0D2)"></div><div class="sw-m"><b>Mesh</b><span>multi-radial</span></div></div>
+<div class="sw"><div class="sw-c" style="background:rgba(255,255,255,.6);backdrop-filter:blur(8px);border:1px solid #fff"></div><div class="sw-m"><b>Glass</b><span>rgba blur</span></div></div>
+<div class="sw"><div class="sw-c" style="background:#007AFF"></div><div class="sw-m"><b>SF Blue</b><span>#007AFF</span></div></div>
+<div class="sw"><div class="sw-c" style="background:#1C1C1E"></div><div class="sw-m"><b>Ink</b><span>#1C1C1E</span></div></div>
+</div>
+</body></html>

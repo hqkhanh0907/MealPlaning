@@ -174,19 +174,19 @@ textarea.input-native {
 @media (prefers-color-scheme: dark) {
   .input-wrapper {
     background: var(--bg-card);
-    border-color: #444850;
+    border-color: var(--input-border-color);
   }
   .input-wrapper.invalid {
-    border-color: #ef5350;
+    border-color: var(--ion-color-danger);
   }
   .input-native,
   .picker-trigger--floating {
-    color: #fff;
+    color: var(--text-primary);
   }
   .input-label.invalid {
-    color: #ef5350;
+    color: var(--ion-color-danger);
   }
   .field-error {
-    color: #ef5350;
+    color: var(--ion-color-danger);
   }
 }

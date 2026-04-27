@@ -471,16 +471,17 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
         transition: background 0.2s var(--ease-out-quart);
       }
 
-      /* Selected state — mockup: #E3F2FD light / #1A237E dark */
+      /* Selected state — sage tint */
       .radio-item.selected {
-        background: var(--primary-50, #e3f2fd);
+        background: var(--primary-50);
       }
       @media (prefers-color-scheme: dark) {
         .radio-item {
           background: var(--bg-card);
         }
         .radio-item.selected {
-          background: #1a237e;
+          background: var(--bg-elevated);
+          box-shadow: inset 0 0 0 1px var(--ion-color-primary);
         }
       }
 
@@ -504,7 +505,7 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
         content: '';
         width: 8px;
         height: 8px;
-        background: #fff;
+        background: var(--ion-color-primary-contrast);
         border-radius: 50%;
         position: absolute;
         top: 50%;
@@ -513,7 +514,7 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
       }
       @media (prefers-color-scheme: dark) {
         .radio-circle {
-          border-color: #5f6575;
+          border-color: var(--input-border-color);
         }
       }
 
