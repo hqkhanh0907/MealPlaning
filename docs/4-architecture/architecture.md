@@ -639,8 +639,8 @@ Tất cả code tuân thủ Angular 21 best practices:
 | **New control flow** | `@if`, `@for`, `@switch`, `@defer` thay vì `*ngIf`, `*ngFor` |
 | **inject()** | Function-based injection thay vì constructor injection |
 | **Signals** | `signal()`, `computed()`, `effect()` cho state management |
-| **Signal Forms** | `form()` + `schema()` từ `@angular/forms/signals` (stable v21). Là target cho mọi form mới — xem `docs/5-development/signal-forms-migration-plan.md`. |
-| **Reactive Forms (legacy)** | Vẫn được hỗ trợ qua `@angular/forms/signals/compat`. Phase 1 forms hiện tại là signals-native (ngModel + signal()), sẽ migrate sang Signal Forms. |
+| **Signal Forms** | `form()` + `schema()` + `[formField]` từ `@angular/forms/signals` (stable v21) — pattern duy nhất cho mọi form mới. Migration B1→B5 hoàn tất 2026-04-27. Xem `docs/5-development/signal-forms-migration-plan.md`. |
+| **Reactive Forms / FormsModule (legacy)** | KHÔNG dùng cho form mới. `@angular/forms/signals/compat` chỉ giữ làm escape hatch nếu thật sự cần. |
 | **Route-level lazy loading** | `loadChildren` / `loadComponent` |
 | **`@defer` blocks** | Lazy load heavy components (charts, AI preview) |
 

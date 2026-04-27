@@ -186,7 +186,7 @@ V1 chỉ tiếng Việt. Hardcode trực tiếp trong template Angular (KHÔNG d
 
 ### Forms
 
-V1 hiện dùng **signals-native template-driven forms** (`ngModel` + `signal()` cho value, `computed()` cho errors — xem `features/onboarding/onboarding.page.ts` làm reference). Đang ở giai đoạn migration sang **Signal Forms** (Angular 21, `@angular/forms/signals`) — kế hoạch và base infra ở `docs/5-development/signal-forms-migration-plan.md`. KHÔNG dùng React Hook Form. KHÔNG add Reactive Forms mới (legacy, chỉ giữ `@angular/forms/signals/compat` nếu cần). Phase 1.5+ có thể dùng `zod` (đã là dependency) cho validate AI response runtime — schema đặt trong `core/schemas/`. Markup form input PHẢI tuân thủ `src/theme/form-field.scss` (xem `design-system.md §8.6`).
+V1 dùng **Signal Forms** (Angular 21 stable, `@angular/forms/signals`) — `form()` + `schema()` + `[formField]="field.name"` 1-binding. Migration B1→B5 hoàn tất 2026-04-27 (xem `docs/5-development/signal-forms-migration-plan.md`). Reference impl: `features/onboarding/onboarding.page.ts` (step 2a), `features/management/components/ingredient-edit-modal`, `features/management/components/dish-edit-modal`. Schemas đặt trong `src/app/shared/forms/schemas/`. Live validation pattern dùng `showErrors = signal(false)` + `effect()` re-run validate sau submit đầu (xem step 2a). KHÔNG dùng `ngModel`/`FormsModule`/`ReactiveFormsModule` cho form mới. KHÔNG dùng React Hook Form. Phase 1.5+ có thể dùng `zod` (đã là dependency) cho validate AI response runtime — schema đặt trong `core/schemas/`. Markup form input PHẢI tuân thủ `src/theme/form-field.scss` (xem `design-system.md §8.6`).
 
 ### Error / Logging / Config
 

@@ -419,21 +419,27 @@ Theo PRD F-12 (Dashboard Quick Actions):
 
 > **Source of truth:** `src/theme/form-field.scss`. ALL inputs MUST use these classes — không tạo pattern thay thế.
 
-**PREFERRED markup (Phase B1+):** dùng wrapper component `<app-form-field>`
-ở `src/app/shared/forms/form-field/`. Wrapper render đúng cấu trúc bên dưới
-+ floating label + error message + a11y `for=`. Forward-compatible với
-Signal Forms (xem `docs/5-development/signal-forms-migration-plan.md`).
+**PREFERRED markup (Signal Forms, mọi form mới):** dùng wrapper component
+`<app-form-field>` ở `src/app/shared/forms/form-field/` + `[formField]` directive
+từ `@angular/forms/signals`. Wrapper render đúng cấu trúc bên dưới + floating
+label + error message + a11y `for=`. Reference impl: onboarding step 2a,
+ingredient-edit-modal, dish-edit-modal.
 
 ```html
 <app-form-field
   label="Tên trường"
   inputId="my-field"
-  [invalid]="showErrors && !form.name.trim()"
+  errorId="err-my-field"
+  [invalid]="showErrors && !nameValid()"
   errorMessage="Vui lòng nhập tên"
 >
-  <input id="my-field" class="input-native" [(ngModel)]="form.name" />
+  <input id="my-field" class="input-native" [formField]="form.name" />
 </app-form-field>
 ```
+
+> `nameValid` là `computed()` đọc từ `form.name().value()` + rule. `showErrors`
+> bật sau submit đầu (`showErrors = signal(false)` trong onboarding step 2a;
+> plain boolean trong các modal). Xem reference impl đã liệt kê ở trên.
 
 **Raw markup (chấp nhận, sẽ refactor dần):** áp dụng cho code đã viết
 trước Phase B1 hoặc trường hợp cần custom layout.

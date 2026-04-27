@@ -2,6 +2,7 @@
 
 Ngày: 2026-04-27
 Sau commit: `fc1e3e4` (B1: adopt `<app-form-field>` wrapper)
+Cập nhật 2026-04-27 (B5 DONE): tất cả 3 form (`onboarding step 2a`, `ingredient-edit-modal`, `dish-edit-modal`) đã migrate sang **Signal Forms**. `errorMessage` literal vẫn còn trong modal (xem §7) — sẽ chuyển sang `schema()` `*Error({ message })` ở vòng cleanup tiếp theo (không nằm trong B1-B5 core).
 Phạm vi: `src/app/features/onboarding/onboarding.page.ts` vs `src/app/shared/components/{ingredient,dish}-edit-modal/*.component.ts`
 Tham chiếu CSS: `src/theme/form-field.scss` (canonical), `src/theme/form-modal.scss` (modal-only)
 
