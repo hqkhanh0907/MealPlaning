@@ -301,3 +301,4 @@ component, chỉ value+validation vào Signal Forms.
 | 2026-04-27 | Pilot = ingredient-edit-modal | Đủ phức tạp + có safety net 25 tests + standalone scope |
 | 2026-04-27 | Mapper convention thay vì share entity type | Tách concern UI ↔ DB rõ ràng |
 | 2026-04-27 | `<app-form-field>` introduced ngay (forward-compat) | Cost thấp, lợi cho Phase B1 và B2+ |
+| 2026-04-27 | **OVERRIDE**: thực hiện liền B1→B5 trên Angular 21.2.10 dù API còn `@experimental` | User direction; chấp nhận risk breaking change nội bộ 21.x. Pin Angular minor + giữ rollback path qua mappers + form-field wrapper |
