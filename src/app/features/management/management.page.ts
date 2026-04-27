@@ -841,7 +841,7 @@ export default class ManagementPage {
     this.dishForm.set({
       name: '',
       description: '',
-      servings: 1,
+      servings: null,
       items: [],
     });
     this.dishModalOpen.set(true);
@@ -898,7 +898,7 @@ export default class ManagementPage {
         description: form.description || null,
         type: 'ingredient_based' as const,
         source: 'custom' as const,
-        servings: form.servings,
+        servings: form.servings ?? 1,
         image_url: null,
       };
 
@@ -921,11 +921,11 @@ export default class ManagementPage {
       name: '',
       category: '',
       nutrition_basis_unit: 'g',
-      calories: 0,
-      protein: 0,
-      carbs: 0,
-      fat: 0,
-      fiber: 0,
+      calories: null,
+      protein: null,
+      carbs: null,
+      fat: null,
+      fiber: null,
       density_g_per_ml: null,
       units: [],
     });
@@ -983,17 +983,21 @@ export default class ManagementPage {
         display_label: unit.display_label.trim() || null,
       }));
 
+      const nutrition = {
+        calories: form.calories ?? 0,
+        protein: form.protein ?? 0,
+        carbs: form.carbs ?? 0,
+        fat: form.fat ?? 0,
+        fiber: form.fiber ?? 0,
+      };
+
       if (editingId) {
         await this.ingredientStore.edit(editingId, {
           name: form.name,
           category: form.category,
           nutrition_basis_unit: form.nutrition_basis_unit,
           nutrition_basis_quantity: 100,
-          calories: form.calories,
-          protein: form.protein,
-          carbs: form.carbs,
-          fat: form.fat,
-          fiber: form.fiber,
+          ...nutrition,
           density_g_per_ml: form.density_g_per_ml,
           source: 'manual',
           units,
@@ -1004,11 +1008,7 @@ export default class ManagementPage {
           category: form.category,
           nutrition_basis_unit: form.nutrition_basis_unit,
           nutrition_basis_quantity: 100,
-          calories: form.calories,
-          protein: form.protein,
-          carbs: form.carbs,
-          fat: form.fat,
-          fiber: form.fiber,
+          ...nutrition,
           density_g_per_ml: form.density_g_per_ml,
           source: 'manual',
           units,

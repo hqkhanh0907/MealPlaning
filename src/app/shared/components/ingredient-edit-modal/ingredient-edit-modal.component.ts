@@ -36,11 +36,11 @@ export interface IngredientEditFormValue {
   name: string;
   category: string;
   nutrition_basis_unit: NutritionBasisUnit;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
+  calories: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+  fiber: number | null;
   density_g_per_ml: number | null;
   units: IngredientEditUnitFormValue[];
 }
@@ -80,45 +80,43 @@ export interface IngredientEditFormValue {
           </div>
 
           <div class="form-content">
-            <div class="input-wrapper" [class.invalid]="showErrors && !form.name.trim()">
-              <label
-                class="input-label"
-                for="ingr-field-1"
-                [class.invalid]="showErrors && !form.name.trim()"
-                >Tên nguyên liệu</label
-              >
-              <input
-                id="ingr-field-1"
-                class="input-native"
-                #nameInput
-                [(ngModel)]="form.name"
-                placeholder="Ví dụ: Trứng gà"
-              />
+            <div class="form-field">
+              <div class="input-wrapper" [class.invalid]="showErrors && !form.name.trim()">
+                <label
+                  class="input-label"
+                  for="ingr-field-1"
+                  [class.invalid]="showErrors && !form.name.trim()"
+                  >Tên nguyên liệu</label
+                >
+                <input id="ingr-field-1" class="input-native" #nameInput [(ngModel)]="form.name" />
+              </div>
+              @if (showErrors && !form.name.trim()) {
+                <div class="field-error">Vui lòng nhập tên nguyên liệu</div>
+              }
             </div>
-            @if (showErrors && !form.name.trim()) {
-              <div class="field-error">Vui lòng nhập tên nguyên liệu</div>
-            }
 
-            <div class="input-wrapper" [class.invalid]="showErrors && !form.category.trim()">
-              <label
-                class="input-label"
-                for="ingr-field-10"
-                [class.invalid]="showErrors && !form.category.trim()"
-                >Nhóm</label
-              >
-              <button
-                type="button"
-                id="ingr-field-10"
-                class="picker-trigger--floating"
-                (click)="openCategoryPicker()"
-              >
-                <span>{{ form.category || 'Chọn nhóm nguyên liệu' }}</span>
-                <ion-icon name="chevron-down-outline" aria-hidden="true" />
-              </button>
+            <div class="form-field">
+              <div class="input-wrapper" [class.invalid]="showErrors && !form.category.trim()">
+                <label
+                  class="input-label"
+                  for="ingr-field-10"
+                  [class.invalid]="showErrors && !form.category.trim()"
+                  >Nhóm</label
+                >
+                <button
+                  type="button"
+                  id="ingr-field-10"
+                  class="picker-trigger--floating"
+                  (click)="openCategoryPicker()"
+                >
+                  <span>{{ form.category || 'Chọn nhóm nguyên liệu' }}</span>
+                  <ion-icon name="chevron-down-outline" aria-hidden="true" />
+                </button>
+              </div>
+              @if (showErrors && !form.category.trim()) {
+                <div class="field-error">Vui lòng chọn nhóm nguyên liệu</div>
+              }
             </div>
-            @if (showErrors && !form.category.trim()) {
-              <div class="field-error">Vui lòng chọn nhóm nguyên liệu</div>
-            }
 
             <div class="section-label">Tính dinh dưỡng theo</div>
             <div class="segmented" role="tablist" aria-label="Tính dinh dưỡng theo">
@@ -140,75 +138,90 @@ export interface IngredientEditFormValue {
               </button>
             </div>
 
-            <div class="input-wrapper" [class.invalid]="showErrors && form.calories < 0">
-              <label
-                class="input-label"
-                for="ingr-field-2"
-                [class.invalid]="showErrors && form.calories < 0"
-                >Calories (kcal)</label
-              >
-              <input
-                id="ingr-field-2"
-                class="input-native"
-                type="number"
-                inputmode="decimal"
-                [(ngModel)]="form.calories"
-                min="0"
-                step="0.1"
-              />
+            <div class="form-field">
+              <div class="input-wrapper" [class.invalid]="showErrors && isNegative(form.calories)">
+                <label
+                  class="input-label"
+                  for="ingr-field-2"
+                  [class.invalid]="showErrors && isNegative(form.calories)"
+                  >Calories (kcal)</label
+                >
+                <input
+                  id="ingr-field-2"
+                  class="input-native"
+                  type="number"
+                  inputmode="decimal"
+                  [ngModel]="form.calories"
+                  (ngModelChange)="onNutritionChange('calories', $event)"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+              @if (showErrors && isNegative(form.calories)) {
+                <div class="field-error">Calories không được nhỏ hơn 0</div>
+              }
             </div>
-            @if (showErrors && form.calories < 0) {
-              <div class="field-error">Calories không được nhỏ hơn 0</div>
-            }
 
             <div class="nutrition-grid">
-              <div class="input-wrapper">
-                <label class="input-label" for="ingr-field-3">Protein (g)</label>
-                <input
-                  id="ingr-field-3"
-                  class="input-native"
-                  type="number"
-                  inputmode="decimal"
-                  [(ngModel)]="form.protein"
-                  min="0"
-                  step="0.1"
-                />
+              <div class="form-field">
+                <div class="input-wrapper">
+                  <label class="input-label" for="ingr-field-3">Protein (g)</label>
+                  <input
+                    id="ingr-field-3"
+                    class="input-native"
+                    type="number"
+                    inputmode="decimal"
+                    [ngModel]="form.protein"
+                    (ngModelChange)="onNutritionChange('protein', $event)"
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
               </div>
-              <div class="input-wrapper">
-                <label class="input-label" for="ingr-field-4">Carbs (g)</label>
-                <input
-                  id="ingr-field-4"
-                  class="input-native"
-                  type="number"
-                  inputmode="decimal"
-                  [(ngModel)]="form.carbs"
-                  min="0"
-                  step="0.1"
-                />
+              <div class="form-field">
+                <div class="input-wrapper">
+                  <label class="input-label" for="ingr-field-4">Carbs (g)</label>
+                  <input
+                    id="ingr-field-4"
+                    class="input-native"
+                    type="number"
+                    inputmode="decimal"
+                    [ngModel]="form.carbs"
+                    (ngModelChange)="onNutritionChange('carbs', $event)"
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
               </div>
-              <div class="input-wrapper">
-                <label class="input-label" for="ingr-field-5">Fat (g)</label>
-                <input
-                  id="ingr-field-5"
-                  class="input-native"
-                  type="number"
-                  inputmode="decimal"
-                  [(ngModel)]="form.fat"
-                  min="0"
-                  step="0.1"
-                />
+              <div class="form-field">
+                <div class="input-wrapper">
+                  <label class="input-label" for="ingr-field-5">Fat (g)</label>
+                  <input
+                    id="ingr-field-5"
+                    class="input-native"
+                    type="number"
+                    inputmode="decimal"
+                    [ngModel]="form.fat"
+                    (ngModelChange)="onNutritionChange('fat', $event)"
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
               </div>
-              <div class="input-wrapper">
-                <label class="input-label" for="ingr-field-6">Chất xơ (g)</label>
-                <input
-                  id="ingr-field-6"
-                  class="input-native"
-                  type="number"
-                  inputmode="decimal"
-                  [(ngModel)]="form.fiber"
-                  min="0"
-                  step="0.1"
-                />
+              <div class="form-field">
+                <div class="input-wrapper">
+                  <label class="input-label" for="ingr-field-6">Chất xơ (g)</label>
+                  <input
+                    id="ingr-field-6"
+                    class="input-native"
+                    type="number"
+                    inputmode="decimal"
+                    [ngModel]="form.fiber"
+                    (ngModelChange)="onNutritionChange('fiber', $event)"
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
               </div>
             </div>
 
@@ -323,18 +336,20 @@ export interface IngredientEditFormValue {
               </div>
             </div>
 
-            <div class="input-wrapper">
-              <label class="input-label" for="ingr-field-9">Mật độ (g/ml) — tùy chọn</label>
-              <input
-                id="ingr-field-9"
-                class="input-native"
-                type="number"
-                inputmode="decimal"
-                [ngModel]="form.density_g_per_ml"
-                (ngModelChange)="onDensityChange($event)"
-                min="0"
-                step="0.001"
-              />
+            <div class="form-field">
+              <div class="input-wrapper">
+                <label class="input-label" for="ingr-field-9">Mật độ (g/ml) — tùy chọn</label>
+                <input
+                  id="ingr-field-9"
+                  class="input-native"
+                  type="number"
+                  inputmode="decimal"
+                  [ngModel]="form.density_g_per_ml"
+                  (ngModelChange)="onDensityChange($event)"
+                  min="0"
+                  step="0.001"
+                />
+              </div>
             </div>
 
             <button type="button" class="btn-cta" [disabled]="saving" (click)="submit()">
@@ -543,11 +558,11 @@ export class IngredientEditModalComponent implements OnChanges {
     name: '',
     category: '',
     nutrition_basis_unit: 'g',
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    fat: 0,
-    fiber: 0,
+    calories: null,
+    protein: null,
+    carbs: null,
+    fat: null,
+    fiber: null,
     density_g_per_ml: null,
     units: [],
   };
@@ -671,6 +686,22 @@ export class IngredientEditModalComponent implements OnChanges {
     this.form.density_g_per_ml = Number(value);
   }
 
+  isNegative(value: number | null): boolean {
+    return value !== null && value < 0;
+  }
+
+  onNutritionChange(
+    field: 'calories' | 'protein' | 'carbs' | 'fat' | 'fiber',
+    value: string | number | null,
+  ): void {
+    if (value === null || value === '' || value === undefined) {
+      this.form[field] = null;
+      return;
+    }
+    const parsed = typeof value === 'number' ? value : Number(value);
+    this.form[field] = Number.isFinite(parsed) ? parsed : null;
+  }
+
   updateUnit(
     localId: string,
     field: 'display_label' | 'factor_to_basis',
@@ -718,6 +749,11 @@ export class IngredientEditModalComponent implements OnChanges {
       ...this.form,
       name: this.form.name.trim(),
       category: this.form.category.trim(),
+      calories: this.form.calories ?? 0,
+      protein: this.form.protein ?? 0,
+      carbs: this.form.carbs ?? 0,
+      fat: this.form.fat ?? 0,
+      fiber: this.form.fiber ?? 0,
       units: this.form.units.map((unit) => ({
         ...unit,
         display_label: unit.display_label.trim(),
@@ -729,7 +765,7 @@ export class IngredientEditModalComponent implements OnChanges {
     return (
       this.form.name.trim().length > 0 &&
       this.form.category.trim().length > 0 &&
-      this.form.calories >= 0 &&
+      !this.isNegative(this.form.calories) &&
       this.unitErrors.length === 0
     );
   }
@@ -739,7 +775,7 @@ export class IngredientEditModalComponent implements OnChanges {
       ? 'input'
       : !this.form.category.trim()
         ? '.picker-trigger'
-        : this.form.calories < 0
+        : this.isNegative(this.form.calories)
           ? 'input[type="number"]'
           : this.unitErrors.length > 0
             ? '.unit-empty, .unit-list'

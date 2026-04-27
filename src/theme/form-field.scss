@@ -26,6 +26,14 @@
   margin-bottom: 16px;
 }
 
+/* Inside flex-gap containers (modal .form-content), the parent gap already
+   provides 16px spacing between groups — so suppress the field's own margin
+   to avoid compounding (32px gap). The .form-field wrapper is still useful
+   to keep the input + .field-error visually bundled with no extra gap. */
+.form-content > .form-field {
+  margin-bottom: 0;
+}
+
 .input-wrapper {
   position: relative;
   padding: 20px 16px 8px;

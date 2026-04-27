@@ -30,7 +30,7 @@ export interface DishIngredientFormItem {
 export interface DishEditFormValue {
   name: string;
   description: string;
-  servings: number;
+  servings: number | null;
   items: DishIngredientFormItem[];
 }
 
@@ -66,61 +66,58 @@ export interface DishEditFormValue {
           <div class="form-content">
             <div class="section-label">Thông tin cơ bản</div>
 
-            <div class="input-wrapper" [class.invalid]="showErrors && !form.name.trim()">
-              <label
-                class="input-label"
-                for="dish-field-1"
-                [class.invalid]="showErrors && !form.name.trim()"
-                >Tên món ăn</label
-              >
-              <input
-                id="dish-field-1"
-                class="input-native"
-                #nameInput
-                [(ngModel)]="form.name"
-                placeholder="Ví dụ: Cơm trứng"
-              />
-            </div>
-            @if (showErrors && !form.name.trim()) {
-              <div class="field-error">Vui lòng nhập tên món ăn</div>
-            }
-
-            <div class="input-wrapper">
-              <label class="input-label" for="dish-field-2">Mô tả</label>
-              <textarea
-                id="dish-field-2"
-                class="input-native"
-                rows="2"
-                style="resize: none;"
-                [(ngModel)]="form.description"
-                placeholder="Mô tả ngắn (tùy chọn)"
-              ></textarea>
+            <div class="form-field">
+              <div class="input-wrapper" [class.invalid]="showErrors && !form.name.trim()">
+                <label
+                  class="input-label"
+                  for="dish-field-1"
+                  [class.invalid]="showErrors && !form.name.trim()"
+                  >Tên món ăn</label
+                >
+                <input id="dish-field-1" class="input-native" #nameInput [(ngModel)]="form.name" />
+              </div>
+              @if (showErrors && !form.name.trim()) {
+                <div class="field-error">Vui lòng nhập tên món ăn</div>
+              }
             </div>
 
-            <div
-              class="input-wrapper"
-              [class.invalid]="showErrors && (form.servings < 0.5 || form.servings > 20)"
-            >
-              <label
-                class="input-label"
-                for="dish-field-3"
-                [class.invalid]="showErrors && (form.servings < 0.5 || form.servings > 20)"
-                >Số phần ăn</label
-              >
-              <input
-                id="dish-field-3"
-                class="input-native"
-                type="number"
-                inputmode="decimal"
-                [(ngModel)]="form.servings"
-                min="0.5"
-                max="20"
-                step="0.5"
-              />
+            <div class="form-field">
+              <div class="input-wrapper">
+                <label class="input-label" for="dish-field-2">Mô tả</label>
+                <textarea
+                  id="dish-field-2"
+                  class="input-native"
+                  rows="2"
+                  style="resize: none;"
+                  [(ngModel)]="form.description"
+                ></textarea>
+              </div>
             </div>
-            @if (showErrors && (form.servings < 0.5 || form.servings > 20)) {
-              <div class="field-error">Số phần ăn cần nằm trong khoảng 0.5 đến 20.</div>
-            }
+
+            <div class="form-field">
+              <div class="input-wrapper" [class.invalid]="showErrors && !isServingsValid()">
+                <label
+                  class="input-label"
+                  for="dish-field-3"
+                  [class.invalid]="showErrors && !isServingsValid()"
+                  >Số phần ăn</label
+                >
+                <input
+                  id="dish-field-3"
+                  class="input-native"
+                  type="number"
+                  inputmode="decimal"
+                  [ngModel]="form.servings ?? ''"
+                  (ngModelChange)="onServingsChange($event)"
+                  min="0.5"
+                  max="20"
+                  step="0.5"
+                />
+              </div>
+              @if (showErrors && !isServingsValid()) {
+                <div class="field-error">Số phần ăn cần nằm trong khoảng 0.5 đến 20.</div>
+              }
+            </div>
 
             <div class="section-label">Nguyên liệu</div>
 
@@ -402,7 +399,7 @@ export class DishEditModalComponent implements OnChanges {
   @Input() form: DishEditFormValue = {
     name: '',
     description: '',
-    servings: 1,
+    servings: null,
     items: [],
   };
   @Output() dismissed = new EventEmitter<void>();
@@ -585,6 +582,7 @@ export class DishEditModalComponent implements OnChanges {
       ...this.form,
       name: this.form.name.trim(),
       description: this.form.description.trim(),
+      servings: this.form.servings ?? 1,
       items: this.form.items.map((item) => ({ ...item })),
     });
   }
@@ -593,10 +591,24 @@ export class DishEditModalComponent implements OnChanges {
     return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, '');
   }
 
+  isServingsValid(): boolean {
+    const value = this.form.servings;
+    return value !== null && value >= 0.5 && value <= 20;
+  }
+
+  onServingsChange(value: string | number | null): void {
+    if (value === '' || value === null || value === undefined) {
+      this.form.servings = null;
+      return;
+    }
+    const parsed = typeof value === 'number' ? value : Number(value);
+    this.form.servings = Number.isFinite(parsed) ? parsed : null;
+  }
+
   private focusFirstInvalidField(): void {
     const firstErrorSelector = !this.form.name.trim()
       ? 'input'
-      : this.form.servings < 0.5 || this.form.servings > 20
+      : !this.isServingsValid()
         ? 'input[type="number"]'
         : this.form.items.length === 0
           ? '.ingredient-empty'
@@ -617,8 +629,7 @@ export class DishEditModalComponent implements OnChanges {
   private isValid(): boolean {
     return (
       this.form.name.trim().length > 0 &&
-      this.form.servings >= 0.5 &&
-      this.form.servings <= 20 &&
+      this.isServingsValid() &&
       this.form.items.length > 0 &&
       this.form.items.every((item) => item.amount_value > 0 && item.unit_id.trim().length > 0)
     );
