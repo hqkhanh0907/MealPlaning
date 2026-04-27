@@ -74,7 +74,7 @@ cd android && ./gradlew assembleRelease          # build APK release
 
 ## Architecture
 
-**Offline-first Android meal planning app** — Angular 20 (standalone components + Signals) + Ionic 8 + Capacitor 8.3, deployed to Android. Vietnamese-language UI. Local-first SQLite với hai implementation:
+**Offline-first Android meal planning app** — Angular 21 (standalone components + Signals) + Ionic 8 + Capacitor 8.3, deployed to Android. Vietnamese-language UI. Local-first SQLite với hai implementation:
 - **Web/test**: `sql.js` WASM (persist base64 vào `localStorage`).
 - **Native (Android)**: `@capacitor-community/sqlite` 8.1 (file thật + WAL + `PRAGMA user_version`).
 
@@ -157,7 +157,7 @@ Khi implement feature: **đọc spec phase tương ứng TRƯỚC**, không vư�
 - `ChangeDetectionStrategy.OnPush` mặc định cho mọi component mới.
 - Signals-first: `signal()`, `computed()`, `effect()`. KHÔNG kéo thêm state lib (NgRx, Akita, ...).
 - Component/page lazy: `loadComponent` / `loadChildren` qua `*.routes.ts` export default `Routes`.
-- Sử dụng signal API mới của Angular 20 (`input()`, `output()`, `model()`) cho component mới; legacy `@Input/@Output` được chấp nhận trong code cũ chưa migrate.
+- Sử dụng signal API mới của Angular 21 (`input()`, `output()`, `model()`) cho component mới; legacy `@Input/@Output` được chấp nhận trong code cũ chưa migrate.
 - Naming: snake_case columns DB, camelCase TypeScript, kebab-case file, PascalCase class.
 - ID: `uuidv4()` từ `uuid` package. KHÔNG `Math.random()`, KHÔNG autoincrement.
 - Timestamp: SQL `datetime('now')` server-side; TypeScript đọc ra `string` ISO.
@@ -186,7 +186,7 @@ V1 chỉ tiếng Việt. Hardcode trực tiếp trong template Angular (KHÔNG d
 
 ### Forms
 
-V1 dùng Angular Reactive Forms + signal-based state (xem `features/onboarding/onboarding.page.ts` làm reference). KHÔNG React Hook Form. Validation: kết hợp `Validators` built-in + custom validator function. Phase 1.5+ có thể dùng `zod` (đã là dependency) cho validate AI response runtime — schema đặt trong `core/schemas/`.
+V1 hiện dùng **signals-native template-driven forms** (`ngModel` + `signal()` cho value, `computed()` cho errors — xem `features/onboarding/onboarding.page.ts` làm reference). Đang ở giai đoạn migration sang **Signal Forms** (Angular 21, `@angular/forms/signals`) — kế hoạch và base infra ở `docs/5-development/signal-forms-migration-plan.md`. KHÔNG dùng React Hook Form. KHÔNG add Reactive Forms mới (legacy, chỉ giữ `@angular/forms/signals/compat` nếu cần). Phase 1.5+ có thể dùng `zod` (đã là dependency) cho validate AI response runtime — schema đặt trong `core/schemas/`. Markup form input PHẢI tuân thủ `src/theme/form-field.scss` (xem `design-system.md §8.6`).
 
 ### Error / Logging / Config
 
@@ -363,7 +363,7 @@ Copilot là **Pragmatic Perfectionist**, KHÔNG phải Toxic Perfectionist:
 
 ### Platform & Stack
 
-- **Android-only** (Ionic 8 + Angular 20 + Capacitor)
+- **Android-only** (Ionic 8 + Angular 21 + Capacitor)
 - Design width: **375px** portrait, min 320px, max 428px
 - Phone frame: 375×812px
 

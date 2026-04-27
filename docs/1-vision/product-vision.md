@@ -203,7 +203,7 @@ Mở app lần đầu
 
 | Layer | Công nghệ | Version |
 |-------|-----------|---------|
-| UI Framework | Angular | 20 |
+| UI Framework | Angular | 21 |
 | UI Components | Ionic | 8 |
 | Language | TypeScript | 5.9, strict mode |
 | Native Wrapper | Capacitor | 8.3 |

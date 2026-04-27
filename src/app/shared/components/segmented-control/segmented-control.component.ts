@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 export interface SegmentedControlOption<T extends string> {
@@ -10,7 +9,7 @@ export interface SegmentedControlOption<T extends string> {
 @Component({
   selector: 'app-segmented-control',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <div class="segmented-control" role="tablist" [attr.aria-label]="ariaLabel">
       @for (option of options; track option.value) {

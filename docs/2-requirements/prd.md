@@ -15,7 +15,7 @@ Tài liệu này mô tả chi tiết **13 features** của HealthMate AI V1, bao
 ### Phạm vi V1
 
 - **Platform:** Android only (Capacitor)
-- **Stack:** Angular 20 + Ionic 8 + Capacitor 8
+- **Stack:** Angular 21 + Ionic 8 + Capacitor 8
 - **Database:** SQLite local-first
 - **AI:** Google Gemini API (paid tier)
 - **Ngôn ngữ:** Tiếng Việt only

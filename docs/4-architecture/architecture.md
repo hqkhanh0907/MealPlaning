@@ -12,7 +12,7 @@
 
 | Layer | Công nghệ | Version | Ghi chú |
 |-------|-----------|---------|---------|
-| UI Framework | Angular | 20 | Standalone components, Signals, new control flow |
+| UI Framework | Angular | 21 | Standalone components, Signals, Signal Forms, new control flow |
 | UI Components | Ionic | 8 | Mobile-native UI components |
 | Language | TypeScript | 5.9, strict mode | No `any` allowed |
 | Native Wrapper | Capacitor | 8.3 | Android only |
@@ -38,7 +38,7 @@
 
 ```
 ┌─────────────────────────────────────────┐
-│              Angular 20 App              │
+│              Angular 21 App              │
 │                                         │
 │  ┌─────────┐ ┌─────────┐ ┌──────────┐  │
 │  │Dashboard│ │Calendar │ │Management│  │
@@ -629,17 +629,18 @@ export class NetworkService {
 
 ---
 
-## 9. Angular 20 Patterns
+## 9. Angular 21 Patterns
 
-Tất cả code tuân thủ Angular 20 best practices:
+Tất cả code tuân thủ Angular 21 best practices:
 
 | Pattern | Mô tả |
 |---------|-------|
-| **Standalone components** | Không dùng NgModule — tất cả components đều standalone |
+| **Standalone components** | Không dùng NgModule — tất cả components đều standalone (default từ v19) |
 | **New control flow** | `@if`, `@for`, `@switch`, `@defer` thay vì `*ngIf`, `*ngFor` |
 | **inject()** | Function-based injection thay vì constructor injection |
 | **Signals** | `signal()`, `computed()`, `effect()` cho state management |
-| **Typed Reactive Forms** | `FormGroup<{...}>` với strong typing khi cần form |
+| **Signal Forms** | `form()` + `schema()` từ `@angular/forms/signals` (stable v21). Là target cho mọi form mới — xem `docs/5-development/signal-forms-migration-plan.md`. |
+| **Reactive Forms (legacy)** | Vẫn được hỗ trợ qua `@angular/forms/signals/compat`. Phase 1 forms hiện tại là signals-native (ngModel + signal()), sẽ migrate sang Signal Forms. |
 | **Route-level lazy loading** | `loadChildren` / `loadComponent` |
 | **`@defer` blocks** | Lazy load heavy components (charts, AI preview) |
 
@@ -718,7 +719,7 @@ jobs:
 }
 ```
 
-> **Note:** Angular 20 default test runner là Karma + Jasmine (không phải Jest). Command `ng test` sử dụng Karma theo `angular.json` config.
+> **Note:** Angular 21 default test runner là Karma + Jasmine (không phải Jest). Command `ng test` sử dụng Karma theo `angular.json` config.
 
 ---
 

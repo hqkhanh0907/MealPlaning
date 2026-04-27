@@ -22,7 +22,7 @@ Tài liệu này mô tả **kế hoạch phát triển theo giai đoạn** để
 
 | Hạng mục | Status |
 |---------|--------|
-| Angular 20 + Ionic 8 + Capacitor 8 scaffold | ✅ |
+| Angular 21 + Ionic 8 + Capacitor 8 scaffold | ✅ |
 | DB abstraction (DatabaseService + WebDatabaseService + sql.js) | ✅ |
 | Schema DDL (18 tables từ data-model.md) | ✅ |
 | Routing (4 tabs + Settings + Onboarding) | ✅ |

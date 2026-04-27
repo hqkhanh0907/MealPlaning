@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -37,7 +36,7 @@ export interface DishEditFormValue {
 @Component({
   selector: 'app-dish-edit-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, IonIcon, BottomSheetPickerComponent],
+  imports: [FormsModule, IonIcon, BottomSheetPickerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (isOpen) {

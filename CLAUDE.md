@@ -25,7 +25,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Code Architecture
 ### Overview
-HealthMate AI is an offline-first Angular 20 + Ionic 8 mobile app built with Capacitor (Android only). It uses a local SQLite database with dual implementations (sql.js WASM for web/tests and @capacitor-community/sqlite for Android native).
+HealthMate AI is an offline-first Angular 21 + Ionic 8 mobile app built with Capacitor (Android only). It uses a local SQLite database with dual implementations (sql.js WASM for web/tests and @capacitor-community/sqlite for Android native).
+
+**Angular 21 features available:**
+- Signal Forms (`@angular/forms/signals`) — stable, planned for adoption (see `docs/5-development/signal-forms-migration-plan.md`).
+- Default control-flow syntax (`@if`, `@for`, `@switch`).
+- `inject()` everywhere; constructor DI deprecated for new code.
 
 ### Core Structure
 ```
