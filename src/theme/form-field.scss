@@ -34,6 +34,15 @@
   margin-bottom: 0;
 }
 
+/* Same logic for grid containers — the grid `gap` already controls spacing,
+   so .form-field (when used to wrap each cell so .field-error stays attached
+   to its input) must drop its own margin to avoid double-gap. Use :where()
+   so this override has 0 specificity and component CSS can still customise. */
+:where(.nutrition-grid, .unit-grid, .ingredient-item__grid, [class*='form-field-grid'])
+  > .form-field {
+  margin-bottom: 0;
+}
+
 .input-wrapper {
   position: relative;
   padding: 20px 16px 8px;
@@ -116,6 +125,54 @@
   flex-shrink: 0;
 }
 
+/* Textarea variant — multi-line input bên trong .input-wrapper.
+   Floating-label canonical pattern thiết kế cho input 1 dòng (padding-top
+   20px ăn vào dòng đầu). Variant này expand padding & bỏ min-height fix
+   để textarea hiển thị 2+ dòng đúng cân đối. */
+.input-wrapper:has(textarea.input-native) {
+  min-height: auto;
+  padding: 24px 16px 12px;
+}
+
+textarea.input-native {
+  resize: none;
+  line-height: 1.5;
+  min-height: 40px;
+}
+
+/* ============================================================
+   FIELD-LEVEL TYPOGRAPHY — dùng chung cho onboarding + modals.
+   .section-label / .section-hint / .field-error trước đây sống ở
+   form-modal.scss (chỉ modal) hoặc redefined inline trong onboarding,
+   gây drift visual. Hợp nhất ở đây để mọi form có cùng spacing.
+   ============================================================ */
+.section-label {
+  font: 600 14px/1.4 var(--ion-font-family);
+  color: var(--text-primary);
+  margin: 16px 0 8px;
+}
+
+.section-label.invalid {
+  color: var(--ion-color-danger);
+}
+
+.section-hint {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.field-error {
+  font: 400 12px/1.4 var(--ion-font-family);
+  color: var(--ion-color-danger);
+  padding: 4px 4px 0;
+  margin-bottom: 4px;
+}
+
+/* Trong .form-content (modal flex-gap layout) — error vẫn bám sát input
+   bên trên, không cần margin-top âm vì nó ở trong cùng .form-field wrapper. */
+
 @media (prefers-color-scheme: dark) {
   .input-wrapper {
     background: var(--bg-card);
@@ -129,6 +186,9 @@
     color: #fff;
   }
   .input-label.invalid {
+    color: #ef5350;
+  }
+  .field-error {
     color: #ef5350;
   }
 }

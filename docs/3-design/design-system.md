@@ -456,6 +456,36 @@ trước Phase B1 hoặc trường hợp cần custom layout.
 </div>
 ```
 
+**Textarea (multi-line):** dùng `<textarea class="input-native">` — selector
+`.input-wrapper:has(textarea.input-native)` tự expand `padding-top` để label
+floating không đè lên dòng đầu. Khi có nhiều browser cũ, thêm class modifier
+`.input-native--textarea` làm fallback.
+
+**Field error message:** ALL error messages (modal + onboarding + page) dùng
+duy nhất `<div class="field-error" role="alert">…</div>`. Style canonical
+nằm trong `form-field.scss` (`margin-top:-8px` để hút sát input). KHÔNG
+redefine trong `form-modal.scss` hay component scoped CSS.
+
+**Section label / hint:** `<div class="section-label">` và
+`<div class="section-hint">` — canonical trong `form-field.scss`. Dùng
+trong cả modal và onboarding step để tách nhóm trường (vd "Thông tin cơ
+bản", "Tính dinh dưỡng theo"). KHÔNG override `margin` hay `font-size`
+trong component CSS.
+
+**Grid groups (≥2 input cạnh nhau):** mỗi cell PHẢI bọc bằng `.form-field`.
+Selector `.form-field:not(:last-child){margin-bottom:16px}` không áp dụng
+khi parent là `display:grid` (gap đã giải quyết spacing) — xem rule
+`.form-grid > .form-field, .nutrition-grid > .form-field, .unit-grid > .form-field, .ingredient-item__grid > .form-field { margin-bottom:0 }`
+trong `form-field.scss`.
+
+**A11y attributes (mandatory cho mọi input có validation):**
+- `[attr.aria-invalid]="showErrors && <invalidExpr>"` trên `<input>` /
+  `<textarea>` / `<button class="picker-trigger--floating">`.
+- `[attr.aria-describedby]="(showErrors && <invalidExpr>) ? 'err-<slug>' : null"`.
+- Error `<div>` phải có `id="err-<slug>"` và `role="alert"`.
+- `<slug>` là tên ngắn trong scope form (vd `name`, `calories`, `dish-items`),
+  KHÔNG dùng số thứ tự kiểu `field-1`, `field-2`.
+
 **Cấm:**
 - `<label class="field"><span/><input/></label>` (deprecated stacked pattern)
 - `ion-item` wrapping inputs
@@ -1452,6 +1482,7 @@ Xem `docs/3-design/mockups/README.md` để biết danh sách hiện có và tr�
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.6 | 2026-04-27 | **Audit Round 8 — Input style consistency:** Hợp nhất `.field-error` + `.section-label` + `.section-hint` về `form-field.scss` (xóa redefinition trong `form-modal.scss` + onboarding scoped CSS). Thêm rule grid override `margin-bottom:0` cho `.form-field` trong `nutrition-grid` / `unit-grid` / `ingredient-item__grid`. Thêm `.input-native--textarea` modifier + selector `:has(textarea.input-native)`. A11y: bắt buộc `aria-invalid` + `aria-describedby="err-<slug>"` + `id="err-<slug>"` + `role="alert"` cho mọi input. Rename id pattern `ingr-field-N` → slug có nghĩa (`ingr-name`, `ingr-calories`, …). |
 | 1.5 | 2026-04-21 | **Audit Round 7:** Add heading hierarchy mapping (h1-h4 → token). Add §8.12 Divider/Separator spec. Fix duplicate §8.7 header. Remove stale §8.7 fragment from §8.6b insertion. |
 | 1.4 | 2026-04-21 | **Audit Round 6:** Add --bg-muted token (skeleton shimmer + disabled surfaces). Add §8.6b Search Bar component spec. Add §10.0b Responsive Scaling (320-428px) guidance. Add Text/Link button states to per-component table. Fix toast position 80→136px (above FAB). Fix Dialog Action min-height → 44px. Add Outline Dashed dark mode border colors. Expand skeleton shimmer spec (base/highlight/reduced-motion). Fix FAB font-weight 300→400 (2 mockups). Fix dialog-btn min-height → 44px (2 mockups). Fix accent bar radius 2→4px (ingredient-edit). |
 | 1.3 | 2026-04-21 | **Audit Rounds 1-5 (cross-system):** Fix 22× #939AAA→#5F6575 (light text-tertiary misuse). Fix 17× #333340/#E2E4EC→#2D3142/#E0E0E8 (text-secondary token swap). Fix 15× dark #5F6575→#A8AAB4 (dark text-tertiary misuse). Add --shadow-xl overlay token. Add --radius-micro (4px). Add radius prohibition rule. Add Focus Ring Shadow spec. Add §8.9 Confirm Dialog (ARIA). Add §8.10 Bottom Sheet (ARIA, keyboard). Add §8.11 Toast/Snackbar. Expand §8.2 Button table (7 variants + padding rationale). Expand §4.2 spacing exceptions. Add §12 Z-Index Scale. Add §13 Tab Bar. Add §14 Text Overflow & Truncation. Add §15 Number Formatting. Add --space-xl (20px) to scale. Add Status Bar spec. Fix segment padding 2→4px. Fix category chip padding 2→4px. Fix tab icon 20→24px. Fix radio selected weight 500→600. Consolidate §8i → §8.10 (deduplicate). Fix streak dark bg olive→blue-tinted. |

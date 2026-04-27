@@ -464,11 +464,7 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
         color: var(--text-tertiary);
         margin: 0 0 24px;
       }
-      .section-label {
-        font: 600 14px/1.4 var(--ion-font-family);
-        color: var(--text-primary);
-        margin: 16px 0 8px;
-      }
+      /* .section-label sống ở src/theme/form-field.scss — dùng chung cho onboarding + modals. */
 
       /* ====================================================================
          RADIO ITEMS — matches mockup HTML structure exactly:
@@ -632,14 +628,9 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
       }
 
       /* ====================================================================
-         FIELD ERROR — 12px, danger color, per-field
+         FIELD ERROR — sống ở src/theme/form-field.scss (canonical, dùng chung
+         cho onboarding + modals). Trước đây redefined inline gây drift.
          ==================================================================== */
-      .field-error {
-        font: 400 12px/1.4 var(--ion-font-family);
-        color: var(--ion-color-danger);
-        padding: 4px 4px 0;
-        margin-bottom: 4px;
-      }
 
       /* ====================================================================
          ERROR TOAST — form-level save error

@@ -69,25 +69,33 @@ export interface DishEditFormValue {
               <div class="input-wrapper" [class.invalid]="showErrors && !form.name.trim()">
                 <label
                   class="input-label"
-                  for="dish-field-1"
+                  for="dish-field-name"
                   [class.invalid]="showErrors && !form.name.trim()"
                   >Tên món ăn</label
                 >
-                <input id="dish-field-1" class="input-native" #nameInput [(ngModel)]="form.name" />
+                <input
+                  id="dish-field-name"
+                  class="input-native"
+                  #nameInput
+                  [(ngModel)]="form.name"
+                  [attr.aria-invalid]="showErrors && !form.name.trim() ? 'true' : null"
+                  [attr.aria-describedby]="showErrors && !form.name.trim() ? 'err-dish-name' : null"
+                />
               </div>
               @if (showErrors && !form.name.trim()) {
-                <div class="field-error">Vui lòng nhập tên món ăn</div>
+                <div id="err-dish-name" class="field-error" role="alert">
+                  Vui lòng nhập tên món ăn
+                </div>
               }
             </div>
 
             <div class="form-field">
               <div class="input-wrapper">
-                <label class="input-label" for="dish-field-2">Mô tả</label>
+                <label class="input-label" for="dish-field-description">Mô tả</label>
                 <textarea
-                  id="dish-field-2"
-                  class="input-native"
+                  id="dish-field-description"
+                  class="input-native input-native--textarea"
                   rows="2"
-                  style="resize: none;"
                   [(ngModel)]="form.description"
                 ></textarea>
               </div>
@@ -97,12 +105,12 @@ export interface DishEditFormValue {
               <div class="input-wrapper" [class.invalid]="showErrors && !isServingsValid()">
                 <label
                   class="input-label"
-                  for="dish-field-3"
+                  for="dish-field-servings"
                   [class.invalid]="showErrors && !isServingsValid()"
                   >Số phần ăn</label
                 >
                 <input
-                  id="dish-field-3"
+                  id="dish-field-servings"
                   class="input-native"
                   type="number"
                   inputmode="decimal"
@@ -111,10 +119,16 @@ export interface DishEditFormValue {
                   min="0.5"
                   max="20"
                   step="0.5"
+                  [attr.aria-invalid]="showErrors && !isServingsValid() ? 'true' : null"
+                  [attr.aria-describedby]="
+                    showErrors && !isServingsValid() ? 'err-dish-servings' : null
+                  "
                 />
               </div>
               @if (showErrors && !isServingsValid()) {
-                <div class="field-error">Số phần ăn cần nằm trong khoảng 0.5 đến 20.</div>
+                <div id="err-dish-servings" class="field-error" role="alert">
+                  Số phần ăn cần nằm trong khoảng 0.5 đến 20.
+                </div>
               }
             </div>
 
@@ -149,42 +163,49 @@ export interface DishEditFormValue {
                     </div>
 
                     <div class="ingredient-item__grid">
-                      <div
-                        class="input-wrapper"
-                        [class.invalid]="showErrors && !(item.amount_value > 0)"
-                      >
-                        <label
-                          class="input-label"
-                          [attr.for]="'dish-amount-' + item.local_id"
+                      <div class="form-field">
+                        <div
+                          class="input-wrapper"
                           [class.invalid]="showErrors && !(item.amount_value > 0)"
-                          >Số lượng</label
                         >
-                        <input
-                          [id]="'dish-amount-' + item.local_id"
-                          class="input-native"
-                          type="number"
-                          inputmode="decimal"
-                          [ngModel]="item.amount_value"
-                          (ngModelChange)="updateAmount(item.local_id, $event)"
-                          min="0.1"
-                          max="10000"
-                          step="0.1"
-                        />
+                          <label
+                            class="input-label"
+                            [attr.for]="'dish-amount-' + item.local_id"
+                            [class.invalid]="showErrors && !(item.amount_value > 0)"
+                            >Số lượng</label
+                          >
+                          <input
+                            [id]="'dish-amount-' + item.local_id"
+                            class="input-native"
+                            type="number"
+                            inputmode="decimal"
+                            [ngModel]="item.amount_value"
+                            (ngModelChange)="updateAmount(item.local_id, $event)"
+                            min="0.1"
+                            max="10000"
+                            step="0.1"
+                            [attr.aria-invalid]="
+                              showErrors && !(item.amount_value > 0) ? 'true' : null
+                            "
+                          />
+                        </div>
                       </div>
 
-                      <div class="input-wrapper">
-                        <label class="input-label" [attr.for]="'dish-unit-' + item.local_id"
-                          >Đơn vị</label
-                        >
-                        <button
-                          type="button"
-                          [id]="'dish-unit-' + item.local_id"
-                          class="picker-trigger--floating"
-                          (click)="openUnitPicker(item.local_id)"
-                        >
-                          <span>{{ unitLabel(item) }}</span>
-                          <ion-icon name="chevron-down-outline" aria-hidden="true" />
-                        </button>
+                      <div class="form-field">
+                        <div class="input-wrapper">
+                          <label class="input-label" [attr.for]="'dish-unit-' + item.local_id"
+                            >Đơn vị</label
+                          >
+                          <button
+                            type="button"
+                            [id]="'dish-unit-' + item.local_id"
+                            class="picker-trigger--floating"
+                            (click)="openUnitPicker(item.local_id)"
+                          >
+                            <span>{{ unitLabel(item) }}</span>
+                            <ion-icon name="chevron-down-outline" aria-hidden="true" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </article>
@@ -197,7 +218,9 @@ export interface DishEditFormValue {
             }
 
             @if (showErrors && form.items.length === 0) {
-              <div class="field-error">Cần ít nhất 1 nguyên liệu trước khi lưu món ăn.</div>
+              <div id="err-dish-items" class="field-error" role="alert">
+                Cần ít nhất 1 nguyên liệu trước khi lưu món ăn.
+              </div>
             }
 
             <div class="section-label">Tổng dinh dưỡng (1 phần)</div>

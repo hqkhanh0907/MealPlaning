@@ -96,24 +96,8 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-.section-label {
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.4;
-  margin-top: 8px;
-}
-
-.section-hint {
-  color: var(--text-tertiary);
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0;
-}
-
-/* Form field styles (.input-wrapper, .input-label, .input-native,
-   .picker-trigger--floating) live in src/theme/form-field.scss —
-   the single canonical floating-label pattern for ALL inputs. */
+/* Form-level typography (.section-label, .section-hint, .field-error) sống ở
+   src/theme/form-field.scss để onboarding + modals dùng chung 1 nguồn. */
 
 .btn-outline,
 .btn-danger-text,
@@ -153,9 +137,4 @@
   opacity: 0.6;
 }
 
-.field-error {
-  color: var(--ion-color-danger);
-  font-size: 12px;
-  line-height: 1.4;
-  margin-top: -8px;
-}
+/* .field-error styles sống ở form-field.scss để dùng chung cho onboarding + modals. */
