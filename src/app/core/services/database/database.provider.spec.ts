@@ -1,6 +1,8 @@
 import { APP_INITIALIZER, ApplicationInitStatus } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { ProfileStore } from '../../stores/profile.store';
+import { SeedLoaderService } from '../seed/seed-loader.service';
 import { provideDatabaseService } from './database.provider';
 import { DatabaseService } from './database.service';
 
@@ -9,6 +11,7 @@ describe('provideDatabaseService startup orchestration', () => {
     calls: string[];
     db: jasmine.SpyObj<DatabaseService>;
     profileStore: jasmine.SpyObj<ProfileStore>;
+    seedLoader: jasmine.SpyObj<SeedLoaderService>;
     initializers: (() => Promise<void>)[];
     initStatus: ApplicationInitStatus;
   } {
@@ -23,12 +26,20 @@ describe('provideDatabaseService startup orchestration', () => {
       calls.push('profile.loadProfile');
     });
 
+    const seedLoader = jasmine.createSpyObj<SeedLoaderService>('SeedLoaderService', ['run']);
+    seedLoader.run.and.callFake(async () => {
+      calls.push('seed.run');
+      return { ingredients: 0, dishes: 0 };
+    });
+
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
+        provideHttpClient(),
         provideDatabaseService(),
         { provide: DatabaseService, useValue: db },
         { provide: ProfileStore, useValue: profileStore },
+        { provide: SeedLoaderService, useValue: seedLoader },
       ],
     });
 
@@ -36,6 +47,7 @@ describe('provideDatabaseService startup orchestration', () => {
       calls,
       db,
       profileStore,
+      seedLoader,
       initializers: TestBed.inject(APP_INITIALIZER) as (() => Promise<void>)[],
       initStatus: TestBed.inject(ApplicationInitStatus),
     };
@@ -49,6 +61,16 @@ describe('provideDatabaseService startup orchestration', () => {
   it('initializes database before loading profile during app init', async () => {
     const { calls, initStatus } = configure();
     await initStatus.donePromise;
-    expect(calls).toEqual(['db.initialize', 'profile.loadProfile']);
+    expect(calls).toEqual(['db.initialize', 'seed.run', 'profile.loadProfile']);
+  });
+
+  it('continues startup even if seed loader throws', async () => {
+    const { calls, seedLoader, initStatus } = configure();
+    seedLoader.run.and.callFake(async () => {
+      calls.push('seed.run');
+      throw new Error('boom');
+    });
+    await initStatus.donePromise;
+    expect(calls).toEqual(['db.initialize', 'seed.run', 'profile.loadProfile']);
   });
 });

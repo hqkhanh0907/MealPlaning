@@ -10,6 +10,7 @@ import { WebDatabaseService } from './web-database.service';
 import { NativeDatabaseService } from './native-database.service';
 import { LegacySqlJsMigrator } from './legacy-sqljs-migrator';
 import { ProfileStore } from '../../stores/profile.store';
+import { SeedLoaderService } from '../seed/seed-loader.service';
 
 /** Upper bound for legacy import — never block startup longer than this. */
 const LEGACY_MIGRATION_TIMEOUT_MS = 3000;
@@ -35,6 +36,7 @@ export function provideDatabaseService(): EnvironmentProviders {
       useFactory: () => {
         const db = inject(DatabaseService);
         const profileStore = inject(ProfileStore);
+        const seedLoader = inject(SeedLoaderService);
         return async () => {
           await db.initialize();
 
@@ -43,9 +45,19 @@ export function provideDatabaseService(): EnvironmentProviders {
               new LegacySqlJsMigrator(db).migrate(),
               LEGACY_MIGRATION_TIMEOUT_MS,
               'legacy-sqljs-migration',
-            ).catch((err) =>
-              console.warn('[DatabaseProvider] legacy migration skipped:', err),
-            );
+            ).catch((err) => console.warn('[DatabaseProvider] legacy migration skipped:', err));
+          }
+
+          try {
+            const inserted = await seedLoader.run();
+            if (inserted.ingredients > 0 || inserted.dishes > 0) {
+              console.info(
+                `[DatabaseProvider] seed loaded: ${inserted.ingredients} ingredients, ${inserted.dishes} dishes`,
+              );
+            }
+          } catch (err) {
+            // Seed failure must NOT block app startup — log + continue.
+            console.warn('[DatabaseProvider] seed load failed:', err);
           }
 
           await profileStore.loadProfile();
