@@ -8,8 +8,10 @@ import {
   Output,
   SimpleChanges,
   ViewChild,
+  signal,
+  untracked,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormField, form } from '@angular/forms/signals';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline, chevronDownOutline, closeOutline } from 'ionicons/icons';
@@ -19,25 +21,27 @@ import {
   type PickerOption,
 } from '../bottom-sheet-picker/bottom-sheet-picker.component';
 import { FormFieldComponent } from '../../forms';
+import { dishFormSchema } from '../../forms/schemas/dish-form.schema';
+import type { DishEditFormValue, DishIngredientFormItem } from './dish-edit-modal.types';
 
-export interface DishIngredientFormItem {
-  local_id: string;
-  ingredient_id: string;
-  amount_value: number;
-  unit_id: string;
-}
+export type { DishEditFormValue, DishIngredientFormItem } from './dish-edit-modal.types';
 
-export interface DishEditFormValue {
-  name: string;
-  description: string;
-  servings: number | null;
-  items: DishIngredientFormItem[];
-}
+const emptyForm = (): DishEditFormValue => ({
+  name: '',
+  description: '',
+  servings: null,
+  items: [],
+});
+
+const cloneForm = (value: DishEditFormValue): DishEditFormValue => ({
+  ...value,
+  items: value.items.map((item) => ({ ...item })),
+});
 
 @Component({
   selector: 'app-dish-edit-modal',
   standalone: true,
-  imports: [FormsModule, IonIcon, BottomSheetPickerComponent, FormFieldComponent],
+  imports: [FormField, IonIcon, BottomSheetPickerComponent, FormFieldComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (isOpen) {
@@ -70,16 +74,18 @@ export interface DishEditFormValue {
               label="Tên món ăn"
               inputId="dish-field-name"
               errorId="err-dish-name"
-              [invalid]="showErrors && !form.name.trim()"
+              [invalid]="showErrors && !formSignal().name.trim()"
               errorMessage="Vui lòng nhập tên món ăn"
             >
               <input
                 id="dish-field-name"
                 class="input-native"
                 #nameInput
-                [(ngModel)]="form.name"
-                [attr.aria-invalid]="showErrors && !form.name.trim() ? 'true' : null"
-                [attr.aria-describedby]="showErrors && !form.name.trim() ? 'err-dish-name' : null"
+                [formField]="dishForm.name"
+                [attr.aria-invalid]="showErrors && !formSignal().name.trim() ? 'true' : null"
+                [attr.aria-describedby]="
+                  showErrors && !formSignal().name.trim() ? 'err-dish-name' : null
+                "
               />
             </app-form-field>
 
@@ -88,7 +94,7 @@ export interface DishEditFormValue {
                 id="dish-field-description"
                 class="input-native input-native--textarea"
                 rows="2"
-                [(ngModel)]="form.description"
+                [formField]="dishForm.description"
               ></textarea>
             </app-form-field>
 
@@ -104,10 +110,7 @@ export interface DishEditFormValue {
                 class="input-native"
                 type="number"
                 inputmode="decimal"
-                [ngModel]="form.servings ?? ''"
-                (ngModelChange)="onServingsChange($event)"
-                min="0.5"
-                max="20"
+                [formField]="dishForm.servings"
                 step="0.5"
                 [attr.aria-invalid]="showErrors && !isServingsValid() ? 'true' : null"
                 [attr.aria-describedby]="
@@ -118,8 +121,11 @@ export interface DishEditFormValue {
 
             <div class="section-label">Nguyên liệu</div>
 
-            @if (form.items.length === 0) {
-              <div class="ingredient-empty" [class.invalid]="showErrors && form.items.length === 0">
+            @if (formSignal().items.length === 0) {
+              <div
+                class="ingredient-empty"
+                [class.invalid]="showErrors && formSignal().items.length === 0"
+              >
                 <div class="ingredient-empty-title">Chưa có nguyên liệu nào</div>
                 <button type="button" class="btn-outline" (click)="openIngredientPicker()">
                   + Thêm nguyên liệu đầu tiên
@@ -127,7 +133,7 @@ export interface DishEditFormValue {
               </div>
             } @else {
               <div class="ingredient-list">
-                @for (item of form.items; track item.local_id) {
+                @for (item of formSignal().items; track item.local_id; let i = $index) {
                   <article class="ingredient-item">
                     <div class="ingredient-item__row">
                       <div class="ingredient-item__info">
@@ -157,10 +163,7 @@ export interface DishEditFormValue {
                           class="input-native"
                           type="number"
                           inputmode="decimal"
-                          [ngModel]="item.amount_value"
-                          (ngModelChange)="updateAmount(item.local_id, $event)"
-                          min="0.1"
-                          max="10000"
+                          [formField]="dishForm.items[i].amount_value"
                           step="0.1"
                           [attr.aria-invalid]="
                             showErrors && !(item.amount_value > 0) ? 'true' : null
@@ -189,7 +192,7 @@ export interface DishEditFormValue {
               </button>
             }
 
-            @if (showErrors && form.items.length === 0) {
+            @if (showErrors && formSignal().items.length === 0) {
               <div id="err-dish-items" class="field-error" role="alert">
                 Cần ít nhất 1 nguyên liệu trước khi lưu món ăn.
               </div>
@@ -390,15 +393,19 @@ export class DishEditModalComponent implements OnChanges {
   @Input() saving = false;
   @Input() allowDelete = false;
   @Input() ingredients: IngredientListItem[] = [];
-  @Input() form: DishEditFormValue = {
-    name: '',
-    description: '',
-    servings: null,
-    items: [],
-  };
+  @Input() form: DishEditFormValue = emptyForm();
   @Output() dismissed = new EventEmitter<void>();
   @Output() submitted = new EventEmitter<DishEditFormValue>();
   @Output() deleteRequested = new EventEmitter<void>();
+
+  /**
+   * Internal writable signal mirroring the @Input `form` object. Signal Forms
+   * binds against this; ngOnChanges keeps it in sync with the parent.
+   */
+  protected readonly formSignal = signal<DishEditFormValue>(emptyForm());
+
+  /** Signal Forms FieldTree built from {@link formSignal} + schema. */
+  protected readonly dishForm = form(this.formSignal, dishFormSchema);
 
   showErrors = false;
   activeUnitRowId: string | null = null;
@@ -408,8 +415,13 @@ export class DishEditModalComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes['form']) {
+      this.formSignal.set(cloneForm(this.form));
+    }
     if (changes['isOpen']?.currentValue) {
       this.showErrors = false;
+      // Re-sync from input on each open (parent may have mutated `form` in place).
+      this.formSignal.set(cloneForm(this.form));
       queueMicrotask(() => {
         window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
         document
@@ -428,7 +440,9 @@ export class DishEditModalComponent implements OnChanges {
   }
 
   get unitOptions(): PickerOption[] {
-    const item = this.form.items.find((candidate) => candidate.local_id === this.activeUnitRowId);
+    const item = this.formSignal().items.find(
+      (candidate) => candidate.local_id === this.activeUnitRowId,
+    );
     const ingredient = item
       ? this.ingredients.find((candidate) => candidate.id === item.ingredient_id)
       : null;
@@ -447,8 +461,8 @@ export class DishEditModalComponent implements OnChanges {
 
   get activeUnitValue(): string | null {
     return (
-      this.form.items.find((candidate) => candidate.local_id === this.activeUnitRowId)?.unit_id ??
-      null
+      this.formSignal().items.find((candidate) => candidate.local_id === this.activeUnitRowId)
+        ?.unit_id ?? null
     );
   }
 
@@ -459,7 +473,7 @@ export class DishEditModalComponent implements OnChanges {
     fat: number;
     fiber: number;
   } {
-    return this.form.items.reduce(
+    return this.formSignal().items.reduce(
       (totals, item) => {
         const ingredient = this.ingredients.find(
           (candidate) => candidate.id === item.ingredient_id,
@@ -504,15 +518,18 @@ export class DishEditModalComponent implements OnChanges {
       return;
     }
 
-    this.form.items = [
-      ...this.form.items,
-      {
-        local_id: this.createLocalId('dish-item'),
-        ingredient_id: ingredient.id,
-        amount_value: 1,
-        unit_id: defaultUnit.unit_id,
-      },
-    ];
+    this.formSignal.update((v) => ({
+      ...v,
+      items: [
+        ...v.items,
+        {
+          local_id: this.createLocalId('dish-item'),
+          ingredient_id: ingredient.id,
+          amount_value: 1,
+          unit_id: defaultUnit.unit_id,
+        },
+      ],
+    }));
   }
 
   onUnitSelected(unitId: string): void {
@@ -520,22 +537,20 @@ export class DishEditModalComponent implements OnChanges {
       return;
     }
 
-    this.form.items = this.form.items.map((item) =>
-      item.local_id === this.activeUnitRowId ? { ...item, unit_id: unitId } : item,
-    );
-  }
-
-  updateAmount(localId: string, value: string | number): void {
-    const parsed = Number(value);
-    this.form.items = this.form.items.map((item) =>
-      item.local_id === localId
-        ? { ...item, amount_value: Number.isFinite(parsed) ? parsed : 0 }
-        : item,
-    );
+    const targetId = this.activeUnitRowId;
+    this.formSignal.update((v) => ({
+      ...v,
+      items: v.items.map((item) =>
+        item.local_id === targetId ? { ...item, unit_id: unitId } : item,
+      ),
+    }));
   }
 
   removeItem(localId: string): void {
-    this.form.items = this.form.items.filter((item) => item.local_id !== localId);
+    this.formSignal.update((v) => ({
+      ...v,
+      items: v.items.filter((item) => item.local_id !== localId),
+    }));
   }
 
   ingredientName(ingredientId: string): string {
@@ -572,12 +587,13 @@ export class DishEditModalComponent implements OnChanges {
       return;
     }
 
+    const value = untracked(() => this.formSignal());
     this.submitted.emit({
-      ...this.form,
-      name: this.form.name.trim(),
-      description: this.form.description.trim(),
-      servings: this.form.servings ?? 1,
-      items: this.form.items.map((item) => ({ ...item })),
+      ...value,
+      name: value.name.trim(),
+      description: value.description.trim(),
+      servings: value.servings ?? 1,
+      items: value.items.map((item) => ({ ...item })),
     });
   }
 
@@ -586,30 +602,24 @@ export class DishEditModalComponent implements OnChanges {
   }
 
   isServingsValid(): boolean {
-    const value = this.form.servings;
-    return value !== null && value >= 0.5 && value <= 20;
-  }
-
-  onServingsChange(value: string | number | null): void {
-    if (value === '' || value === null || value === undefined) {
-      this.form.servings = null;
-      return;
-    }
-    const parsed = typeof value === 'number' ? value : Number(value);
-    this.form.servings = Number.isFinite(parsed) ? parsed : null;
+    const value = this.formSignal().servings;
+    return (
+      value !== null && value !== undefined && !Number.isNaN(value) && value >= 0.5 && value <= 20
+    );
   }
 
   private focusFirstInvalidField(): void {
-    const firstErrorSelector = !this.form.name.trim()
+    const v = this.formSignal();
+    const firstErrorSelector = !v.name.trim()
       ? 'input'
       : !this.isServingsValid()
         ? 'input[type="number"]'
-        : this.form.items.length === 0
+        : v.items.length === 0
           ? '.ingredient-empty'
           : null;
 
     setTimeout(() => {
-      if (!this.form.name.trim()) {
+      if (!this.formSignal().name.trim()) {
         this.nameInput?.nativeElement.focus();
       }
 
@@ -621,11 +631,12 @@ export class DishEditModalComponent implements OnChanges {
   }
 
   private isValid(): boolean {
+    const v = this.formSignal();
     return (
-      this.form.name.trim().length > 0 &&
+      v.name.trim().length > 0 &&
       this.isServingsValid() &&
-      this.form.items.length > 0 &&
-      this.form.items.every((item) => item.amount_value > 0 && item.unit_id.trim().length > 0)
+      v.items.length > 0 &&
+      v.items.every((item) => item.amount_value > 0 && item.unit_id.trim().length > 0)
     );
   }
 

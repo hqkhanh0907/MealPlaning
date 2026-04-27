@@ -10,7 +10,7 @@ describe('DishEditModalComponent', () => {
     fixture = TestBed.createComponent(DishEditModalComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('isOpen', true);
-    component.ingredients = [
+    fixture.componentRef.setInput('ingredients', [
       {
         id: 'ingredient-1',
         name: 'Trứng gà',
@@ -39,7 +39,7 @@ describe('DishEditModalComponent', () => {
           },
         ],
       },
-    ];
+    ]);
     fixture.detectChanges();
   });
 
@@ -57,7 +57,7 @@ describe('DishEditModalComponent', () => {
       submittedName = value.name;
     });
 
-    component.form = {
+    fixture.componentRef.setInput('form', {
       name: ' Cơm trứng ',
       description: ' nhanh ',
       servings: 1,
@@ -69,10 +69,54 @@ describe('DishEditModalComponent', () => {
           unit_id: 'g',
         },
       ],
-    };
+    });
     fixture.detectChanges();
     component.submit();
 
     expect(submittedName).toBe('Cơm trứng');
+  });
+
+  it('rejects submit when servings is out of range (validated by schema)', () => {
+    let emitted = false;
+    component.submitted.subscribe(() => {
+      emitted = true;
+    });
+
+    fixture.componentRef.setInput('form', {
+      name: 'Test',
+      description: '',
+      servings: 25, // > 20
+      items: [
+        {
+          local_id: 'item-1',
+          ingredient_id: 'ingredient-1',
+          amount_value: 2,
+          unit_id: 'g',
+        },
+      ],
+    });
+    fixture.detectChanges();
+    component.submit();
+
+    expect(emitted).toBeFalse();
+    expect(component.showErrors).toBeTrue();
+  });
+
+  it('rejects submit when items list is empty', () => {
+    let emitted = false;
+    component.submitted.subscribe(() => {
+      emitted = true;
+    });
+
+    fixture.componentRef.setInput('form', {
+      name: 'Test',
+      description: '',
+      servings: 2,
+      items: [],
+    });
+    fixture.detectChanges();
+    component.submit();
+
+    expect(emitted).toBeFalse();
   });
 });
