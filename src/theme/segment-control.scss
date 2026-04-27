@@ -1,0 +1,78 @@
+/*
+ * CANONICAL segment control — design-system §8.8 (binary/N-way chooser).
+ * Used by ALL segment controls across the app (onboarding gender, modal
+ * nutrition basis, future filters).
+ *
+ * MANDATORY MARKUP:
+ *   <div class="segment-control" [class.invalid]="hasError"
+ *        role="radiogroup" aria-label="...">
+ *     <button type="button" class="segment-button" [class.selected]="..."
+ *             role="radio" [attr.aria-checked]="..." (click)="...">
+ *       Option A
+ *     </button>
+ *     <button type="button" class="segment-button" [class.selected]="..."
+ *             role="radio" [attr.aria-checked]="..." (click)="...">
+ *       Option B
+ *     </button>
+ *   </div>
+ *
+ * Optional invalid state (used by onboarding step 2a — gender required):
+ *   - Add `.invalid` to the container; combine with `<span class="section-label invalid">`
+ *     above the segment.
+ *
+ * DEPRECATED ALIASES (do NOT use):
+ *   - `.segmented` / `.segment-btn` / `.active`  ← old modal-local names
+ *
+ * If a deviation is needed, update §8.8 first AND get explicit user approval —
+ * never silently re-introduce a parallel pattern.
+ */
+
+.segment-control {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg-muted);
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+}
+
+.segment-control.invalid {
+  box-shadow: 0 0 0 1px var(--ion-color-danger) inset;
+}
+
+.segment-button {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  font: 500 14px/1.4 var(--ion-font-family);
+  color: var(--text-tertiary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.segment-button.selected {
+  background: var(--bg-card);
+  color: var(--ion-color-primary);
+  box-shadow: var(--shadow-md);
+  font-weight: 600;
+}
+
+.segment-button:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .segment-control.invalid {
+    box-shadow: 0 0 0 1px #ef5350 inset;
+  }
+  .segment-button.selected {
+    /* var(--bg-card) trong dark = #1d1f26; var(--shadow-md) = none */
+    color: #42a5f5;
+  }
+}

@@ -558,64 +558,12 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
          .picker-trigger--floating) live in src/theme/form-field.scss —
          the canonical floating-label pattern. See CLAUDE.md "Form Inputs". */
 
-      /* SEGMENT CONTROL — §8.8, binary choice (Nam/Nữ) */
+      /* SEGMENT CONTROL — §8.8, canonical sống ở src/theme/segment-control.scss
+         (.segment-control / .segment-button / .selected). Override segment-label
+         margin để hợp với nhịp 8px của step-content. */
       .segment-label {
         display: block;
         margin: 0 0 8px;
-      }
-      .segment-label.invalid {
-        color: var(--ion-color-danger);
-      }
-      .segment-control {
-        display: flex;
-        gap: 4px;
-        padding: 4px;
-        background: #eef1f6;
-        border-radius: var(--radius-sm);
-        box-sizing: border-box;
-      }
-      .segment-control.invalid {
-        box-shadow: 0 0 0 1px var(--ion-color-danger) inset;
-      }
-      .segment-button {
-        flex: 1;
-        min-height: 44px;
-        border: 0;
-        background: transparent;
-        font: 500 14px/1.4 var(--ion-font-family);
-        color: var(--text-tertiary);
-        border-radius: 8px;
-        cursor: pointer;
-        transition:
-          background 0.15s ease,
-          color 0.15s ease,
-          box-shadow 0.15s ease;
-      }
-      .segment-button.selected {
-        background: #fff;
-        color: var(--ion-color-primary);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-        font-weight: 600;
-      }
-      .segment-button:focus-visible {
-        outline: 2px solid var(--ion-color-primary);
-        outline-offset: 2px;
-      }
-      @media (prefers-color-scheme: dark) {
-        .segment-control {
-          background: #2a2d35;
-        }
-        .segment-control.invalid {
-          box-shadow: 0 0 0 1px #ef5350 inset;
-        }
-        .segment-button {
-          color: #a8aab4;
-        }
-        .segment-button.selected {
-          background: #1d1f26;
-          color: #42a5f5;
-          box-shadow: none;
-        }
       }
 
       /* ====================================================================

@@ -6,17 +6,24 @@ export interface SegmentedControlOption<T extends string> {
   ariaLabel?: string;
 }
 
+/**
+ * Reusable N-way segment chooser. Visuals delegated to the canonical
+ * .segment-control / .segment-button / .selected classes living in
+ * src/theme/segment-control.scss (design system §8.8). DO NOT add local
+ * styles — keep this wrapper pure markup so onboarding, modal and
+ * management filter all render identically.
+ */
 @Component({
   selector: 'app-segmented-control',
   standalone: true,
   imports: [],
   template: `
-    <div class="segmented-control" role="tablist" [attr.aria-label]="ariaLabel">
+    <div class="segment-control" role="tablist" [attr.aria-label]="ariaLabel">
       @for (option of options; track option.value) {
         <button
           type="button"
-          class="segmented-control__option"
-          [class.segmented-control__option--active]="option.value === value"
+          class="segment-button"
+          [class.selected]="option.value === value"
           role="tab"
           [attr.aria-selected]="option.value === value"
           [attr.aria-label]="option.ariaLabel ?? option.label"
@@ -27,45 +34,6 @@ export interface SegmentedControlOption<T extends string> {
       }
     </div>
   `,
-  styles: [
-    `
-      .segmented-control {
-        display: grid;
-        grid-template-columns: repeat(var(--segment-count, 2), minmax(0, 1fr));
-        gap: 0;
-        padding: 4px;
-        border-radius: 12px;
-        background: var(--bg-muted);
-      }
-
-      .segmented-control__option {
-        min-height: 36px;
-        border: none;
-        border-radius: 8px;
-        background: transparent;
-        color: var(--text-tertiary);
-        font-size: 14px;
-        font-weight: 500;
-        line-height: 1.2;
-        transition:
-          background-color 160ms ease,
-          color 160ms ease,
-          box-shadow 160ms ease;
-      }
-
-      .segmented-control__option--active {
-        background: var(--bg-card);
-        color: var(--text-primary);
-        font-weight: 600;
-        box-shadow: var(--shadow-sm);
-      }
-
-      .segmented-control__option:focus-visible {
-        outline: 2px solid rgba(var(--ion-color-primary-rgb), 0.35);
-        outline-offset: 2px;
-      }
-    `,
-  ],
 })
 export class SegmentedControlComponent<T extends string> {
   @Input({ required: true }) options: SegmentedControlOption<T>[] = [];

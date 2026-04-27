@@ -120,19 +120,19 @@ export interface IngredientEditFormValue {
             </app-form-field>
 
             <div class="section-label">Tính dinh dưỡng theo</div>
-            <div class="segmented" role="tablist" aria-label="Tính dinh dưỡng theo">
+            <div class="segment-control" role="tablist" aria-label="Tính dinh dưỡng theo">
               <button
                 type="button"
-                class="segment-btn"
-                [class.active]="form.nutrition_basis_unit === 'g'"
+                class="segment-button"
+                [class.selected]="form.nutrition_basis_unit === 'g'"
                 (click)="setBasisUnit('g')"
               >
                 100g
               </button>
               <button
                 type="button"
-                class="segment-btn"
-                [class.active]="form.nutrition_basis_unit === 'ml'"
+                class="segment-button"
+                [class.selected]="form.nutrition_basis_unit === 'ml'"
                 (click)="setBasisUnit('ml')"
               >
                 100ml
@@ -382,32 +382,8 @@ export interface IngredientEditFormValue {
       margin: 0;
     }
 
-    .segmented {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 2px;
-      padding: 4px;
-      border-radius: 12px;
-      background: var(--bg-muted);
-    }
-
-    .segment-btn {
-      min-height: 36px;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      color: var(--text-tertiary);
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .segment-btn.active {
-      border-color: transparent;
-      background: var(--bg-card);
-      box-shadow: var(--shadow-md);
-      color: var(--text-primary);
-      font-weight: 600;
-    }
+    /* Segment control styles sống ở src/theme/segment-control.scss
+       (.segment-control / .segment-button / .selected) — canonical §8.8. */
 
     .nutrition-grid,
     .unit-grid {
