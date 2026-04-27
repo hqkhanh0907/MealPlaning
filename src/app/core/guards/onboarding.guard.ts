@@ -19,3 +19,21 @@ export const onboardingGuard: CanActivateFn = () => {
 
   return router.createUrlTree(['/onboarding']);
 };
+
+/**
+ * Reverse guard for the /onboarding route — if the user has
+ * already completed onboarding, redirect them back to the app
+ * shell instead of letting them re-enter the wizard. Prevents
+ * Android hardware-back from popping into a stale onboarding
+ * page that is still sitting in the navigation stack.
+ */
+export const onboardingCompletedRedirectGuard: CanActivateFn = () => {
+  const profileStore = inject(ProfileStore);
+  const router = inject(Router);
+
+  if (profileStore.isOnboardingComplete()) {
+    return router.createUrlTree(['/']);
+  }
+
+  return true;
+};

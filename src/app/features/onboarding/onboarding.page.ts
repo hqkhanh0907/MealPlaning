@@ -791,7 +791,9 @@ export default class OnboardingPage {
         onboarding_completed: 1,
       });
 
-      void this.router.navigate(['/']);
+      // Replace history entry so Android hardware-back from inside the app
+      // doesn't pop back into the onboarding wizard once completed.
+      void this.router.navigateByUrl('/', { replaceUrl: true });
     } catch {
       this.saveError.set('Lưu thất bại. Vui lòng thử lại.');
     } finally {

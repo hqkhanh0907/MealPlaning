@@ -1,5 +1,5 @@
 import { DOCUMENT, NgClass } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
 import {
   IonButton,
   IonButtons,
@@ -460,7 +460,7 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
     DishEditModalComponent,
   ],
 })
-export default class ManagementPage {
+export default class ManagementPage implements OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
   private readonly unitRepository = inject(UnitRepository);
@@ -696,6 +696,16 @@ export default class ManagementPage {
         void this.dishStore.load();
       }
     });
+  }
+
+  /**
+   * Ensure the body-level overlay class is always cleared when this page is
+   * destroyed. Without this, navigating away (e.g. Android hardware-back from
+   * an open modal) can leave `body.edit-overlay-open` stuck, which hides the
+   * bottom tab bar globally via the rule in tabs.page.ts.
+   */
+  ngOnDestroy(): void {
+    this.document.body.classList.remove('edit-overlay-open');
   }
 
   onTabChange(value: ManagementTab | string | null | undefined): void {

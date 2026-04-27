@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
-import { onboardingGuard } from './core/guards/onboarding.guard';
+import { onboardingGuard, onboardingCompletedRedirectGuard } from './core/guards/onboarding.guard';
 
 export const routes: Routes = [
   {
     path: 'onboarding',
+    canActivate: [onboardingCompletedRedirectGuard],
     loadComponent: () => import('./features/onboarding/onboarding.page'),
   },
   {
