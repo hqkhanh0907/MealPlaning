@@ -419,7 +419,25 @@ Theo PRD F-12 (Dashboard Quick Actions):
 
 > **Source of truth:** `src/theme/form-field.scss`. ALL inputs MUST use these classes — không tạo pattern thay thế.
 
-**Required markup:**
+**PREFERRED markup (Phase B1+):** dùng wrapper component `<app-form-field>`
+ở `src/app/shared/forms/form-field/`. Wrapper render đúng cấu trúc bên dưới
++ floating label + error message + a11y `for=`. Forward-compatible với
+Signal Forms (xem `docs/5-development/signal-forms-migration-plan.md`).
+
+```html
+<app-form-field
+  label="Tên trường"
+  inputId="my-field"
+  [invalid]="showErrors && !form.name.trim()"
+  errorMessage="Vui lòng nhập tên"
+>
+  <input id="my-field" class="input-native" [(ngModel)]="form.name" />
+</app-form-field>
+```
+
+**Raw markup (chấp nhận, sẽ refactor dần):** áp dụng cho code đã viết
+trước Phase B1 hoặc trường hợp cần custom layout.
+
 ```html
 <div class="input-wrapper" [class.invalid]="hasError">
   <label class="input-label" [class.invalid]="hasError">Tên trường</label>
