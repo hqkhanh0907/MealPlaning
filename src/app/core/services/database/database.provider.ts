@@ -51,7 +51,7 @@ export function provideDatabaseService(): EnvironmentProviders {
           try {
             const inserted = await seedLoader.run();
             if (inserted.ingredients > 0 || inserted.dishes > 0) {
-              console.info(
+              console.warn(
                 `[DatabaseProvider] seed loaded: ${inserted.ingredients} ingredients, ${inserted.dishes} dishes`,
               );
             }

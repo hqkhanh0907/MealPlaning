@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   IonHeader,
@@ -11,8 +11,13 @@ import {
   IonProgressBar,
   IonText,
 } from '@ionic/angular/standalone';
-import { FormsModule } from '@angular/forms';
+import { FormField, form } from '@angular/forms/signals';
 import { FormFieldComponent } from '../../shared/forms';
+import {
+  EMPTY_ONBOARDING_STEP2A_FORM,
+  type OnboardingStep2aFormValue,
+} from './onboarding-form.types';
+import { onboardingStep2aSchema } from '../../shared/forms/schemas/onboarding-step2a-form.schema';
 import { addIcons } from 'ionicons';
 import {
   arrowBackOutline,
@@ -176,10 +181,8 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                 type="number"
                 inputmode="decimal"
                 class="input-native"
-                [value]="heightCm() ?? ''"
-                (input)="heightCm.set(heightInput.value ? +heightInput.value : null)"
-                min="130"
-                max="250"
+                [formField]="step2aForm.heightCm"
+                step="0.1"
                 [attr.aria-invalid]="step2aErrors().heightCm ? 'true' : null"
                 [attr.aria-describedby]="step2aErrors().heightCm ? 'err-height' : null"
               />
@@ -198,10 +201,8 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                 type="number"
                 inputmode="decimal"
                 class="input-native"
-                [value]="weightKg() ?? ''"
-                (input)="weightKg.set(weightInput.value ? +weightInput.value : null)"
-                min="30"
-                max="200"
+                [formField]="step2aForm.weightKg"
+                step="0.1"
                 [attr.aria-invalid]="step2aErrors().weightKg ? 'true' : null"
                 [attr.aria-describedby]="step2aErrors().weightKg ? 'err-weight' : null"
               />
@@ -220,10 +221,7 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                 type="number"
                 inputmode="numeric"
                 class="input-native"
-                [value]="age() ?? ''"
-                (input)="age.set(ageInput.value ? +ageInput.value : null)"
-                min="13"
-                max="120"
+                [formField]="step2aForm.age"
                 [attr.aria-invalid]="step2aErrors().age ? 'true' : null"
                 [attr.aria-describedby]="step2aErrors().age ? 'err-age' : null"
               />
@@ -243,9 +241,9 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
               <button
                 type="button"
                 class="segment-button"
-                [class.selected]="gender() === 'male'"
+                [class.selected]="step2aFormSignal().gender === 'male'"
                 role="radio"
-                [attr.aria-checked]="gender() === 'male'"
+                [attr.aria-checked]="step2aFormSignal().gender === 'male'"
                 (click)="onGenderChange('male')"
               >
                 Nam
@@ -253,9 +251,9 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
               <button
                 type="button"
                 class="segment-button"
-                [class.selected]="gender() === 'female'"
+                [class.selected]="step2aFormSignal().gender === 'female'"
                 role="radio"
-                [attr.aria-checked]="gender() === 'female'"
+                [attr.aria-checked]="step2aFormSignal().gender === 'female'"
                 (click)="onGenderChange('female')"
               >
                 Nữ
@@ -623,7 +621,7 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
     `,
   ],
   imports: [
-    FormsModule,
+    FormField,
     FormFieldComponent,
     IonHeader,
     IonToolbar,
@@ -668,12 +666,15 @@ export default class OnboardingPage {
   // Step 1 — Goal
   readonly goal = signal<Goal | null>(null);
 
-  // Step 2a — Body info
-  readonly heightCm = signal<number | null>(null);
-  readonly weightKg = signal<number | null>(null);
-  readonly age = signal<number | null>(null);
-  readonly gender = signal<Gender | null>(null);
+  // Step 2a — Body info (Signal Forms FieldTree, see B4 in
+  // docs/5-development/signal-forms-migration-plan.md)
+  protected readonly step2aFormSignal = signal<OnboardingStep2aFormValue>({
+    ...EMPTY_ONBOARDING_STEP2A_FORM,
+  });
+  protected readonly step2aForm = form(this.step2aFormSignal, onboardingStep2aSchema);
   readonly step2aErrors = signal<Step2aErrors>({ ...EMPTY_2A });
+  /** True after first submit attempt — controls live error display (Phase 1 pattern). */
+  protected readonly showStep2aErrors = signal(false);
 
   // Step 2b — Activity info
   readonly activityLevel = signal<ActivityLevel | null>(null);
@@ -695,11 +696,26 @@ export default class OnboardingPage {
       trophyOutline,
       checkmark,
     });
+    // Live re-validate Step 2a errors after first submit attempt — keeps UX
+    // consistent with Phase 1 modals where errors update on every keystroke
+    // once the user has tried to advance.
+    effect(() => {
+      const v = this.step2aFormSignal();
+      if (!this.showStep2aErrors()) return;
+      this.step2aErrors.set(
+        validateStep2a({
+          heightCm: v.heightCm,
+          weightKg: v.weightKg,
+          age: v.age,
+          gender: v.gender,
+        }),
+      );
+    });
   }
 
   /** Set gender from segment control */
   onGenderChange(value: Gender): void {
-    this.gender.set(value);
+    this.step2aFormSignal.update((v) => ({ ...v, gender: value }));
   }
 
   /** Set activity level from radio card */
@@ -716,11 +732,13 @@ export default class OnboardingPage {
 
   /** Step 2a → Step 2b (validate body info first) */
   nextFromStep2a(): void {
+    this.showStep2aErrors.set(true);
+    const v = this.step2aFormSignal();
     const errors = validateStep2a({
-      heightCm: this.heightCm(),
-      weightKg: this.weightKg(),
-      age: this.age(),
-      gender: this.gender(),
+      heightCm: v.heightCm,
+      weightKg: v.weightKg,
+      age: v.age,
+      gender: v.gender,
     });
     this.step2aErrors.set(errors);
     if (Object.values(errors).some((e) => e !== '')) {
@@ -757,10 +775,11 @@ export default class OnboardingPage {
 
     try {
       const goal = this.goal()!;
-      const gender = this.gender()!;
-      const heightCm = this.heightCm()!;
-      const weightKg = this.weightKg()!;
-      const age = this.age()!;
+      const v = this.step2aFormSignal();
+      const gender = v.gender!;
+      const heightCm = v.heightCm!;
+      const weightKg = v.weightKg!;
+      const age = v.age!;
       const gym = this.gymExperience()!;
       const activityLevel = this.activityLevel()!;
       const fitnessLevel = deriveFitnessLevel(gym);
