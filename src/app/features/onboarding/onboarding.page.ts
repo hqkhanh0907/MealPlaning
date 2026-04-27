@@ -229,45 +229,43 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
               />
             </app-form-field>
 
-            <div class="form-field">
-              <span class="section-label segment-label" [class.invalid]="step2aErrors().gender"
-                >Giới tính</span
+            <span class="section-label segment-label" [class.invalid]="step2aErrors().gender"
+              >Giới tính</span
+            >
+            <div
+              class="segment-control"
+              [class.invalid]="step2aErrors().gender"
+              role="radiogroup"
+              aria-label="Giới tính"
+              [attr.aria-invalid]="step2aErrors().gender ? 'true' : null"
+              [attr.aria-describedby]="step2aErrors().gender ? 'err-gender' : null"
+            >
+              <button
+                type="button"
+                class="segment-button"
+                [class.selected]="gender() === 'male'"
+                role="radio"
+                [attr.aria-checked]="gender() === 'male'"
+                (click)="onGenderChange('male')"
               >
-              <div
-                class="segment-control"
-                [class.invalid]="step2aErrors().gender"
-                role="radiogroup"
-                aria-label="Giới tính"
-                [attr.aria-invalid]="step2aErrors().gender ? 'true' : null"
-                [attr.aria-describedby]="step2aErrors().gender ? 'err-gender' : null"
+                Nam
+              </button>
+              <button
+                type="button"
+                class="segment-button"
+                [class.selected]="gender() === 'female'"
+                role="radio"
+                [attr.aria-checked]="gender() === 'female'"
+                (click)="onGenderChange('female')"
               >
-                <button
-                  type="button"
-                  class="segment-button"
-                  [class.selected]="gender() === 'male'"
-                  role="radio"
-                  [attr.aria-checked]="gender() === 'male'"
-                  (click)="onGenderChange('male')"
-                >
-                  Nam
-                </button>
-                <button
-                  type="button"
-                  class="segment-button"
-                  [class.selected]="gender() === 'female'"
-                  role="radio"
-                  [attr.aria-checked]="gender() === 'female'"
-                  (click)="onGenderChange('female')"
-                >
-                  Nữ
-                </button>
-              </div>
-              @if (step2aErrors().gender) {
-                <div id="err-gender" class="field-error" role="alert">
-                  {{ step2aErrors().gender }}
-                </div>
-              }
+                Nữ
+              </button>
             </div>
+            @if (step2aErrors().gender) {
+              <div id="err-gender" class="field-error" role="alert">
+                {{ step2aErrors().gender }}
+              </div>
+            }
 
             <div class="button-row">
               <ion-button fill="outline" class="btn-row btn-row--secondary" (click)="goBack()">

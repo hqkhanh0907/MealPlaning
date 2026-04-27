@@ -103,7 +103,12 @@ column; gap: 16px; }` (như `.form-content`) + override
 `.step-content > .form-field { margin-bottom: 0; }`. Hai nơi cùng cơ chế →
 hết drift.
 
-### 5. `.form-field` raw vs `<app-form-field>` ở onboarding
+### 5. `.form-field` raw vs `<app-form-field>` ở onboarding — RESOLVED
+
+~~Pattern cũ~~: onboarding bao segment "Giới tính" bằng `<div class="form-field">` thừa.
+**Đã unwrap** (commit fix #5): label + control + error là siblings direct
+của `.step-content`, giống hệt modal segment `nutrition_basis_unit`. Pattern
+non-input control giờ thống nhất 2 nơi.
 
 `onboarding.page.ts:232` còn 1 chỗ dùng `<div class="form-field">` raw bao
 quanh segment-control "Giới tính":
