@@ -27,5 +27,185 @@
     "protein": 1.52,
     "source": "derived",
     "source_citation": "sources/wikipedia-vi.md#nuoc-cham-chua-ngot"
+  },
+  {
+    "calories": 28.89,
+    "carbs": 0.83,
+    "category": "composite",
+    "default_unit_id": "ml",
+    "density_g_per_ml": 1.02,
+    "derived_from": {
+      "component_ingredient_ids": [
+        "7c4e8b1a-0002-4000-8000-000000000103",
+        "7c4e8b1a-0002-4000-8000-000000000005",
+        "7c4e8b1a-0002-4000-8000-000000000008",
+        "7c4e8b1a-0002-4000-8000-000000000001",
+        "7c4e8b1a-0002-4000-8000-000000000002"
+      ],
+      "composite_recipe_id": "c0114c01-0001-4000-8000-000000000002",
+      "yield_total_g": 2040
+    },
+    "fat": 1.51,
+    "fiber": 0.13,
+    "id": "c0114c01-0001-4000-8000-000000000002",
+    "is_approximate": true,
+    "name_en": "Nước dùng phở bò",
+    "name_vi": "Nước dùng phở bò",
+    "notes": "Light beef broth — meat trimmings simmered with charred aromatics, then strained.",
+    "nutrition_basis_quantity": 100,
+    "nutrition_basis_unit": "ml",
+    "protein": 2.78,
+    "source": "derived",
+    "source_citation": "sources/wikipedia-vi.md#nuoc-dung-pho"
+  },
+  {
+    "calories": 31.85,
+    "carbs": 1.58,
+    "category": "composite",
+    "default_unit_id": "ml",
+    "density_g_per_ml": 1.03,
+    "derived_from": {
+      "component_ingredient_ids": [
+        "7c4e8b1a-0002-4000-8000-000000000103",
+        "7c4e8b1a-0002-4000-8000-000000000009",
+        "7c4e8b1a-0002-4000-8000-000000000005",
+        "7c4e8b1a-0002-4000-8000-000000000001",
+        "7c4e8b1a-0002-4000-8000-00000000000a"
+      ],
+      "composite_recipe_id": "c0114c01-0001-4000-8000-000000000003",
+      "yield_total_g": 2060
+    },
+    "fat": 1.53,
+    "fiber": 0.09,
+    "id": "c0114c01-0001-4000-8000-000000000003",
+    "is_approximate": true,
+    "name_en": "Nước dùng bún bò Huế",
+    "name_vi": "Nước dùng bún bò Huế",
+    "notes": "Spicy lemongrass beef broth — Huế signature.",
+    "nutrition_basis_quantity": 100,
+    "nutrition_basis_unit": "ml",
+    "protein": 2.86,
+    "source": "derived",
+    "source_citation": "sources/wikipedia-vi.md#nuoc-dung-bun-bo-hue"
+  },
+  {
+    "calories": 76.96,
+    "carbs": 1.6,
+    "category": "composite",
+    "default_unit_id": "ml",
+    "density_g_per_ml": 1.05,
+    "derived_from": {
+      "component_ingredient_ids": [
+        "7c4e8b1a-0002-4000-8000-000000000105",
+        "7c4e8b1a-0002-4000-8000-000000000005",
+        "7c4e8b1a-0002-4000-8000-000000000007",
+        "7c4e8b1a-0002-4000-8000-000000000001"
+      ],
+      "composite_recipe_id": "c0114c01-0001-4000-8000-000000000004",
+      "yield_total_g": 840
+    },
+    "fat": 5.51,
+    "fiber": 0.2,
+    "id": "c0114c01-0001-4000-8000-000000000004",
+    "is_approximate": true,
+    "name_en": "Nước dùng mì Quảng",
+    "name_vi": "Nước dùng mì Quảng",
+    "notes": "Reduced pork-bone gravy — Quảng Nam style; smaller pour than phở.",
+    "nutrition_basis_quantity": 100,
+    "nutrition_basis_unit": "ml",
+    "protein": 5.09,
+    "source": "derived",
+    "source_citation": "sources/wikipedia-vi.md#nuoc-dung-mi-quang"
+  },
+  {
+    "calories": 18.42,
+    "carbs": 4.65,
+    "category": "composite",
+    "default_unit_id": "ml",
+    "density_g_per_ml": 1.02,
+    "derived_from": {
+      "component_ingredient_ids": [
+        "7c4e8b1a-0002-4000-8000-00000000011b",
+        "7c4e8b1a-0002-4000-8000-000000000119",
+        "7c4e8b1a-0002-4000-8000-000000000115",
+        "7c4e8b1a-0002-4000-8000-000000000001",
+        "7c4e8b1a-0002-4000-8000-000000000003"
+      ],
+      "composite_recipe_id": "c0114c01-0001-4000-8000-000000000005",
+      "yield_total_g": 1530
+    },
+    "fat": 0.04,
+    "fiber": 0.36,
+    "id": "c0114c01-0001-4000-8000-000000000005",
+    "is_approximate": true,
+    "name_en": "Nước canh chua",
+    "name_vi": "Nước canh chua",
+    "notes": "Southern-style sour broth — tamarind + pineapple + tomato base.",
+    "nutrition_basis_quantity": 100,
+    "nutrition_basis_unit": "ml",
+    "protein": 0.3,
+    "source": "derived",
+    "source_citation": "sources/wikipedia-vi.md#nuoc-canh-chua"
+  },
+  {
+    "calories": 20.61,
+    "carbs": 5.11,
+    "category": "composite",
+    "default_unit_id": "ml",
+    "density_g_per_ml": 1.03,
+    "derived_from": {
+      "component_ingredient_ids": [
+        "7c4e8b1a-0002-4000-8000-000000000009",
+        "7c4e8b1a-0002-4000-8000-000000000008",
+        "7c4e8b1a-0002-4000-8000-00000000000a",
+        "7c4e8b1a-0002-4000-8000-00000000011b",
+        "7c4e8b1a-0002-4000-8000-000000000001",
+        "7c4e8b1a-0002-4000-8000-000000000003"
+      ],
+      "composite_recipe_id": "c0114c01-0001-4000-8000-000000000006",
+      "yield_total_g": 1854
+    },
+    "fat": 0.06,
+    "fiber": 0.2,
+    "id": "c0114c01-0001-4000-8000-000000000006",
+    "is_approximate": true,
+    "name_en": "Nước lẩu Thái",
+    "name_vi": "Nước lẩu Thái",
+    "notes": "VN-Thai fusion hotpot base — sour + spicy aromatic.",
+    "nutrition_basis_quantity": 100,
+    "nutrition_basis_unit": "ml",
+    "protein": 0.37,
+    "source": "derived",
+    "source_citation": "sources/wikipedia-vi.md#nuoc-lau-thai"
+  },
+  {
+    "calories": 21.07,
+    "carbs": 1.25,
+    "category": "composite",
+    "default_unit_id": "ml",
+    "density_g_per_ml": 1.02,
+    "derived_from": {
+      "component_ingredient_ids": [
+        "7c4e8b1a-0002-4000-8000-00000000010c",
+        "7c4e8b1a-0002-4000-8000-000000000115",
+        "7c4e8b1a-0002-4000-8000-000000000005",
+        "7c4e8b1a-0002-4000-8000-000000000106",
+        "7c4e8b1a-0002-4000-8000-000000000001"
+      ],
+      "composite_recipe_id": "c0114c01-0001-4000-8000-000000000007",
+      "yield_total_g": 1836
+    },
+    "fat": 0.5,
+    "fiber": 0.22,
+    "id": "c0114c01-0001-4000-8000-000000000007",
+    "is_approximate": true,
+    "name_en": "Nước riêu cua",
+    "name_vi": "Nước riêu cua",
+    "notes": "Field-crab broth with tomato — bún riêu signature.",
+    "nutrition_basis_quantity": 100,
+    "nutrition_basis_unit": "ml",
+    "protein": 3.03,
+    "source": "derived",
+    "source_citation": "sources/wikipedia-vi.md#nuoc-rieu-cua"
   }
 ]
