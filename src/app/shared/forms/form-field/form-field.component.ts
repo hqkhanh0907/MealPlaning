@@ -53,7 +53,13 @@ import type { FormError } from '../types';
         <ng-content />
       </div>
       @if (isInvalid() && resolvedMessage(); as msg) {
-        <div class="field-error">{{ msg }}</div>
+        <div
+          class="field-error"
+          [attr.id]="errorId() || null"
+          [attr.role]="errorId() ? 'alert' : null"
+        >
+          {{ msg }}
+        </div>
       }
     </div>
   `,
@@ -73,6 +79,14 @@ export class FormFieldComponent {
 
   /** Boolean-mode error text shown below the input when `invalid` is true. */
   readonly errorMessage = input<string>('');
+
+  /**
+   * Optional `id=` placed on the rendered `.field-error` div when an error
+   * is shown. Lets callers reference the error from `aria-describedby` or
+   * imperative scroll-to-error helpers (e.g. onboarding's
+   * `focusFirstInvalidField2a()`). When set, also adds `role="alert"`.
+   */
+  readonly errorId = input<string>('');
 
   /** Error-object mode signal; takes precedence over boolean mode. */
   readonly error = input<FormError | null>(null);

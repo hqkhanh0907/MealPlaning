@@ -12,6 +12,7 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { FormsModule } from '@angular/forms';
+import { FormFieldComponent } from '../../shared/forms';
 import { addIcons } from 'ionicons';
 import {
   arrowBackOutline,
@@ -162,87 +163,71 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
             <h1 #step2aHeading class="step-title" tabindex="-1">Thông tin cơ thể</h1>
             <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
 
-            <div class="form-field">
-              <div class="input-wrapper" [class.invalid]="step2aErrors().heightCm">
-                <label
-                  for="field-height"
-                  class="input-label"
-                  [class.invalid]="step2aErrors().heightCm"
-                  >Chiều cao (cm)</label
-                >
-                <input
-                  #heightInput
-                  id="field-height"
-                  type="number"
-                  inputmode="decimal"
-                  class="input-native"
-                  [value]="heightCm() ?? ''"
-                  (input)="heightCm.set(heightInput.value ? +heightInput.value : null)"
-                  min="130"
-                  max="250"
-                  [attr.aria-invalid]="step2aErrors().heightCm ? 'true' : null"
-                  [attr.aria-describedby]="step2aErrors().heightCm ? 'err-height' : null"
-                />
-              </div>
-              @if (step2aErrors().heightCm) {
-                <div id="err-height" class="field-error" role="alert">
-                  {{ step2aErrors().heightCm }}
-                </div>
-              }
-            </div>
+            <app-form-field
+              label="Chiều cao (cm)"
+              inputId="field-height"
+              errorId="err-height"
+              [invalid]="!!step2aErrors().heightCm"
+              [errorMessage]="step2aErrors().heightCm"
+            >
+              <input
+                #heightInput
+                id="field-height"
+                type="number"
+                inputmode="decimal"
+                class="input-native"
+                [value]="heightCm() ?? ''"
+                (input)="heightCm.set(heightInput.value ? +heightInput.value : null)"
+                min="130"
+                max="250"
+                [attr.aria-invalid]="step2aErrors().heightCm ? 'true' : null"
+                [attr.aria-describedby]="step2aErrors().heightCm ? 'err-height' : null"
+              />
+            </app-form-field>
 
-            <div class="form-field">
-              <div class="input-wrapper" [class.invalid]="step2aErrors().weightKg">
-                <label
-                  for="field-weight"
-                  class="input-label"
-                  [class.invalid]="step2aErrors().weightKg"
-                  >Cân nặng (kg)</label
-                >
-                <input
-                  #weightInput
-                  id="field-weight"
-                  type="number"
-                  inputmode="decimal"
-                  class="input-native"
-                  [value]="weightKg() ?? ''"
-                  (input)="weightKg.set(weightInput.value ? +weightInput.value : null)"
-                  min="30"
-                  max="200"
-                  [attr.aria-invalid]="step2aErrors().weightKg ? 'true' : null"
-                  [attr.aria-describedby]="step2aErrors().weightKg ? 'err-weight' : null"
-                />
-              </div>
-              @if (step2aErrors().weightKg) {
-                <div id="err-weight" class="field-error" role="alert">
-                  {{ step2aErrors().weightKg }}
-                </div>
-              }
-            </div>
+            <app-form-field
+              label="Cân nặng (kg)"
+              inputId="field-weight"
+              errorId="err-weight"
+              [invalid]="!!step2aErrors().weightKg"
+              [errorMessage]="step2aErrors().weightKg"
+            >
+              <input
+                #weightInput
+                id="field-weight"
+                type="number"
+                inputmode="decimal"
+                class="input-native"
+                [value]="weightKg() ?? ''"
+                (input)="weightKg.set(weightInput.value ? +weightInput.value : null)"
+                min="30"
+                max="200"
+                [attr.aria-invalid]="step2aErrors().weightKg ? 'true' : null"
+                [attr.aria-describedby]="step2aErrors().weightKg ? 'err-weight' : null"
+              />
+            </app-form-field>
 
-            <div class="form-field">
-              <div class="input-wrapper" [class.invalid]="step2aErrors().age">
-                <label for="field-age" class="input-label" [class.invalid]="step2aErrors().age"
-                  >Tuổi</label
-                >
-                <input
-                  #ageInput
-                  id="field-age"
-                  type="number"
-                  inputmode="numeric"
-                  class="input-native"
-                  [value]="age() ?? ''"
-                  (input)="age.set(ageInput.value ? +ageInput.value : null)"
-                  min="13"
-                  max="120"
-                  [attr.aria-invalid]="step2aErrors().age ? 'true' : null"
-                  [attr.aria-describedby]="step2aErrors().age ? 'err-age' : null"
-                />
-              </div>
-              @if (step2aErrors().age) {
-                <div id="err-age" class="field-error" role="alert">{{ step2aErrors().age }}</div>
-              }
-            </div>
+            <app-form-field
+              label="Tuổi"
+              inputId="field-age"
+              errorId="err-age"
+              [invalid]="!!step2aErrors().age"
+              [errorMessage]="step2aErrors().age"
+            >
+              <input
+                #ageInput
+                id="field-age"
+                type="number"
+                inputmode="numeric"
+                class="input-native"
+                [value]="age() ?? ''"
+                (input)="age.set(ageInput.value ? +ageInput.value : null)"
+                min="13"
+                max="120"
+                [attr.aria-invalid]="step2aErrors().age ? 'true' : null"
+                [attr.aria-describedby]="step2aErrors().age ? 'err-age' : null"
+              />
+            </app-form-field>
 
             <div class="form-field">
               <span class="section-label segment-label" [class.invalid]="step2aErrors().gender"
@@ -685,6 +670,7 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
   ],
   imports: [
     FormsModule,
+    FormFieldComponent,
     IonHeader,
     IonToolbar,
     IonTitle,

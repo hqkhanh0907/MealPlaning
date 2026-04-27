@@ -18,6 +18,7 @@ import {
   BottomSheetPickerComponent,
   type PickerOption,
 } from '../bottom-sheet-picker/bottom-sheet-picker.component';
+import { FormFieldComponent } from '../../forms';
 
 export interface DishIngredientFormItem {
   local_id: string;
@@ -36,7 +37,7 @@ export interface DishEditFormValue {
 @Component({
   selector: 'app-dish-edit-modal',
   standalone: true,
-  imports: [FormsModule, IonIcon, BottomSheetPickerComponent],
+  imports: [FormsModule, IonIcon, BottomSheetPickerComponent, FormFieldComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (isOpen) {
@@ -65,72 +66,55 @@ export interface DishEditFormValue {
           <div class="form-content">
             <div class="section-label">Thông tin cơ bản</div>
 
-            <div class="form-field">
-              <div class="input-wrapper" [class.invalid]="showErrors && !form.name.trim()">
-                <label
-                  class="input-label"
-                  for="dish-field-name"
-                  [class.invalid]="showErrors && !form.name.trim()"
-                  >Tên món ăn</label
-                >
-                <input
-                  id="dish-field-name"
-                  class="input-native"
-                  #nameInput
-                  [(ngModel)]="form.name"
-                  [attr.aria-invalid]="showErrors && !form.name.trim() ? 'true' : null"
-                  [attr.aria-describedby]="showErrors && !form.name.trim() ? 'err-dish-name' : null"
-                />
-              </div>
-              @if (showErrors && !form.name.trim()) {
-                <div id="err-dish-name" class="field-error" role="alert">
-                  Vui lòng nhập tên món ăn
-                </div>
-              }
-            </div>
+            <app-form-field
+              label="Tên món ăn"
+              inputId="dish-field-name"
+              errorId="err-dish-name"
+              [invalid]="showErrors && !form.name.trim()"
+              errorMessage="Vui lòng nhập tên món ăn"
+            >
+              <input
+                id="dish-field-name"
+                class="input-native"
+                #nameInput
+                [(ngModel)]="form.name"
+                [attr.aria-invalid]="showErrors && !form.name.trim() ? 'true' : null"
+                [attr.aria-describedby]="showErrors && !form.name.trim() ? 'err-dish-name' : null"
+              />
+            </app-form-field>
 
-            <div class="form-field">
-              <div class="input-wrapper">
-                <label class="input-label" for="dish-field-description">Mô tả</label>
-                <textarea
-                  id="dish-field-description"
-                  class="input-native input-native--textarea"
-                  rows="2"
-                  [(ngModel)]="form.description"
-                ></textarea>
-              </div>
-            </div>
+            <app-form-field label="Mô tả" inputId="dish-field-description">
+              <textarea
+                id="dish-field-description"
+                class="input-native input-native--textarea"
+                rows="2"
+                [(ngModel)]="form.description"
+              ></textarea>
+            </app-form-field>
 
-            <div class="form-field">
-              <div class="input-wrapper" [class.invalid]="showErrors && !isServingsValid()">
-                <label
-                  class="input-label"
-                  for="dish-field-servings"
-                  [class.invalid]="showErrors && !isServingsValid()"
-                  >Số phần ăn</label
-                >
-                <input
-                  id="dish-field-servings"
-                  class="input-native"
-                  type="number"
-                  inputmode="decimal"
-                  [ngModel]="form.servings ?? ''"
-                  (ngModelChange)="onServingsChange($event)"
-                  min="0.5"
-                  max="20"
-                  step="0.5"
-                  [attr.aria-invalid]="showErrors && !isServingsValid() ? 'true' : null"
-                  [attr.aria-describedby]="
-                    showErrors && !isServingsValid() ? 'err-dish-servings' : null
-                  "
-                />
-              </div>
-              @if (showErrors && !isServingsValid()) {
-                <div id="err-dish-servings" class="field-error" role="alert">
-                  Số phần ăn cần nằm trong khoảng 0.5 đến 20.
-                </div>
-              }
-            </div>
+            <app-form-field
+              label="Số phần ăn"
+              inputId="dish-field-servings"
+              errorId="err-dish-servings"
+              [invalid]="showErrors && !isServingsValid()"
+              errorMessage="Số phần ăn cần nằm trong khoảng 0.5 đến 20."
+            >
+              <input
+                id="dish-field-servings"
+                class="input-native"
+                type="number"
+                inputmode="decimal"
+                [ngModel]="form.servings ?? ''"
+                (ngModelChange)="onServingsChange($event)"
+                min="0.5"
+                max="20"
+                step="0.5"
+                [attr.aria-invalid]="showErrors && !isServingsValid() ? 'true' : null"
+                [attr.aria-describedby]="
+                  showErrors && !isServingsValid() ? 'err-dish-servings' : null
+                "
+              />
+            </app-form-field>
 
             <div class="section-label">Nguyên liệu</div>
 
@@ -163,50 +147,38 @@ export interface DishEditFormValue {
                     </div>
 
                     <div class="ingredient-item__grid">
-                      <div class="form-field">
-                        <div
-                          class="input-wrapper"
-                          [class.invalid]="showErrors && !(item.amount_value > 0)"
-                        >
-                          <label
-                            class="input-label"
-                            [attr.for]="'dish-amount-' + item.local_id"
-                            [class.invalid]="showErrors && !(item.amount_value > 0)"
-                            >Số lượng</label
-                          >
-                          <input
-                            [id]="'dish-amount-' + item.local_id"
-                            class="input-native"
-                            type="number"
-                            inputmode="decimal"
-                            [ngModel]="item.amount_value"
-                            (ngModelChange)="updateAmount(item.local_id, $event)"
-                            min="0.1"
-                            max="10000"
-                            step="0.1"
-                            [attr.aria-invalid]="
-                              showErrors && !(item.amount_value > 0) ? 'true' : null
-                            "
-                          />
-                        </div>
-                      </div>
+                      <app-form-field
+                        label="Số lượng"
+                        [inputId]="'dish-amount-' + item.local_id"
+                        [invalid]="showErrors && !(item.amount_value > 0)"
+                      >
+                        <input
+                          [id]="'dish-amount-' + item.local_id"
+                          class="input-native"
+                          type="number"
+                          inputmode="decimal"
+                          [ngModel]="item.amount_value"
+                          (ngModelChange)="updateAmount(item.local_id, $event)"
+                          min="0.1"
+                          max="10000"
+                          step="0.1"
+                          [attr.aria-invalid]="
+                            showErrors && !(item.amount_value > 0) ? 'true' : null
+                          "
+                        />
+                      </app-form-field>
 
-                      <div class="form-field">
-                        <div class="input-wrapper">
-                          <label class="input-label" [attr.for]="'dish-unit-' + item.local_id"
-                            >Đơn vị</label
-                          >
-                          <button
-                            type="button"
-                            [id]="'dish-unit-' + item.local_id"
-                            class="picker-trigger--floating"
-                            (click)="openUnitPicker(item.local_id)"
-                          >
-                            <span>{{ unitLabel(item) }}</span>
-                            <ion-icon name="chevron-down-outline" aria-hidden="true" />
-                          </button>
-                        </div>
-                      </div>
+                      <app-form-field label="Đơn vị" [inputId]="'dish-unit-' + item.local_id">
+                        <button
+                          type="button"
+                          [id]="'dish-unit-' + item.local_id"
+                          class="picker-trigger--floating"
+                          (click)="openUnitPicker(item.local_id)"
+                        >
+                          <span>{{ unitLabel(item) }}</span>
+                          <ion-icon name="chevron-down-outline" aria-hidden="true" />
+                        </button>
+                      </app-form-field>
                     </div>
                   </article>
                 }
