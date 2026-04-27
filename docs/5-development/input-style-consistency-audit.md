@@ -143,7 +143,11 @@ bằng `.form-field` mà chỉ có `.section-label` + `.segmented`.
 Em đề xuất (a) — segment đứng độc lập ngoài form-field, để `<app-form-field>`
 chỉ dành cho field có `<input>`/`<button.picker-trigger>`.
 
-### 6. Số character allowed trên input width
+### 6. Số character allowed trên input width — RESOLVED (false alarm)
+
+**Verified 360dp**: label dài nhất trong `.nutrition-grid` là "Chất xơ (g)" = 63px tại 12px floating size. Cell width @ 360dp ≈ 158px → margin còn ~95px. Không wrap, không truncate. Emulator QA xác nhận. **No code change needed.**
+
+### 6-original. Số character allowed trên input width (concern raised)
 
 Cả 2 đều dùng `.input-native { width: 100% }`. Modal có `.nutrition-grid`
 2-column (mỗi cell `1fr`); onboarding height/weight/age full-width.
