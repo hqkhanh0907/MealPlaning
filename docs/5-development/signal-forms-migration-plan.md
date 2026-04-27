@@ -50,7 +50,7 @@ Mục tiêu kế hoạch:
 
 | Pain                       | Signal Forms API              |
 |----------------------------|-------------------------------|
-| boilerplate `(ngModelChange)` | `[control]="field.name"` 1-binding |
+| boilerplate `(ngModelChange)` | `[formField]="field.name"` 1-binding |
 | validation rời rạc         | `schema()` + `validate()` co-located với type |
 | submit state               | `field().submitting()`, `field().errors()`, `submit()` helper |
 | nested array (dish lines)  | `applyEach()`                 |
@@ -179,9 +179,9 @@ hiện tại VÀ Signal Forms tương lai (forward-compatible).
   <input class="input-native" [(ngModel)]="form.name" />
 </app-form-field>
 
-<!-- Phase 2 (post-migration): wrap [control] -->
-<app-form-field label="Tên" [field]="ingredientForm.name">
-  <input class="input-native" [control]="ingredientForm.name" />
+<!-- Phase 2 (post-migration): wrap [formField] -->
+<app-form-field [field]="ingredientForm.name" label="Tên nguyên liệu">
+  <input class="input-native" [formField]="ingredientForm.name" />
 </app-form-field>
 ```
 
@@ -232,7 +232,7 @@ team đánh giá API ổn định ở Angular 22.
 
 Steps:
 1. Tạo `ingredient-form.model.ts` + mapper (TDD: viết test mapper trước).
-2. Convert template: `[(ngModel)]` → `[control]="field.name"`.
+2. Convert template: `[(ngModel)]` → `[formField]="field.name"`.
 3. Move validation từ `computed canSave()` sang `schema()`.
 4. Refactor nested `units` thành `applyEach()`.
 5. Run 25 unit tests + emulator QA — không regression.
