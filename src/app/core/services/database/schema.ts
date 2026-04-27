@@ -12,7 +12,7 @@
  * Source: docs/3-design/data-model.md
  */
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 /**
  * Array of DDL statements. Each string is a single CREATE TABLE / CREATE INDEX.
@@ -598,5 +598,23 @@ export function buildMealTagMigration(): { version: number; statements: readonly
   return {
     version: 4,
     statements: MEAL_TAG_MIGRATION_DDL,
+  };
+}
+
+export const SEED_ARTIFACT_MIGRATION_DDL: readonly string[] = [
+  `CREATE TABLE IF NOT EXISTS seed_artifact (
+    artifact_id      TEXT PRIMARY KEY,
+    artifact_type    TEXT NOT NULL CHECK (artifact_type IN ('ingredient', 'dish')),
+    seed_version     TEXT NOT NULL,
+    inserted_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    fingerprint_hash TEXT NOT NULL
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_seed_artifact_type ON seed_artifact(artifact_type)`,
+];
+
+export function buildSeedArtifactMigration(): { version: number; statements: readonly string[] } {
+  return {
+    version: 5,
+    statements: SEED_ARTIFACT_MIGRATION_DDL,
   };
 }

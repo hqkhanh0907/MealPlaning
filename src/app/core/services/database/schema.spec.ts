@@ -4,6 +4,7 @@ import {
   buildMealTagMigration,
   buildNutritionSchemaFinalizationMigration,
   buildNutritionUnitsMigration,
+  buildSeedArtifactMigration,
 } from './schema';
 
 describe('buildInitialSchemaMigration', () => {
@@ -83,6 +84,31 @@ describe('buildMealTagMigration', () => {
     expect(
       migration.statements.some((statement: string) =>
         statement.includes('CREATE INDEX IF NOT EXISTS idx_dish_meal_tag ON dish(meal_tag)'),
+      ),
+    ).toBeTrue();
+  });
+});
+
+describe('buildSeedArtifactMigration', () => {
+  it('builds a V5 migration that creates seed_artifact table + index', () => {
+    const migration = buildSeedArtifactMigration();
+
+    expect(migration.version).toBe(5);
+    expect(
+      migration.statements.some((statement: string) =>
+        statement.includes('CREATE TABLE IF NOT EXISTS seed_artifact'),
+      ),
+    ).toBeTrue();
+    expect(
+      migration.statements.some((statement: string) =>
+        statement.includes("artifact_type IN ('ingredient', 'dish')"),
+      ),
+    ).toBeTrue();
+    expect(
+      migration.statements.some((statement: string) =>
+        statement.includes(
+          'CREATE INDEX IF NOT EXISTS idx_seed_artifact_type ON seed_artifact(artifact_type)',
+        ),
       ),
     ).toBeTrue();
   });

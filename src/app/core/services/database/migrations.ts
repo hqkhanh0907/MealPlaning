@@ -3,6 +3,7 @@ import {
   buildMealTagMigration,
   buildNutritionSchemaFinalizationMigration,
   buildNutritionUnitsMigration,
+  buildSeedArtifactMigration,
   SCHEMA_VERSION,
 } from './schema';
 import type { Migration } from './migration-runner';
@@ -12,6 +13,7 @@ export const MIGRATION_REGISTRY: readonly Migration[] = [
   buildNutritionUnitsMigration(),
   buildNutritionSchemaFinalizationMigration(),
   buildMealTagMigration(),
+  buildSeedArtifactMigration(),
 ].sort((left, right) => left.version - right.version);
 
 if (MIGRATION_REGISTRY[MIGRATION_REGISTRY.length - 1]?.version !== SCHEMA_VERSION) {
