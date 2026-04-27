@@ -22,24 +22,22 @@
  * If a component needs a deviation, update §8.6 first AND get explicit user approval.
  */
 
+/*
+ * SPACING MODEL (post-B1):
+ * Cha (.form-content, .step-content, .nutrition-grid, .unit-grid…) đảm nhiệm
+ * spacing bằng `display: flex/grid` + `gap`. Field tự không có margin —
+ * tránh double-gap khi wrapper Angular host xen giữa cha và `.form-field`.
+ *
+ * `<app-form-field>` host được set `display: block` để trở thành flex item
+ * hợp lệ và để selectors `.form-content > app-form-field` match đúng.
+ */
+app-form-field {
+  display: block;
+}
+
 .form-field {
-  margin-bottom: 16px;
-}
-
-/* Inside flex-gap containers (modal .form-content), the parent gap already
-   provides 16px spacing between groups — so suppress the field's own margin
-   to avoid compounding (32px gap). The .form-field wrapper is still useful
-   to keep the input + .field-error visually bundled with no extra gap. */
-.form-content > .form-field {
-  margin-bottom: 0;
-}
-
-/* Same logic for grid containers — the grid `gap` already controls spacing,
-   so .form-field (when used to wrap each cell so .field-error stays attached
-   to its input) must drop its own margin to avoid double-gap. Use :where()
-   so this override has 0 specificity and component CSS can still customise. */
-:where(.nutrition-grid, .unit-grid, .ingredient-item__grid, [class*='form-field-grid'])
-  > .form-field {
+  /* No default margin — let the parent container's gap drive spacing.
+     Onboarding's raw `.form-field` (gender segment) chia sẻ cùng cơ chế. */
   margin-bottom: 0;
 }
 

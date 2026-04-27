@@ -433,6 +433,14 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
       .step-content {
         max-width: 428px;
         margin: 0 auto;
+        /* Adopt cùng cơ chế spacing với modal .form-content — flex+gap thay
+           cho margin-bottom trên từng field. Tránh inconsistency cho field
+           non-input (segment-control, radio-card, info-card) vì gap áp dụng
+           đồng đều cho mọi direct child. Title/subtitle giữ margin riêng
+           (tổng spacing tiêu đề = 24px qua .step-subtitle margin-bottom). */
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
       }
 
       /* ====================================================================
