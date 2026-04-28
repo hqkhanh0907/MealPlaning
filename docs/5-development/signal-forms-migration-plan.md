@@ -95,19 +95,22 @@ async save(): Promise<void> {
 - KHÔNG còn `canSave()` computed riêng. Dùng `form().valid()` trực tiếp.
 - KHÔNG còn function `validateXxx()` viết tay. FieldTree đã chứa errors.
 
-### 1.4 Template — consume errors trực tiếp
+### 1.4 Template — consume errors qua `<app-form-field>` wrapper
+
+Markup canonical (dùng wrapper `AppFormField` ở `src/app/shared/forms/form-field/`):
 
 ```html
-<div class="input-wrapper" [class.invalid]="showErrors() && form.name().errors().length > 0">
-  <label class="input-label">Tên món ăn</label>
-  <input class="input-native" [field]="form.name" />
-</div>
-@if (showErrors() && form.name().errors().length > 0) {
-  <p class="error-text">{{ form.name().errors()[0].message }}</p>
-}
+<app-form-field
+  label="Tên món ăn"
+  inputId="dish-field-name"
+  [invalid]="showErrors() && fieldError('name') !== null"
+  [errorMessage]="fieldError('name') ?? ''"
+>
+  <input id="dish-field-name" class="input-native" [field]="form.name" />
+</app-form-field>
 ```
 
-**Hoặc** dùng helper trong component cho readability:
+Component cung cấp helper `fieldError()` đọc từ FieldTree:
 
 ```ts
 protected fieldError(name: keyof DishEditFormValue): string | null {
@@ -116,17 +119,15 @@ protected fieldError(name: keyof DishEditFormValue): string | null {
 }
 ```
 
-```html
-@if (showErrors() && fieldError('name'); as msg) {
-  <p class="error-text">{{ msg }}</p>
-}
-```
-
 **Rule:**
-- KHÔNG dùng wrapper `<app-form-field>`. (Đã thử ở B0 plan cũ — bỏ vì
-  schema + helper đủ DRY, wrapper thêm 1 lớp không tăng giá trị.)
+- DÙNG `<app-form-field>` wrapper cho mọi text/number input — single source
+  of truth cho `.input-wrapper` + `.input-label` + error display markup.
+- `[field]="form.<name>"` ở `<input>` projected — 2-way bind native vào
+  underlying signal qua `FormField` directive từ `@angular/forms/signals`.
 - KHÔNG sync state ngược từ template về `formValue` qua `(input)` handler —
-  `[field]` directive đã 2-way bind vào underlying signal.
+  `[field]` directive đã handle.
+- KHÔNG dùng raw `.input-wrapper` ở feature code (form-input-pattern guard
+  enforce). Chỉ `app-form-field` template được dùng raw markup.
 
 ### 1.5 Array fields (`applyEach`)
 
@@ -172,15 +173,31 @@ src/app/
 ├── features/<feature>/
 │   ├── <name>.ts            # component
 │   ├── <name>.html
+│   └── <name>.scss
+├── shared/components/<modal>/   # cross-feature modals (dish, ingredient)
+│   ├── <name>.ts
+│   ├── <name>.html
 │   ├── <name>.scss
-│   ├── <name>-form.schema.ts       # ⭐ schema + types
-│   └── <name>-form.schema.spec.ts  # schema unit tests
-└── shared/forms/            # (giữ tối thiểu — chỉ helper dùng chung)
+│   └── <name>.spec.ts
+└── shared/forms/
+    ├── form-field/              # AppFormField wrapper (canonical markup)
+    │   ├── form-field.ts
+    │   ├── form-field.html
+    │   └── form-field.spec.ts
+    ├── schemas/                 # ⭐ tất cả form schemas + specs
+    │   ├── ingredient-form.schema.ts
+    │   ├── ingredient-form.schema.spec.ts
+    │   ├── dish-form.schema.ts
+    │   ├── dish-form.schema.spec.ts
+    │   ├── onboarding-step2a-form.schema.ts
+    │   └── onboarding-step2a-form.schema.spec.ts
+    ├── types.ts                 # FormError + alias types
+    └── index.ts                 # barrel export AppFormField
 ```
 
-KHÔNG có wrapper component `<app-form-field>` (đã evaluate, bỏ ở Phase D).
-Form-field styling vẫn ở `src/theme/form-field.scss` — single source of truth
-cho `.input-wrapper`, `.input-label`, `.input-native`, `.error-text`.
+Form-field styling ở `src/theme/form-field.scss` — single source of truth cho
+`.input-wrapper`, `.input-label`, `.input-native`, `.field-error`. KHÔNG inline
+trong component `.scss`.
 
 ---
 
