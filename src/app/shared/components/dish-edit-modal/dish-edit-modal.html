@@ -23,17 +23,19 @@
           label="Tên món ăn"
           inputId="dish-field-name"
           errorId="err-dish-name"
-          [invalid]="showErrors && !formSignal().name.trim()"
-          errorMessage="Vui lòng nhập tên món ăn"
+          [invalid]="showErrors() && dishForm.name().errors().length > 0"
+          [errorMessage]="dishForm.name().errors()[0]?.message ?? ''"
         >
           <input
             id="dish-field-name"
             class="input-native"
             #nameInput
             [formField]="dishForm.name"
-            [attr.aria-invalid]="showErrors && !formSignal().name.trim() ? 'true' : null"
+            [attr.aria-invalid]="
+              showErrors() && dishForm.name().errors().length > 0 ? 'true' : null
+            "
             [attr.aria-describedby]="
-              showErrors && !formSignal().name.trim() ? 'err-dish-name' : null
+              showErrors() && dishForm.name().errors().length > 0 ? 'err-dish-name' : null
             "
           />
         </app-form-field>
@@ -51,8 +53,8 @@
           label="Số phần ăn"
           inputId="dish-field-servings"
           errorId="err-dish-servings"
-          [invalid]="showErrors && !isServingsValid()"
-          errorMessage="Số phần ăn cần nằm trong khoảng 0.5 đến 20."
+          [invalid]="showErrors() && dishForm.servings().errors().length > 0"
+          [errorMessage]="dishForm.servings().errors()[0]?.message ?? ''"
         >
           <input
             id="dish-field-servings"
@@ -61,8 +63,12 @@
             inputmode="decimal"
             [formField]="dishForm.servings"
             step="0.5"
-            [attr.aria-invalid]="showErrors && !isServingsValid() ? 'true' : null"
-            [attr.aria-describedby]="showErrors && !isServingsValid() ? 'err-dish-servings' : null"
+            [attr.aria-invalid]="
+              showErrors() && dishForm.servings().errors().length > 0 ? 'true' : null
+            "
+            [attr.aria-describedby]="
+              showErrors() && dishForm.servings().errors().length > 0 ? 'err-dish-servings' : null
+            "
           />
         </app-form-field>
 
@@ -71,7 +77,7 @@
         @if (formSignal().items.length === 0) {
           <div
             class="ingredient-empty"
-            [class.invalid]="showErrors && formSignal().items.length === 0"
+            [class.invalid]="showErrors() && itemsErrorMessages().length > 0"
           >
             <div class="ingredient-empty-title">Chưa có nguyên liệu nào</div>
             <button type="button" class="btn-outline" (click)="openIngredientPicker()">
@@ -103,7 +109,8 @@
                   <app-form-field
                     label="Số lượng"
                     [inputId]="'dish-amount-' + item.local_id"
-                    [invalid]="showErrors && !(item.amount_value > 0)"
+                    [invalid]="showErrors() && dishForm.items[i].amount_value().errors().length > 0"
+                    [errorMessage]="dishForm.items[i].amount_value().errors()[0]?.message ?? ''"
                   >
                     <input
                       [id]="'dish-amount-' + item.local_id"
@@ -112,7 +119,11 @@
                       inputmode="decimal"
                       [formField]="dishForm.items[i].amount_value"
                       step="0.1"
-                      [attr.aria-invalid]="showErrors && !(item.amount_value > 0) ? 'true' : null"
+                      [attr.aria-invalid]="
+                        showErrors() && dishForm.items[i].amount_value().errors().length > 0
+                          ? 'true'
+                          : null
+                      "
                     />
                   </app-form-field>
 
@@ -137,10 +148,10 @@
           </button>
         }
 
-        @if (showErrors && formSignal().items.length === 0) {
-          <div id="err-dish-items" class="field-error" role="alert">
-            Cần ít nhất 1 nguyên liệu trước khi lưu món ăn.
-          </div>
+        @if (showErrors() && itemsErrorMessages().length > 0) {
+          @for (msg of itemsErrorMessages(); track msg) {
+            <div id="err-dish-items" class="field-error" role="alert">{{ msg }}</div>
+          }
         }
 
         <div class="section-label">Tổng dinh dưỡng (1 phần)</div>

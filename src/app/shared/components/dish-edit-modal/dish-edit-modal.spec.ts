@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DishEditModal } from './dish-edit-modal';
 
+/** Bypass `protected` to assert internal signal state from the test. */
+const showErrorsOf = (c: DishEditModal): boolean =>
+  (c as unknown as { showErrors: () => boolean }).showErrors();
+
 describe('DishEditModalComponent', () => {
   let fixture: ComponentFixture<DishEditModal>;
   let component: DishEditModal;
@@ -48,7 +52,7 @@ describe('DishEditModalComponent', () => {
     expect(button.disabled).toBeFalse();
     component.submit();
     fixture.detectChanges();
-    expect(component.showErrors).toBeTrue();
+    expect(showErrorsOf(component)).toBeTrue();
   });
 
   it('emits trimmed payload when form is valid', () => {
@@ -99,7 +103,7 @@ describe('DishEditModalComponent', () => {
     component.submit();
 
     expect(emitted).toBeFalse();
-    expect(component.showErrors).toBeTrue();
+    expect(showErrorsOf(component)).toBeTrue();
   });
 
   it('rejects submit when items list is empty', () => {

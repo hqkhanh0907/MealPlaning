@@ -68,7 +68,11 @@ export class DishEditModal implements OnChanges {
   /** Signal Forms FieldTree built from {@link formSignal} + schema. */
   protected readonly dishForm = form(this.formSignal, dishFormSchema);
 
-  showErrors = false;
+  /**
+   * Live error gate. Toggled to `true` on first submit attempt; templates
+   * render `field.errors()` only when this is `true`.
+   */
+  protected readonly showErrors = signal(false);
   activeUnitRowId: string | null = null;
 
   constructor() {
@@ -80,7 +84,7 @@ export class DishEditModal implements OnChanges {
       this.formSignal.set(cloneForm(this.form));
     }
     if (changes['isOpen']?.currentValue) {
-      this.showErrors = false;
+      this.showErrors.set(false);
       // Re-sync from input on each open (parent may have mutated `form` in place).
       this.formSignal.set(cloneForm(this.form));
       queueMicrotask(() => {
@@ -156,6 +160,15 @@ export class DishEditModal implements OnChanges {
       },
       { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
     );
+  }
+
+  /** Aggregated own-errors on the `items` array field (eg. "Cần ít nhất 1 nguyên liệu"). */
+  protected itemsErrorMessages(): string[] {
+    return this.dishForm
+      .items()
+      .errors()
+      .map((e) => e.message)
+      .filter((m): m is string => typeof m === 'string' && m.length > 0);
   }
 
   openIngredientPicker(): void {
@@ -242,8 +255,8 @@ export class DishEditModal implements OnChanges {
   }
 
   submit(): void {
-    this.showErrors = true;
-    if (!this.isValid()) {
+    this.showErrors.set(true);
+    if (!this.dishForm().valid()) {
       this.focusFirstInvalidField();
       return;
     }
@@ -262,25 +275,18 @@ export class DishEditModal implements OnChanges {
     return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, '');
   }
 
-  isServingsValid(): boolean {
-    const value = this.formSignal().servings;
-    return (
-      value !== null && value !== undefined && !Number.isNaN(value) && value >= 0.5 && value <= 20
-    );
-  }
-
   private focusFirstInvalidField(): void {
-    const v = this.formSignal();
-    const firstErrorSelector = !v.name.trim()
+    const f = this.dishForm;
+    const firstErrorSelector = f.name().errors().length
       ? 'input'
-      : !this.isServingsValid()
+      : f.servings().errors().length
         ? 'input[type="number"]'
-        : v.items.length === 0
+        : f.items().errors().length
           ? '.ingredient-empty'
           : null;
 
     setTimeout(() => {
-      if (!this.formSignal().name.trim()) {
+      if (f.name().errors().length) {
         this.nameInput?.nativeElement.focus();
       }
 
@@ -289,16 +295,6 @@ export class DishEditModal implements OnChanges {
         : null;
       target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
-  }
-
-  private isValid(): boolean {
-    const v = this.formSignal();
-    return (
-      v.name.trim().length > 0 &&
-      this.isServingsValid() &&
-      v.items.length > 0 &&
-      v.items.every((item) => item.amount_value > 0 && item.unit_id.trim().length > 0)
-    );
   }
 
   private findUnit(item: DishIngredientFormItem): IngredientListItem['units'][number] | undefined {
