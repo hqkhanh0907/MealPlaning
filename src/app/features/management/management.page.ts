@@ -438,7 +438,9 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
   `,
   styles: `
     .management-shell {
-      padding: 12px 16px 80px;
+      /* 96px bottom = 56px FAB + 16px FAB margin + 24px breathing room.
+         Earlier 80px clipped the last list card behind the FAB. */
+      padding: 12px 16px 96px;
       background: var(--bg-page);
       min-height: 100%;
     }

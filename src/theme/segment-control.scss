@@ -56,8 +56,12 @@
 }
 
 .segment-button.selected {
-  background: var(--bg-card);
-  color: var(--ion-color-primary);
+  /* Selected pill = solid sage fill + white label.
+     Earlier soft variant (bg-card + sage text) sat at ~2.5:1 contrast on
+     light bg-muted track, failing WCAG AA. Solid fill yields ≥4.5:1 and
+     reads as the active state at a glance. */
+  background: var(--ion-color-primary);
+  color: #ffffff;
   box-shadow: var(--shadow-md);
   font-weight: 600;
 }
@@ -72,7 +76,9 @@
     box-shadow: 0 0 0 1px var(--ion-color-danger) inset;
   }
   .segment-button.selected {
-    /* var(--bg-card) trong dark = warm charcoal; var(--shadow-md) = none */
-    color: var(--ion-color-primary);
+    /* Dark mode keeps the same solid sage fill — the sage primary token
+       already targets ≥4.5:1 contrast against white text in both schemes. */
+    background: var(--ion-color-primary);
+    color: #ffffff;
   }
 }

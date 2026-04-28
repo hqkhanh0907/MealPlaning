@@ -48,9 +48,13 @@
 }
 
 .filter-chip--active {
-  border-color: rgba(var(--ion-color-primary-rgb), 0.2);
-  background: rgba(var(--ion-color-primary-rgb), 0.08);
-  color: var(--primary-700);
+  /* Solid sage fill — earlier soft tint (8% sage + sage-700 text) was nearly
+     indistinguishable from the inactive chip on the light surface. Solid fill
+     gives an unambiguous "selected" affordance and ≥4.5:1 text contrast. */
+  border-color: var(--ion-color-primary);
+  background: var(--ion-color-primary);
+  color: #ffffff;
+  font-weight: 600;
 }
 
 .result-hint,

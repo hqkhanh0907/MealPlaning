@@ -152,7 +152,7 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
 
             <ion-button
               expand="block"
-              color="secondary"
+              [color]="goal() ? 'secondary' : 'medium'"
               class="cta-button"
               [disabled]="!goal()"
               (click)="nextFromStep1()"
@@ -270,8 +270,9 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                 Quay lại
               </ion-button>
               <ion-button
-                color="secondary"
+                [color]="step2aValid() ? 'secondary' : 'medium'"
                 class="btn-row btn-row--primary"
+                [disabled]="!step2aValid()"
                 (click)="nextFromStep2a()"
               >
                 Tiếp tục
@@ -405,9 +406,9 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                 Quay lại
               </ion-button>
               <ion-button
-                color="secondary"
+                [color]="step2bValid() && !saving() ? 'secondary' : 'medium'"
                 class="btn-row btn-row--primary"
-                [disabled]="saving()"
+                [disabled]="saving() || !step2bValid()"
                 (click)="complete()"
               >
                 {{ saving() ? 'Đang lưu...' : 'Hoàn tất' }}
@@ -596,6 +597,22 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
         height: 48px;
       }
 
+      /* Explicit disabled state — Ionic default only dims the secondary fill,
+         which still reads as "active coral" before the user has picked a goal.
+         Force a neutral surface + muted text so the CTA visibly waits for input.
+         !important is required to beat the inline color="secondary" token
+         that Ionic injects on the host. */
+      .cta-button[disabled],
+      .cta-button.button-disabled {
+        --background: var(--bg-muted) !important;
+        --background-hover: var(--bg-muted) !important;
+        --background-activated: var(--bg-muted) !important;
+        --background-focused: var(--bg-muted) !important;
+        --color: var(--text-tertiary) !important;
+        --box-shadow: none !important;
+        opacity: 1;
+      }
+
       /* NOTE: .button-row + .btn-row (--primary/--secondary) live in
          src/theme/button-row.scss — shared across onboarding + Phase 1. */
 
@@ -677,9 +694,27 @@ export default class OnboardingPage {
   /** True after first submit attempt — controls live error display (Phase 1 pattern). */
   protected readonly showStep2aErrors = signal(false);
 
+  /**
+   * Step 2a presence check — is every required field filled in?
+   * Used to disable the "Tiếp tục" CTA until the user has typed something
+   * in each of the four inputs. Note: this is intentionally weaker than
+   * validateStep2a (which checks ranges); range validation still runs on
+   * submit and shows inline errors — but the CTA itself only needs presence
+   * so the user gets the "press is now meaningful" affordance.
+   */
+  protected readonly step2aValid = computed(() => {
+    const v = this.step2aFormSignal();
+    return v.heightCm != null && v.weightKg != null && v.age != null && v.gender != null;
+  });
+
   // Step 2b — Activity info
   readonly activityLevel = signal<ActivityLevel | null>(null);
   readonly gymExperience = signal<GymExperience | null>(null);
+
+  /** Step 2b presence check — both selects picked. */
+  protected readonly step2bValid = computed(
+    () => this.activityLevel() != null && this.gymExperience() != null,
+  );
   readonly step2bErrors = signal<Step2bErrors>({ ...EMPTY_2B });
   readonly saveError = signal('');
 
