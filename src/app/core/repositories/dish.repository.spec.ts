@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { DatabaseService } from '../services/database/database.service';
+import { Database } from '../services/database/database';
 import { DishIngredientRepository } from './dish-ingredient.repository';
 import { DishRepository, type CreateDishInput } from './dish.repository';
 
 describe('DishRepository', () => {
   let repo: DishRepository;
-  let db: jasmine.SpyObj<DatabaseService>;
+  let db: jasmine.SpyObj<Database>;
   let dishIngredientRepository: jasmine.SpyObj<DishIngredientRepository>;
 
   const createInput: CreateDishInput = {
@@ -26,7 +26,7 @@ describe('DishRepository', () => {
   ];
 
   beforeEach(() => {
-    db = jasmine.createSpyObj<DatabaseService>('DatabaseService', [
+    db = jasmine.createSpyObj<Database>('DatabaseService', [
       'initialize',
       'execute',
       'query',
@@ -63,7 +63,7 @@ describe('DishRepository', () => {
     TestBed.configureTestingModule({
       providers: [
         DishRepository,
-        { provide: DatabaseService, useValue: db },
+        { provide: Database, useValue: db },
         { provide: DishIngredientRepository, useValue: dishIngredientRepository },
       ],
     });

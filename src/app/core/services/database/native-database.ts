@@ -9,12 +9,8 @@
  * hot-reload, Angular zone reruns, or Capacitor app resume.
  */
 import { Injectable } from '@angular/core';
-import {
-  CapacitorSQLite,
-  SQLiteConnection,
-  SQLiteDBConnection,
-} from '@capacitor-community/sqlite';
-import { DatabaseService } from './database.service';
+import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection } from '@capacitor-community/sqlite';
+import { Database } from './database';
 import { SCHEMA_DDL, SCHEMA_VERSION } from './schema';
 import {
   shouldResetLegacyManagementSchema,
@@ -33,7 +29,7 @@ type Primitive = string | number | boolean | null;
 type SqlParam = Primitive | Uint8Array;
 
 @Injectable()
-export class NativeDatabaseService extends DatabaseService {
+export class NativeDatabase extends Database {
   private sqlite = new SQLiteConnection(CapacitorSQLite);
   private db: SQLiteDBConnection | null = null;
   private initPromise: Promise<void> | null = null;
@@ -99,8 +95,9 @@ export class NativeDatabaseService extends DatabaseService {
   }
 
   private async readManagementSchemaSnapshot(): Promise<ManagementSchemaSnapshot> {
-    const [{ user_version = 0 } = { user_version: 0 }] =
-      await this.query<{ user_version: number }>('PRAGMA user_version;');
+    const [{ user_version = 0 } = { user_version: 0 }] = await this.query<{ user_version: number }>(
+      'PRAGMA user_version;',
+    );
 
     return {
       userVersion: user_version,

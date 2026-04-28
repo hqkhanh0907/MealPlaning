@@ -1,4 +1,4 @@
-import { DatabaseService } from './database.service';
+import { Database } from './database';
 
 export interface Migration {
   version: number;
@@ -7,7 +7,7 @@ export interface Migration {
 
 export class MigrationRunner {
   constructor(
-    private readonly db: DatabaseService,
+    private readonly db: Database,
     private readonly migrations: readonly Migration[],
   ) {}
 

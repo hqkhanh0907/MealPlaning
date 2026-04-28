@@ -1,4 +1,4 @@
-import { NativeDatabaseService } from './native-database.service';
+import { NativeDatabase } from './native-database';
 
 describe('NativeDatabaseService transaction behavior', () => {
   const createDb = (): {
@@ -10,7 +10,7 @@ describe('NativeDatabaseService transaction behavior', () => {
   });
 
   it('uses direct run calls inside an open transaction and commits once', async () => {
-    const service = new NativeDatabaseService();
+    const service = new NativeDatabase();
     const db = createDb();
     (service as unknown as { db: ReturnType<typeof createDb> }).db = db;
 

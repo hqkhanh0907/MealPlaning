@@ -5,12 +5,12 @@ import {
   makeEnvironmentProviders,
 } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
-import { DatabaseService } from './database.service';
-import { WebDatabaseService } from './web-database.service';
-import { NativeDatabaseService } from './native-database.service';
+import { Database } from './database';
+import { WebDatabase } from './web-database';
+import { NativeDatabase } from './native-database';
 import { LegacySqlJsMigrator } from './legacy-sqljs-migrator';
 import { ProfileStore } from '../../stores/profile.store';
-import { SeedLoaderService } from '../seed/seed-loader.service';
+import { SeedLoader } from '../seed/seed-loader';
 
 /** Upper bound for legacy import — never block startup longer than this. */
 const LEGACY_MIGRATION_TIMEOUT_MS = 3000;
@@ -28,15 +28,15 @@ const LEGACY_MIGRATION_TIMEOUT_MS = 3000;
 export function provideDatabaseService(): EnvironmentProviders {
   return makeEnvironmentProviders([
     {
-      provide: DatabaseService,
-      useClass: Capacitor.isNativePlatform() ? NativeDatabaseService : WebDatabaseService,
+      provide: Database,
+      useClass: Capacitor.isNativePlatform() ? NativeDatabase : WebDatabase,
     },
     {
       provide: APP_INITIALIZER,
       useFactory: () => {
-        const db = inject(DatabaseService);
+        const db = inject(Database);
         const profileStore = inject(ProfileStore);
-        const seedLoader = inject(SeedLoaderService);
+        const seedLoader = inject(SeedLoader);
         return async () => {
           await db.initialize();
 

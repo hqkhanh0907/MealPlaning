@@ -2,21 +2,21 @@ import { APP_INITIALIZER, ApplicationInitStatus } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { ProfileStore } from '../../stores/profile.store';
-import { SeedLoaderService } from '../seed/seed-loader.service';
+import { SeedLoader } from '../seed/seed-loader';
 import { provideDatabaseService } from './database.provider';
-import { DatabaseService } from './database.service';
+import { Database } from './database';
 
 describe('provideDatabaseService startup orchestration', () => {
   function configure(): {
     calls: string[];
-    db: jasmine.SpyObj<DatabaseService>;
+    db: jasmine.SpyObj<Database>;
     profileStore: jasmine.SpyObj<ProfileStore>;
-    seedLoader: jasmine.SpyObj<SeedLoaderService>;
+    seedLoader: jasmine.SpyObj<SeedLoader>;
     initializers: (() => Promise<void>)[];
     initStatus: ApplicationInitStatus;
   } {
     const calls: string[] = [];
-    const db = jasmine.createSpyObj<DatabaseService>('DatabaseService', ['initialize']);
+    const db = jasmine.createSpyObj<Database>('DatabaseService', ['initialize']);
     db.initialize.and.callFake(async () => {
       calls.push('db.initialize');
     });
@@ -26,7 +26,7 @@ describe('provideDatabaseService startup orchestration', () => {
       calls.push('profile.loadProfile');
     });
 
-    const seedLoader = jasmine.createSpyObj<SeedLoaderService>('SeedLoaderService', ['run']);
+    const seedLoader = jasmine.createSpyObj<SeedLoader>('SeedLoaderService', ['run']);
     seedLoader.run.and.callFake(async () => {
       calls.push('seed.run');
       return { ingredients: 0, dishes: 0 };
@@ -37,9 +37,9 @@ describe('provideDatabaseService startup orchestration', () => {
       providers: [
         provideHttpClient(),
         provideDatabaseService(),
-        { provide: DatabaseService, useValue: db },
+        { provide: Database, useValue: db },
         { provide: ProfileStore, useValue: profileStore },
-        { provide: SeedLoaderService, useValue: seedLoader },
+        { provide: SeedLoader, useValue: seedLoader },
       ],
     });
 

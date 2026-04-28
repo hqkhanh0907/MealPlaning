@@ -1,16 +1,15 @@
 import { TestBed } from '@angular/core/testing';
-import { DatabaseService } from '../services/database/database.service';
-import type {
-  IngredientModel,
-  IngredientUnitModel,
-  UnitModel,
-} from '../models/management.model';
+import { Database } from '../services/database/database';
+import type { IngredientModel, IngredientUnitModel, UnitModel } from '../models/management.model';
 import { InvalidDishIngredientUnitError } from '../services/unit-resolver';
-import { DishIngredientRepository, type CreateDishIngredientInput } from './dish-ingredient.repository';
+import {
+  DishIngredientRepository,
+  type CreateDishIngredientInput,
+} from './dish-ingredient.repository';
 
 describe('DishIngredientRepository', () => {
   let repo: DishIngredientRepository;
-  let db: jasmine.SpyObj<DatabaseService>;
+  let db: jasmine.SpyObj<Database>;
   let queryResponses: unknown[][];
 
   const ingredient = {
@@ -66,11 +65,16 @@ describe('DishIngredientRepository', () => {
 
   beforeEach(() => {
     queryResponses = [];
-    db = jasmine.createSpyObj<DatabaseService>('DatabaseService', ['initialize', 'execute', 'query', 'getOne']);
+    db = jasmine.createSpyObj<Database>('DatabaseService', [
+      'initialize',
+      'execute',
+      'query',
+      'getOne',
+    ]);
     db.getOne.and.callFake(async () => (queryResponses.shift()?.[0] ?? null) as never);
 
     TestBed.configureTestingModule({
-      providers: [DishIngredientRepository, { provide: DatabaseService, useValue: db }],
+      providers: [DishIngredientRepository, { provide: Database, useValue: db }],
     });
 
     repo = TestBed.inject(DishIngredientRepository);

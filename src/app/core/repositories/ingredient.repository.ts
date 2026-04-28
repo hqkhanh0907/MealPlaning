@@ -1,11 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  type IngredientModel,
-  type IngredientUnitModel,
-} from '../models/management.model';
+import { type IngredientModel, type IngredientUnitModel } from '../models/management.model';
 import type { IngredientSource, NutritionBasisUnit } from '../models/management.types';
-import { DatabaseService } from '../services/database/database.service';
+import { Database } from '../services/database/database';
 
 export interface IngredientListUnit extends IngredientUnitModel {
   is_approximate: number;
@@ -47,7 +44,7 @@ type IngredientRow = IngredientModel;
 
 @Injectable({ providedIn: 'root' })
 export class IngredientRepository {
-  private readonly db = inject(DatabaseService);
+  private readonly db = inject(Database);
 
   async list(): Promise<IngredientListItem[]> {
     const ingredients = await this.db.query<IngredientRow>(
@@ -65,7 +62,10 @@ export class IngredientRepository {
   }
 
   async getById(id: string): Promise<IngredientListItem | null> {
-    const ingredient = await this.db.getOne<IngredientRow>('SELECT * FROM ingredient WHERE id = ?', [id]);
+    const ingredient = await this.db.getOne<IngredientRow>(
+      'SELECT * FROM ingredient WHERE id = ?',
+      [id],
+    );
     if (!ingredient) {
       return null;
     }
@@ -173,7 +173,10 @@ export class IngredientRepository {
     }));
   }
 
-  private async replaceUnits(ingredientId: string, units: CreateIngredientUnitInput[]): Promise<void> {
+  private async replaceUnits(
+    ingredientId: string,
+    units: CreateIngredientUnitInput[],
+  ): Promise<void> {
     await this.db.execute('DELETE FROM ingredient_unit WHERE ingredient_id = ?', [ingredientId]);
 
     for (const unit of units) {

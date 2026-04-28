@@ -6,7 +6,7 @@
  *   - WebDatabaseService  — sql.js WASM (web / tests)
  *   - NativeDatabaseService — @capacitor-community/sqlite (Android)
  */
-export abstract class DatabaseService {
+export abstract class Database {
   /**
    * Initialize the database: open connection, run schema DDL + migrations.
    * Must be called once at app startup before any queries.

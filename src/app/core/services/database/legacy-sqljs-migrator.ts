@@ -13,7 +13,7 @@
  *  - Timeout: wrapped by caller so startup cannot block indefinitely.
  */
 import initSqlJs, { type Database as SqlJsDatabase } from 'sql.js';
-import { DatabaseService } from './database.service';
+import { Database } from './database';
 import { UserProfile } from '../../models/user-profile.model';
 
 /** Known legacy localStorage keys from the Web-only build. */
@@ -27,7 +27,7 @@ export interface LegacyMigrationResult {
 }
 
 export class LegacySqlJsMigrator {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(private readonly db: Database) {}
 
   /**
    * Import legacy user_profile into native DB if and only if:
@@ -60,9 +60,7 @@ export class LegacySqlJsMigrator {
 
       await this.insertProfile(profile);
       // eslint-disable-next-line no-console
-      console.info(
-        `[LegacyMigrator] imported user_profile from ${legacyBlob.key} → native SQLite`,
-      );
+      console.info(`[LegacyMigrator] imported user_profile from ${legacyBlob.key} → native SQLite`);
       return { attempted: true, imported: true, sourceKey: legacyBlob.key };
     } catch (err) {
       console.warn('[LegacyMigrator] import failed, continuing with empty native DB', err);

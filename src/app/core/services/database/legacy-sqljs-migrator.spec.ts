@@ -1,11 +1,11 @@
-import { DatabaseService } from './database.service';
+import { Database } from './database';
 import { LegacySqlJsMigrator } from './legacy-sqljs-migrator';
 
 describe('LegacySqlJsMigrator', () => {
-  let db: jasmine.SpyObj<DatabaseService>;
+  let db: jasmine.SpyObj<Database>;
 
   beforeEach(() => {
-    db = jasmine.createSpyObj<DatabaseService>('DatabaseService', ['getOne', 'execute']);
+    db = jasmine.createSpyObj<Database>('DatabaseService', ['getOne', 'execute']);
     localStorage.clear();
   });
 
@@ -25,7 +25,11 @@ describe('LegacySqlJsMigrator', () => {
 
     const result = await new LegacySqlJsMigrator(db).migrate();
 
-    expect(result).toEqual({ attempted: false, imported: false, reason: 'native-already-populated' });
+    expect(result).toEqual({
+      attempted: false,
+      imported: false,
+      reason: 'native-already-populated',
+    });
     expect(db.getOne).toHaveBeenCalled();
     expect(db.execute).not.toHaveBeenCalled();
   });

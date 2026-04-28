@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { DatabaseService } from '../database/database.service';
+import { Database } from '../database/database';
 
 /**
  * Phase 1 §5.2.6 — Idempotent seed loader.
@@ -62,8 +62,8 @@ export interface SeedDishRecord {
 }
 
 @Injectable({ providedIn: 'root' })
-export class SeedLoaderService {
-  private readonly db = inject(DatabaseService);
+export class SeedLoader {
+  private readonly db = inject(Database);
   private readonly http = inject(HttpClient);
 
   async run(): Promise<{ ingredients: number; dishes: number }> {

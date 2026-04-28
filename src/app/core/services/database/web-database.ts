@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import initSqlJs, { type Database as SqlJsDatabase } from 'sql.js';
-import { DatabaseService } from './database.service';
+import { Database } from './database';
 import { environment } from '../../../../environments/environment';
 import { MigrationRunner } from './migration-runner';
 import { MIGRATION_REGISTRY } from './migrations';
@@ -10,7 +10,7 @@ import { MIGRATION_REGISTRY } from './migrations';
  * Used for browser development (`ionic serve`) and unit tests.
  */
 @Injectable()
-export class WebDatabaseService extends DatabaseService {
+export class WebDatabase extends Database {
   private db: SqlJsDatabase | null = null;
 
   override async initialize(): Promise<void> {

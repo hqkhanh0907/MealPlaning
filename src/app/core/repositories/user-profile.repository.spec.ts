@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { DatabaseService } from '../services/database/database.service';
+import { Database } from '../services/database/database';
 import { UserProfileRepository } from './user-profile.repository';
 import { UserProfile } from '../models/user-profile.model';
 
@@ -10,7 +10,7 @@ import { UserProfile } from '../models/user-profile.model';
  */
 describe('UserProfileRepository (singleton semantics)', () => {
   let rows: UserProfile[];
-  let fakeDb: jasmine.SpyObj<DatabaseService>;
+  let fakeDb: jasmine.SpyObj<Database>;
   let repo: UserProfileRepository;
 
   const sampleData: Omit<UserProfile, 'id' | 'created_at' | 'updated_at'> = {
@@ -37,13 +37,13 @@ describe('UserProfileRepository (singleton semantics)', () => {
 
   beforeEach(() => {
     rows = [];
-    fakeDb = jasmine.createSpyObj<DatabaseService>('DatabaseService', [
+    fakeDb = jasmine.createSpyObj<Database>('DatabaseService', [
       'initialize',
       'execute',
       'query',
       'getOne',
     ]);
-    fakeDb.getOne.and.callFake((async () => (rows[0] ?? null)) as DatabaseService['getOne']);
+    fakeDb.getOne.and.callFake((async () => rows[0] ?? null) as Database['getOne']);
     fakeDb.execute.and.callFake((async (_sql: string, params?: unknown[]) => {
       rows.push({
         id: params![0] as string,
@@ -51,10 +51,10 @@ describe('UserProfileRepository (singleton semantics)', () => {
         created_at: new Date().toISOString(),
         updated_at: null,
       });
-    }) as DatabaseService['execute']);
+    }) as Database['execute']);
 
     TestBed.configureTestingModule({
-      providers: [UserProfileRepository, { provide: DatabaseService, useValue: fakeDb }],
+      providers: [UserProfileRepository, { provide: Database, useValue: fakeDb }],
     });
     repo = TestBed.inject(UserProfileRepository);
   });

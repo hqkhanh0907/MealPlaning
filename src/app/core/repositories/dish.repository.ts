@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import type { DishIngredientModel, DishModel } from '../models/management.model';
 import type { DishSource, DishType, MealTag } from '../models/management.types';
-import { DatabaseService } from '../services/database/database.service';
+import { Database } from '../services/database/database';
 import {
   DishIngredientRepository,
   type CreateDishIngredientInput,
@@ -32,7 +32,7 @@ export interface CreateDishInput {
 
 @Injectable({ providedIn: 'root' })
 export class DishRepository {
-  private readonly db = inject(DatabaseService);
+  private readonly db = inject(Database);
   private readonly dishIngredientRepository = inject(DishIngredientRepository);
 
   async list(): Promise<DishListItem[]> {

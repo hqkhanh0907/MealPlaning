@@ -1,4 +1,4 @@
-import { DatabaseService } from './database.service';
+import { Database } from './database';
 import {
   buildInitialSchemaMigration,
   buildMealTagMigration,
@@ -120,10 +120,10 @@ describe('buildSeedArtifactMigration', () => {
 });
 
 describe('schema migration compatibility smoke test', () => {
-  let db: jasmine.SpyObj<DatabaseService>;
+  let db: jasmine.SpyObj<Database>;
 
   beforeEach(() => {
-    db = jasmine.createSpyObj<DatabaseService>('DatabaseService', ['execute', 'query']);
+    db = jasmine.createSpyObj<Database>('DatabaseService', ['execute', 'query']);
     db.execute.and.resolveTo();
   });
 

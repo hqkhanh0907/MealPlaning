@@ -1,17 +1,23 @@
-import { DatabaseService } from './database.service';
+import { Database } from './database';
 import { MigrationRunner, type Migration } from './migration-runner';
 
 describe('MigrationRunner', () => {
-  let db: jasmine.SpyObj<DatabaseService>;
+  let db: jasmine.SpyObj<Database>;
 
   beforeEach(() => {
-    db = jasmine.createSpyObj<DatabaseService>('DatabaseService', ['execute', 'query']);
+    db = jasmine.createSpyObj<Database>('DatabaseService', ['execute', 'query']);
   });
 
   it('applies pending migrations in version order and stamps user_version', async () => {
     const migrations: Migration[] = [
       { version: 1, statements: ['CREATE TABLE one (id INTEGER PRIMARY KEY)'] },
-      { version: 2, statements: ['CREATE TABLE two (id INTEGER PRIMARY KEY)', 'CREATE INDEX idx_two_id ON two(id)'] },
+      {
+        version: 2,
+        statements: [
+          'CREATE TABLE two (id INTEGER PRIMARY KEY)',
+          'CREATE INDEX idx_two_id ON two(id)',
+        ],
+      },
     ];
     db.query.and.resolveTo([{ user_version: 0 }]);
     db.execute.and.resolveTo();
@@ -29,7 +35,9 @@ describe('MigrationRunner', () => {
   });
 
   it('skips all migrations when schema is already up to date', async () => {
-    const migrations: Migration[] = [{ version: 2, statements: ['CREATE TABLE ignored (id INTEGER PRIMARY KEY)'] }];
+    const migrations: Migration[] = [
+      { version: 2, statements: ['CREATE TABLE ignored (id INTEGER PRIMARY KEY)'] },
+    ];
     db.query.and.resolveTo([{ user_version: 2 }]);
 
     await new MigrationRunner(db, migrations).run();
@@ -38,7 +46,9 @@ describe('MigrationRunner', () => {
   });
 
   it('treats missing user_version rows as version zero', async () => {
-    const migrations: Migration[] = [{ version: 1, statements: ['CREATE TABLE first (id INTEGER PRIMARY KEY)'] }];
+    const migrations: Migration[] = [
+      { version: 1, statements: ['CREATE TABLE first (id INTEGER PRIMARY KEY)'] },
+    ];
     db.query.and.resolveTo([]);
     db.execute.and.resolveTo();
 

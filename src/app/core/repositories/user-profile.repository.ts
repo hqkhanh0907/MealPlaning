@@ -1,11 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
-import { DatabaseService } from '../services/database/database.service';
+import { Database } from '../services/database/database';
 import { UserProfile } from '../models/user-profile.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserProfileRepository {
-  private readonly db = inject(DatabaseService);
+  private readonly db = inject(Database);
 
   async getProfile(): Promise<UserProfile | null> {
     return this.db.getOne<UserProfile>('SELECT * FROM user_profile LIMIT 1');

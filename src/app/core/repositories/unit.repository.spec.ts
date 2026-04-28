@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { DatabaseService } from '../services/database/database.service';
+import { Database } from '../services/database/database';
 import { UnitRepository } from './unit.repository';
 
 describe('UnitRepository', () => {
   let repo: UnitRepository;
-  let db: jasmine.SpyObj<DatabaseService>;
+  let db: jasmine.SpyObj<Database>;
 
   beforeEach(() => {
-    db = jasmine.createSpyObj<DatabaseService>('DatabaseService', [
+    db = jasmine.createSpyObj<Database>('DatabaseService', [
       'initialize',
       'execute',
       'query',
@@ -30,7 +30,7 @@ describe('UnitRepository', () => {
     ]);
 
     TestBed.configureTestingModule({
-      providers: [UnitRepository, { provide: DatabaseService, useValue: db }],
+      providers: [UnitRepository, { provide: Database, useValue: db }],
     });
 
     repo = TestBed.inject(UnitRepository);

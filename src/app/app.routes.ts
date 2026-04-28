@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { onboardingGuard, onboardingCompletedRedirectGuard } from './core/guards/onboarding.guard';
+import { onboardingGuard, onboardingCompletedRedirectGuard } from './core/guards/onboarding-guard';
 
 export const routes: Routes = [
   {

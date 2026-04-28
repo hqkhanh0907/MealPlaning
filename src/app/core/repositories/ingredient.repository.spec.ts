@@ -1,13 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { DatabaseService } from '../services/database/database.service';
-import {
-  IngredientRepository,
-  type CreateIngredientInput,
-} from './ingredient.repository';
+import { Database } from '../services/database/database';
+import { IngredientRepository, type CreateIngredientInput } from './ingredient.repository';
 
 describe('IngredientRepository', () => {
   let repo: IngredientRepository;
-  let db: jasmine.SpyObj<DatabaseService>;
+  let db: jasmine.SpyObj<Database>;
   let queryResponses: unknown[][];
 
   const ingredientRow = {
@@ -62,12 +59,17 @@ describe('IngredientRepository', () => {
 
   beforeEach(() => {
     queryResponses = [];
-    db = jasmine.createSpyObj<DatabaseService>('DatabaseService', ['initialize', 'execute', 'query', 'getOne']);
+    db = jasmine.createSpyObj<Database>('DatabaseService', [
+      'initialize',
+      'execute',
+      'query',
+      'getOne',
+    ]);
     db.query.and.callFake(async () => (queryResponses.shift() ?? []) as never[]);
     db.getOne.and.callFake(async () => null);
 
     TestBed.configureTestingModule({
-      providers: [IngredientRepository, { provide: DatabaseService, useValue: db }],
+      providers: [IngredientRepository, { provide: Database, useValue: db }],
     });
 
     repo = TestBed.inject(IngredientRepository);
@@ -139,6 +141,8 @@ describe('IngredientRepository', () => {
 
   it('deletes ingredient by id', async () => {
     await repo.delete('ingredient-1');
-    expect(db.execute).toHaveBeenCalledWith('DELETE FROM ingredient WHERE id = ?', ['ingredient-1']);
+    expect(db.execute).toHaveBeenCalledWith('DELETE FROM ingredient WHERE id = ?', [
+      'ingredient-1',
+    ]);
   });
 });

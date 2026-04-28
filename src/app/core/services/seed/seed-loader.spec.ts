@@ -1,13 +1,9 @@
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { DatabaseService } from '../database/database.service';
-import { WebDatabaseService } from '../database/web-database.service';
-import {
-  SeedLoaderService,
-  type SeedDishRecord,
-  type SeedIngredientRecord,
-} from './seed-loader.service';
+import { Database } from '../database/database';
+import { WebDatabase } from '../database/web-database';
+import { SeedLoader, type SeedDishRecord, type SeedIngredientRecord } from './seed-loader';
 
 interface CountRow {
   c: number;
@@ -70,25 +66,25 @@ function makeDish(
 }
 
 describe('SeedLoaderService', () => {
-  let loader: SeedLoaderService;
-  let db: DatabaseService;
+  let loader: SeedLoader;
+  let db: Database;
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
     localStorage.clear();
     TestBed.configureTestingModule({
       providers: [
-        SeedLoaderService,
-        { provide: DatabaseService, useClass: WebDatabaseService },
+        SeedLoader,
+        { provide: Database, useClass: WebDatabase },
         provideHttpClient(),
         provideHttpClientTesting(),
       ],
     });
 
-    db = TestBed.inject(DatabaseService);
+    db = TestBed.inject(Database);
     await db.initialize();
 
-    loader = TestBed.inject(SeedLoaderService);
+    loader = TestBed.inject(SeedLoader);
     httpMock = TestBed.inject(HttpTestingController);
   });
 

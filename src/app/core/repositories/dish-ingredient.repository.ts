@@ -6,7 +6,7 @@ import type {
   IngredientUnitModel,
   UnitModel,
 } from '../models/management.model';
-import { DatabaseService } from '../services/database/database.service';
+import { Database } from '../services/database/database';
 import { resolveUnit } from '../services/unit-resolver';
 
 export interface CreateDishIngredientInput {
@@ -21,7 +21,7 @@ type IngredientRow = IngredientModel;
 
 @Injectable({ providedIn: 'root' })
 export class DishIngredientRepository {
-  private readonly db = inject(DatabaseService);
+  private readonly db = inject(Database);
 
   async listByDish(dishId: string): Promise<DishIngredientModel[]> {
     return this.db.query<DishIngredientModel>(
@@ -32,9 +32,10 @@ export class DishIngredientRepository {
 
   async bulkInsert(dishId: string, items: CreateDishIngredientInput[]): Promise<void> {
     for (const item of items) {
-      const ingredient = await this.db.getOne<IngredientRow>('SELECT * FROM ingredient WHERE id = ?', [
-        item.ingredient_id,
-      ]);
+      const ingredient = await this.db.getOne<IngredientRow>(
+        'SELECT * FROM ingredient WHERE id = ?',
+        [item.ingredient_id],
+      );
       const unit = await this.db.getOne<UnitRow>('SELECT * FROM unit WHERE id = ?', [item.unit_id]);
       const ingredientUnit = await this.db.getOne<IngredientUnitRow>(
         'SELECT * FROM ingredient_unit WHERE ingredient_id = ? AND unit_id = ?',
