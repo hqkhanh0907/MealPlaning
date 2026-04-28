@@ -3,10 +3,191 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/tabs/management" />
     </ion-buttons>
-    <ion-title>Thêm món</ion-title>
+    <ion-title>{{ isEdit() ? 'Sửa món' : 'Thêm món' }}</ion-title>
     <ion-buttons slot="end">
-      <ion-button strong="true">Lưu</ion-button>
+      <ion-button strong="true" [disabled]="saving()" (click)="onSave()">
+        {{ saving() ? 'Đang lưu...' : 'Lưu' }}
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
-<ion-content class="page-shell page-shell--cream"> </ion-content>
+
+<ion-content>
+  <div class="form-content">
+    <div class="section-label">Thông tin cơ bản</div>
+
+    <app-form-field
+      label="Tên món ăn"
+      inputId="dish-field-name"
+      errorId="err-dish-name"
+      [invalid]="showErrors() && dishForm.name().errors().length > 0"
+      [errorMessage]="dishForm.name().errors()[0]?.message ?? ''"
+    >
+      <input
+        id="dish-field-name"
+        class="input-native"
+        #nameInput
+        [formField]="dishForm.name"
+        [attr.aria-invalid]="showErrors() && dishForm.name().errors().length > 0 ? 'true' : null"
+        [attr.aria-describedby]="
+          showErrors() && dishForm.name().errors().length > 0 ? 'err-dish-name' : null
+        "
+      />
+    </app-form-field>
+
+    <app-form-field label="Mô tả" inputId="dish-field-description">
+      <textarea
+        id="dish-field-description"
+        class="input-native input-native--textarea"
+        rows="2"
+        [formField]="dishForm.description"
+      ></textarea>
+    </app-form-field>
+
+    <app-form-field
+      label="Số phần ăn"
+      inputId="dish-field-servings"
+      errorId="err-dish-servings"
+      [invalid]="showErrors() && dishForm.servings().errors().length > 0"
+      [errorMessage]="dishForm.servings().errors()[0]?.message ?? ''"
+    >
+      <input
+        id="dish-field-servings"
+        class="input-native"
+        type="number"
+        inputmode="decimal"
+        [formField]="dishForm.servings"
+        step="0.5"
+        [attr.aria-invalid]="
+          showErrors() && dishForm.servings().errors().length > 0 ? 'true' : null
+        "
+        [attr.aria-describedby]="
+          showErrors() && dishForm.servings().errors().length > 0 ? 'err-dish-servings' : null
+        "
+      />
+    </app-form-field>
+
+    <div class="section-label">Nguyên liệu</div>
+
+    @if (formSignal().items.length === 0) {
+      <div
+        class="ingredient-empty"
+        [class.invalid]="showErrors() && itemsErrorMessages().length > 0"
+      >
+        <div class="ingredient-empty-title">Chưa có nguyên liệu nào</div>
+        <button type="button" class="btn-outline" (click)="openIngredientPicker()">
+          + Thêm nguyên liệu đầu tiên
+        </button>
+      </div>
+    } @else {
+      <div class="ingredient-list">
+        @for (item of formSignal().items; track item.local_id; let i = $index) {
+          <article class="ingredient-item">
+            <div class="ingredient-item__row">
+              <div class="ingredient-item__info">
+                <div class="ingredient-item__name">
+                  {{ ingredientName(item.ingredient_id) }}
+                </div>
+                <div class="ingredient-item__detail">{{ ingredientDetail(item) }}</div>
+              </div>
+              <button
+                type="button"
+                class="icon-button icon-button--danger"
+                (click)="removeItem(item.local_id)"
+                [attr.aria-label]="'Xóa ' + ingredientName(item.ingredient_id)"
+              >
+                <ion-icon name="close-outline" />
+              </button>
+            </div>
+
+            <div class="ingredient-item__grid">
+              <app-form-field
+                label="Số lượng"
+                [inputId]="'dish-amount-' + item.local_id"
+                [invalid]="showErrors() && dishForm.items[i].amount_value().errors().length > 0"
+                [errorMessage]="dishForm.items[i].amount_value().errors()[0]?.message ?? ''"
+              >
+                <input
+                  [id]="'dish-amount-' + item.local_id"
+                  class="input-native"
+                  type="number"
+                  inputmode="decimal"
+                  [formField]="dishForm.items[i].amount_value"
+                  step="0.1"
+                  [attr.aria-invalid]="
+                    showErrors() && dishForm.items[i].amount_value().errors().length > 0
+                      ? 'true'
+                      : null
+                  "
+                />
+              </app-form-field>
+
+              <app-form-field label="Đơn vị" [inputId]="'dish-unit-' + item.local_id">
+                <button
+                  type="button"
+                  [id]="'dish-unit-' + item.local_id"
+                  class="picker-trigger--floating"
+                  (click)="openUnitPicker(item.local_id)"
+                >
+                  <span>{{ unitLabel(item) }}</span>
+                  <ion-icon name="chevron-down-outline" aria-hidden="true" />
+                </button>
+              </app-form-field>
+            </div>
+          </article>
+        }
+      </div>
+
+      <button type="button" class="btn-outline" (click)="openIngredientPicker()">
+        + Thêm nguyên liệu
+      </button>
+    }
+
+    @if (showErrors() && itemsErrorMessages().length > 0) {
+      @for (msg of itemsErrorMessages(); track msg) {
+        <div id="err-dish-items" class="field-error" role="alert">{{ msg }}</div>
+      }
+    }
+
+    <div class="section-label">Tổng dinh dưỡng (1 phần)</div>
+    <p class="section-hint">Dinh dưỡng được tính tự động từ danh sách nguyên liệu hiện tại.</p>
+    <div class="nutrition-card">
+      <div class="nutrition-row">
+        <span class="nutrition-label">Calories</span>
+        <strong class="nutrition-value">{{ formatNumber(previewTotals.calories) }} kcal</strong>
+      </div>
+      <div class="nutrition-row">
+        <span class="nutrition-label">Protein</span>
+        <strong class="nutrition-value">{{ formatNumber(previewTotals.protein) }}g</strong>
+      </div>
+      <div class="nutrition-row">
+        <span class="nutrition-label">Carbs</span>
+        <strong class="nutrition-value">{{ formatNumber(previewTotals.carbs) }}g</strong>
+      </div>
+      <div class="nutrition-row">
+        <span class="nutrition-label">Fat</span>
+        <strong class="nutrition-value">{{ formatNumber(previewTotals.fat) }}g</strong>
+      </div>
+      <div class="nutrition-row">
+        <span class="nutrition-label">Chất xơ</span>
+        <strong class="nutrition-value">{{ formatNumber(previewTotals.fiber) }}g</strong>
+      </div>
+    </div>
+  </div>
+
+  <app-bottom-sheet-picker
+    #ingredientPicker
+    title="Chọn nguyên liệu"
+    [options]="ingredientOptions"
+    [searchable]="true"
+    (valueChange)="onIngredientSelected($event)"
+  />
+
+  <app-bottom-sheet-picker
+    #unitPicker
+    title="Chọn đơn vị"
+    [value]="activeUnitValue"
+    [options]="unitOptions"
+    (valueChange)="onUnitSelected($event)"
+  />
+</ion-content>

@@ -13,7 +13,7 @@ import { applyEach, schema, validate, type ValidationError } from '@angular/form
 import type {
   DishEditFormValue,
   DishIngredientFormItem,
-} from '../../components/dish-edit-modal/dish-edit-modal.types';
+} from '../../../features/management/dish-edit/dish-edit.types';
 
 const itemSchema = schema<DishIngredientFormItem>((p) => {
   validate(p.amount_value, ({ value }) => {

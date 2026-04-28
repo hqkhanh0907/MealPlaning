@@ -5,7 +5,7 @@ import { form } from '@angular/forms/signals';
 import type {
   DishEditFormValue,
   DishIngredientFormItem,
-} from '../../components/dish-edit-modal/dish-edit-modal.types';
+} from '../../../features/management/dish-edit/dish-edit.types';
 import { dishFormSchema } from './dish-form.schema';
 
 const baseItem = (overrides: Partial<DishIngredientFormItem> = {}): DishIngredientFormItem => ({
