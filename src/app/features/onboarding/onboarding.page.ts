@@ -1,4 +1,4 @@
-import { Component, computed, effect, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   IonHeader,
@@ -37,14 +37,7 @@ import {
   deriveFitnessLevel,
   getActivityFactor,
 } from './onboarding-calculation';
-import {
-  EMPTY_2A,
-  EMPTY_2B,
-  Step2aErrors,
-  Step2bErrors,
-  validateStep2a,
-  validateStep2b,
-} from './onboarding-validation';
+import { EMPTY_2B, Step2bErrors, validateStep2b } from './onboarding-validation';
 
 export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
   sedentary: 'Ít vận động (ngồi nhiều)',
@@ -109,17 +102,27 @@ export default class OnboardingPage {
     ...EMPTY_ONBOARDING_STEP2A_FORM,
   });
   protected readonly step2aForm = form(this.step2aFormSignal, onboardingStep2aSchema);
-  readonly step2aErrors = signal<Step2aErrors>({ ...EMPTY_2A });
-  /** True after first submit attempt — controls live error display (Phase 1 pattern). */
+  /** True after first submit attempt — gates live error rendering. */
   protected readonly showStep2aErrors = signal(false);
+
+  /**
+   * Helper for templates: returns the first error message for a Step 2a field,
+   * or `''` if the form hasn't been submitted yet. Drives both
+   * `<app-form-field [errorMessage]>` and the gender segment-control error UI.
+   */
+  protected step2aFieldError(field: 'heightCm' | 'weightKg' | 'age' | 'gender'): string {
+    if (!this.showStep2aErrors()) return '';
+    return this.step2aForm[field]().errors()[0]?.message ?? '';
+  }
 
   /**
    * Step 2a presence check — is every required field filled in?
    * Used to disable the "Tiếp tục" CTA until the user has typed something
    * in each of the four inputs. Note: this is intentionally weaker than
-   * validateStep2a (which checks ranges); range validation still runs on
-   * submit and shows inline errors — but the CTA itself only needs presence
-   * so the user gets the "press is now meaningful" affordance.
+   * the schema (which checks ranges); range validation runs on submit
+   * via `step2aForm().valid()` and shows inline errors — but the CTA
+   * itself only needs presence so the user gets the "press is now
+   * meaningful" affordance.
    */
   protected readonly step2aValid = computed(() => {
     const v = this.step2aFormSignal();
@@ -151,21 +154,7 @@ export default class OnboardingPage {
       trophyOutline,
       checkmark,
     });
-    // Live re-validate Step 2a errors after first submit attempt — keeps UX
-    // consistent with Phase 1 modals where errors update on every keystroke
-    // once the user has tried to advance.
-    effect(() => {
-      const v = this.step2aFormSignal();
-      if (!this.showStep2aErrors()) return;
-      this.step2aErrors.set(
-        validateStep2a({
-          heightCm: v.heightCm,
-          weightKg: v.weightKg,
-          age: v.age,
-          gender: v.gender,
-        }),
-      );
-    });
+    // Live error updates are reactive via FieldTree.errors() — no effect needed.
   }
 
   /** Set gender from segment control */
@@ -185,19 +174,11 @@ export default class OnboardingPage {
     this.focusHeading('step2aHeading');
   }
 
-  /** Step 2a → Step 2b (validate body info first) */
+  /** Step 2a → Step 2b (validate body info via Signal Forms schema) */
   nextFromStep2a(): void {
     this.showStep2aErrors.set(true);
-    const v = this.step2aFormSignal();
-    const errors = validateStep2a({
-      heightCm: v.heightCm,
-      weightKg: v.weightKg,
-      age: v.age,
-      gender: v.gender,
-    });
-    this.step2aErrors.set(errors);
-    if (Object.values(errors).some((e) => e !== '')) {
-      this.focusFirstInvalidField2a(errors);
+    if (!this.step2aForm().valid()) {
+      this.focusFirstInvalidField2a();
       return;
     }
     this.step.set(3);
@@ -286,15 +267,16 @@ export default class OnboardingPage {
     });
   }
 
-  private focusFirstInvalidField2a(errors: Step2aErrors): void {
-    const order: (keyof Step2aErrors)[] = ['heightCm', 'weightKg', 'age', 'gender'];
-    const idMap: Record<keyof Step2aErrors, string> = {
+  private focusFirstInvalidField2a(): void {
+    type Step2aField = 'heightCm' | 'weightKg' | 'age' | 'gender';
+    const order: Step2aField[] = ['heightCm', 'weightKg', 'age', 'gender'];
+    const idMap: Record<Step2aField, string> = {
       heightCm: 'err-height',
       weightKg: 'err-weight',
       age: 'err-age',
       gender: 'err-gender',
     };
-    const first = order.find((f) => errors[f] !== '');
+    const first = order.find((f) => !this.step2aForm[f]().valid());
     if (!first) return;
     setTimeout(() =>
       document

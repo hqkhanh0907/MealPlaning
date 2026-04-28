@@ -110,8 +110,8 @@
           label="Chiều cao (cm)"
           inputId="field-height"
           errorId="err-height"
-          [invalid]="!!step2aErrors().heightCm"
-          [errorMessage]="step2aErrors().heightCm"
+          [invalid]="!!step2aFieldError('heightCm')"
+          [errorMessage]="step2aFieldError('heightCm')"
         >
           <input
             #heightInput
@@ -121,8 +121,8 @@
             class="input-native"
             [formField]="step2aForm.heightCm"
             step="0.1"
-            [attr.aria-invalid]="step2aErrors().heightCm ? 'true' : null"
-            [attr.aria-describedby]="step2aErrors().heightCm ? 'err-height' : null"
+            [attr.aria-invalid]="step2aFieldError('heightCm') ? 'true' : null"
+            [attr.aria-describedby]="step2aFieldError('heightCm') ? 'err-height' : null"
           />
         </app-form-field>
 
@@ -130,8 +130,8 @@
           label="Cân nặng (kg)"
           inputId="field-weight"
           errorId="err-weight"
-          [invalid]="!!step2aErrors().weightKg"
-          [errorMessage]="step2aErrors().weightKg"
+          [invalid]="!!step2aFieldError('weightKg')"
+          [errorMessage]="step2aFieldError('weightKg')"
         >
           <input
             #weightInput
@@ -141,8 +141,8 @@
             class="input-native"
             [formField]="step2aForm.weightKg"
             step="0.1"
-            [attr.aria-invalid]="step2aErrors().weightKg ? 'true' : null"
-            [attr.aria-describedby]="step2aErrors().weightKg ? 'err-weight' : null"
+            [attr.aria-invalid]="step2aFieldError('weightKg') ? 'true' : null"
+            [attr.aria-describedby]="step2aFieldError('weightKg') ? 'err-weight' : null"
           />
         </app-form-field>
 
@@ -150,8 +150,8 @@
           label="Tuổi"
           inputId="field-age"
           errorId="err-age"
-          [invalid]="!!step2aErrors().age"
-          [errorMessage]="step2aErrors().age"
+          [invalid]="!!step2aFieldError('age')"
+          [errorMessage]="step2aFieldError('age')"
         >
           <input
             #ageInput
@@ -160,21 +160,21 @@
             inputmode="numeric"
             class="input-native"
             [formField]="step2aForm.age"
-            [attr.aria-invalid]="step2aErrors().age ? 'true' : null"
-            [attr.aria-describedby]="step2aErrors().age ? 'err-age' : null"
+            [attr.aria-invalid]="step2aFieldError('age') ? 'true' : null"
+            [attr.aria-describedby]="step2aFieldError('age') ? 'err-age' : null"
           />
         </app-form-field>
 
-        <span class="section-label segment-label" [class.invalid]="step2aErrors().gender"
+        <span class="section-label segment-label" [class.invalid]="step2aFieldError('gender')"
           >Giới tính</span
         >
         <div
           class="segment-control"
-          [class.invalid]="step2aErrors().gender"
+          [class.invalid]="step2aFieldError('gender')"
           role="radiogroup"
           aria-label="Giới tính"
-          [attr.aria-invalid]="step2aErrors().gender ? 'true' : null"
-          [attr.aria-describedby]="step2aErrors().gender ? 'err-gender' : null"
+          [attr.aria-invalid]="step2aFieldError('gender') ? 'true' : null"
+          [attr.aria-describedby]="step2aFieldError('gender') ? 'err-gender' : null"
         >
           <button
             type="button"
@@ -197,9 +197,9 @@
             Nữ
           </button>
         </div>
-        @if (step2aErrors().gender) {
+        @if (step2aFieldError('gender')) {
           <div id="err-gender" class="field-error" role="alert">
-            {{ step2aErrors().gender }}
+            {{ step2aFieldError('gender') }}
           </div>
         }
 

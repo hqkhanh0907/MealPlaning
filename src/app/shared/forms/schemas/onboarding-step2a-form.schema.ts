@@ -1,7 +1,7 @@
 /**
  * Signal Forms schema for the onboarding wizard's Step 2a (body info).
  *
- * Mirrors the rules in `validateStep2a()` from `onboarding-validation.ts`:
+ * Validation rules for body info:
  *   - heightCm: required, 130–250 cm
  *   - weightKg: required, 30–200 kg
  *   - age:      required, 13–120
