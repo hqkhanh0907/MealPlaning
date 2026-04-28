@@ -81,7 +81,7 @@ Coral là **màu CTA chính** (form submit, FAB, save, primary action). Lý do t
 
 | Token | Light Mode | Dark Mode | Dùng cho |
 |-------|-----------|-----------|----------|
-| `--bg-page` | `#FAFAF7` | `#1C1A17` | Page background (warm cream / warm charcoal) |
+| `--bg-page` | `#F7F2EA` | `#14110E` | Page background (warm cream / deep warm charcoal — sage-wellness foundation 2026-04-28) |
 | `--bg-card` | `#FFFFFF` | `#28251F` | Card background |
 | `--bg-elevated` | `#F2F2EE` | `#34302A` | Modal, bottom sheet, segment selected |
 | `--bg-muted` | `#E8E3D9` | `#34302A` | Skeleton shimmer, disabled surfaces, search bg |
@@ -1309,10 +1309,11 @@ After adding an ingredient, bottom sheet stays open:
   --ion-color-danger-shade: #A33C33;
   --ion-color-danger-tint: #D06B62;
 
-  // Background — warm cream
-  --ion-background-color: #FAFAF7;
+  // Background — warm cream (sage-wellness foundation 2026-04-28)
+  --ion-background-color: #F7F2EA;
   --ion-card-background: #FFFFFF;
-  --ion-toolbar-background: #FAFAF7;   // toolbar transparent (không primary fill)
+  --ion-toolbar-background: #6B8E6F;   // SAGE primary toolbar (mockup spec)
+  --ion-toolbar-color: #FFFFFF;
   --ion-tab-bar-background: #FFFFFF;
 
   // Text — warm charcoal
@@ -1325,7 +1326,7 @@ After adding an ingredient, bottom sheet stays open:
 }
 ```
 
-> **Toolbar đổi pattern:** v1 dùng `--ion-toolbar-background = primary` (Material-style filled bar). v2 dùng cream bg + sage text → editorial, ít visual noise. Header KHÔNG còn fill primary blue.
+> **Toolbar pattern (v3 — sage wellness, 2026-04-28):** Toolbar bg = SAGE `#6B8E6F` + text WHITE. Status bar Android cũng tinted sage qua `@capacitor/status-bar` (style LIGHT). v2 dùng cream bg trắng-trong-suốt, đã đổi vì identity sage-wellness mạnh hơn cho mockup phase-0+.
 
 ### 9.2 Dark Mode
 
@@ -1346,9 +1347,9 @@ After adding an ingredient, bottom sheet stays open:
     --ion-color-danger:  #D06B62;
 
     // Warm charcoal neutrals (KHÔNG blue-tinted)
-    --ion-background-color: #1C1A17;
+    --ion-background-color: #14110E;
     --ion-card-background: #28251F;
-    --ion-toolbar-background: #1C1A17;
+    --ion-toolbar-background: #4A6B4E;
     --ion-tab-bar-background: #28251F;
 
     --ion-text-color: #F5F1E8;

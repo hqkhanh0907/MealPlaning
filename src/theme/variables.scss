@@ -82,11 +82,11 @@
   // ---------------------------------------------------------------------------
   // Background & Surfaces (warm hue ~30°, very low chroma)
   // ---------------------------------------------------------------------------
-  --ion-background-color: #fafaf7;
-  --ion-background-color-rgb: 250, 250, 247;
+  --ion-background-color: #f7f2ea;
+  --ion-background-color-rgb: 247, 242, 234;
   --ion-card-background: #ffffff;
-  --ion-toolbar-background: #fafaf7;
-  --ion-toolbar-color: #1c1a17;
+  --ion-toolbar-background: #6b8e6f;
+  --ion-toolbar-color: #ffffff;
   --ion-tab-bar-background: #ffffff;
   --ion-tab-bar-color: #80776a;
   --ion-tab-bar-color-selected: #6f8b6e;
@@ -138,7 +138,7 @@
   --accent-50: #fcf1ed;
 
   // Neutral (warm — DS §2.4)
-  --bg-page: #fafaf7;
+  --bg-page: #f7f2ea;
   --bg-card: #ffffff;
   --bg-elevated: #f2f2ee;
   --bg-muted: #e8e3d9;
@@ -245,10 +245,10 @@
     --ion-color-danger-tint: #d98980;
 
     // Background & Surfaces — warm charcoal
-    --ion-background-color: #1c1a17;
-    --ion-background-color-rgb: 28, 26, 23;
+    --ion-background-color: #14110e;
+    --ion-background-color-rgb: 20, 17, 14;
     --ion-card-background: #28251f;
-    --ion-toolbar-background: #1c1a17;
+    --ion-toolbar-background: #4a6b4e;
     --ion-toolbar-color: #f5f1e8;
     --ion-tab-bar-background: #28251f;
     --ion-tab-bar-color: #918876;
@@ -265,7 +265,7 @@
     --ion-item-background: #28251f;
 
     // App-specific overrides (warm charcoal neutrals)
-    --bg-page: #1c1a17;
+    --bg-page: #14110e;
     --bg-card: #28251f;
     --bg-elevated: #34302a;
     --bg-muted: #34302a;
