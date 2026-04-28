@@ -1,17 +1,15 @@
-@if (!editOverlayOpen()) {
-  <ion-header>
-    <ion-toolbar>
-      <ion-title>Quản lý</ion-title>
-      <ion-buttons slot="end">
-        <ion-button (click)="openSettings()" aria-label="Mở cài đặt">
-          <ion-icon slot="icon-only" name="settings-outline" />
-        </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
-}
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Quản lý</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSettings()" aria-label="Mở cài đặt">
+        <ion-icon slot="icon-only" name="settings-outline" />
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
 
-<ion-content [fullscreen]="editOverlayOpen()">
+<ion-content>
   <section class="management-shell">
     <app-segmented-control
       [options]="managementTabs"
@@ -243,32 +241,6 @@
         </div>
       </div>
     }
-
-    <app-ingredient-edit-modal
-      [isOpen]="ingredientModalOpen()"
-      [form]="ingredientForm()"
-      [saving]="ingredientSaving()"
-      [title]="ingredientModalTitle()"
-      [saveLabel]="ingredientModalSaveLabel()"
-      [allowDelete]="editingIngredientId() !== null"
-      [availableUnits]="availableUnits()"
-      (dismissed)="closeIngredientModal()"
-      (submitted)="submitIngredient($event)"
-      (deleteRequested)="handleIngredientDeleteFromModal()"
-    />
-
-    <app-dish-edit-modal
-      [isOpen]="dishModalOpen()"
-      [form]="dishForm()"
-      [saving]="dishSaving()"
-      [title]="dishModalTitle()"
-      [saveLabel]="dishModalSaveLabel()"
-      [allowDelete]="editingDishId() !== null"
-      [ingredients]="ingredientStore.ingredients()"
-      (dismissed)="closeDishModal()"
-      (submitted)="submitDish($event)"
-      (deleteRequested)="handleDishDeleteFromModal()"
-    />
 
     <app-confirm-dialog
       [isOpen]="pendingIngredientDeleteId() !== null"

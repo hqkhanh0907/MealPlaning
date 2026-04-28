@@ -1,5 +1,5 @@
-import { DOCUMENT, NgClass } from '@angular/common';
-import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import {
   IonButton,
   IonButtons,
@@ -25,22 +25,12 @@ import {
   trashOutline,
 } from 'ionicons/icons';
 import { INGREDIENT_CATEGORIES } from '../../core/models/management.constants';
-import type { UnitModel } from '../../core/models/management.model';
 import type { DishListItem } from '../../core/repositories/dish.repository';
 import type { IngredientListItem } from '../../core/repositories/ingredient.repository';
-import { UnitRepository } from '../../core/repositories/unit.repository';
 import { DishStore } from '../../core/stores/dish.store';
 import { IngredientStore } from '../../core/stores/ingredient.store';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
-import {
-  DishEditModal,
-  type DishEditFormValue,
-} from '../../shared/components/dish-edit-modal/dish-edit-modal';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
-import {
-  IngredientEditModal,
-  type IngredientEditFormValue,
-} from '../../shared/components/ingredient-edit-modal/ingredient-edit-modal';
 import { SearchToolbar } from '../../shared/components/search-toolbar/search-toolbar';
 import {
   SegmentedControl,
@@ -68,14 +58,10 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
     EmptyState,
     SearchToolbar,
     ConfirmDialog,
-    IngredientEditModal,
-    DishEditModal,
   ],
 })
-export default class ManagementPage implements OnDestroy {
-  private readonly document = inject(DOCUMENT);
+export default class ManagementPage {
   private readonly router = inject(Router);
-  private readonly unitRepository = inject(UnitRepository);
   readonly ingredientStore = inject(IngredientStore);
   readonly dishStore = inject(DishStore);
 
@@ -86,7 +72,6 @@ export default class ManagementPage implements OnDestroy {
   readonly ingredientFilters: IngredientFilter[] = ['Tất cả', ...INGREDIENT_CATEGORIES];
   readonly tab = signal<ManagementTab>('ingredients');
   readonly activeIngredientFilter = signal<IngredientFilter>('Tất cả');
-  readonly availableUnits = signal<UnitModel[]>([]);
 
   readonly ingredientOptionsItem = signal<IngredientListItem | null>(null);
   readonly dishOptionsItem = signal<DishListItem | null>(null);
@@ -94,18 +79,11 @@ export default class ManagementPage implements OnDestroy {
   readonly pendingIngredientDeleteId = signal<string | null>(null);
   readonly pendingIngredientDeleteName = signal('');
   readonly ingredientDeleteReferenceCount = signal(0);
-  readonly ingredientModalOpen = signal(false);
-  readonly ingredientSaving = signal(false);
-  readonly editingIngredientId = signal<string | null>(null);
 
   readonly pendingDishDeleteId = signal<string | null>(null);
   readonly pendingDishDeleteName = signal('');
   readonly dishDeleteReferenceCount = signal(0);
-  readonly dishModalOpen = signal(false);
-  readonly dishSaving = signal(false);
-  readonly editingDishId = signal<string | null>(null);
   readonly fabMenuOpen = signal(false);
-  readonly editOverlayOpen = computed(() => this.ingredientModalOpen() || this.dishModalOpen());
 
   readonly filteredIngredients = computed(() => {
     const activeFilter = this.activeIngredientFilter();
@@ -182,11 +160,7 @@ export default class ManagementPage implements OnDestroy {
   });
 
   readonly hideFab = computed(() => {
-    if (
-      this.editOverlayOpen() ||
-      this.pendingIngredientDeleteId() !== null ||
-      this.pendingDishDeleteId() !== null
-    ) {
+    if (this.pendingIngredientDeleteId() !== null || this.pendingDishDeleteId() !== null) {
       return true;
     }
 
@@ -255,36 +229,6 @@ export default class ManagementPage implements OnDestroy {
       : 'Món ăn này sẽ bị xóa khỏi thư viện hiện tại.';
   });
 
-  readonly ingredientModalTitle = computed(() =>
-    this.editingIngredientId() ? 'Sửa nguyên liệu' : 'Thêm nguyên liệu',
-  );
-  readonly ingredientModalSaveLabel = computed(() =>
-    this.editingIngredientId() ? 'Lưu thay đổi' : 'Lưu nguyên liệu',
-  );
-  readonly dishModalTitle = computed(() => (this.editingDishId() ? 'Sửa món ăn' : 'Thêm món ăn'));
-  readonly dishModalSaveLabel = computed(() =>
-    this.editingDishId() ? 'Lưu thay đổi' : 'Lưu món ăn',
-  );
-
-  readonly dishForm = signal<DishEditFormValue>({
-    name: '',
-    description: '',
-    servings: 1,
-    items: [],
-  });
-  readonly ingredientForm = signal<IngredientEditFormValue>({
-    name: '',
-    category: '',
-    nutrition_basis_unit: 'g',
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    fat: 0,
-    fiber: 0,
-    density_g_per_ml: null,
-    units: [],
-  });
-
   constructor() {
     addIcons({
       settingsOutline,
@@ -298,7 +242,6 @@ export default class ManagementPage implements OnDestroy {
       sparklesOutline,
       trashOutline,
     });
-    void this.loadUnits();
 
     effect(() => {
       const activeTab = this.tab();
@@ -308,16 +251,6 @@ export default class ManagementPage implements OnDestroy {
         void this.dishStore.load();
       }
     });
-  }
-
-  /**
-   * Ensure the body-level overlay class is always cleared when this page is
-   * destroyed. Without this, navigating away (e.g. Android hardware-back from
-   * an open modal) can leave `body.edit-overlay-open` stuck, which hides the
-   * bottom tab bar globally via the rule in tabs.page.ts.
-   */
-  ngOnDestroy(): void {
-    this.document.body.classList.remove('edit-overlay-open');
   }
 
   onTabChange(value: ManagementTab | string | null | undefined): void {
@@ -371,7 +304,7 @@ export default class ManagementPage implements OnDestroy {
     const active = this.ingredientOptionsItem();
     this.closeIngredientOptions();
     if (active) {
-      this.openEditIngredient(active.id);
+      void this.openEditIngredient(active.id);
     }
   }
 
@@ -381,17 +314,6 @@ export default class ManagementPage implements OnDestroy {
     if (active) {
       void this.openIngredientDeleteDialog(active.id, active.name);
     }
-  }
-
-  handleIngredientDeleteFromModal(): void {
-    const id = this.editingIngredientId();
-    if (!id) {
-      return;
-    }
-
-    const ingredient = this.ingredientStore.ingredients().find((item) => item.id === id);
-    this.closeIngredientModal();
-    void this.openIngredientDeleteDialog(id, ingredient?.name ?? 'nguyên liệu');
   }
 
   handleIngredientBackdropClick(event: MouseEvent): void {
@@ -439,17 +361,6 @@ export default class ManagementPage implements OnDestroy {
     }
   }
 
-  handleDishDeleteFromModal(): void {
-    const id = this.editingDishId();
-    if (!id) {
-      return;
-    }
-
-    const dish = this.dishStore.dishes().find((item) => item.id === id);
-    this.closeDishModal();
-    void this.openDishDeleteDialog(id, dish?.name ?? 'món ăn');
-  }
-
   handleDishBackdropClick(event: MouseEvent): void {
     if (event.target === event.currentTarget) {
       this.closeDishOptions();
@@ -458,188 +369,24 @@ export default class ManagementPage implements OnDestroy {
 
   async openCreateDish(): Promise<void> {
     this.closeFabMenu();
-    await this.ingredientStore.load();
-    this.editingDishId.set(null);
-    this.dishForm.set({
-      name: '',
-      description: '',
-      servings: null,
-      items: [],
-    });
-    this.dishModalOpen.set(true);
-    this.document.body.classList.add('edit-overlay-open');
+    await this.router.navigate(['/tabs/management/dish/new']);
   }
 
   async openCreateAiDish(): Promise<void> {
     this.closeFabMenu();
-    await this.openCreateDish();
+    await this.router.navigate(['/tabs/management/dish/new']);
   }
 
   async openEditDish(id: string): Promise<void> {
-    const dish = await this.dishStore.fetchById(id);
-    if (!dish) {
-      return;
-    }
-
-    await this.ingredientStore.load();
-    this.editingDishId.set(id);
-    this.dishForm.set({
-      name: dish.name,
-      description: dish.description ?? '',
-      servings: dish.servings,
-      items: dish.ingredients.map((item) => ({
-        local_id: this.createLocalId('dish-item'),
-        ingredient_id: item.ingredient_id,
-        amount_value: item.amount_value,
-        unit_id: item.unit_id,
-      })),
-    });
-    this.dishModalOpen.set(true);
-    this.document.body.classList.add('edit-overlay-open');
-  }
-
-  closeDishModal(): void {
-    this.dishModalOpen.set(false);
-    this.dishSaving.set(false);
-    this.editingDishId.set(null);
-    this.closeFabMenu();
-    this.document.body.classList.remove('edit-overlay-open');
-  }
-
-  async submitDish(form: DishEditFormValue): Promise<void> {
-    this.dishSaving.set(true);
-    try {
-      const items = form.items.map((item) => ({
-        ingredient_id: item.ingredient_id,
-        amount_value: item.amount_value,
-        unit_id: item.unit_id,
-      }));
-
-      const payload = {
-        name: form.name,
-        description: form.description || null,
-        type: 'ingredient_based' as const,
-        source: 'custom' as const,
-        servings: form.servings ?? 1,
-        image_url: null,
-      };
-
-      const editingId = this.editingDishId();
-      if (editingId) {
-        await this.dishStore.edit(editingId, payload, items);
-      } else {
-        await this.dishStore.addFromIngredients(payload, items);
-      }
-      this.closeDishModal();
-      this.tab.set('dishes');
-    } finally {
-      this.dishSaving.set(false);
-    }
+    await this.router.navigate(['/tabs/management/dish/edit', id]);
   }
 
   openCreateIngredient(): void {
-    this.editingIngredientId.set(null);
-    this.ingredientForm.set({
-      name: '',
-      category: '',
-      nutrition_basis_unit: 'g',
-      calories: null,
-      protein: null,
-      carbs: null,
-      fat: null,
-      fiber: null,
-      density_g_per_ml: null,
-      units: [],
-    });
-    this.ingredientModalOpen.set(true);
-    this.document.body.classList.add('edit-overlay-open');
-  }
-
-  closeIngredientModal(): void {
-    this.ingredientModalOpen.set(false);
-    this.ingredientSaving.set(false);
-    this.editingIngredientId.set(null);
-    this.closeFabMenu();
-    this.document.body.classList.remove('edit-overlay-open');
+    void this.router.navigate(['/tabs/management/ingredient/new']);
   }
 
   openEditIngredient(id: string): void {
-    const ingredient = this.ingredientStore.ingredients().find((item) => item.id === id);
-    if (!ingredient) {
-      return;
-    }
-
-    this.editingIngredientId.set(id);
-    this.ingredientForm.set({
-      name: ingredient.name,
-      category: ingredient.category,
-      nutrition_basis_unit: ingredient.nutrition_basis_unit,
-      calories: ingredient.calories,
-      protein: ingredient.protein,
-      carbs: ingredient.carbs,
-      fat: ingredient.fat,
-      fiber: ingredient.fiber,
-      density_g_per_ml: ingredient.density_g_per_ml,
-      units: ingredient.units.map((unit) => ({
-        local_id: this.createLocalId('ingredient-unit'),
-        unit_id: unit.unit_id,
-        factor_to_basis: unit.factor_to_basis,
-        is_default: unit.is_default === 1,
-        display_label: unit.display_label ?? unit.short_name_vi,
-        is_approximate: unit.is_approximate === 1,
-        short_name_vi: unit.short_name_vi,
-      })),
-    });
-    this.ingredientModalOpen.set(true);
-    this.document.body.classList.add('edit-overlay-open');
-  }
-
-  async submitIngredient(form: IngredientEditFormValue): Promise<void> {
-    this.ingredientSaving.set(true);
-    try {
-      const editingId = this.editingIngredientId();
-      const units = form.units.map((unit) => ({
-        unit_id: unit.unit_id,
-        factor_to_basis: unit.factor_to_basis,
-        is_default: unit.is_default ? 1 : 0,
-        display_label: unit.display_label.trim() || null,
-      }));
-
-      const nutrition = {
-        calories: form.calories ?? 0,
-        protein: form.protein ?? 0,
-        carbs: form.carbs ?? 0,
-        fat: form.fat ?? 0,
-        fiber: form.fiber ?? 0,
-      };
-
-      if (editingId) {
-        await this.ingredientStore.edit(editingId, {
-          name: form.name,
-          category: form.category,
-          nutrition_basis_unit: form.nutrition_basis_unit,
-          nutrition_basis_quantity: 100,
-          ...nutrition,
-          density_g_per_ml: form.density_g_per_ml,
-          source: 'manual',
-          units,
-        });
-      } else {
-        await this.ingredientStore.add({
-          name: form.name,
-          category: form.category,
-          nutrition_basis_unit: form.nutrition_basis_unit,
-          nutrition_basis_quantity: 100,
-          ...nutrition,
-          density_g_per_ml: form.density_g_per_ml,
-          source: 'manual',
-          units,
-        });
-      }
-      this.closeIngredientModal();
-    } finally {
-      this.ingredientSaving.set(false);
-    }
+    void this.router.navigate(['/tabs/management/ingredient/edit', id]);
   }
 
   async openIngredientDeleteDialog(id: string, name: string): Promise<void> {
@@ -752,13 +499,5 @@ export default class ManagementPage implements OnDestroy {
 
   formatNumber(value: number): string {
     return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, '');
-  }
-
-  private async loadUnits(): Promise<void> {
-    this.availableUnits.set(await this.unitRepository.list());
-  }
-
-  private createLocalId(prefix: string): string {
-    return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
   }
 }
