@@ -1,0 +1,46 @@
+/**
+ * Header elevation — global header polish for tab pages.
+ *
+ * Problem (issue #11): header bled into scrolled content. Users lost the
+ * "I'm at the top of this page" anchor.
+ *
+ * Solution: 1px hairline separator at the bottom of every ion-toolbar inside
+ * ion-header, plus a soft drop shadow on the ion-header itself. Border + shadow
+ * is the standard mobile pattern (Lifesum, Apple Health, Lemon8) for tab roots.
+ *
+ * Note: Ionic only adds `.header-collapse-condense-inactive` when the page uses
+ * the iOS "large title" pattern (`<ion-header collapse="condense">`). For our
+ * tab pages we keep a single `<ion-header>` without collapse, so the shadow has
+ * to be on the base selector. Tuned to be visible but not aggressive on the
+ * cream background.
+ *
+ * Sage-wellness foundation (2026-04-28):
+ *   - Toolbar `--background` now reads from `--ion-toolbar-background` token
+ *     (sage `#6B8E6F` light / `#4A6B4E` dark) instead of `--bg-card` white.
+ *     This is what makes every page (onboarding + 5 phase-1 tabs) sage.
+ *   - Hairline border kept (visible against cream page bg even with sage bar).
+ */
+
+ion-header ion-toolbar {
+  --background: var(--ion-toolbar-background);
+  --color: var(--ion-toolbar-color);
+  --border-width: 0 0 1px 0;
+  --border-color: var(--border-color);
+  --border-style: solid;
+}
+
+ion-header {
+  box-shadow: 0 2px 6px rgba(60, 45, 25, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  ion-header {
+    /* Token --shadow-* is set to none on dark; rely solely on the hairline
+       border to avoid muddy halos against the deep neutral background. */
+    box-shadow: none;
+  }
+}
+
+/* Settings push pages override this to 0 — they get the OS back-chevron which
+   already provides the hierarchy cue. Override at the component level if a
+   page genuinely needs a borderless header. */

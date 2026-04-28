@@ -47,7 +47,8 @@
               "src/theme/form-field.scss",
               "src/theme/segment-control.scss",
               "src/theme/list-card.scss",
-              "src/theme/button-row.scss"
+              "src/theme/button-row.scss",
+              "src/theme/header-elevation.scss"
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
@@ -137,7 +138,8 @@
               "src/theme/form-field.scss",
               "src/theme/segment-control.scss",
               "src/theme/list-card.scss",
-              "src/theme/button-row.scss"
+              "src/theme/button-row.scss",
+              "src/theme/header-elevation.scss"
             ],
             "scripts": []
           },
