@@ -62,7 +62,7 @@ src/app/
 - **Database:** All data goes through Repository → DatabaseService abstraction.
 - **Icons:** Use `addIcons()` from ionicons in component constructor + `IonIcon` in template.
 - **Imports:** Ionic standalone components imported individually (e.g., `IonButton`, `IonContent`).
-- **Naming Style:** Project is migrating from Style 2016 → **Style 2025**. New files SHOULD use Style 2025 (no `.component.ts`/`.service.ts` suffix, no `Component`/`Service` class suffix). Existing files keep Style 2016 until the dedicated rename task. See `docs/4-architecture/coding-conventions.md` §1.
+- **Naming Style:** Project đã migrate xong sang **Style 2025** (Phase C refactor 2026-04-28). KHÔNG dùng suffix `.component.ts`/`.service.ts`/`.pipe.ts`/`.directive.ts`; KHÔNG dùng class suffix `Component`/`Service`/`Pipe`/`Directive`. Mọi file mới MUST tuân thủ. Xem `docs/4-architecture/coding-conventions.md` §1.
 - **Selectors:** Always prefix with `app-` (e.g., `app-user-profile`).
 - **Folders:** Component used by ≥ 2 features → `shared/components/`. Single-feature components → `features/<x>/components/<name>/`. Do NOT create empty placeholder folders.
 

@@ -11,15 +11,16 @@
 
 ---
 
-## 1. Naming style — đang migrate Style 2016 → Style 2025
+## 1. Naming style — Style 2025 (DONE)
 
-### 1.1 Trạng thái hiện tại (snapshot 2026-04-28)
+### 1.1 Trạng thái (snapshot 2026-04-28)
 
-- Toàn bộ codebase đang dùng **Style 2016** (suffix `.component.ts`, `.service.ts`, `.page.ts`, `.repository.ts`, `.store.ts`, `.guard.ts`, `.routes.ts` ở cả file name và class name).
-- Quyết định project: **MIGRATE sang Style 2025** trong một task refactor riêng.
-- Lý do: theo default mới của Angular CLI 21+, future-proof, đồng bộ với doc chính thức và mọi project mới sinh ra từ `ng new`.
+- ✅ **Đã migrate Style 2016 → Style 2025** trong Phase C refactor (xem `_audit/2026-04-28-structure-audit.md`).
+- Toàn bộ file `.component.ts`, `.service.ts` đã rename → bỏ suffix; class declaration tương ứng cũng bỏ suffix `Component` / `Service`.
+- Codemod: `scripts/rename-style-2025.mjs` (ts-morph based). Đã chạy xong, giữ lại trong repo cho reference.
+- Ngoại lệ tên class: `AppFormField` (giữ prefix `App`) vì `FormField` đụng symbol từ `@angular/forms/signals`.
 
-### 1.2 Quy tắc Style 2025 (TARGET — áp dụng cho code mới)
+### 1.2 Quy tắc Style 2025 (BẮT BUỘC cho mọi file mới)
 
 | Loại | Style 2016 (cũ) | **Style 2025 (mới — TARGET)** |
 |------|-----------------|-------------------------------|
@@ -39,11 +40,9 @@
 | Test | `user-profile.spec.ts` | `user-profile.spec.ts` (giữ — không đổi) |
 | Model / interface | `user.model.ts` | `user.ts` hoặc giữ `user.model.ts` (Style Guide không cấm) |
 
-### 1.3 Tạm thời (chưa migrate xong)
+### 1.3 Code legacy
 
-- **CODE MỚI**: bắt đầu áp dụng Style 2025 ngay khi có thể (ví dụ tạo feature/component mới).
-- **CODE CŨ**: KHÔNG đổi tên ad-hoc — chờ migration task để rename hàng loạt và update import trong 1 commit duy nhất, tránh git blame và merge conflict.
-- Ngoại lệ: file đang sửa nội dung lớn có thể rename luôn nếu không kéo theo > 5 file import.
+Sau Phase C, KHÔNG còn file Style 2016 nào trong `src/app/`. Mọi file mới MUST tuân thủ Style 2025; PR review phải reject Style 2016.
 
 ---
 
