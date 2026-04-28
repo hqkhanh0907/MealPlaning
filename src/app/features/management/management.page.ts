@@ -444,6 +444,15 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
       background: var(--bg-page);
       min-height: 100%;
     }
+
+    /* Gap segment → search/filter — fix #5: search bar đứng quá sát segment
+       gây cảm giác "dính". 20px tách bạch rõ ràng giữa control switch tabs
+       và search-and-filter zone. */
+    .management-shell app-segmented-control + app-search-toolbar,
+    .management-shell app-segmented-control + .filter-strip {
+      display: block;
+      margin-top: 20px;
+    }
   `,
   imports: [
     IonHeader,

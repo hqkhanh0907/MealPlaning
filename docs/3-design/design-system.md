@@ -85,6 +85,7 @@ Coral là **màu CTA chính** (form submit, FAB, save, primary action). Lý do t
 | `--bg-card` | `#FFFFFF` | `#28251F` | Card background |
 | `--bg-elevated` | `#F2F2EE` | `#34302A` | Modal, bottom sheet, segment selected |
 | `--bg-muted` | `#E8E3D9` | `#34302A` | Skeleton shimmer, disabled surfaces, search bg |
+| `--bg-sunken` | `#DED5C2` | `#2A2620` | Segment track, surface "chìm" hơn `--bg-page` (diff ~12% lightness vs page để tách layer) |
 | `--text-primary` | `#1C1A17` | `#F5F1E8` | Heading, số liệu |
 | `--text-secondary` | `#4A453E` | `#C9C2B4` | Body text |
 | `--text-tertiary` | `#80776A` | `#918876` | Subtitle, mô tả phụ |

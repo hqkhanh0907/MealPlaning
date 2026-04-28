@@ -142,6 +142,10 @@
   --bg-card: #ffffff;
   --bg-elevated: #f2f2ee;
   --bg-muted: #e8e3d9;
+  // Sunken — surface "chìm" hơn --bg-page, dùng cho segment track + search bar
+  // (cần tách layer rõ với page khi không có border). Đậm hơn --bg-muted một
+  // nấc để diff lightness vs --bg-page (#fafaf7) đạt ~12%, đủ visible.
+  --bg-sunken: #ded5c2;
   --text-primary: #1c1a17;
   --text-secondary: #4a453e;
   --text-tertiary: #80776a;
@@ -265,6 +269,9 @@
     --bg-card: #28251f;
     --bg-elevated: #34302a;
     --bg-muted: #34302a;
+    // Sunken (dark) — sáng hơn --bg-page (#1c1a17) một nấc để tách layer
+    // (trong dark mode, "sunken/track" sáng hơn page, ngược chiều light).
+    --bg-sunken: #2a2620;
     --text-primary: #f5f1e8;
     --text-secondary: #c9c2b4;
     --text-tertiary: #918876;

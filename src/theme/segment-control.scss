@@ -31,7 +31,10 @@
   display: flex;
   gap: 4px;
   padding: 4px;
-  background: var(--bg-muted);
+  /* Track background — dùng --bg-sunken (DS §2.4) thay vì --bg-muted để diff
+     lightness vs --bg-page đạt ~12%, đủ tách layer. --bg-muted (chỉ chênh ~5%)
+     làm mắt cảm giác search-toolbar bên trên "dính" cùng container. */
+  background: var(--bg-sunken);
   border-radius: var(--radius-sm);
   box-sizing: border-box;
 }

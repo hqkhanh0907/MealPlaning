@@ -163,8 +163,20 @@
   font-size: 10px;
   letter-spacing: 0;
   text-transform: none;
-  background: var(--border-color);
-  color: var(--text-tertiary);
+  /* Source badge — sage tint (DS §2.1 Sage scale) thay vì neutral xám.
+     Trước: bg=--border-color + color=--text-tertiary → trông như disabled,
+     không đọc ra "Có sẵn" là affirmative state. Sage tint 10% alpha + sage-700
+     text giữ contrast ≥4.5:1 và signal "available/curated". */
+  background: rgba(111, 139, 110, 0.12);
+  color: #4f6a4f;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge--source,
+  .badge--source-inline {
+    background: rgba(138, 160, 134, 0.18);
+    color: #c8d2c5;
+  }
 }
 
 // Category & Type badges (DS §2.7 Data-viz palette — Sage Wellness)

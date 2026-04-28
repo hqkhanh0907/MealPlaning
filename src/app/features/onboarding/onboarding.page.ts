@@ -90,7 +90,6 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                 (keydown.enter)="goal.set('lose_weight')"
                 (keydown.space)="goal.set('lose_weight'); $event.preventDefault()"
               >
-                <span class="radio-circle"></span>
                 <ion-icon name="body-outline" class="radio-icon" />
                 <span class="radio-label">Giảm cân</span>
                 @if (goal() === 'lose_weight') {
@@ -107,7 +106,6 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                 (keydown.enter)="goal.set('gain_muscle')"
                 (keydown.space)="goal.set('gain_muscle'); $event.preventDefault()"
               >
-                <span class="radio-circle"></span>
                 <ion-icon name="barbell-outline" class="radio-icon" />
                 <span class="radio-label">Tăng cơ</span>
                 @if (goal() === 'gain_muscle') {
@@ -124,7 +122,6 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                 (keydown.enter)="goal.set('maintain')"
                 (keydown.space)="goal.set('maintain'); $event.preventDefault()"
               >
-                <span class="radio-circle"></span>
                 <ion-icon name="scale-outline" class="radio-icon" />
                 <span class="radio-label">Duy trì</span>
                 @if (goal() === 'maintain') {
@@ -141,7 +138,6 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                 (keydown.enter)="goal.set('performance')"
                 (keydown.space)="goal.set('performance'); $event.preventDefault()"
               >
-                <span class="radio-circle"></span>
                 <ion-icon name="trophy-outline" class="radio-icon" />
                 <span class="radio-label">Tăng sức mạnh</span>
                 @if (goal() === 'performance') {
@@ -305,7 +301,6 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                   (keydown.enter)="onActivityChange(level)"
                   (keydown.space)="onActivityChange(level); $event.preventDefault()"
                 >
-                  <span class="radio-circle"></span>
                   <span class="radio-label">{{ ACTIVITY_LABEL_MAP[level] }}</span>
                   @if (activityLevel() === level) {
                     <ion-icon name="checkmark" class="check-icon" />
@@ -331,7 +326,6 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                 (keydown.enter)="gymExperience.set('never')"
                 (keydown.space)="gymExperience.set('never'); $event.preventDefault()"
               >
-                <span class="radio-circle"></span>
                 <span class="radio-label">Chưa bao giờ</span>
                 @if (gymExperience() === 'never') {
                   <ion-icon name="checkmark" class="check-icon" />
@@ -347,7 +341,6 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                 (keydown.enter)="gymExperience.set('under_6m')"
                 (keydown.space)="gymExperience.set('under_6m'); $event.preventDefault()"
               >
-                <span class="radio-circle"></span>
                 <span class="radio-label">Dưới 6 tháng</span>
                 @if (gymExperience() === 'under_6m') {
                   <ion-icon name="checkmark" class="check-icon" />
@@ -363,7 +356,6 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                 (keydown.enter)="gymExperience.set('6m_2y')"
                 (keydown.space)="gymExperience.set('6m_2y'); $event.preventDefault()"
               >
-                <span class="radio-circle"></span>
                 <span class="radio-label">6 tháng — 2 năm</span>
                 @if (gymExperience() === '6m_2y') {
                   <ion-icon name="checkmark" class="check-icon" />
@@ -379,7 +371,6 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
                 (keydown.enter)="gymExperience.set('over_2y')"
                 (keydown.space)="gymExperience.set('over_2y'); $event.preventDefault()"
               >
-                <span class="radio-circle"></span>
                 <span class="radio-label">Trên 2 năm</span>
                 @if (gymExperience() === 'over_2y') {
                   <ion-icon name="checkmark" class="check-icon" />
@@ -487,37 +478,10 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
       }
 
       /* ====================================================================
-         RADIO CIRCLE — 18px, 2px border, centered white dot when selected
+         RADIO CIRCLE removed — selected state đủ rõ qua 3 cue: bg sage tint
+         (--primary-50) + check icon bên phải + label bold. Giữ thêm
+         radio-circle = over-affordance, làm row nặng và giảm tinh tế.
          ==================================================================== */
-      .radio-circle {
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        border: 2px solid var(--input-border-color);
-        flex-shrink: 0;
-        box-sizing: border-box;
-        position: relative;
-      }
-      .radio-item.selected .radio-circle {
-        background: var(--ion-color-primary);
-        border-color: var(--ion-color-primary);
-      }
-      .radio-item.selected .radio-circle::after {
-        content: '';
-        width: 8px;
-        height: 8px;
-        background: var(--ion-color-primary-contrast);
-        border-radius: 50%;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
-      @media (prefers-color-scheme: dark) {
-        .radio-circle {
-          border-color: var(--input-border-color);
-        }
-      }
 
       /* ====================================================================
          RADIO ICON — 22px, primary color (Step 1 goals only)
@@ -564,6 +528,15 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
       .segment-label {
         display: block;
         margin: 0 0 8px;
+      }
+
+      /* Section spacing — onboarding step có nhiều section liên tiếp (radio
+         group, segment, picker). Default .section-label margin-top=16px +
+         flex gap 16px = 32px, chưa đủ "thở" giữa 2 group. Bump lên 24px ⇒
+         tổng 40px khi đứng giữa các group, đủ tách nhóm.
+         Scope vào .step-content để không ảnh hưởng modal. */
+      .step-content .section-label:not(.segment-label) {
+        margin-top: 24px;
       }
 
       /* ====================================================================
