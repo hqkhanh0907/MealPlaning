@@ -31,21 +31,21 @@ import type { IngredientListItem } from '../../core/repositories/ingredient.repo
 import { UnitRepository } from '../../core/repositories/unit.repository';
 import { DishStore } from '../../core/stores/dish.store';
 import { IngredientStore } from '../../core/stores/ingredient.store';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import {
-  DishEditModalComponent,
+  DishEditModal,
   type DishEditFormValue,
-} from '../../shared/components/dish-edit-modal/dish-edit-modal.component';
+} from '../../shared/components/dish-edit-modal/dish-edit-modal';
 import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import {
-  IngredientEditModalComponent,
+  IngredientEditModal,
   type IngredientEditFormValue,
-} from '../../shared/components/ingredient-edit-modal/ingredient-edit-modal.component';
-import { SearchToolbarComponent } from '../../shared/components/search-toolbar/search-toolbar.component';
+} from '../../shared/components/ingredient-edit-modal/ingredient-edit-modal';
+import { SearchToolbar } from '../../shared/components/search-toolbar/search-toolbar';
 import {
-  SegmentedControlComponent,
+  SegmentedControl,
   type SegmentedControlOption,
-} from '../../shared/components/segmented-control/segmented-control.component';
+} from '../../shared/components/segmented-control/segmented-control';
 
 type ManagementTab = 'ingredients' | 'dishes';
 type DishCreateMode = 'ingredient' | 'ai';
@@ -63,13 +63,13 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
     IonButtons,
     IonButton,
     IonIcon,
-    SegmentedControlComponent,
+    SegmentedControl,
     NgClass,
     EmptyState,
-    SearchToolbarComponent,
-    ConfirmDialogComponent,
-    IngredientEditModalComponent,
-    DishEditModalComponent,
+    SearchToolbar,
+    ConfirmDialog,
+    IngredientEditModal,
+    DishEditModal,
   ],
 })
 export default class ManagementPage implements OnDestroy {

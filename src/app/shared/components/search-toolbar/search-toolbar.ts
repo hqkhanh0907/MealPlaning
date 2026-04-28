@@ -8,10 +8,10 @@ import { closeCircleOutline, searchOutline } from 'ionicons/icons';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IonIcon],
-  templateUrl: './search-toolbar.component.html',
-  styleUrl: './search-toolbar.component.scss',
+  templateUrl: './search-toolbar.html',
+  styleUrl: './search-toolbar.scss',
 })
-export class SearchToolbarComponent {
+export class SearchToolbar {
   @Input() query = '';
   @Input() placeholder = 'Tìm kiếm';
   @Input() ariaLabel = 'Thanh tìm kiếm';

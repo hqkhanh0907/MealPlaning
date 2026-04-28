@@ -18,10 +18,7 @@ import { chevronBackOutline, chevronDownOutline } from 'ionicons/icons';
 import { INGREDIENT_CATEGORIES } from '../../../core/models/management.constants';
 import type { UnitModel } from '../../../core/models/management.model';
 import type { NutritionBasisUnit } from '../../../core/models/management.types';
-import {
-  BottomSheetPickerComponent,
-  type PickerOption,
-} from '../bottom-sheet-picker/bottom-sheet-picker.component';
+import { BottomSheetPicker, type PickerOption } from '../bottom-sheet-picker/bottom-sheet-picker';
 import { FormFieldComponent } from '../../forms';
 import { ingredientFormSchema } from '../../forms/schemas/ingredient-form.schema';
 import type {
@@ -55,14 +52,14 @@ const cloneForm = (value: IngredientEditFormValue): IngredientEditFormValue => (
 @Component({
   selector: 'app-ingredient-edit-modal',
   standalone: true,
-  imports: [FormField, IonIcon, BottomSheetPickerComponent, FormFieldComponent],
+  imports: [FormField, IonIcon, BottomSheetPicker, FormFieldComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './ingredient-edit-modal.component.html',
-  styleUrl: './ingredient-edit-modal.component.scss',
+  templateUrl: './ingredient-edit-modal.html',
+  styleUrl: './ingredient-edit-modal.scss',
 })
-export class IngredientEditModalComponent implements OnChanges {
-  @ViewChild('categoryPicker') private categoryPicker?: BottomSheetPickerComponent;
-  @ViewChild('unitPicker') private unitPicker?: BottomSheetPickerComponent;
+export class IngredientEditModal implements OnChanges {
+  @ViewChild('categoryPicker') private categoryPicker?: BottomSheetPicker;
+  @ViewChild('unitPicker') private unitPicker?: BottomSheetPicker;
   @ViewChild('nameInput') private nameInput?: ElementRef<HTMLInputElement>;
 
   @Input() isOpen = false;

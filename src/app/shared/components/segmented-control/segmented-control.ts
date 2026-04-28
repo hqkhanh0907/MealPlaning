@@ -17,9 +17,9 @@ export interface SegmentedControlOption<T extends string> {
   selector: 'app-segmented-control',
   standalone: true,
   imports: [],
-  templateUrl: './segmented-control.component.html',
+  templateUrl: './segmented-control.html',
 })
-export class SegmentedControlComponent<T extends string> {
+export class SegmentedControl<T extends string> {
   @Input({ required: true }) options: SegmentedControlOption<T>[] = [];
   @Input({ required: true }) value!: T;
   @Input() ariaLabel = 'Bộ chọn phân đoạn';

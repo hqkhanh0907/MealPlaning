@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SearchToolbarComponent } from './search-toolbar.component';
+import { SearchToolbar } from './search-toolbar';
 
 describe('SearchToolbarComponent', () => {
-  let fixture: ComponentFixture<SearchToolbarComponent>;
-  let component: SearchToolbarComponent;
+  let fixture: ComponentFixture<SearchToolbar>;
+  let component: SearchToolbar;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SearchToolbarComponent],
+      imports: [SearchToolbar],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SearchToolbarComponent);
+    fixture = TestBed.createComponent(SearchToolbar);
     component = fixture.componentInstance;
     component.placeholder = 'Tìm nguyên liệu';
     fixture.detectChanges();

@@ -36,10 +36,10 @@ export interface PickerOption {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IonModal, IonHeader, IonToolbar, IonContent, IonIcon, IonSearchbar],
-  templateUrl: './bottom-sheet-picker.component.html',
-  styleUrl: './bottom-sheet-picker.component.scss',
+  templateUrl: './bottom-sheet-picker.html',
+  styleUrl: './bottom-sheet-picker.scss',
 })
-export class BottomSheetPickerComponent {
+export class BottomSheetPicker {
   @Input({ required: true }) title = '';
   @Input() value: string | null = null;
   @Input() searchable = false;

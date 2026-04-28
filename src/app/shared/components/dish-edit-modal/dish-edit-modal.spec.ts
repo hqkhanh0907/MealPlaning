@@ -1,13 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DishEditModalComponent } from './dish-edit-modal.component';
+import { DishEditModal } from './dish-edit-modal';
 
 describe('DishEditModalComponent', () => {
-  let fixture: ComponentFixture<DishEditModalComponent>;
-  let component: DishEditModalComponent;
+  let fixture: ComponentFixture<DishEditModal>;
+  let component: DishEditModal;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [DishEditModalComponent] }).compileComponents();
-    fixture = TestBed.createComponent(DishEditModalComponent);
+    await TestBed.configureTestingModule({ imports: [DishEditModal] }).compileComponents();
+    fixture = TestBed.createComponent(DishEditModal);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('isOpen', true);
     fixture.componentRef.setInput('ingredients', [

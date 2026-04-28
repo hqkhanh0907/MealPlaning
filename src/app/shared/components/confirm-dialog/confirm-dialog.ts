@@ -4,10 +4,10 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
   selector: 'app-confirm-dialog',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './confirm-dialog.component.html',
-  styleUrl: './confirm-dialog.component.scss',
+  templateUrl: './confirm-dialog.html',
+  styleUrl: './confirm-dialog.scss',
 })
-export class ConfirmDialogComponent {
+export class ConfirmDialog {
   @Input() isOpen = false;
   @Input({ required: true }) title = '';
   @Input({ required: true }) message = '';

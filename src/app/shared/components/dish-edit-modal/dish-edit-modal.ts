@@ -16,10 +16,7 @@ import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { chevronBackOutline, chevronDownOutline, closeOutline } from 'ionicons/icons';
 import type { IngredientListItem } from '../../../core/repositories/ingredient.repository';
-import {
-  BottomSheetPickerComponent,
-  type PickerOption,
-} from '../bottom-sheet-picker/bottom-sheet-picker.component';
+import { BottomSheetPicker, type PickerOption } from '../bottom-sheet-picker/bottom-sheet-picker';
 import { FormFieldComponent } from '../../forms';
 import { dishFormSchema } from '../../forms/schemas/dish-form.schema';
 import type { DishEditFormValue, DishIngredientFormItem } from './dish-edit-modal.types';
@@ -41,14 +38,14 @@ const cloneForm = (value: DishEditFormValue): DishEditFormValue => ({
 @Component({
   selector: 'app-dish-edit-modal',
   standalone: true,
-  imports: [FormField, IonIcon, BottomSheetPickerComponent, FormFieldComponent],
+  imports: [FormField, IonIcon, BottomSheetPicker, FormFieldComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './dish-edit-modal.component.html',
-  styleUrl: './dish-edit-modal.component.scss',
+  templateUrl: './dish-edit-modal.html',
+  styleUrl: './dish-edit-modal.scss',
 })
-export class DishEditModalComponent implements OnChanges {
-  @ViewChild('ingredientPicker') private ingredientPicker?: BottomSheetPickerComponent;
-  @ViewChild('unitPicker') private unitPicker?: BottomSheetPickerComponent;
+export class DishEditModal implements OnChanges {
+  @ViewChild('ingredientPicker') private ingredientPicker?: BottomSheetPicker;
+  @ViewChild('unitPicker') private unitPicker?: BottomSheetPicker;
   @ViewChild('nameInput') private nameInput?: ElementRef<HTMLInputElement>;
 
   @Input() isOpen = false;

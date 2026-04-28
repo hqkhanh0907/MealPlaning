@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { IngredientEditModalComponent } from './ingredient-edit-modal.component';
+import { IngredientEditModal } from './ingredient-edit-modal';
 
 describe('IngredientEditModalComponent', () => {
-  let fixture: ComponentFixture<IngredientEditModalComponent>;
-  let component: IngredientEditModalComponent;
+  let fixture: ComponentFixture<IngredientEditModal>;
+  let component: IngredientEditModal;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [IngredientEditModalComponent],
+      imports: [IngredientEditModal],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(IngredientEditModalComponent);
+    fixture = TestBed.createComponent(IngredientEditModal);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('isOpen', true);
     fixture.detectChanges();

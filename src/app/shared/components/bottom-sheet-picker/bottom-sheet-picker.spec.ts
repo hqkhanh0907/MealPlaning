@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BottomSheetPickerComponent, PickerOption } from './bottom-sheet-picker.component';
+import { BottomSheetPicker, PickerOption } from './bottom-sheet-picker';
 
 const sampleOptions: PickerOption[] = [
   { value: 'a', label: 'Apple' },
@@ -8,15 +8,15 @@ const sampleOptions: PickerOption[] = [
 ];
 
 describe('BottomSheetPickerComponent', () => {
-  let fixture: ComponentFixture<BottomSheetPickerComponent>;
-  let component: BottomSheetPickerComponent;
+  let fixture: ComponentFixture<BottomSheetPicker>;
+  let component: BottomSheetPicker;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BottomSheetPickerComponent],
+      imports: [BottomSheetPicker],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(BottomSheetPickerComponent);
+    fixture = TestBed.createComponent(BottomSheetPicker);
     component = fixture.componentInstance;
     component.title = 'Pick one';
     component.options = sampleOptions;

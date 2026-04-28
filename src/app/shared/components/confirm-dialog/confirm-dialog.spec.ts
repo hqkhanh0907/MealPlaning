@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ConfirmDialogComponent } from './confirm-dialog.component';
+import { ConfirmDialog } from './confirm-dialog';
 
 describe('ConfirmDialogComponent', () => {
-  let fixture: ComponentFixture<ConfirmDialogComponent>;
-  let component: ConfirmDialogComponent;
+  let fixture: ComponentFixture<ConfirmDialog>;
+  let component: ConfirmDialog;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ConfirmDialogComponent],
+      imports: [ConfirmDialog],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConfirmDialogComponent);
+    fixture = TestBed.createComponent(ConfirmDialog);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('isOpen', true);
     fixture.componentRef.setInput('title', 'Xóa nguyên liệu?');
@@ -52,7 +52,9 @@ describe('ConfirmDialogComponent', () => {
     fixture.componentRef.setInput('confirmVariant', 'primary');
     fixture.detectChanges();
 
-    const button = fixture.nativeElement.querySelector('.dialog-btn-primary') as HTMLButtonElement | null;
+    const button = fixture.nativeElement.querySelector(
+      '.dialog-btn-primary',
+    ) as HTMLButtonElement | null;
     expect(button).not.toBeNull();
     expect(button?.textContent).toContain('Xóa');
   });
