@@ -132,3 +132,18 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Phase 4 — exact unit factor input is fixed (1g = 1g, 1ml = 1ml). Display as
+   read-only with subtle muted background + hint text below. */
+.input-native--readonly {
+  color: var(--text-secondary);
+  background: var(--bg-muted);
+  cursor: default;
+}
+
+.unit-grid__hint {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}

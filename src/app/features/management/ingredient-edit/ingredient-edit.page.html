@@ -225,8 +225,14 @@
                   type="number"
                   inputmode="decimal"
                   [formField]="ingredientForm.units[i].factor_to_basis"
+                  [readonly]="!unit.is_approximate"
+                  [attr.aria-readonly]="!unit.is_approximate ? 'true' : null"
+                  [class.input-native--readonly]="!unit.is_approximate"
                   step="0.001"
                 />
+                @if (!unit.is_approximate) {
+                  <div class="unit-grid__hint">Đơn vị chuẩn — quy đổi cố định</div>
+                }
               </app-form-field>
             </div>
 
