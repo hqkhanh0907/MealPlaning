@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NutritionBadgeComponent } from './nutrition-badge.component';
+import { NutritionBadge } from './nutrition-badge';
 
-describe('NutritionBadgeComponent', () => {
-  let fixture: ComponentFixture<NutritionBadgeComponent>;
-  let component: NutritionBadgeComponent;
+describe('NutritionBadge', () => {
+  let fixture: ComponentFixture<NutritionBadge>;
+  let component: NutritionBadge;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NutritionBadgeComponent],
+      imports: [NutritionBadge],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(NutritionBadgeComponent);
+    fixture = TestBed.createComponent(NutritionBadge);
     component = fixture.componentInstance;
     component.calories = 155;
     component.protein = 13;

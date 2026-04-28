@@ -4,10 +4,10 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   selector: 'app-nutrition-badge',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './nutrition-badge.component.html',
-  styleUrl: './nutrition-badge.component.scss',
+  templateUrl: './nutrition-badge.html',
+  styleUrl: './nutrition-badge.scss',
 })
-export class NutritionBadgeComponent {
+export class NutritionBadge {
   @Input({ required: true }) calories = 0;
   @Input({ required: true }) protein = 0;
   @Input() approximate = false;
