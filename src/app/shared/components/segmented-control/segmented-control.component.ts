@@ -17,23 +17,7 @@ export interface SegmentedControlOption<T extends string> {
   selector: 'app-segmented-control',
   standalone: true,
   imports: [],
-  template: `
-    <div class="segment-control" role="tablist" [attr.aria-label]="ariaLabel">
-      @for (option of options; track option.value) {
-        <button
-          type="button"
-          class="segment-button"
-          [class.selected]="option.value === value"
-          role="tab"
-          [attr.aria-selected]="option.value === value"
-          [attr.aria-label]="option.ariaLabel ?? option.label"
-          (click)="select(option.value)"
-        >
-          {{ option.label }}
-        </button>
-      }
-    </div>
-  `,
+  templateUrl: './segmented-control.component.html',
 })
 export class SegmentedControlComponent<T extends string> {
   @Input({ required: true }) options: SegmentedControlOption<T>[] = [];

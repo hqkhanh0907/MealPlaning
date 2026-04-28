@@ -10,20 +10,7 @@ import {
 
 @Component({
   selector: 'app-settings',
-  template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-back-button defaultHref="/" />
-        </ion-buttons>
-        <ion-title>Cài đặt</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <h2>Cài đặt</h2>
-      <p>Settings — Coming soon</p>
-    </ion-content>
-  `,
+  templateUrl: './settings.page.html',
   imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton],
 })
 export default class SettingsPage {}

@@ -1,0 +1,10 @@
+<section class="empty-state" aria-live="polite">
+  <div class="empty-icon-shell" aria-hidden="true">
+    <ion-icon class="empty-icon" [name]="icon" />
+  </div>
+  <h2 class="empty-title">{{ title }}</h2>
+  <p class="empty-description">{{ description }}</p>
+  @if (actionLabel) {
+    <button class="empty-action" type="button" (click)="action.emit()">{{ actionLabel }}</button>
+  }
+</section>

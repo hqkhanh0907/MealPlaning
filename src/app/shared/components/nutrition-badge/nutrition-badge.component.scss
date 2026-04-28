@@ -1,0 +1,23 @@
+.nutrition-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  padding: 6px 10px;
+  border-radius: var(--radius-full);
+  background: var(--bg-muted);
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+
+.nutrition-primary {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.nutrition-secondary {
+  color: var(--text-tertiary);
+}

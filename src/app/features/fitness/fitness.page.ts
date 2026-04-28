@@ -14,22 +14,7 @@ import { settingsOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-fitness',
-  template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Tập luyện</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="openSettings()">
-            <ion-icon slot="icon-only" name="settings-outline" />
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <h2>Tập luyện</h2>
-      <p>Fitness — Coming soon</p>
-    </ion-content>
-  `,
+  templateUrl: './fitness.page.html',
   imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon],
 })
 export default class FitnessPage {

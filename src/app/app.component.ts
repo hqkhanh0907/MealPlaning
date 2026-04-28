@@ -4,11 +4,7 @@ import { SplashScreen } from '@capacitor/splash-screen';
 
 @Component({
   selector: 'app-root',
-  template: `
-    <ion-app>
-      <ion-router-outlet />
-    </ion-app>
-  `,
+  templateUrl: './app.component.html',
   imports: [IonApp, IonRouterOutlet],
 })
 export class AppComponent {
