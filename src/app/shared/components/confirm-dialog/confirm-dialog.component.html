@@ -1,0 +1,29 @@
+@if (isOpen) {
+  <div class="dialog-backdrop" role="presentation">
+    <section
+      class="dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="dialog-title"
+      aria-describedby="dialog-message"
+    >
+      <h2 id="dialog-title" class="dialog-title">{{ title }}</h2>
+      <p id="dialog-message" class="dialog-message">{{ message }}</p>
+      <div class="dialog-actions">
+        <button class="dialog-btn-cancel" type="button" (click)="cancelled.emit()">
+          {{ cancelLabel }}
+        </button>
+        <button
+          [class.dialog-btn-primary]="confirmVariant === 'primary'"
+          [class.dialog-btn-danger]="confirmVariant === 'danger'"
+          type="button"
+          [attr.aria-label]="confirmAriaLabel ?? null"
+          [disabled]="confirmDisabled"
+          (click)="confirmed.emit()"
+        >
+          {{ confirmLabel }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

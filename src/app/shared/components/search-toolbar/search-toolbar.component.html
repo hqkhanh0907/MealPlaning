@@ -1,0 +1,17 @@
+<label class="search-toolbar" [attr.aria-label]="ariaLabel" role="search">
+  <ion-icon class="search-icon" name="search-outline" aria-hidden="true" />
+  <input
+    class="search-input"
+    type="text"
+    [value]="query"
+    [placeholder]="placeholder"
+    (input)="handleInput($event)"
+  />
+  @if (query) {
+    <button class="search-clear" type="button" aria-label="Xóa tìm kiếm" (click)="clear()">
+      <span class="search-clear-dot">
+        <ion-icon name="close-circle-outline" aria-hidden="true" />
+      </span>
+    </button>
+  }
+</label>

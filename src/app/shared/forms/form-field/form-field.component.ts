@@ -42,27 +42,7 @@ import type { FormError } from '../types';
   selector: 'app-form-field',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="form-field">
-      <div class="input-wrapper" [class.invalid]="isInvalid()">
-        @if (label()) {
-          <label class="input-label" [class.invalid]="isInvalid()" [attr.for]="inputId() || null">{{
-            label()
-          }}</label>
-        }
-        <ng-content />
-      </div>
-      @if (isInvalid() && resolvedMessage(); as msg) {
-        <div
-          class="field-error"
-          [attr.id]="errorId() || null"
-          [attr.role]="errorId() ? 'alert' : null"
-        >
-          {{ msg }}
-        </div>
-      }
-    </div>
-  `,
+  templateUrl: './form-field.component.html',
 })
 export class FormFieldComponent {
   /** Visible label text. Empty string hides the label. */
