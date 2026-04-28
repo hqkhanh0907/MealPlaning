@@ -49,6 +49,25 @@ export class BottomSheetPicker {
     this._options.set(list ?? []);
   }
 
+  /**
+   * Optional "Recently used" (MRU) section rendered above the main options.
+   * Per design-system §8l: max 5 items, hidden when empty. Caller is responsible
+   * for limiting + ordering. Hidden automatically when search query is non-empty.
+   */
+  private _recentOptions = signal<PickerOption[]>([]);
+  @Input() set recentOptions(list: PickerOption[] | null | undefined) {
+    this._recentOptions.set(list ?? []);
+  }
+  /**
+   * Section label for the recent group. Defaults to "Gần đây".
+   */
+  @Input() recentLabel = 'Gần đây';
+  /**
+   * Section label rendered above the main options when a recent section is
+   * visible. Defaults to "Tất cả nguyên liệu".
+   */
+  @Input() allLabel = 'Tất cả nguyên liệu';
+
   @Output() valueChange = new EventEmitter<string>();
   @Output() dismissed = new EventEmitter<void>();
 
@@ -62,6 +81,15 @@ export class BottomSheetPicker {
     if (!q) return this._options();
     return this._options().filter((o) => o.label.toLowerCase().includes(q));
   });
+  /**
+   * Recent options visible only when query is empty (search hides MRU to avoid
+   * duplicate hits) AND recent list is non-empty.
+   */
+  readonly visibleRecentOptions = computed(() => {
+    if (this.query().trim().length > 0) return [];
+    return this._recentOptions();
+  });
+  readonly hasRecentSection = computed(() => this.visibleRecentOptions().length > 0);
 
   constructor() {
     addIcons({ checkmarkOutline, closeOutline });

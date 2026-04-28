@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import type { IngredientListItem } from '../../../core/repositories/ingredient.repository';
+import { IngredientRepository } from '../../../core/repositories/ingredient.repository';
 import { DishStore } from '../../../core/stores/dish.store';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
 import DishEditPage from './dish-edit.page';
@@ -53,6 +54,10 @@ describe('DishEditPage', () => {
       load: jasmine.createSpy().and.resolveTo(),
     };
 
+    const ingredientRepo = {
+      findRecentlyUsed: jasmine.createSpy('findRecentlyUsed').and.resolveTo([]),
+    };
+
     const activatedRoute = {
       snapshot: { paramMap: convertToParamMap({}) },
     };
@@ -64,6 +69,7 @@ describe('DishEditPage', () => {
         { provide: ActivatedRoute, useValue: activatedRoute },
         { provide: DishStore, useValue: dishStore },
         { provide: IngredientStore, useValue: ingredientStore },
+        { provide: IngredientRepository, useValue: ingredientRepo },
       ],
     }).compileComponents();
 
@@ -78,6 +84,30 @@ describe('DishEditPage', () => {
 
   it('starts in create mode (no id param)', () => {
     expect(component.isEdit()).toBeFalse();
+  });
+
+  it('loads recent ingredients into picker on bootstrap', async () => {
+    const repo = TestBed.inject(IngredientRepository) as unknown as {
+      findRecentlyUsed: jasmine.Spy;
+    };
+    expect(repo.findRecentlyUsed).toHaveBeenCalledWith(5);
+    // Default mock resolves to [] so MRU options are empty.
+    expect(component.recentIngredientOptions.length).toBe(0);
+  });
+
+  it('exposes recent ingredients as picker options when present', async () => {
+    const repo = TestBed.inject(IngredientRepository) as unknown as {
+      findRecentlyUsed: jasmine.Spy;
+    };
+    repo.findRecentlyUsed.and.resolveTo([sampleIngredient]);
+    // Force re-bootstrap by setting signal directly (covers transformation logic).
+    const access = component as unknown as {
+      recentIngredients: { set: (v: IngredientListItem[]) => void };
+    };
+    access.recentIngredients.set([sampleIngredient]);
+    expect(component.recentIngredientOptions.length).toBe(1);
+    expect(component.recentIngredientOptions[0].value).toBe('ingredient-1');
+    expect(component.recentIngredientOptions[0].label).toBe('Trứng gà');
   });
 
   it('rejects submit when required fields are empty', async () => {

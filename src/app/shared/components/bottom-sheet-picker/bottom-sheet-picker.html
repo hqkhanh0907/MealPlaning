@@ -26,9 +26,38 @@
       </ion-toolbar>
     </ion-header>
     <ion-content class="sheet-content">
-      @if (filteredOptions().length === 0) {
+      @if (filteredOptions().length === 0 && !hasRecentSection()) {
         <div class="sheet-empty">Không có lựa chọn phù hợp</div>
       } @else {
+        @if (hasRecentSection()) {
+          <div class="sheet-section-header">{{ recentLabel }}</div>
+          <ul class="sheet-list sheet-list--compact" role="listbox" [attr.aria-label]="recentLabel">
+            @for (option of visibleRecentOptions(); track 'recent-' + option.value) {
+              <li
+                class="sheet-option sheet-option--compact"
+                [class.selected]="option.value === value"
+                role="option"
+                tabindex="0"
+                [attr.aria-selected]="option.value === value"
+                (click)="select(option)"
+                (keydown.enter)="select(option)"
+                (keydown.space)="select(option); $event.preventDefault()"
+              >
+                <div class="sheet-option-text">
+                  <span class="sheet-option-label">{{ option.label }}</span>
+                  @if (option.description) {
+                    <span class="sheet-option-desc">{{ option.description }}</span>
+                  }
+                </div>
+                @if (option.value === value) {
+                  <ion-icon class="sheet-option-check" name="checkmark-outline"></ion-icon>
+                }
+              </li>
+            }
+          </ul>
+          <div class="sheet-section-divider" aria-hidden="true"></div>
+          <div class="sheet-section-header">{{ allLabel }}</div>
+        }
         <ul class="sheet-list" role="listbox" [attr.aria-labelledby]="titleId">
           @for (option of filteredOptions(); track option.value) {
             <li

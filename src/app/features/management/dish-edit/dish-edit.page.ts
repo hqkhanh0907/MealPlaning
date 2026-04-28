@@ -23,6 +23,7 @@ import {
 import { addIcons } from 'ionicons';
 import { chevronDownOutline, closeOutline } from 'ionicons/icons';
 import type { IngredientListItem } from '../../../core/repositories/ingredient.repository';
+import { IngredientRepository } from '../../../core/repositories/ingredient.repository';
 import { DishStore } from '../../../core/stores/dish.store';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
 import {
@@ -71,11 +72,17 @@ export default class DishEditPage {
   private readonly router = inject(Router);
   private readonly dishStore = inject(DishStore);
   private readonly ingredientStore = inject(IngredientStore);
+  private readonly ingredientRepo = inject(IngredientRepository);
 
   readonly dishId = signal<string | null>(this.route.snapshot.paramMap.get('id'));
   readonly isEdit = computed(() => this.dishId() !== null);
 
   readonly availableIngredients = signal<IngredientListItem[]>([]);
+  /**
+   * Recently-used ingredients (MRU) — top 5 by latest dish update. Surfaced as
+   * "Gần đây" section in the ingredient picker. Empty when DB has no dishes yet.
+   */
+  readonly recentIngredients = signal<IngredientListItem[]>([]);
   readonly saving = signal(false);
   protected readonly showErrors = signal(false);
 
@@ -94,6 +101,15 @@ export default class DishEditPage {
       await this.ingredientStore.load();
     }
     this.availableIngredients.set(this.ingredientStore.ingredients());
+
+    // Load MRU ("Gần đây") for ingredient picker. Best-effort — failure is
+    // non-blocking; picker simply hides the section when list is empty.
+    try {
+      const recent = await this.ingredientRepo.findRecentlyUsed(5);
+      this.recentIngredients.set(recent);
+    } catch {
+      this.recentIngredients.set([]);
+    }
 
     const id = this.dishId();
     if (!id) {
@@ -123,6 +139,15 @@ export default class DishEditPage {
       value: ingredient.id,
       label: ingredient.name,
       description: `${ingredient.category} · Dinh dưỡng theo ${ingredient.nutrition_basis_quantity}${ingredient.nutrition_basis_unit}`,
+    }));
+  }
+
+  /** Recently-used ingredients mapped to picker rows (compact "Gần đây" section). */
+  get recentIngredientOptions(): PickerOption[] {
+    return this.recentIngredients().map((ingredient) => ({
+      value: ingredient.id,
+      label: ingredient.name,
+      description: ingredient.category,
     }));
   }
 

@@ -160,3 +160,26 @@ ion-modal {
     background: rgba(var(--ion-color-primary-rgb), 0.16);
   }
 }
+
+/* ===========================================================================
+   MRU "Gần đây" section — design-system §8l
+   =========================================================================== */
+.sheet-section-header {
+  padding: 12px 16px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+  letter-spacing: 0.2px;
+}
+
+.sheet-section-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 16px;
+}
+
+.sheet-list--compact .sheet-option--compact {
+  padding: 10px 16px;
+  min-height: 48px;
+}
