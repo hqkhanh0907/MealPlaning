@@ -136,9 +136,11 @@
 /* Phase 4 — exact unit factor input is fixed (1g = 1g, 1ml = 1ml). Display as
    read-only with subtle muted background + hint text below. */
 .input-native--readonly {
-  color: var(--text-secondary);
-  background: var(--bg-muted);
-  cursor: default;
+  background: var(--bg-disabled, #f5f5f5);
+  color: var(--text-secondary, #6b6b6b);
+  cursor: not-allowed;
+  pointer-events: none;        /* prevent edit on exact unit factor */
+  user-select: text;
 }
 
 .unit-grid__hint {
