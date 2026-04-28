@@ -88,7 +88,7 @@
 
 Đây là cấu trúc THỰC TẾ trong `src/` tại thời điểm 2026-04-28. **Không** thêm/bớt file ảo.
 
-> **Lưu ý quan trọng — không có file `.html` / `.scss` riêng cho components:** project đang đi theo pattern **inline-first** — mọi component dùng `template:` (và phần lớn dùng `styles:`) inline trong file `.ts`. Đây KHÔNG phải pattern mong muốn — chỉ là snapshot thực tế. **Project convention PC-1 (binary, không ngoại lệ): mọi component MUST tách `templateUrl` + `styleUrl`** — xem `coding-conventions.md` §2.2. Toàn bộ 17/17 component hiện đang vi phạm PC-1 và sẽ được refactor trong task riêng (3 wave).
+> **Phase B refactor — DONE (2026-04-28):** toàn bộ component đã tuân thủ PC-1, dùng `templateUrl` + `styleUrl` external. Refactor chia 3 wave (Wave 1: 9 component nhỏ, Wave 2: 4 component trung bình, Wave 3: 4 component lớn — `dish-edit-modal` 652 dòng, `ingredient-edit-modal` 749 dòng, `onboarding.page` 869 dòng, `management.page` 1163 dòng). Lint + 145/145 test + ng build + APK build + emulator smoke đều pass. Helper script `scripts/extract-component-template.mjs` được giữ lại để dùng cho component mới nếu cần.
 
 ```
 src/
@@ -141,8 +141,8 @@ src/
     │
     ├── shared/
     │   ├── components/                            # Component dùng cho ≥ 2 features
-    │   │   ├── ingredient-edit-modal/             # 749 dòng inline → tách external (PC-1)
-    │   │   ├── dish-edit-modal/                   # 652 dòng inline → cần tách external (PC-1)
+    │   │   ├── ingredient-edit-modal/             # đã tách external (PC-1, Phase B Wave 3)
+    │   │   ├── dish-edit-modal/                   # đã tách external (PC-1, Phase B Wave 3)
     │   │   └── (các component shared khác)
     │   ├── forms/                                 # Signal Forms infrastructure
     │   │   ├── form-field/
@@ -162,7 +162,7 @@ src/
     │   │   ├── calendar.page.ts
     │   │   └── calendar.routes.ts
     │   ├── management/
-    │   │   ├── management.page.ts                 # 1163 dòng inline → cần tách external (PC-1)
+    │   │   ├── management.page.ts                 # đã tách external (PC-1, Phase B Wave 3)
     │   │   ├── management.routes.ts
     │   │   └── (unit-resolver.ts đã xoá ở Phase A — re-export barrel không dùng)
     │   ├── fitness/
@@ -172,7 +172,7 @@ src/
     │   │   ├── settings.page.ts
     │   │   └── settings.routes.ts
     │   └── onboarding/
-    │       ├── onboarding.page.ts                 # 869 dòng inline → cần tách external (PC-1)
+    │       ├── onboarding.page.ts                 # đã tách external (PC-1, Phase B Wave 3)
     │       ├── onboarding.routes.ts
     │       ├── onboarding-validation.ts           # Pure util (không suffix)
     │       └── onboarding-calculation.ts          # Pure util (không suffix)
@@ -209,9 +209,7 @@ Folder layout của target **giống current** — chỉ khác tên file/class.
 3. **Migrations**: doc cũ nói `migrations/V1_initial_schema.sql`. Thực tế là `migrations.ts` (TypeScript inline) cho phép logic phức tạp + type-safe. **Giữ implementation thực tế**.
 4. **Dead barrel**: `features/management/unit-resolver.ts` — ✅ **đã xoá** (Phase A, 2026-04-28). Spec file moved sang `core/services/unit-resolver.spec.ts`.
 5. **Empty placeholder folders**: `shared/pipes/`, `shared/directives/`, `core/services/ai/` — ✅ **đã xoá** (Phase A, 2026-04-28). Còn lại `shared/forms/mappers/` — giữ tạm; xoá nếu sau Q3 2026 vẫn không có content.
-6. **17/17 component hiện inline** → tách `templateUrl` + `styleUrl` (PC-1 binary, xem `coding-conventions.md` §2.2). Refactor riêng theo 3 wave; component lớn cần tách bắt buộc:
-   - Wave 3 (lớn): `management.page.ts` (1163), `onboarding.page.ts` (869), `ingredient-edit-modal` (749), `dish-edit-modal` (652).
-   - Wave 1+2: 13 component còn lại, từ `app.component.ts` (20) đến `bottom-sheet-picker` (153).
+6. **17/17 component inline** → ✅ **DONE Phase B (2026-04-28)**. Toàn bộ đã tách `templateUrl` + `styleUrl` external theo PC-1. Wave 1 (9 component nhỏ), Wave 2 (4 component trung bình), Wave 3 (4 component lớn: `management.page` 1163, `onboarding.page` 869, `ingredient-edit-modal` 749, `dish-edit-modal` 652). Lint + 145/145 test + ng build + APK install + emulator smoke pass. Helper script: `scripts/extract-component-template.mjs`.
 
 ### 2.4 Compliance vs Angular Style Guide 2025
 
@@ -231,7 +229,7 @@ Folder layout của target **giống current** — chỉ khác tên file/class.
 | 8 | Selector có prefix riêng cho app | [Angular] | ✅ | 17/17 dùng `app-` |
 | 9 | Tách external template/style khi "more than a few lines" | [Angular] | ⚠️ | Angular không nêu ngưỡng — xem PC-1 |
 | 10 | Multi-style file → hậu tố mô tả | [Angular] | n/a | hiện không có case multi-style |
-| PC-1 | Mọi component MUST tách `templateUrl` + `styleUrl` (binary, không ngoại lệ) | [Project] | ❌ | **17/17 component vi phạm**, xem §2.3 |
+| PC-1 | Mọi component MUST tách `templateUrl` + `styleUrl` (binary, không ngoại lệ) | [Project] | ✅ | **DONE Phase B (2026-04-28)** — 17/17 component external |
 | PC-2 | Naming pattern khi tách external (Style 2016 vs 2025) | [Project] | ✅ | Xem `coding-conventions.md` §2.2 |
 
 ---

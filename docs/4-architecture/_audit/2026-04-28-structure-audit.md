@@ -178,7 +178,7 @@ Chỉ phát hiện **1 cặp**: `unit-resolver.ts`
 | 8 | Selector có prefix riêng cho app | [Angular] | ✅ | 17/17 dùng `app-` |
 | 9 | Tách external khi "more than a few lines" (Angular không nêu ngưỡng) | [Angular] | ⚠️ | xem PC-1 |
 | 10 | Multi-style hậu tố mô tả | [Angular] | n/a | hiện không có case multi-style |
-| PC-1 | Mọi component MUST tách `templateUrl` + `styleUrl` (binary) | [Project] | ❌ | **17/17 component vi phạm** (xem §4) |
+| PC-1 | Mọi component MUST tách `templateUrl` + `styleUrl` (binary) | [Project] | ✅ | **DONE Phase B (2026-04-28)** — 17/17 component external |
 | PC-2 | Naming pattern khi tách external | [Project] | ✅ | |
 
 ---
@@ -186,7 +186,7 @@ Chỉ phát hiện **1 cặp**: `unit-resolver.ts`
 ## 9. Action items (chỉ ghi nhận, không thực hiện trong scope doc update)
 
 1. **Migrate Style 2016 → 2025** (rename ~150 file + 20 class) — task riêng, blocker cao, cần branch độc lập.
-2. **Tách template/style external** cho toàn bộ 17 component (PC-1 binary) — refactor riêng theo 3 wave.
+2. **Tách template/style external** cho toàn bộ 17 component (PC-1 binary) — ✅ **DONE Phase B (2026-04-28)**, 3 wave (9 + 4 + 4 component).
 3. **Xoá dead barrel** `features/management/unit-resolver.ts` — ✅ DONE (Phase A, 2026-04-28).
 4. **Quyết định** về `shared/forms/mappers/`, `shared/pipes/`, `shared/directives/`: giữ placeholder hay xoá đến khi cần?
 
