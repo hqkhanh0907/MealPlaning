@@ -29,6 +29,37 @@ ion-header ion-toolbar {
   --border-style: solid;
 }
 
+/**
+ * Center the toolbar title across the full viewport, ignoring slot widths.
+ *
+ * Problem: in Ionic Material mode (default for Android), `<ion-title>` lives
+ * in the flex row alongside `<ion-buttons slot="start">` and takes only the
+ * remaining horizontal space. `text-align: center` then centers the text
+ * inside that shrunk box → title shifts right whenever a back button (or any
+ * start slot) appears. Result: pages with `←` look misaligned compared to
+ * pages without one (filed by user 2026-04-28 for onboarding step 2a/2b).
+ *
+ * Fix: give `<ion-title>` `position: absolute; left/right: 0;` so it spans
+ * the full toolbar width regardless of siblings, then `text-align: center`
+ * lands on the true viewport center. `pointer-events: none` keeps the back
+ * button clickable underneath. iOS mode already does this internally; we
+ * apply it globally for visual consistency on Android.
+ *
+ * Use `padding-inline` ≥ back button width (44–48px) to prevent long titles
+ * from overlapping the buttons; ellipsis takes over after that.
+ */
+ion-header ion-toolbar ion-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  padding-inline: 56px;
+  pointer-events: none;
+  text-align: center;
+}
+
 ion-header {
   box-shadow: 0 2px 6px rgba(60, 45, 25, 0.06);
 }
