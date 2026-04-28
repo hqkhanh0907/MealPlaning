@@ -88,6 +88,18 @@ DO NOT:
 
 If a deviation is genuinely needed, update §8.6 first AND get explicit user approval — never silently add a new pattern. The Node guard at `scripts/check-form-input-pattern.mjs` runs on `npm run check:form-pattern` and is wired into `npm run build`.
 
+### Architecture Guards (CI-enforced)
+
+Three Node guards run on every `npm run build`, every `git commit` (via Husky pre-commit), and on GitHub Actions for `push` / `pull_request`:
+
+| Script | Purpose | Reference |
+|--------|---------|-----------|
+| `scripts/check-form-input-pattern.mjs` | Floating-label form pattern (no stacked `<label class="field">`, no inline `.input-wrapper`, no `.picker-trigger` without `--floating`). | design-system §8.6 |
+| `scripts/check-pc1-external-templates.mjs` | PC-1 binary rule — every `@Component` MUST use external `templateUrl` + `styleUrl`; inline `template:` / `styles:` forbidden. | coding-conventions §2.2 |
+| `scripts/check-style-2025-naming.mjs` | No `.component.ts` / `.service.ts` / `.directive.ts` / `.pipe.ts` file suffix; no `Component` / `Service` / `Directive` / `Pipe` class suffix. | coding-conventions §1 |
+
+Run all guards manually: `npm run check:guards`.
+
 ### Key Conventions
 - Vietnamese labels in UI (Tổng quan, Lịch ăn, Quản lý, Tập luyện, Cài đặt)
 - UUID v4 for all primary keys
