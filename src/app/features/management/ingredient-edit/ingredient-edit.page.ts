@@ -31,6 +31,7 @@ import {
   BottomSheetPicker,
   type PickerOption,
 } from '../../../shared/components/bottom-sheet-picker/bottom-sheet-picker';
+import { DishesUsingSheet } from '../../../shared/components/dishes-using-sheet/dishes-using-sheet';
 import { AppFormField } from '../../../shared/forms';
 import { ingredientFormSchema } from '../../../shared/forms/schemas/ingredient-form.schema';
 import type { IngredientEditFormValue, IngredientEditUnitFormValue } from './ingredient-edit.types';
@@ -67,6 +68,7 @@ const emptyForm = (): IngredientEditFormValue => ({
     IonIcon,
     FormField,
     BottomSheetPicker,
+    DishesUsingSheet,
     AppFormField,
   ],
 })
@@ -84,6 +86,12 @@ export default class IngredientEditPage {
 
   readonly ingredientId = signal<string | null>(this.route.snapshot.paramMap.get('id'));
   readonly isEdit = computed(() => this.ingredientId() !== null);
+
+  /**
+   * Whether the "Đang dùng trong N món" sheet is currently open. Only meaningful
+   * in edit mode (we already have a persisted ingredient id to query against).
+   */
+  readonly isDishesSheetOpen = signal(false);
 
   readonly availableUnits = signal<UnitModel[]>([]);
   readonly saving = signal(false);
@@ -164,6 +172,25 @@ export default class IngredientEditPage {
 
   openUnitPicker(): void {
     this.unitPicker?.open();
+  }
+
+  /** Open the "Đang dùng trong N món" sheet. No-op in create mode. */
+  openDishesSheet(): void {
+    if (!this.isEdit()) {
+      return;
+    }
+    this.isDishesSheetOpen.set(true);
+  }
+
+  /** Sheet emitted dismiss — reset state. */
+  onDishesSheetClosed(): void {
+    this.isDishesSheetOpen.set(false);
+  }
+
+  /** Sheet emitted dishSelected — navigate to the dish-edit route. */
+  async onDishSelectedFromSheet(dishId: string): Promise<void> {
+    this.isDishesSheetOpen.set(false);
+    await this.router.navigate(['/tabs/management/dish/edit', dishId]);
   }
 
   onCategorySelected(category: string): void {

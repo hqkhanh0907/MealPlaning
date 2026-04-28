@@ -1,0 +1,70 @@
+<ion-modal
+  [isOpen]="isOpen"
+  [breakpoints]="[0, 0.6, 0.9]"
+  [initialBreakpoint]="0.6"
+  [handle]="true"
+  (ionModalDidDismiss)="onIonDismiss()"
+>
+  <ng-template>
+    <ion-header class="dus-header">
+      <ion-toolbar class="dus-toolbar">
+        <ion-title class="dus-title">
+          @if (loading()) {
+            Đang tải…
+          } @else if (count() === 0) {
+            Không có món nào dùng nguyên liệu này
+          } @else {
+            Đang dùng trong {{ count() }} món
+          }
+        </ion-title>
+        <button
+          slot="end"
+          type="button"
+          class="dus-close"
+          aria-label="Đóng"
+          (click)="close()"
+        >
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="dus-content">
+      @if (errorMessage(); as msg) {
+        <div class="dus-error">{{ msg }}</div>
+      }
+
+      @if (!loading() && count() === 0 && !errorMessage()) {
+        <div class="dus-empty">
+          <ion-icon name="restaurant-outline" class="dus-empty__icon"></ion-icon>
+          <p class="dus-empty__text">
+            Nguyên liệu này chưa được dùng trong món ăn nào. Bạn có thể yên tâm sửa hoặc xoá.
+          </p>
+        </div>
+      }
+
+      @if (count() > 0) {
+        <ul class="dus-list" role="list">
+          @for (dish of dishes(); track dish.id) {
+            <li
+              class="dus-row"
+              role="button"
+              tabindex="0"
+              (click)="onSelect(dish)"
+              (keydown.enter)="onSelect(dish)"
+              (keydown.space)="onSelect(dish); $event.preventDefault()"
+            >
+              <div class="dus-row__main">
+                <div class="dus-row__name">{{ dish.name }}</div>
+                @if (dish.description) {
+                  <div class="dus-row__desc">{{ dish.description }}</div>
+                }
+              </div>
+              <div class="dus-row__chevron" aria-hidden="true">›</div>
+            </li>
+          }
+        </ul>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

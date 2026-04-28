@@ -282,7 +282,27 @@
         step="0.001"
       />
     </app-form-field>
+
+    @if (isEdit()) {
+      <button
+        type="button"
+        class="btn-outline btn-outline--full"
+        data-testid="open-dishes-using-sheet"
+        (click)="openDishesSheet()"
+      >
+        Xem các món đang dùng nguyên liệu này
+      </button>
+    }
   </div>
+
+  @if (isEdit() && ingredientId(); as id) {
+    <app-dishes-using-sheet
+      [ingredientId]="id"
+      [isOpen]="isDishesSheetOpen()"
+      (dishSelected)="onDishSelectedFromSheet($event)"
+      (closed)="onDishesSheetClosed()"
+    />
+  }
 
   <app-bottom-sheet-picker
     #categoryPicker

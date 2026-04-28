@@ -1,0 +1,142 @@
+/* DishesUsingSheet — sage-themed bottom sheet listing dishes containing the
+   current ingredient. Pattern aligned with bottom-sheet-picker. */
+
+:host {
+  display: contents;
+}
+
+.dus-header {
+  --background: var(--surface);
+}
+
+.dus-toolbar {
+  --background: var(--surface);
+  --color: var(--text-primary);
+  --border-color: var(--border);
+  --min-height: 56px;
+}
+
+.dus-title {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  padding-inline: 56px; /* Reserve space for close button */
+}
+
+.dus-close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline-end: 8px;
+  color: var(--text-secondary);
+
+  &:active {
+    background: var(--bg-muted);
+  }
+
+  ion-icon {
+    font-size: 22px;
+  }
+}
+
+.dus-content {
+  --background: var(--surface);
+  --padding-bottom: var(--ion-safe-area-bottom, 0);
+}
+
+.dus-empty {
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  &__icon {
+    font-size: 48px;
+    color: var(--text-tertiary);
+  }
+
+  &__text {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 280px;
+  }
+}
+
+.dus-error {
+  margin: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: rgba(var(--ion-color-danger-rgb), 0.1);
+  color: var(--ion-color-danger);
+  font-size: 14px;
+}
+
+.dus-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dus-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  outline: none;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &:active {
+    background: var(--bg-muted);
+  }
+
+  &:focus-visible {
+    background: rgba(var(--ion-color-primary-rgb), 0.08);
+  }
+
+  &__main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__name {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__desc {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__chevron {
+    font-size: 24px;
+    color: var(--text-tertiary);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+}
