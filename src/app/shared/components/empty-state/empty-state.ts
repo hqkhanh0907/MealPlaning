@@ -13,10 +13,10 @@ import {
   standalone: true,
   imports: [IonIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './empty-state.component.html',
-  styleUrl: './empty-state.component.scss',
+  templateUrl: './empty-state.html',
+  styleUrl: './empty-state.scss',
 })
-export class EmptyStateComponent {
+export class EmptyState {
   @Input() icon = 'restaurant-outline';
   @Input({ required: true }) title = '';
   @Input({ required: true }) description = '';

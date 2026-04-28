@@ -36,7 +36,7 @@ import {
   DishEditModalComponent,
   type DishEditFormValue,
 } from '../../shared/components/dish-edit-modal/dish-edit-modal.component';
-import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { EmptyState } from '../../shared/components/empty-state/empty-state';
 import {
   IngredientEditModalComponent,
   type IngredientEditFormValue,
@@ -65,7 +65,7 @@ type IngredientFilter = 'Tất cả' | (typeof INGREDIENT_CATEGORIES)[number];
     IonIcon,
     SegmentedControlComponent,
     NgClass,
-    EmptyStateComponent,
+    EmptyState,
     SearchToolbarComponent,
     ConfirmDialogComponent,
     IngredientEditModalComponent,
