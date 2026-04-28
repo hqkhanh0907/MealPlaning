@@ -2,12 +2,12 @@ import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 
-import { FormFieldComponent } from './form-field.component';
+import { AppFormField } from './form-field';
 import type { FormError } from '../types';
 
 @Component({
   standalone: true,
-  imports: [FormFieldComponent],
+  imports: [AppFormField],
   template: `
     <app-form-field
       [label]="label()"
@@ -28,7 +28,7 @@ class HostComponent {
   readonly error = signal<FormError | null>(null);
 }
 
-describe('FormFieldComponent', () => {
+describe('AppFormField', () => {
   let fixture: ComponentFixture<HostComponent>;
   let host: HostComponent;
 

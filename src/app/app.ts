@@ -4,10 +4,10 @@ import { SplashScreen } from '@capacitor/splash-screen';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
+  templateUrl: './app.html',
   imports: [IonApp, IonRouterOutlet],
 })
-export class AppComponent {
+export class App {
   constructor() {
     afterNextRender(() => {
       SplashScreen.hide();

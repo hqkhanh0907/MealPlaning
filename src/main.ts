@@ -10,10 +10,10 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalo
 import { provideHttpClient } from '@angular/common/http';
 
 import { routes } from './app/app.routes';
-import { AppComponent } from './app/app.component';
+import { App } from './app/app';
 import { provideDatabaseService } from './app/core/services/database/database.provider';
 
-bootstrapApplication(AppComponent, {
+bootstrapApplication(App, {
   providers: [
     provideZoneChangeDetection(),
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },

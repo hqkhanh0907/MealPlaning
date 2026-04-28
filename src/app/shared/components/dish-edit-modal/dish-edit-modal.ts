@@ -17,7 +17,7 @@ import { addIcons } from 'ionicons';
 import { chevronBackOutline, chevronDownOutline, closeOutline } from 'ionicons/icons';
 import type { IngredientListItem } from '../../../core/repositories/ingredient.repository';
 import { BottomSheetPicker, type PickerOption } from '../bottom-sheet-picker/bottom-sheet-picker';
-import { FormFieldComponent } from '../../forms';
+import { AppFormField } from '../../forms';
 import { dishFormSchema } from '../../forms/schemas/dish-form.schema';
 import type { DishEditFormValue, DishIngredientFormItem } from './dish-edit-modal.types';
 
@@ -38,7 +38,7 @@ const cloneForm = (value: DishEditFormValue): DishEditFormValue => ({
 @Component({
   selector: 'app-dish-edit-modal',
   standalone: true,
-  imports: [FormField, IonIcon, BottomSheetPicker, FormFieldComponent],
+  imports: [FormField, IonIcon, BottomSheetPicker, AppFormField],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dish-edit-modal.html',
   styleUrl: './dish-edit-modal.scss',

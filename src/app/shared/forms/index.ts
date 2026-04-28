@@ -11,5 +11,5 @@
  */
 
 export * from './types';
-export * from './form-field/form-field.component';
+export * from './form-field/form-field';
 export * as schemas from './schemas/common';

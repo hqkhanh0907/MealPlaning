@@ -42,9 +42,9 @@ import type { FormError } from '../types';
   selector: 'app-form-field',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './form-field.component.html',
+  templateUrl: './form-field.html',
 })
-export class FormFieldComponent {
+export class AppFormField {
   /** Visible label text. Empty string hides the label. */
   readonly label = input<string>('');
 

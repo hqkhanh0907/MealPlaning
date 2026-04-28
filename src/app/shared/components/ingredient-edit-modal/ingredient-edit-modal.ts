@@ -19,7 +19,7 @@ import { INGREDIENT_CATEGORIES } from '../../../core/models/management.constants
 import type { UnitModel } from '../../../core/models/management.model';
 import type { NutritionBasisUnit } from '../../../core/models/management.types';
 import { BottomSheetPicker, type PickerOption } from '../bottom-sheet-picker/bottom-sheet-picker';
-import { FormFieldComponent } from '../../forms';
+import { AppFormField } from '../../forms';
 import { ingredientFormSchema } from '../../forms/schemas/ingredient-form.schema';
 import type {
   IngredientEditFormValue,
@@ -52,7 +52,7 @@ const cloneForm = (value: IngredientEditFormValue): IngredientEditFormValue => (
 @Component({
   selector: 'app-ingredient-edit-modal',
   standalone: true,
-  imports: [FormField, IonIcon, BottomSheetPicker, FormFieldComponent],
+  imports: [FormField, IonIcon, BottomSheetPicker, AppFormField],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './ingredient-edit-modal.html',
   styleUrl: './ingredient-edit-modal.scss',

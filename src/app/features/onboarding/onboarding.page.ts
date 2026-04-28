@@ -12,7 +12,7 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { FormField, form } from '@angular/forms/signals';
-import { FormFieldComponent } from '../../shared/forms';
+import { AppFormField } from '../../shared/forms';
 import {
   EMPTY_ONBOARDING_STEP2A_FORM,
   type OnboardingStep2aFormValue,
@@ -59,7 +59,7 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
   styleUrl: './onboarding.page.scss',
   imports: [
     FormField,
-    FormFieldComponent,
+    AppFormField,
     IonHeader,
     IonToolbar,
     IonTitle,
