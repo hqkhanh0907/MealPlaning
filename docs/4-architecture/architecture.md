@@ -81,157 +81,158 @@
 
 ## 2. Project Structure
 
+> Coding conventions chi tiết (naming style 2016 vs 2025, file/folder rules, AI agent guidelines): xem `./coding-conventions.md`.
+> Audit baseline (snapshot 2026-04-28): xem `./_audit/2026-04-28-structure-audit.md`.
+
+### 2.1 Current — đang dùng Style 2016
+
+Đây là cấu trúc THỰC TẾ trong `src/` tại thời điểm 2026-04-28. **Không** thêm/bớt file ảo.
+
+> **Lưu ý quan trọng — không có file `.html` / `.scss` riêng cho components:** project đang đi theo pattern **inline-first** — mọi component dùng `template:` (và phần lớn dùng `styles:`) inline trong file `.ts`. Đây KHÔNG phải pattern mong muốn — chỉ là snapshot thực tế. **Project convention PC-1 (binary, không ngoại lệ): mọi component MUST tách `templateUrl` + `styleUrl`** — xem `coding-conventions.md` §2.2. Toàn bộ 17/17 component hiện đang vi phạm PC-1 và sẽ được refactor trong task riêng (3 wave).
+
 ```
 src/
-├── app/
-│   ├── app.component.ts              # Root component
-│   ├── app.config.ts                 # Application config (providers)
-│   ├── app.routes.ts                 # Top-level routes
-│   │
-│   ├── core/                         # Singleton services, stores, guards
-│   │   ├── services/
-│   │   │   ├── database/
-│   │   │   │   ├── database.service.ts        # Abstract interface (4 methods)
-│   │   │   │   ├── web-database.service.ts    # sql.js WASM (web/tests)
-│   │   │   │   ├── native-database.service.ts # @capacitor-community/sqlite
-│   │   │   │   ├── database.provider.ts       # Factory provider
-│   │   │   │   ├── migration-runner.ts        # Versioned migrations executor
-│   │   │   │   └── migrations/
-│   │   │   │       └── V1_initial_schema.sql
-│   │   │   ├── ai/
-│   │   │   │   ├── gemini.service.ts          # Core Gemini API caller
-│   │   │   │   ├── nutrition-ai.service.ts    # Menu suggest, meal plan, autofill
-│   │   │   │   ├── fitness-ai.service.ts      # Training plan, plateau analysis
-│   │   │   │   └── insight-ai.service.ts      # Daily insights, weekly review
-│   │   │   ├── platform.service.ts            # Capacitor platform detection
-│   │   │   └── network.service.ts             # Online/offline status
-│   │   ├── repositories/
-│   │   │   ├── ingredient.repository.ts
-│   │   │   ├── dish.repository.ts
-│   │   │   ├── day-plan.repository.ts
-│   │   │   ├── meal-slot.repository.ts
-│   │   │   ├── exercise.repository.ts
-│   │   │   ├── training-plan.repository.ts
-│   │   │   ├── workout.repository.ts
-│   │   │   ├── weight-log.repository.ts
-│   │   │   ├── streak-log.repository.ts
-│   │   │   ├── ai-chat-log.repository.ts
-│   │   │   └── app-config.repository.ts
-│   │   ├── stores/
-│   │   │   ├── ingredient.store.ts
-│   │   │   ├── dish.store.ts
-│   │   │   ├── day-plan.store.ts
-│   │   │   ├── fitness.store.ts
-│   │   │   ├── profile.store.ts
-│   │   │   ├── dashboard.store.ts
-│   │   │   └── ui.store.ts                    # Loading, errors, offline status
-│   │   ├── models/
-│   │   │   ├── ingredient.model.ts
-│   │   │   ├── dish.model.ts
-│   │   │   ├── day-plan.model.ts
-│   │   │   ├── user-profile.model.ts
-│   │   │   ├── training-plan.model.ts
-│   │   │   ├── workout.model.ts
-│   │   │   └── ai.model.ts
-│   │   └── guards/
-│   │       └── onboarding.guard.ts
-│   │
-│   ├── shared/                       # Reusable components, pipes, directives
-│   │   ├── components/
-│   │   │   ├── empty-state/
-│   │   │   ├── confirm-dialog/
-│   │   │   ├── nutrition-badge/
-│   │   │   ├── search-toolbar/
-│   │   │   ├── offline-banner/
-│   │   │   └── loading-skeleton/
-│   │   ├── pipes/
-│   │   │   ├── calorie.pipe.ts
-│   │   │   └── unit-format.pipe.ts
-│   │   └── directives/
-│   │       └── long-press.directive.ts
-│   │
-│   ├── features/                     # Feature modules (lazy loaded)
-│   │   ├── dashboard/
-│   │   │   ├── dashboard.page.ts
-│   │   │   ├── dashboard.routes.ts
-│   │   │   └── components/
-│   │   │       ├── ai-insight-card/
-│   │   │       ├── nutrition-card/
-│   │   │       ├── workout-card/
-│   │   │       ├── streak-weight-card/
-│   │   │       └── quick-actions/
-│   │   │
-│   │   ├── calendar/
-│   │   │   ├── calendar.page.ts
-│   │   │   ├── calendar.routes.ts
-│   │   │   └── components/
-│   │   │       ├── week-view/
-│   │   │       ├── day-view/
-│   │   │       ├── meal-slot/
-│   │   │       ├── nutrition-summary/
-│   │   │       ├── add-dish-modal/
-│   │   │       └── ai-plan-preview/
-│   │   │
-│   │   ├── management/
-│   │   │   ├── management.page.ts
-│   │   │   ├── management.routes.ts
-│   │   │   └── components/
-│   │   │       ├── ingredient-list/
-│   │   │       ├── ingredient-edit-modal/
-│   │   │       ├── dish-list/
-│   │   │       ├── dish-edit-modal/
-│   │   │       ├── ai-autofill-preview/
-│   │   │       └── filter-sheet/
-│   │   │
-│   │   ├── fitness/
-│   │   │   ├── fitness.page.ts
-│   │   │   ├── fitness.routes.ts
-│   │   │   └── components/
-│   │   │       ├── training-plan-card/
-│   │   │       ├── workout-logger/
-│   │   │       ├── exercise-picker/
-│   │   │       ├── set-input/
-│   │   │       ├── effort-emoji-picker/
-│   │   │       ├── rest-timer/
-│   │   │       └── progress-chart/
-│   │   │
-│   │   ├── settings/
-│   │   │   ├── settings.page.ts
-│   │   │   ├── settings.routes.ts
-│   │   │   └── components/
-│   │   │       ├── profile-editor/
-│   │   │       ├── goal-settings/
-│   │   │       ├── notification-settings/
-│   │   │       ├── theme-settings/
-│   │   │       └── about/
-│   │   │
-│   │   └── onboarding/
-│   │       ├── onboarding.page.ts
-│   │       ├── onboarding.routes.ts
-│   │       └── components/
-│   │           ├── goal-step/
-│   │           └── profile-step/
-│   │
-│   └── tabs/
-│       ├── tabs.page.ts               # ion-tabs wrapper (4 tabs)
-│       └── tabs.routes.ts
-│
-├── assets/
-│   ├── icon/
-│   ├── images/
-│   └── seed/                          # Seed data JSON files
-│       ├── ingredients.json
-│       └── exercises.json
+├── main.ts
+├── polyfills.ts
+├── test.ts
+├── zone-flags.ts
+├── global.scss
+├── index.html
+├── types/
+│   └── sql.js.d.ts
 ├── environments/
 │   ├── environment.ts
 │   └── environment.prod.ts
 ├── theme/
-│   └── variables.scss                 # Ionic CSS custom properties
-├── global.scss
-├── index.html
-├── main.ts                            # bootstrapApplication()
-└── test-setup.ts
+│   └── variables.scss
+├── theme/form-field.scss              # Floating-label input pattern (xem design-system §8.6)
+└── app/
+    ├── app.component.ts               # Root: IonApp + IonRouterOutlet
+    ├── app.config.ts                  # bootstrapApplication providers
+    ├── app.routes.ts                  # Top-level routes (onboarding, tabs, settings)
+    │
+    ├── core/
+    │   ├── services/
+    │   │   ├── database/
+    │   │   │   ├── database.service.ts            # Abstract interface
+    │   │   │   ├── web-database.service.ts        # sql.js WASM (web + tests)
+    │   │   │   ├── database.provider.ts           # Factory
+    │   │   │   ├── schema.ts                      # Schema constants
+    │   │   │   ├── schema-compatibility.ts
+    │   │   │   ├── migrations.ts                  # Versioned migrations (TypeScript inline, KHÔNG phải .sql riêng)
+    │   │   │   ├── migration-runner.ts
+    │   │   │   └── legacy-sqljs-migrator.ts       # Migrate dữ liệu từ legacy DB
+    │   │   ├── unit-resolver.ts                   # Pure function (không decorator → không suffix)
+    │   │   └── (3 service khác có suffix .service.ts)
+    │   ├── repositories/                          # 5 file .repository.ts
+    │   │   ├── ingredient.repository.ts
+    │   │   ├── dish.repository.ts
+    │   │   ├── dish-ingredient.repository.ts
+    │   │   ├── unit.repository.ts
+    │   │   └── ingredient-unit.repository.ts
+    │   ├── stores/                                # 3 file .store.ts (ingredient, dish, profile)
+    │   ├── models/
+    │   │   ├── management.model.ts                # Gộp ingredient/dish/unit/dish-ingredient
+    │   │   ├── management.types.ts
+    │   │   ├── management.constants.ts
+    │   │   └── user-profile.model.ts
+    │   └── guards/
+    │       └── onboarding.guard.ts
+    │
+    ├── shared/
+    │   ├── components/                            # Component dùng cho ≥ 2 features
+    │   │   ├── ingredient-edit-modal/             # 749 dòng inline → tách external (PC-1)
+    │   │   ├── dish-edit-modal/                   # 652 dòng inline → cần tách external (PC-1)
+    │   │   └── (các component shared khác)
+    │   ├── forms/                                 # Signal Forms infrastructure
+    │   │   ├── form-field/
+    │   │   ├── schemas/
+    │   │   │   └── common.ts
+    │   │   ├── mappers/                           # PLACEHOLDER — chỉ có README.md
+    │   │   ├── types.ts
+    │   │   └── index.ts
+    │   ├── pipes/                                 # PLACEHOLDER — rỗng
+    │   └── directives/                            # PLACEHOLDER — rỗng
+    │
+    ├── features/                                  # Lazy-loaded feature pages
+    │   ├── dashboard/
+    │   │   ├── dashboard.page.ts
+    │   │   └── dashboard.routes.ts
+    │   ├── calendar/
+    │   │   ├── calendar.page.ts
+    │   │   └── calendar.routes.ts
+    │   ├── management/
+    │   │   ├── management.page.ts                 # 1163 dòng inline → cần tách external (PC-1)
+    │   │   ├── management.routes.ts
+    │   │   └── unit-resolver.ts                   # Re-export barrel (dead — xem §2.3)
+    │   ├── fitness/
+    │   │   ├── fitness.page.ts
+    │   │   └── fitness.routes.ts
+    │   ├── settings/
+    │   │   ├── settings.page.ts
+    │   │   └── settings.routes.ts
+    │   └── onboarding/
+    │       ├── onboarding.page.ts                 # 869 dòng inline → cần tách external (PC-1)
+    │       ├── onboarding.routes.ts
+    │       ├── onboarding-validation.ts           # Pure util (không suffix)
+    │       └── onboarding-calculation.ts          # Pure util (không suffix)
+    │
+    └── tabs/
+        ├── tabs.page.ts                           # IonTabs wrapper (4 tabs)
+        └── tabs.routes.ts
 ```
+
+**Inventory thực tế (102 file `.ts`):**
+- 33 spec, 10 component, 8 routes, 7 page, 5 repository, 4 service, 3 store, 3 schema, 5 types, 2 model, 1 guard, 1 provider, 1 constants, 19 không suffix (utility/bootstrap/env).
+
+### 2.2 Target — Style 2025 (sau migration task)
+
+Sẽ migrate trong task riêng. Mapping rule:
+
+| Current (2016) | Target (2025) |
+|----------------|---------------|
+| `dashboard.page.ts` + `class DashboardPage` | `dashboard.ts` + `class Dashboard` |
+| `ingredient.repository.ts` + `class IngredientRepository` | `ingredient-repository.ts` + `class IngredientRepository` (giữ class — Style Guide cho phép khi cùng tên với entity) |
+| `web-database.service.ts` + `class WebDatabaseService` | `web-database.ts` + `class WebDatabase` |
+| `ingredient.store.ts` + `class IngredientStore` | `ingredient-store.ts` (giữ suffix file để tránh đụng `ingredient.ts` model) |
+| `onboarding.guard.ts` | `onboarding-guard.ts` |
+| `app.routes.ts` | `app.routes.ts` (KHÔNG đổi) |
+| `*.spec.ts` | `*.spec.ts` (KHÔNG đổi) |
+| `management.model.ts` / `*.types.ts` / `*.constants.ts` | giữ — Style Guide không cấm |
+
+Folder layout của target **giống current** — chỉ khác tên file/class.
+
+### 2.3 Drift đã ghi nhận (sẽ xử lý ở task riêng)
+
+1. **Doc cũ liệt kê services/repositories chưa tồn tại** (gemini, nutrition-ai, fitness-ai, insight-ai, platform, network, day-plan/meal-slot/exercise/training-plan/workout/weight-log/streak-log/ai-chat-log/app-config repos, day-plan/fitness/dashboard/ui stores). Đã xoá khỏi doc — sẽ tái-thêm khi feature thực sự được implement.
+2. **Doc cũ nói có `features/<x>/components/`** với danh sách sub-component cụ thể. Thực tế các features hiện chỉ có `*.page.ts` + `*.routes.ts`; modal lớn được nâng lên `shared/components/`. Khi triển khai sub-component cho feature, đặt vào `features/<x>/components/<name>/`.
+3. **Migrations**: doc cũ nói `migrations/V1_initial_schema.sql`. Thực tế là `migrations.ts` (TypeScript inline) cho phép logic phức tạp + type-safe. **Giữ implementation thực tế**.
+4. **Dead barrel**: `features/management/unit-resolver.ts` (153 bytes, không file nào import) — sẽ xoá ở cleanup task.
+5. **Empty placeholder folders**: `shared/pipes/`, `shared/directives/`, `shared/forms/mappers/` — giữ tạm; xoá nếu sau Q3 2026 vẫn không có content.
+6. **17/17 component hiện inline** → tách `templateUrl` + `styleUrl` (PC-1 binary, xem `coding-conventions.md` §2.2). Refactor riêng theo 3 wave; component lớn cần tách bắt buộc:
+   - Wave 3 (lớn): `management.page.ts` (1163), `onboarding.page.ts` (869), `ingredient-edit-modal` (749), `dish-edit-modal` (652).
+   - Wave 1+2: 13 component còn lại, từ `app.component.ts` (20) đến `bottom-sheet-picker` (153).
+
+### 2.4 Compliance vs Angular Style Guide 2025
+
+> Phân biệt:
+> - **[Angular]** = rule chính thức từ angular.dev/style-guide.
+> - **[Project]** = convention nội bộ HealthMate AI (PC-N), không phải Angular official.
+
+| # | Rule | Source | Status | Ghi chú |
+|---|------|--------|--------|---------|
+| 1 | Code in `src/` | [Angular] | ✅ | |
+| 2 | One concept per file | [Angular] | ✅ | |
+| 3 | Group related files (ts/html/scss/spec cùng folder) | [Angular] | ✅ | |
+| 4 | kebab-case file names | [Angular] | ✅ | |
+| 5 | Same base name across ts/html/scss/spec | [Angular] | ✅ | (theo cặp đang tồn tại) |
+| 6 | Style 2025 file/class names (no `.component.ts`/`Component` suffix) | [Angular] | ⏳ | Migrate trong task riêng |
+| 7 | `.spec.ts` cùng folder | [Angular] | ✅ | |
+| 8 | Selector có prefix riêng cho app | [Angular] | ✅ | 17/17 dùng `app-` |
+| 9 | Tách external template/style khi "more than a few lines" | [Angular] | ⚠️ | Angular không nêu ngưỡng — xem PC-1 |
+| 10 | Multi-style file → hậu tố mô tả | [Angular] | n/a | hiện không có case multi-style |
+| PC-1 | Mọi component MUST tách `templateUrl` + `styleUrl` (binary, không ngoại lệ) | [Project] | ❌ | **17/17 component vi phạm**, xem §2.3 |
+| PC-2 | Naming pattern khi tách external (Style 2016 vs 2025) | [Project] | ✅ | Xem `coding-conventions.md` §2.2 |
 
 ---
 

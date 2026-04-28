@@ -55,13 +55,18 @@ src/app/
 
 ### Coding Guidelines
 - **Language:** TypeScript in strict mode. No `any` allowed.
-- **Components:** Standalone Angular components (no NgModule). Inline templates preferred for small pages.
+- **Components:** Standalone Angular components (no NgModule). **All components MUST use external `templateUrl` + `styleUrl` — inline `template:` / `styles:` is forbidden** (project convention PC-1 binary, no exceptions; see `docs/4-architecture/coding-conventions.md` §2.2).
 - **Styling:** Ionic CSS custom properties via `src/theme/variables.scss`. Dark mode via `@media (prefers-color-scheme: dark)`.
 - **State Management:** Angular Signals — `signal()`, `computed()`, `effect()`.
 - **Routing:** Lazy-loaded feature routes via `loadChildren()` / `loadComponent()`.
 - **Database:** All data goes through Repository → DatabaseService abstraction.
 - **Icons:** Use `addIcons()` from ionicons in component constructor + `IonIcon` in template.
 - **Imports:** Ionic standalone components imported individually (e.g., `IonButton`, `IonContent`).
+- **Naming Style:** Project is migrating from Style 2016 → **Style 2025**. New files SHOULD use Style 2025 (no `.component.ts`/`.service.ts` suffix, no `Component`/`Service` class suffix). Existing files keep Style 2016 until the dedicated rename task. See `docs/4-architecture/coding-conventions.md` §1.
+- **Selectors:** Always prefix with `app-` (e.g., `app-user-profile`).
+- **Folders:** Component used by ≥ 2 features → `shared/components/`. Single-feature components → `features/<x>/components/<name>/`. Do NOT create empty placeholder folders.
+
+> Full conventions: `docs/4-architecture/coding-conventions.md`. Current vs Target structure: `docs/4-architecture/architecture.md` §2.
 
 ### Form Inputs (MANDATORY)
 ALL text/number/select inputs across the app MUST use the canonical floating-label pattern defined in `src/theme/form-field.scss`. See `docs/3-design/design-system.md` §8.6.

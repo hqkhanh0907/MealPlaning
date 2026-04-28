@@ -1,0 +1,262 @@
+# Coding Conventions — HealthMate AI (MealPlaning)
+
+**Version:** 1.0
+**Date:** 2026-04-28
+**Status:** Active
+**Audience:** Developers + AI agents (Claude Code, Hermes, Codex…) generating code trong repo này.
+
+> Tài liệu này tách ra từ `architecture.md` để dễ maintain. Khi có conflict giữa file này và `architecture.md`, **file này thắng**.
+>
+> Nguồn chuẩn: https://angular.dev/style-guide (Angular Style Guide 2025).
+
+---
+
+## 1. Naming style — đang migrate Style 2016 → Style 2025
+
+### 1.1 Trạng thái hiện tại (snapshot 2026-04-28)
+
+- Toàn bộ codebase đang dùng **Style 2016** (suffix `.component.ts`, `.service.ts`, `.page.ts`, `.repository.ts`, `.store.ts`, `.guard.ts`, `.routes.ts` ở cả file name và class name).
+- Quyết định project: **MIGRATE sang Style 2025** trong một task refactor riêng.
+- Lý do: theo default mới của Angular CLI 21+, future-proof, đồng bộ với doc chính thức và mọi project mới sinh ra từ `ng new`.
+
+### 1.2 Quy tắc Style 2025 (TARGET — áp dụng cho code mới)
+
+| Loại | Style 2016 (cũ) | **Style 2025 (mới — TARGET)** |
+|------|-----------------|-------------------------------|
+| Component file | `user-profile.component.ts` | `user-profile.ts` |
+| Component class | `export class UserProfileComponent` | `export class UserProfile` |
+| Service file | `auth.service.ts` | `auth.ts` (hoặc `auth-service.ts` nếu trùng tên thực thể) |
+| Service class | `export class AuthService` | `export class Auth` |
+| Directive file | `highlight.directive.ts` | `highlight.ts` |
+| Directive class | `export class HighlightDirective` | `export class Highlight` |
+| Pipe file | `currency.pipe.ts` | `currency.ts` (hoặc `currency-pipe.ts`) |
+| Pipe class | `export class CurrencyPipe` | `export class Currency` |
+| Guard file | `auth.guard.ts` | `auth-guard.ts` |
+| Resolver file | `user.resolver.ts` | `user-resolver.ts` |
+| Interceptor file | `auth.interceptor.ts` | `auth-interceptor.ts` |
+| Module (legacy) | `user.module.ts` | n/a — chỉ standalone |
+| Routes | `app.routes.ts` | `app.routes.ts` (giữ — không đổi) |
+| Test | `user-profile.spec.ts` | `user-profile.spec.ts` (giữ — không đổi) |
+| Model / interface | `user.model.ts` | `user.ts` hoặc giữ `user.model.ts` (Style Guide không cấm) |
+
+### 1.3 Tạm thời (chưa migrate xong)
+
+- **CODE MỚI**: bắt đầu áp dụng Style 2025 ngay khi có thể (ví dụ tạo feature/component mới).
+- **CODE CŨ**: KHÔNG đổi tên ad-hoc — chờ migration task để rename hàng loạt và update import trong 1 commit duy nhất, tránh git blame và merge conflict.
+- Ngoại lệ: file đang sửa nội dung lớn có thể rename luôn nếu không kéo theo > 5 file import.
+
+---
+
+## 2. File & folder rules
+
+> **Cách đọc tài liệu này:**
+> - Mục có **[Angular]** = quote từ Angular Style Guide chính thức (https://angular.dev/style-guide). Authority cao.
+> - Mục có **[Project]** = convention nội bộ HealthMate AI. KHÔNG phải rule official của Angular — chỉ áp dụng trong repo này. Đánh số `PC-N` (Project Convention).
+> - Angular Style Guide chính thức **không có hệ thống đánh số R1, R2…** — bất kỳ "R-number" nào trong tài liệu cũ phải hiểu là numbering nội bộ (đã loại bỏ ở phiên bản này).
+
+### 2.1 Bắt buộc — quote từ Angular Style Guide [Angular]
+
+1. Toàn bộ UI code nằm trong `src/`.
+2. **One concept per file** — 1 component / service / directive / pipe / store / repository per file.
+3. **Group related files together**: `<name>.ts` + `<name>.html` + `<name>.css/scss` + `<name>.spec.ts` cùng thư mục.
+4. **kebab-case** cho file name (`user-profile.ts`, không phải `userProfile.ts`).
+5. Cùng **base name** cho mọi file của 1 component.
+6. `.spec.ts` đặt cùng thư mục với code, **KHÔNG** tách `/tests`.
+7. Selector component dùng prefix riêng cho app (project chọn `app-`).
+8. Multiple style file → hậu tố mô tả (`user-profile.layout.scss`, `user-profile.theme.scss`).
+9. **Template/style: Angular khuyến nghị tách external khi "more than a few lines"** — nguyên văn: *"Consider extracting templates and styles into a separate file when they are more than a few lines."* — không có ngưỡng cứng.
+
+### 2.2 Inline vs external template/style — Project Convention [Project]
+
+Angular không quy định ngưỡng cụ thể cho việc tách external. Project HealthMate AI chọn rule **binary, không ngoại lệ**: mọi component MUST tách `templateUrl` + `styleUrl`.
+
+#### PC-1 — Mọi component tách external (binary, không ngưỡng)
+
+| Trường hợp | Rule |
+|---|---|
+| Component bất kỳ (kể cả page shell, app root, component < 30 dòng) | **BẮT BUỘC** dùng `templateUrl` + `styleUrl`. Cấm inline `template:` / `styles:` / `styles[]`. |
+
+Lý do chọn binary thay vì threshold:
+- Loại bỏ tranh cãi trong code review về "dòng nào tính, đếm comment không…".
+- Consistency: mọi component cùng pattern → reviewer nhìn 1 chỗ.
+- Tooling (Prettier, IDE syntax highlight cho HTML/SCSS, hot reload) hoạt động tối ưu khi template/style nằm file riêng.
+- Diff PR sạch hơn — không còn diff hỗn hợp HTML+TS+CSS trong cùng 1 file.
+
+#### Trạng thái hiện tại (snapshot 2026-04-28) — TẤT CẢ 17/17 component vi phạm PC-1
+
+| Component | Lines `.ts` | `.html`? | `.scss`? | Status |
+|-----------|------:|----------|----------|--------|
+| `features/management/management.page.ts` | 1163 | ❌ | ❌ | **Phải tách** |
+| `features/onboarding/onboarding.page.ts` | 869 | ❌ | ❌ | **Phải tách** |
+| `shared/components/ingredient-edit-modal/ingredient-edit-modal.component.ts` | 749 | ❌ | ❌ | **Phải tách** |
+| `shared/components/dish-edit-modal/dish-edit-modal.component.ts` | 652 | ❌ | ❌ | **Phải tách** |
+| `shared/components/bottom-sheet-picker/bottom-sheet-picker.component.ts` | 153 | ❌ | ✅ | **Phải tách `.html`** |
+| `shared/components/confirm-dialog/confirm-dialog.component.ts` | 129 | ❌ | ❌ | **Phải tách** |
+| `shared/components/search-toolbar/search-toolbar.component.ts` | 121 | ❌ | ❌ | **Phải tách** |
+| `shared/forms/form-field/form-field.component.ts` | 103 | ❌ | ❌ | **Phải tách** |
+| `shared/components/empty-state/empty-state.component.ts` | 96 | ❌ | ❌ | **Phải tách** |
+| `shared/components/segmented-control/segmented-control.component.ts` | 51 | ❌ | ❌ | **Phải tách** |
+| `tabs/tabs.page.ts` | 49 | ❌ | ❌ | **Phải tách** |
+| `shared/components/nutrition-badge/nutrition-badge.component.ts` | 47 | ❌ | ❌ | **Phải tách** |
+| `features/calendar/calendar.page.ts` | 45 | ❌ | ❌ | **Phải tách** |
+| `features/dashboard/dashboard.page.ts` | 45 | ❌ | ❌ | **Phải tách** |
+| `features/fitness/fitness.page.ts` | 45 | ❌ | ❌ | **Phải tách** |
+| `features/settings/settings.page.ts` | 29 | ❌ | ❌ | **Phải tách** |
+| `app.component.ts` | 20 | ❌ | ❌ | **Phải tách** |
+
+**Tổng nợ:** 17 file `.html` + 16 file `.scss` cần tạo.
+
+#### PC-2 — Pattern naming khi tách
+
+Style 2016 (code hiện tại):
+```
+shared/components/<name>/
+├── <name>.component.ts          # @Component({ templateUrl: './<name>.component.html', styleUrl: './<name>.component.scss' })
+├── <name>.component.html
+├── <name>.component.scss
+└── <name>.component.spec.ts
+```
+
+Style 2025 (sau migration):
+```
+shared/components/<name>/
+├── <name>.ts                    # @Component({ templateUrl: './<name>.html', styleUrl: './<name>.scss' })
+├── <name>.html
+├── <name>.scss
+└── <name>.spec.ts
+```
+
+#### Vì sao project trước đây chọn inline-first
+
+- Sprint Phase 1 ưu tiên tốc độ + ít file → inline gọn cho component nhỏ.
+- Đây là quyết định **tactical**, đã hết hạn dùng. PC-1 hiện hành thay thế hoàn toàn.
+
+#### Action — refactor toàn bộ 17 component
+
+Refactor task riêng (không nằm trong scope doc update). Thứ tự đề xuất theo độ rủi ro tăng dần (làm thấp rủi ro trước để build muscle memory):
+
+**Wave 1 — component nhỏ, ít coupling (sanity check):**
+1. `app.component.ts` (20)
+2. `tabs.page.ts` (49)
+3. `nutrition-badge.component.ts` (47)
+4. `segmented-control.component.ts` (51)
+5. `calendar/dashboard/fitness/settings.page.ts` (45-29 dòng, 4 router shell)
+6. `empty-state.component.ts` (96)
+
+**Wave 2 — component trung bình:**
+7. `form-field.component.ts` (103)
+8. `search-toolbar.component.ts` (121)
+9. `confirm-dialog.component.ts` (129)
+10. `bottom-sheet-picker.component.ts` (153) — đã có `.scss`, chỉ cần tách `.html`
+
+**Wave 3 — component lớn (test kỹ từng cái, commit riêng):**
+11. `dish-edit-modal` (652)
+12. `ingredient-edit-modal` (749)
+13. `onboarding.page` (869)
+14. `management.page` (1163)
+
+### 2.3 Folder layout chuẩn
+
+```
+src/app/
+├── core/                 # singleton — providedIn: 'root'
+│   ├── services/         # business + infra services (database, ai, platform, network…)
+│   ├── repositories/     # data access (mỗi entity 1 file)
+│   ├── stores/           # Signal stores (ingredient, dish, profile…)
+│   ├── models/           # interfaces, types, constants
+│   └── guards/
+├── shared/               # reusable across ≥ 2 features
+│   ├── components/<name>/<name>.ts(.html/.scss/.spec.ts)
+│   ├── pipes/
+│   ├── directives/
+│   └── forms/            # Signal Forms infrastructure (form-field, schemas, mappers)
+├── features/<feature>/
+│   ├── <feature>.page.ts (sẽ thành <feature>.ts ở Style 2025)
+│   ├── <feature>.routes.ts
+│   └── components/<name>/      # component CHỈ dùng trong feature này
+└── tabs/                 # tab bar wrapper (IonTabs)
+```
+
+**Quy tắc nâng cấp shared:**
+- Component **chỉ 1 feature** dùng → đặt trong `features/<x>/components/`.
+- Component **≥ 2 features** dùng → nâng lên `shared/components/`.
+- Service **singleton toàn app** → `core/services/` + `@Injectable({ providedIn: 'root' })`.
+
+### 2.4 Empty placeholder folders
+
+KHÔNG tạo thư mục rỗng "để dành". Tạo khi có file đầu tiên thực sự cần. Hiện trạng `shared/pipes/` và `shared/directives/` rỗng được giữ tạm vì doc lịch sử đã reference — sẽ xoá nếu Phase 2 vẫn không có content.
+
+---
+
+## 3. Class & code style
+
+### 3.1 Bắt buộc
+
+- TypeScript strict mode. **KHÔNG** `any`.
+- Standalone components — **không** dùng `NgModule` cho code mới.
+- Inject bằng `inject()`. **Không** dùng constructor DI cho code mới.
+- State: Angular Signals (`signal`, `computed`, `effect`). Không dùng RxJS BehaviorSubject mới.
+- Control flow: `@if`, `@for`, `@switch` (không dùng `*ngIf`, `*ngFor`).
+- DB columns: snake_case. TypeScript: camelCase. Mapper ở repository layer.
+- Primary key: UUID v4 (string).
+- Timestamp: ISO 8601 string.
+
+### 3.2 Khuyến nghị
+
+- Pure utility (không decorator) → file không cần suffix: `unit-resolver.ts`, `onboarding-validation.ts`. OK.
+- Re-export barrel chỉ tạo khi có ≥ 2 consumer thật. Tránh dead barrel (xem audit 2026-04-28).
+- Type-only file: hậu tố `.types.ts` được chấp nhận (vd `management.types.ts`).
+- Constants file: hậu tố `.constants.ts`.
+
+---
+
+## 4. Form inputs (đã có rule riêng)
+
+Xem `docs/3-design/design-system.md §8.6` và `CLAUDE.md §Form Inputs`. Tóm tắt: tất cả input dùng `.input-wrapper` + `.input-label` + `.input-native` floating-label, hoặc `.picker-trigger--floating`. Lint script: `npm run check:form-pattern`.
+
+---
+
+## 5. Test conventions
+
+- Framework: Karma + Jasmine (Angular default).
+- Unit test cùng thư mục, kết thúc `.spec.ts`.
+- Mỗi public function của service/repository/store: ≥ 1 test happy path + ≥ 1 edge case.
+- Test naming: `describe('FeatureName')` → `it('should <behaviour> when <condition>')`.
+
+---
+
+## 6. Imports
+
+- Ionic standalone components import từng cái: `import { IonButton, IonContent } from '@ionic/angular/standalone';`
+- Icons: `addIcons({ ... })` trong constructor + `<ion-icon name="...">` trong template.
+- Path alias: ưu tiên relative path trong cùng feature; cross-feature dùng absolute (`@app/core/...`) khi thiết lập tsconfig path mapping (chưa cấu hình hiện tại).
+
+---
+
+## 7. Vietnamese UI labels
+
+Mọi label hiển thị end-user dùng tiếng Việt: Tổng quan, Lịch ăn, Quản lý, Tập luyện, Cài đặt. Identifier code (variable, class, file) dùng tiếng Anh.
+
+---
+
+## 8. AI agent guidelines
+
+Khi AI agent (Claude Code, Codex, Hermes…) generate code mới trong repo này:
+
+1. Đọc file này TRƯỚC khi tạo file mới.
+2. **Code mới → Style 2025** (bỏ suffix). Code sửa file cũ → giữ tên cũ.
+3. KHÔNG tạo `NgModule`. KHÔNG dùng `any`. KHÔNG dùng constructor DI.
+4. Component mới → tạo selector `app-<kebab>`.
+5. Component mới → **bắt buộc** tạo `templateUrl` + `styleUrl` external (PC-1, không ngoại lệ).
+6. KHÔNG tạo barrel file `index.ts` trừ khi đã có ≥ 2 consumer.
+7. KHÔNG tạo thư mục rỗng "để dành".
+
+---
+
+## 9. References
+
+- Angular Style Guide (2025): https://angular.dev/style-guide
+- Angular CLI `file-name-style-guide` option: https://angular.dev/cli/generate/application
+- Component basics: https://angular.dev/essentials/components
+- Architecture overview: `./architecture.md`
+- Audit baseline: `./_audit/2026-04-28-structure-audit.md`
