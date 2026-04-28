@@ -1,0 +1,134 @@
+/* Shared modal scaffolding (overlay, .modal, .modal-toolbar, .form-content,
+   .section-label, .section-hint, .field, .picker-trigger, .btn-outline,
+   .btn-danger-text, .btn-cta, .field-error) lives in
+   src/theme/form-modal.scss to keep this component under the 4 kB
+   anyComponentStyle budget. */
+
+.info-card-copy,
+.unit-meta {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Segment control styles sống ở src/theme/segment-control.scss
+   (.segment-control / .segment-button / .selected) — canonical §8.8. */
+
+.nutrition-grid,
+.unit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.unit-empty,
+.info-card,
+.unit-card {
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 16px;
+}
+
+.unit-empty.invalid,
+.unit-list.invalid {
+  border-color: rgba(244, 67, 54, 0.4);
+}
+
+.unit-empty {
+  text-align: center;
+}
+
+.unit-empty-title,
+.info-card-title,
+.unit-card__title {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.unit-empty-copy {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 8px 0 16px;
+}
+
+.unit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.unit-card__top,
+.unit-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.unit-card__badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.unit-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.badge-default {
+  background: rgba(var(--ion-color-primary-rgb), 0.12);
+  color: var(--primary-700);
+}
+
+.badge-exact {
+  background: rgba(76, 175, 80, 0.12);
+  color: var(--ion-color-success);
+}
+
+.badge-approx {
+  background: rgba(var(--ion-color-warning-rgb, 217, 168, 87), 0.18);
+  color: var(--ion-color-warning-shade);
+}
+
+.unit-actions {
+  justify-content: flex-start;
+  margin-top: 12px;
+}
+
+.unit-action {
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  padding: 10px 16px;
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.32);
+  background: transparent;
+  color: var(--primary-700);
+  font-weight: 500;
+}
+
+.unit-action--danger {
+  border: none;
+  background: transparent;
+  color: var(--ion-color-danger);
+  font-weight: 500;
+  padding: 0;
+}
+
+@media (max-width: 480px) {
+  .nutrition-grid,
+  .unit-grid {
+    grid-template-columns: 1fr;
+  }
+}
