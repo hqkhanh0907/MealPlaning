@@ -187,7 +187,7 @@ Chỉ phát hiện **1 cặp**: `unit-resolver.ts`
 
 1. **Migrate Style 2016 → 2025** (rename ~150 file + 20 class) — task riêng, blocker cao, cần branch độc lập.
 2. **Tách template/style external** cho toàn bộ 17 component (PC-1 binary) — refactor riêng theo 3 wave.
-3. **Xoá dead barrel** `features/management/unit-resolver.ts` — boy-scout cleanup.
+3. **Xoá dead barrel** `features/management/unit-resolver.ts` — ✅ DONE (Phase A, 2026-04-28).
 4. **Quyết định** về `shared/forms/mappers/`, `shared/pipes/`, `shared/directives/`: giữ placeholder hay xoá đến khi cần?
 
 ---

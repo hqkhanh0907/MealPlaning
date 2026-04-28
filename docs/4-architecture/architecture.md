@@ -164,7 +164,7 @@ src/
     │   ├── management/
     │   │   ├── management.page.ts                 # 1163 dòng inline → cần tách external (PC-1)
     │   │   ├── management.routes.ts
-    │   │   └── unit-resolver.ts                   # Re-export barrel (dead — xem §2.3)
+    │   │   └── (unit-resolver.ts đã xoá ở Phase A — re-export barrel không dùng)
     │   ├── fitness/
     │   │   ├── fitness.page.ts
     │   │   └── fitness.routes.ts
@@ -207,8 +207,8 @@ Folder layout của target **giống current** — chỉ khác tên file/class.
 1. **Doc cũ liệt kê services/repositories chưa tồn tại** (gemini, nutrition-ai, fitness-ai, insight-ai, platform, network, day-plan/meal-slot/exercise/training-plan/workout/weight-log/streak-log/ai-chat-log/app-config repos, day-plan/fitness/dashboard/ui stores). Đã xoá khỏi doc — sẽ tái-thêm khi feature thực sự được implement.
 2. **Doc cũ nói có `features/<x>/components/`** với danh sách sub-component cụ thể. Thực tế các features hiện chỉ có `*.page.ts` + `*.routes.ts`; modal lớn được nâng lên `shared/components/`. Khi triển khai sub-component cho feature, đặt vào `features/<x>/components/<name>/`.
 3. **Migrations**: doc cũ nói `migrations/V1_initial_schema.sql`. Thực tế là `migrations.ts` (TypeScript inline) cho phép logic phức tạp + type-safe. **Giữ implementation thực tế**.
-4. **Dead barrel**: `features/management/unit-resolver.ts` (153 bytes, không file nào import) — sẽ xoá ở cleanup task.
-5. **Empty placeholder folders**: `shared/pipes/`, `shared/directives/`, `shared/forms/mappers/` — giữ tạm; xoá nếu sau Q3 2026 vẫn không có content.
+4. **Dead barrel**: `features/management/unit-resolver.ts` — ✅ **đã xoá** (Phase A, 2026-04-28). Spec file moved sang `core/services/unit-resolver.spec.ts`.
+5. **Empty placeholder folders**: `shared/pipes/`, `shared/directives/`, `core/services/ai/` — ✅ **đã xoá** (Phase A, 2026-04-28). Còn lại `shared/forms/mappers/` — giữ tạm; xoá nếu sau Q3 2026 vẫn không có content.
 6. **17/17 component hiện inline** → tách `templateUrl` + `styleUrl` (PC-1 binary, xem `coding-conventions.md` §2.2). Refactor riêng theo 3 wave; component lớn cần tách bắt buộc:
    - Wave 3 (lớn): `management.page.ts` (1163), `onboarding.page.ts` (869), `ingredient-edit-modal` (749), `dish-edit-modal` (652).
    - Wave 1+2: 13 component còn lại, từ `app.component.ts` (20) đến `bottom-sheet-picker` (153).

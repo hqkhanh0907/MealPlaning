@@ -1,9 +1,5 @@
-import type {
-  IngredientModel,
-  IngredientUnitModel,
-  UnitModel,
-} from '../../core/models/management.model';
-import { InvalidDishIngredientUnitError, resolveUnit } from '../../core/services/unit-resolver';
+import type { IngredientModel, IngredientUnitModel, UnitModel } from '../models/management.model';
+import { InvalidDishIngredientUnitError, resolveUnit } from './unit-resolver';
 
 describe('resolveUnit', () => {
   const chicken: IngredientModel = {
