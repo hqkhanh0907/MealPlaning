@@ -47,7 +47,10 @@ app-form-field {
   border: 1px solid var(--input-border-color);
   border-radius: var(--radius-sm);
   min-height: 56px;
-  background: var(--bg-card);
+  // Sage-wellness foundation: dedicated `--input-bg` cream (light: #F5F1E8,
+  // dark: #28251F = card bg). Tách khỏi `--bg-card` để không phải override
+  // theo từng theme — token-driven.
+  background: var(--input-bg);
   box-sizing: border-box;
 }
 
@@ -173,7 +176,7 @@ textarea.input-native {
 
 @media (prefers-color-scheme: dark) {
   .input-wrapper {
-    background: var(--bg-card);
+    background: var(--input-bg);
     border-color: var(--input-border-color);
   }
   .input-wrapper.invalid {

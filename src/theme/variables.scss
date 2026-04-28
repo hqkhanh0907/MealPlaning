@@ -154,6 +154,7 @@
 
   // Input-specific border (DS §8.6 — slightly darker than --border-color)
   --input-border-color: #d4ccbc;
+  --input-bg: #f5f1e8;
 
   // Macro nutrient palette (DS §2.6)
   --macro-protein: #6f8b6e; // sage
@@ -280,6 +281,7 @@
 
     // Input-specific border
     --input-border-color: #4a463e;
+    --input-bg: #28251f;
 
     // Macro (slightly brighter for dark bg)
     --macro-protein: #8aa086;
