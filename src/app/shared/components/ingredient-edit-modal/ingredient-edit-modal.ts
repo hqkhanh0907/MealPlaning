@@ -74,7 +74,13 @@ export class IngredientEditModal implements OnChanges {
   @Output() deleteRequested = new EventEmitter<void>();
 
   readonly categories = INGREDIENT_CATEGORIES;
-  showErrors = false;
+
+  /**
+   * Live error gate. Toggled to `true` on first submit attempt; templates
+   * render `field.errors()` only when this is `true`. Signal so templates
+   * pick up changes without manual change detection.
+   */
+  protected readonly showErrors = signal(false);
 
   /**
    * Internal writable signal mirroring the @Input `form` object. Signal Forms
@@ -94,7 +100,7 @@ export class IngredientEditModal implements OnChanges {
       this.formSignal.set(cloneForm(this.form));
     }
     if (changes['isOpen']?.currentValue) {
-      this.showErrors = false;
+      this.showErrors.set(false);
       // Re-mirror the parent's form when reopening even if reference unchanged.
       this.formSignal.set(cloneForm(this.form));
       queueMicrotask(() => {
@@ -121,27 +127,18 @@ export class IngredientEditModal implements OnChanges {
       }));
   }
 
-  protected nameValid(): boolean {
-    return this.formSignal().name.trim().length > 0;
-  }
-
-  protected categoryValid(): boolean {
-    return this.formSignal().category.trim().length > 0;
-  }
-
-  protected unitErrors(): string[] {
-    const errors: string[] = [];
-    const units = this.formSignal().units;
-    if (units.length === 0) {
-      errors.push('Cần ít nhất 1 đơn vị hợp lệ.');
-    }
-    if (units.length > 0 && units.filter((unit) => unit.is_default).length !== 1) {
-      errors.push('Chọn đúng 1 đơn vị mặc định trước khi lưu.');
-    }
-    if (units.some((unit) => unit.factor_to_basis <= 0)) {
-      errors.push('Mỗi đơn vị cần có quy đổi lớn hơn 0.');
-    }
-    return errors;
+  /**
+   * Aggregated unit-list errors (own errors on `units` field — empty list,
+   * default-count rule). Per-item factor errors live on each
+   * `units[i].factor_to_basis` field; templates surface them via the
+   * `errorSummary()` filter `unitListAggregateErrors()` below if needed.
+   */
+  protected unitListErrorMessages(): string[] {
+    return this.ingredientForm
+      .units()
+      .errorSummary()
+      .map((e) => e.message)
+      .filter((m): m is string => typeof m === 'string' && m.length > 0);
   }
 
   openCategoryPicker(): void {
@@ -201,10 +198,6 @@ export class IngredientEditModal implements OnChanges {
     }));
   }
 
-  isNegative(value: number | null): boolean {
-    return value !== null && value < 0;
-  }
-
   markDefault(localId: string): void {
     this.formSignal.update((v) => ({
       ...v,
@@ -237,8 +230,8 @@ export class IngredientEditModal implements OnChanges {
   }
 
   submit(): void {
-    this.showErrors = true;
-    if (!this.isValid()) {
+    this.showErrors.set(true);
+    if (!this.ingredientForm().valid()) {
       this.focusFirstInvalidField();
       return;
     }
@@ -260,29 +253,20 @@ export class IngredientEditModal implements OnChanges {
     });
   }
 
-  private isValid(): boolean {
-    return (
-      this.nameValid() &&
-      this.categoryValid() &&
-      !this.isNegative(this.formSignal().calories) &&
-      this.unitErrors().length === 0
-    );
-  }
-
   private focusFirstInvalidField(): void {
-    const v = this.formSignal();
-    const firstErrorSelector = !v.name.trim()
+    const f = this.ingredientForm;
+    const firstErrorSelector = f.name().errors().length
       ? 'input'
-      : !v.category.trim()
-        ? '.picker-trigger'
-        : this.isNegative(v.calories)
+      : f.category().errors().length
+        ? '.picker-trigger--floating'
+        : f.calories().errors().length
           ? 'input[type="number"]'
-          : this.unitErrors().length > 0
+          : f.units().errorSummary().length
             ? '.unit-empty, .unit-list'
             : null;
 
     setTimeout(() => {
-      if (!this.formSignal().name.trim()) {
+      if (f.name().errors().length) {
         this.nameInput?.nativeElement.focus();
       }
 

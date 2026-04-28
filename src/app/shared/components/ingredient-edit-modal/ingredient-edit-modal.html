@@ -21,16 +21,20 @@
           label="Tên nguyên liệu"
           inputId="ingr-field-name"
           errorId="err-ingr-name"
-          [invalid]="showErrors && !nameValid()"
-          errorMessage="Vui lòng nhập tên nguyên liệu"
+          [invalid]="showErrors() && ingredientForm.name().errors().length > 0"
+          [errorMessage]="ingredientForm.name().errors()[0]?.message ?? ''"
         >
           <input
             id="ingr-field-name"
             class="input-native"
             #nameInput
             [formField]="ingredientForm.name"
-            [attr.aria-invalid]="showErrors && !nameValid() ? 'true' : null"
-            [attr.aria-describedby]="showErrors && !nameValid() ? 'err-ingr-name' : null"
+            [attr.aria-invalid]="
+              showErrors() && ingredientForm.name().errors().length > 0 ? 'true' : null
+            "
+            [attr.aria-describedby]="
+              showErrors() && ingredientForm.name().errors().length > 0 ? 'err-ingr-name' : null
+            "
           />
         </app-form-field>
 
@@ -38,16 +42,22 @@
           label="Nhóm"
           inputId="ingr-field-category"
           errorId="err-ingr-category"
-          [invalid]="showErrors && !categoryValid()"
-          errorMessage="Vui lòng chọn nhóm nguyên liệu"
+          [invalid]="showErrors() && ingredientForm.category().errors().length > 0"
+          [errorMessage]="ingredientForm.category().errors()[0]?.message ?? ''"
         >
           <button
             type="button"
             id="ingr-field-category"
             class="picker-trigger--floating"
             (click)="openCategoryPicker()"
-            [attr.aria-invalid]="showErrors && !categoryValid() ? 'true' : null"
-            [attr.aria-describedby]="showErrors && !categoryValid() ? 'err-ingr-category' : null"
+            [attr.aria-invalid]="
+              showErrors() && ingredientForm.category().errors().length > 0 ? 'true' : null
+            "
+            [attr.aria-describedby]="
+              showErrors() && ingredientForm.category().errors().length > 0
+                ? 'err-ingr-category'
+                : null
+            "
           >
             <span>{{ formSignal().category || 'Chọn nhóm nguyên liệu' }}</span>
             <ion-icon name="chevron-down-outline" aria-hidden="true" />
@@ -78,8 +88,8 @@
           label="Calories (kcal)"
           inputId="ingr-field-calories"
           errorId="err-ingr-calories"
-          [invalid]="showErrors && isNegative(formSignal().calories)"
-          errorMessage="Calories không được nhỏ hơn 0"
+          [invalid]="showErrors() && ingredientForm.calories().errors().length > 0"
+          [errorMessage]="ingredientForm.calories().errors()[0]?.message ?? ''"
         >
           <input
             id="ingr-field-calories"
@@ -88,15 +98,24 @@
             inputmode="decimal"
             [formField]="ingredientForm.calories"
             step="0.1"
-            [attr.aria-invalid]="showErrors && isNegative(formSignal().calories) ? 'true' : null"
+            [attr.aria-invalid]="
+              showErrors() && ingredientForm.calories().errors().length > 0 ? 'true' : null
+            "
             [attr.aria-describedby]="
-              showErrors && isNegative(formSignal().calories) ? 'err-ingr-calories' : null
+              showErrors() && ingredientForm.calories().errors().length > 0
+                ? 'err-ingr-calories'
+                : null
             "
           />
         </app-form-field>
 
         <div class="nutrition-grid">
-          <app-form-field label="Protein (g)" inputId="ingr-field-protein">
+          <app-form-field
+            label="Protein (g)"
+            inputId="ingr-field-protein"
+            [invalid]="showErrors() && ingredientForm.protein().errors().length > 0"
+            [errorMessage]="ingredientForm.protein().errors()[0]?.message ?? ''"
+          >
             <input
               id="ingr-field-protein"
               class="input-native"
@@ -106,7 +125,12 @@
               step="0.1"
             />
           </app-form-field>
-          <app-form-field label="Carbs (g)" inputId="ingr-field-carbs">
+          <app-form-field
+            label="Carbs (g)"
+            inputId="ingr-field-carbs"
+            [invalid]="showErrors() && ingredientForm.carbs().errors().length > 0"
+            [errorMessage]="ingredientForm.carbs().errors()[0]?.message ?? ''"
+          >
             <input
               id="ingr-field-carbs"
               class="input-native"
@@ -116,7 +140,12 @@
               step="0.1"
             />
           </app-form-field>
-          <app-form-field label="Fat (g)" inputId="ingr-field-fat">
+          <app-form-field
+            label="Fat (g)"
+            inputId="ingr-field-fat"
+            [invalid]="showErrors() && ingredientForm.fat().errors().length > 0"
+            [errorMessage]="ingredientForm.fat().errors()[0]?.message ?? ''"
+          >
             <input
               id="ingr-field-fat"
               class="input-native"
@@ -126,7 +155,12 @@
               step="0.1"
             />
           </app-form-field>
-          <app-form-field label="Chất xơ (g)" inputId="ingr-field-fiber">
+          <app-form-field
+            label="Chất xơ (g)"
+            inputId="ingr-field-fiber"
+            [invalid]="showErrors() && ingredientForm.fiber().errors().length > 0"
+            [errorMessage]="ingredientForm.fiber().errors()[0]?.message ?? ''"
+          >
             <input
               id="ingr-field-fiber"
               class="input-native"
@@ -144,7 +178,10 @@
         </p>
 
         @if (formSignal().units.length === 0) {
-          <div class="unit-empty" [class.invalid]="showErrors && unitErrors().length > 0">
+          <div
+            class="unit-empty"
+            [class.invalid]="showErrors() && unitListErrorMessages().length > 0"
+          >
             <div class="unit-empty-title">Chưa có đơn vị nào</div>
             <div class="unit-empty-copy">
               Thêm đơn vị quen thuộc như quả, g, ml hoặc đơn vị riêng của nguyên liệu này.
@@ -154,7 +191,10 @@
             </button>
           </div>
         } @else {
-          <div class="unit-list" [class.invalid]="showErrors && unitErrors().length > 0">
+          <div
+            class="unit-list"
+            [class.invalid]="showErrors() && unitListErrorMessages().length > 0"
+          >
             @for (unit of formSignal().units; track unit.local_id; let i = $index) {
               <article class="unit-card">
                 <div class="unit-card__top">
@@ -185,6 +225,12 @@
                   <app-form-field
                     [label]="'1 đơn vị = ? ' + formSignal().nutrition_basis_unit"
                     [inputId]="'ingr-unit-factor-' + unit.local_id"
+                    [invalid]="
+                      showErrors() && ingredientForm.units[i].factor_to_basis().errors().length > 0
+                    "
+                    [errorMessage]="
+                      ingredientForm.units[i].factor_to_basis().errors()[0]?.message ?? ''
+                    "
                   >
                     <input
                       [id]="'ingr-unit-factor-' + unit.local_id"
@@ -221,9 +267,9 @@
           </button>
         }
 
-        @if (showErrors && unitErrors().length > 0) {
-          @for (error of unitErrors(); track error) {
-            <div class="field-error">{{ error }}</div>
+        @if (showErrors() && unitListErrorMessages().length > 0) {
+          @for (msg of unitListErrorMessages(); track msg) {
+            <div class="field-error">{{ msg }}</div>
           }
         }
 
