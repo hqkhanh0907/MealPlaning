@@ -7,7 +7,13 @@ describe('Native schema compatibility guard', () => {
         userVersion: 0,
         ingredientColumns: ['id', 'name', 'calories'],
         dishColumns: ['id', 'name', 'type', 'servings'],
-        dishIngredientColumns: ['id', 'dish_id', 'ingredient_id', 'amount_unit', 'normalized_amount'],
+        dishIngredientColumns: [
+          'id',
+          'dish_id',
+          'ingredient_id',
+          'amount_unit',
+          'normalized_amount',
+        ],
       }),
     ).toBeTrue();
   });
