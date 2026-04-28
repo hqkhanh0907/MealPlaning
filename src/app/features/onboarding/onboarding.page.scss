@@ -1,0 +1,197 @@
+/* ====================================================================
+   PAGE CONTAINER — DS §4 spacing: 12px top, 16px horizontal
+   ==================================================================== */
+.page-container {
+  padding: 12px 16px 16px;
+}
+.step-content {
+  max-width: 428px;
+  margin: 0 auto;
+  /* Adopt cùng cơ chế spacing với modal .form-content — flex+gap thay
+     cho margin-bottom trên từng field. Tránh inconsistency cho field
+     non-input (segment-control, radio-card, info-card) vì gap áp dụng
+     đồng đều cho mọi direct child. Title/subtitle giữ margin riêng
+     (tổng spacing tiêu đề = 24px qua .step-subtitle margin-bottom). */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ====================================================================
+   TYPOGRAPHY — matches mockup exactly
+   ==================================================================== */
+.step-title {
+  font: 700 22px/1.3 var(--ion-font-family);
+  color: var(--text-primary);
+  margin: 0 0 4px;
+  outline: none;
+}
+.step-subtitle {
+  font: 500 16px/1.4 var(--ion-font-family);
+  color: var(--text-tertiary);
+  margin: 0 0 24px;
+}
+/* .section-label sống ở src/theme/form-field.scss — dùng chung cho onboarding + modals. */
+
+/* ====================================================================
+   RADIO ITEMS — matches mockup HTML structure exactly:
+   display:flex, gap:12px, padding:12px 16px, radius:12px, mb:8px
+   ==================================================================== */
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  cursor: pointer;
+  background: var(--bg-card);
+  transition: background 0.2s var(--ease-out-quart);
+}
+
+/* Selected state — sage tint */
+.radio-item.selected {
+  background: var(--primary-50);
+}
+@media (prefers-color-scheme: dark) {
+  .radio-item {
+    background: var(--bg-card);
+  }
+  .radio-item.selected {
+    background: var(--bg-elevated);
+    box-shadow: inset 0 0 0 1px var(--ion-color-primary);
+  }
+}
+
+/* ====================================================================
+   RADIO CIRCLE removed — selected state đủ rõ qua 3 cue: bg sage tint
+   (--primary-50) + check icon bên phải + label bold. Giữ thêm
+   radio-circle = over-affordance, làm row nặng và giảm tinh tế.
+   ==================================================================== */
+
+/* ====================================================================
+   RADIO ICON — 22px, primary color (Step 1 goals only)
+   ==================================================================== */
+.radio-icon {
+  font-size: 22px;
+  color: var(--ion-color-primary);
+  flex-shrink: 0;
+}
+
+/* ====================================================================
+   RADIO LABEL — 16px/400, primary text, 700 when selected
+   ==================================================================== */
+.radio-label {
+  font: 400 16px/1.5 var(--ion-font-family);
+  color: var(--text-primary);
+  flex: 1;
+}
+.radio-item.selected .radio-label {
+  font-weight: 700;
+}
+@media (prefers-color-scheme: dark) {
+  .radio-label {
+    color: var(--text-secondary);
+  }
+}
+
+/* ====================================================================
+   CHECKMARK ICON — 22px, primary color, right side of selected item
+   ==================================================================== */
+.check-icon {
+  font-size: 22px;
+  color: var(--ion-color-primary);
+  flex-shrink: 0;
+}
+
+/* Form field styles (.input-wrapper, .input-label, .input-native,
+   .picker-trigger--floating) live in src/theme/form-field.scss —
+   the canonical floating-label pattern. See CLAUDE.md "Form Inputs". */
+
+/* SEGMENT CONTROL — §8.8, canonical sống ở src/theme/segment-control.scss
+   (.segment-control / .segment-button / .selected). Override segment-label
+   margin để hợp với nhịp 8px của step-content. */
+.segment-label {
+  display: block;
+  margin: 0 0 8px;
+}
+
+/* Section spacing — onboarding step có nhiều section liên tiếp (radio
+   group, segment, picker). Default .section-label margin-top=16px +
+   flex gap 16px = 32px, chưa đủ "thở" giữa 2 group. Bump lên 24px ⇒
+   tổng 40px khi đứng giữa các group, đủ tách nhóm.
+   Scope vào .step-content để không ảnh hưởng modal. */
+.step-content .section-label:not(.segment-label) {
+  margin-top: 24px;
+}
+
+/* ====================================================================
+   FIELD ERROR — sống ở src/theme/form-field.scss (canonical, dùng chung
+   cho onboarding + modals). Trước đây redefined inline gây drift.
+   ==================================================================== */
+
+/* ====================================================================
+   ERROR TOAST — form-level save error
+   ==================================================================== */
+.error-toast {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-xs);
+  background: rgba(var(--ion-color-danger-rgb), 0.08);
+  font-size: 13px;
+}
+
+/* ====================================================================
+   BUTTONS — CTA (secondary/orange), Outline (primary border)
+   Mockup: padding 14px, 12px radius, 16px font, weight 500
+   ==================================================================== */
+.cta-button {
+  --border-radius: var(--radius-sm);
+  --padding-top: 14px;
+  --padding-bottom: 14px;
+  margin-top: 24px;
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: none;
+  height: 48px;
+}
+
+/* Explicit disabled state — Ionic default only dims the secondary fill,
+   which still reads as "active coral" before the user has picked a goal.
+   Force a neutral surface + muted text so the CTA visibly waits for input.
+   !important is required to beat the inline color="secondary" token
+   that Ionic injects on the host. */
+.cta-button[disabled],
+.cta-button.button-disabled {
+  --background: var(--bg-muted) !important;
+  --background-hover: var(--bg-muted) !important;
+  --background-activated: var(--bg-muted) !important;
+  --background-focused: var(--bg-muted) !important;
+  --color: var(--text-tertiary) !important;
+  --box-shadow: none !important;
+  opacity: 1;
+}
+
+/* NOTE: .button-row + .btn-row (--primary/--secondary) live in
+   src/theme/button-row.scss — shared across onboarding + Phase 1. */
+
+/* ====================================================================
+   TOOLBAR — title centered (mockup spec), back button white, progress bar
+   ==================================================================== */
+ion-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* ====================================================================
+   TOOLBAR — back button white, progress bar styling
+   ==================================================================== */
+.back-button {
+  --color: #fff;
+}
+.onboarding-progress {
+  --progress-background: rgba(255, 255, 255, 0.3);
+  --buffer-background: transparent;
+  height: 4px;
+}

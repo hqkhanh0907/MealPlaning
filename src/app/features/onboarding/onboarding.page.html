@@ -1,0 +1,353 @@
+<!-- ============================== HEADER ============================== -->
+<ion-header>
+  <ion-toolbar>
+    @if (step() > 1) {
+      <ion-buttons slot="start">
+        <ion-button fill="clear" (click)="goBack()" class="back-button">
+          <ion-icon slot="icon-only" name="arrow-back-outline" />
+        </ion-button>
+      </ion-buttons>
+    }
+    <ion-title>{{ toolbarTitle() }}</ion-title>
+  </ion-toolbar>
+  <ion-progress-bar [value]="progressValue()" class="onboarding-progress" />
+</ion-header>
+
+<ion-content>
+  <div class="page-container">
+    <!-- ======================== STEP 1: MỤC TIÊU ======================== -->
+    @if (step() === 1) {
+      <div class="step-content">
+        <h1 #step1Heading class="step-title" tabindex="-1">Mục tiêu của bạn?</h1>
+        <p class="step-subtitle">Chọn 1 mục tiêu chính</p>
+
+        <div role="radiogroup" aria-label="Chọn mục tiêu">
+          <div
+            class="radio-item"
+            [class.selected]="goal() === 'lose_weight'"
+            (click)="goal.set('lose_weight')"
+            role="radio"
+            tabindex="0"
+            [attr.aria-checked]="goal() === 'lose_weight'"
+            (keydown.enter)="goal.set('lose_weight')"
+            (keydown.space)="goal.set('lose_weight'); $event.preventDefault()"
+          >
+            <ion-icon name="body-outline" class="radio-icon" />
+            <span class="radio-label">Giảm cân</span>
+            @if (goal() === 'lose_weight') {
+              <ion-icon name="checkmark" class="check-icon" />
+            }
+          </div>
+          <div
+            class="radio-item"
+            [class.selected]="goal() === 'gain_muscle'"
+            (click)="goal.set('gain_muscle')"
+            role="radio"
+            tabindex="0"
+            [attr.aria-checked]="goal() === 'gain_muscle'"
+            (keydown.enter)="goal.set('gain_muscle')"
+            (keydown.space)="goal.set('gain_muscle'); $event.preventDefault()"
+          >
+            <ion-icon name="barbell-outline" class="radio-icon" />
+            <span class="radio-label">Tăng cơ</span>
+            @if (goal() === 'gain_muscle') {
+              <ion-icon name="checkmark" class="check-icon" />
+            }
+          </div>
+          <div
+            class="radio-item"
+            [class.selected]="goal() === 'maintain'"
+            (click)="goal.set('maintain')"
+            role="radio"
+            tabindex="0"
+            [attr.aria-checked]="goal() === 'maintain'"
+            (keydown.enter)="goal.set('maintain')"
+            (keydown.space)="goal.set('maintain'); $event.preventDefault()"
+          >
+            <ion-icon name="scale-outline" class="radio-icon" />
+            <span class="radio-label">Duy trì</span>
+            @if (goal() === 'maintain') {
+              <ion-icon name="checkmark" class="check-icon" />
+            }
+          </div>
+          <div
+            class="radio-item"
+            [class.selected]="goal() === 'performance'"
+            (click)="goal.set('performance')"
+            role="radio"
+            tabindex="0"
+            [attr.aria-checked]="goal() === 'performance'"
+            (keydown.enter)="goal.set('performance')"
+            (keydown.space)="goal.set('performance'); $event.preventDefault()"
+          >
+            <ion-icon name="trophy-outline" class="radio-icon" />
+            <span class="radio-label">Tăng sức mạnh</span>
+            @if (goal() === 'performance') {
+              <ion-icon name="checkmark" class="check-icon" />
+            }
+          </div>
+        </div>
+
+        <ion-button
+          expand="block"
+          [color]="goal() ? 'secondary' : 'medium'"
+          class="cta-button"
+          [disabled]="!goal()"
+          (click)="nextFromStep1()"
+        >
+          Tiếp tục
+        </ion-button>
+      </div>
+    }
+
+    <!-- ==================== STEP 2a: THÔNG TIN CƠ THỂ ==================== -->
+    @if (step() === 2) {
+      <div class="step-content">
+        <h1 #step2aHeading class="step-title" tabindex="-1">Thông tin cơ thể</h1>
+        <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
+
+        <app-form-field
+          label="Chiều cao (cm)"
+          inputId="field-height"
+          errorId="err-height"
+          [invalid]="!!step2aErrors().heightCm"
+          [errorMessage]="step2aErrors().heightCm"
+        >
+          <input
+            #heightInput
+            id="field-height"
+            type="number"
+            inputmode="decimal"
+            class="input-native"
+            [formField]="step2aForm.heightCm"
+            step="0.1"
+            [attr.aria-invalid]="step2aErrors().heightCm ? 'true' : null"
+            [attr.aria-describedby]="step2aErrors().heightCm ? 'err-height' : null"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Cân nặng (kg)"
+          inputId="field-weight"
+          errorId="err-weight"
+          [invalid]="!!step2aErrors().weightKg"
+          [errorMessage]="step2aErrors().weightKg"
+        >
+          <input
+            #weightInput
+            id="field-weight"
+            type="number"
+            inputmode="decimal"
+            class="input-native"
+            [formField]="step2aForm.weightKg"
+            step="0.1"
+            [attr.aria-invalid]="step2aErrors().weightKg ? 'true' : null"
+            [attr.aria-describedby]="step2aErrors().weightKg ? 'err-weight' : null"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Tuổi"
+          inputId="field-age"
+          errorId="err-age"
+          [invalid]="!!step2aErrors().age"
+          [errorMessage]="step2aErrors().age"
+        >
+          <input
+            #ageInput
+            id="field-age"
+            type="number"
+            inputmode="numeric"
+            class="input-native"
+            [formField]="step2aForm.age"
+            [attr.aria-invalid]="step2aErrors().age ? 'true' : null"
+            [attr.aria-describedby]="step2aErrors().age ? 'err-age' : null"
+          />
+        </app-form-field>
+
+        <span class="section-label segment-label" [class.invalid]="step2aErrors().gender"
+          >Giới tính</span
+        >
+        <div
+          class="segment-control"
+          [class.invalid]="step2aErrors().gender"
+          role="radiogroup"
+          aria-label="Giới tính"
+          [attr.aria-invalid]="step2aErrors().gender ? 'true' : null"
+          [attr.aria-describedby]="step2aErrors().gender ? 'err-gender' : null"
+        >
+          <button
+            type="button"
+            class="segment-button"
+            [class.selected]="step2aFormSignal().gender === 'male'"
+            role="radio"
+            [attr.aria-checked]="step2aFormSignal().gender === 'male'"
+            (click)="onGenderChange('male')"
+          >
+            Nam
+          </button>
+          <button
+            type="button"
+            class="segment-button"
+            [class.selected]="step2aFormSignal().gender === 'female'"
+            role="radio"
+            [attr.aria-checked]="step2aFormSignal().gender === 'female'"
+            (click)="onGenderChange('female')"
+          >
+            Nữ
+          </button>
+        </div>
+        @if (step2aErrors().gender) {
+          <div id="err-gender" class="field-error" role="alert">
+            {{ step2aErrors().gender }}
+          </div>
+        }
+
+        <div class="button-row">
+          <ion-button fill="outline" class="btn-row btn-row--secondary" (click)="goBack()">
+            Quay lại
+          </ion-button>
+          <ion-button
+            [color]="step2aValid() ? 'secondary' : 'medium'"
+            class="btn-row btn-row--primary"
+            [disabled]="!step2aValid()"
+            (click)="nextFromStep2a()"
+          >
+            Tiếp tục
+          </ion-button>
+        </div>
+      </div>
+    }
+
+    <!-- ==================== STEP 2b: MỨC HOẠT ĐỘNG ==================== -->
+    @if (step() === 3) {
+      <div class="step-content">
+        <h1 #step2bHeading class="step-title" tabindex="-1">Mức hoạt động</h1>
+        <p class="step-subtitle">Giúp chúng tôi tính nhu cầu calo phù hợp</p>
+
+        <p class="section-label" style="margin-top: 0">Mức vận động</p>
+        <div
+          role="radiogroup"
+          aria-label="Mức vận động"
+          [attr.aria-invalid]="step2bErrors().activityLevel ? 'true' : null"
+          [attr.aria-describedby]="step2bErrors().activityLevel ? 'err-activity' : null"
+        >
+          @for (level of activityLevels; track level) {
+            <div
+              class="radio-item"
+              [class.selected]="activityLevel() === level"
+              (click)="onActivityChange(level)"
+              role="radio"
+              tabindex="0"
+              [attr.aria-checked]="activityLevel() === level"
+              (keydown.enter)="onActivityChange(level)"
+              (keydown.space)="onActivityChange(level); $event.preventDefault()"
+            >
+              <span class="radio-label">{{ ACTIVITY_LABEL_MAP[level] }}</span>
+              @if (activityLevel() === level) {
+                <ion-icon name="checkmark" class="check-icon" />
+              }
+            </div>
+          }
+        </div>
+        @if (step2bErrors().activityLevel) {
+          <div id="err-activity" class="field-error" role="alert">
+            {{ step2bErrors().activityLevel }}
+          </div>
+        }
+
+        <p class="section-label">Kinh nghiệm tập gym?</p>
+        <div role="radiogroup" aria-label="Kinh nghiệm tập gym">
+          <div
+            class="radio-item"
+            [class.selected]="gymExperience() === 'never'"
+            (click)="gymExperience.set('never')"
+            role="radio"
+            tabindex="0"
+            [attr.aria-checked]="gymExperience() === 'never'"
+            (keydown.enter)="gymExperience.set('never')"
+            (keydown.space)="gymExperience.set('never'); $event.preventDefault()"
+          >
+            <span class="radio-label">Chưa bao giờ</span>
+            @if (gymExperience() === 'never') {
+              <ion-icon name="checkmark" class="check-icon" />
+            }
+          </div>
+          <div
+            class="radio-item"
+            [class.selected]="gymExperience() === 'under_6m'"
+            (click)="gymExperience.set('under_6m')"
+            role="radio"
+            tabindex="0"
+            [attr.aria-checked]="gymExperience() === 'under_6m'"
+            (keydown.enter)="gymExperience.set('under_6m')"
+            (keydown.space)="gymExperience.set('under_6m'); $event.preventDefault()"
+          >
+            <span class="radio-label">Dưới 6 tháng</span>
+            @if (gymExperience() === 'under_6m') {
+              <ion-icon name="checkmark" class="check-icon" />
+            }
+          </div>
+          <div
+            class="radio-item"
+            [class.selected]="gymExperience() === '6m_2y'"
+            (click)="gymExperience.set('6m_2y')"
+            role="radio"
+            tabindex="0"
+            [attr.aria-checked]="gymExperience() === '6m_2y'"
+            (keydown.enter)="gymExperience.set('6m_2y')"
+            (keydown.space)="gymExperience.set('6m_2y'); $event.preventDefault()"
+          >
+            <span class="radio-label">6 tháng — 2 năm</span>
+            @if (gymExperience() === '6m_2y') {
+              <ion-icon name="checkmark" class="check-icon" />
+            }
+          </div>
+          <div
+            class="radio-item"
+            [class.selected]="gymExperience() === 'over_2y'"
+            (click)="gymExperience.set('over_2y')"
+            role="radio"
+            tabindex="0"
+            [attr.aria-checked]="gymExperience() === 'over_2y'"
+            (keydown.enter)="gymExperience.set('over_2y')"
+            (keydown.space)="gymExperience.set('over_2y'); $event.preventDefault()"
+          >
+            <span class="radio-label">Trên 2 năm</span>
+            @if (gymExperience() === 'over_2y') {
+              <ion-icon name="checkmark" class="check-icon" />
+            }
+          </div>
+        </div>
+        @if (step2bErrors().gymExperience) {
+          <div class="field-error" role="alert">{{ step2bErrors().gymExperience }}</div>
+        }
+
+        @if (saveError()) {
+          <div class="error-toast" role="alert" aria-live="assertive">
+            <ion-text color="danger">{{ saveError() }}</ion-text>
+          </div>
+        }
+
+        <div class="button-row">
+          <ion-button
+            fill="outline"
+            class="btn-row btn-row--secondary"
+            [disabled]="saving()"
+            (click)="goBack()"
+          >
+            Quay lại
+          </ion-button>
+          <ion-button
+            [color]="step2bValid() && !saving() ? 'secondary' : 'medium'"
+            class="btn-row btn-row--primary"
+            [disabled]="saving() || !step2bValid()"
+            (click)="complete()"
+          >
+            {{ saving() ? 'Đang lưu...' : 'Hoàn tất' }}
+          </ion-button>
+        </div>
+      </div>
+    }
+  </div>
+</ion-content>
