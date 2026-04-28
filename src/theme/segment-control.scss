@@ -85,3 +85,49 @@
     color: #ffffff;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────
+ * MODIFIER: .segment-control--inverse-sage
+ * ─────────────────────────────────────────────────────────────────
+ * Inverse logic for sage-wellness mockups (phase-0 onboarding gender).
+ * Track = sage tint (--primary-100), unselected button = sage text on tint,
+ * SELECTED button = WHITE pill + sage text + soft shadow.
+ *
+ * Reads as "selected option emerges from sage field" — calmer / more editorial
+ * than the default solid-sage pill. Use on cream pages where the default
+ * variant would over-power the page color (mockup phase-0 step 2a).
+ *
+ * Markup: same as canonical, just add `--inverse-sage` to container class:
+ *   <div class="segment-control segment-control--inverse-sage" role="radiogroup">
+ */
+.segment-control--inverse-sage {
+  background: var(--primary-100, #dde5d5);
+}
+
+.segment-control--inverse-sage .segment-button {
+  color: var(--ion-color-primary-shade, #54704d);
+}
+
+.segment-control--inverse-sage .segment-button.selected {
+  background: #ffffff;
+  color: var(--ion-color-primary-shade, #54704d);
+  box-shadow:
+    0 1px 2px rgba(60, 80, 60, 0.06),
+    0 4px 12px rgba(60, 80, 60, 0.08);
+  font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+  .segment-control--inverse-sage {
+    /* Dark mode dùng sage shade tối hơn cho track + sage tint sáng cho selected text */
+    background: rgba(138, 160, 134, 0.16);
+  }
+  .segment-control--inverse-sage .segment-button {
+    color: #b6c9b3;
+  }
+  .segment-control--inverse-sage .segment-button.selected {
+    background: var(--bg-card);
+    color: #b6c9b3;
+    box-shadow: var(--shadow-md);
+  }
+}
