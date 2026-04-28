@@ -81,3 +81,6 @@ src/environments/environment.local.ts
 .junie/
 .graphify_*
 .superpowers/
+
+# Hermes agent internal plans
+.hermes/
