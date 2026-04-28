@@ -5,6 +5,7 @@
   "homepage": "https://ionicframework.com/",
   "scripts": {
     "ng": "ng",
+    "qa:tap": "node scripts/qa-tap.mjs",
     "start": "ng serve",
     "build": "npm run check:guards && ng build",
     "check:guards": "npm run check:form-pattern && npm run check:pc1 && npm run check:style-2025",
@@ -72,6 +73,7 @@
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
     "angular-eslint": "^21.3.1",
+    "chrome-remote-interface": "^0.34.0",
     "eslint": "^9.16.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.29.1",

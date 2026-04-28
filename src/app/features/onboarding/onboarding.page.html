@@ -89,6 +89,7 @@
         </div>
 
         <ion-button
+          data-testid="onb-step1-continue"
           expand="block"
           [color]="goal() ? 'secondary' : 'medium'"
           class="cta-button"
@@ -116,6 +117,7 @@
           <input
             #heightInput
             id="field-height"
+            data-testid="onb-height"
             type="number"
             inputmode="decimal"
             class="input-native"
@@ -136,6 +138,7 @@
           <input
             #weightInput
             id="field-weight"
+            data-testid="onb-weight"
             type="number"
             inputmode="decimal"
             class="input-native"
@@ -156,6 +159,7 @@
           <input
             #ageInput
             id="field-age"
+            data-testid="onb-age"
             type="number"
             inputmode="numeric"
             class="input-native"
@@ -204,10 +208,16 @@
         }
 
         <div class="button-row">
-          <ion-button fill="outline" class="btn-row btn-row--secondary" (click)="goBack()">
+          <ion-button
+            data-testid="onb-step2-back"
+            fill="outline"
+            class="btn-row btn-row--secondary"
+            (click)="goBack()"
+          >
             Quay lại
           </ion-button>
           <ion-button
+            data-testid="onb-step2-continue"
             [color]="step2aValid() ? 'secondary' : 'medium'"
             class="btn-row btn-row--primary"
             [disabled]="!step2aValid()"
@@ -331,6 +341,7 @@
 
         <div class="button-row">
           <ion-button
+            data-testid="onb-step3-back"
             fill="outline"
             class="btn-row btn-row--secondary"
             [disabled]="saving()"
@@ -339,6 +350,7 @@
             Quay lại
           </ion-button>
           <ion-button
+            data-testid="onb-step3-finish"
             [color]="step2bValid() && !saving() ? 'secondary' : 'medium'"
             class="btn-row btn-row--primary"
             [disabled]="saving() || !step2bValid()"
