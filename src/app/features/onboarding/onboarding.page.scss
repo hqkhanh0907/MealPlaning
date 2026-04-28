@@ -21,7 +21,12 @@
    TYPOGRAPHY — matches mockup exactly
    ==================================================================== */
 .step-title {
-  font: 700 22px/1.3 var(--ion-font-family);
+  font-family: var(--font-display); /* Fraunces */
+  font-style: italic;
+  font-weight: 500; /* Fraunces italic 500 ~ Inter 700 visual weight */
+  font-size: 22px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
   margin: 0 0 4px;
   outline: none;
@@ -49,9 +54,17 @@
   transition: background 0.2s var(--ease-out-quart);
 }
 
-/* Selected state — sage tint */
+/* Selected state — sage tint (mockup --primary-100 for stronger contrast) */
 .radio-item.selected {
-  background: var(--primary-50);
+  background: var(--primary-100);
+}
+@media (hover: hover) {
+  .radio-item:hover {
+    background: var(--primary-50);
+  }
+  .radio-item.selected:hover {
+    background: var(--primary-100); /* selected wins */
+  }
 }
 @media (prefers-color-scheme: dark) {
   .radio-item {
@@ -149,6 +162,7 @@
   --border-radius: var(--radius-sm);
   --padding-top: 14px;
   --padding-bottom: 14px;
+  --box-shadow: 0 1px 2px rgba(196, 95, 63, 0.15), 0 8px 20px rgba(196, 95, 63, 0.25);
   margin-top: 24px;
   font-size: 16px;
   font-weight: 500;
@@ -180,8 +194,11 @@
    ==================================================================== */
 ion-title {
   text-align: center;
-  font-size: 18px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 22px;
   font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 /* ====================================================================
