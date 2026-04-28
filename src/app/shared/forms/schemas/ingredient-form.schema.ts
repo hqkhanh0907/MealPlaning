@@ -2,7 +2,7 @@
  * Signal Forms schema for the ingredient edit modal (Phase B2).
  *
  * Mirrors the validation rules previously hard-coded in
- * `IngredientEditModalComponent.isValid()` + `unitErrors`. Pure schema —
+ * `IngredientEditPage.isValid()` + `unitErrors`. Pure schema —
  * no DI, no template coupling — so the rules can be unit-tested in
  * isolation.
  *
@@ -13,7 +13,7 @@ import { applyEach, schema, validate, type ValidationError } from '@angular/form
 import type {
   IngredientEditFormValue,
   IngredientEditUnitFormValue,
-} from '../../components/ingredient-edit-modal/ingredient-edit-modal.types';
+} from '../../../features/management/ingredient-edit/ingredient-edit.types';
 
 const optionalNonNegative = (
   v: number | null,

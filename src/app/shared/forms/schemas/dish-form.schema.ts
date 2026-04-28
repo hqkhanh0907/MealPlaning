@@ -2,7 +2,7 @@
  * Signal Forms schema for the dish edit modal (Phase B3).
  *
  * Mirrors the validation rules previously hard-coded in
- * `DishEditModalComponent.isValid()` + `isServingsValid()`. Pure schema —
+ * `DishEditPage.isValid()` + `isServingsValid()`. Pure schema —
  * no DI, no template coupling — so the rules can be unit-tested in
  * isolation.
  *

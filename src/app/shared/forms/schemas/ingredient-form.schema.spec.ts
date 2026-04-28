@@ -5,7 +5,7 @@ import { form } from '@angular/forms/signals';
 import type {
   IngredientEditFormValue,
   IngredientEditUnitFormValue,
-} from '../../components/ingredient-edit-modal/ingredient-edit-modal.types';
+} from '../../../features/management/ingredient-edit/ingredient-edit.types';
 import { ingredientFormSchema } from './ingredient-form.schema';
 
 const baseUnit = (
