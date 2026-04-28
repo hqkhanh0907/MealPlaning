@@ -1,8 +1,4 @@
-import type {
-  IngredientModel,
-  IngredientUnitModel,
-  UnitModel,
-} from '../models/management.model';
+import type { IngredientModel, IngredientUnitModel, UnitModel } from '../models/management.model';
 import type { NutritionBasisUnit } from '../models/management.types';
 
 export class InvalidDishIngredientUnitError extends Error {
@@ -83,7 +79,7 @@ export function resolveUnit({
 
     if (basisUnit === 'ml' && unit.unit_type === 'mass' && unit.base_factor_g !== null) {
       return {
-        normalizedAmount: amountValue * unit.base_factor_g / ingredient.density_g_per_ml,
+        normalizedAmount: (amountValue * unit.base_factor_g) / ingredient.density_g_per_ml,
         normalizedUnit: 'ml',
         isApproximate: unit.is_approximate === 1,
         displayUnit,

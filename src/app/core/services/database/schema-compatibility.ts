@@ -20,7 +20,11 @@ export function shouldResetLegacyManagementSchema(snapshot: ManagementSchemaSnap
 
   const ingredientLooksLegacy =
     hasTable(snapshot.ingredientColumns) &&
-    !hasColumns(snapshot.ingredientColumns, ['category', 'default_entry_unit', 'nutrition_basis_unit']);
+    !hasColumns(snapshot.ingredientColumns, [
+      'category',
+      'default_entry_unit',
+      'nutrition_basis_unit',
+    ]);
 
   const dishLooksLegacy =
     hasTable(snapshot.dishColumns) && !hasColumns(snapshot.dishColumns, ['type', 'servings']);

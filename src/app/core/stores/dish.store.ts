@@ -1,6 +1,10 @@
 import { Injectable, inject, signal } from '@angular/core';
 import type { CreateDishIngredientInput } from '../repositories/dish-ingredient.repository';
-import type { CreateDishInput, DishListItem, DishWithIngredients } from '../repositories/dish.repository';
+import type {
+  CreateDishInput,
+  DishListItem,
+  DishWithIngredients,
+} from '../repositories/dish.repository';
 import { DishRepository } from '../repositories/dish.repository';
 
 @Injectable({ providedIn: 'root' })
@@ -45,7 +49,11 @@ export class DishStore {
     this.dishes.set([this.toListItem(saved), ...this.dishes()]);
   }
 
-  async edit(id: string, input: CreateDishInput, items: CreateDishIngredientInput[]): Promise<void> {
+  async edit(
+    id: string,
+    input: CreateDishInput,
+    items: CreateDishIngredientInput[],
+  ): Promise<void> {
     const saved = await this.repo.update(id, input, items);
     const nextItem = this.toListItem(saved);
     this.dishes.set(this.dishes().map((item) => (item.id === id ? nextItem : item)));

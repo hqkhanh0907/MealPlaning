@@ -55,6 +55,8 @@ export function calculateTargetProtein(weightKg: number, goal: Goal): number {
   return Math.round(weightKg * PROTEIN_MULTIPLIER[goal]);
 }
 
-export function deriveFitnessLevel(gymExperience: GymExperience): 'beginner' | 'intermediate' | 'advanced' {
+export function deriveFitnessLevel(
+  gymExperience: GymExperience,
+): 'beginner' | 'intermediate' | 'advanced' {
   return GYM_TO_LEVEL[gymExperience];
 }
