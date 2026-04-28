@@ -145,4 +145,32 @@ describe('IngredientRepository', () => {
       'ingredient-1',
     ]);
   });
+
+  describe('findRecentlyUsed', () => {
+    it('returns ingredients ordered by MRU and limited', async () => {
+      queryResponses.push([ingredientRow]);
+      queryResponses.push(unitRows);
+
+      const result = await repo.findRecentlyUsed(5);
+
+      const sqlArg = db.query.calls.argsFor(0)[0] as string;
+      expect(sqlArg).toContain('FROM ingredient i');
+      expect(sqlArg).toContain('INNER JOIN');
+      expect(sqlArg).toContain('dish_ingredient');
+      expect(sqlArg).toContain('MAX(COALESCE(d.updated_at, d.created_at))');
+      expect(sqlArg).toContain('ORDER BY recent.last_used DESC');
+      expect(sqlArg).toContain('LIMIT ?');
+      expect(db.query.calls.argsFor(0)[1]).toEqual([5]);
+      expect(result.length).toBe(1);
+      expect(result[0].id).toBe('ingredient-1');
+    });
+
+    it('returns empty array when no ingredient is used in any dish', async () => {
+      queryResponses.push([]);
+
+      const result = await repo.findRecentlyUsed(5);
+
+      expect(result).toEqual([]);
+    });
+  });
 });

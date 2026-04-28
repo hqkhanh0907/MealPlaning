@@ -61,6 +61,32 @@ export class IngredientRepository {
     return this.hydrateUnits(ingredients);
   }
 
+  /**
+   * Returns ingredients ordered by most recent dish usage (MRU).
+   * Ranks by MAX(dish.updated_at, dish.created_at) across dishes that contain
+   * the ingredient. Ingredients never used in any dish are excluded.
+   *
+   * Used by the ingredient picker in dish-edit to surface "Gần đây" section.
+   * Per design-system §8l: max 5 items, hide section when empty.
+   */
+  async findRecentlyUsed(limit: number): Promise<IngredientListItem[]> {
+    const ingredients = await this.db.query<IngredientRow>(
+      `SELECT i.*
+       FROM ingredient i
+       INNER JOIN (
+         SELECT di.ingredient_id,
+                MAX(COALESCE(d.updated_at, d.created_at)) AS last_used
+           FROM dish_ingredient di
+           INNER JOIN dish d ON d.id = di.dish_id
+         GROUP BY di.ingredient_id
+       ) recent ON recent.ingredient_id = i.id
+       ORDER BY recent.last_used DESC
+       LIMIT ?`,
+      [limit],
+    );
+    return this.hydrateUnits(ingredients);
+  }
+
   async getById(id: string): Promise<IngredientListItem | null> {
     const ingredient = await this.db.getOne<IngredientRow>(
       'SELECT * FROM ingredient WHERE id = ?',
