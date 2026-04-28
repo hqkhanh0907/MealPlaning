@@ -140,6 +140,23 @@ export class DishRepository {
     await this.db.execute('DELETE FROM dish WHERE id = ?', [id]);
   }
 
+/**
+   * Returns all dishes that contain the given ingredient. Used by the
+   * "Đang dùng trong N món" sheet on the ingredient-edit page so the user
+   * can see which dishes will be affected before deleting/editing the
+   * ingredient. Sorted by dish name ASC.
+   */
+  async findDishesUsingIngredient(ingredientId: string): Promise<DishListItem[]> {
+    return this.db.query<DishListItem>(
+      `SELECT DISTINCT d.*
+       FROM dish_with_totals d
+       INNER JOIN dish_ingredient di ON di.dish_id = d.id
+       WHERE di.ingredient_id = ?
+       ORDER BY d.name COLLATE NOCASE ASC`,
+      [ingredientId],
+    );
+  }
+
   async countReferences(id: string): Promise<number> {
     const row = await this.db.getOne<{ ref_count: number }>(
       'SELECT COUNT(*) AS ref_count FROM planned_dish WHERE dish_id = ?',

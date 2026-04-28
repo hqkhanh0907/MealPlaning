@@ -110,4 +110,32 @@ describe('DishRepository', () => {
     const paramsWithTag = insertArgsWithTag[1] as readonly unknown[];
     expect(paramsWithTag[paramsWithTag.length - 1]).toBe('breakfast');
   });
+
+  describe('findDishesUsingIngredient', () => {
+    it('queries dish_with_totals joined to dish_ingredient sorted by name asc', async () => {
+      const fakeRows = [
+        { id: 'dish-1', name: 'Bún bò' },
+        { id: 'dish-2', name: 'Cơm gà' },
+      ];
+      db.query.and.resolveTo(fakeRows as never);
+
+      const result = await repo.findDishesUsingIngredient('ingredient-x');
+
+      expect(db.query).toHaveBeenCalled();
+      const args = db.query.calls.mostRecent().args;
+      const sql = args[0] as string;
+      const params = args[1] as readonly unknown[] | undefined;
+      expect(sql).toContain('FROM dish_with_totals');
+      expect(sql).toContain('INNER JOIN dish_ingredient');
+      expect(sql).toContain('ORDER BY d.name COLLATE NOCASE ASC');
+      expect(params).toEqual(['ingredient-x']);
+      expect(result.length).toBe(2);
+    });
+
+    it('returns empty array when ingredient is not used in any dish', async () => {
+      db.query.and.resolveTo([] as never);
+      const result = await repo.findDishesUsingIngredient('ingredient-orphan');
+      expect(result).toEqual([]);
+    });
+  });
 });
