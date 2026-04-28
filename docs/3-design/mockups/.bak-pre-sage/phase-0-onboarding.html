@@ -10,30 +10,30 @@
      ========================================================================= */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
     padding: 24px;
     line-height: 1.6;
     transition: background 0.3s, color 0.3s;
   }
-  body.light { background: #F0EAE0; color: #1A1612; }
-  body.dark  { background: #1A1612; color: #ffffff; }
+  body.light { background: #E2E4EC; color: #1A1A2E; }
+  body.dark  { background: #1A1A2E; color: #ffffff; }
 
   h1.page-title { text-align: center; margin-bottom: 4px; font-size: 24px; font-weight: 700; }
   .page-subtitle { text-align: center; margin-bottom: 20px; font-size: 14px; }
-  body.light .page-subtitle { color: #6B6557; }
-  body.dark  .page-subtitle { color: #C9C2B4; }
+  body.light .page-subtitle { color: #5F6575; }
+  body.dark  .page-subtitle { color: #A8AAB4; }
 
   /* Theme toggle */
   .theme-toggle { text-align: center; margin-bottom: 24px; }
   .theme-toggle button {
-    padding: 8px 20px; border: 2px solid #6B8E6F; border-radius: 8px;
+    padding: 8px 20px; border: 2px solid #2196F3; border-radius: 8px;
     background: transparent; font-size: 14px; font-weight: 500;
     cursor: pointer; margin: 0 4px; transition: all 0.2s;
   }
-  body.light .theme-toggle button { color: #6B8E6F; }
-  body.dark  .theme-toggle button { color: #8AA086; border-color: #8AA086; }
-  body.light .theme-toggle button.active { background: #6B8E6F; color: #fff; }
-  body.dark  .theme-toggle button.active { background: #8AA086; color: #14110E; }
+  body.light .theme-toggle button { color: #2196F3; }
+  body.dark  .theme-toggle button { color: #42a5f5; border-color: #42a5f5; }
+  body.light .theme-toggle button.active { background: #2196F3; color: #fff; }
+  body.dark  .theme-toggle button.active { background: #42a5f5; color: #121218; }
 
   /* =========================================================================
      PHONE FRAMES
@@ -46,8 +46,8 @@
   .screen-wrapper { text-align: center; }
   .screen-label { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
   .screen-desc { font-size: 12px; margin-bottom: 12px; }
-  body.light .screen-desc { color: #6B6557; }
-  body.dark  .screen-desc { color: #C9C2B4; }
+  body.light .screen-desc { color: #5F6575; }
+  body.dark  .screen-desc { color: #A8AAB4; }
 
   .phone {
     width: 375px; height: 812px;
@@ -56,8 +56,8 @@
     box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     position: relative; display: flex; flex-direction: column;
   }
-  body.light .phone { border: 3px solid #D6CCB8; }
-  body.dark  .phone { border: 3px solid #4A463E; }
+  body.light .phone { border: 3px solid #C8CBD4; }
+  body.dark  .phone { border: 3px solid #444850; }
 
   /* Status bar */
   .status-bar {
@@ -75,9 +75,9 @@
     color: #fff; position: relative;
   }
   body.light .status-bar,
-  body.light .toolbar { background: #6B8E6F; }
+  body.light .toolbar { background: #2196f3; }
   body.dark  .status-bar,
-  body.dark  .toolbar { background: #4A6B4E; }
+  body.dark  .toolbar { background: #1565c0; }
 
   .toolbar-title { font-size: 20px; font-weight: 500; flex: 1; }
   .toolbar-back {
@@ -104,29 +104,29 @@
     flex: 1; padding: 12px 16px 16px; overflow-y: auto;
     text-align: left;
   }
-  body.light .content { background: #F7F2EA; }
-  body.dark  .content { background: #14110E; }
+  body.light .content { background: #F5F7FA; }
+  body.dark  .content { background: #121218; }
 
   /* Typography — matches onboarding.page.ts styles */
   .step-title {
     font-size: 22px; font-weight: 700; line-height: 1.3;
     margin-bottom: 4px;
   }
-  body.light .step-title { color: #1A1612; }
+  body.light .step-title { color: #1A1A2E; }
   body.dark  .step-title { color: #fff; }
 
   .step-subtitle {
     font-size: 16px; font-weight: 500; line-height: 1.4;
     margin-bottom: 24px;
   }
-  body.light .step-subtitle { color: #6B6557; }
-  body.dark  .step-subtitle { color: #C9C2B4; }
+  body.light .step-subtitle { color: #5F6575; }
+  body.dark  .step-subtitle { color: #A8AAB4; }
 
   .section-label {
     font-size: 14px; font-weight: 600; line-height: 1.4;
     margin-top: 16px; margin-bottom: 8px;
   }
-  body.light .section-label { color: #1A1612; }
+  body.light .section-label { color: #1A1A2E; }
   body.dark  .section-label { color: #fff; }
 
   /* =========================================================================
@@ -139,29 +139,29 @@
     transition: background 0.2s;
   }
   body.light .radio-item { background: #fff; }
-  body.dark  .radio-item { background: #28251F; }
-  body.light .radio-item:hover { background: #E5EAE3; }
-  body.dark  .radio-item:hover { background: #34302A; }
+  body.dark  .radio-item { background: #1D1F26; }
+  body.light .radio-item:hover { background: #E3F2FD; }
+  body.dark  .radio-item:hover { background: #2C2E36; }
 
   /* Radio circle — triple affordance: circle (left) + bg highlight + checkmark (right) */
   .radio-circle {
     width: 18px; height: 18px;
     border-radius: 50%;
-    border: 2px solid #D6CCB8;
+    border: 2px solid #C8CBD4;
     flex-shrink: 0;
     position: relative;
     box-sizing: border-box;
   }
   body.dark .radio-circle {
-    border-color: #6B6557;
+    border-color: #5F6575;
   }
   .radio-item.selected .radio-circle {
-    background: #6B8E6F;
-    border-color: #6B8E6F;
+    background: #2196F3;
+    border-color: #2196F3;
   }
   body.dark .radio-item.selected .radio-circle {
-    background: #8AA086;
-    border-color: #8AA086;
+    background: #42a5f5;
+    border-color: #42a5f5;
   }
   .radio-item.selected .radio-circle::after {
     content: '';
@@ -176,19 +176,19 @@
   .radio-icon {
     width: 22px; height: 22px; flex-shrink: 0;
   }
-  body.light .radio-icon { color: #6B8E6F; }
-  body.dark  .radio-icon { color: #8AA086; }
+  body.light .radio-icon { color: #2196f3; }
+  body.dark  .radio-icon { color: #42a5f5; }
   .radio-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 32; stroke-linecap: round; stroke-linejoin: round; }
 
   .radio-label {
     font-size: 16px; font-weight: 400; flex: 1;
   }
-  body.light .radio-label { color: #1A1612; }
-  body.dark  .radio-label { color: #E5DED0; }
+  body.light .radio-label { color: #1A1A2E; }
+  body.dark  .radio-label { color: #E0E0E8; }
 
   /* Selected item highlight */
-  body.light .radio-item.selected { background: #E5EAE3; }
-  body.dark  .radio-item.selected { background: #2A3F2D; }
+  body.light .radio-item.selected { background: #E3F2FD; }
+  body.dark  .radio-item.selected { background: #1a237e; }
 
   /* Checkmark icon for selected radio items */
   .radio-check {
@@ -199,8 +199,8 @@
     display: flex;
     align-items: center; justify-content: center;
   }
-  body.light .radio-check { color: #6B8E6F; }
-  body.dark  .radio-check { color: #8AA086; }
+  body.light .radio-check { color: #2196F3; }
+  body.dark  .radio-check { color: #42A5F5; }
   .radio-check svg {
     width: 22px; height: 22px; fill: none; stroke: currentColor;
     stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round;
@@ -217,26 +217,26 @@
     border: 1px solid; border-radius: 12px;
     min-height: 56px;
   }
-  body.light .input-wrapper { border-color: #D6CCB8; background: #fff; }
-  body.dark  .input-wrapper { border-color: #4A463E; background: #28251F; }
+  body.light .input-wrapper { border-color: #C8CBD4; background: #fff; }
+  body.dark  .input-wrapper { border-color: #444850; background: #1D1F26; }
 
-  .input-wrapper.invalid { border-color: #B5483A !important; }
-  body.dark .input-wrapper.invalid { border-color: #C45F3F !important; }
+  .input-wrapper.invalid { border-color: #F44336 !important; }
+  body.dark .input-wrapper.invalid { border-color: #EF5350 !important; }
 
   .input-label {
     position: absolute; top: 6px; left: 16px;
     font-size: 12px; font-weight: 400;
   }
-  body.light .input-label { color: #6B6557; }
-  body.dark  .input-label { color: #C9C2B4; }
-  .input-label.invalid { color: #B5483A; }
-  body.dark .input-label.invalid { color: #C45F3F; }
+  body.light .input-label { color: #5F6575; }
+  body.dark  .input-label { color: #A8AAB4; }
+  .input-label.invalid { color: #F44336; }
+  body.dark .input-label.invalid { color: #EF5350; }
 
   .input-value {
     font-size: 16px; font-weight: 400; min-height: 24px;
     font-variant-numeric: tabular-nums;
   }
-  body.light .input-value { color: #1A1612; }
+  body.light .input-value { color: #1A1A2E; }
   body.dark  .input-value { color: #fff; }
   .input-value.placeholder { color: transparent; }
 
@@ -245,35 +245,35 @@
     position: relative; padding: 20px 16px 8px;
     border: 1px solid; border-radius: 12px; display: flex; align-items: center;
   }
-  body.light .select-wrapper { border-color: #D6CCB8; background: #fff; }
-  body.dark  .select-wrapper { border-color: #4A463E; background: #28251F; }
-  .select-wrapper.invalid { border-color: #B5483A !important; }
-  body.dark .select-wrapper.invalid { border-color: #C45F3F !important; }
+  body.light .select-wrapper { border-color: #C8CBD4; background: #fff; }
+  body.dark  .select-wrapper { border-color: #444850; background: #1D1F26; }
+  .select-wrapper.invalid { border-color: #F44336 !important; }
+  body.dark .select-wrapper.invalid { border-color: #EF5350 !important; }
 
   .select-arrow {
     width: 16px; height: 16px; margin-left: auto;
   }
-  body.light .select-arrow { color: #6B6557; }
-  body.dark  .select-arrow { color: #C9C2B4; }
+  body.light .select-arrow { color: #5F6575; }
+  body.dark  .select-arrow { color: #A8AAB4; }
 
   /* Segment control (binary choice, §8.8) */
   .segment-control {
     display: flex; padding: 4px; border-radius: 12px;
     gap: 4px;
   }
-  body.light .segment-control { background: #F0EAE0; }
-  body.dark  .segment-control { background: #28251F; }
-  .segment-control.invalid { box-shadow: 0 0 0 1px #B5483A inset; }
-  body.dark .segment-control.invalid { box-shadow: 0 0 0 1px #C45F3F inset; }
+  body.light .segment-control { background: #EEF1F6; }
+  body.dark  .segment-control { background: #2A2D35; }
+  .segment-control.invalid { box-shadow: 0 0 0 1px #F44336 inset; }
+  body.dark .segment-control.invalid { box-shadow: 0 0 0 1px #EF5350 inset; }
   .segment-button {
     flex: 1; min-height: 44px; border: 0; background: transparent;
     font-size: 14px; font-weight: 500; border-radius: 8px;
     cursor: pointer; transition: background .15s, color .15s;
   }
-  body.light .segment-button { color: #6B6557; }
-  body.dark  .segment-button { color: #C9C2B4; }
-  body.light .segment-button.selected { background: #fff; color: #6B8E6F; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-  body.dark  .segment-button.selected { background: #28251F; color: #8AA086; }
+  body.light .segment-button { color: #5F6575; }
+  body.dark  .segment-button { color: #A8AAB4; }
+  body.light .segment-button.selected { background: #fff; color: #2196F3; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  body.dark  .segment-button.selected { background: #1D1F26; color: #42A5F5; }
 
   /* =========================================================================
      FIELD ERROR — 12px, danger color
@@ -282,16 +282,16 @@
     font-size: 12px; font-weight: 400; line-height: 1.4;
     padding: 4px 4px 0; margin-bottom: 4px;
   }
-  body.light .field-error { color: #B5483A; }
-  body.dark  .field-error { color: #C45F3F; }
+  body.light .field-error { color: #F44336; }
+  body.dark  .field-error { color: #EF5350; }
 
   /* Form-level error toast */
   .error-toast {
     margin-top: 8px; padding: 8px 12px; border-radius: 8px;
     font-size: 13px; line-height: 1.5;
   }
-  body.light .error-toast { background: rgba(244,67,54,0.08); color: #B5483A; }
-  body.dark  .error-toast { background: rgba(239,83,80,0.12); color: #C45F3F; }
+  body.light .error-toast { background: rgba(244,67,54,0.08); color: #F44336; }
+  body.dark  .error-toast { background: rgba(239,83,80,0.12); color: #EF5350; }
 
   /* =========================================================================
      BUTTONS — CTA orange, outline primary
@@ -302,8 +302,8 @@
     cursor: pointer; margin-top: 24px;
     display: flex; align-items: center; justify-content: center;
   }
-  body.light .btn-cta { background: #C9A227; }
-  body.dark  .btn-cta { background: #D9A857; color: #14110E; }
+  body.light .btn-cta { background: #FF9800; }
+  body.dark  .btn-cta { background: #FFB74D; color: #121218; }
   .btn-cta.disabled { opacity: 0.5; pointer-events: none; }
 
   .button-row {
@@ -317,8 +317,8 @@
     cursor: pointer; background: transparent;
     display: flex; align-items: center; justify-content: center;
   }
-  body.light .btn-outline { border: 2px solid #6B8E6F; color: #6B8E6F; }
-  body.dark  .btn-outline { border: 2px solid #8AA086; color: #8AA086; }
+  body.light .btn-outline { border: 2px solid #2196f3; color: #2196f3; }
+  body.dark  .btn-outline { border: 2px solid #42a5f5; color: #42a5f5; }
   .btn-outline.disabled { opacity: 0.5; pointer-events: none; }
 
   /* =========================================================================
@@ -328,50 +328,20 @@
     margin-top: 40px; padding: 20px;
     border-radius: 12px; max-width: 1600px; margin-left: auto; margin-right: auto;
   }
-  body.light .spec-notes { background: #EFE4D0; border: 1px solid #E3BB7A; }
-  body.dark  .spec-notes { background: #2D2A1F; border: 1px solid #5C4623; }
+  body.light .spec-notes { background: #fff3e0; border: 1px solid #ffcc80; }
+  body.dark  .spec-notes { background: #2e2e1e; border: 1px solid #5a5020; }
   .spec-notes h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
   .spec-notes table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .spec-notes th, .spec-notes td { padding: 6px 10px; text-align: left; border-bottom: 1px solid; }
-  body.light .spec-notes th, body.light .spec-notes td { border-color: #EFE4D0; }
-  body.dark  .spec-notes th, body.dark  .spec-notes td { border-color: #5C4623; }
+  body.light .spec-notes th, body.light .spec-notes td { border-color: #ffe0b2; }
+  body.dark  .spec-notes th, body.dark  .spec-notes td { border-color: #5a5020; }
   .spec-notes th { font-weight: 600; }
-  body.light .spec-notes th { color: #C45F3F; }
-  body.dark  .spec-notes th { color: #D9A857; }
+  body.light .spec-notes th { color: #E65100; }
+  body.dark  .spec-notes th { color: #FFB74D; }
   .spec-notes code { font-family: 'Fira Code', monospace; font-size: 12px; padding: 1px 4px; border-radius: 3px; }
-  body.light .spec-notes code { background: #EFE4D0; }
-  body.dark  .spec-notes code { background: #3E3A33; }
-
-/* ---- Round 2: dialog ghost button + tertiary contrast ---- */
-.dialog-btn-cancel, .dlg-btn-cancel, .btn-ghost, .btn-secondary,
-button.cancel, .alert-btn-cancel, button[class*="cancel"]:not(.fab):not(.btn-cta),
-.bs-btn-secondary, .bs-btn.bs-btn-secondary, .bs-btn-cancel,
-.modal-cancel, .sheet-cancel {
-  background: var(--sage-card-soft, #F0EAE0) !important;
-  color: var(--sage-ink, #2D2A1F) !important;
-  border: 1px solid var(--sage-line-strong, #D6CCB8) !important;
-  font-weight: 600 !important;
-}
-body.dark .dialog-btn-cancel, body.dark .btn-ghost {
-  background: #34302A !important; color: #F5F1E8 !important; border-color: #4A463E !important;
-}
-
-/* Tertiary text — bump contrast on warm cream */
-:root { --text-tertiary: #5A5346 !important; }
-.text-tertiary, .caption, .meta, .servings, .result-count,
-small, .small, .sub, .subtle { color: #5A5346 !important; }
-body.dark :root { --text-tertiary: #C9C2B4 !important; }
-body.dark .text-tertiary, body.dark .caption, body.dark .meta,
-body.dark .servings, body.dark .result-count, body.dark small,
-body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important; }
-
-/* FAB icon contrast — ensure white icon on coral */
-.fab svg, .fab .icon, .fab i, .fab span { color: #FFFCF6 !important; fill: #FFFCF6 !important; }
-
+  body.light .spec-notes code { background: #fff8e1; }
+  body.dark  .spec-notes code { background: #3e3e1e; }
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600;1,9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="light">
 
@@ -939,20 +909,20 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
   <h2>📐 Design Spec Notes</h2>
   <table>
     <tr><th>Token</th><th>Light</th><th>Dark</th><th>Source</th></tr>
-    <tr><td>Toolbar bg</td><td><code>#6B8E6F</code></td><td><code>#4A6B4E</code></td><td><code>--ion-toolbar-background</code></td></tr>
-    <tr><td>CTA button</td><td><code>#C9A227</code> orange</td><td><code>#D9A857</code> light orange</td><td><code>--ion-color-secondary</code> via <code>color="secondary"</code></td></tr>
-    <tr><td>Page bg</td><td><code>#F7F2EA</code></td><td><code>#14110E</code></td><td><code>--ion-background-color</code></td></tr>
-    <tr><td>Card / Item bg</td><td><code>#fff</code></td><td><code>#28251F</code></td><td><code>--bg-card</code></td></tr>
+    <tr><td>Toolbar bg</td><td><code>#2196F3</code></td><td><code>#1565C0</code></td><td><code>--ion-toolbar-background</code></td></tr>
+    <tr><td>CTA button</td><td><code>#FF9800</code> orange</td><td><code>#FFB74D</code> light orange</td><td><code>--ion-color-secondary</code> via <code>color="secondary"</code></td></tr>
+    <tr><td>Page bg</td><td><code>#F5F7FA</code></td><td><code>#121218</code></td><td><code>--ion-background-color</code></td></tr>
+    <tr><td>Card / Item bg</td><td><code>#fff</code></td><td><code>#1D1F26</code></td><td><code>--bg-card</code></td></tr>
     <tr><td>Title</td><td colspan="2">22px / 700 / 1.3</td><td>DS headline</td></tr>
     <tr><td>Subtitle</td><td colspan="2">16px / 500 / 1.4</td><td>DS subtitle</td></tr>
     <tr><td>Section label</td><td colspan="2">14px / 600 / 1.4</td><td>DS section</td></tr>
-    <tr><td>Field error</td><td><code>#B5483A</code> 12px</td><td><code>#C45F3F</code> 12px</td><td><code>--ion-color-danger</code></td></tr>
+    <tr><td>Field error</td><td><code>#F44336</code> 12px</td><td><code>#EF5350</code> 12px</td><td><code>--ion-color-danger</code></td></tr>
     <tr><td>Radio radius</td><td colspan="2">12px</td><td><code>--radius-sm</code></td></tr>
     <tr><td>Button radius</td><td colspan="2">12px</td><td><code>--radius-sm</code></td></tr>
     <tr><td>Progress bar</td><td colspan="2">4px, white track</td><td><code>ion-progress-bar</code></td></tr>
-    <tr><td>Selected bg</td><td><code>#E5EAE3</code></td><td><code>#2A3F2D</code></td><td><code>--primary-50</code> / custom dark</td></tr>
+    <tr><td>Selected bg</td><td><code>#E3F2FD</code></td><td><code>#1A237E</code></td><td><code>--primary-50</code> / custom dark</td></tr>
     <tr><td>radio-check</td><td colspan="2">22px, --primary color</td><td>Checkmark icon on selected radio items (A11y enhancement)</td></tr>
-    <tr><td>radio-circle</td><td>18px, border <code>#D6CCB8</code></td><td>18px, border <code>#6B6557</code></td><td>Unselected: empty circle. Selected: filled <code>--primary</code> + 8px white dot center</td></tr>
+    <tr><td>radio-circle</td><td>18px, border <code>#C8CBD4</code></td><td>18px, border <code>#5F6575</code></td><td>Unselected: empty circle. Selected: filled <code>--primary</code> + 8px white dot center</td></tr>
     <tr><td>Easing — micro</td><td colspan="2"><code>cubic-bezier(0.25, 1, 0.5, 1)</code> 200ms</td><td>Radio select, progress bar fill, toggle</td></tr>
     <tr><td>Easing — snappy</td><td colspan="2"><code>cubic-bezier(0.16, 1, 0.3, 1)</code> 150ms</td><td>CTA button press, step transition</td></tr>
     <tr><td>Keyboard types</td><td colspan="2"><code>inputmode="decimal"</code></td><td>Weight (kg), height (cm) fields. Age: <code>inputmode="numeric"</code>. Triggers numeric keyboard on mobile</td></tr>
@@ -964,7 +934,7 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
   <table>
     <tr><th>State</th><th>Step 1</th><th>Step 2a</th><th>Step 2b</th></tr>
     <tr><td>Default</td><td>Screen 1: empty radio group, CTA disabled, radio circles empty</td><td>Screen 3: empty body info fields</td><td>Screen 6: empty activity fields</td></tr>
-    <tr><td>Hover</td><td>Radio item bg → <code>#E5EAE3</code></td><td>Same on inputs</td><td>Same on radio items</td></tr>
+    <tr><td>Hover</td><td>Radio item bg → <code>#E3F2FD</code></td><td>Same on inputs</td><td>Same on radio items</td></tr>
     <tr><td>Active/Selected</td><td>Screen 2: radio circle filled + bg highlight + checkmark ✓, CTA enabled</td><td>Screen 4: filled body info</td><td>Screen 7: filled activity + gym highlight</td></tr>
     <tr><td>Focus</td><td><code>tabindex="-1"</code> on heading for a11y</td><td>Focus first invalid field on error</td><td>Focus first invalid field on error</td></tr>
     <tr><td>Disabled</td><td>Screen 1: CTA button 50% opacity until selection</td><td>—</td><td>Screen 9: buttons 50% opacity while saving</td></tr>
@@ -1013,82 +983,5 @@ function setTheme(theme) {
 }
 </script>
 
-
-<!-- SAGE_OVERRIDE_INJECTED -->
-<style>
-/* ====================================================================
-   SAGE WELLNESS DNA — Visual override v2 (Direction 03 Lifesum Sage)
-   Appended 2026-04-28. Token source:
-   docs/3-design/explorations/2026-color-directions/03-sage-suite/_tokens.css
-   ==================================================================== */
-:root{
-  --sage-cream:#F7F2EA; --sage-card:#FFFFFF; --sage-card-soft:#F0EAE0;
-  --sage-elev:#FFFCF6;  --sage-ink:#2D2A1F; --sage-ink-2:#6B6557; --sage-ink-3:#A09A8B;
-  --sage-line:#E5DED0;  --sage-line-strong:#D6CCB8;
-  --sage-primary:#6B8E6F; --sage-primary-deep:#4A6B4E;
-  --sage-primary-soft:#D4DFCE; --sage-primary-ink:#2A3F2D;
-  --sage-coral:#E07856; --sage-coral-deep:#C45F3F;
-  --sage-coral-soft:#F5DCD0; --sage-coral-ink:#5A2A18;
-  --sage-gold:#B89968; --sage-gold-soft:#EFE4D0; --sage-gold-ink:#5C4623;
-  --sage-warn:#C9A227; --sage-danger:#B5483A;
-  --sage-macro-p:#6B8E6F; --sage-macro-c:#C99B6E; --sage-macro-f:#E07856;
-  --sage-track:#F0E9DA;
-  --sage-shadow-cta:0 1px 2px rgba(196,95,63,.15),0 8px 20px rgba(196,95,63,.25);
-}
-
-/* Body / root family — Inter */
-html, body, body.light, body.dark {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
-}
-body, body.light { background: var(--sage-cream) !important; color: var(--sage-ink) !important; }
-body.dark { background: #1A1612 !important; color: #F5F1E8 !important; }
-
-/* Display type — Fraunces italic for titles, big numbers, dish/ingredient names */
-.page-title, h1.page-title, .toolbar-title, .step-title, .hero-title,
-.dish-name, .ingredient-name, .dn, .hdr-title, .kcal, .big-number,
-.calorie-number, .number-display, .stat-value, .calorie-hero,
-.cal-value, .kcal-value, .dialog-title, .empty-title,
-.ing-name, .dish-title, .name, .item-name, .field-label-hero {
-  font-family: 'Fraunces', 'Playfair Display', Georgia, serif !important;
-  font-style: italic !important;
-  font-weight: 500 !important;
-  letter-spacing: -0.02em !important;
-}
-
-/* Toolbar title — slightly bigger */
-.toolbar-title { font-size: 22px !important; }
-
-/* Mono kept for clock/timestamps */
-code, pre, .mono, [class*="mono"]{ font-family: ui-monospace,'SF Mono',Menlo,monospace !important; font-style: normal !important; }
-
-/* ---- CORAL CTA enforcement ----
-   Original mockups used #FF9800 (Material orange) for FAB / .btn-cta etc.
-   The hex sweep mapped it to warm gold #C9A227, which is too washed-out for
-   primary action. Force the canonical CTA components to coral here. */
-.fab, .fab-expanded, .btn-cta, .btn-empty-cta, .bs-btn-add,
-.btn-primary, button.cta, .cta-button, .save-btn, .submit-btn,
-.btn-confirm, .btn-save {
-  background: var(--sage-coral) !important;
-  color: #FFFCF6 !important;
-  box-shadow: var(--sage-shadow-cta) !important;
-  border-color: var(--sage-coral) !important;
-}
-body.light .fab, body.light .fab-expanded,
-body.light .btn-cta, body.light .btn-empty-cta { background: var(--sage-coral) !important; }
-body.dark .fab, body.dark .fab-expanded,
-body.dark .btn-cta, body.dark .btn-empty-cta {
-  background: #E8A287 !important; color: #1A1612 !important;
-}
-
-/* CTA pressed/hover */
-.fab:hover, .btn-cta:hover, .btn-empty-cta:hover { background: var(--sage-coral-deep) !important; }
-
-/* Phone shell — warm tones */
-.phone { box-shadow: 0 0 0 3px var(--sage-line-strong), 0 40px 80px -20px rgba(45,42,31,.18) !important; }
-body.dark .phone { box-shadow: 0 0 0 3px #4A463E, 0 40px 80px -20px rgba(0,0,0,.5) !important; }
-
-/* Hide native scrollbars in phone frames */
-.phone *::-webkit-scrollbar { display: none; }
-</style>
 </body>
 </html>

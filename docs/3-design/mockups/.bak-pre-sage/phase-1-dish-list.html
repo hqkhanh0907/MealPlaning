@@ -10,30 +10,30 @@
      ========================================================================= */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
     padding: 24px;
     line-height: 1.6;
     transition: background 0.3s, color 0.3s;
   }
-  body.light { background: #F0EAE0; color: #1A1612; }
-  body.dark  { background: #1A1612; color: #ffffff; }
+  body.light { background: #E2E4EC; color: #1A1A2E; }
+  body.dark  { background: #1A1A2E; color: #ffffff; }
 
   h1.page-title { text-align: center; margin-bottom: 4px; font-size: 24px; font-weight: 700; }
   .page-subtitle { text-align: center; margin-bottom: 20px; font-size: 14px; }
-  body.light .page-subtitle { color: #6B6557; }
-  body.dark  .page-subtitle { color: #C9C2B4; }
+  body.light .page-subtitle { color: #5F6575; }
+  body.dark  .page-subtitle { color: #A8AAB4; }
 
   /* Theme toggle */
   .theme-toggle { text-align: center; margin-bottom: 24px; }
   .theme-toggle button {
-    padding: 8px 20px; border: 2px solid #6B8E6F; border-radius: 8px;
+    padding: 8px 20px; border: 2px solid #2196F3; border-radius: 8px;
     background: transparent; font-size: 14px; font-weight: 500;
     cursor: pointer; margin: 0 4px; transition: all 0.2s;
   }
-  body.light .theme-toggle button { color: #6B8E6F; }
-  body.dark  .theme-toggle button { color: #8AA086; border-color: #8AA086; }
-  body.light .theme-toggle button.active { background: #6B8E6F; color: #fff; }
-  body.dark  .theme-toggle button.active { background: #8AA086; color: #14110E; }
+  body.light .theme-toggle button { color: #2196F3; }
+  body.dark  .theme-toggle button { color: #42a5f5; border-color: #42a5f5; }
+  body.light .theme-toggle button.active { background: #2196F3; color: #fff; }
+  body.dark  .theme-toggle button.active { background: #42a5f5; color: #121218; }
 
   /* =========================================================================
      PHONE FRAMES
@@ -46,8 +46,8 @@
   .screen-wrapper { text-align: center; }
   .screen-label { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
   .screen-desc { font-size: 12px; margin-bottom: 12px; }
-  body.light .screen-desc { color: #6B6557; }
-  body.dark  .screen-desc { color: #C9C2B4; }
+  body.light .screen-desc { color: #5F6575; }
+  body.dark  .screen-desc { color: #A8AAB4; }
 
   .phone {
     width: 375px; height: 812px;
@@ -56,8 +56,8 @@
     box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     position: relative; display: flex; flex-direction: column;
   }
-  body.light .phone { border: 3px solid #D6CCB8; }
-  body.dark  .phone { border: 3px solid #4A463E; }
+  body.light .phone { border: 3px solid #C8CBD4; }
+  body.dark  .phone { border: 3px solid #444850; }
 
   /* Status bar */
   .status-bar {
@@ -65,8 +65,8 @@
     display: flex; justify-content: space-between; align-items: center;
     font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0;
   }
-  body.light .status-bar { background: #5A745A; }
-  body.dark  .status-bar { background: #2A3F2D; }
+  body.light .status-bar { background: #1976D2; }
+  body.dark  .status-bar { background: #0D47A1; }
 
   /* =========================================================================
      TOOLBAR
@@ -76,8 +76,8 @@
     display: flex; align-items: center; gap: 8px;
     color: #fff; position: relative; flex-shrink: 0;
   }
-  body.light .toolbar { background: #6B8E6F; }
-  body.dark  .toolbar { background: #4A6B4E; }
+  body.light .toolbar { background: #2196F3; }
+  body.dark  .toolbar { background: #1565C0; }
 
   .toolbar-title { font-size: 20px; font-weight: 500; flex: 1; }
 
@@ -87,14 +87,14 @@
   .sub-tabs {
     padding: 12px 16px; flex-shrink: 0;
   }
-  body.light .sub-tabs { background: #F7F2EA; }
-  body.dark  .sub-tabs { background: #14110E; }
+  body.light .sub-tabs { background: #F5F7FA; }
+  body.dark  .sub-tabs { background: #121218; }
 
   .sub-tab-track {
     display: flex; height: 36px; border-radius: 12px; padding: 4px; gap: 2px;
   }
-  body.light .sub-tab-track { background: #F0EAE0; }
-  body.dark  .sub-tab-track { background: #3E3A33; }
+  body.light .sub-tab-track { background: #E2E4EC; }
+  body.dark  .sub-tab-track { background: #333340; }
 
   .sub-tab {
     flex: 1; text-align: center; padding: 0 16px;
@@ -103,11 +103,11 @@
     display: flex; align-items: center; justify-content: center;
     background: transparent;
   }
-  body.light .sub-tab { color: #6B6557; }
-  body.dark  .sub-tab { color: #C9C2B4; }
+  body.light .sub-tab { color: #5F6575; }
+  body.dark  .sub-tab { color: #A8AAB4; }
   .sub-tab.active { font-weight: 600; }
-  body.light .sub-tab.active { color: #1A1612; background: #FFFFFF; }
-  body.dark  .sub-tab.active { color: #FFF; background: #34302A; }
+  body.light .sub-tab.active { color: #1A1A2E; background: #FFFFFF; }
+  body.dark  .sub-tab.active { color: #FFF; background: #2C2E36; }
 
   /* =========================================================================
      CONTENT AREA
@@ -117,8 +117,8 @@
     text-align: left;
     /* padding-bottom: 80px = FAB 56px + 16px gap + 8px safe */
   }
-  body.light .content { background: #F7F2EA; }
-  body.dark  .content { background: #14110E; }
+  body.light .content { background: #F5F7FA; }
+  body.dark  .content { background: #121218; }
 
   /* =========================================================================
      SEARCH BAR
@@ -128,18 +128,18 @@
     padding: 10px 14px; border-radius: 12px; margin-bottom: 12px;
     border: 1px solid;
   }
-  body.light .search-bar { background: #fff; border-color: #F0EAE0; }
-  body.dark  .search-bar { background: #28251F; border-color: #3E3A33; }
+  body.light .search-bar { background: #fff; border-color: #E2E4EC; }
+  body.dark  .search-bar { background: #1D1F26; border-color: #333340; }
 
   .search-icon { width: 20px; height: 20px; flex-shrink: 0; }
-  body.light .search-icon { color: #6B6557; }
-  body.dark  .search-icon { color: #C9C2B4; }
+  body.light .search-icon { color: #5F6575; }
+  body.dark  .search-icon { color: #A8AAB4; }
 
   .search-text { font-size: 14px; font-weight: 400; flex: 1; }
-  body.light .search-text { color: #1A1612; }
+  body.light .search-text { color: #1A1A2E; }
   body.dark  .search-text { color: #fff; }
-  body.light .search-text.placeholder { color: #918876; }
-  body.dark  .search-text.placeholder { color: #6B6557; }
+  body.light .search-text.placeholder { color: #939AAA; }
+  body.dark  .search-text.placeholder { color: #5F6575; }
 
   .search-clear {
     min-width: 44px; min-height: 44px; display: flex;
@@ -151,8 +151,8 @@
     align-items: center; justify-content: center;
     font-size: 12px; font-weight: 600;
   }
-  body.light .search-clear-dot { background: #F0EAE0; color: #6B6557; }
-  body.dark  .search-clear-dot { background: #4A463E; color: #C9C2B4; }
+  body.light .search-clear-dot { background: #E2E4EC; color: #5F6575; }
+  body.dark  .search-clear-dot { background: #444850; color: #A8AAB4; }
 
   .filter-chips-wrapper {
     position: relative;
@@ -162,10 +162,10 @@
     width: 32px; height: 100%; pointer-events: none;
   }
   body.light .filter-chips-wrapper::after {
-    background: linear-gradient(to right, transparent, #F7F2EA);
+    background: linear-gradient(to right, transparent, #F5F7FA);
   }
   body.dark .filter-chips-wrapper::after {
-    background: linear-gradient(to right, transparent, #14110E);
+    background: linear-gradient(to right, transparent, #121218);
   }
 
   /* =========================================================================
@@ -176,7 +176,7 @@
     transition: all 0.2s; position: relative;
   }
   body.light .dish-card { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-  body.dark  .dish-card { background: #28251F; }
+  body.dark  .dish-card { background: #1D1F26; }
 
   /* ⋮ More icon — top-right of card */
   .dish-more {
@@ -187,8 +187,8 @@
     border: none; background: none; padding: 0;
     font-family: inherit; letter-spacing: 1px;
   }
-  body.light .dish-more { color: #6B6557; }
-  body.dark  .dish-more { color: #C9C2B4; }
+  body.light .dish-more { color: #5F6575; }
+  body.dark  .dish-more { color: #A8AAB4; }
 
   .dish-header {
     display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
@@ -199,7 +199,7 @@
   .dish-name {
     font-size: 16px; font-weight: 600; line-height: 1.4;
   }
-  body.light .dish-name { color: #1A1612; }
+  body.light .dish-name { color: #1A1A2E; }
   body.dark  .dish-name { color: #fff; }
 
   /* Type badges */
@@ -207,24 +207,24 @@
     display: inline-block; padding: 4px 8px; border-radius: 8px;
     font-size: 11px; font-weight: 500; line-height: 1.4;
   }
-  .type-ingredient { background: #E5EAE3; color: #4A6B4E; }
-  .type-ai         { background: #EFE4D0; color: #C45F3F; }
-  body.dark .type-ingredient { background: rgba(33,150,243,0.2); color: #D4DFCE; }
-  body.dark .type-ai         { background: rgba(255,152,0,0.2); color: #D9A857; }
+  .type-ingredient { background: #E3F2FD; color: #1565C0; }
+  .type-ai         { background: #FFF3E0; color: #E65100; }
+  body.dark .type-ingredient { background: rgba(33,150,243,0.2); color: #90CAF9; }
+  body.dark .type-ai         { background: rgba(255,152,0,0.2); color: #FFB74D; }
 
   .source-badge {
     font-size: 10px; font-weight: 500; padding: 1px 6px; border-radius: 4px;
     vertical-align: middle;
   }
-  body.light .source-badge { background: #F0EAE0; color: #6B6557; }
-  body.dark  .source-badge { background: #3E3A33; color: #C9C2B4; }
+  body.light .source-badge { background: #E2E4EC; color: #5F6575; }
+  body.dark  .source-badge { background: #333340; color: #A8AAB4; }
 
   /* Line 2: Calories — hero stat, 22px/700 */
   .dish-calories {
     font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 4px;
     font-variant-numeric: tabular-nums;
   }
-  body.light .dish-calories { color: #1A1612; }
+  body.light .dish-calories { color: #1A1A2E; }
   body.dark  .dish-calories { color: #FFFFFF; }
 
   /* Line 3: P/C/F macros — secondary, 13px/400 */
@@ -233,19 +233,19 @@
     display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
     margin-bottom: 4px; font-variant-numeric: tabular-nums;
   }
-  body.light .dish-macros { color: #6B6557; }
-  body.dark  .dish-macros { color: #C9C2B4; }
+  body.light .dish-macros { color: #5F6575; }
+  body.dark  .dish-macros { color: #A8AAB4; }
 
   .macro-p, .macro-c, .macro-f { font-weight: 400; }
-  body.light .macro-p, body.light .macro-c, body.light .macro-f { color: #6B6557; }
-  body.dark  .macro-p, body.dark  .macro-c, body.dark  .macro-f { color: #C9C2B4; }
+  body.light .macro-p, body.light .macro-c, body.light .macro-f { color: #5F6575; }
+  body.dark  .macro-p, body.dark  .macro-c, body.dark  .macro-f { color: #A8AAB4; }
 
   /* Line 4: Servings/source — tertiary, 12px/400 */
   .dish-servings {
     font-size: 12px; font-weight: 400;
   }
-  body.light .dish-servings { color: #6B6557; }
-  body.dark  .dish-servings { color: #C9C2B4; }
+  body.light .dish-servings { color: #5F6575; }
+  body.dark  .dish-servings { color: #A8AAB4; }
 
   /* =========================================================================
      EMPTY STATE
@@ -256,18 +256,18 @@
   }
   .empty-icon { font-size: 48px; margin-bottom: 16px; }
   .empty-title { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
-  body.light .empty-title { color: #2A2620; }
-  body.dark  .empty-title { color: #E5DED0; }
+  body.light .empty-title { color: #2D3142; }
+  body.dark  .empty-title { color: #E0E0E8; }
   .empty-desc { font-size: 13px; margin-bottom: 20px; }
-  body.light .empty-desc { color: #6B6557; }
-  body.dark  .empty-desc { color: #C9C2B4; }
+  body.light .empty-desc { color: #5F6575; }
+  body.dark  .empty-desc { color: #A8AAB4; }
 
   .btn-empty-cta {
     padding: 12px 24px; border: none; border-radius: 12px;
     font-size: 14px; font-weight: 500; color: #fff; cursor: pointer;
   }
-  body.light .btn-empty-cta { background: #C9A227; }
-  body.dark  .btn-empty-cta { background: #D9A857; color: #14110E; }
+  body.light .btn-empty-cta { background: #FF9800; }
+  body.dark  .btn-empty-cta { background: #FFB74D; color: #121218; }
 
   /* =========================================================================
      FAB + FAB MENU
@@ -279,8 +279,8 @@
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     z-index: 10;
   }
-  body.light .fab { background: #C9A227; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
-  body.dark  .fab { background: #D9A857; color: #14110E; box-shadow: none; }
+  body.light .fab { background: #FF9800; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  body.dark  .fab { background: #FFB74D; color: #121218; box-shadow: none; }
 
   /* FAB expanded overlay */
   .fab-overlay {
@@ -299,8 +299,8 @@
     width: 272px; max-width: 272px; white-space: normal; cursor: pointer;
     border: none;
   }
-  body.light .fab-menu-item { background: #fff; color: #1A1612; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
-  body.dark  .fab-menu-item { background: #34302A; color: #E5DED0; }
+  body.light .fab-menu-item { background: #fff; color: #1A1A2E; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  body.dark  .fab-menu-item { background: #2C2E36; color: #E0E0E8; }
   .fab-menu-item .fab-menu-icon { font-size: 18px; flex-shrink: 0; }
   .fab-menu-item .fab-menu-label { font-size: 14px; }
   .fab-menu-text { display: flex; flex-direction: column; gap: 2px; text-align: left; }
@@ -316,8 +316,8 @@
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     z-index: 20; transform: rotate(45deg);
   }
-  body.light .fab-expanded { background: #C9A227; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
-  body.dark  .fab-expanded { background: #D9A857; color: #14110E; box-shadow: none; }
+  body.light .fab-expanded { background: #FF9800; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  body.dark  .fab-expanded { background: #FFB74D; color: #121218; box-shadow: none; }
 
   /* =========================================================================
      TAB BAR
@@ -326,19 +326,19 @@
     display: flex; height: 56px; flex-shrink: 0;
     border-top: 1px solid;
   }
-  body.light .tab-bar { background: #fff; border-top-color: #F0EAE0; }
-  body.dark  .tab-bar { background: #28251F; border-top-color: #3E3A33; }
+  body.light .tab-bar { background: #fff; border-top-color: #E2E4EC; }
+  body.dark  .tab-bar { background: #1D1F26; border-top-color: #333340; }
 
   .tab-item {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 2px;
     font-size: 11px; font-weight: 500; cursor: pointer;
-    color: #6B6557; transition: color 0.2s;
+    color: #5F6575; transition: color 0.2s;
   }
   .tab-item .tab-icon { font-size: 24px; line-height: 1; }
-  body.light .tab-item.active { color: #6B8E6F; }
-  body.dark  .tab-item.active { color: #8AA086; }
-  body.dark  .tab-item { color: #C9C2B4; }
+  body.light .tab-item.active { color: #2196F3; }
+  body.dark  .tab-item.active { color: #42A5F5; }
+  body.dark  .tab-item { color: #A8AAB4; }
 
   /* =========================================================================
      DIALOG OVERLAY
@@ -354,19 +354,19 @@
     border-radius: 16px;
   }
   body.light .dialog-box { background: #fff; }
-  body.dark  .dialog-box { background: #34302A; }
+  body.dark  .dialog-box { background: #2C2E36; }
 
   .dialog-title {
     font-size: 18px; font-weight: 500; margin-bottom: 8px;
   }
-  body.light .dialog-title { color: #1A1612; }
+  body.light .dialog-title { color: #1A1A2E; }
   body.dark  .dialog-title { color: #fff; }
 
   .dialog-message {
     font-size: 14px; font-weight: 400; line-height: 1.5; margin-bottom: 20px;
   }
-  body.light .dialog-message { color: #6B6557; }
-  body.dark  .dialog-message { color: #C9C2B4; }
+  body.light .dialog-message { color: #5F6575; }
+  body.dark  .dialog-message { color: #A8AAB4; }
 
   .dialog-actions {
     display: flex; justify-content: flex-end; gap: 12px;
@@ -378,14 +378,14 @@
   .dialog-btn-cancel {
     background: transparent; border: 1px solid rgba(95,101,117,0.24);
   }
-  body.light .dialog-btn-cancel { color: #6B6557; }
-  body.dark  .dialog-btn-cancel { color: #C9C2B4; }
+  body.light .dialog-btn-cancel { color: #5F6575; }
+  body.dark  .dialog-btn-cancel { color: #A8AAB4; }
 
   .dialog-btn-danger {
     color: #fff;
   }
-  body.light .dialog-btn-danger { background: #B5483A; }
-  body.dark  .dialog-btn-danger { background: #C45F3F; }
+  body.light .dialog-btn-danger { background: #F44336; }
+  body.dark  .dialog-btn-danger { background: #EF5350; }
 
   /* =========================================================================
      RESULT COUNT
@@ -393,8 +393,8 @@
   .result-count {
     font-size: 12px; font-weight: 400; margin-bottom: 8px;
   }
-  body.light .result-count { color: #6B6557; }
-  body.dark  .result-count { color: #C9C2B4; }
+  body.light .result-count { color: #5F6575; }
+  body.dark  .result-count { color: #A8AAB4; }
 
   /* =========================================================================
      DESIGN SPEC NOTES
@@ -403,56 +403,26 @@
     max-width: 900px; margin: 48px auto 0; padding: 24px;
     border-radius: 16px; font-size: 13px; line-height: 1.7;
   }
-  body.light .spec-notes { background: #fff; border: 1px solid #F0EAE0; }
-  body.dark  .spec-notes { background: #28251F; border: 1px solid #3E3A33; }
+  body.light .spec-notes { background: #fff; border: 1px solid #E2E4EC; }
+  body.dark  .spec-notes { background: #1D1F26; border: 1px solid #333340; }
   .spec-notes h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
   .spec-notes table { width: 100%; border-collapse: collapse; margin-top: 8px; }
   .spec-notes th, .spec-notes td {
     text-align: left; padding: 6px 10px; font-size: 12px;
     border-bottom: 1px solid;
   }
-  body.light .spec-notes th, body.light .spec-notes td { border-bottom-color: #F0EAE0; }
-  body.dark  .spec-notes th, body.dark  .spec-notes td { border-bottom-color: #3E3A33; }
+  body.light .spec-notes th, body.light .spec-notes td { border-bottom-color: #E2E4EC; }
+  body.dark  .spec-notes th, body.dark  .spec-notes td { border-bottom-color: #333340; }
   .spec-notes th { font-weight: 600; }
-  body.light .spec-notes th { color: #3E3A33; }
-  body.dark  .spec-notes th { color: #E5DED0; }
+  body.light .spec-notes th { color: #333340; }
+  body.dark  .spec-notes th { color: #E0E0E8; }
   .spec-notes code {
     font-family: 'SF Mono', Menlo, monospace; font-size: 11px;
     padding: 1px 5px; border-radius: 4px;
   }
-  body.light .spec-notes code { background: #F7F2EA; color: #3E3A33; }
-  body.dark  .spec-notes code { background: #34302A; color: #E5DED0; }
-
-/* ---- Round 2: dialog ghost button + tertiary contrast ---- */
-.dialog-btn-cancel, .dlg-btn-cancel, .btn-ghost, .btn-secondary,
-button.cancel, .alert-btn-cancel, button[class*="cancel"]:not(.fab):not(.btn-cta),
-.bs-btn-secondary, .bs-btn.bs-btn-secondary, .bs-btn-cancel,
-.modal-cancel, .sheet-cancel {
-  background: var(--sage-card-soft, #F0EAE0) !important;
-  color: var(--sage-ink, #2D2A1F) !important;
-  border: 1px solid var(--sage-line-strong, #D6CCB8) !important;
-  font-weight: 600 !important;
-}
-body.dark .dialog-btn-cancel, body.dark .btn-ghost {
-  background: #34302A !important; color: #F5F1E8 !important; border-color: #4A463E !important;
-}
-
-/* Tertiary text — bump contrast on warm cream */
-:root { --text-tertiary: #5A5346 !important; }
-.text-tertiary, .caption, .meta, .servings, .result-count,
-small, .small, .sub, .subtle { color: #5A5346 !important; }
-body.dark :root { --text-tertiary: #C9C2B4 !important; }
-body.dark .text-tertiary, body.dark .caption, body.dark .meta,
-body.dark .servings, body.dark .result-count, body.dark small,
-body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important; }
-
-/* FAB icon contrast — ensure white icon on coral */
-.fab svg, .fab .icon, .fab i, .fab span { color: #FFFCF6 !important; fill: #FFFCF6 !important; }
-
+  body.light .spec-notes code { background: #F5F7FA; color: #333340; }
+  body.dark  .spec-notes code { background: #2C2E36; color: #E0E0E8; }
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600;1,9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="light">
 
@@ -576,7 +546,7 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
         </div>
       </div>
       <div class="content">
-        <div class="search-bar" role="search" aria-label="Tìm món ăn" style="border-color: #6B8E6F;">
+        <div class="search-bar" role="search" aria-label="Tìm món ăn" style="border-color: #2196F3;">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text">phở</span>
           <div class="search-clear" role="button" aria-label="Xóa tìm kiếm"><span class="search-clear-dot">✕</span></div>
@@ -625,7 +595,7 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
         </div>
       </div>
       <div class="content">
-        <div class="search-bar" role="search" aria-label="Tìm món ăn" style="border-color: #6B8E6F;">
+        <div class="search-bar" role="search" aria-label="Tìm món ăn" style="border-color: #2196F3;">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="search-text">pizza</span>
           <div class="search-clear" role="button" aria-label="Xóa tìm kiếm"><span class="search-clear-dot">✕</span></div>
@@ -828,22 +798,22 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
   <h2>📐 Design Spec Notes — Dish List (F-02)</h2>
   <table>
     <tr><th>Token</th><th>Value</th><th>Usage</th></tr>
-    <tr><td><code>--bg-page</code></td><td>#F7F2EA / #14110E</td><td>Content background</td></tr>
-    <tr><td><code>--bg-card</code></td><td>#FFFFFF / #28251F</td><td>Dish cards, search bar, dialog, tab bar</td></tr>
-    <tr><td><code>--bg-elevated</code></td><td>#FFFFFF / #34302A</td><td>FAB menu items, dialog box (dark)</td></tr>
-    <tr><td><code>--primary</code></td><td>#6B8E6F / #8AA086</td><td>Toolbar, active tab</td></tr>
-    <tr><td><code>--segment-track</code></td><td>#F0EAE0 / #3E3A33</td><td>Segment control track background</td></tr>
-    <tr><td><code>--segment-active</code></td><td>#FFFFFF / #34302A</td><td>Segment control active pill</td></tr>
-    <tr><td><code>--status-bar</code></td><td>#5A745A / #2A3F2D</td><td>Status bar background</td></tr>
-    <tr><td><code>--cta</code></td><td>#C9A227 / #D9A857</td><td>FAB button, empty-state CTA</td></tr>
-    <tr><td><code>--text-primary</code></td><td>#1A1612 / #FFFFFF</td><td>Dish name, dialog title</td></tr>
-    <tr><td><code>--text-secondary</code></td><td>#2A2620 / #E5DED0</td><td>Dialog message bold, empty-title</td></tr>
-    <tr><td><code>--text-tertiary</code></td><td>#6B6557 / #C9C2B4</td><td>Macro summary, servings, dialog message, kcal captions</td></tr>
-    <tr><td><code>--text-disabled</code></td><td>#918876 / #6B6557</td><td>Search placeholder</td></tr>
-    <tr><td><code>--text-tertiary</code></td><td>#6B6557 / #C9C2B4</td><td>Search icon, ⋮ more, servings info, empty-desc, inactive tabs, result count</td></tr>
-    <tr><td><code>--border</code></td><td>#F0EAE0 / #3E3A33</td><td>Search bar, tab bar top border, source badge bg (light)</td></tr>
-    <tr><td><code>--error</code></td><td>#B5483A / #C45F3F</td><td>Delete dialog danger button</td></tr>
-    <tr><td><code>--success</code></td><td>#6B8E6F / #8AA086</td><td>Protein macro color</td></tr>
+    <tr><td><code>--bg-page</code></td><td>#F5F7FA / #121218</td><td>Content background</td></tr>
+    <tr><td><code>--bg-card</code></td><td>#FFFFFF / #1D1F26</td><td>Dish cards, search bar, dialog, tab bar</td></tr>
+    <tr><td><code>--bg-elevated</code></td><td>#FFFFFF / #2C2E36</td><td>FAB menu items, dialog box (dark)</td></tr>
+    <tr><td><code>--primary</code></td><td>#2196F3 / #42A5F5</td><td>Toolbar, active tab</td></tr>
+    <tr><td><code>--segment-track</code></td><td>#E2E4EC / #333340</td><td>Segment control track background</td></tr>
+    <tr><td><code>--segment-active</code></td><td>#FFFFFF / #2C2E36</td><td>Segment control active pill</td></tr>
+    <tr><td><code>--status-bar</code></td><td>#1976D2 / #0D47A1</td><td>Status bar background</td></tr>
+    <tr><td><code>--cta</code></td><td>#FF9800 / #FFB74D</td><td>FAB button, empty-state CTA</td></tr>
+    <tr><td><code>--text-primary</code></td><td>#1A1A2E / #FFFFFF</td><td>Dish name, dialog title</td></tr>
+    <tr><td><code>--text-secondary</code></td><td>#2D3142 / #E0E0E8</td><td>Dialog message bold, empty-title</td></tr>
+    <tr><td><code>--text-tertiary</code></td><td>#5F6575 / #A8AAB4</td><td>Macro summary, servings, dialog message, kcal captions</td></tr>
+    <tr><td><code>--text-disabled</code></td><td>#939AAA / #5F6575</td><td>Search placeholder</td></tr>
+    <tr><td><code>--text-tertiary</code></td><td>#5F6575 / #A8AAB4</td><td>Search icon, ⋮ more, servings info, empty-desc, inactive tabs, result count</td></tr>
+    <tr><td><code>--border</code></td><td>#E2E4EC / #333340</td><td>Search bar, tab bar top border, source badge bg (light)</td></tr>
+    <tr><td><code>--error</code></td><td>#F44336 / #EF5350</td><td>Delete dialog danger button</td></tr>
+    <tr><td><code>--success</code></td><td>#4CAF50 / #66BB6A</td><td>Protein macro color</td></tr>
     <tr><td><code>--card-shadow</code></td><td>0 1px 4px rgba(0,0,0,0.08)</td><td>Dish cards (light only)</td></tr>
     <tr><td><code>radius-xs</code></td><td>8px</td><td>Type badges, source badge, dialog buttons</td></tr>
     <tr><td><code>radius-sm</code></td><td>12px</td><td>Search bar, FAB menu items</td></tr>
@@ -859,12 +829,12 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
     <tr><td>Typography — Caption</td><td>13px/400</td><td>P/C/F macro summary, result count</td></tr>
     <tr><td>Typography — Overline</td><td>11px/500</td><td>Type badge text, source badge, tab bar labels, servings</td></tr>
     <tr><td>Source badge labels</td><td>Vietnamese display</td><td>DB value → Display: <code>db</code> → "Có sẵn", <code>custom</code> → "Tự tạo", <code>ai</code> → "AI". Same mapping used in ingredient-list</td></tr>
-    <tr><td>Macro colors</td><td>Cal=#6B8E6F, P=#6B8E6F, C=#C9A227, F=#B5483A</td><td>Color-coded macro values in dish summary</td></tr>
-    <tr><td>Type badge — Nguyên liệu</td><td>Blue bg + blue text</td><td>#E5EAE3/#4A6B4E (light), rgba(33,150,243,0.2)/#D4DFCE (dark)</td></tr>
-    <tr><td>Type badge — AI tự điền</td><td>Orange bg + orange text</td><td>#EFE4D0/#C45F3F (light), rgba(255,152,0,0.2)/#D9A857 (dark). Class: <code>.type-ai</code>. Áp dụng cho dish có <code>type='ai_autofill'</code> (sau C-02 đã loại bỏ Quick Add).</td></tr>
+    <tr><td>Macro colors</td><td>Cal=#2196F3, P=#4CAF50, C=#FF9800, F=#F44336</td><td>Color-coded macro values in dish summary</td></tr>
+    <tr><td>Type badge — Nguyên liệu</td><td>Blue bg + blue text</td><td>#E3F2FD/#1565C0 (light), rgba(33,150,243,0.2)/#90CAF9 (dark)</td></tr>
+    <tr><td>Type badge — AI tự điền</td><td>Orange bg + orange text</td><td>#FFF3E0/#E65100 (light), rgba(255,152,0,0.2)/#FFB74D (dark). Class: <code>.type-ai</code>. Áp dụng cho dish có <code>type='ai_autofill'</code> (sau C-02 đã loại bỏ Quick Add).</td></tr>
     <tr><td>FAB menu</td><td>Popup above FAB</td><td>Semi-transparent overlay + 2 items with sublabels + rotated X FAB. "Tạo từ nguyên liệu" = primary (top, 600 weight)</td></tr>
     <tr><td>Phone frame</td><td>375×812px</td><td>iPhone-size frame with tab bar</td></tr>
-    <tr><td>Tab bar</td><td>56px height, 4 tabs</td><td>"Quản lý" active (#6B8E6F / #8AA086)</td></tr>
+    <tr><td>Tab bar</td><td>56px height, 4 tabs</td><td>"Quản lý" active (#2196F3 / #42A5F5)</td></tr>
     <tr><td>FAB</td><td>56px circle, bottom-right</td><td>16px from right edge, 72px from bottom (above tab bar)</td></tr>
     <tr><td>Easing — micro</td><td><code>cubic-bezier(0.25, 1, 0.5, 1)</code> 200ms</td><td>Segment pill slide, search focus, chip select</td></tr>
     <tr><td>Easing — snappy</td><td><code>cubic-bezier(0.16, 1, 0.3, 1)</code> 150ms</td><td>FAB button press, empty-state CTA press, card tap feedback</td></tr>
@@ -884,82 +854,5 @@ function setTheme(theme) {
 }
 </script>
 
-
-<!-- SAGE_OVERRIDE_INJECTED -->
-<style>
-/* ====================================================================
-   SAGE WELLNESS DNA — Visual override v2 (Direction 03 Lifesum Sage)
-   Appended 2026-04-28. Token source:
-   docs/3-design/explorations/2026-color-directions/03-sage-suite/_tokens.css
-   ==================================================================== */
-:root{
-  --sage-cream:#F7F2EA; --sage-card:#FFFFFF; --sage-card-soft:#F0EAE0;
-  --sage-elev:#FFFCF6;  --sage-ink:#2D2A1F; --sage-ink-2:#6B6557; --sage-ink-3:#A09A8B;
-  --sage-line:#E5DED0;  --sage-line-strong:#D6CCB8;
-  --sage-primary:#6B8E6F; --sage-primary-deep:#4A6B4E;
-  --sage-primary-soft:#D4DFCE; --sage-primary-ink:#2A3F2D;
-  --sage-coral:#E07856; --sage-coral-deep:#C45F3F;
-  --sage-coral-soft:#F5DCD0; --sage-coral-ink:#5A2A18;
-  --sage-gold:#B89968; --sage-gold-soft:#EFE4D0; --sage-gold-ink:#5C4623;
-  --sage-warn:#C9A227; --sage-danger:#B5483A;
-  --sage-macro-p:#6B8E6F; --sage-macro-c:#C99B6E; --sage-macro-f:#E07856;
-  --sage-track:#F0E9DA;
-  --sage-shadow-cta:0 1px 2px rgba(196,95,63,.15),0 8px 20px rgba(196,95,63,.25);
-}
-
-/* Body / root family — Inter */
-html, body, body.light, body.dark {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
-}
-body, body.light { background: var(--sage-cream) !important; color: var(--sage-ink) !important; }
-body.dark { background: #1A1612 !important; color: #F5F1E8 !important; }
-
-/* Display type — Fraunces italic for titles, big numbers, dish/ingredient names */
-.page-title, h1.page-title, .toolbar-title, .step-title, .hero-title,
-.dish-name, .ingredient-name, .dn, .hdr-title, .kcal, .big-number,
-.calorie-number, .number-display, .stat-value, .calorie-hero,
-.cal-value, .kcal-value, .dialog-title, .empty-title,
-.ing-name, .dish-title, .name, .item-name, .field-label-hero {
-  font-family: 'Fraunces', 'Playfair Display', Georgia, serif !important;
-  font-style: italic !important;
-  font-weight: 500 !important;
-  letter-spacing: -0.02em !important;
-}
-
-/* Toolbar title — slightly bigger */
-.toolbar-title { font-size: 22px !important; }
-
-/* Mono kept for clock/timestamps */
-code, pre, .mono, [class*="mono"]{ font-family: ui-monospace,'SF Mono',Menlo,monospace !important; font-style: normal !important; }
-
-/* ---- CORAL CTA enforcement ----
-   Original mockups used #FF9800 (Material orange) for FAB / .btn-cta etc.
-   The hex sweep mapped it to warm gold #C9A227, which is too washed-out for
-   primary action. Force the canonical CTA components to coral here. */
-.fab, .fab-expanded, .btn-cta, .btn-empty-cta, .bs-btn-add,
-.btn-primary, button.cta, .cta-button, .save-btn, .submit-btn,
-.btn-confirm, .btn-save {
-  background: var(--sage-coral) !important;
-  color: #FFFCF6 !important;
-  box-shadow: var(--sage-shadow-cta) !important;
-  border-color: var(--sage-coral) !important;
-}
-body.light .fab, body.light .fab-expanded,
-body.light .btn-cta, body.light .btn-empty-cta { background: var(--sage-coral) !important; }
-body.dark .fab, body.dark .fab-expanded,
-body.dark .btn-cta, body.dark .btn-empty-cta {
-  background: #E8A287 !important; color: #1A1612 !important;
-}
-
-/* CTA pressed/hover */
-.fab:hover, .btn-cta:hover, .btn-empty-cta:hover { background: var(--sage-coral-deep) !important; }
-
-/* Phone shell — warm tones */
-.phone { box-shadow: 0 0 0 3px var(--sage-line-strong), 0 40px 80px -20px rgba(45,42,31,.18) !important; }
-body.dark .phone { box-shadow: 0 0 0 3px #4A463E, 0 40px 80px -20px rgba(0,0,0,.5) !important; }
-
-/* Hide native scrollbars in phone frames */
-.phone *::-webkit-scrollbar { display: none; }
-</style>
 </body>
 </html>
