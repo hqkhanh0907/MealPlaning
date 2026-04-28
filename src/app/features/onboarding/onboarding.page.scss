@@ -77,10 +77,46 @@
 }
 
 /* ====================================================================
-   RADIO CIRCLE removed — selected state đủ rõ qua 3 cue: bg sage tint
-   (--primary-50) + check icon bên phải + label bold. Giữ thêm
-   radio-circle = over-affordance, làm row nặng và giảm tinh tế.
+   RADIO CIRCLE — 18px circle bên trái (sage-wellness 4-cue selected state):
+   1) circle dot fills sage when selected
+   2) bg row tint sage
+   3) check icon bên phải
+   4) label bold
+   Mockup phase-0 spec: border 2px outline (#D6CCB8 / sage shade dark),
+   selected → border + dot white-on-sage.
    ==================================================================== */
+.radio-circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--input-border-color);
+  background: transparent;
+  flex-shrink: 0;
+  position: relative;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+.radio-item.selected .radio-circle {
+  border-color: var(--ion-color-primary);
+  background: var(--ion-color-primary);
+}
+.radio-item.selected .radio-circle::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  .radio-circle {
+    border-color: var(--input-border-color);
+  }
+  .radio-item.selected .radio-circle {
+    border-color: var(--ion-color-primary);
+    background: var(--ion-color-primary);
+  }
+}
 
 /* ====================================================================
    RADIO ICON — 22px, primary color (Step 1 goals only)
