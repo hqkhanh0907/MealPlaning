@@ -48,12 +48,16 @@
 }
 
 .filter-chip--active {
-  /* Solid sage fill — earlier soft tint (8% sage + sage-700 text) was nearly
-     indistinguishable from the inactive chip on the light surface. Solid fill
-     gives an unambiguous "selected" affordance and ≥4.5:1 text contrast. */
+  /* Outlined sage — visually distinct from the segment-control SOLID-sage active
+     state above (segment is primary navigation; filter chips are a sub-control).
+     Earlier solid-fill chip put both controls at the same hierarchy level and
+     read as "two segment bars stacked", confusing the user about which control
+     was active. Outlined fill keeps the chip clearly selected (sage border +
+     sage text on cream surface, ≥4.5:1) while ceding visual weight to the
+     segment above it. */
   border-color: var(--ion-color-primary);
-  background: var(--ion-color-primary);
-  color: #ffffff;
+  background: var(--bg-card);
+  color: var(--primary-700);
   font-weight: 600;
 }
 
