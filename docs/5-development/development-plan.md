@@ -78,11 +78,11 @@ F-04 Tracking             │
          (đọc F-04 + F-09 + F-10)
 
 AI features split 2 phases:
-  Phase 1.5 (AI Foundation — infra + template F-01/F-02):
+  Phase 1.5B (AI Foundation — infra + template F-01/F-02):
     F-01 AI Lookup   ─► Ingredient table (tra cứu dinh dưỡng)
     F-02 AI Autofill ─► Dish table (gợi ý nguyên liệu)
 
-  Phase 2 (dùng lại infra):
+  Phase 2 (dùng lại Phase 1.5B infra):
     F-03 AI Meal Plan (Day + Week)
 
   Phase 5 (dùng lại infra + thêm Camera):
@@ -104,12 +104,13 @@ AI features split 2 phases:
 
 | Phase | Tên | Features | Shared platform built | Deliverable |
 |-------|-----|----------|----------------------|-------------|
-| **1** | Management (CRUD) | F-01, F-02 (phần non-AI) | IngredientRepo, DishRepo, DishIngredientRepo, stores, migration system, seed data loader | User CRUD nguyên liệu + món ăn (ingredient-based + quick add, chưa có AI) |
-| **1.5** | AI Foundation | F-01 AI Lookup + F-02 AI Auto-fill | GeminiService (HTTP, retry, error handling), prompt template executor, AI error UI | F-01/F-02 complete-done với AI; infra sẵn cho các AI features sau |
-| **2** | Calendar & Tracking | F-03, F-04 | DayPlanRepo, MealSlotRepo, PlannedDishRepo, daily summary computation, AI Meal Plan templates (day+week, dùng Phase 1.5 infra) | User lên kế hoạch bữa ăn + track macro hàng ngày + AI meal plan |
+| **1** | Management (dish-first) | F-01, F-02 (phần non-AI) | IngredientRepo, DishRepo, DishIngredientRepo, stores, migration system, seed data loader | User mở Quản lý thấy Món ăn trước; tạo/sửa món ingredient-based; tạo nhanh nguyên liệu khi thiếu; có Thư viện nguyên liệu hỗ trợ |
+| **1.5A** | Pantry & Measurement | F-02.5 Pantry + Ingredient Measurement | StorageLocation/PantryItem target schema, ingredient measurement, missing-conversion UX, conversion snapshots | User quản lý nguyên liệu đang có, hạn dùng, vị trí, unit theo từng nguyên liệu/product; chưa cần barcode/AI |
+| **1.5B** | AI Foundation | F-01 AI Lookup + F-02 AI Auto-fill | GeminiService (HTTP, retry, error handling), prompt template executor, AI error UI | F-01/F-02 complete-done với AI; infra sẵn cho các AI features sau |
+| **2** | Calendar & Tracking | F-03, F-04 | DayPlanRepo, MealSlotRepo, PlannedDishRepo, daily summary computation, AI Meal Plan templates (day+week, dùng Phase 1.5B infra) | User lên kế hoạch bữa ăn + track macro hàng ngày + AI meal plan |
 | **3** | Dashboard | F-12 | Dashboard store, shared macro/progress components | User có màn tổng quan: nutrition + streak + weight |
 | **4** | Fitness | F-08, F-09, F-10 | TrainingPlanRepo, WorkoutRepo, ExerciseRepo, chart component | User follow training plan + log workout + xem progress |
-| **5** | AI Suite (remaining) | F-05, F-06, F-07, F-11 | Camera service, 5 prompt templates mới (Image, Menu Suggest, Daily Insight, Weekly Review, Training Plan) | 4 AI features còn lại hoạt động (kế thừa infra từ Phase 1.5) |
+| **5** | AI Suite (remaining) | F-05, F-06, F-07, F-11 | Camera service, 5 prompt templates mới (Image, Menu Suggest, Daily Insight, Weekly Review, Training Plan) | 4 AI features còn lại hoạt động (kế thừa infra từ Phase 1.5B) |
 | **6** | Settings & Polish | F-13 | Notification service, theme service, profile editor | Full Settings + release prep (app icon, splash, Play Store assets) |
 
 ---
@@ -119,8 +120,8 @@ AI features split 2 phases:
 ### Phase 1: Management — CRUD only (F-01 + F-02, non-AI)
 
 **Features:**
-- F-01 Quản lý Nguyên liệu: CRUD thủ công + curated ingredient seed liên kết trực tiếp với 20 món Việt core (chưa có AI Lookup)
-- F-02 Quản lý Món ăn: CRUD 2/3 cách (ingredient-based + quick add; AI auto-fill để Phase 1.5) + ship sẵn 20 món Việt curated
+- F-01 Thư viện Nguyên liệu: supporting library để tìm/xem/sửa/xóa có kiểm soát; nguyên liệu chủ yếu được chọn/tạo nhanh trong flow tạo món (chưa có AI Lookup)
+- F-02 Quản lý Món ăn: flow chính của Quản lý; ingredient-based CRUD + contextual ingredient quick-create; AI auto-fill để Phase 1.5B + ship sẵn 20 món Việt curated
 
 **Shared platform built trong phase này:**
 - Schema migration system (`db_version`, migration scripts)
@@ -130,13 +131,33 @@ AI features split 2 phases:
 - Shared components: `<app-nutrition-badge>`, `<app-search-toolbar>`, `<app-empty-state>`, `<app-confirm-dialog>`
 - Testing setup: Karma config verify + Cypress/Playwright chọn & setup
 
-**Deliverable:** User mở Management tab → thấy ingredient set gắn với 20 món Việt core (6 sáng / 7 trưa / 7 tối) → CRUD được → tạo/sửa món ăn từ ingredients (thủ công + quick add).
+**Deliverable:** User mở Management tab → thấy `Món ăn` trước → tạo/sửa món ăn từ nguyên liệu → nếu thiếu nguyên liệu thì tạo nhanh và thêm vào món → vẫn có `Thư viện nguyên liệu` để xem/sửa/xóa có kiểm soát.
 
 **Detail doc:** `phase-1-management.md` (đã viết, tiếp tục refine trước khi start code)
 
 ---
 
-### Phase 1.5: AI Foundation (F-01 AI Lookup + F-02 AI Auto-fill)
+### Phase 1.5A: Pantry & Measurement (F-02.5)
+
+**Dependencies:** Phase 1 (ingredient + dish foundation).
+
+**Features:**
+- Pantry list/add stock: quản lý nguyên liệu đang có, số lượng, vị trí, hạn dùng.
+- Ingredient Measurement: conversion theo từng nguyên liệu/product/state/size cho `quả/trái/củ/tép/cup/tbsp/tsp/pack/bottle/serving`.
+- Gross vs edible handling: nutrition tính trên phần ăn được.
+- Missing conversion UX: hỏi user một câu cụ thể, lưu snapshot hoặc reusable measurement.
+
+**Shared platform built trong phase này:**
+- Target schema: `ingredient_variant`, `ingredient_measurement`, `storage_location`, `pantry_item`, optional `data_source`.
+- Resolver upgrade: returns resolved/needs-conversion state, not silent fallback.
+- Conversion snapshot model for pantry item and future recipe/dish line.
+- Mockup source: `docs/3-design/mockups/phase-1-5-pantry-recipe-nutrition-wireflow.html`.
+
+**Deliverable:** User thêm được nguyên liệu đang có vào kho, thấy hạn dùng/vị trí, nhập unit đời thực và preview dinh dưỡng sau khi app resolve conversion.
+
+---
+
+### Phase 1.5B: AI Foundation (F-01 AI Lookup + F-02 AI Auto-fill)
 
 **Features:**
 - F-01 AI Lookup: Nhập tên nguyên liệu → AI tra cứu dinh dưỡng → user confirm
@@ -151,13 +172,13 @@ AI features split 2 phases:
 
 **Deliverable:** F-01/F-02 PRD complete-done — user có thể dùng AI để lookup/autofill. Infra sẵn để Phase 2/5 plug templates mới mà không build lại.
 
-**Detail doc:** `phase-1.5-ai-foundation.md` (sẽ viết khi bắt đầu Phase 1.5)
+**Detail doc:** `phase-1.5b-ai-foundation.md` (sẽ viết khi bắt đầu Phase 1.5B)
 
 ---
 
 ### Phase 2: Calendar & Tracking (F-03 + F-04)
 
-**Dependencies:** Phase 1 (dish data cần có trong DB để thêm vào bữa + làm input cho AI Meal Plan templates) + Phase 1.5 (GeminiService infra).
+**Dependencies:** Phase 1 (dish data cần có trong DB để thêm vào bữa + làm input cho AI Meal Plan templates) + Phase 1.5B (GeminiService infra).
 
 **Features:**
 - F-03 Calendar & Meal Planning: Lịch tuần/ngày, thêm món vào bữa, AI lên plan ngày/tuần
@@ -167,7 +188,7 @@ AI features split 2 phases:
 - DayPlanRepository, MealSlotRepository, PlannedDishRepository
 - DayPlanStore (reactive signals cho selected date)
 - Daily summary computation (SQL aggregate queries)
-- **AI Meal Plan templates**: §3.4 Plan Day + §3.5 Plan Week (plug vào NutritionAiService từ Phase 1.5)
+- **AI Meal Plan templates**: §3.4 Plan Day + §3.5 Plan Week (plug vào NutritionAiService từ Phase 1.5B)
 - Shared components: `<app-macro-bar>`, `<app-day-selector>`
 
 **Deliverable:** User chọn ngày → thêm món ăn vào bữa sáng/trưa/tối → thấy tổng calo/macro ngày đó vs target → dùng được AI Meal Plan.
@@ -178,7 +199,7 @@ AI features split 2 phases:
 
 **Features:**
 - F-12 Dashboard: Feed card stack — 5 cards theo PRD F-12:
-  1. **AI Insight Card** — placeholder hard-coded tĩnh (data thật sẽ fill ở Phase 5 sau khi có F-07 Daily Insight template — GeminiService đã có từ Phase 1.5)
+  1. **AI Insight Card** — placeholder hard-coded tĩnh (data thật sẽ fill ở Phase 5 sau khi có F-07 Daily Insight template — GeminiService đã có từ Phase 1.5B)
   2. **Nutrition Card** — data thật từ Phase 2 (calo + protein progress bars)
   3. **Workout Card** — placeholder "Chưa có lịch tập" (data thật fill ở Phase 4)
   4. **Streak + Weight Card** — data thật (streak từ F-04, weight từ weight_log)
@@ -218,7 +239,7 @@ AI features split 2 phases:
 - F-07 AI Daily Insights
 - F-11 AI Training Plan
 
-**Shared platform built trong phase này (kế thừa GeminiService từ Phase 1.5):**
+**Shared platform built trong phase này (kế thừa GeminiService từ Phase 1.5B):**
 - Camera service wrapper (Capacitor Camera) — mới
 - **5 prompt templates mới**: §3.1 Image Analysis, §3.3 Menu Suggest, §3.6 Daily Insight, §3.7 Weekly Review, §3.8 Training Plan
 - FitnessAiService, InsightAiService (plug vào GeminiService core)
@@ -302,14 +323,15 @@ Sau khi end phase:
 |-----|:------:|---------|
 | `5-development/development-plan.md` (file này) | ✅ Active | — |
 | `5-development/phase-1-management.md` | ✅ Active | — |
-| `5-development/phase-1.5-ai-foundation.md` | ⏳ Chưa viết | Trước khi start Phase 1.5 |
+| `5-development/phase-1.5a-pantry-measurement.md` | ⏳ Chưa viết | Trước khi start Phase 1.5A implementation |
+| `5-development/phase-1.5b-ai-foundation.md` | ⏳ Chưa viết | Trước khi start Phase 1.5B |
 | `5-development/phase-2-calendar.md` | ⏳ Chưa viết | Trước khi start Phase 2 |
 | `5-development/phase-3-dashboard.md` | ⏳ Chưa viết | Trước khi start Phase 3 |
 | `5-development/phase-4-fitness.md` | ⏳ Chưa viết | Trước khi start Phase 4 |
 | `5-development/phase-5-ai-suite.md` | ⏳ Chưa viết | Trước khi start Phase 5 |
 | `5-development/phase-6-settings-polish.md` | ⏳ Chưa viết | Trước khi start Phase 6 |
 | `6-testing/testing-strategy.md` | ⏳ Chưa viết | Trước Phase 1 (setup Karma + E2E) |
-| `6-decisions/ADR-001-ai-key-strategy.md` | ⏳ Chưa viết | Trước Phase 1.5 (obfuscation setup) |
+| `6-decisions/ADR-001-ai-key-strategy.md` | ⏳ Chưa viết | Trước Phase 1.5B (obfuscation setup) |
 | `6-decisions/ADR-002-migration-strategy.md` | ⏳ Chưa viết | Phase 1 |
 | `3-design/mockups/phase-1-*.html` | ⏳ Chưa viết | Trước Phase 1 code |
 
@@ -323,5 +345,5 @@ Sau khi end phase:
 |---------|------|---------|
 | 1.0 | 2026-04-18 | Initial development plan — 6 phases, decisions D1-D8 |
 | 1.1 | 2026-04-18 | Audit round 1-2 fixes: dependency graph, Phase 3 card spec, migration naming sync với data-model.md, DishIngredientRepo typo, Document Map status tags |
-| 1.2 | 2026-04-18 | Audit round 3: **thêm Phase 1.5 "AI Foundation"** — tách GeminiService ra khỏi Phase 5 để F-01/F-02 PRD complete-done. 6 phases → 7 phases. Update Phase 1/2/5 scope accordingly. |
-| 1.3 | 2026-04-18 | Audit round 4: Phase 5 template count 4→5 (thêm Weekly Review), ADR-001 gating Phase 1.5 (thay Phase 5), Phase 2 explicit dependency note, Phase 3 Dashboard rationale clarify |
+| 1.2 | 2026-04-18 | Audit round 3: **thêm Phase 1.5B "AI Foundation"** — tách GeminiService ra khỏi Phase 5 để F-01/F-02 PRD complete-done. 6 phases → 7 phases. Update Phase 1/2/5 scope accordingly. |
+| 1.3 | 2026-04-18 | Audit round 4: Phase 5 template count 4→5 (thêm Weekly Review), ADR-001 gating Phase 1.5B (thay Phase 5), Phase 2 explicit dependency note, Phase 3 Dashboard rationale clarify |

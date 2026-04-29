@@ -31,20 +31,22 @@ Tài liệu này mô tả chi tiết **13 features** của HealthMate AI V1, bao
 
 ## 2. Nhóm 1: Core Nutrition
 
-### F-01: Quản lý Nguyên liệu
+### F-01: Thư viện Nguyên liệu
 
-**Mô tả:** CRUD nguyên liệu với thông tin dinh dưỡng canonical theo `100g` hoặc `100ml`. Là nền tảng cho toàn bộ hệ thống tính calo.
+**Mô tả:** Quản lý thư viện nguyên liệu với thông tin dinh dưỡng canonical theo `100g` hoặc `100ml`. Đây là dữ liệu nền để tính calo cho món ăn, nhưng **không phải entry flow chính trong tab Quản lý**. UX mặc định của `Quản lý` là `Món ăn`; nguyên liệu chủ yếu được chọn/tạo nhanh trong ngữ cảnh tạo món và chỉ vào `Thư viện nguyên liệu` khi cần xem, sửa sai hoặc bảo trì dữ liệu.
 
 **Chức năng chi tiết:**
 
 | Chức năng | Mô tả |
 |-----------|-------|
-| **Xem danh sách** | Hiển thị tất cả nguyên liệu, hỗ trợ tìm kiếm, sắp xếp theo tên/nhóm |
-| **Thêm thủ công** | Form nhập: tên, category, calories/protein/carbs/fat/fiber + nutrition basis (`100g` hoặc `100ml`) + danh sách unit hợp lệ (`ingredient_unit[]`) + default unit |
-| **Sửa** | Chỉnh sửa thông tin nguyên liệu đã thêm |
-| **Xóa** | Xóa nguyên liệu (confirm dialog nếu đang dùng trong món ăn) |
+| **Xem danh sách** | Hiển thị tất cả nguyên liệu, hỗ trợ tìm kiếm, sắp xếp theo tên/nhóm. Tap card mở màn chi tiết/read-only trước, không mở form sửa trực tiếp. |
+| **Thêm vào thư viện** | Form nhập: tên, category, calories/protein/carbs/fat/fiber + nutrition basis (`100g` hoặc `100ml`) + danh sách unit hợp lệ (`ingredient_unit[]`) + default unit. Đây là advanced/supporting flow; user thường tạo nguyên liệu từ flow tạo món. |
+| **Tạo nhanh trong món** | Khi tạo/sửa món và search không có nguyên liệu, user có thể tạo nhanh nguyên liệu rồi `Lưu và thêm vào món`. Nguyên liệu mới vẫn được lưu vào thư viện để sửa lại sau. |
+| **Sửa** | Chỉnh sửa thông tin nguyên liệu đã thêm từ màn chi tiết bằng CTA `Sửa thông tin`. V1 là sửa global; nếu nguyên liệu đang được dùng trong món, UI phải cảnh báo tổng calories/macro của các món liên quan có thể thay đổi trước khi vào form sửa hoặc trước khi lưu. |
+| **Xóa** | Xóa nguyên liệu nếu chưa được dùng; nếu đang dùng trong món thì chặn xóa và hiển thị danh sách/đếm số món liên quan. |
 | **AI Lookup** | Nhập tên nguyên liệu → AI tra cứu thông tin dinh dưỡng → user confirm |
 | **Vietnamese Core Seed** | App ship sẵn dataset nền cho **20 món Việt curated** (6 sáng / 7 trưa / 7 tối), không gồm snack |
+| **Measurement layer (Phase 1.5A)** | Mở rộng `ingredient_unit` thành measurement theo từng nguyên liệu/trạng thái/size để xử lý `quả`, `trái`, `củ`, `tép`, `cup`, `tbsp`, `tsp`, `pack`, `bottle`, `serving`; không dùng conversion global cho các unit này. |
 
 **Dữ liệu nguyên liệu:**
 
@@ -81,6 +83,10 @@ IngredientUnit {
 > Approximate unit (VD `pinch`, `bunch`) được phép trong Phase 1 nhưng UI phải hiển thị dấu `≈` / nhãn `ước lượng`.
 > `Ingredient.source` dùng để phân biệt provenance: seed mặc định = `db`, user tự tạo/sửa ingredient = `manual`, AI lookup tạo ingredient = `ai`. Khi user sửa một seed ingredient, record đó đổi từ `db` sang `manual`. Khi user sửa một AI-lookup ingredient, record đó đổi từ `ai` sang `manual`.
 > **AI Lookup duplicate handling:** Trước khi insert, app kiểm tra tên ingredient trùng/gần giống trong DB. Nếu trùng → cảnh báo user + cho chọn: cập nhật ingredient cũ hoặc tạo mới.
+> **Management UX principle:** Tab `Quản lý` mở `Món ăn` trước. Segment order là `Món ăn | Thư viện nguyên liệu`. `Thư viện nguyên liệu` là supporting library/master data, không phải bước bắt buộc trước khi tạo món.
+> **Ingredient library edit principle:** Tap nguyên liệu trong `Thư viện nguyên liệu` phải mở detail/read-only trước để user thấy dinh dưỡng, đơn vị thường dùng và món đang dùng. Chỉ khi user bấm `Sửa thông tin` mới mở form sửa. V1 `Sửa nguyên liệu` là sửa global; dish totals sẽ derive lại từ `dish_with_totals`, nên referenced ingredient phải có impact warning.
+> **Measurement specificity principle (Phase 1.5A):** Global conversion chỉ an toàn cho true mass/volume (`g`, `kg`, `ml`, `l`). Các unit `piece/quả/trái/củ/tép`, cooking volume khi cần gram (`cup`, `tbsp`, `tsp`), package (`pack`, `bottle`) và `serving` phải có conversion theo từng ingredient/product/state/size. Nếu thiếu conversion, UI phải hỏi user một câu cụ thể thay vì tự đoán.
+> **Gross vs edible principle (Phase 1.5A):** Nutrition luôn tính trên phần ăn được (`edible amount`). Nếu input là gross weight (ví dụ 1 trái dưa hấu có vỏ, khoai tây trước khi gọt), hệ thống phải có `edible_yield_ratio` hoặc hỏi user trước khi tính dinh dưỡng authoritative.
 
 **Tiêu chí chấp nhận:**
 - [ ] CRUD hoạt động đúng, data persist sau restart
@@ -115,16 +121,18 @@ IngredientUnit {
 
 ### F-02: Quản lý Món ăn
 
-**Mô tả:** CRUD món ăn. Mỗi món gồm danh sách nguyên liệu (với khối lượng) → dinh dưỡng tổng được **tính derived** từ nguyên liệu (single source of truth: SQL VIEW `dish_with_totals`). Không có cơ chế nhập tay total.
+**Mô tả:** CRUD món ăn là flow chính của tab `Quản lý`. Mỗi món gồm danh sách nguyên liệu (với khối lượng) → dinh dưỡng tổng được **tính derived** từ nguyên liệu (single source of truth: SQL VIEW `dish_with_totals`). Không có cơ chế nhập tay total. Khi thiếu nguyên liệu, user tạo nhanh nguyên liệu ngay trong flow món và quay lại món với nguyên liệu vừa tạo được chọn sẵn.
 
 **2 cách thêm món (V1):**
 
 | Cách | Mô tả | Khi nào dùng |
 |------|-------|-------------|
-| **Ingredient-based** | Chọn nguyên liệu + nhập số lượng theo unit hợp lệ của từng ingredient (`g`, `tbsp`, `piece`, `clove`, `pinch`...) → tự tính nutrition | Muốn chính xác, tự chọn |
+| **Ingredient-based** | Chọn nguyên liệu + nhập số lượng theo unit hợp lệ của từng ingredient (`g`, `tbsp`, `piece`, `clove`, `pinch`...) → tự tính nutrition. Nếu nguyên liệu chưa có, tạo nhanh ngay trong flow món với CTA `Lưu và thêm vào món`. | Muốn chính xác, tự chọn |
 | **🤖 AI Auto-fill** | Nhập tên món → bấm AI → AI trả về nguyên liệu + khối lượng thông dụng → User confirm | Muốn chính xác nhưng không biết nguyên liệu |
 
 > **Quick Add đã bị loại bỏ khỏi V1.** Mọi món ăn đều phải có danh sách `dish_ingredient`; total nutrition luôn derived từ ingredient (xem `docs/4-architecture/business-rules.md` — RULE-DISH-TOTAL).
+> **Missing conversion handling (Phase 1.5A):** Khi user nhập amount/unit mà resolver không convert được về `g/ml` canonical, app không được silent convert hoặc fallback `1g = 1ml`. UI phải hỏi conversion bằng ngôn ngữ đời thực, ví dụ “1 quả cà chua của bạn khoảng bao nhiêu gram?” với lựa chọn `Nhỏ / Vừa / Lớn / Tự nhập`.
+> **Conversion snapshot (Phase 1.5A):** Dòng nguyên liệu trong món/công thức nên lưu input gốc + normalized amount + snapshot conversion đã dùng (`quantity_per_unit`, `applies_to`, `edible_yield_ratio`, `confidence`, `version`) để tránh drift khi measurement master thay đổi sau này.
 
 **AI Auto-fill Flow:**
 
@@ -204,6 +212,73 @@ DishIngredient {
 - [ ] Hiển thị tổng nutrition mỗi món (đọc từ `dish_with_totals`)
 - [ ] Tìm kiếm món ăn theo tên
 - [ ] App ship sẵn 20 món Việt curated dưới dạng `1 serving` templates để user có dữ liệu nền ngay từ lần mở đầu tiên
+
+---
+
+### F-02.5: Kho nguyên liệu & Measurement Layer (Phase 1.5A)
+
+**Mô tả:** Bổ sung lớp quản lý nguyên liệu đang có trong nhà (pantry/stock) và lớp đo lường nguyên liệu giàu hơn để xử lý chính xác count unit, cooking unit, package/serving unit, gross weight và edible weight. Đây là extension trước khi implement barcode/product import hoặc AI nâng cao; runtime code chưa được sửa trong tài liệu này.
+
+**Lý do:** F-01/F-02 hiện đủ cho Phase 1 dish-first, nhưng chưa đáp ứng đầy đủ các case hằng ngày như “4 quả cà chua trong tủ lạnh”, “1 trái dưa hấu 5kg gross, ăn được 60%”, “1 cup bột mì khác 1 cup sữa”, “1 serving theo bao bì”.
+
+**Chức năng chi tiết:**
+
+| Chức năng | Mô tả |
+|---|---|
+| **Pantry list** | Hiển thị nguyên liệu/product đang có, số lượng còn lại, vị trí lưu trữ (`Tủ lạnh`, `Tủ đông`, `Kệ bếp`), hạn dùng và cảnh báo sắp hết hạn. |
+| **Add stock** | Thêm nguyên liệu bằng search, scan barcode (future), chọn từ DB hoặc manual input; lưu input gốc + normalized edible quantity. |
+| **Ingredient measurement** | Quản lý conversion theo từng ingredient/product/state/size: `1 quả cà chua vừa ≈ 120g`, `1 cup bột mì ≈ 120g`, `1 chai sữa = 1000ml`. |
+| **Gross/edible handling** | Phân biệt gross amount và edible amount; nếu nguyên liệu có vỏ/xương/hao hụt, dùng `edible_yield_ratio`. |
+| **Missing conversion** | Nếu user nhập unit chưa có conversion, UI hỏi một câu cụ thể và cho chọn “chỉ dùng lần này” hoặc “nhớ cho sau”. |
+| **Nutrition preview** | Sau khi nhập amount/unit, preview kcal/protein/carbs/fat theo normalized edible amount trước khi save. |
+| **Snapshot** | Pantry item / recipe line / meal log lưu conversion snapshot; meal/food log lịch sử lưu nutrition snapshot. |
+
+**Data target:**
+
+```ts
+IngredientMeasurement {
+  ingredient_id: string
+  variant_id?: string
+  unit_id: string                         // piece, cup, tbsp, serving, pack...
+  display_label?: string                  // "quả vừa", "cup bột mì"
+  size_option?: 'small' | 'medium' | 'large' | 'custom' | 'not_applicable'
+  quantity_per_unit: number               // 1 unit = ?
+  quantity_unit_id: 'g' | 'ml'
+  applies_to: 'gross' | 'edible'
+  edible_yield_ratio?: number             // 0..1 nếu applies_to = gross
+  is_default: boolean
+  is_approximate: boolean
+  confidence: 'verified' | 'estimated' | 'user_custom'
+  version: number
+}
+
+PantryItem {
+  ingredient_variant_id?: string
+  product_id?: string
+  input_quantity_value: number
+  input_unit_id: string
+  storage_location_id: string
+  expiry_date?: string
+  gross_quantity?: number
+  edible_quantity?: number
+  remaining_edible_quantity?: number
+  conversion_snapshot_json: string
+}
+```
+
+**Acceptance criteria (Phase 1.5A):**
+
+- [ ] User xem được pantry theo vị trí lưu trữ và hạn dùng.
+- [ ] User thêm stock bằng search/chọn ingredient có sẵn; manual create chỉ là fallback.
+- [ ] User nhập `g/kg/ml/l` bằng global conversion an toàn.
+- [ ] User nhập `quả/trái/củ/tép/cup/tbsp/tsp/pack/bottle/serving` chỉ khi có ingredient/product-specific measurement.
+- [ ] Nếu thiếu conversion, UI hỏi weight/size/yield trước khi tính nutrition.
+- [ ] Cà chua, trứng, dưa hấu, khoai tây, bột mì, sữa có example measurement rõ.
+- [ ] Pantry item lưu input gốc + normalized edible quantity + conversion snapshot.
+- [ ] Recipe line preview nutrition theo normalized edible amount.
+- [ ] Food log/meal history dùng nutrition snapshot để không drift khi ingredient/measurement đổi sau này.
+
+**Mockup spec:** `docs/3-design/mockups/phase-1-5-pantry-recipe-nutrition-wireflow.html`.
 
 ---
 
@@ -805,7 +880,7 @@ Bước 2: Thông tin cơ bản
 ## 8. Feature Dependency Map
 
 ```
-F-01 (Nguyên liệu) ──→ F-02 (Món ăn + AI Auto-fill) ──→ F-03 (Calendar + AI Plan)
+F-02 (Món ăn-first + contextual ingredient creation) ──→ F-01 (Thư viện nguyên liệu hỗ trợ) ──→ F-03 (Calendar + AI Plan)
                                                               │
                                                               ▼
                                                          F-04 (Nutrition) ──→ F-07 (AI Insights)
@@ -823,7 +898,7 @@ F-13 (Settings) ← affects F-04 targets + F-08 plans + F-07 AI tone
 ```
 
 **Build Order (theo dependency):**
-1. F-01 → F-02 → F-03 → F-04 (Core Nutrition)
+1. F-02 món ăn-first + F-01 thư viện nguyên liệu hỗ trợ → F-03 → F-04 (Core Nutrition)
 2. F-08 → F-09 → F-10 (Core Fitness)
 3. F-05 → F-06 → F-07 (AI Features)
 4. F-11 (AI Training — depends on F-08 + F-09)

@@ -161,9 +161,11 @@ CREATE INDEX idx_unit_type ON unit(unit_type);
 
 Rules:
 - `g`, `kg` là global mass units.
-- `ml`, `l`, `tbsp`, `tsp`, `cup` là global volume units.
-- `piece`, `clove`, `bunch`, `slice`, `pinch` có thể là ingredient-specific trong cách convert về basis.
+- `ml`, `l`, `tbsp`, `tsp`, `cup` là global volume units khi dùng để quy đổi về `ml`.
+- `tbsp`, `tsp`, `cup` **không** tự quy đổi sang `g` nếu ingredient nutrition basis là mass; cần `ingredient_unit.factor_to_basis`, `ingredient_measurement`, hoặc `density_g_per_ml` đáng tin.
+- `piece`, `clove`, `bunch`, `slice`, `pinch`, `pack`, `bottle`, `serving` là ingredient/product-specific trong cách convert về basis.
 - `is_approximate = 1` dùng cho unit ước lượng; UI phải hiển thị dấu `≈` hoặc nhãn `ước lượng`.
+- Phase 1.5A target nên bổ sung `requires_food_specific_conversion` để guard các unit không được global-convert.
 
 ### 4.0b ingredient_unit
 
@@ -190,6 +192,85 @@ Rules:
 - `factor_to_basis > 0`.
 - `factor_to_basis` luôn được hiểu theo `nutrition_basis_unit` hiện tại của ingredient.
 - `ingredient_unit` KHÔNG lưu nutrition snapshot theo unit.
+
+
+#### 4.0c ingredient_measurement (Phase 1.5A target)
+
+`ingredient_unit` đủ cho Phase 1, nhưng chưa đủ cho pantry/recipe/nutrition use case có size, gross/edible, source confidence và versioning. Phase 1.5A target thêm `ingredient_measurement` như measurement layer canonical; `ingredient_unit` có thể được giữ làm compatibility view hoặc migration source.
+
+```sql
+CREATE TABLE ingredient_measurement (
+  id                  TEXT PRIMARY KEY,
+  ingredient_id       TEXT NOT NULL REFERENCES ingredient(id) ON DELETE CASCADE,
+  variant_id          TEXT REFERENCES ingredient_variant(id) ON DELETE CASCADE,
+  unit_id             TEXT NOT NULL REFERENCES unit(id),          -- piece, cup, tbsp, tsp, pack, bottle, serving...
+  display_label       TEXT,                                       -- "quả vừa", "cup bột mì", "chai 1 lít"
+  size_option         TEXT CHECK (size_option IN ('small', 'medium', 'large', 'custom', 'not_applicable')),
+  quantity_per_unit   REAL NOT NULL,                              -- 1 unit = ?
+  quantity_unit_id    TEXT NOT NULL REFERENCES unit(id),           -- usually 'g' or 'ml'
+  applies_to          TEXT NOT NULL CHECK (applies_to IN ('gross', 'edible')),
+  edible_yield_ratio  REAL CHECK (edible_yield_ratio > 0 AND edible_yield_ratio <= 1),
+  is_default          INTEGER NOT NULL DEFAULT 0,
+  is_approximate      INTEGER NOT NULL DEFAULT 1,
+  confidence          TEXT NOT NULL CHECK (confidence IN ('verified', 'estimated', 'user_custom')),
+  data_source_id      TEXT REFERENCES data_source(id),
+  version             INTEGER NOT NULL DEFAULT 1,
+  created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at          TEXT
+);
+
+CREATE INDEX idx_ingredient_measurement_ingredient ON ingredient_measurement(ingredient_id);
+CREATE INDEX idx_ingredient_measurement_variant ON ingredient_measurement(variant_id);
+CREATE UNIQUE INDEX idx_ingredient_measurement_default
+  ON ingredient_measurement(ingredient_id, COALESCE(variant_id, ''), unit_id, COALESCE(size_option, ''))
+  WHERE is_default = 1;
+```
+
+Rules:
+- `piece/quả/trái/củ/tép`, `pack`, `bottle`, `serving` không được global-convert; bắt buộc có measurement theo ingredient/product/state/size.
+- `cup/tbsp/tsp` có thể global-convert sang `ml`; nếu cần sang `g` thì phải có measurement hoặc density đáng tin.
+- Nếu `applies_to = 'gross'`, nutrition calculation phải nhân `edible_yield_ratio` trước khi tính macro.
+- Mọi UI hiển thị measurement `is_approximate = 1` phải có dấu `≈` hoặc nhãn `ước lượng`.
+- Khi measurement được dùng trong pantry/recipe/log, saved row phải lưu conversion snapshot gồm `measurement_id`, `version`, `quantity_per_unit`, `quantity_unit_id`, `applies_to`, `edible_yield_ratio`, `confidence`.
+
+#### 4.0d ingredient_variant (Phase 1.5A target)
+
+```sql
+CREATE TABLE ingredient_variant (
+  id                    TEXT PRIMARY KEY,
+  ingredient_id          TEXT NOT NULL REFERENCES ingredient(id) ON DELETE CASCADE,
+  state                 TEXT NOT NULL CHECK (state IN ('raw', 'cooked', 'peeled', 'chopped', 'canned', 'dried', 'frozen', 'drained', 'roasted', 'boiled')),
+  form                  TEXT,                         -- whole, diced, sliced, minced, powder, liquid...
+  preparation_note      TEXT,
+  default_measurement_id TEXT REFERENCES ingredient_measurement(id),
+  is_default            INTEGER NOT NULL DEFAULT 0,
+  created_at            TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at            TEXT
+);
+
+CREATE INDEX idx_ingredient_variant_ingredient ON ingredient_variant(ingredient_id);
+CREATE UNIQUE INDEX idx_ingredient_variant_unique
+  ON ingredient_variant(ingredient_id, state, COALESCE(form, ''));
+```
+
+Rules:
+- Dùng variant khi raw/cooked/peeled/chopped/canned/dried có nutrition hoặc conversion khác nhau.
+- SQLite không cho expression như `COALESCE(form, '')` trong table-level `UNIQUE(...)`; dùng unique expression index riêng như trên.
+- MVP Phase 1.5A có thể seed default variant `raw/whole` cho ingredient hiện có rồi mở rộng dần.
+
+#### 4.0e data_source (Phase 1.5A/2 target)
+
+```sql
+CREATE TABLE data_source (
+  id              TEXT PRIMARY KEY,
+  source_type     TEXT NOT NULL CHECK (source_type IN ('USDA', 'OpenFoodFacts', 'Nutritionix', 'AI', 'User', 'CuratedDB')),
+  external_id     TEXT,
+  source_url      TEXT,
+  license         TEXT,
+  fetched_at      TEXT,
+  raw_payload_json TEXT
+);
+```
 
 ### 4.1 ingredient
 
@@ -227,9 +308,51 @@ CREATE INDEX idx_ingredient_category ON ingredient(category);
 ```
 
 Rules:
-- Mỗi ingredient chỉ có đúng 1 nutrition basis authoritative: `100g` hoặc `100ml`.
-- `density_g_per_ml` là optional. Nếu có, chỉ dùng làm bridge khi cần convert khác dimension và không có curated `factor_to_basis` phù hợp hơn.
+- Mỗi ingredient chỉ có đúng 1 nutrition basis authoritative: `100g` hoặc `100ml` trong Phase 1.
+- `density_g_per_ml` là optional. Nếu có, chỉ dùng làm bridge khi cần convert khác dimension và không có curated `factor_to_basis` / `ingredient_measurement` phù hợp hơn.
 - Scope nutrient của redesign này vẫn là `calories`, `protein`, `carbs`, `fat`, `fiber`. `sugar` / `sodium` chưa được thêm vào schema Phase 1 này.
+- Phase 1.5A có thể thêm `nutrition_profile` để lưu raw source nutrition per `100g`, `100ml`, `piece`, hoặc `serving`, nhưng calculation vẫn phải normalize về `100g/100ml` khi có đủ conversion.
+
+#### 4.1b nutrition_profile (Phase 1.5A/2 target)
+
+Bảng này lưu provenance của nutrition source. Phase 1 vẫn dùng columns trực tiếp trên `ingredient`; Phase 1.5A/2 dùng `nutrition_profile` khi cần product/barcode, serving/package, hoặc nhiều source cho cùng ingredient variant.
+
+```sql
+CREATE TABLE nutrition_profile (
+  id                       TEXT PRIMARY KEY,
+  ingredient_variant_id    TEXT REFERENCES ingredient_variant(id) ON DELETE CASCADE,
+  product_id               TEXT REFERENCES product(id) ON DELETE CASCADE,
+  basis_type               TEXT NOT NULL CHECK (basis_type IN ('per_100g', 'per_100ml', 'per_piece', 'per_serving')),
+  basis_quantity           REAL NOT NULL,
+  basis_unit_id            TEXT NOT NULL REFERENCES unit(id),
+  calories                 REAL NOT NULL,
+  protein_g                REAL NOT NULL DEFAULT 0,
+  carbs_g                  REAL NOT NULL DEFAULT 0,
+  fat_g                    REAL NOT NULL DEFAULT 0,
+  fiber_g                  REAL NOT NULL DEFAULT 0,
+  sugar_g                  REAL,
+  sodium_mg                REAL,
+  normalized_basis_unit_id TEXT CHECK (normalized_basis_unit_id IN ('g', 'ml')),
+  calories_per_100         REAL,
+  protein_per_100          REAL,
+  carbs_per_100            REAL,
+  fat_per_100              REAL,
+  fiber_per_100            REAL,
+  serving_size_value       REAL,
+  serving_size_unit_id     TEXT REFERENCES unit(id),
+  serving_measurement_id   TEXT REFERENCES ingredient_measurement(id),
+  data_source_id           TEXT REFERENCES data_source(id),
+  confidence               TEXT NOT NULL CHECK (confidence IN ('verified', 'estimated', 'user_custom', 'ai_estimated')),
+  is_default               INTEGER NOT NULL DEFAULT 0,
+  created_at               TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at               TEXT,
+  CHECK ((ingredient_variant_id IS NOT NULL) OR (product_id IS NOT NULL))
+);
+```
+
+Rules:
+- `per_piece` và `per_serving` chỉ được dùng cho precise calculation khi có serving/measurement convert được về `g/ml`.
+- Product/barcode nutrition có thể lưu source values (`per_serving`) và normalized values (`*_per_100`) song song.
 
 Rule provenance cho `ingredient`:
 - Seed ingredient insert từ `ingredients.json` phải dùng `source = 'db'`
@@ -319,6 +442,12 @@ CREATE TABLE dish_ingredient (
 
   UNIQUE(dish_id, ingredient_id)
 );
+
+-- Phase 1.5A target extension:
+-- measurement_id TEXT REFERENCES ingredient_measurement(id),
+-- size_option TEXT,
+-- conversion_snapshot_json TEXT,
+-- normalized_unit_id TEXT CHECK (normalized_unit_id IN ('g', 'ml'))
 
 CREATE INDEX idx_dish_ingredient_dish ON dish_ingredient(dish_id);
 ```
@@ -419,6 +548,95 @@ CREATE TABLE planned_dish (
 
 CREATE INDEX idx_planned_dish_slot ON planned_dish(meal_slot_id);
 ```
+
+
+### 4.7 storage_location (Phase 1.5A target)
+
+Vị trí lưu trữ nguyên liệu trong nhà.
+
+```sql
+CREATE TABLE storage_location (
+  id              TEXT PRIMARY KEY,
+  user_id         TEXT REFERENCES user_profile(id),
+  name            TEXT NOT NULL,                 -- "Tủ lạnh", "Tủ đông", "Kệ bếp"
+  type            TEXT NOT NULL CHECK (type IN ('fridge', 'freezer', 'pantry', 'spice_rack', 'custom')),
+  display_order   INTEGER NOT NULL DEFAULT 0,
+  created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at      TEXT
+);
+```
+
+### 4.8 pantry_item (Phase 1.5A target)
+
+Stock/lot nguyên liệu user đang có. Không trộn hạn dùng/vị trí vào `ingredient` master.
+
+```sql
+CREATE TABLE pantry_item (
+  id                         TEXT PRIMARY KEY,
+  user_id                    TEXT NOT NULL REFERENCES user_profile(id),
+  ingredient_id              TEXT REFERENCES ingredient(id),
+  ingredient_variant_id      TEXT REFERENCES ingredient_variant(id),
+  product_id                 TEXT REFERENCES product(id),
+  storage_location_id        TEXT NOT NULL REFERENCES storage_location(id),
+  input_quantity_value       REAL NOT NULL,
+  input_unit_id              TEXT NOT NULL REFERENCES unit(id),
+  measurement_id             TEXT REFERENCES ingredient_measurement(id),
+  size_option                TEXT,
+  gross_quantity             REAL,
+  gross_unit_id              TEXT REFERENCES unit(id),
+  edible_quantity            REAL,
+  edible_unit_id             TEXT REFERENCES unit(id),
+  remaining_edible_quantity  REAL,
+  conversion_snapshot_json   TEXT NOT NULL,
+  purchase_date              TEXT,
+  opened_at                  TEXT,
+  expiry_date                TEXT,
+  status                     TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'consumed', 'expired', 'discarded')),
+  created_at                 TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at                 TEXT,
+  CHECK ((ingredient_id IS NOT NULL) OR (ingredient_variant_id IS NOT NULL) OR (product_id IS NOT NULL))
+);
+
+CREATE INDEX idx_pantry_item_location ON pantry_item(storage_location_id);
+CREATE INDEX idx_pantry_item_expiry ON pantry_item(expiry_date);
+```
+
+Rules:
+- `input_quantity_value` + `input_unit_id` giữ nguyên cách user nhập.
+- `edible_quantity` là amount dùng cho nutrition; `gross_quantity` dùng cho inventory nếu input có phần không ăn được.
+- `conversion_snapshot_json` bắt buộc để biết conversion nào đã được dùng tại thời điểm nhập stock.
+- Nhiều lot cùng ingredient nhưng khác expiry phải là nhiều `pantry_item`, không gộp mất hạn dùng.
+
+### 4.9 product + barcode (Phase 2 target)
+
+```sql
+CREATE TABLE product (
+  id                  TEXT PRIMARY KEY,
+  ingredient_id       TEXT REFERENCES ingredient(id),
+  name                TEXT NOT NULL,
+  brand               TEXT,
+  package_quantity    REAL,
+  package_unit_id     TEXT REFERENCES unit(id),
+  serving_size_text   TEXT,
+  data_source_id      TEXT REFERENCES data_source(id),
+  confidence          TEXT NOT NULL CHECK (confidence IN ('verified', 'estimated', 'user_custom')),
+  created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at          TEXT
+);
+
+CREATE TABLE barcode (
+  id             TEXT PRIMARY KEY,
+  product_id     TEXT NOT NULL REFERENCES product(id) ON DELETE CASCADE,
+  barcode_value  TEXT NOT NULL UNIQUE,
+  barcode_type   TEXT CHECK (barcode_type IN ('EAN', 'UPC', 'QR', 'OTHER'))
+);
+```
+
+Rules:
+- Barcode/product scope để Phase 2 sau khi manual pantry + measurement ổn định.
+- Product có thể có package quantity, serving size và nutrition profile riêng; không ép mọi product thành ingredient thuần.
+
+---
 
 ---
 
