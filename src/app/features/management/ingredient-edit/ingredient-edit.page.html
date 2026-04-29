@@ -4,11 +4,6 @@
       <ion-back-button defaultHref="/tabs/management" />
     </ion-buttons>
     <ion-title>{{ isEdit() ? 'Sửa nguyên liệu' : 'Thêm nguyên liệu' }}</ion-title>
-    <ion-buttons slot="end">
-      <ion-button strong="true" [disabled]="saving()" (click)="onSave()">
-        {{ saving() ? 'Đang lưu...' : 'Lưu' }}
-      </ion-button>
-    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -182,74 +177,34 @@
       </div>
     } @else {
       <div class="unit-list" [class.invalid]="showErrors() && unitListErrorMessages().length > 0">
-        @for (unit of formSignal().units; track unit.local_id; let i = $index) {
-          <article class="unit-card">
-            <div class="unit-card__top">
-              <div class="unit-card__title">{{ unitTitle(unit) }}</div>
-              <div class="unit-card__badges">
-                @if (unit.is_default) {
-                  <span class="unit-badge badge-default">mặc định</span>
-                }
-                <span
-                  class="unit-badge"
-                  [class.badge-approx]="unit.is_approximate"
-                  [class.badge-exact]="!unit.is_approximate"
-                >
-                  {{ unit.is_approximate ? 'ước lượng' : 'chuẩn' }}
-                </span>
+        @for (unit of formSignal().units; track unit.local_id) {
+          <article class="unit-card unit-card--summary">
+            <button
+              type="button"
+              class="unit-card__summary-action"
+              (click)="openUnitEditSheet(unit.local_id)"
+              [attr.aria-label]="'Sửa đơn vị ' + unitTitle(unit)"
+            >
+              <div class="unit-card__top">
+                <div class="unit-card__title">{{ unitTitle(unit) }}</div>
+                <div class="unit-card__badges">
+                  @if (unit.is_default) {
+                    <span class="unit-badge badge-default">mặc định</span>
+                  }
+                  <span
+                    class="unit-badge"
+                    [class.badge-approx]="unit.is_approximate"
+                    [class.badge-exact]="!unit.is_approximate"
+                  >
+                    {{ unit.is_approximate ? 'ước lượng' : 'chuẩn' }}
+                  </span>
+                </div>
               </div>
-            </div>
-
-            <div class="unit-grid">
-              <app-form-field label="Hiển thị" [inputId]="'ingr-unit-display-' + unit.local_id">
-                <input
-                  [id]="'ingr-unit-display-' + unit.local_id"
-                  class="input-native"
-                  [formField]="ingredientForm.units[i].display_label"
-                  [placeholder]="unit.short_name_vi"
-                />
-              </app-form-field>
-              <app-form-field
-                [label]="'1 đơn vị = ? ' + formSignal().nutrition_basis_unit"
-                [inputId]="'ingr-unit-factor-' + unit.local_id"
-                [invalid]="
-                  showErrors() && ingredientForm.units[i].factor_to_basis().errors().length > 0
-                "
-                [errorMessage]="
-                  ingredientForm.units[i].factor_to_basis().errors()[0]?.message ?? ''
-                "
-              >
-                <input
-                  [id]="'ingr-unit-factor-' + unit.local_id"
-                  class="input-native"
-                  type="number"
-                  inputmode="decimal"
-                  [formField]="ingredientForm.units[i].factor_to_basis"
-                  [class.input-native--readonly]="!unit.is_approximate"
-                  step="0.001"
-                />
-                @if (!unit.is_approximate) {
-                  <div class="unit-grid__hint">Đơn vị chuẩn — quy đổi cố định</div>
-                }
-              </app-form-field>
-            </div>
-
-            <div class="unit-meta">
-              {{ unitExample(unit) }}
-            </div>
-
-            <div class="unit-actions">
-              <button type="button" class="unit-action" (click)="markDefault(unit.local_id)">
-                Đặt mặc định
-              </button>
-              <button
-                type="button"
-                class="unit-action unit-action--danger"
-                (click)="removeUnit(unit.local_id)"
-              >
-                Xóa
-              </button>
-            </div>
+              <div class="unit-meta">
+                {{ unitExample(unit) }}
+              </div>
+              <span class="unit-edit-chip">Cập nhật quy đổi</span>
+            </button>
           </article>
         }
       </div>
@@ -291,6 +246,16 @@
         Xem các món đang dùng nguyên liệu này
       </button>
     }
+
+    <button type="button" class="btn-cta" [disabled]="saving()" (click)="onSave()">
+      {{ saving() ? 'Đang lưu...' : isEdit() ? 'Lưu thay đổi' : 'Lưu nguyên liệu' }}
+    </button>
+
+    @if (isEdit()) {
+      <button type="button" class="btn-danger-text" (click)="openDeleteDialog()">
+        Xóa nguyên liệu
+      </button>
+    }
   </div>
 
   @if (isEdit() && ingredientId(); as id) {
@@ -301,6 +266,138 @@
       (closed)="onDishesSheetClosed()"
     />
   }
+
+  <ion-modal
+    [isOpen]="activeUnitEditLocalId() !== null"
+    [breakpoints]="[0, 0.82, 0.95]"
+    [initialBreakpoint]="0.82"
+    [handle]="true"
+    (didDismiss)="closeUnitEditSheet()"
+  >
+    <ng-template>
+      <ion-header class="sheet-header">
+        <ion-toolbar>
+          <div class="sheet-title-row">
+            <h2 class="sheet-title">Cập nhật đơn vị</h2>
+            <button
+              class="sheet-close"
+              type="button"
+              (click)="closeUnitEditSheet()"
+              aria-label="Đóng"
+            >
+              <ion-icon name="chevron-down-outline" />
+            </button>
+          </div>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="sheet-content unit-edit-sheet">
+        @if (unitDraft(); as draft) {
+          <div class="sheet-card">
+            <div class="unit-card__top">
+              <div class="unit-card__title">{{ unitTitle(draft) }}</div>
+              <div class="unit-card__badges">
+                @if (draft.is_default) {
+                  <span class="unit-badge badge-default">mặc định</span>
+                }
+                <span
+                  class="unit-badge"
+                  [class.badge-approx]="draft.is_approximate"
+                  [class.badge-exact]="!draft.is_approximate"
+                >
+                  {{ draft.is_approximate ? 'ước lượng' : 'chuẩn' }}
+                </span>
+              </div>
+            </div>
+
+            <app-form-field label="Hiển thị" inputId="unit-draft-display">
+              <input
+                id="unit-draft-display"
+                class="input-native"
+                [value]="draft.display_label"
+                [placeholder]="draft.short_name_vi"
+                (input)="updateUnitDraftDisplayLabel($event)"
+              />
+            </app-form-field>
+
+            <app-form-field
+              label="1 đơn vị = ? {{ formSignal().nutrition_basis_unit }}"
+              inputId="unit-draft-factor"
+            >
+              <input
+                id="unit-draft-factor"
+                class="input-native"
+                type="number"
+                inputmode="decimal"
+                [value]="draft.factor_to_basis"
+                [class.input-native--readonly]="!draft.is_approximate"
+                [readOnly]="!draft.is_approximate"
+                step="0.001"
+                (input)="updateUnitDraftFactor($event)"
+              />
+              @if (!draft.is_approximate) {
+                <div class="unit-grid__hint">Đơn vị chuẩn — quy đổi cố định</div>
+              }
+            </app-form-field>
+
+            <div class="unit-meta">{{ unitExample(draft) }}</div>
+
+            <button
+              type="button"
+              class="btn-outline btn-outline--full"
+              [disabled]="draft.is_default"
+              (click)="markDraftDefault()"
+            >
+              {{ draft.is_default ? 'Đang là mặc định' : 'Đặt làm mặc định' }}
+            </button>
+            <button type="button" class="btn-danger-text" (click)="removeDraftUnit()">
+              Xóa đơn vị
+            </button>
+          </div>
+          <div class="sheet-actions">
+            <button type="button" class="btn-outline" (click)="closeUnitEditSheet()">Hủy</button>
+            <button type="button" class="btn-cta" (click)="saveUnitDraft()">Lưu đơn vị</button>
+          </div>
+        }
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <app-confirm-dialog
+    [isOpen]="pendingDeleteId() !== null"
+    [title]="
+      deleteReferenceLoading()
+        ? 'Đang kiểm tra...'
+        : deleteReferenceCount() > 0
+          ? 'Không thể xóa'
+          : 'Xóa nguyên liệu?'
+    "
+    [message]="
+      deleteReferenceLoading()
+        ? 'Đang kiểm tra món ăn đang dùng nguyên liệu này.'
+        : deleteReferenceCount() > 0
+          ? 'Nguyên liệu này đang được dùng trong ' + deleteReferenceCount() + ' món ăn.'
+          : 'Bạn có chắc muốn xóa nguyên liệu này? Thao tác này không thể hoàn tác.'
+    "
+    [cancelLabel]="deleteReferenceCount() > 0 ? 'Đóng' : 'Giữ lại'"
+    [confirmLabel]="
+      deleteReferenceLoading() ? 'Đang kiểm tra...' : deleteReferenceCount() > 0 ? 'Đóng' : 'Xóa'
+    "
+    [confirmVariant]="deleteReferenceCount() > 0 || deleteReferenceLoading() ? 'primary' : 'danger'"
+    (cancelled)="closeDeleteDialog()"
+    [confirmDisabled]="deleteReferenceLoading()"
+    (confirmed)="confirmDelete()"
+  />
+
+  <app-confirm-dialog
+    [isOpen]="discardDialogOpen()"
+    title="Bỏ thay đổi?"
+    message="Bạn có thay đổi chưa lưu. Nếu rời khỏi màn hình này, các thay đổi sẽ bị mất."
+    cancelLabel="Ở lại"
+    confirmLabel="Bỏ thay đổi"
+    confirmVariant="danger"
+    (cancelled)="cancelDiscardChanges()"
+    (confirmed)="confirmDiscardChangesDialog()"
+  />
 
   <app-bottom-sheet-picker
     #categoryPicker

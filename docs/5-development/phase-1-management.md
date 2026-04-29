@@ -15,8 +15,8 @@
 
 | Feature | Phần in scope Phase 1 |
 |---------|----------------------|
-| **F-01** Quản lý Nguyên liệu | CRUD thủ công + tìm kiếm + sắp xếp + curated ingredient seed phục vụ trực tiếp cho 20 món Việt core |
-| **F-02** Quản lý Món ăn | CRUD **2/3 cách**: (1) Ingredient-based, (2) Quick add, + ship sẵn 20 món Việt curated (6 sáng / 7 trưa / 7 tối) |
+| **F-01** Thư viện Nguyên liệu | Supporting library: tìm kiếm, xem/sửa/xóa có kiểm soát + curated ingredient seed phục vụ trực tiếp cho flow tạo món |
+| **F-02** Quản lý Món ăn | Flow chính của Quản lý: ingredient-based dish CRUD + contextual ingredient quick-create khi thiếu nguyên liệu + ship sẵn 20 món Việt curated (6 sáng / 7 trưa / 7 tối) |
 
 ### Out of scope → Phase 1.5
 
@@ -67,7 +67,6 @@ Các hạng mục phải **done** trước khi start code Phase 1:
     - [ ] `phase-1-ingredient-edit.html`
     - [ ] `phase-1-dish-list.html`
     - [ ] `phase-1-dish-edit-ingredient-based.html`
-    - [ ] `phase-1-dish-edit-quick-add.html`
 - [ ] **ADR-002** (migration strategy) viết + commit — xem §4.1
 - [x] **Danh sách 20 món Việt core** được chốt (6 sáng / 7 trưa / 7 tối) — xem §5.2
 - [x] **Nguồn nutrition authority** cho ingredient canonical values được xác nhận (§5.2) — USDA làm authority chính cho macro ingredient-level
@@ -77,6 +76,18 @@ Các hạng mục có thể **defer** sang Phase 1.5/2:
 - E2E tool decision (O2) — chỉ cần chốt khi bắt đầu viết E2E tests
 
 ---
+
+## 4.0 Management UX Principle
+
+Source-doc guardrails:
+- Product Vision: AI-first, không form-first; interaction hằng ngày nên hướng tới <10 giây; beginner thấy đơn giản, pro vẫn có data chi tiết; local-first, chỉ gọi Gemini khi user chủ động dùng AI.
+- PRD Core Nutrition: F-01 là supporting ingredient library; F-02 là primary dish flow; ingredient nutrition canonical chỉ theo `100g/100ml`; dish total luôn derived từ `dish_with_totals`; Quick Add/manual total không thuộc V1.
+
+- `Quản lý` phải là **Món ăn-first**: user vào tab này để tạo/sửa món ăn, xem calories/macro món và dùng món trong lịch ăn.
+- `Thư viện nguyên liệu` là supporting library/master data. Không xóa bỏ vì ingredient vẫn là source of truth cho nutrition/unit conversion, nhưng không đặt làm entry mặc định.
+- Khi tạo/sửa món và thiếu nguyên liệu, UI phải cho tạo nhanh nguyên liệu trong ngữ cảnh món với CTA `Lưu và thêm vào món`.
+- Tap nguyên liệu trong thư viện phải đi qua detail/read-only trước khi sửa để user thấy nutrition, unit và món đang dùng. CTA `Sửa thông tin` mới mở form sửa.
+- V1 `Sửa nguyên liệu` là sửa global. Nếu ingredient đang được dùng trong món, UI phải cảnh báo impact trước khi sửa/lưu vì `dish_with_totals` derive totals từ ingredient hiện tại.
 
 ## 4. Architecture Decisions cho Phase 1
 
@@ -319,7 +330,7 @@ Note:
 
 **Interface:**
 - `IngredientStore`: signals `ingredients()`, `loading()`, `searchQuery()`, actions `load()`, `add()`, `edit()`, `remove()`, `search(q)`
-- `DishStore`: signals `dishes()`, `loading()`, actions `load()`, `addFromIngredients(data, items)`, `addQuick(data)`, `edit()`, `remove()`
+- `DishStore`: signals `dishes()`, `loading()`, actions `load()`, `addFromIngredients(data, items)`, `addFromAiAutofill(data, items)`, `edit()`, `remove()` — không có action nhập nhanh/manual total trong V1
 
 Stores chỉ giữ list hiện tại + UI state. Source of truth = DB qua repos.
 
@@ -346,20 +357,20 @@ Skip ở Phase 1 (để Phase 2+):
 
 ```
 management/
-├── management.page.ts          (container với tabs: Nguyên liệu | Món ăn)
+├── management.page.ts          (container với tabs: Món ăn | Thư viện nguyên liệu)
 ├── management.routes.ts
 ├── components/
 │   ├── ingredient-list/
 │   ├── ingredient-edit-modal/  (form + validation, no AI button visible trong Phase 1)
 │   ├── dish-list/
-│   └── dish-edit-modal/        (2 modes: ingredient-based | quick-add; no 🤖 button)
+│   └── dish-edit-modal/        (ingredient-based; AI auto-fill entry uses ingredient rows, never manual total)
 ```
 
 **Behavior:**
-- Management page có segment control: "Nguyên liệu" | "Món ăn"
+- Management page có segment control: "Món ăn" | "Thư viện nguyên liệu"; default active tab là "Món ăn"
 - List pages: search + sort; chỉ thêm virtualization nếu thực sự cần sau khi đo performance
-- Edit modals: Ionic modal, submit → repo → store refresh
-- **AI buttons (🤖) KHÔNG render trong Phase 1** (feature flag không cần, chỉ conditional rendering / TODO comment)
+- Edit/detail: Thư viện nguyên liệu dùng detail-first; tap card → detail/read-only → `Sửa thông tin` → impact warning nếu đang dùng trong món → edit form → repo → store refresh
+- **AI Auto-fill is PRD V1 scope**, but it must still return/confirm `ingredients[]`; do not reintroduce Quick Add/manual total. If a runtime milestone defers Gemini wiring, mark the AI CTA as deferred/disabled explicitly rather than replacing it with manual total entry.
 
 ### 5.7 Tests
 
@@ -379,7 +390,7 @@ management/
 - [ ] Cross-dimension conversion dùng đúng thứ tự: curated factor → density → reject
 - [ ] Tìm kiếm ingredient real-time
 - [ ] Tạo dish ingredient-based → calo/macro tự tính đúng
-- [ ] Tạo dish quick-add → data persist
+- [ ] Tạo dish AI auto-fill → user confirms ingredient rows → data persist; no manual total fields
 - [ ] Sửa dish → ingredients update transactional
 - [ ] Xóa dish → generic confirm dialog + không claim full planned_dish-aware UX
 - [ ] Dark mode toggle → UI OK

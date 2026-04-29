@@ -103,11 +103,21 @@
 
 .item-card__main-action {
   width: 100%;
-  padding: 0;
+  margin: -6px;
+  padding: 6px;
   border: none;
+  border-radius: calc(var(--radius-lg) - 6px);
   background: transparent;
   text-align: left;
   color: inherit;
+  transition:
+    background-color 120ms ease,
+    transform 120ms ease;
+}
+
+.item-card__main-action:active {
+  background: rgba(var(--ion-color-primary-rgb), 0.08);
+  transform: scale(0.995);
 }
 
 .item-card__split {

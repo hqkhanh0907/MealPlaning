@@ -11,3 +11,7 @@ export interface DishEditFormValue {
   servings: number | null;
   items: DishIngredientFormItem[];
 }
+
+export interface DishAmountDraft extends DishIngredientFormItem {
+  mode: 'create' | 'edit';
+}

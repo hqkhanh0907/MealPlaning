@@ -16,6 +16,7 @@ Các file HTML trong folder này là **mockup spec chính thức** cho từng m�
 | `phase-1-dish-edit-ingredient-based.html` | 1 | Pending implementation |
 | `phase-1-ingredient-list.html` | 1 | Pending implementation |
 | `phase-1-ingredient-edit.html` | 1 | Pending implementation |
+| `phase-1-5-pantry-recipe-nutrition-wireflow.html` | 1.5 | Draft spec — Pantry + Ingredient Measurement + Recipe Nutrition |
 
 ## Spec phụ thuộc
 

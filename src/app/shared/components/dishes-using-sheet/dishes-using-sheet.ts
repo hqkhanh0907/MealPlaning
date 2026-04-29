@@ -8,13 +8,17 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { IonContent, IonHeader, IonIcon, IonModal, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import {
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonModal,
+  IonTitle,
+  IonToolbar,
+} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { closeOutline, restaurantOutline } from 'ionicons/icons';
-import {
-  DishRepository,
-  type DishListItem,
-} from '../../../core/repositories/dish.repository';
+import { DishRepository, type DishListItem } from '../../../core/repositories/dish.repository';
 
 /**
  * Bottom sheet that lists every dish currently using a given ingredient. Opens

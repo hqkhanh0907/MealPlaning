@@ -1,0 +1,198 @@
+[
+  {
+    "slug": "supercook",
+    "app": "SuperCook Recipe By Ingredient",
+    "url": "https://apps.apple.com/us/app/supercook-recipe-by-ingredient/id1477747816?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/supercook-01.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource125/v4/f6/52/71/f6527121-8987-ccdc-2125-5e4f09f6a179/54364fc8-8888-4dbe-8907-af5c19296046_screenshot1.jpeg/392x696bb.jpg"
+  },
+  {
+    "slug": "supercook",
+    "app": "SuperCook Recipe By Ingredient",
+    "url": "https://apps.apple.com/us/app/supercook-recipe-by-ingredient/id1477747816?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/supercook-02.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource125/v4/1e/39/64/1e396472-0227-457c-7316-2478c80c5388/ef91d365-7095-4a62-a6a5-4bc0b09afb9a_screenshot2.jpeg/392x696bb.jpg"
+  },
+  {
+    "slug": "supercook",
+    "app": "SuperCook Recipe By Ingredient",
+    "url": "https://apps.apple.com/us/app/supercook-recipe-by-ingredient/id1477747816?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/supercook-03.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource125/v4/df/aa/ec/dfaaec56-744f-58c6-9a4f-108b8945c941/9e12bf4d-c144-42e0-b46d-5cf9a0282abb_screenshot3.jpeg/392x696bb.jpg"
+  },
+  {
+    "slug": "supercook",
+    "app": "SuperCook Recipe By Ingredient",
+    "url": "https://apps.apple.com/us/app/supercook-recipe-by-ingredient/id1477747816?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/supercook-04.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource125/v4/8b/35/c6/8b35c6df-e315-9c46-c402-4572c33238f8/587a9347-3bca-44a5-a160-caf951dee29e_screenshot4.jpeg/392x696bb.jpg"
+  },
+  {
+    "slug": "bigoven",
+    "app": "BigOven Recipes & Meal Planner",
+    "url": "https://apps.apple.com/us/app/bigoven-recipes-meal-planner/id294363034?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/bigoven-01.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource112/v4/53/0f/2e/530f2ec1-237c-7c32-574d-12f2da6fc3c4/9b6b2587-0683-4817-bf7f-898a22258f34_iPhone_5.5_-_01_Home.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "bigoven",
+    "app": "BigOven Recipes & Meal Planner",
+    "url": "https://apps.apple.com/us/app/bigoven-recipes-meal-planner/id294363034?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/bigoven-02.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource122/v4/88/43/0b/88430b66-aab8-bb08-1b09-81430adf1952/9825d86e-d05b-4c12-948a-a5b00db4198e_iPhone_5.5_-_02_Collections.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "bigoven",
+    "app": "BigOven Recipes & Meal Planner",
+    "url": "https://apps.apple.com/us/app/bigoven-recipes-meal-planner/id294363034?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/bigoven-03.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource116/v4/a4/ee/8f/a4ee8f9f-20df-5446-3065-4304e2dc9f34/dd90178a-4b8e-48bc-b590-0598ee1a4210_iPhone_5.5_-_03_Groceries.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "bigoven",
+    "app": "BigOven Recipes & Meal Planner",
+    "url": "https://apps.apple.com/us/app/bigoven-recipes-meal-planner/id294363034?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/bigoven-04.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource122/v4/60/b2/99/60b299ca-1b0a-cee4-69b4-7442692b45e9/26c5a6b6-8567-4831-b372-13a4c8cdf638_iPhone_5.5_-_04_Meal_Planner.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "whisk",
+    "app": "Samsung Food: Meal Planner",
+    "url": "https://apps.apple.com/us/app/samsung-food-meal-planner/id1133637674?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/whisk-01.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/67/50/88/67508843-e7f4-5dc1-305c-8c9314ebd7c9/iOS_5.5_-_00.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "whisk",
+    "app": "Samsung Food: Meal Planner",
+    "url": "https://apps.apple.com/us/app/samsung-food-meal-planner/id1133637674?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/whisk-02.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/52/97/1d/52971dd7-95e6-d2c1-bfcd-487ae5c38f43/iOS_5.5_-_01.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "whisk",
+    "app": "Samsung Food: Meal Planner",
+    "url": "https://apps.apple.com/us/app/samsung-food-meal-planner/id1133637674?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/whisk-03.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/e9/a0/ba/e9a0ba43-6311-63be-ba60-181df806d41e/iOS_5.5_-_02.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "whisk",
+    "app": "Samsung Food: Meal Planner",
+    "url": "https://apps.apple.com/us/app/samsung-food-meal-planner/id1133637674?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/whisk-04.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/de/db/4c/dedb4c96-469e-60c8-f8f1-8b49d30a8831/iOS_5.5_-_03.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "mealime",
+    "app": "Mealime Meal Plans & Recipes",
+    "url": "https://apps.apple.com/us/app/mealime-meal-plans-recipes/id1079999103?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/mealime-01.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource125/v4/5c/0c/e8/5c0ce820-2844-6555-70bb-732ad6baf9aa/bfe3e365-9722-4fe1-8445-bfeeb6fdf3e9_app_preview_5.5.png/392x696bb.png"
+  },
+  {
+    "slug": "mealime",
+    "app": "Mealime Meal Plans & Recipes",
+    "url": "https://apps.apple.com/us/app/mealime-meal-plans-recipes/id1079999103?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/mealime-02.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple115/v4/06/78/97/06789741-143d-140e-a31b-cc92688c1bcb/46713c6a-8846-498e-8aee-146111388056_1_30_minute_recipes_5.5.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "mealime",
+    "app": "Mealime Meal Plans & Recipes",
+    "url": "https://apps.apple.com/us/app/mealime-meal-plans-recipes/id1079999103?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/mealime-03.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple115/v4/d2/73/9a/d2739a35-e363-1109-be19-e81753db0619/6b1aa50a-e32c-4352-9d6d-9634e4cdaa02_2_organized_grocery_list_5.5.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "mealime",
+    "app": "Mealime Meal Plans & Recipes",
+    "url": "https://apps.apple.com/us/app/mealime-meal-plans-recipes/id1079999103?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/mealime-04.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple115/v4/32/c5/6d/32c56dc3-2621-43e7-0961-a3524833cc3d/7f010b6e-d7dc-4b57-8443-ede7fb1621bb_3_simple_meal_planner_5.5.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "sidechef",
+    "app": "SideСhef: Easy Cooking Recipes",
+    "url": "https://apps.apple.com/us/app/side%D1%81hef-easy-cooking-recipes/id905229928?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/sidechef-01.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/22/98/3a/22983aa5-8231-7125-84d1-73ee36633d51/00__U00282_U0029.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "sidechef",
+    "app": "SideСhef: Easy Cooking Recipes",
+    "url": "https://apps.apple.com/us/app/side%D1%81hef-easy-cooking-recipes/id905229928?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/sidechef-02.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/e7/9d/c1/e79dc179-8a03-b19c-1e6f-c5bc1182a9c4/9a20c8dd-3fdd-4d46-ba1c-598beac2ad9c_01.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "sidechef",
+    "app": "SideСhef: Easy Cooking Recipes",
+    "url": "https://apps.apple.com/us/app/side%D1%81hef-easy-cooking-recipes/id905229928?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/sidechef-03.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/09/f9/ed/09f9edd0-eee1-94cf-e073-979cd89f6d8d/e9b0128d-1f94-44e2-ac36-a443c2a3f01c_02.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "sidechef",
+    "app": "SideСhef: Easy Cooking Recipes",
+    "url": "https://apps.apple.com/us/app/side%D1%81hef-easy-cooking-recipes/id905229928?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/sidechef-04.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/e6/3b/5d/e63b5d5c-0830-a841-7560-d3539b35f0b2/56292850-ad8f-410a-a6db-906b5d2ef2c2_03.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "platejoy",
+    "app": "Eat This Much - Meal Planner",
+    "url": "https://apps.apple.com/us/app/eat-this-much-meal-planner/id981637806?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/platejoy-01.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource122/v4/9e/8b/b2/9e8bb25f-0217-3d62-a92c-ecaa305777e9/d7571d81-1002-4a31-a775-7129f5a10ea9_iPhone_8_Plus_-_1.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "platejoy",
+    "app": "Eat This Much - Meal Planner",
+    "url": "https://apps.apple.com/us/app/eat-this-much-meal-planner/id981637806?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/platejoy-02.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource112/v4/62/25/c4/6225c49d-e2d1-940f-a73e-c4056c8edf73/77bba1b6-e14a-46d0-9be8-029ab26884e0_iPhone_8_Plus_-_2.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "platejoy",
+    "app": "Eat This Much - Meal Planner",
+    "url": "https://apps.apple.com/us/app/eat-this-much-meal-planner/id981637806?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/platejoy-03.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource112/v4/95/65/d7/9565d70a-0d7a-3856-8c39-53b5505f6418/14de0440-6898-41fd-8443-c46dcef29a48_iPhone_8_Plus_-_3.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "platejoy",
+    "app": "Eat This Much - Meal Planner",
+    "url": "https://apps.apple.com/us/app/eat-this-much-meal-planner/id981637806?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/platejoy-04.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource112/v4/ec/80/8f/ec808f25-e2bb-2f68-5188-48b1c4081bf8/3e11ad91-a412-45dc-8484-05a112f76a78_iPhone_8_Plus_-_4.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "emeals",
+    "app": "Mealime Meal Plans & Recipes",
+    "url": "https://apps.apple.com/us/app/mealime-meal-plans-recipes/id1079999103?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/emeals-01.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource125/v4/5c/0c/e8/5c0ce820-2844-6555-70bb-732ad6baf9aa/bfe3e365-9722-4fe1-8445-bfeeb6fdf3e9_app_preview_5.5.png/392x696bb.png"
+  },
+  {
+    "slug": "emeals",
+    "app": "Mealime Meal Plans & Recipes",
+    "url": "https://apps.apple.com/us/app/mealime-meal-plans-recipes/id1079999103?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/emeals-02.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple115/v4/06/78/97/06789741-143d-140e-a31b-cc92688c1bcb/46713c6a-8846-498e-8aee-146111388056_1_30_minute_recipes_5.5.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "emeals",
+    "app": "Mealime Meal Plans & Recipes",
+    "url": "https://apps.apple.com/us/app/mealime-meal-plans-recipes/id1079999103?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/emeals-03.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple115/v4/d2/73/9a/d2739a35-e363-1109-be19-e81753db0619/6b1aa50a-e32c-4352-9d6d-9634e4cdaa02_2_organized_grocery_list_5.5.jpg/392x696bb.jpg"
+  },
+  {
+    "slug": "emeals",
+    "app": "Mealime Meal Plans & Recipes",
+    "url": "https://apps.apple.com/us/app/mealime-meal-plans-recipes/id1079999103?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/emeals-04.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple115/v4/32/c5/6d/32c56dc3-2621-43e7-0961-a3524833cc3d/7f010b6e-d7dc-4b57-8443-ede7fb1621bb_3_simple_meal_planner_5.5.jpg/392x696bb.jpg"
+  }
+]

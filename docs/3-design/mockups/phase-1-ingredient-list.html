@@ -145,8 +145,8 @@
   }
   body.light .search-bar { background: #fff; border-color: #F0EAE0; }
   body.dark  .search-bar { background: #28251F; border-color: #3E3A33; }
-  body.light .search-bar.focused { border-color: #6B8E6F; box-shadow: 0 0 0 2px rgba(33,150,243,0.12); }
-  body.dark  .search-bar.focused { border-color: #8AA086; box-shadow: 0 0 0 2px rgba(66,165,245,0.15); }
+  body.light .search-bar.focused { border-color: #6B8E6F; box-shadow: 0 0 0 2px rgba(107,142,111,0.12); }
+  body.dark  .search-bar.focused { border-color: #8AA086; box-shadow: 0 0 0 2px rgba(138,160,134,0.15); }
 
   .search-icon { width: 20px; height: 20px; flex-shrink: 0; }
   body.light .search-icon { color: #6B6557; }
@@ -199,8 +199,8 @@
   }
   body.light .filter-chip { background: #fff; border-color: #F0EAE0; color: #6B6557; }
   body.dark  .filter-chip { background: #28251F; border-color: #3E3A33; color: #C9C2B4; }
-  body.light .filter-chip.active { background: rgba(33,150,243,0.15); border-color: rgba(33,150,243,0.3); color: #5A745A; font-weight: 600; }
-  body.dark  .filter-chip.active { background: rgba(66,165,245,0.15); border-color: rgba(66,165,245,0.3); color: #D4DFCE; font-weight: 600; }
+  body.light .filter-chip.active { background: rgba(107,142,111,0.15); border-color: rgba(107,142,111,0.30); color: #5A745A; font-weight: 600; }
+  body.dark  .filter-chip.active { background: rgba(138,160,134,0.15); border-color: rgba(138,160,134,0.30); color: #D4DFCE; font-weight: 600; }
 
   /* =========================================================================
      INGREDIENT CARDS
@@ -457,7 +457,7 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
 <body class="light">
 
 <h1 class="page-title">Phase 1 — Ingredient List</h1>
-<p class="page-subtitle">F-01 Quản lý Nguyên liệu · 7 screens · List, Search, Filter, Empty, Delete</p>
+<p class="page-subtitle">F-01 Thư viện nguyên liệu · Supporting library · 7 screens · List, Search, Filter, Empty, Delete</p>
 
 <div class="theme-toggle">
   <button class="active" onclick="setTheme('light')">☀️ Light</button>
@@ -480,8 +480,8 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
       </div>
       <div class="content">
         <div class="sub-tabs">
-          <div class="sub-tab active">Nguyên liệu</div>
           <div class="sub-tab">Món ăn</div>
+          <div class="sub-tab active">Thư viện nguyên liệu</div>
         </div>
         <!-- Search bar -->
         <div class="search-bar" role="search" aria-label="Tìm nguyên liệu">
@@ -587,8 +587,8 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
       </div>
       <div class="content">
         <div class="sub-tabs">
-          <div class="sub-tab active">Nguyên liệu</div>
           <div class="sub-tab">Món ăn</div>
+          <div class="sub-tab active">Thư viện nguyên liệu</div>
         </div>
         <!-- Search bar — focused, with value -->
         <div class="search-bar focused" role="search" aria-label="Tìm nguyên liệu">
@@ -662,8 +662,8 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
       </div>
       <div class="content">
         <div class="sub-tabs">
-          <div class="sub-tab active">Nguyên liệu</div>
           <div class="sub-tab">Món ăn</div>
+          <div class="sub-tab active">Thư viện nguyên liệu</div>
         </div>
         <!-- Search bar with query -->
         <div class="search-bar focused" role="search" aria-label="Tìm nguyên liệu">
@@ -694,7 +694,7 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
        =================================================================== -->
   <div class="screen-wrapper">
     <div class="screen-label">4. Trạng thái trống</div>
-    <div class="screen-desc">Chưa có nguyên liệu nào — CTA thêm mới</div>
+    <div class="screen-desc">Chưa có nguyên liệu riêng — CTA thêm mới</div>
     <div class="phone">
       <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
       <div class="toolbar">
@@ -703,14 +703,14 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
       </div>
       <div class="content">
         <div class="sub-tabs">
-          <div class="sub-tab active">Nguyên liệu</div>
           <div class="sub-tab">Món ăn</div>
+          <div class="sub-tab active">Thư viện nguyên liệu</div>
         </div>
         <div class="empty-state" style="padding-top: 88px;">
           <div class="empty-icon">🥗</div>
-          <div class="empty-title">Chưa có nguyên liệu nào</div>
-          <div class="empty-desc">Bắt đầu thêm nguyên liệu để quản lý dinh dưỡng</div>
-          <button class="btn-empty-cta">+ Thêm nguyên liệu đầu tiên</button>
+          <div class="empty-title">Chưa có nguyên liệu riêng</div>
+          <div class="empty-desc">Nguyên liệu thường được tạo khi bạn thêm vào món ăn. Bạn vẫn có thể thêm vào thư viện nếu cần chỉnh dữ liệu dinh dưỡng</div>
+          <button class="btn-empty-cta">+ Thêm vào thư viện</button>
         </div>
       </div>
       <div class="tab-bar">
@@ -736,8 +736,8 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
       </div>
       <div class="content" style="position:relative;">
         <div class="sub-tabs">
-          <div class="sub-tab active">Nguyên liệu</div>
           <div class="sub-tab">Món ăn</div>
+          <div class="sub-tab active">Thư viện nguyên liệu</div>
         </div>
         <!-- Search bar -->
         <div class="search-bar" role="search" aria-label="Tìm nguyên liệu">
@@ -807,8 +807,8 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
       </div>
       <div class="content" style="position:relative;">
         <div class="sub-tabs">
-          <div class="sub-tab active">Nguyên liệu</div>
           <div class="sub-tab">Món ăn</div>
+          <div class="sub-tab active">Thư viện nguyên liệu</div>
         </div>
         <div class="search-bar" role="search" aria-label="Tìm nguyên liệu">
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -866,8 +866,8 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
       </div>
       <div class="content">
         <div class="sub-tabs">
-          <div class="sub-tab active">Nguyên liệu</div>
           <div class="sub-tab">Món ăn</div>
+          <div class="sub-tab active">Thư viện nguyên liệu</div>
         </div>
         <!-- Search bar -->
         <div class="search-bar" role="search" aria-label="Tìm nguyên liệu">
@@ -947,6 +947,209 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
     </div>
   </div>
 
+
+  <!-- ===================================================================
+       SCREEN 8: Ingredient Detail — read-only before edit
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">8. Chi tiết nguyên liệu — trước khi sửa</div>
+    <div class="screen-desc">Tap card trong Thư viện nguyên liệu mở detail/read-only trước, không mở form sửa ngay.</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-action" aria-label="Quay lại">‹</button>
+        <div class="toolbar-title">Trứng gà</div>
+        <button class="toolbar-action" aria-label="Tùy chọn">⋮</button>
+      </div>
+      <div class="content">
+        <div class="ingredient-card" style="display:block; text-align:center; padding:20px 16px;">
+          <div style="font-size:44px; margin-bottom:8px;">🥚</div>
+          <div class="ingredient-name" style="font-size:20px; margin-bottom:8px;">Trứng gà</div>
+          <div class="ingredient-meta" style="justify-content:center;">
+            <span class="category-chip cat-trung">Trứng &amp; Sữa</span>
+            <span class="source-badge">Có sẵn</span>
+          </div>
+        </div>
+
+        <div class="ingredient-card" style="display:block;">
+          <div class="ingredient-name">Dinh dưỡng</div>
+          <div class="ingredient-meta" style="margin-top:8px;">Theo 100g</div>
+          <div class="ingredient-kcal" style="text-align:left; margin-top:8px;"><strong>155</strong>kcal</div>
+          <div style="display:flex; gap:10px; margin-top:8px; color:var(--text-tertiary); font-size:12px;">
+            <span>P 13g</span><span>C 1.1g</span><span>F 11g</span><span>Xơ 0g</span>
+          </div>
+        </div>
+
+        <div class="ingredient-card" style="display:block;">
+          <div class="ingredient-name">Đơn vị thường dùng</div>
+          <div style="margin-top:10px; display:grid; gap:8px;">
+            <div class="ingredient-meta">1 quả ≈ 60g · mặc định</div>
+            <div class="ingredient-meta">1 g = 1g · nhập chính xác</div>
+          </div>
+        </div>
+
+        <div class="ingredient-card" style="display:block; border-color:#E7D2A9; background:#FFF8EA;">
+          <div class="ingredient-name">Đang dùng trong 4 món</div>
+          <div class="ingredient-meta" style="margin-top:8px; line-height:1.5;">Sửa dinh dưỡng hoặc đơn vị quy đổi có thể làm thay đổi tổng calories của các món này.</div>
+          <div style="margin-top:10px; display:grid; gap:8px;">
+            <div style="display:flex; justify-content:space-between;"><span>Cơm trứng</span><strong>2 quả</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span>Salad trứng</span><strong>1 quả</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span>Bánh mì trứng</span><strong>1 quả</strong></div>
+          </div>
+        </div>
+
+        <button class="btn-empty-cta" style="width:100%; margin-top:12px;">Sửa thông tin</button>
+        <button class="btn-empty-cta" style="width:100%; margin-top:10px; background:transparent; color:#B5483A; box-shadow:none; border:1px solid #E4B8AD;">Xóa nguyên liệu</button>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
+        <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
+        <div class="tab-item active"><span class="tab-icon">🍳</span><span>Quản lý</span></div>
+        <div class="tab-item"><span class="tab-icon">💪</span><span>Tập luyện</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 9: Impact warning before edit
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">9. Cảnh báo trước khi sửa</div>
+    <div class="screen-desc">Nguyên liệu đang dùng trong món → phải cảnh báo trước khi vào form sửa.</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-action" aria-label="Quay lại">‹</button>
+        <div class="toolbar-title">Trứng gà</div>
+        <button class="toolbar-action" aria-label="Tùy chọn">⋮</button>
+      </div>
+      <div class="content" style="opacity:.35;">
+        <div class="ingredient-card" style="display:block; text-align:center; padding:20px 16px;">
+          <div style="font-size:44px; margin-bottom:8px;">🥚</div>
+          <div class="ingredient-name" style="font-size:20px; margin-bottom:8px;">Trứng gà</div>
+          <div class="ingredient-meta" style="justify-content:center;">Đang dùng trong 4 món</div>
+        </div>
+      </div>
+      <div class="dialog-overlay" role="presentation">
+        <div class="dialog-box" role="alertdialog" aria-modal="true" aria-labelledby="ingredient-edit-impact-title" aria-describedby="ingredient-edit-impact-message">
+          <div class="dialog-title" id="ingredient-edit-impact-title">Sửa nguyên liệu này?</div>
+          <div class="dialog-message" id="ingredient-edit-impact-message">Nguyên liệu <strong>Trứng gà</strong> đang được dùng trong 4 món. Nếu bạn sửa dinh dưỡng hoặc đơn vị quy đổi, tổng calories của các món đó có thể thay đổi.</div>
+          <div class="dialog-actions">
+            <button class="dialog-btn dialog-btn-cancel">Hủy</button>
+            <button class="dialog-btn" style="background:#6B8E6F;color:white;">Tiếp tục sửa</button>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
+        <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
+        <div class="tab-item active"><span class="tab-icon">🍳</span><span>Quản lý</span></div>
+        <div class="tab-item"><span class="tab-icon">💪</span><span>Tập luyện</span></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===================================================================
+       SCREEN 10: Ingredient Detail — unused ingredient / safe edit-delete
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">10. Chi tiết nguyên liệu — chưa dùng trong món</div>
+    <div class="screen-desc">State an toàn: nguyên liệu chưa được món nào dùng, vẫn detail-first nhưng không cần cảnh báo trước khi sửa; xóa được sau confirm.</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-action" aria-label="Quay lại">‹</button>
+        <div class="toolbar-title">Hạt chia</div>
+        <button class="toolbar-action" aria-label="Tùy chọn">⋮</button>
+      </div>
+      <div class="content">
+        <div class="ingredient-card" style="display:block; text-align:center; padding:20px 16px;">
+          <div style="font-size:44px; margin-bottom:8px;">🌱</div>
+          <div class="ingredient-name" style="font-size:20px; margin-bottom:8px;">Hạt chia</div>
+          <div class="ingredient-meta" style="justify-content:center;">
+            <span class="category-chip cat-dau-hat">Đậu &amp; Hạt</span>
+            <span class="source-badge">Tự tạo</span>
+          </div>
+        </div>
+
+        <div class="ingredient-card" style="display:block;">
+          <div class="ingredient-name">Dinh dưỡng</div>
+          <div class="ingredient-meta" style="margin-top:8px;">Theo 100g</div>
+          <div class="ingredient-kcal" style="text-align:left; margin-top:8px;"><strong>486</strong>kcal</div>
+          <div style="display:flex; gap:10px; margin-top:8px; color:var(--text-tertiary); font-size:12px;">
+            <span>P 17g</span><span>C 42g</span><span>F 31g</span><span>Xơ 34g</span>
+          </div>
+        </div>
+
+        <div class="ingredient-card" style="display:block;">
+          <div class="ingredient-name">Đơn vị thường dùng</div>
+          <div style="margin-top:10px; display:grid; gap:8px;">
+            <div class="ingredient-meta">1 muỗng canh ≈ 12g · mặc định</div>
+            <div class="ingredient-meta">1 g = 1g · nhập chính xác</div>
+          </div>
+        </div>
+
+        <div class="ingredient-card" style="display:block; border-color:#D4DFCE; background:#F4F8F1;">
+          <div class="ingredient-name">Chưa dùng trong món nào</div>
+          <div class="ingredient-meta" style="margin-top:8px; line-height:1.5;">Bạn có thể sửa hoặc xóa nguyên liệu này mà chưa ảnh hưởng món ăn hiện có.</div>
+        </div>
+
+        <button class="btn-empty-cta" style="width:100%; margin-top:12px;">Sửa thông tin</button>
+        <button class="btn-empty-cta" style="width:100%; margin-top:10px; background:transparent; color:#B5483A; box-shadow:none; border:1px solid #E4B8AD;">Xóa nguyên liệu</button>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
+        <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
+        <div class="tab-item active"><span class="tab-icon">🍳</span><span>Quản lý</span></div>
+        <div class="tab-item"><span class="tab-icon">💪</span><span>Tập luyện</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================
+       SCREEN 11: Detail delete blocked — used ingredient
+       =================================================================== -->
+  <div class="screen-wrapper">
+    <div class="screen-label">11. Xóa bị chặn từ màn chi tiết</div>
+    <div class="screen-desc">Nguyên liệu đang dùng trong món → detail cho thấy impact và dialog xóa bị chặn có CTA xem món liên quan.</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+      <div class="toolbar">
+        <button class="toolbar-action" aria-label="Quay lại">‹</button>
+        <div class="toolbar-title">Ức gà</div>
+        <button class="toolbar-action" aria-label="Tùy chọn">⋮</button>
+      </div>
+      <div class="content" style="opacity:.35;">
+        <div class="ingredient-card" style="display:block; text-align:center; padding:20px 16px;">
+          <div style="font-size:44px; margin-bottom:8px;">🍗</div>
+          <div class="ingredient-name" style="font-size:20px; margin-bottom:8px;">Ức gà</div>
+          <div class="ingredient-meta" style="justify-content:center;">Đang dùng trong 3 món</div>
+        </div>
+        <div class="ingredient-card" style="display:block; border-color:#E7D2A9; background:#FFF8EA;">
+          <div class="ingredient-name">Món đang dùng</div>
+          <div class="ingredient-meta" style="margin-top:8px; line-height:1.5;">Cơm gà · Salad ức gà · Bún gà</div>
+        </div>
+      </div>
+      <div class="dialog-overlay" role="presentation">
+        <div class="dialog-box" role="alertdialog" aria-modal="true" aria-labelledby="ingredient-detail-blocked-title" aria-describedby="ingredient-detail-blocked-message">
+          <div class="dialog-title" id="ingredient-detail-blocked-title">Không thể xóa</div>
+          <div class="dialog-message" id="ingredient-detail-blocked-message"><strong>Ức gà</strong> đang được dùng trong <strong>3 món</strong>. Hãy gỡ khỏi các món trước khi xóa nguyên liệu này.</div>
+          <div class="dialog-actions" style="justify-content: space-between; gap: 16px;">
+            <button class="dialog-btn dialog-btn-cancel">Đóng</button>
+            <button class="dialog-btn dialog-btn-primary" aria-label="Xem 3 món đang dùng Ức gà">Xem món đang dùng</button>
+          </div>
+        </div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item"><span class="tab-icon">🏠</span><span>Tổng quan</span></div>
+        <div class="tab-item"><span class="tab-icon">📅</span><span>Lịch ăn</span></div>
+        <div class="tab-item active"><span class="tab-icon">🍳</span><span>Quản lý</span></div>
+        <div class="tab-item"><span class="tab-icon">💪</span><span>Tập luyện</span></div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /screens-grid -->
 
 <!-- ===================================================================
@@ -960,7 +1163,7 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
     <tr><td><code>--bg-card</code></td><td>#FFFFFF / #28251F</td><td>Ingredient cards, search bar, tab bar</td></tr>
     <tr><td><code>--primary</code></td><td>#6B8E6F / #8AA086</td><td>Toolbar, active tab, segment control active text, focused search border</td></tr>
     <tr><td><code>--status-bar</code></td><td>#5A745A / #2A3F2D</td><td>Status bar background</td></tr>
-    <tr><td><code>--cta</code></td><td>#C9A227 / #D9A857</td><td>FAB, empty-state CTA button</td></tr>
+    <tr><td><code>--cta</code></td><td>#D97757 / #E8A287</td><td>Coral CTA for FAB, save/submit, empty-state primary action</td></tr>
     <tr><td><code>--text-primary</code></td><td>#1A1612 / #FFFFFF</td><td>Ingredient name, kcal number</td></tr>
     <tr><td><code>--text-secondary</code></td><td>#2A2620 / #E5DED0</td><td>Dialog message bold text</td></tr>
     <tr><td><code>--text-tertiary</code></td><td>#6B6557 / #C9C2B4</td><td>Kcal caption, dialog message, search placeholder</td></tr>
@@ -982,13 +1185,15 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
     <tr><td>Typography — Overline</td><td>11px/500</td><td>Category chip text, tab label</td></tr>
     <tr><td>Typography — Caption</td><td>12px/400</td><td>Kcal unit label, result count, source badge</td></tr>
     <tr><td>Source badge labels</td><td>Vietnamese display</td><td>DB value → Display: <code>db</code> → "Có sẵn", <code>manual</code> → "Tự tạo", <code>ai</code> → "AI". Same mapping used in dish-list ("Có sẵn"/"Tự tạo")</td></tr>
+    <tr><td>Product Vision guardrail</td><td>AI-first, fast, beginner-friendly</td><td>This library is a safety/maintenance surface. Do not make ingredient CRUD the main path; normal users should create dishes first and only inspect ingredient detail when needed.</td></tr>
+    <tr><td>PRD nutrition guardrail</td><td><code>100g</code> / <code>100ml</code> only</td><td>Any serving/package wording in UI must be converted back to canonical <code>100g/100ml</code> before persistence. No Phase 1 nutrition basis like <code>per serving</code>.</td></tr>
     <tr><td>Phone frame</td><td>375×812px</td><td>iPhone-size frame with tab bar</td></tr>
     <tr><td>Tab bar</td><td>56px height</td><td>4 tabs, Quản lý active (#6B8E6F / #8AA086)</td></tr>
     <tr><td>FAB</td><td>56px circle, bottom-right</td><td>16px from right edge, 72px from bottom (above tab bar)</td></tr>
     <tr><td>Scroll-to-top</td><td>40px circle</td><td>Above FAB (bottom: 136px, right: 16px). Visible after scroll &gt;200px</td></tr>
     <tr><td>Content padding-bottom</td><td>80px</td><td>56px FAB + 16px gap + 8px safe — last item never hidden</td></tr>
     <tr><td colspan="3"><strong>🚫 Delete rule:</strong> Ingredient used in ≥1 dish → hard block (no delete). Dialog: "Không thể xóa" + [Đóng] + [Xem N món đang dùng] (actionable CTA). Only unused ingredients show confirm dialog with [Xóa].</td></tr>
-    <tr><td colspan="3"><strong>👆 Interactions:</strong> Tap card → navigate to edit page. ⋮ more icon top-right of each card (44×44 hitbox) → popover menu with [Sửa] + [Xóa] options. This is the PRIMARY and ONLY mechanism for edit/delete actions.</td></tr>
+    <tr><td colspan="3"><strong>👆 Interactions:</strong> Tap card → navigate to ingredient detail/read-only page. Detail shows nutrition, common units, and dishes using this ingredient before user chooses [Sửa thông tin]. If used in dishes, edit shows an impact warning; if unused, edit/delete are safe after normal confirmation. ⋮ more icon top-right (44×44 hitbox) is reserved for secondary/destructive actions such as [Xem chi tiết] + [Xóa]. Direct edit from list is deprecated because ingredient edits can change dish totals.</td></tr>
     <tr><td>Easing — micro</td><td><code>cubic-bezier(0.25, 1, 0.5, 1)</code> 200ms</td><td>Filter chip select, search focus, dialog open</td></tr>
     <tr><td>Easing — snappy</td><td><code>cubic-bezier(0.16, 1, 0.3, 1)</code> 150ms</td><td>FAB button press, filter chip tap, scroll-top button press</td></tr>
     <tr><td>Easing — sheet</td><td><code>cubic-bezier(0.32, 0.72, 0, 1)</code> 300ms</td><td>Bottom sheet / popover menu open. Exit: 225ms (75%)</td></tr>

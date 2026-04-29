@@ -1,0 +1,282 @@
+[
+  {
+    "slug": "paprika",
+    "app": "Paprika Recipe Manager 3",
+    "url": "https://apps.apple.com/us/app/paprika-recipe-manager-3/id1303222868?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/paprika-01.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/69/4f/43/694f4395-b008-b2a9-1d62-3ffd26bc7bc3/pr_source.png/392x696bb.png",
+    "bytes": 253537
+  },
+  {
+    "slug": "paprika",
+    "app": "Paprika Recipe Manager 3",
+    "url": "https://apps.apple.com/us/app/paprika-recipe-manager-3/id1303222868?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/paprika-02.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/c5/4e/0d/c54e0d7d-4c02-3b9b-4321-9227f1bf93d2/pr_source.png/392x696bb.png",
+    "bytes": 108375
+  },
+  {
+    "slug": "paprika",
+    "app": "Paprika Recipe Manager 3",
+    "url": "https://apps.apple.com/us/app/paprika-recipe-manager-3/id1303222868?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/paprika-03.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple123/v4/30/17/82/3017825d-bed4-4d7c-c499-f271965403e3/pr_source.png/392x696bb.png",
+    "bytes": 93981
+  },
+  {
+    "slug": "paprika",
+    "app": "Paprika Recipe Manager 3",
+    "url": "https://apps.apple.com/us/app/paprika-recipe-manager-3/id1303222868?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/paprika-04.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple123/v4/26/ac/94/26ac94e3-8bce-e8eb-583f-a164448e96ae/pr_source.png/392x696bb.png",
+    "bytes": 89590
+  },
+  {
+    "slug": "paprika",
+    "app": "Paprika Recipe Manager 3",
+    "url": "https://apps.apple.com/us/app/paprika-recipe-manager-3/id1303222868?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/paprika-05.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple113/v4/1d/54/9b/1d549bd0-bdb2-5486-a8f5-8fd0e0466b7d/pr_source.png/392x696bb.png",
+    "bytes": 78467
+  },
+  {
+    "slug": "recipe-keeper",
+    "app": "Recipe Keeper",
+    "url": "https://apps.apple.com/us/app/recipe-keeper/id974683711?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/recipe-keeper-01.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple112/v4/e1/8f/69/e18f6988-32fe-3f89-9076-2fb0a30d0d5b/4a17a3c4-a04f-445b-983a-368a7761a2b1_1.png/392x696bb.png",
+    "bytes": 221107
+  },
+  {
+    "slug": "recipe-keeper",
+    "app": "Recipe Keeper",
+    "url": "https://apps.apple.com/us/app/recipe-keeper/id974683711?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/recipe-keeper-02.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple122/v4/99/2a/fd/992afd61-b9db-f5ec-102c-e50b8c6971aa/26f09c2f-8203-474b-8dd8-a141d3ced2fc_2.png/392x696bb.png",
+    "bytes": 206306
+  },
+  {
+    "slug": "recipe-keeper",
+    "app": "Recipe Keeper",
+    "url": "https://apps.apple.com/us/app/recipe-keeper/id974683711?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/recipe-keeper-03.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple122/v4/76/93/a4/7693a403-100c-b8eb-815e-1714e6b57be1/41431915-9532-4d7f-a0b1-0e644896f707_3.png/392x696bb.png",
+    "bytes": 183686
+  },
+  {
+    "slug": "recipe-keeper",
+    "app": "Recipe Keeper",
+    "url": "https://apps.apple.com/us/app/recipe-keeper/id974683711?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/recipe-keeper-04.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource112/v4/e5/f9/7d/e5f97d10-7f24-2517-3e9e-5e74d53edf19/21400231-b3a4-48fb-9104-8f0d766cd7b3_4.png/392x696bb.png",
+    "bytes": 166829
+  },
+  {
+    "slug": "recipe-keeper",
+    "app": "Recipe Keeper",
+    "url": "https://apps.apple.com/us/app/recipe-keeper/id974683711?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/recipe-keeper-05.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple112/v4/a0/88/87/a0888727-b680-2160-67cb-48ec571155de/1d20fa28-9910-40ba-8753-f3a317f11d08_5.png/392x696bb.png",
+    "bytes": 80723
+  },
+  {
+    "slug": "samsung-food",
+    "app": "Samsung Food: Meal Planner",
+    "url": "https://apps.apple.com/us/app/samsung-food-meal-planner/id1133637674?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/samsung-food-01.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/67/50/88/67508843-e7f4-5dc1-305c-8c9314ebd7c9/iOS_5.5_-_00.jpg/392x696bb.jpg",
+    "bytes": 73285
+  },
+  {
+    "slug": "samsung-food",
+    "app": "Samsung Food: Meal Planner",
+    "url": "https://apps.apple.com/us/app/samsung-food-meal-planner/id1133637674?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/samsung-food-02.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/52/97/1d/52971dd7-95e6-d2c1-bfcd-487ae5c38f43/iOS_5.5_-_01.jpg/392x696bb.jpg",
+    "bytes": 53113
+  },
+  {
+    "slug": "samsung-food",
+    "app": "Samsung Food: Meal Planner",
+    "url": "https://apps.apple.com/us/app/samsung-food-meal-planner/id1133637674?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/samsung-food-03.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/e9/a0/ba/e9a0ba43-6311-63be-ba60-181df806d41e/iOS_5.5_-_02.jpg/392x696bb.jpg",
+    "bytes": 55249
+  },
+  {
+    "slug": "samsung-food",
+    "app": "Samsung Food: Meal Planner",
+    "url": "https://apps.apple.com/us/app/samsung-food-meal-planner/id1133637674?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/samsung-food-04.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/de/db/4c/dedb4c96-469e-60c8-f8f1-8b49d30a8831/iOS_5.5_-_03.jpg/392x696bb.jpg",
+    "bytes": 113395
+  },
+  {
+    "slug": "samsung-food",
+    "app": "Samsung Food: Meal Planner",
+    "url": "https://apps.apple.com/us/app/samsung-food-meal-planner/id1133637674?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/samsung-food-05.jpg",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/9d/85/a6/9d85a66d-7c0d-2116-84aa-d4c4adfe4f4a/iOS_5.5_-_04.jpg/392x696bb.jpg",
+    "bytes": 70324
+  },
+  {
+    "slug": "cookpad",
+    "app": "Cookpad Recipes, homemade food",
+    "url": "https://apps.apple.com/us/app/cookpad-recipes-homemade-food/id585332633?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/cookpad-01.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/48/a8/3f/48a83f35-cfd9-0cfb-f65b-8f741ed8bac2/5.5_1.png/392x696bb.png",
+    "bytes": 186044
+  },
+  {
+    "slug": "cookpad",
+    "app": "Cookpad Recipes, homemade food",
+    "url": "https://apps.apple.com/us/app/cookpad-recipes-homemade-food/id585332633?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/cookpad-02.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/bd/ec/55/bdec556a-6e25-9df4-86b4-d1b5fffa16e5/5.5_2.png/392x696bb.png",
+    "bytes": 285100
+  },
+  {
+    "slug": "cookpad",
+    "app": "Cookpad Recipes, homemade food",
+    "url": "https://apps.apple.com/us/app/cookpad-recipes-homemade-food/id585332633?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/cookpad-03.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/33/46/c8/3346c87a-9db2-5c89-470e-2590fada4434/5.5_3.png/392x696bb.png",
+    "bytes": 289606
+  },
+  {
+    "slug": "cookpad",
+    "app": "Cookpad Recipes, homemade food",
+    "url": "https://apps.apple.com/us/app/cookpad-recipes-homemade-food/id585332633?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/cookpad-04.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/c4/e2/57/c4e2578a-966a-f7ea-1901-505b3d071a57/5.5_4.png/392x696bb.png",
+    "bytes": 246679
+  },
+  {
+    "slug": "cookpad",
+    "app": "Cookpad Recipes, homemade food",
+    "url": "https://apps.apple.com/us/app/cookpad-recipes-homemade-food/id585332633?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/cookpad-05.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/1c/f8/91/1cf891f1-6e93-2acb-a500-aa232d35c18a/5.5_5.png/392x696bb.png",
+    "bytes": 234857
+  },
+  {
+    "slug": "crouton",
+    "app": "Crouton: Recipe Manager",
+    "url": "https://apps.apple.com/us/app/crouton-recipe-manager/id1461650987?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/crouton-01.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/0c/6e/54/0c6e542a-c9ea-cd52-3624-218e4c735461/a5de2fc4-6635-460f-b7d7-97a748652005_1._Meal_Detail.png/392x696bb.png",
+    "bytes": 158546
+  },
+  {
+    "slug": "crouton",
+    "app": "Crouton: Recipe Manager",
+    "url": "https://apps.apple.com/us/app/crouton-recipe-manager/id1461650987?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/crouton-02.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/c1/9a/3e/c19a3e8b-4836-30cd-1a27-dff9d6dc2883/ce8e3d9b-8588-4064-a914-074e6ef825b0_2._Timers.png/392x696bb.png",
+    "bytes": 138211
+  },
+  {
+    "slug": "crouton",
+    "app": "Crouton: Recipe Manager",
+    "url": "https://apps.apple.com/us/app/crouton-recipe-manager/id1461650987?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/crouton-03.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/a1/a6/cf/a1a6cf8f-b044-7649-be99-7438d15c9b3c/851588e6-fd7d-48f3-b51f-3d64917749a7_3._Meal_Plan.png/392x696bb.png",
+    "bytes": 115041
+  },
+  {
+    "slug": "crouton",
+    "app": "Crouton: Recipe Manager",
+    "url": "https://apps.apple.com/us/app/crouton-recipe-manager/id1461650987?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/crouton-04.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/6c/f7/4c/6cf74ccc-ab59-2d0b-348f-fe04cb0ae76a/1618dd00-b1ce-4cc2-8997-2ee45122ce87_4._Steps.png/392x696bb.png",
+    "bytes": 99383
+  },
+  {
+    "slug": "crouton",
+    "app": "Crouton: Recipe Manager",
+    "url": "https://apps.apple.com/us/app/crouton-recipe-manager/id1461650987?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/crouton-05.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/1f/4a/9b/1f4a9b48-22e9-732d-79df-239826bb8f37/b4e21c27-fc20-4b26-bd55-b1bce9522a6a_5._Groceries.png/392x696bb.png",
+    "bytes": 120010
+  },
+  {
+    "slug": "mela",
+    "app": "Mela - Recipe Manager",
+    "url": "https://apps.apple.com/us/app/mela-recipe-manager/id1548466041?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/mela-01.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource126/v4/a0/77/97/a07797cd-5962-8e5b-f1aa-2a4104aeb413/6f5eac3a-5bb5-4b75-bec1-e75fc3070b1c_1242x2208bb-0.png/392x696bb.png",
+    "bytes": 224763
+  },
+  {
+    "slug": "mela",
+    "app": "Mela - Recipe Manager",
+    "url": "https://apps.apple.com/us/app/mela-recipe-manager/id1548466041?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/mela-02.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource126/v4/de/71/0d/de710dac-ad66-dcf3-4f6e-b4c0b40a6168/b29d081f-9f32-47f2-b69e-4d752ca8cbf7_1242x2208bb-1.png/392x696bb.png",
+    "bytes": 155318
+  },
+  {
+    "slug": "mela",
+    "app": "Mela - Recipe Manager",
+    "url": "https://apps.apple.com/us/app/mela-recipe-manager/id1548466041?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/mela-03.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource116/v4/1c/ed/fd/1cedfdad-62b6-9403-89a2-9b1bb968ae81/995f3184-919e-4d4d-a556-5c163a995359_1242x2208bb-2.png/392x696bb.png",
+    "bytes": 60276
+  },
+  {
+    "slug": "mela",
+    "app": "Mela - Recipe Manager",
+    "url": "https://apps.apple.com/us/app/mela-recipe-manager/id1548466041?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/mela-04.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource126/v4/99/1c/51/991c51c1-a074-dcdf-6b9d-8e1f8e623c6d/22086d55-e5e9-4d8c-9fc2-b1d83ef49ec1_1242x2208bb-3.png/392x696bb.png",
+    "bytes": 59330
+  },
+  {
+    "slug": "mela",
+    "app": "Mela - Recipe Manager",
+    "url": "https://apps.apple.com/us/app/mela-recipe-manager/id1548466041?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/mela-05.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource116/v4/dc/8c/6f/dc8c6f5f-1d7c-cb96-c6b4-1f83a7507aaf/d04cd35f-f912-44ba-a87c-25c9701df32a_1242x2208bb-4.png/392x696bb.png",
+    "bytes": 52444
+  },
+  {
+    "slug": "grocy",
+    "app": "Grocy",
+    "url": "https://apps.apple.com/us/app/grocy/id1539113503?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/grocy-01.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource115/v4/0b/f0/58/0bf05899-c23c-efeb-16fb-89439011a3ed/1d3a4fde-9c7c-49f7-a9cc-adf3ffa8e466_splashscreen.png/392x696bb.png",
+    "bytes": 45021
+  },
+  {
+    "slug": "grocy",
+    "app": "Grocy",
+    "url": "https://apps.apple.com/us/app/grocy/id1539113503?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/grocy-02.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource125/v4/e1/fa/0f/e1fa0f18-8d4e-6518-c771-49cc7cab6bec/75acf249-cc33-4300-8802-b2fb19f80541_login.png/392x696bb.png",
+    "bytes": 60582
+  },
+  {
+    "slug": "grocy",
+    "app": "Grocy",
+    "url": "https://apps.apple.com/us/app/grocy/id1539113503?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/grocy-03.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource115/v4/58/81/d1/5881d1a8-072a-afa4-9971-45aa634ead67/d582909a-70fa-4fb2-8222-5b9e60804380_dashboard.png/392x696bb.png",
+    "bytes": 78326
+  },
+  {
+    "slug": "grocy",
+    "app": "Grocy",
+    "url": "https://apps.apple.com/us/app/grocy/id1539113503?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/grocy-04.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource115/v4/dd/b3/6d/ddb36d78-776b-e05b-7d93-233b36e35968/e9f38f99-060b-454e-ac3d-ddba0c47752b_products.png/392x696bb.png",
+    "bytes": 108702
+  },
+  {
+    "slug": "grocy",
+    "app": "Grocy",
+    "url": "https://apps.apple.com/us/app/grocy/id1539113503?uo=4",
+    "asset": "docs/5-development/ingredient-management-pattern-evidence-assets/grocy-05.png",
+    "source": "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource115/v4/cd/20/76/cd207620-f7ed-28ce-22a3-8ab084b35319/75eed428-b99d-4170-93f7-e56bfae893fb_orders.png/392x696bb.png",
+    "bytes": 69246
+  }
+]

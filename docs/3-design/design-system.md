@@ -1064,7 +1064,8 @@ trong `form-field.scss`.
 ## 8g. Segment Control (Sub-tabs)
 
 > **Rule:** Sub-tabs trong page PHẢI dùng `ion-segment` (Segmented Control), KHÔNG dùng underline tabs.
-> Theo spec `phase-1-management.md`: "Management page có segment control: Nguyên liệu | Món ăn"
+> Theo spec cập nhật 2026-04-29: Management page có segment control: `Món ăn | Thư viện nguyên liệu`; `Món ăn` là default entry, nguyên liệu là supporting library.
+> Trong `Thư viện nguyên liệu`, card tap theo pattern detail-first: mở màn chi tiết/read-only trước, hiển thị dinh dưỡng + đơn vị + món đang dùng, rồi mới có CTA `Sửa thông tin`. Không mở form sửa trực tiếp từ card vì sửa ingredient là sửa global và có thể ảnh hưởng calories/macro của món liên quan.
 
 ### Spec
 
@@ -1089,7 +1090,7 @@ trong `form-field.scss`.
 └──────────────────────────────────────┘
 ┌─ Content area (gray/dark bg) ────────┐
 │  ┌─────────────────────────────────┐ │
-│  │ [Nguyên liệu] │  Món ăn        │ │  ← segment (page bg)
+│  │ [Món ăn] │ Thư viện NL      │ │  ← segment (page bg)
 │  └─────────────────────────────────┘ │
 │  ┌─ Search ──────────────────────┐   │
 │  │ 🔍 Tìm kiếm...               │   │
@@ -1099,7 +1100,7 @@ trong `form-field.scss`.
    ▲ active (white pill)  ▲ inactive
 ```
 
-> **Lý do đổi:** Status bar + toolbar + segment cùng xanh = "dày đầu màn hình". Đưa segment xuống nền trắng/xám giảm visual weight đáng kể.
+> **Lý do đổi:** Status bar + toolbar + segment cùng xanh = "dày đầu màn hình". Đưa segment xuống nền trắng/xám giảm visual weight đáng kể. Với tab `Quản lý`, thứ tự segment phải phản ánh mental model mới: user tạo/sửa `Món ăn` trước; `Thư viện nguyên liệu` chỉ là nơi xem/sửa dữ liệu nền.
 
 ---
 
@@ -1220,8 +1221,8 @@ Triple affordance:
 
 | Interaction | Action | Notes |
 |-------------|--------|-------|
-| **Tap card** | Navigate to detail/edit page | Primary interaction |
-| **Tap ⋮** | Open bottom sheet: [Sửa] + [Xóa] | Discoverable, accessible |
+| **Tap card** | Navigate to detail/read-only page first where impact matters; edit page only for explicit edit CTA | Ingredient library uses detail-first; dish list may open edit/detail per feature spec |
+| **Tap ⋮** | Open bottom sheet with secondary actions | For ingredient library prefer [Xem chi tiết] + [Xóa]; direct [Sửa] must route through detail/impact warning |
 | ~~Swipe left~~ | ~~Removed~~ | Deprecated — low discoverability |
 
 ### ⋮ More Icon Spec
@@ -1237,7 +1238,7 @@ Triple affordance:
 
 | Property | Value |
 |----------|-------|
-| Items | [Sửa] (icon: pencil, primary text) + [Xóa] (icon: trash, `--ion-color-danger`) |
+| Items | Feature-specific secondary actions | Ingredient library: [Xem chi tiết] + [Xóa]. Edit action appears on detail page as `Sửa thông tin` so impact can be shown first. |
 | Divider | 1px `var(--border)` between items |
 | Cancel | Tap outside / drag down to dismiss |
 

@@ -550,6 +550,9 @@ cd android && ./gradlew assembleDebug
 ~/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell monkey -p com.healthmate.ai 1
 ```
 
+
+> Note 2026-04-29: Management UX was later redesigned to dish-first. If this QA is run after the redesign, `Quản lý` should already open `Món ăn`; the ingredient segment label is `Thư viện nguyên liệu` rather than the older `Nguyên liệu` label.
+
 Then:
 1. Complete onboarding (one quick path).
 2. Tap Quản lý tab.

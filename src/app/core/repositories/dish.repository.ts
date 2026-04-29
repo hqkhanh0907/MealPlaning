@@ -140,7 +140,7 @@ export class DishRepository {
     await this.db.execute('DELETE FROM dish WHERE id = ?', [id]);
   }
 
-/**
+  /**
    * Returns all dishes that contain the given ingredient. Used by the
    * "Đang dùng trong N món" sheet on the ingredient-edit page so the user
    * can see which dishes will be affected before deleting/editing the

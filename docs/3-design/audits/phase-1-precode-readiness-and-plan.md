@@ -3,6 +3,8 @@
 Ngày: 2026-04-26
 Trạng thái: Hoàn tất bước đọc hiểu document + phân tích mockup + lập kế hoạch + audit kế hoạch trước khi code
 
+> **Superseded note — 2026-04-29:** Một số phần trong file này phản ánh flow Phase 1 cũ. Source of truth mới cho Management UX là dish-first: `Món ăn | Thư viện nguyên liệu`, ingredient library dùng detail-first trước khi sửa. Xem `docs/plans/2026-04-29-management-dish-first-ux-redesign.md` và `docs/plans/2026-04-29-ingredient-library-detail-first-edit-flow.md`.
+
 ## 1. Source of truth hierarchy
 
 Khi tài liệu mâu thuẫn, dùng thứ tự sau:
@@ -16,7 +18,7 @@ Khi tài liệu mâu thuẫn, dùng thứ tự sau:
 
 Lý do:
 - `business-rules.md` là rule chính thức mới nhất cho `dish total`, `unit normalization`, provenance.
-- `phase-1-management.md` còn drift: vẫn nhắc Quick Add, chưa sync hoàn toàn với scope mới.
+- `phase-1-management.md` từng có drift trong thời điểm audit này; sau 2026-04-29 cần đối chiếu lại với plan dish-first mới.
 - Mockup đã được sync 12 vòng, nên hiện được xem là UI spec đáng tin sau khi đối chiếu lại với docs cốt lõi.
 
 ## 2. Phase 1 cần triển khai gì
@@ -73,14 +75,14 @@ Lý do:
 
 ## Màn hình chính Phase 1
 1. `management.page.ts`
-   - container với segment `Nguyên liệu | Món ăn`
+   - container với segment `Món ăn | Thư viện nguyên liệu` theo plan mới
 2. `ingredient-list`
 3. `ingredient-edit`
 4. `dish-list`
 5. `dish-edit-ingredient-based`
 
 ## Flow ingredient
-- vào tab Quản lý -> tab con Nguyên liệu
+- vào tab Quản lý -> tab con Thư viện nguyên liệu
 - xem seed + manual items
 - search theo tên
 - mở form thêm nguyên liệu
@@ -91,7 +93,7 @@ Lý do:
   - approximate marker
   - optional density
 - save
-- edit ingredient cũ
+- mở chi tiết ingredient cũ trước, sau đó bấm `Sửa thông tin` để edit
 - delete ingredient:
   - nếu không có reference -> confirm delete thường
   - nếu đang được dùng -> blocked delete / RESTRICT-aware dialog

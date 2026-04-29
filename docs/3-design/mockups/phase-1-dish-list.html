@@ -220,7 +220,7 @@
   }
   .type-ingredient { background: #E5EAE3; color: #4A6B4E; }
   .type-ai         { background: #EFE4D0; color: #C45F3F; }
-  body.dark .type-ingredient { background: rgba(33,150,243,0.2); color: #D4DFCE; }
+  body.dark .type-ingredient { background: rgba(138,160,134,0.20); color: #D4DFCE; }
   body.dark .type-ai         { background: rgba(255,152,0,0.2); color: #D9A857; }
 
   .source-badge {
@@ -468,7 +468,7 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
 <body class="light">
 
 <h1 class="page-title">Phase 1 — Dish List</h1>
-<p class="page-subtitle">F-02 Quản lý Món ăn · List, Search, Empty, ⋮ Menu, Delete confirm, FAB menu · 6 screens</p>
+<p class="page-subtitle">F-02 Quản lý Món ăn · Default Management tab · List, Search, Empty, ⋮ Menu, Delete confirm, FAB menu · 6 screens</p>
 
 <div class="theme-toggle">
   <button class="active" onclick="setTheme('light')">☀️ Light</button>
@@ -491,8 +491,8 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
       </div>
       <div class="sub-tabs">
         <div class="sub-tab-track">
-          <div class="sub-tab">Nguyên liệu</div>
           <div class="sub-tab active">Món ăn</div>
+          <div class="sub-tab">Thư viện nguyên liệu</div>
         </div>
       </div>
       <div class="content">
@@ -584,8 +584,8 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
       </div>
       <div class="sub-tabs">
         <div class="sub-tab-track">
-          <div class="sub-tab">Nguyên liệu</div>
           <div class="sub-tab active">Món ăn</div>
+          <div class="sub-tab">Thư viện nguyên liệu</div>
         </div>
       </div>
       <div class="content">
@@ -634,8 +634,8 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
       </div>
       <div class="sub-tabs">
         <div class="sub-tab-track">
-          <div class="sub-tab">Nguyên liệu</div>
           <div class="sub-tab active">Món ăn</div>
+          <div class="sub-tab">Thư viện nguyên liệu</div>
         </div>
       </div>
       <div class="content">
@@ -675,8 +675,8 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
       </div>
       <div class="sub-tabs">
         <div class="sub-tab-track">
-          <div class="sub-tab">Nguyên liệu</div>
           <div class="sub-tab active">Món ăn</div>
+          <div class="sub-tab">Thư viện nguyên liệu</div>
         </div>
       </div>
       <div class="content">
@@ -710,8 +710,8 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
       </div>
       <div class="sub-tabs">
         <div class="sub-tab-track">
-          <div class="sub-tab">Nguyên liệu</div>
           <div class="sub-tab active">Món ăn</div>
+          <div class="sub-tab">Thư viện nguyên liệu</div>
         </div>
       </div>
       <div class="content" style="opacity: 0.3;">
@@ -776,8 +776,8 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
       </div>
       <div class="sub-tabs">
         <div class="sub-tab-track">
-          <div class="sub-tab">Nguyên liệu</div>
           <div class="sub-tab active">Món ăn</div>
+          <div class="sub-tab">Thư viện nguyên liệu</div>
         </div>
       </div>
       <div class="content" style="opacity: 0.4;">
@@ -852,7 +852,7 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
     <tr><td><code>--segment-track</code></td><td>#F0EAE0 / #3E3A33</td><td>Segment control track background</td></tr>
     <tr><td><code>--segment-active</code></td><td>#FFFFFF / #34302A</td><td>Segment control active pill</td></tr>
     <tr><td><code>--status-bar</code></td><td>#5A745A / #2A3F2D</td><td>Status bar background</td></tr>
-    <tr><td><code>--cta</code></td><td>#C9A227 / #D9A857</td><td>FAB button, empty-state CTA</td></tr>
+    <tr><td><code>--cta</code></td><td>#D97757 / #E8A287</td><td>Coral CTA for FAB, save/submit, empty-state primary action</td></tr>
     <tr><td><code>--text-primary</code></td><td>#1A1612 / #FFFFFF</td><td>Dish name, dialog title</td></tr>
     <tr><td><code>--text-secondary</code></td><td>#2A2620 / #E5DED0</td><td>Dialog message bold, empty-title</td></tr>
     <tr><td><code>--text-tertiary</code></td><td>#6B6557 / #C9C2B4</td><td>Macro summary, servings, dialog message, kcal captions</td></tr>
@@ -877,7 +877,7 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
     <tr><td>Typography — Overline</td><td>11px/500</td><td>Type badge text, source badge, tab bar labels, servings</td></tr>
     <tr><td>Source badge labels</td><td>Vietnamese display</td><td>DB value → Display: <code>db</code> → "Có sẵn", <code>custom</code> → "Tự tạo", <code>ai</code> → "AI". Same mapping used in ingredient-list</td></tr>
     <tr><td>Macro colors</td><td>Cal=#6B8E6F, P=#6B8E6F, C=#C9A227, F=#B5483A</td><td>Color-coded macro values in dish summary</td></tr>
-    <tr><td>Type badge — Nguyên liệu</td><td>Blue bg + blue text</td><td>#E5EAE3/#4A6B4E (light), rgba(33,150,243,0.2)/#D4DFCE (dark)</td></tr>
+    <tr><td>Type badge — Nguyên liệu</td><td>Sage bg + sage text</td><td>#E5EAE3/#4A6B4E (light), rgba(138,160,134,0.20)/#D4DFCE (dark). No Material-blue badge colors.</td></tr>
     <tr><td>Type badge — AI tự điền</td><td>Orange bg + orange text</td><td>#EFE4D0/#C45F3F (light), rgba(255,152,0,0.2)/#D9A857 (dark). Class: <code>.type-ai</code>. Áp dụng cho dish có <code>type='ai_autofill'</code> (sau C-02 đã loại bỏ Quick Add).</td></tr>
     <tr><td>FAB menu</td><td>Popup above FAB</td><td>Semi-transparent overlay + 2 items with sublabels + rotated X FAB. "Tạo từ nguyên liệu" = primary (top, 600 weight)</td></tr>
     <tr><td>Phone frame</td><td>375×812px</td><td>iPhone-size frame with tab bar</td></tr>

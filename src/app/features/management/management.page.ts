@@ -15,7 +15,6 @@ import { addIcons } from 'ionicons';
 import {
   addOutline,
   closeOutline,
-  createOutline,
   ellipsisVertical,
   nutritionOutline,
   restaurantOutline,
@@ -238,7 +237,6 @@ export default class ManagementPage {
       restaurantOutline,
       searchOutline,
       ellipsisVertical,
-      createOutline,
       sparklesOutline,
       trashOutline,
     });
@@ -300,14 +298,6 @@ export default class ManagementPage {
     this.ingredientOptionsItem.set(null);
   }
 
-  handleIngredientEditOption(): void {
-    const active = this.ingredientOptionsItem();
-    this.closeIngredientOptions();
-    if (active) {
-      void this.openEditIngredient(active.id);
-    }
-  }
-
   handleIngredientDeleteOption(): void {
     const active = this.ingredientOptionsItem();
     this.closeIngredientOptions();
@@ -343,14 +333,6 @@ export default class ManagementPage {
     }
 
     void this.openCreateAiDish();
-  }
-
-  handleDishEditOption(): void {
-    const active = this.dishOptionsItem();
-    this.closeDishOptions();
-    if (active) {
-      void this.openEditDish(active.id);
-    }
   }
 
   handleDishDeleteOption(): void {

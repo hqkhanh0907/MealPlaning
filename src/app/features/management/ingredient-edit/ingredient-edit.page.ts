@@ -12,11 +12,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormField, form } from '@angular/forms/signals';
 import {
   IonBackButton,
-  IonButton,
   IonButtons,
   IonContent,
   IonHeader,
   IonIcon,
+  IonModal,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
@@ -27,10 +27,12 @@ import type { UnitModel } from '../../../core/models/management.model';
 import type { NutritionBasisUnit } from '../../../core/models/management.types';
 import { UnitRepository } from '../../../core/repositories/unit.repository';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
+import type { HasUnsavedChanges } from '../../../core/guards/unsaved-changes-guard';
 import {
   BottomSheetPicker,
   type PickerOption,
 } from '../../../shared/components/bottom-sheet-picker/bottom-sheet-picker';
+import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { DishesUsingSheet } from '../../../shared/components/dishes-using-sheet/dishes-using-sheet';
 import { AppFormField } from '../../../shared/forms';
 import { ingredientFormSchema } from '../../../shared/forms/schemas/ingredient-form.schema';
@@ -63,16 +65,17 @@ const emptyForm = (): IngredientEditFormValue => ({
     IonTitle,
     IonContent,
     IonButtons,
-    IonButton,
     IonBackButton,
     IonIcon,
+    IonModal,
     FormField,
     BottomSheetPicker,
     DishesUsingSheet,
+    ConfirmDialog,
     AppFormField,
   ],
 })
-export default class IngredientEditPage {
+export default class IngredientEditPage implements HasUnsavedChanges {
   @ViewChild('categoryPicker') private categoryPicker?: BottomSheetPicker;
   @ViewChild('unitPicker') private unitPicker?: BottomSheetPicker;
   @ViewChild('nameInput') private nameInput?: ElementRef<HTMLInputElement>;
@@ -92,6 +95,15 @@ export default class IngredientEditPage {
    * in edit mode (we already have a persisted ingredient id to query against).
    */
   readonly isDishesSheetOpen = signal(false);
+  readonly activeUnitEditLocalId = signal<string | null>(null);
+  readonly unitDraft = signal<IngredientEditUnitFormValue | null>(null);
+  readonly pendingDeleteId = signal<string | null>(null);
+  readonly deleteReferenceCount = signal(0);
+  readonly deleteReferenceLoading = signal(false);
+  readonly discardDialogOpen = signal(false);
+  private discardDialogResolver: ((value: boolean) => void) | null = null;
+  private dirtyBaseline = '';
+  private skipUnsavedPrompt = false;
 
   readonly availableUnits = signal<UnitModel[]>([]);
   readonly saving = signal(false);
@@ -109,6 +121,7 @@ export default class IngredientEditPage {
     this.availableUnits.set(await this.unitRepository.list());
     const id = this.ingredientId();
     if (!id) {
+      this.resetDirtyBaseline();
       return;
     }
 
@@ -118,6 +131,7 @@ export default class IngredientEditPage {
 
     const ingredient = this.ingredientStore.ingredients().find((item) => item.id === id);
     if (!ingredient) {
+      this.resetDirtyBaseline();
       return;
     }
 
@@ -141,6 +155,7 @@ export default class IngredientEditPage {
         short_name_vi: unit.short_name_vi,
       })),
     });
+    this.resetDirtyBaseline();
   }
 
   get categoryOptions(): PickerOption[] {
@@ -273,6 +288,127 @@ export default class IngredientEditPage {
     return `Hiển thị: ${label} · 1 ${label} ≈ ${this.formatNumber(unit.factor_to_basis)}${this.formSignal().nutrition_basis_unit}`;
   }
 
+  openUnitEditSheet(localId: string): void {
+    const unit = this.formSignal().units.find((item) => item.local_id === localId);
+    if (!unit) {
+      return;
+    }
+
+    this.activeUnitEditLocalId.set(localId);
+    this.unitDraft.set({ ...unit });
+  }
+
+  closeUnitEditSheet(): void {
+    this.activeUnitEditLocalId.set(null);
+    this.unitDraft.set(null);
+  }
+
+  updateUnitDraftDisplayLabel(event: Event): void {
+    const value = this.readInputValue(event);
+    this.unitDraft.update((draft) => (draft ? { ...draft, display_label: value } : draft));
+  }
+
+  updateUnitDraftFactor(event: Event): void {
+    const numeric = Number(this.readInputValue(event));
+    this.unitDraft.update((draft) =>
+      draft ? { ...draft, factor_to_basis: Number.isFinite(numeric) ? numeric : 0 } : draft,
+    );
+  }
+
+  saveUnitDraft(): void {
+    const draft = this.unitDraft();
+    if (!draft || draft.factor_to_basis <= 0) {
+      this.showErrors.set(true);
+      return;
+    }
+
+    this.formSignal.update((v) => ({
+      ...v,
+      units: v.units.map((unit) => ({
+        ...(unit.local_id === draft.local_id ? draft : unit),
+        is_default: draft.is_default ? unit.local_id === draft.local_id : unit.is_default,
+      })),
+    }));
+    this.closeUnitEditSheet();
+  }
+
+  markDraftDefault(): void {
+    this.unitDraft.update((current) => (current ? { ...current, is_default: true } : current));
+  }
+
+  removeDraftUnit(): void {
+    const draft = this.unitDraft();
+    if (!draft) {
+      return;
+    }
+
+    this.removeUnit(draft.local_id);
+    this.closeUnitEditSheet();
+  }
+
+  async openDeleteDialog(): Promise<void> {
+    const id = this.ingredientId();
+    if (!id) {
+      return;
+    }
+
+    this.deleteReferenceLoading.set(true);
+    this.pendingDeleteId.set(id);
+    try {
+      this.deleteReferenceCount.set(await this.ingredientStore.countDishReferences(id));
+    } finally {
+      this.deleteReferenceLoading.set(false);
+    }
+  }
+
+  closeDeleteDialog(): void {
+    this.pendingDeleteId.set(null);
+    this.deleteReferenceCount.set(0);
+    this.deleteReferenceLoading.set(false);
+  }
+
+  async confirmDelete(): Promise<void> {
+    const id = this.pendingDeleteId();
+    if (!id) {
+      return;
+    }
+
+    if (this.deleteReferenceLoading() || this.deleteReferenceCount() > 0) {
+      this.closeDeleteDialog();
+      return;
+    }
+
+    await this.ingredientStore.remove(id);
+    this.skipUnsavedPrompt = true;
+    this.resetDirtyBaseline();
+    this.closeDeleteDialog();
+    await this.router.navigate(['/tabs/management']);
+  }
+
+  hasUnsavedChanges(): boolean {
+    if (this.skipUnsavedPrompt) {
+      return false;
+    }
+
+    return this.createDirtySnapshot() !== this.dirtyBaseline || this.unitDraft() !== null;
+  }
+
+  confirmDiscardChanges(): Promise<boolean> {
+    this.discardDialogOpen.set(true);
+    return new Promise<boolean>((resolve) => {
+      this.discardDialogResolver = resolve;
+    });
+  }
+
+  cancelDiscardChanges(): void {
+    this.resolveDiscardDialog(false);
+  }
+
+  confirmDiscardChangesDialog(): void {
+    this.skipUnsavedPrompt = true;
+    this.resolveDiscardDialog(true);
+  }
+
   async onSave(): Promise<void> {
     this.showErrors.set(true);
     if (!this.ingredientForm().valid()) {
@@ -329,10 +465,51 @@ export default class IngredientEditPage {
         });
       }
 
+      this.resetDirtyBaseline();
+      this.skipUnsavedPrompt = true;
       await this.router.navigate(['/tabs/management']);
     } finally {
       this.saving.set(false);
     }
+  }
+
+  private resolveDiscardDialog(value: boolean): void {
+    const resolver = this.discardDialogResolver;
+    this.discardDialogResolver = null;
+    this.discardDialogOpen.set(false);
+    resolver?.(value);
+  }
+
+  private resetDirtyBaseline(): void {
+    if (this.dirtyBaseline && this.createDirtySnapshot() !== this.dirtyBaseline) {
+      return;
+    }
+
+    this.dirtyBaseline = this.createDirtySnapshot();
+    this.skipUnsavedPrompt = false;
+  }
+
+  private createDirtySnapshot(): string {
+    const value = this.formSignal();
+    return JSON.stringify({
+      name: value.name.trim(),
+      category: value.category.trim(),
+      nutrition_basis_unit: value.nutrition_basis_unit,
+      calories: value.calories ?? null,
+      protein: value.protein ?? null,
+      carbs: value.carbs ?? null,
+      fat: value.fat ?? null,
+      fiber: value.fiber ?? null,
+      density_g_per_ml: value.density_g_per_ml ?? null,
+      units: value.units.map((unit) => ({
+        unit_id: unit.unit_id,
+        factor_to_basis: unit.factor_to_basis,
+        is_default: unit.is_default,
+        display_label: unit.display_label.trim(),
+        is_approximate: unit.is_approximate,
+        short_name_vi: unit.short_name_vi,
+      })),
+    });
   }
 
   private focusFirstInvalidField(): void {
@@ -374,6 +551,11 @@ export default class IngredientEditPage {
     return Number.isInteger(value)
       ? String(value)
       : value.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+  }
+
+  private readInputValue(event: Event): string {
+    const target = event.target;
+    return target instanceof HTMLInputElement ? target.value : '';
   }
 
   private createLocalId(prefix: string): string {

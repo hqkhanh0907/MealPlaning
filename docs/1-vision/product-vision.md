@@ -138,8 +138,8 @@ HealthMate AI giúp người Việt Nam từ 16-45 tuổi đạt mục tiêu s�
 
 | ID | Feature | Mô tả |
 |----|---------|-------|
-| F-01 | Quản lý Nguyên liệu | CRUD nguyên liệu với dinh dưỡng per 100g |
-| F-02 | Quản lý Món ăn | CRUD món ăn (ingredient-based, quick add, AI auto-fill) |
+| F-01 | Thư viện Nguyên liệu | Supporting library cho nguyên liệu với dinh dưỡng per 100g/100ml; tạo/sửa khi phục vụ món ăn |
+| F-02 | Quản lý Món ăn | Flow chính: CRUD món ăn ingredient-based, tạo nhanh nguyên liệu khi thiếu, AI auto-fill |
 | F-03 | Calendar & Meal Planning | Lịch ăn tuần/ngày, thêm món vào bữa, AI lên plan ngày/tuần |
 | F-04 | Nutrition Tracking | Tổng calo, protein, carbs, fat, fiber hàng ngày |
 

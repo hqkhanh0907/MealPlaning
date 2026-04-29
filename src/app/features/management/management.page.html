@@ -280,14 +280,6 @@
           <h2>Tuỳ chọn cho {{ activeIngredient.name }}</h2>
           <button
             type="button"
-            class="options-sheet__action"
-            (click)="handleIngredientEditOption()"
-          >
-            <ion-icon name="create-outline" />
-            <span>Sửa</span>
-          </button>
-          <button
-            type="button"
             class="options-sheet__action options-sheet__action--danger"
             (click)="handleIngredientDeleteOption()"
           >
@@ -313,10 +305,6 @@
       >
         <section class="options-sheet">
           <h2>Tuỳ chọn cho {{ activeDish.name }}</h2>
-          <button type="button" class="options-sheet__action" (click)="handleDishEditOption()">
-            <ion-icon name="create-outline" />
-            <span>Sửa</span>
-          </button>
           <button
             type="button"
             class="options-sheet__action options-sheet__action--danger"
