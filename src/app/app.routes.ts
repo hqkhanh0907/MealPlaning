@@ -12,8 +12,13 @@ export const routes: Routes = [
     loadChildren: () => import('./features/settings/settings.routes'),
   },
   {
-    path: '',
+    path: 'tabs',
     canActivate: [onboardingGuard],
     loadChildren: () => import('./tabs/tabs.routes'),
+  },
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'tabs',
   },
 ];

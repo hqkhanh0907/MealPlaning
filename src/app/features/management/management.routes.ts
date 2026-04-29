@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 export default [
   {
     path: '',
+    pathMatch: 'full',
     loadComponent: () => import('./management.page'),
   },
   {
