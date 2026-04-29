@@ -82,7 +82,7 @@
 ## 2. Project Structure
 
 > Coding conventions chi tiết (naming style 2016 vs 2025, file/folder rules, AI agent guidelines): xem `./coding-conventions.md`.
-> Audit baseline (snapshot 2026-04-28): xem `./_audit/2026-04-28-structure-audit.md`.
+> Audit baseline (snapshot 2026-04-28): xoá khỏi repo trong cleanup 2026-04-29 sau khi Style 2025 migration (Phase C) đã ship. Convention canonical hiện tại: `./coding-conventions.md`.
 
 ### 2.1 Current — đang dùng Style 2016
 

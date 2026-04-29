@@ -278,7 +278,7 @@ PantryItem {
 - [ ] Recipe line preview nutrition theo normalized edible amount.
 - [ ] Food log/meal history dùng nutrition snapshot để không drift khi ingredient/measurement đổi sau này.
 
-**Mockup spec:** `docs/3-design/mockups/phase-1-5-pantry-recipe-nutrition-wireflow.html`.
+**Mockup spec:** Chưa viết (Phase 1.5A chưa implement). Khi bắt đầu Phase 1.5A, tạo mockup mới dựa trên schema canonical trong `docs/3-design/data-model.md` §4.0c (`ingredient_measurement`) + business rule (RULE-MEASUREMENT, RULE-PANTRY-STOCK, RULE-CS-01/02) trong `docs/4-architecture/business-rules.md`.
 
 ---
 

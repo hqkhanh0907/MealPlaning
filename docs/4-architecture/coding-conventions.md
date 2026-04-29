@@ -15,7 +15,7 @@
 
 ### 1.1 Trạng thái (snapshot 2026-04-28)
 
-- ✅ **Đã migrate Style 2016 → Style 2025** trong Phase C refactor (xem `_audit/2026-04-28-structure-audit.md`).
+- ✅ **Đã migrate Style 2016 → Style 2025** trong Phase C refactor.
 - Toàn bộ file `.component.ts`, `.service.ts` đã rename → bỏ suffix; class declaration tương ứng cũng bỏ suffix `Component` / `Service`.
 - Codemod: `scripts/rename-style-2025.mjs` (ts-morph based). Đã chạy xong, giữ lại trong repo cho reference.
 - Ngoại lệ tên class: `AppFormField` (giữ prefix `App`) vì `FormField` đụng symbol từ `@angular/forms/signals`.
@@ -258,4 +258,3 @@ Khi AI agent (Claude Code, Codex, Hermes…) generate code mới trong repo này
 - Angular CLI `file-name-style-guide` option: https://angular.dev/cli/generate/application
 - Component basics: https://angular.dev/essentials/components
 - Architecture overview: `./architecture.md`
-- Audit baseline: `./_audit/2026-04-28-structure-audit.md`

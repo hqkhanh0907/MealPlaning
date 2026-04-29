@@ -4,9 +4,11 @@ This directory builds the offline seed shipped with the app: ~atomic VN ingredie
 composite recipes (broth/dipping sauce/base), and 20 curated Vietnamese dishes
 (6 sáng / 7 trưa / 7 tối).
 
-**Spec:** `docs/5-development/phase-1-management.md` §5.2
-**Plan:** `docs/5-development/_plans/phase-1-section-5.2-implementation.md`
-**Draft details:** `docs/5-development/_drafts/phase-1-section-5.2-update.md`
+**Spec:** Code-canonical sau cleanup 2026-04-29. Tham chiếu:
+- PRD F-01/F-02 — `docs/2-requirements/prd.md`
+- Schema — `docs/3-design/data-model.md`
+- Business rule — `docs/4-architecture/business-rules.md`
+- Implementation — `src/app/features/management/` + `src/app/core/repositories/`
 
 ## Files
 

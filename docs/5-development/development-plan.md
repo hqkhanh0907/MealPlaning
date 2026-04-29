@@ -133,7 +133,7 @@ AI features split 2 phases:
 
 **Deliverable:** User mở Management tab → thấy `Món ăn` trước → tạo/sửa món ăn từ nguyên liệu → nếu thiếu nguyên liệu thì tạo nhanh và thêm vào món → vẫn có `Thư viện nguyên liệu` để xem/sửa/xóa có kiểm soát.
 
-**Detail doc:** `phase-1-management.md` (đã viết, tiếp tục refine trước khi start code)
+**Detail doc:** Đã xoá sau Phase 1 ship (cleanup 2026-04-29). Source of truth hiện tại = code `src/app/features/management/` + `docs/2-requirements/prd.md` (F-01, F-02) + `docs/4-architecture/business-rules.md` + `docs/3-design/design-system.md`.
 
 ---
 
@@ -151,7 +151,7 @@ AI features split 2 phases:
 - Target schema: `ingredient_variant`, `ingredient_measurement`, `storage_location`, `pantry_item`, optional `data_source`.
 - Resolver upgrade: returns resolved/needs-conversion state, not silent fallback.
 - Conversion snapshot model for pantry item and future recipe/dish line.
-- Mockup source: `docs/3-design/mockups/phase-1-5-pantry-recipe-nutrition-wireflow.html`.
+- Mockup source: Chưa viết (tạo khi bắt đầu Phase 1.5A; tham chiếu schema canonical `docs/3-design/data-model.md` §4.0c).
 
 **Deliverable:** User thêm được nguyên liệu đang có vào kho, thấy hạn dùng/vị trí, nhập unit đời thực và preview dinh dưỡng sau khi app resolve conversion.
 
@@ -322,8 +322,7 @@ Sau khi end phase:
 | Doc | Status | Khi cần |
 |-----|:------:|---------|
 | `5-development/development-plan.md` (file này) | ✅ Active | — |
-| `5-development/phase-1-management.md` | ✅ Active | — |
-| `5-development/phase-1.5a-pantry-measurement.md` | ⏳ Chưa viết | Trước khi start Phase 1.5A implementation |
+| `5-development/signal-forms-migration-plan.md` | ✅ Active | — |
 | `5-development/phase-1.5b-ai-foundation.md` | ⏳ Chưa viết | Trước khi start Phase 1.5B |
 | `5-development/phase-2-calendar.md` | ⏳ Chưa viết | Trước khi start Phase 2 |
 | `5-development/phase-3-dashboard.md` | ⏳ Chưa viết | Trước khi start Phase 3 |
@@ -333,9 +332,8 @@ Sau khi end phase:
 | `6-testing/testing-strategy.md` | ⏳ Chưa viết | Trước Phase 1 (setup Karma + E2E) |
 | `6-decisions/ADR-001-ai-key-strategy.md` | ⏳ Chưa viết | Trước Phase 1.5B (obfuscation setup) |
 | `6-decisions/ADR-002-migration-strategy.md` | ⏳ Chưa viết | Phase 1 |
-| `3-design/mockups/phase-1-*.html` | ⏳ Chưa viết | Trước Phase 1 code |
 
-**Missing artifacts hiện tại:** `phase-1-management.md` đã tồn tại; các docs ⏳ còn lại sẽ viết khi tới phase tương ứng theo triết lý "only write detail for next phase".
+**Missing artifacts hiện tại:** Phase 1 detail spec + ADR + mockups đã được dọn sau khi Phase 1 ship (cleanup 2026-04-29) — source of truth là code `src/` + canonical docs (PRD, business-rules, data-model, design-system). Các docs ⏳ còn lại sẽ viết khi tới phase tương ứng theo triết lý "only write detail for next phase".
 
 ---
 

@@ -12,15 +12,14 @@ Các file HTML trong folder này là **mockup spec chính thức** cho từng m�
 | File | Phase | Trạng thái |
 |------|-------|------------|
 | `phase-0-onboarding.html` | 0 | Implemented (`src/app/features/onboarding/`) |
-| `phase-1-dish-list.html` | 1 | Pending implementation |
-| `phase-1-dish-edit-ingredient-based.html` | 1 | Pending implementation |
-| `phase-1-ingredient-list.html` | 1 | Pending implementation |
-| `phase-1-ingredient-edit.html` | 1 | Pending implementation |
-| `phase-1-5-pantry-recipe-nutrition-wireflow.html` | 1.5 | Draft spec — Pantry + Ingredient Measurement + Recipe Nutrition |
+
+> Phase 1 mockups (dish list / dish edit / ingredient list / ingredient edit) **đã được implement xong** trong `src/app/features/management/` và mockup HTML đã được xoá khỏi repo (cleanup 2026-04-29). Source of truth cho Phase 1 UX hiện tại là code trong `src/` + `docs/3-design/design-system.md` + `docs/2-requirements/prd.md`.
+>
+> Phase 1.5A (Pantry + Ingredient Measurement) chưa implement, mockup chưa viết. Khi bắt đầu Phase 1.5A, tạo lại mockup theo schema canonical trong `docs/3-design/data-model.md` §4.0c + business rule trong `docs/4-architecture/business-rules.md` (RULE-MEASUREMENT, RULE-PANTRY-STOCK, RULE-CS-01/02).
 
 ## Spec phụ thuộc
 
-- Token: `docs/3-design/design-system.md` v1.2 + `src/theme/variables.scss`.
+- Token: `docs/3-design/design-system.md` + `src/theme/variables.scss`.
 - Schema: `docs/3-design/data-model.md`.
 - Business rule: `docs/4-architecture/business-rules.md`.
 
@@ -28,10 +27,6 @@ Các file HTML trong folder này là **mockup spec chính thức** cho từng m�
 
 Nếu mockup mâu thuẫn với schema/code thì **schema/code là source of truth**. Tạo task sync mockup, không sửa code theo mockup outdated.
 
-Đã sync sau commit C-02 (loại bỏ Quick Add):
-- `phase-1-dish-list.html` — đổi badge `Nhập nhanh`/`type-quick` → `AI tự điền`/`type-ai`, FAB menu option 2 đổi sang AI auto-fill.
-
 ## Folder liên quan
 
 - `../explorations/` — exploration A/B/C (KHÔNG phải spec).
-- `.audit/` — screenshot audit cũ, không phải spec.
