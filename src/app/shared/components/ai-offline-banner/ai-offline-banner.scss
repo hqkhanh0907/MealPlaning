@@ -1,0 +1,29 @@
+.ai-offline-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(var(--ion-color-warning-rgb), 0.14);
+  color: var(--ion-color-warning-shade);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.ai-offline-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.ai-offline-text {
+  flex: 1;
+}
+
+:host-context(body.dark),
+:host-context(.dark) {
+  .ai-offline-banner {
+    background: rgba(var(--ion-color-warning-rgb), 0.18);
+    color: var(--ion-color-warning-tint);
+  }
+}

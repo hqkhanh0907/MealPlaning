@@ -21,7 +21,9 @@
     "lint:fix": "ng lint --fix",
     "format": "prettier --write \"src/**/*.{ts,html,scss,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,scss,json}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "obfuscate:key": "node scripts/obfuscate-gemini-key.mjs",
+    "build:prod": "npm run obfuscate:key && npm run check:guards && ng build --configuration=production"
   },
   "private": true,
   "dependencies": {

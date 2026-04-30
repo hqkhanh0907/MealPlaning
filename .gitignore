@@ -84,3 +84,7 @@ src/environments/environment.local.ts
 
 # Hermes agent internal plans
 .hermes/
+
+# Phase 1.5B AI Foundation
+.env
+src/environments/environment.prod.ts
