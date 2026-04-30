@@ -3,24 +3,20 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000001",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000006",
-        "quantity": 15,
-        "unit_id": "g"
+        "gram_weight": 15,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000006"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000102",
-        "quantity": 200,
-        "unit_id": "g"
+        "gram_weight": 200,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000102"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000103",
-        "quantity": 80,
-        "unit_id": "g"
+        "gram_weight": 80,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000103"
       },
       {
-        "ingredient_id": "c0114c01-0001-4000-8000-000000000002",
-        "quantity": 400,
-        "unit_id": "ml"
+        "gram_weight": 408.0,
+        "ingredient_id": "c0114c01-0001-4000-8000-000000000002"
       }
     ],
     "is_favorite": false,
@@ -33,24 +29,20 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000002",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000004",
-        "quantity": 5,
-        "unit_id": "ml"
+        "gram_weight": 4.6,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000004"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010a",
-        "quantity": 100,
-        "unit_id": "g"
+        "gram_weight": 100,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010a"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000111",
-        "quantity": 100,
-        "unit_id": "g"
+        "gram_weight": 100,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000111"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117",
-        "quantity": 20,
-        "unit_id": "g"
+        "gram_weight": 20,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117"
       }
     ],
     "is_favorite": false,
@@ -63,24 +55,20 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000003",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000103",
-        "quantity": 80,
-        "unit_id": "g"
+        "gram_weight": 80,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000103"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010e",
-        "quantity": 200,
-        "unit_id": "g"
+        "gram_weight": 200,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010e"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117"
       },
       {
-        "ingredient_id": "c0114c01-0001-4000-8000-000000000003",
-        "quantity": 400,
-        "unit_id": "ml"
+        "gram_weight": 412.0,
+        "ingredient_id": "c0114c01-0001-4000-8000-000000000003"
       }
     ],
     "is_favorite": false,
@@ -93,19 +81,16 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000004",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000005",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000005"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010b",
-        "quantity": 50,
-        "unit_id": "g"
+        "gram_weight": 50,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010b"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000112",
-        "quantity": 200,
-        "unit_id": "g"
+        "gram_weight": 200,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000112"
       }
     ],
     "is_favorite": false,
@@ -118,24 +103,20 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000005",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000001",
-        "quantity": 30,
-        "unit_id": "ml"
+        "gram_weight": 36.0,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000001"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000006",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000006"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000101",
-        "quantity": 80,
-        "unit_id": "g"
+        "gram_weight": 80,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000101"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d",
-        "quantity": 150,
-        "unit_id": "g"
+        "gram_weight": 150,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d"
       }
     ],
     "is_favorite": false,
@@ -148,34 +129,28 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000006",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000005",
-        "quantity": 20,
-        "unit_id": "g"
+        "gram_weight": 20,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000005"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104",
-        "quantity": 50,
-        "unit_id": "g"
+        "gram_weight": 50,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010b",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010b"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000114",
-        "quantity": 100,
-        "unit_id": "g"
+        "gram_weight": 100,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000114"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000118",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000118"
       },
       {
-        "ingredient_id": "c0114c01-0001-4000-8000-000000000001",
-        "quantity": 30,
-        "unit_id": "ml"
+        "gram_weight": 31.5,
+        "ingredient_id": "c0114c01-0001-4000-8000-000000000001"
       }
     ],
     "is_favorite": false,
@@ -188,24 +163,20 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000007",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000105",
-        "quantity": 150,
-        "unit_id": "g"
+        "gram_weight": 150,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000105"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d",
-        "quantity": 200,
-        "unit_id": "g"
+        "gram_weight": 200,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000116",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000116"
       },
       {
-        "ingredient_id": "c0114c01-0001-4000-8000-000000000001",
-        "quantity": 30,
-        "unit_id": "ml"
+        "gram_weight": 31.5,
+        "ingredient_id": "c0114c01-0001-4000-8000-000000000001"
       }
     ],
     "is_favorite": false,
@@ -218,24 +189,20 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000008",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104",
-        "quantity": 100,
-        "unit_id": "g"
+        "gram_weight": 100,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010e",
-        "quantity": 200,
-        "unit_id": "g"
+        "gram_weight": 200,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010e"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117",
-        "quantity": 50,
-        "unit_id": "g"
+        "gram_weight": 50,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117"
       },
       {
-        "ingredient_id": "c0114c01-0001-4000-8000-000000000001",
-        "quantity": 50,
-        "unit_id": "ml"
+        "gram_weight": 52.5,
+        "ingredient_id": "c0114c01-0001-4000-8000-000000000001"
       }
     ],
     "is_favorite": false,
@@ -248,29 +215,24 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000009",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104",
-        "quantity": 120,
-        "unit_id": "g"
+        "gram_weight": 120,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010e",
-        "quantity": 200,
-        "unit_id": "g"
+        "gram_weight": 200,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010e"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117",
-        "quantity": 50,
-        "unit_id": "g"
+        "gram_weight": 50,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000011a",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000011a"
       },
       {
-        "ingredient_id": "c0114c01-0001-4000-8000-000000000001",
-        "quantity": 30,
-        "unit_id": "ml"
+        "gram_weight": 31.5,
+        "ingredient_id": "c0114c01-0001-4000-8000-000000000001"
       }
     ],
     "is_favorite": false,
@@ -283,29 +245,24 @@
     "id": "7c4e8b1a-0003-4000-8000-00000000000a",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104",
-        "quantity": 50,
-        "unit_id": "g"
+        "gram_weight": 50,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000106",
-        "quantity": 80,
-        "unit_id": "g"
+        "gram_weight": 80,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000106"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000110",
-        "quantity": 200,
-        "unit_id": "g"
+        "gram_weight": 200,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000110"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117"
       },
       {
-        "ingredient_id": "c0114c01-0001-4000-8000-000000000004",
-        "quantity": 200,
-        "unit_id": "ml"
+        "gram_weight": 210.0,
+        "ingredient_id": "c0114c01-0001-4000-8000-000000000004"
       }
     ],
     "is_favorite": false,
@@ -318,24 +275,20 @@
     "id": "7c4e8b1a-0003-4000-8000-00000000000b",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000004",
-        "quantity": 10,
-        "unit_id": "ml"
+        "gram_weight": 9.2,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000004"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000101",
-        "quantity": 150,
-        "unit_id": "g"
+        "gram_weight": 150,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000101"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d",
-        "quantity": 250,
-        "unit_id": "g"
+        "gram_weight": 250,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000116",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000116"
       }
     ],
     "is_favorite": false,
@@ -348,34 +301,28 @@
     "id": "7c4e8b1a-0003-4000-8000-00000000000c",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104",
-        "quantity": 50,
-        "unit_id": "g"
+        "gram_weight": 50,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000106",
-        "quantity": 80,
-        "unit_id": "g"
+        "gram_weight": 80,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000106"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000114",
-        "quantity": 120,
-        "unit_id": "g"
+        "gram_weight": 120,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000114"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000011a",
-        "quantity": 50,
-        "unit_id": "g"
+        "gram_weight": 50,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000011a"
       },
       {
-        "ingredient_id": "c0114c01-0001-4000-8000-000000000001",
-        "quantity": 30,
-        "unit_id": "ml"
+        "gram_weight": 31.5,
+        "ingredient_id": "c0114c01-0001-4000-8000-000000000001"
       }
     ],
     "is_favorite": false,
@@ -388,34 +335,28 @@
     "id": "7c4e8b1a-0003-4000-8000-00000000000d",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104",
-        "quantity": 50,
-        "unit_id": "g"
+        "gram_weight": 50,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000106",
-        "quantity": 80,
-        "unit_id": "g"
+        "gram_weight": 80,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000106"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010e",
-        "quantity": 50,
-        "unit_id": "g"
+        "gram_weight": 50,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010e"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000113",
-        "quantity": 80,
-        "unit_id": "g"
+        "gram_weight": 80,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000113"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117"
       },
       {
-        "ingredient_id": "c0114c01-0001-4000-8000-000000000001",
-        "quantity": 50,
-        "unit_id": "ml"
+        "gram_weight": 52.5,
+        "ingredient_id": "c0114c01-0001-4000-8000-000000000001"
       }
     ],
     "is_favorite": false,
@@ -428,29 +369,24 @@
     "id": "7c4e8b1a-0003-4000-8000-00000000000e",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000001",
-        "quantity": 15,
-        "unit_id": "ml"
+        "gram_weight": 18.0,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000001"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000003",
-        "quantity": 20,
-        "unit_id": "g"
+        "gram_weight": 20,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000003"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000005",
-        "quantity": 15,
-        "unit_id": "g"
+        "gram_weight": 15,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000005"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000109",
-        "quantity": 150,
-        "unit_id": "g"
+        "gram_weight": 150,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000109"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d",
-        "quantity": 200,
-        "unit_id": "g"
+        "gram_weight": 200,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d"
       }
     ],
     "is_favorite": false,
@@ -463,24 +399,20 @@
     "id": "7c4e8b1a-0003-4000-8000-00000000000f",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000108",
-        "quantity": 150,
-        "unit_id": "g"
+        "gram_weight": 150,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000108"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d",
-        "quantity": 200,
-        "unit_id": "g"
+        "gram_weight": 200,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117"
       },
       {
-        "ingredient_id": "c0114c01-0001-4000-8000-000000000005",
-        "quantity": 400,
-        "unit_id": "ml"
+        "gram_weight": 408.0,
+        "ingredient_id": "c0114c01-0001-4000-8000-000000000005"
       }
     ],
     "is_favorite": false,
@@ -493,29 +425,24 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000010",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000001",
-        "quantity": 15,
-        "unit_id": "ml"
+        "gram_weight": 18.0,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000001"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000003",
-        "quantity": 20,
-        "unit_id": "g"
+        "gram_weight": 20,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000003"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104",
-        "quantity": 150,
-        "unit_id": "g"
+        "gram_weight": 150,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000104"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010a",
-        "quantity": 80,
-        "unit_id": "g"
+        "gram_weight": 80,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010a"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d",
-        "quantity": 200,
-        "unit_id": "g"
+        "gram_weight": 200,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d"
       }
     ],
     "is_favorite": false,
@@ -528,29 +455,24 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000011",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000004",
-        "quantity": 10,
-        "unit_id": "ml"
+        "gram_weight": 9.2,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000004"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000005",
-        "quantity": 20,
-        "unit_id": "g"
+        "gram_weight": 20,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000005"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000103",
-        "quantity": 150,
-        "unit_id": "g"
+        "gram_weight": 150,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000103"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d",
-        "quantity": 200,
-        "unit_id": "g"
+        "gram_weight": 200,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010d"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000115",
-        "quantity": 50,
-        "unit_id": "g"
+        "gram_weight": 50,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000115"
       }
     ],
     "is_favorite": false,
@@ -563,34 +485,28 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000012",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000106",
-        "quantity": 80,
-        "unit_id": "g"
+        "gram_weight": 80,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000106"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000107",
-        "quantity": 80,
-        "unit_id": "g"
+        "gram_weight": 80,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000107"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010e",
-        "quantity": 100,
-        "unit_id": "g"
+        "gram_weight": 100,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010e"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117",
-        "quantity": 50,
-        "unit_id": "g"
+        "gram_weight": 50,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000118",
-        "quantity": 50,
-        "unit_id": "g"
+        "gram_weight": 50,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000118"
       },
       {
-        "ingredient_id": "c0114c01-0001-4000-8000-000000000006",
-        "quantity": 400,
-        "unit_id": "ml"
+        "gram_weight": 412.0,
+        "ingredient_id": "c0114c01-0001-4000-8000-000000000006"
       }
     ],
     "is_favorite": false,
@@ -603,29 +519,24 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000013",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010b",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010b"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010c",
-        "quantity": 80,
-        "unit_id": "g"
+        "gram_weight": 80,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010c"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010e",
-        "quantity": 200,
-        "unit_id": "g"
+        "gram_weight": 200,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010e"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117"
       },
       {
-        "ingredient_id": "c0114c01-0001-4000-8000-000000000007",
-        "quantity": 400,
-        "unit_id": "ml"
+        "gram_weight": 408.0,
+        "ingredient_id": "c0114c01-0001-4000-8000-000000000007"
       }
     ],
     "is_favorite": false,
@@ -638,34 +549,28 @@
     "id": "7c4e8b1a-0003-4000-8000-000000000014",
     "ingredients": [
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000004",
-        "quantity": 15,
-        "unit_id": "ml"
+        "gram_weight": 13.8,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000004"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000006",
-        "quantity": 30,
-        "unit_id": "g"
+        "gram_weight": 30,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000006"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000106",
-        "quantity": 80,
-        "unit_id": "g"
+        "gram_weight": 80,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000106"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000107",
-        "quantity": 80,
-        "unit_id": "g"
+        "gram_weight": 80,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000107"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010f",
-        "quantity": 200,
-        "unit_id": "g"
+        "gram_weight": 200,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-00000000010f"
       },
       {
-        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117",
-        "quantity": 50,
-        "unit_id": "g"
+        "gram_weight": 50,
+        "ingredient_id": "7c4e8b1a-0002-4000-8000-000000000117"
       }
     ],
     "is_favorite": false,

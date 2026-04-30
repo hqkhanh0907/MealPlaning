@@ -5,14 +5,17 @@ import { v4 as uuidv4 } from 'uuid';
 import { Database } from '../database/database';
 
 /**
- * Phase 1 §5.2.6 — Idempotent seed loader.
+ * Phase 1 §5.2.6 — Idempotent seed loader (gram-only revision).
  *
  * Loads the curated Vietnamese ingredient + composite + dish seed JSON
- * artifacts into SQLite, gated by the `seed_artifact` tracker (V5).
+ * artifacts into SQLite, gated by the `seed_artifact` tracker.
  * Re-runs are safe: each artifact_id is processed at most once.
+ *
+ * Schema v6: ingredient nutrition is per-100g (no basis_unit/quantity/density).
+ * dish_ingredient stores gram_weight directly (no unit_id/normalized_amount).
  */
 
-export const SEED_VERSION = '1.0.0';
+export const SEED_VERSION = '1.1.0';
 
 const INGREDIENTS_URL = 'assets/seed/ingredients.json';
 const COMPOSITES_URL = 'assets/seed/composites.json';
@@ -36,20 +39,16 @@ export interface SeedIngredientRecord {
   id: string;
   name_vi: string;
   category: string;
-  nutrition_basis_unit: 'g' | 'ml';
-  nutrition_basis_quantity: number;
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
   fiber: number;
-  density_g_per_ml: number | null;
 }
 
 export interface SeedDishIngredient {
   ingredient_id: string;
-  quantity: number;
-  unit_id: string;
+  gram_weight: number;
 }
 
 export interface SeedDishRecord {
@@ -100,30 +99,19 @@ export class SeedLoader {
 
     await this.db.execute(
       `INSERT INTO ingredient (
-        id, name, category, nutrition_basis_unit, nutrition_basis_quantity,
-        calories, protein, carbs, fat, fiber, density_g_per_ml, source
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        id, name, category, calories, protein, carbs, fat, fiber, source
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         rec.id,
         rec.name_vi,
         category,
-        rec.nutrition_basis_unit,
-        rec.nutrition_basis_quantity,
         rec.calories,
         rec.protein,
         rec.carbs,
         rec.fat,
         rec.fiber,
-        rec.density_g_per_ml,
         'db',
       ],
-    );
-
-    await this.db.execute(
-      `INSERT INTO ingredient_unit (
-        ingredient_id, unit_id, factor_to_basis, is_default, display_label
-      ) VALUES (?, ?, 1, 1, NULL)`,
-      [rec.id, rec.nutrition_basis_unit],
     );
 
     await this.db.execute(
@@ -150,13 +138,15 @@ export class SeedLoader {
       [rec.id, rec.name_vi, rec.servings, rec.meal_tag, rec.is_favorite ? 1 : 0],
     );
 
+    let position = 0;
     for (const ing of rec.ingredients) {
       await this.db.execute(
         `INSERT INTO dish_ingredient (
-          id, dish_id, ingredient_id, amount_value, unit_id, normalized_amount
-        ) VALUES (?, ?, ?, ?, ?, ?)`,
-        [uuidv4(), rec.id, ing.ingredient_id, ing.quantity, ing.unit_id, ing.quantity],
+          id, dish_id, ingredient_id, gram_weight, sort_order
+        ) VALUES (?, ?, ?, ?, ?)`,
+        [uuidv4(), rec.id, ing.ingredient_id, ing.gram_weight, position],
       );
+      position += 1;
     }
 
     await this.db.execute(

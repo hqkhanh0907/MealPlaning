@@ -17,14 +17,11 @@ function makeIngredient(
     id: `aaaaaaaa-0000-4000-8000-0000000000${idSuffix}`,
     name_vi: `Test ${idSuffix}`,
     category: 'meat',
-    nutrition_basis_unit: 'g',
-    nutrition_basis_quantity: 100,
     calories: 100,
     protein: 10,
     carbs: 5,
     fat: 5,
     fiber: 1,
-    density_g_per_ml: null,
     ...overrides,
   };
 }
@@ -37,14 +34,11 @@ function makeComposite(
     id: `bbbbbbbb-0000-4000-8000-0000000000${idSuffix}`,
     name_vi: `Composite ${idSuffix}`,
     category: 'composite',
-    nutrition_basis_unit: 'ml',
-    nutrition_basis_quantity: 100,
     calories: 50,
     protein: 1,
     carbs: 10,
     fat: 0,
     fiber: 0,
-    density_g_per_ml: 1.0,
     ...overrides,
   };
 }
@@ -60,7 +54,7 @@ function makeDish(
     meal_tag: 'lunch',
     servings: 1,
     is_favorite: false,
-    ingredients: [{ ingredient_id: ingredientId, quantity: 100, unit_id: 'g' }],
+    ingredients: [{ ingredient_id: ingredientId, gram_weight: 100 }],
     ...overrides,
   };
 }
@@ -109,11 +103,11 @@ describe('SeedLoaderService', () => {
 
   it('fresh DB inserts every ingredient + composite + dish and tracker grows by N+M+D', async () => {
     const ing1 = makeIngredient('01');
-    const ing2 = makeIngredient('02', { nutrition_basis_unit: 'ml', category: 'staple' });
+    const ing2 = makeIngredient('02', { category: 'staple' });
     const comp = makeComposite('11');
     const dish1 = makeDish('21', ing1.id);
     const dish2 = makeDish('22', comp.id, {
-      ingredients: [{ ingredient_id: comp.id, quantity: 50, unit_id: 'ml' }],
+      ingredients: [{ ingredient_id: comp.id, gram_weight: 50 }],
     });
 
     const promise = loader.run();
@@ -125,7 +119,6 @@ describe('SeedLoaderService', () => {
     expect(await count('dish')).toBe(2);
     expect(await count('seed_artifact')).toBe(5);
     expect(await count('dish_ingredient')).toBe(2);
-    expect(await count('ingredient_unit')).toBe(3);
   });
 
   it('second run on populated DB inserts zero', async () => {
