@@ -544,15 +544,12 @@ export default class DishEditPage implements HasUnsavedChanges {
    */
   async onAutofillApplied(payload: DishAutofillAppliedPayload): Promise<void> {
     try {
-      const ops = await this.autofillApplier.apply(payload.result, {
+      const ops = await this.dishStore.applyAutofillAtomic(payload.result, {
         fuzzyDecisions: payload.fuzzyDecisions,
       });
 
-      // Refresh ingredient store (mới insert) để index trong form lookup được.
-      if (ops.createdIngredientIds.length > 0) {
-        await this.ingredientStore.load();
-        this.availableIngredients.set(this.ingredientStore.ingredients());
-      }
+      // Refresh availableIngredients từ store cache (đã được store bulk-merge).
+      this.availableIngredients.set(this.ingredientStore.ingredients());
 
       // Append AI rows vào cuối list hiện tại (Decision: AI bổ sung, không thay thế).
       const newItems: DishIngredientFormItem[] = ops.dishIngredients.map((row) => ({

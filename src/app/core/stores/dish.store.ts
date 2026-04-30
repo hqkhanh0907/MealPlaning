@@ -6,10 +6,22 @@ import type {
   DishWithIngredients,
 } from '../repositories/dish.repository';
 import { DishRepository } from '../repositories/dish.repository';
+import {
+  DishAutofillApplier,
+  type ApplyAutofillOptions,
+} from '../services/ai/dish-autofill-applier';
+import type { DishAutofillResult } from '../services/ai/nutrition-ai';
+import { Database } from '../services/database/database';
+import { IngredientRepository } from '../repositories/ingredient.repository';
+import { IngredientStore } from './ingredient.store';
 
 @Injectable({ providedIn: 'root' })
 export class DishStore {
   private readonly repo = inject(DishRepository);
+  private readonly db = inject(Database);
+  private readonly autofillApplier = inject(DishAutofillApplier);
+  private readonly ingredientRepo = inject(IngredientRepository);
+  private readonly ingredientStore = inject(IngredientStore);
 
   readonly dishes = signal<DishListItem[]>([]);
   readonly loading = signal(false);
@@ -65,6 +77,42 @@ export class DishStore {
   async remove(id: string): Promise<void> {
     await this.repo.delete(id);
     this.dishes.set(this.dishes().filter((item) => item.id !== id));
+  }
+
+  /**
+   * F-02 — Atomic AI autofill ingredient materialization.
+   *
+   * Wrap `autofillApplier.apply()` trong 1 outer `withTransaction`:
+   *  - find-or-create N ingredient mới qua `IngredientRepository.insert`
+   *    (mỗi insert là inner tx → no-op nested vì đã trong outer tx).
+   *  - Nếu bất kỳ insert nào throw → ROLLBACK toàn bộ ingredient batch
+   *    (cache không update).
+   *  - Sau commit: bulk-merge ingredient mới vào `ingredientStore.addManyToCache`.
+   *
+   * KHÔNG save dish ở đây. Dish save vẫn đi qua `addFromIngredients` /
+   * `edit` (tx riêng) sau khi user nhấn nút lưu — 2 atomic boundaries
+   * riêng biệt khớp UX (apply → form sửa → save).
+   */
+  async applyAutofillAtomic(
+    autofillResult: DishAutofillResult,
+    options: ApplyAutofillOptions,
+  ): Promise<{
+    dishIngredients: readonly CreateDishIngredientInput[];
+    createdIngredientIds: readonly string[];
+  }> {
+    const applied = await this.db.withTransaction(async () =>
+      this.autofillApplier.apply(autofillResult, options),
+    );
+
+    if (applied.createdIngredientIds.length > 0) {
+      const newIngredients = await this.ingredientRepo.findByIds([...applied.createdIngredientIds]);
+      this.ingredientStore.addManyToCache(newIngredients);
+    }
+
+    return {
+      dishIngredients: applied.dishIngredients,
+      createdIngredientIds: applied.createdIngredientIds,
+    };
   }
 
   async countReferences(id: string): Promise<number> {

@@ -12,6 +12,7 @@ import { MIGRATION_REGISTRY } from './migrations';
 @Injectable()
 export class WebDatabase extends Database {
   private db: SqlJsDatabase | null = null;
+  private transactionDepth = 0;
 
   override async initialize(): Promise<void> {
     try {
@@ -50,14 +51,24 @@ export class WebDatabase extends Database {
 
   override async withTransaction<T>(callback: () => Promise<T>): Promise<T> {
     this.ensureDb();
-    this.db!.run('BEGIN');
+    const isOuter = this.transactionDepth === 0;
+    if (isOuter) {
+      this.db!.run('BEGIN');
+    }
+    this.transactionDepth += 1;
     try {
       const result = await callback();
-      this.db!.run('COMMIT');
-      this.persist();
+      this.transactionDepth -= 1;
+      if (isOuter) {
+        this.db!.run('COMMIT');
+        this.persist();
+      }
       return result;
     } catch (error) {
-      this.db!.run('ROLLBACK');
+      this.transactionDepth = Math.max(0, this.transactionDepth - 1);
+      if (isOuter) {
+        this.db!.run('ROLLBACK');
+      }
       throw error;
     }
   }

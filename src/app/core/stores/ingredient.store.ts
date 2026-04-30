@@ -41,6 +41,24 @@ export class IngredientStore {
     this.ingredients.set([saved, ...this.ingredients()]);
   }
 
+  /**
+   * F-02 — Bulk-merge ingredients vào cache sau khi store-level transaction
+   * commit (tránh repo.list() reload tốn IO). Dedup theo `id`: nếu cache đã
+   * có row cùng id (vì find-or-create trả về existing) thì giữ nguyên,
+   * không double-prepend.
+   */
+  addManyToCache(saved: readonly IngredientListItem[]): void {
+    if (saved.length === 0) {
+      return;
+    }
+    const existingIds = new Set(this.ingredients().map((row) => row.id));
+    const fresh = saved.filter((row) => !existingIds.has(row.id));
+    if (fresh.length === 0) {
+      return;
+    }
+    this.ingredients.set([...fresh, ...this.ingredients()]);
+  }
+
   async edit(id: string, input: UpdateIngredientInput): Promise<void> {
     await this.repo.update(id, input);
     await this.reloadActiveView();

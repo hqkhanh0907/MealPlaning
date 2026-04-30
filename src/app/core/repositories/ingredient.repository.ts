@@ -78,6 +78,29 @@ export class IngredientRepository {
   }
 
   /**
+   * Batch-fetch ingredients theo list `id`. Trả về array đúng thứ tự `ids`
+   * truyền vào (dropping rows không tồn tại). Dùng cho F-02 sau khi commit
+   * AI autofill transaction để bulk-merge cache.
+   */
+  async findByIds(ids: readonly string[]): Promise<IngredientListItem[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+    const placeholders = ids.map(() => '?').join(',');
+    const rows = await this.db.query<IngredientRow>(
+      `SELECT * FROM ingredient WHERE id IN (${placeholders})`,
+      [...ids],
+    );
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    const ordered: IngredientListItem[] = [];
+    for (const id of ids) {
+      const row = byId.get(id);
+      if (row) ordered.push(row);
+    }
+    return ordered;
+  }
+
+  /**
    * Tìm ingredient có tên trùng (case-insensitive + bỏ dấu) với `name`.
    * Dùng cho F-02 trước khi insert ingredient mới từ AI để tránh duplicate.
    *
