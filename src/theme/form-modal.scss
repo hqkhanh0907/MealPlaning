@@ -13,7 +13,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(18, 18, 24, 0.52);
+  background: var(--scrim-strong);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -61,7 +61,7 @@
   margin: 0;
   flex: 1;
   color: var(--text-primary);
-  font-size: 20px;
+  font-size: var(--font-size-icon-md);
   font-weight: 600;
   line-height: 1.3;
 }
@@ -73,7 +73,7 @@
   border: none;
   background: transparent;
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: var(--font-size-subtitle);
   font-weight: 500;
 }
 
@@ -91,7 +91,7 @@
 }
 
 .toolbar-icon-button ion-icon {
-  font-size: 22px;
+  font-size: var(--font-size-icon-lg);
 }
 
 .toolbar-save-button[disabled] {
@@ -113,7 +113,7 @@
 .btn-cta {
   min-height: 44px;
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--font-size-body);
 }
 
 .btn-outline {

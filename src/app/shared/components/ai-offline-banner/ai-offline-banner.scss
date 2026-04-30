@@ -6,13 +6,13 @@
   border-radius: var(--radius-sm);
   background: rgba(var(--ion-color-warning-rgb), 0.14);
   color: var(--ion-color-warning-shade);
-  font-size: 13px;
+  font-size: var(--font-size-body-sm);
   font-weight: 500;
   line-height: 1.4;
 }
 
 .ai-offline-icon {
-  font-size: 18px;
+  font-size: var(--font-size-title);
   flex-shrink: 0;
 }
 

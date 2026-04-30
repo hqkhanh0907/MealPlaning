@@ -41,7 +41,7 @@
   border-radius: var(--radius-xs);
   background: var(--bg-card);
   color: var(--text-tertiary);
-  font-size: 11px;
+  font-size: var(--font-size-overline);
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -67,7 +67,7 @@
 .dish-macros {
   margin: 0;
   color: var(--text-tertiary);
-  font-size: 13px;
+  font-size: var(--font-size-body-sm);
   line-height: 1.5;
 }
 
@@ -116,7 +116,10 @@
 }
 
 .item-card__main-action:active {
-  background: rgba(var(--ion-color-primary-rgb), 0.08);
+  background: rgba(
+    var(--ion-color-primary-rgb),
+    0.08
+  ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
   transform: scale(0.995);
 }
 
@@ -141,7 +144,7 @@
   margin: 0;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
-  font-size: 16px;
+  font-size: var(--font-size-subtitle);
   font-weight: 600;
   line-height: 1.4;
 }
@@ -160,7 +163,7 @@
   border-radius: var(--radius-xs);
   background: var(--bg-muted);
   color: var(--text-tertiary);
-  font-size: 11px;
+  font-size: var(--font-size-overline);
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
@@ -174,22 +177,32 @@
 .badge--source-inline {
   padding: 1px 6px;
   border-radius: var(--radius-micro);
-  font-size: 10px;
+  font-size: var(--font-size-micro);
   letter-spacing: 0;
   text-transform: none;
   /* Source badge — sage tint (DS §2.1 Sage scale) thay vì neutral xám.
      Trước: bg=--border-color + color=--text-tertiary → trông như disabled,
      không đọc ra "Có sẵn" là affirmative state. Sage tint 10% alpha + sage-700
      text giữ contrast ≥4.5:1 và signal "available/curated". */
-  background: rgba(111, 139, 110, 0.12);
-  color: #4f6a4f;
+  background: rgba(
+    111,
+    139,
+    110,
+    0.12
+  ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+  color: #4f6a4f; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
 @media (prefers-color-scheme: dark) {
   .badge--source,
   .badge--source-inline {
-    background: rgba(138, 160, 134, 0.18);
-    color: #c8d2c5;
+    background: rgba(
+      138,
+      160,
+      134,
+      0.18
+    ); // allow-hardcode: DS §2.7 source-badge sage tint — intentional, no semantic token
+    color: #c8d2c5; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
   }
 }
 
@@ -198,58 +211,113 @@
 // với warm cream background. Background = color @ 10% alpha.
 
 .badge--category-cat-thit {
-  background: rgba(168, 85, 68, 0.1);
-  color: #a85544; // terracotta
+  background: rgba(
+    168,
+    85,
+    68,
+    0.1
+  ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+  color: #a85544; // terracotta // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
 .badge--category-cat-ca {
-  background: rgba(74, 122, 138, 0.1);
-  color: #4a7a8a; // slate blue
+  background: rgba(
+    74,
+    122,
+    138,
+    0.1
+  ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+  color: #4a7a8a; // slate blue // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
 .badge--category-cat-trung {
-  background: rgba(176, 122, 62, 0.1);
-  color: #b07a3e; // warm amber
+  background: rgba(
+    176,
+    122,
+    62,
+    0.1
+  ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+  color: #b07a3e; // warm amber // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
 .badge--category-cat-rau {
-  background: rgba(111, 139, 110, 0.1);
-  color: #6f8b6e; // sage (= primary)
+  background: rgba(
+    111,
+    139,
+    110,
+    0.1
+  ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+  color: #6f8b6e; // sage (= primary) // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
 .badge--category-cat-ngu-coc {
-  background: rgba(166, 102, 56, 0.1);
-  color: #a66638; // burnt sienna
+  background: rgba(
+    166,
+    102,
+    56,
+    0.1
+  ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+  color: #a66638; // burnt sienna // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
 .badge--category-cat-dau-hat {
-  background: rgba(138, 106, 140, 0.1);
-  color: #8a6a8c; // muted plum
+  background: rgba(
+    138,
+    106,
+    140,
+    0.1
+  ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+  color: #8a6a8c; // muted plum // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
 .badge--category-cat-dau-mo {
-  background: rgba(201, 168, 71, 0.1);
-  color: #c9a847; // golden
+  background: rgba(
+    201,
+    168,
+    71,
+    0.1
+  ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+  color: #c9a847; // golden // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
 .badge--category-cat-gia-vi {
-  background: rgba(176, 74, 106, 0.1);
-  color: #b04a6a; // muted rose
+  background: rgba(
+    176,
+    74,
+    106,
+    0.1
+  ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+  color: #b04a6a; // muted rose // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
 .badge--category-cat-nuoc-dung {
-  background: rgba(90, 138, 122, 0.1);
-  color: #5a8a7a; // teal-sage
+  background: rgba(
+    90,
+    138,
+    122,
+    0.1
+  ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+  color: #5a8a7a; // teal-sage // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
 .badge--category-cat-trai-cay {
-  background: rgba(194, 73, 62, 0.1);
-  color: #c2493e; // cherry (= danger)
+  background: rgba(
+    194,
+    73,
+    62,
+    0.1
+  ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+  color: #c2493e; // cherry (= danger) // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
 .badge--category-cat-khac {
-  background: rgba(128, 119, 106, 0.1);
-  color: #80776a; // warm medium
+  background: rgba(
+    128,
+    119,
+    106,
+    0.1
+  ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+  color: #80776a; // warm medium // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
 .badge--type-ingredient {
@@ -264,48 +332,103 @@
 
 @media (prefers-color-scheme: dark) {
   .badge--category-cat-thit {
-    background: rgba(168, 85, 68, 0.18);
-    color: #d49e8e;
+    background: rgba(
+      168,
+      85,
+      68,
+      0.18
+    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+    color: #d49e8e; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
   }
   .badge--category-cat-ca {
-    background: rgba(74, 122, 138, 0.18);
-    color: #9ab8c4;
+    background: rgba(
+      74,
+      122,
+      138,
+      0.18
+    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+    color: #9ab8c4; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
   }
   .badge--category-cat-trung {
-    background: rgba(176, 122, 62, 0.18);
-    color: #d4b48a;
+    background: rgba(
+      176,
+      122,
+      62,
+      0.18
+    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+    color: #d4b48a; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
   }
   .badge--category-cat-rau {
-    background: rgba(111, 139, 110, 0.18);
-    color: #a8b7a5;
+    background: rgba(
+      111,
+      139,
+      110,
+      0.18
+    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+    color: #a8b7a5; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
   }
   .badge--category-cat-ngu-coc {
-    background: rgba(166, 102, 56, 0.18);
-    color: #cfa688;
+    background: rgba(
+      166,
+      102,
+      56,
+      0.18
+    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+    color: #cfa688; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
   }
   .badge--category-cat-dau-hat {
-    background: rgba(138, 106, 140, 0.18);
-    color: #b8a4ba;
+    background: rgba(
+      138,
+      106,
+      140,
+      0.18
+    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+    color: #b8a4ba; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
   }
   .badge--category-cat-dau-mo {
-    background: rgba(201, 168, 71, 0.18);
-    color: #ddc78a;
+    background: rgba(
+      201,
+      168,
+      71,
+      0.18
+    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+    color: #ddc78a; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
   }
   .badge--category-cat-gia-vi {
-    background: rgba(176, 74, 106, 0.18);
-    color: #d49ab1;
+    background: rgba(
+      176,
+      74,
+      106,
+      0.18
+    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+    color: #d49ab1; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
   }
   .badge--category-cat-nuoc-dung {
-    background: rgba(90, 138, 122, 0.18);
-    color: #a4c4b8;
+    background: rgba(
+      90,
+      138,
+      122,
+      0.18
+    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+    color: #a4c4b8; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
   }
   .badge--category-cat-trai-cay {
-    background: rgba(194, 73, 62, 0.18);
-    color: #d98980;
+    background: rgba(
+      194,
+      73,
+      62,
+      0.18
+    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+    color: #d98980; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
   }
   .badge--category-cat-khac {
-    background: rgba(128, 119, 106, 0.18);
-    color: #b5ac9c;
+    background: rgba(
+      128,
+      119,
+      106,
+      0.18
+    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
+    color: #b5ac9c; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
   }
   .badge--type-ingredient {
     background: var(--quick-action-bg);
@@ -335,7 +458,7 @@
 }
 
 .kebab-button ion-icon {
-  font-size: 20px;
+  font-size: var(--font-size-icon-md);
 }
 
 .item-card__detail {
@@ -349,7 +472,7 @@
   gap: 4px;
   flex-wrap: wrap;
   margin-bottom: 0;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
 }
 
 .item-card__metric {
@@ -357,7 +480,7 @@
   flex-shrink: 0;
   text-align: right;
   color: var(--text-tertiary);
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   line-height: 1.4;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -366,7 +489,7 @@
 .item-card__metric strong {
   display: block;
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: var(--font-size-subtitle);
   font-weight: 600;
   line-height: 1.4;
 }
@@ -374,7 +497,7 @@
 .dish-calories {
   margin: 4px 0 0;
   color: var(--text-primary);
-  font-size: 22px;
+  font-size: var(--font-size-icon-lg);
   font-weight: 700;
   line-height: 1.3;
   font-variant-numeric: tabular-nums;

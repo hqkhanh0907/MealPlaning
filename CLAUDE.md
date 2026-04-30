@@ -88,15 +88,38 @@ DO NOT:
 
 If a deviation is genuinely needed, update §8.6 first AND get explicit user approval — never silently add a new pattern. The Node guard at `scripts/check-form-input-pattern.mjs` runs on `npm run check:form-pattern` and is wired into `npm run build`.
 
+### Design Tokens (MANDATORY)
+
+ALL `color`, `background`, `background-color`, and `font-size` declarations in `*.scss` / `*.css` MUST use a `var(--*)` token defined in `src/theme/variables.scss`. Raw hex (`#abc`, `#aabbcc`), `rgb(...)`, `rgba(...)`, `hsl(...)`, named colors (`white`, `red`), and `<n>px` font-sizes are forbidden. References: `docs/3-design/design-system.md` §2 (color palette) and §6 (typography scale).
+
+Allowed non-token values: `inherit`, `transparent`, `currentColor`, `unset`, `initial`, `0`, and any value already wrapped in `var(...)` (including fallback chains).
+
+Escape hatch — for genuinely intentional brand/data-viz colors that have no semantic token (e.g. category palette in `list-card.scss`, inverse-sage dark variants in `segment-control.scss`), append a one-line justification comment on the same line, the line above, or inside the multi-line value:
+
+```scss
+background: rgba(168, 85, 68, 0.1); // allow-hardcode: data-viz category 1 (DS §2.7)
+```
+
+The reason is mandatory. Bare `// allow-hardcode` without explanation is rejected by review.
+
+Verify with `npm run check:design-tokens`. Always test new UI under both light AND dark mode (Pitfall 12 in `mealplaning-emulator-fast-qa`):
+
+```bash
+adb -s emulator-5554 shell cmd uimode night yes   # dark
+adb -s emulator-5554 shell cmd uimode night no    # light
+adb -s emulator-5554 shell am force-stop com.healthmate.ai   # required after toggle
+```
+
 ### Architecture Guards (CI-enforced)
 
-Three Node guards run on every `npm run build`, every `git commit` (via Husky pre-commit), and on GitHub Actions for `push` / `pull_request`:
+Four Node guards run on every `npm run build`, every `git commit` (via Husky pre-commit), and on GitHub Actions for `push` / `pull_request`:
 
 | Script | Purpose | Reference |
 |--------|---------|-----------|
 | `scripts/check-form-input-pattern.mjs` | Floating-label form pattern (no stacked `<label class="field">`, no inline `.input-wrapper`, no `.picker-trigger` without `--floating`). | design-system §8.6 |
 | `scripts/check-pc1-external-templates.mjs` | PC-1 binary rule — every `@Component` MUST use external `templateUrl` + `styleUrl`; inline `template:` / `styles:` forbidden. | coding-conventions §2.2 |
 | `scripts/check-style-2025-naming.mjs` | No `.component.ts` / `.service.ts` / `.directive.ts` / `.pipe.ts` file suffix; no `Component` / `Service` / `Directive` / `Pipe` class suffix. | coding-conventions §1 |
+| `scripts/check-design-tokens.mjs` | All `color` / `background` / `background-color` / `font-size` use `var(--*)` tokens; raw literals require `// allow-hardcode: <reason>` escape. | design-system §2 / §6 |
 
 Run all guards manually: `npm run check:guards`.
 
