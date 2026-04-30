@@ -52,19 +52,16 @@ phase-1/
 ├── 01-management-overview.html
 ├── 02-management-empty.html
 ├── 03-ingredient-list.html
-├── 04-ingredient-detail.html
 ├── 05-ingredient-add.html
 ├── 06-ingredient-edit.html
 ├── 09-soft-delete.html
 ├── 10-ingredient-search-empty.html
 ├── 11-recipe-list.html
-├── 12-recipe-detail.html
 ├── 13-recipe-add.html
 ├── 14-recipe-edit.html
 ├── 15-recipe-add-ingredient.html
 ├── 16-recipe-empty.html
 ├── 18-form-validation.html
-├── 19-usda-autofill.html
 └── 20-category-suggest.html
 ```
 

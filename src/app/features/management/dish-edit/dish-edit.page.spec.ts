@@ -198,7 +198,7 @@ describe('DishEditPage (gram-only)', () => {
     expect(items[0].gram_weight).toBe(80);
   });
 
-  it('computes preview totals as sum(calories * gram / 100)', () => {
+  it('computes preview totals per single serving (servings=1 → full sum)', () => {
     const access = component as unknown as {
       formSignal: {
         set: (v: {
@@ -217,8 +217,32 @@ describe('DishEditPage (gram-only)', () => {
       meal_tag: null,
       items: [{ local_id: 'a', ingredient_id: 'ingredient-1', gram_weight: 200 }],
     });
-    // 155 kcal/100g × 200g / 100 = 310
+    // 155 kcal/100g × 200g / 100 / 1 serving = 310
     expect(component.previewTotals().calories).toBeCloseTo(310, 5);
     expect(component.previewTotals().protein).toBeCloseTo(26, 5);
+  });
+
+  it('divides preview totals by servings when servings > 1', () => {
+    const access = component as unknown as {
+      formSignal: {
+        set: (v: {
+          name: string;
+          description: string;
+          servings: number;
+          meal_tag: null;
+          items: { local_id: string; ingredient_id: string; gram_weight: number }[];
+        }) => void;
+      };
+    };
+    access.formSignal.set({
+      name: 'Test',
+      description: '',
+      servings: 2,
+      meal_tag: null,
+      items: [{ local_id: 'a', ingredient_id: 'ingredient-1', gram_weight: 200 }],
+    });
+    // 310 kcal total / 2 servings = 155
+    expect(component.previewTotals().calories).toBeCloseTo(155, 5);
+    expect(component.previewTotals().protein).toBeCloseTo(13, 5);
   });
 });

@@ -134,7 +134,7 @@ export default class DishEditPage implements HasUnsavedChanges {
   private dirtyBaseline = '';
   private skipUnsavedPrompt = false;
 
-  /** Aggregate nutrition preview across all rows. */
+  /** Aggregate nutrition preview per single serving. */
   readonly previewTotals = computed<{
     calories: number;
     protein: number;
@@ -156,7 +156,15 @@ export default class DishEditPage implements HasUnsavedChanges {
       totals.fat += ing.fat * m;
       totals.fiber += ing.fiber * m;
     }
-    return totals;
+    const servings = this.formSignal().servings;
+    const divisor = Number.isFinite(servings) && (servings ?? 0) > 0 ? (servings as number) : 1;
+    return {
+      calories: totals.calories / divisor,
+      protein: totals.protein / divisor,
+      carbs: totals.carbs / divisor,
+      fat: totals.fat / divisor,
+      fiber: totals.fiber / divisor,
+    };
   });
 
   constructor() {
