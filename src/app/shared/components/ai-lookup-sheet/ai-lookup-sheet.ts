@@ -20,6 +20,7 @@ import {
   EventEmitter,
   Input,
   Output,
+  ViewChild,
   computed,
   signal,
 } from '@angular/core';
@@ -29,19 +30,18 @@ import {
   IonHeader,
   IonIcon,
   IonModal,
-  IonSelect,
-  IonSelectOption,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { closeOutline } from 'ionicons/icons';
+import { chevronDownOutline, closeOutline } from 'ionicons/icons';
 
 import {
   INGREDIENT_CATEGORIES,
   type IngredientCategory,
 } from '../../../core/models/management.constants';
 import { AppFormField } from '../../forms/form-field/form-field';
+import { BottomSheetPicker, type PickerOption } from '../bottom-sheet-picker/bottom-sheet-picker';
 import type { IngredientLookupResult } from '../../../core/services/ai/nutrition-ai';
 
 /**
@@ -82,9 +82,8 @@ export interface AiLookupSavePayload {
     IonTitle,
     IonContent,
     IonIcon,
-    IonSelect,
-    IonSelectOption,
     AppFormField,
+    BottomSheetPicker,
   ],
   templateUrl: './ai-lookup-sheet.html',
   styleUrl: './ai-lookup-sheet.scss',
@@ -153,6 +152,12 @@ export class AiLookupSheet {
 
   protected readonly showErrors = signal(false);
   protected readonly categories = INGREDIENT_CATEGORIES;
+  protected readonly categoryOptions: PickerOption[] = INGREDIENT_CATEGORIES.map((c) => ({
+    value: c,
+    label: c,
+  }));
+
+  @ViewChild('categoryPicker') private categoryPicker?: BottomSheetPicker;
 
   protected readonly resultView = this._result.asReadonly();
 
@@ -176,7 +181,7 @@ export class AiLookupSheet {
   });
 
   constructor() {
-    addIcons({ closeOutline });
+    addIcons({ chevronDownOutline, closeOutline });
   }
 
   // --------------------------------------------------------------------------
@@ -188,6 +193,14 @@ export class AiLookupSheet {
     value: ReturnType<typeof this.form>[K],
   ): void {
     this.form.update((f) => ({ ...f, [key]: value }));
+  }
+
+  protected openCategoryPicker(): void {
+    this.categoryPicker?.open();
+  }
+
+  protected onCategorySelected(value: string): void {
+    this.updateField('category', value as IngredientCategory);
   }
 
   // --------------------------------------------------------------------------

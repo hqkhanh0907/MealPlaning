@@ -17,127 +17,134 @@
 
     <ion-content class="als-content">
       @if (resultView(); as r) {
-        @if (mode === 'update') {
-          <div class="als-update-banner" role="status">
-            Đang cập nhật <strong>"{{ r.name }}"</strong> đã có trong DB
+        <div class="als-form">
+          @if (mode === 'update') {
+            <div class="als-update-banner" role="status">
+              Đang cập nhật <strong>"{{ r.name }}"</strong> đã có trong DB
+            </div>
+          }
+
+          <div class="als-confidence" [class]="confidenceClass()">
+            {{ confidenceLabel() }}
           </div>
-        }
 
-        <div class="als-confidence" [class]="confidenceClass()">
-          {{ confidenceLabel() }}
-        </div>
+          @if (r.note) {
+            <div class="als-note">
+              <ion-icon name="information-circle-outline" aria-hidden="true" />
+              <span>{{ r.note }}</span>
+            </div>
+          }
 
-        @if (r.note) {
-          <div class="als-note">
-            <ion-icon name="information-circle-outline" aria-hidden="true" />
-            <span>{{ r.note }}</span>
+          <app-form-field
+            label="Tên nguyên liệu"
+            inputId="als-name"
+            [invalid]="showErrors() && nameInvalid()"
+            errorMessage="Vui lòng nhập tên nguyên liệu"
+          >
+            <input
+              id="als-name"
+              class="input-native"
+              type="text"
+              [ngModel]="form().name"
+              (ngModelChange)="updateField('name', $event)"
+            />
+          </app-form-field>
+
+          <app-form-field label="Nhóm" inputId="als-category">
+            <button
+              type="button"
+              id="als-category"
+              class="picker-trigger--floating"
+              (click)="openCategoryPicker()"
+            >
+              <span>{{ form().category || 'Chọn nhóm' }}</span>
+              <ion-icon name="chevron-down-outline" aria-hidden="true" />
+            </button>
+          </app-form-field>
+
+          <div class="als-grid">
+            <app-form-field label="Calories (kcal/100g)" inputId="als-cal">
+              <input
+                id="als-cal"
+                class="input-native"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                [ngModel]="form().calories"
+                (ngModelChange)="updateField('calories', +$event)"
+              />
+            </app-form-field>
+
+            <app-form-field label="Protein (g/100g)" inputId="als-pro">
+              <input
+                id="als-pro"
+                class="input-native"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                [ngModel]="form().protein"
+                (ngModelChange)="updateField('protein', +$event)"
+              />
+            </app-form-field>
+
+            <app-form-field label="Carbs (g/100g)" inputId="als-car">
+              <input
+                id="als-car"
+                class="input-native"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                [ngModel]="form().carbs"
+                (ngModelChange)="updateField('carbs', +$event)"
+              />
+            </app-form-field>
+
+            <app-form-field label="Fat (g/100g)" inputId="als-fat">
+              <input
+                id="als-fat"
+                class="input-native"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                [ngModel]="form().fat"
+                (ngModelChange)="updateField('fat', +$event)"
+              />
+            </app-form-field>
+
+            <app-form-field label="Fiber (g/100g)" inputId="als-fib">
+              <input
+                id="als-fib"
+                class="input-native"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                [ngModel]="form().fiber"
+                (ngModelChange)="updateField('fiber', +$event)"
+              />
+            </app-form-field>
           </div>
-        }
 
-        <app-form-field
-          label="Tên nguyên liệu"
-          inputId="als-name"
-          [invalid]="showErrors() && nameInvalid()"
-          errorMessage="Vui lòng nhập tên nguyên liệu"
-        >
-          <input
-            id="als-name"
-            class="input-native"
-            type="text"
-            [ngModel]="form().name"
-            (ngModelChange)="updateField('name', $event)"
-          />
-        </app-form-field>
-
-        <app-form-field label="Nhóm" inputId="als-category">
-          <ion-select
-            id="als-category"
-            class="input-native als-select"
-            interface="action-sheet"
-            cancelText="Hủy"
-            [value]="form().category"
-            (ionChange)="updateField('category', $event.detail.value)"
-          >
-            @for (cat of categories; track cat) {
-              <ion-select-option [value]="cat">{{ cat }}</ion-select-option>
-            }
-          </ion-select>
-        </app-form-field>
-
-        <div class="als-grid">
-          <app-form-field label="Calories (kcal/100g)" inputId="als-cal">
-            <input
-              id="als-cal"
-              class="input-native"
-              type="number"
-              inputmode="decimal"
-              min="0"
-              [ngModel]="form().calories"
-              (ngModelChange)="updateField('calories', +$event)"
-            />
-          </app-form-field>
-
-          <app-form-field label="Protein (g/100g)" inputId="als-pro">
-            <input
-              id="als-pro"
-              class="input-native"
-              type="number"
-              inputmode="decimal"
-              min="0"
-              [ngModel]="form().protein"
-              (ngModelChange)="updateField('protein', +$event)"
-            />
-          </app-form-field>
-
-          <app-form-field label="Carbs (g/100g)" inputId="als-car">
-            <input
-              id="als-car"
-              class="input-native"
-              type="number"
-              inputmode="decimal"
-              min="0"
-              [ngModel]="form().carbs"
-              (ngModelChange)="updateField('carbs', +$event)"
-            />
-          </app-form-field>
-
-          <app-form-field label="Fat (g/100g)" inputId="als-fat">
-            <input
-              id="als-fat"
-              class="input-native"
-              type="number"
-              inputmode="decimal"
-              min="0"
-              [ngModel]="form().fat"
-              (ngModelChange)="updateField('fat', +$event)"
-            />
-          </app-form-field>
-
-          <app-form-field label="Fiber (g/100g)" inputId="als-fib">
-            <input
-              id="als-fib"
-              class="input-native"
-              type="number"
-              inputmode="decimal"
-              min="0"
-              [ngModel]="form().fiber"
-              (ngModelChange)="updateField('fiber', +$event)"
-            />
-          </app-form-field>
-        </div>
-
-        <div class="als-actions">
-          <button type="button" class="als-btn als-btn--ghost" (click)="onCancel()">Hủy</button>
-          <button
-            type="button"
-            class="als-btn als-btn--primary"
-            [disabled]="!canSave()"
-            (click)="onSave()"
-          >
-            Lưu
-          </button>
+          <div class="als-actions">
+            <button type="button" class="als-btn als-btn--ghost" (click)="onCancel()">Hủy</button>
+            <button
+              type="button"
+              class="als-btn als-btn--primary"
+              [disabled]="!canSave()"
+              (click)="onSave()"
+            >
+              Lưu
+            </button>
+          </div>
         </div>
       }
+
+      <app-bottom-sheet-picker
+        #categoryPicker
+        title="Chọn nhóm nguyên liệu"
+        [value]="form().category"
+        [options]="categoryOptions"
+        (valueChange)="onCategorySelected($event)"
+      />
     </ion-content>
   </ng-template>
 </ion-modal>
