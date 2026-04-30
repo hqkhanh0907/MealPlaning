@@ -44,10 +44,37 @@ function walk(dir, acc = []) {
 
 const files = walk(ROOT);
 
-// Regexes — keep simple, line-by-line.
-// Match leading `color:` / `background:` / `background-color:` / `font-size:`
-// Capture the value up to `;` or end of line.
-const PROP_RE = /^\s*(color|background|background-color|font-size)\s*:\s*([^;]+?)\s*(?:;|$)/i;
+// Match `<prop>:` declaration starts. We then collect the value across lines
+// until we see `;` outside of any open parens (handles prettier's multi-line
+// rgba()/var() formatting where the value spans 2+ lines).
+const PROP_START_RE = /(?:^|[\s;{])(color|background|background-color|font-size)\s*:\s*/gi;
+
+function collectValue(lines, startLine, startCol) {
+  let value = '';
+  let depth = 0;
+  let endLine = startLine;
+  for (let i = startLine; i < lines.length; i++) {
+    const line = i === startLine ? lines[i].slice(startCol) : lines[i];
+    let j = 0;
+    while (j < line.length) {
+      const c = line[j];
+      if (c === '(') depth++;
+      else if (c === ')') depth--;
+      else if (c === ';' && depth === 0) {
+        return { value: value + line.slice(0, j), endLine: i };
+      } else if (c === '/' && line[j + 1] === '/' && depth === 0) {
+        // inline comment terminates value on this physical line
+        return { value: value + line.slice(0, j), endLine: i, hadInlineComment: true, commentLine: i };
+      }
+      j++;
+    }
+    value += line + '\n';
+    endLine = i;
+    // No `;` on this line — keep going if depth > 0 OR if line ends without semi
+    if (depth === 0 && /[}{]/.test(line)) break;
+  }
+  return { value, endLine };
+}
 
 // Allowed value patterns (tested against the raw value substring)
 const allowedValue = (prop, value) => {
@@ -105,26 +132,34 @@ for (const f of files) {
   const lines = src.split('\n');
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const m = line.match(PROP_RE);
-    if (!m) continue;
-    const [, prop, rawValue] = m;
-    if (allowedValue(prop, rawValue)) continue;
+    PROP_START_RE.lastIndex = 0;
+    let m;
+    while ((m = PROP_START_RE.exec(line)) !== null) {
+      const prop = m[1];
+      const valueStartCol = m.index + m[0].length;
+      const collected = collectValue(lines, i, valueStartCol);
+      const rawValue = collected.value.replace(/\s+/g, ' ').trim();
+      if (!rawValue) continue;
+      if (allowedValue(prop, rawValue)) continue;
 
-    // Check escape hatch: same line trailing `// allow-hardcode: ...`
-    // or previous line ending with such comment.
-    const sameLineEscape = /\/\/\s*allow-hardcode\s*:\s*\S/.test(line) ||
-                           /\/\*\s*allow-hardcode\s*:\s*[^*]+\*\//.test(line);
-    const prev = lines[i - 1] || '';
-    const prevLineEscape = /\/\/\s*allow-hardcode\s*:\s*\S/.test(prev.trim()) ||
-                           /\/\*\s*allow-hardcode\s*:\s*[^*]+\*\//.test(prev.trim());
-    if (sameLineEscape || prevLineEscape) continue;
+      // Escape hatch: same physical line OR line just before declaration OR
+      // anywhere within the multi-line value (prettier may put the comment
+      // after the closing paren).
+      const escapeRe = /\/\/\s*allow-hardcode\s*:\s*\S|\/\*\s*allow-hardcode\s*:\s*[^*]+\*\//;
+      const prevLine = lines[i - 1] || '';
+      let hasEscape = escapeRe.test(prevLine.trim());
+      for (let k = i; k <= collected.endLine + 1 && k < lines.length; k++) {
+        if (escapeRe.test(lines[k])) { hasEscape = true; break; }
+      }
+      if (hasEscape) continue;
 
-    violations.push({
-      file: relative(CWD, f),
-      line: i + 1,
-      prop,
-      value: rawValue.trim(),
-    });
+      violations.push({
+        file: relative(CWD, f),
+        line: i + 1,
+        prop,
+        value: rawValue.length > 80 ? rawValue.slice(0, 77) + '...' : rawValue,
+      });
+    }
   }
 }
 

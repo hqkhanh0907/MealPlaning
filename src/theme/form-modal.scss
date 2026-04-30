@@ -13,7 +13,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(18, 18, 24, 0.52);
+  background: var(--scrim-strong);
   display: flex;
   align-items: flex-end;
   justify-content: center;

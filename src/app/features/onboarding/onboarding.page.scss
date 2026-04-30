@@ -106,7 +106,7 @@
   position: absolute;
   inset: 3px;
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--ion-color-primary-contrast);
 }
 @media (prefers-color-scheme: dark) {
   .radio-circle {

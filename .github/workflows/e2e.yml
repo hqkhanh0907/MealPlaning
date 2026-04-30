@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run architecture guards (PC-1, Style 2025, form-pattern)
+      - name: Run architecture guards (PC-1, Style 2025, form-pattern, design-tokens)
         run: npm run check:guards
 
       - name: Run linter

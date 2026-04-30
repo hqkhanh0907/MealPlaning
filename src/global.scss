@@ -87,7 +87,7 @@ app-management .fab-menu-backdrop {
   position: fixed;
   inset: 0;
   z-index: var(--z-sheet);
-  background: rgba(18, 18, 24, 0.16);
+  background: var(--scrim-light);
 }
 
 app-management .fab-menu {
@@ -151,7 +151,7 @@ app-management .options-sheet-backdrop {
   display: flex;
   align-items: flex-end;
   padding: 16px;
-  background: rgba(18, 18, 24, 0.32);
+  background: var(--scrim-medium);
 }
 
 app-management .options-sheet {

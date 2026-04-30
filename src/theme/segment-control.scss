@@ -64,7 +64,7 @@
      light bg-muted track, failing WCAG AA. Solid fill yields ≥4.5:1 and
      reads as the active state at a glance. */
   background: var(--ion-color-primary);
-  color: #ffffff;
+  color: var(--ion-color-primary-contrast);
   box-shadow: var(--shadow-md);
   font-weight: 600;
 }
@@ -82,7 +82,7 @@
     /* Dark mode keeps the same solid sage fill — the sage primary token
        already targets ≥4.5:1 contrast against white text in both schemes. */
     background: var(--ion-color-primary);
-    color: #ffffff;
+    color: var(--ion-color-primary-contrast);
   }
 }
 
@@ -109,7 +109,7 @@
 }
 
 .segment-control--inverse-sage .segment-button.selected {
-  background: #ffffff;
+  background: var(--bg-card);
   color: var(--ion-color-primary-shade, #54704d);
   box-shadow:
     0 1px 2px rgba(60, 80, 60, 0.06),
@@ -120,14 +120,19 @@
 @media (prefers-color-scheme: dark) {
   .segment-control--inverse-sage {
     /* Dark mode dùng sage shade tối hơn cho track + sage tint sáng cho selected text */
-    background: rgba(138, 160, 134, 0.16);
+    background: rgba(
+      138,
+      160,
+      134,
+      0.16
+    ); // allow-hardcode: sage-tint @16% — inverse-sage dark track, no token
   }
   .segment-control--inverse-sage .segment-button {
-    color: #b6c9b3;
+    color: #b6c9b3; // allow-hardcode: sage-tint-300 — inverse-sage dark text, intentional brand
   }
   .segment-control--inverse-sage .segment-button.selected {
     background: var(--bg-card);
-    color: #b6c9b3;
+    color: #b6c9b3; // allow-hardcode: sage-tint-300 — inverse-sage dark text, intentional brand
     box-shadow: var(--shadow-md);
   }
 }

@@ -124,6 +124,12 @@
   --font-size-icon-lg: 22px;
   --font-size-icon-xl: 24px;
   --font-size-hero: 48px; // Empty-state hero icon
+  --font-size-micro: 10px; // Source-badge micro label (below overline)
+
+  // Scrims (overlay/backdrop) — DS §6 dark cool tint, NOT warm
+  --scrim-light: rgba(18, 18, 24, 0.16);
+  --scrim-medium: rgba(18, 18, 24, 0.32);
+  --scrim-strong: rgba(18, 18, 24, 0.52);
 
   // Z-index scale (DS §12)
   --z-base: 0;
