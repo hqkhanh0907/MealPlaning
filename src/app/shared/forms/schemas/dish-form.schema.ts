@@ -1,12 +1,13 @@
 /**
- * Signal Forms schema for the dish edit modal (Phase B3).
+ * Signal Forms schema for the dish edit page — gram-only (schema v6).
  *
- * Mirrors the validation rules previously hard-coded in
- * `DishEditPage.isValid()` + `isServingsValid()`. Pure schema —
- * no DI, no template coupling — so the rules can be unit-tested in
- * isolation.
- *
- * @see docs/5-development/signal-forms-migration-plan.md §B3
+ * Each ingredient row is (ingredient_id, gram_weight); there is no unit
+ * picker anymore. Validation kinds:
+ *   - required, maxLength            (name)
+ *   - servingsRange                  (servings)
+ *   - itemsRequired                  (items array)
+ *   - gramPositive                   (per item.gram_weight)
+ *   - ingredientRequired             (per item.ingredient_id)
  */
 
 import { applyEach, schema, validate, type ValidationError } from '@angular/forms/signals';
@@ -16,20 +17,20 @@ import type {
 } from '../../../features/management/dish-edit/dish-edit.types';
 
 const itemSchema = schema<DishIngredientFormItem>((p) => {
-  validate(p.amount_value, ({ value }) => {
+  validate(p.gram_weight, ({ value }) => {
     const v = value();
     if (typeof v !== 'number' || !Number.isFinite(v) || v <= 0) {
       return {
-        kind: 'amountPositive',
-        message: 'Số lượng phải lớn hơn 0.',
+        kind: 'gramPositive',
+        message: 'Trọng lượng (g) phải lớn hơn 0.',
       };
     }
     return null;
   });
 
-  validate(p.unit_id, ({ value }) => {
+  validate(p.ingredient_id, ({ value }) => {
     if (!value().trim()) {
-      return { kind: 'unitRequired', message: 'Vui lòng chọn đơn vị.' };
+      return { kind: 'ingredientRequired', message: 'Vui lòng chọn nguyên liệu.' };
     }
     return null;
   });

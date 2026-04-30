@@ -1,126 +1,191 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
-import type { UnitModel } from '../../../core/models/management.model';
-import { UnitRepository } from '../../../core/repositories/unit.repository';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
+import { DishRepository } from '../../../core/repositories/dish.repository';
 import IngredientEditPage from './ingredient-edit.page';
 
-describe('IngredientEditPage', () => {
-  let fixture: ComponentFixture<IngredientEditPage>;
-  let component: IngredientEditPage;
-  let navigateSpy: jasmine.Spy;
+interface FormSignalAccessor {
+  formSignal: {
+    set: (value: {
+      name: string;
+      category: string;
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+      fiber: number;
+    }) => void;
+  };
+}
 
-  beforeEach(async () => {
-    const ingredientStore = {
-      ingredients: () => [],
-      load: jasmine.createSpy().and.resolveTo(),
-      add: jasmine.createSpy().and.resolveTo(),
-      edit: jasmine.createSpy().and.resolveTo(),
-    };
+describe('IngredientEditPage (gram-only)', () => {
+  describe('create mode', () => {
+    let fixture: ComponentFixture<IngredientEditPage>;
+    let component: IngredientEditPage;
+    let navigateSpy: jasmine.Spy;
+    let ingredientStore: { add: jasmine.Spy; edit: jasmine.Spy; load: jasmine.Spy };
 
-    const unitRepository = {
-      list: jasmine.createSpy().and.resolveTo([
-        {
-          id: 'g',
-          display_name_vi: 'gram',
-          display_name_en: 'gram',
-          short_name_vi: 'g',
-          unit_type: 'mass',
-          is_global: 1,
-          base_factor_g: 1,
-          base_factor_ml: null,
-          is_approximate: 0,
-          display_order: 1,
-        },
-      ] satisfies UnitModel[]),
-    };
+    beforeEach(async () => {
+      ingredientStore = {
+        ingredients: () => [] as never[],
+        load: jasmine.createSpy().and.resolveTo(),
+        add: jasmine.createSpy().and.resolveTo(),
+        edit: jasmine.createSpy().and.resolveTo(),
+      } as unknown as { add: jasmine.Spy; edit: jasmine.Spy; load: jasmine.Spy };
 
-    const activatedRoute = {
-      snapshot: { paramMap: convertToParamMap({}) },
-    };
-
-    await TestBed.configureTestingModule({
-      imports: [IngredientEditPage],
-      providers: [
-        provideRouter([]),
-        { provide: ActivatedRoute, useValue: activatedRoute },
-        { provide: IngredientStore, useValue: ingredientStore },
-        { provide: UnitRepository, useValue: unitRepository },
-      ],
-    }).compileComponents();
-
-    const router = TestBed.inject(Router);
-    navigateSpy = spyOn(router, 'navigate').and.resolveTo(true);
-
-    fixture = TestBed.createComponent(IngredientEditPage);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
-    fixture.detectChanges();
-  });
-
-  it('starts in create mode (no id param)', () => {
-    expect(component.isEdit()).toBeFalse();
-  });
-
-  it('renders category options', () => {
-    const categories = component.categoryOptions.map((o) => o.label).join(' ');
-    expect(categories).toContain('Trứng & Sữa');
-    expect(categories).toContain('Rau củ');
-  });
-
-  it('saves new ingredient and navigates back to management', async () => {
-    const protectedAccess = component as unknown as {
-      formSignal: {
-        set: (v: {
-          name: string;
-          category: string;
-          nutrition_basis_unit: 'g';
-          calories: number;
-          protein: number;
-          carbs: number;
-          fat: number;
-          fiber: number;
-          density_g_per_ml: null;
-          units: {
-            local_id: string;
-            unit_id: string;
-            factor_to_basis: number;
-            is_default: boolean;
-            display_label: string;
-            is_approximate: boolean;
-            short_name_vi: string;
-          }[];
-        }) => void;
+      const activatedRoute = {
+        snapshot: { paramMap: convertToParamMap({}) },
       };
-    };
 
-    protectedAccess.formSignal.set({
-      name: 'Trứng gà',
-      category: 'Trứng & Sữa',
-      nutrition_basis_unit: 'g',
-      calories: 155,
-      protein: 13,
-      carbs: 1,
-      fat: 11,
-      fiber: 0,
-      density_g_per_ml: null,
-      units: [
-        {
-          local_id: 'u1',
-          unit_id: 'g',
-          factor_to_basis: 1,
-          is_default: true,
-          display_label: 'g',
-          is_approximate: false,
-          short_name_vi: 'g',
-        },
-      ],
+      await TestBed.configureTestingModule({
+        imports: [IngredientEditPage],
+        providers: [
+          provideRouter([]),
+          { provide: ActivatedRoute, useValue: activatedRoute },
+          { provide: IngredientStore, useValue: ingredientStore },
+        ],
+      }).compileComponents();
+
+      const router = TestBed.inject(Router);
+      navigateSpy = spyOn(router, 'navigate').and.resolveTo(true);
+
+      fixture = TestBed.createComponent(IngredientEditPage);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+      fixture.detectChanges();
     });
 
-    await component.onSave();
+    it('starts in create mode (no id param)', () => {
+      expect(component.isEdit()).toBeFalse();
+    });
 
-    const ingredientStore = TestBed.inject(IngredientStore) as unknown as { add: jasmine.Spy };
-    expect(ingredientStore.add).toHaveBeenCalled();
-    expect(navigateSpy).toHaveBeenCalledWith(['/tabs/management']);
+    it('renders Vietnamese category options', () => {
+      const labels = component.categoryOptions.map((o) => o.label).join(' ');
+      expect(labels).toContain('Trứng & Sữa');
+      expect(labels).toContain('Rau củ');
+    });
+
+    it('saves new ingredient with gram-only payload and navigates back', async () => {
+      const accessor = component as unknown as FormSignalAccessor;
+      accessor.formSignal.set({
+        name: 'Trứng gà',
+        category: 'Trứng & Sữa',
+        calories: 155,
+        protein: 13,
+        carbs: 1,
+        fat: 11,
+        fiber: 0,
+      });
+
+      await component.onSave();
+
+      expect(ingredientStore.add).toHaveBeenCalledOnceWith({
+        name: 'Trứng gà',
+        category: 'Trứng & Sữa',
+        calories: 155,
+        protein: 13,
+        carbs: 1,
+        fat: 11,
+        fiber: 0,
+        source: 'manual',
+      });
+      expect(ingredientStore.edit).not.toHaveBeenCalled();
+      expect(navigateSpy).toHaveBeenCalledWith(['/tabs/management']);
+    });
+
+    it('does not save when form is invalid (missing name)', async () => {
+      await component.onSave();
+      expect(ingredientStore.add).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('edit mode', () => {
+    let fixture: ComponentFixture<IngredientEditPage>;
+    let component: IngredientEditPage;
+    let ingredientStore: {
+      add: jasmine.Spy;
+      edit: jasmine.Spy;
+      load: jasmine.Spy;
+      ingredients: () => {
+        id: string;
+        name: string;
+        category: string;
+        calories: number;
+        protein: number;
+        carbs: number;
+        fat: number;
+        fiber: number;
+        source: 'manual';
+        created_at: string;
+        updated_at: string | null;
+      }[];
+    };
+
+    beforeEach(async () => {
+      ingredientStore = {
+        ingredients: () => [
+          {
+            id: 'ing-1',
+            name: 'Trứng gà',
+            category: 'Trứng & Sữa',
+            calories: 155,
+            protein: 13,
+            carbs: 1,
+            fat: 11,
+            fiber: 0,
+            source: 'manual',
+            created_at: '2026-01-01',
+            updated_at: null,
+          },
+        ],
+        load: jasmine.createSpy().and.resolveTo(),
+        add: jasmine.createSpy().and.resolveTo(),
+        edit: jasmine.createSpy().and.resolveTo(),
+      };
+
+      const dishRepo = { listForIngredient: jasmine.createSpy().and.resolveTo([]) };
+
+      const activatedRoute = {
+        snapshot: { paramMap: convertToParamMap({ id: 'ing-1' }) },
+      };
+
+      await TestBed.configureTestingModule({
+        imports: [IngredientEditPage],
+        providers: [
+          provideRouter([]),
+          { provide: ActivatedRoute, useValue: activatedRoute },
+          { provide: IngredientStore, useValue: ingredientStore },
+          { provide: DishRepository, useValue: dishRepo },
+        ],
+      }).compileComponents();
+
+      const router = TestBed.inject(Router);
+      spyOn(router, 'navigate').and.resolveTo(true);
+
+      fixture = TestBed.createComponent(IngredientEditPage);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+      fixture.detectChanges();
+    });
+
+    it('detects edit mode from id route param', () => {
+      expect(component.isEdit()).toBeTrue();
+      expect(component.ingredientId()).toBe('ing-1');
+    });
+
+    it('calls store.edit() on save with gram-only payload', async () => {
+      await component.onSave();
+      expect(ingredientStore.edit).toHaveBeenCalledOnceWith('ing-1', {
+        name: 'Trứng gà',
+        category: 'Trứng & Sữa',
+        calories: 155,
+        protein: 13,
+        carbs: 1,
+        fat: 11,
+        fiber: 0,
+        source: 'manual',
+      });
+      expect(ingredientStore.add).not.toHaveBeenCalled();
+    });
   });
 });

@@ -10,19 +10,15 @@ describe('IngredientStore', () => {
   const ingredient: IngredientListItem = {
     id: 'ingredient-1',
     name: 'Trứng gà',
-    category: 'protein',
-    nutrition_basis_unit: 'g',
-    nutrition_basis_quantity: 100,
+    category: 'Trứng & Sữa',
     calories: 155,
     protein: 13,
     carbs: 1.1,
     fat: 11,
     fiber: 0,
-    density_g_per_ml: null,
     source: 'manual',
     created_at: '2026-04-26T00:00:00Z',
     updated_at: null,
-    units: [],
   };
 
   beforeEach(() => {
@@ -70,17 +66,13 @@ describe('IngredientStore', () => {
   it('adds a new ingredient and prepends it into state', async () => {
     await store.add({
       name: 'Trứng gà',
-      category: 'protein',
-      nutrition_basis_unit: 'g',
-      nutrition_basis_quantity: 100,
+      category: 'Trứng & Sữa',
       calories: 155,
       protein: 13,
       carbs: 1.1,
       fat: 11,
       fiber: 0,
-      density_g_per_ml: null,
       source: 'manual',
-      units: [],
     });
 
     expect(repo.insert).toHaveBeenCalled();

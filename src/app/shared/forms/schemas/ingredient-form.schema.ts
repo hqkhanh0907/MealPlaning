@@ -1,19 +1,20 @@
 /**
- * Signal Forms schema for the ingredient edit modal (Phase B2).
+ * Signal Forms schema for the ingredient edit page — gram-only (schema v6).
  *
- * Mirrors the validation rules previously hard-coded in
- * `IngredientEditPage.isValid()` + `unitErrors`. Pure schema —
- * no DI, no template coupling — so the rules can be unit-tested in
- * isolation.
+ * Pure schema (không DI, không template coupling) để rule có thể unit-test
+ * độc lập. Tất cả nutrition đều per-100g.
  *
- * @see docs/5-development/signal-forms-migration-plan.md §B2
+ * Validation rules:
+ *  - name: required, trim, ≤ 100 ký tự
+ *  - category: required (non-empty trim)
+ *  - calories/protein/carbs/fat/fiber: optional, nếu nhập phải finite & ≥ 0
+ *  - cross-field: protein + carbs + fat ≤ 100 (per-100g sanity check)
+ *
+ * @see docs/3-design/mockups/phase-1/18-form-validation.html
  */
 
-import { applyEach, schema, validate, type ValidationError } from '@angular/forms/signals';
-import type {
-  IngredientEditFormValue,
-  IngredientEditUnitFormValue,
-} from '../../../features/management/ingredient-edit/ingredient-edit.types';
+import { schema, validate, type ValidationError } from '@angular/forms/signals';
+import type { IngredientEditFormValue } from '../../../features/management/ingredient-edit/ingredient-edit.types';
 
 const optionalNonNegative = (
   v: number | null,
@@ -23,7 +24,7 @@ const optionalNonNegative = (
   if (v === null) {
     return null;
   }
-  if (Number.isNaN(v)) {
+  if (typeof v !== 'number' || !Number.isFinite(v)) {
     return { kind: 'invalid', message: 'Số không hợp lệ' };
   }
   if (v < 0) {
@@ -31,19 +32,6 @@ const optionalNonNegative = (
   }
   return null;
 };
-
-const unitItemSchema = schema<IngredientEditUnitFormValue>((p) => {
-  validate(p.factor_to_basis, ({ value }) => {
-    const v = value();
-    if (typeof v !== 'number' || !Number.isFinite(v) || v <= 0) {
-      return {
-        kind: 'unitFactorPositive',
-        message: 'Mỗi đơn vị cần có quy đổi lớn hơn 0.',
-      };
-    }
-    return null;
-  });
-});
 
 export const ingredientFormSchema = schema<IngredientEditFormValue>((p) => {
   validate(p.name, ({ value }) => {
@@ -80,23 +68,22 @@ export const ingredientFormSchema = schema<IngredientEditFormValue>((p) => {
     optionalNonNegative(value(), 'positive', 'Chất xơ không được nhỏ hơn 0'),
   );
 
-  applyEach(p.units, unitItemSchema);
-
-  validate(p.units, ({ value }) => {
-    const units = value();
-    const errors: ValidationError[] = [];
-    if (units.length === 0) {
-      errors.push({
-        kind: 'unitsRequired',
-        message: 'Cần ít nhất 1 đơn vị hợp lệ.',
-      });
+  // Cross-field sanity check: protein + carbs + fat ≤ 100 g per 100 g.
+  // Surface via the calories field path so the template can display it
+  // alongside the macro inputs.
+  validate(p.calories, ({ valueOf }) => {
+    const protein = valueOf(p.protein) ?? 0;
+    const carbs = valueOf(p.carbs) ?? 0;
+    const fat = valueOf(p.fat) ?? 0;
+    if (protein < 0 || carbs < 0 || fat < 0) {
+      return null;
     }
-    if (units.length > 0 && units.filter((u) => u.is_default).length !== 1) {
-      errors.push({
-        kind: 'unitsDefault',
-        message: 'Chọn đúng 1 đơn vị mặc định trước khi lưu.',
-      });
+    if (protein + carbs + fat > 100) {
+      return {
+        kind: 'macroOver100',
+        message: 'Protein + Carb + Fat trên 100 g không được vượt 100 g.',
+      };
     }
-    return errors;
+    return null;
   });
 });

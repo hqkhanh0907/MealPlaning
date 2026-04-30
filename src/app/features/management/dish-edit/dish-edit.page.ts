@@ -1,3 +1,10 @@
+/**
+ * Dish edit page — gram-only revision (schema v6).
+ *
+ * Each ingredient row stores just (ingredient_id, gram_weight). No unit
+ * picker. Nutrition preview = sum(ingredient.calories * gram_weight / 100).
+ */
+
 import {
   ChangeDetectionStrategy,
   Component,
@@ -22,9 +29,11 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { chevronDownOutline, closeOutline } from 'ionicons/icons';
+import { v4 as uuidv4 } from 'uuid';
 import type { IngredientListItem } from '../../../core/repositories/ingredient.repository';
 import { IngredientRepository } from '../../../core/repositories/ingredient.repository';
 import type { HasUnsavedChanges } from '../../../core/guards/unsaved-changes-guard';
+import type { MealTag } from '../../../core/models/management.types';
 import { DishStore } from '../../../core/stores/dish.store';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
 import {
@@ -34,14 +43,28 @@ import {
 import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { AppFormField } from '../../../shared/forms';
 import { dishFormSchema } from '../../../shared/forms/schemas/dish-form.schema';
-import type { DishAmountDraft, DishEditFormValue, DishIngredientFormItem } from './dish-edit.types';
+import type { DishEditFormValue, DishIngredientFormItem } from './dish-edit.types';
 
 export type { DishEditFormValue, DishIngredientFormItem } from './dish-edit.types';
+
+interface GramDraft {
+  local_id: string;
+  ingredient_id: string;
+  gram_weight: number;
+  mode: 'create' | 'edit';
+}
+
+const MEAL_TAG_OPTIONS: readonly { value: MealTag; label: string }[] = [
+  { value: 'breakfast', label: 'Bữa sáng' },
+  { value: 'lunch', label: 'Bữa trưa' },
+  { value: 'dinner', label: 'Bữa tối' },
+];
 
 const emptyForm = (): DishEditFormValue => ({
   name: '',
   description: '',
   servings: null,
+  meal_tag: null,
   items: [],
 });
 
@@ -68,7 +91,7 @@ const emptyForm = (): DishEditFormValue => ({
 })
 export default class DishEditPage implements HasUnsavedChanges {
   @ViewChild('ingredientPicker') private ingredientPicker?: BottomSheetPicker;
-  @ViewChild('unitPicker') private unitPicker?: BottomSheetPicker;
+  @ViewChild('mealTagPicker') private mealTagPicker?: BottomSheetPicker;
   @ViewChild('nameInput') private nameInput?: ElementRef<HTMLInputElement>;
 
   private readonly route = inject(ActivatedRoute);
@@ -81,20 +104,28 @@ export default class DishEditPage implements HasUnsavedChanges {
   readonly isEdit = computed(() => this.dishId() !== null);
 
   readonly availableIngredients = signal<IngredientListItem[]>([]);
-  /**
-   * Recently-used ingredients (MRU) — top 5 by latest dish update. Surfaced as
-   * "Gần đây" section in the ingredient picker. Empty when DB has no dishes yet.
-   */
+  /** Recently-used ingredients (MRU) — top 5 by latest dish update. */
   readonly recentIngredients = signal<IngredientListItem[]>([]);
+
+  /** id → ingredient for O(1) lookup in template (name + nutrition). */
+  readonly ingredientIndex = computed<Map<string, IngredientListItem>>(() => {
+    const map = new Map<string, IngredientListItem>();
+    for (const ing of this.availableIngredients()) {
+      map.set(ing.id, ing);
+    }
+    return map;
+  });
+
   readonly saving = signal(false);
   protected readonly showErrors = signal(false);
 
   protected readonly formSignal = signal<DishEditFormValue>(emptyForm());
   protected readonly dishForm = form(this.formSignal, dishFormSchema);
 
-  activeUnitRowId: string | null = null;
-  readonly activeAmountRowId = signal<string | null>(null);
-  readonly amountDraft = signal<DishAmountDraft | null>(null);
+  /** Active row id whose gram-weight sheet is open (null = closed). */
+  readonly activeGramRowId = signal<string | null>(null);
+  readonly gramDraft = signal<GramDraft | null>(null);
+
   readonly pendingDeleteId = signal<string | null>(null);
   readonly deleteReferenceCount = signal(0);
   readonly deleteReferenceLoading = signal(false);
@@ -102,6 +133,31 @@ export default class DishEditPage implements HasUnsavedChanges {
   private discardDialogResolver: ((value: boolean) => void) | null = null;
   private dirtyBaseline = '';
   private skipUnsavedPrompt = false;
+
+  /** Aggregate nutrition preview across all rows. */
+  readonly previewTotals = computed<{
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    fiber: number;
+  }>(() => {
+    const totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
+    const index = this.ingredientIndex();
+    for (const item of this.formSignal().items) {
+      const ing = index.get(item.ingredient_id);
+      if (!ing || !Number.isFinite(item.gram_weight) || item.gram_weight <= 0) {
+        continue;
+      }
+      const m = item.gram_weight / 100;
+      totals.calories += ing.calories * m;
+      totals.protein += ing.protein * m;
+      totals.carbs += ing.carbs * m;
+      totals.fat += ing.fat * m;
+      totals.fiber += ing.fiber * m;
+    }
+    return totals;
+  });
 
   constructor() {
     addIcons({ chevronDownOutline, closeOutline });
@@ -114,8 +170,6 @@ export default class DishEditPage implements HasUnsavedChanges {
     }
     this.availableIngredients.set(this.ingredientStore.ingredients());
 
-    // Load MRU ("Gần đây") for ingredient picker. Best-effort — failure is
-    // non-blocking; picker simply hides the section when list is empty.
     try {
       const recent = await this.ingredientRepo.findRecentlyUsed(5);
       this.recentIngredients.set(recent);
@@ -139,25 +193,26 @@ export default class DishEditPage implements HasUnsavedChanges {
       name: dish.name,
       description: dish.description ?? '',
       servings: dish.servings,
-      items: dish.ingredients.map((item) => ({
-        local_id: this.createLocalId('dish-item'),
-        ingredient_id: item.ingredient_id,
-        amount_value: item.amount_value,
-        unit_id: item.unit_id,
+      meal_tag: dish.meal_tag,
+      items: dish.ingredients.map((row) => ({
+        local_id: uuidv4(),
+        ingredient_id: row.ingredient_id,
+        gram_weight: row.gram_weight,
       })),
     });
     this.resetDirtyBaseline();
   }
 
+  // ───────── picker options ─────────
+
   get ingredientOptions(): PickerOption[] {
     return this.availableIngredients().map((ingredient) => ({
       value: ingredient.id,
       label: ingredient.name,
-      description: `${ingredient.category} · Dinh dưỡng theo ${ingredient.nutrition_basis_quantity}${ingredient.nutrition_basis_unit}`,
+      description: `${ingredient.category} · ${this.formatNumber(ingredient.calories)} kcal/100g`,
     }));
   }
 
-  /** Recently-used ingredients mapped to picker rows (compact "Gần đây" section). */
   get recentIngredientOptions(): PickerOption[] {
     return this.recentIngredients().map((ingredient) => ({
       value: ingredient.id,
@@ -166,66 +221,20 @@ export default class DishEditPage implements HasUnsavedChanges {
     }));
   }
 
-  get unitOptions(): PickerOption[] {
-    const draft = this.amountDraft();
-    const item =
-      draft ??
-      this.formSignal().items.find((candidate) => candidate.local_id === this.activeUnitRowId);
-    const ingredient = item
-      ? this.availableIngredients().find((candidate) => candidate.id === item.ingredient_id)
-      : null;
-    return (ingredient?.units ?? []).map((unit) => ({
-      value: unit.unit_id,
-      label:
-        unit.is_approximate === 1
-          ? `≈ ${unit.display_label || unit.short_name_vi}`
-          : unit.display_label || unit.short_name_vi,
-      description:
-        unit.is_approximate === 1
-          ? 'Đơn vị ước lượng'
-          : `1 ${unit.display_label || unit.short_name_vi} ≈ ${this.formatNumber(unit.factor_to_basis)}${ingredient?.nutrition_basis_unit ?? ''}`,
-    }));
+  get mealTagOptions(): PickerOption[] {
+    return MEAL_TAG_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label }));
   }
 
-  get activeUnitValue(): string | null {
-    return (
-      this.formSignal().items.find((candidate) => candidate.local_id === this.activeUnitRowId)
-        ?.unit_id ?? null
-    );
+  get mealTagLabel(): string {
+    const tag = this.formSignal().meal_tag;
+    if (!tag) {
+      return 'Chọn loại bữa (tuỳ chọn)';
+    }
+    return MEAL_TAG_OPTIONS.find((opt) => opt.value === tag)?.label ?? '';
   }
 
-  get previewTotals(): {
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    fiber: number;
-  } {
-    return this.formSignal().items.reduce(
-      (totals, item) => {
-        const ingredient = this.availableIngredients().find(
-          (candidate) => candidate.id === item.ingredient_id,
-        );
-        const unit = ingredient?.units.find((candidate) => candidate.unit_id === item.unit_id);
-        if (!ingredient || !unit || item.amount_value <= 0) {
-          return totals;
-        }
+  // ───────── error helpers ─────────
 
-        const normalizedAmount = item.amount_value * unit.factor_to_basis;
-        const multiplier = normalizedAmount / ingredient.nutrition_basis_quantity;
-        return {
-          calories: totals.calories + ingredient.calories * multiplier,
-          protein: totals.protein + ingredient.protein * multiplier,
-          carbs: totals.carbs + ingredient.carbs * multiplier,
-          fat: totals.fat + ingredient.fat * multiplier,
-          fiber: totals.fiber + ingredient.fiber * multiplier,
-        };
-      },
-      { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
-    );
-  }
-
-  /** Aggregated own-errors on the `items` array field. */
   protected itemsErrorMessages(): string[] {
     return this.dishForm
       .items()
@@ -234,53 +243,38 @@ export default class DishEditPage implements HasUnsavedChanges {
       .filter((m): m is string => typeof m === 'string' && m.length > 0);
   }
 
+  // ───────── pickers ─────────
+
   openIngredientPicker(): void {
     this.ingredientPicker?.open();
   }
 
-  openUnitPicker(localId: string): void {
-    this.activeUnitRowId = localId;
-    this.unitPicker?.open();
+  openMealTagPicker(): void {
+    this.mealTagPicker?.open();
   }
 
+  onMealTagSelected(value: string): void {
+    const allowed = MEAL_TAG_OPTIONS.find((opt) => opt.value === value)?.value ?? null;
+    this.formSignal.update((v) => ({ ...v, meal_tag: allowed }));
+  }
+
+  /** Picked an ingredient → open gram sheet in 'create' mode (default 100 g). */
   onIngredientSelected(ingredientId: string): void {
-    const ingredient = this.availableIngredients().find(
-      (candidate) => candidate.id === ingredientId,
-    );
+    const ingredient = this.ingredientIndex().get(ingredientId);
     if (!ingredient) {
       return;
     }
-
-    const defaultUnit =
-      ingredient.units.find((unit) => unit.is_default === 1) ?? ingredient.units[0];
-    if (!defaultUnit) {
-      return;
-    }
-
-    const localId = this.createLocalId('dish-item');
-    this.activeAmountRowId.set(localId);
-    this.amountDraft.set({
+    const localId = uuidv4();
+    this.activeGramRowId.set(localId);
+    this.gramDraft.set({
       local_id: localId,
       ingredient_id: ingredient.id,
-      amount_value: 1,
-      unit_id: defaultUnit.unit_id,
+      gram_weight: 100,
       mode: 'create',
     });
   }
 
-  onUnitSelected(unitId: string): void {
-    if (!this.activeUnitRowId) {
-      return;
-    }
-
-    const targetId = this.activeUnitRowId;
-    this.formSignal.update((v) => ({
-      ...v,
-      items: v.items.map((item) =>
-        item.local_id === targetId ? { ...item, unit_id: unitId } : item,
-      ),
-    }));
-  }
+  // ───────── ingredient row actions ─────────
 
   removeItem(localId: string): void {
     this.formSignal.update((v) => ({
@@ -289,35 +283,35 @@ export default class DishEditPage implements HasUnsavedChanges {
     }));
   }
 
-  openAmountSheet(localId: string): void {
+  openGramSheet(localId: string): void {
     const item = this.formSignal().items.find((candidate) => candidate.local_id === localId);
     if (!item) {
       return;
     }
-
-    this.activeAmountRowId.set(localId);
-    this.amountDraft.set({ ...item, mode: 'edit' });
+    this.activeGramRowId.set(localId);
+    this.gramDraft.set({
+      local_id: item.local_id,
+      ingredient_id: item.ingredient_id,
+      gram_weight: item.gram_weight,
+      mode: 'edit',
+    });
   }
 
-  closeAmountSheet(): void {
-    this.activeAmountRowId.set(null);
-    this.amountDraft.set(null);
+  closeGramSheet(): void {
+    this.activeGramRowId.set(null);
+    this.gramDraft.set(null);
   }
 
-  updateAmountDraftValue(event: Event): void {
+  updateGramDraftValue(event: Event): void {
     const numeric = Number(this.readInputValue(event));
-    this.amountDraft.update((draft) =>
-      draft ? { ...draft, amount_value: Number.isFinite(numeric) ? numeric : 0 } : draft,
+    this.gramDraft.update((draft) =>
+      draft ? { ...draft, gram_weight: Number.isFinite(numeric) ? numeric : 0 } : draft,
     );
   }
 
-  updateAmountDraftUnit(unitId: string): void {
-    this.amountDraft.update((draft) => (draft ? { ...draft, unit_id: unitId } : draft));
-  }
-
-  saveAmountDraft(): void {
-    const draft = this.amountDraft();
-    if (!draft || draft.amount_value <= 0 || !this.findUnit(draft)) {
+  saveGramDraft(): void {
+    const draft = this.gramDraft();
+    if (!draft || !Number.isFinite(draft.gram_weight) || draft.gram_weight <= 0) {
       this.showErrors.set(true);
       return;
     }
@@ -325,8 +319,7 @@ export default class DishEditPage implements HasUnsavedChanges {
     const item: DishIngredientFormItem = {
       local_id: draft.local_id,
       ingredient_id: draft.ingredient_id,
-      amount_value: draft.amount_value,
-      unit_id: draft.unit_id,
+      gram_weight: draft.gram_weight,
     };
 
     this.formSignal.update((v) => ({
@@ -336,55 +329,48 @@ export default class DishEditPage implements HasUnsavedChanges {
           ? [...v.items, item]
           : v.items.map((current) => (current.local_id === draft.local_id ? item : current)),
     }));
-    this.closeAmountSheet();
+    this.closeGramSheet();
+  }
+
+  // ───────── per-row display ─────────
+
+  ingredientName(ingredientId: string): string {
+    return this.ingredientIndex().get(ingredientId)?.name ?? 'Nguyên liệu';
   }
 
   itemCalories(item: DishIngredientFormItem): string {
-    const totals = this.calculateItemNutrition(item);
-    return `${this.formatNumber(totals.calories)} kcal`;
-  }
-
-  amountPreviewText(draft: DishAmountDraft): string {
-    const totals = this.calculateItemNutrition(draft);
-    return `${this.formatNumber(totals.calories)} kcal · P ${this.formatNumber(totals.protein)}g · C ${this.formatNumber(totals.carbs)}g · F ${this.formatNumber(totals.fat)}g`;
-  }
-
-  ingredientName(ingredientId: string): string {
-    return (
-      this.availableIngredients().find((ingredient) => ingredient.id === ingredientId)?.name ??
-      'Nguyên liệu'
-    );
-  }
-
-  unitLabel(item: DishIngredientFormItem): string {
-    const unit = this.findUnit(item);
-    if (!unit) {
-      return 'Chọn đơn vị';
+    const ing = this.ingredientIndex().get(item.ingredient_id);
+    if (!ing || !Number.isFinite(item.gram_weight) || item.gram_weight <= 0) {
+      return '0 kcal';
     }
-    const label = unit.display_label || unit.short_name_vi;
-    return unit.is_approximate === 1 ? `≈ ${label}` : label;
+    const kcal = (ing.calories * item.gram_weight) / 100;
+    return `${this.formatNumber(kcal)} kcal`;
   }
 
-  ingredientDetail(item: DishIngredientFormItem): string {
-    const ingredient = this.availableIngredients().find(
-      (candidate) => candidate.id === item.ingredient_id,
-    );
-    const unit = this.findUnit(item);
-    if (!ingredient || !unit) {
-      return 'Thiếu cấu hình đơn vị';
+  itemDetail(item: DishIngredientFormItem): string {
+    return `${this.formatNumber(item.gram_weight)} g`;
+  }
+
+  draftCalories(draft: GramDraft): string {
+    const ing = this.ingredientIndex().get(draft.ingredient_id);
+    if (!ing || !Number.isFinite(draft.gram_weight) || draft.gram_weight <= 0) {
+      return '0 kcal';
     }
-
-    const label = unit.display_label || unit.short_name_vi;
-    const prefix = unit.is_approximate === 1 ? '≈ ' : '';
-    return `${prefix}${this.formatNumber(item.amount_value)} ${label}${unit.is_approximate === 1 ? ' · ước lượng' : ''}`;
+    const kcal = (ing.calories * draft.gram_weight) / 100;
+    return `${this.formatNumber(kcal)} kcal`;
   }
+
+  draftIngredientName(draft: GramDraft): string {
+    return this.ingredientIndex().get(draft.ingredient_id)?.name ?? 'Nguyên liệu';
+  }
+
+  // ───────── delete dialog ─────────
 
   async openDeleteDialog(): Promise<void> {
     const id = this.dishId();
     if (!id) {
       return;
     }
-
     this.deleteReferenceLoading.set(true);
     this.pendingDeleteId.set(id);
     try {
@@ -405,12 +391,10 @@ export default class DishEditPage implements HasUnsavedChanges {
     if (!id) {
       return;
     }
-
     if (this.deleteReferenceLoading() || this.deleteReferenceCount() > 0) {
       this.closeDeleteDialog();
       return;
     }
-
     await this.dishStore.remove(id);
     this.skipUnsavedPrompt = true;
     this.resetDirtyBaseline();
@@ -418,12 +402,13 @@ export default class DishEditPage implements HasUnsavedChanges {
     await this.router.navigate(['/tabs/management']);
   }
 
+  // ───────── unsaved-changes guard ─────────
+
   hasUnsavedChanges(): boolean {
     if (this.skipUnsavedPrompt) {
       return false;
     }
-
-    return this.createDirtySnapshot() !== this.dirtyBaseline || this.amountDraft() !== null;
+    return this.createDirtySnapshot() !== this.dirtyBaseline || this.gramDraft() !== null;
   }
 
   confirmDiscardChanges(): Promise<boolean> {
@@ -442,6 +427,8 @@ export default class DishEditPage implements HasUnsavedChanges {
     this.resolveDiscardDialog(true);
   }
 
+  // ───────── save ─────────
+
   async onSave(): Promise<void> {
     this.showErrors.set(true);
     if (!this.dishForm().valid()) {
@@ -456,10 +443,10 @@ export default class DishEditPage implements HasUnsavedChanges {
     this.saving.set(true);
     try {
       const value = untracked(() => this.formSignal());
-      const items = value.items.map((item) => ({
+      const items = value.items.map((item, index) => ({
         ingredient_id: item.ingredient_id,
-        amount_value: item.amount_value,
-        unit_id: item.unit_id,
+        gram_weight: item.gram_weight,
+        sort_order: index,
       }));
 
       const trimmedDescription = value.description.trim();
@@ -470,6 +457,7 @@ export default class DishEditPage implements HasUnsavedChanges {
         source: 'custom' as const,
         servings: value.servings ?? 1,
         image_url: null,
+        meal_tag: value.meal_tag,
       };
 
       const editingId = this.dishId();
@@ -487,6 +475,8 @@ export default class DishEditPage implements HasUnsavedChanges {
     }
   }
 
+  // ───────── utils ─────────
+
   formatNumber(value: number): string {
     return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, '');
   }
@@ -502,7 +492,6 @@ export default class DishEditPage implements HasUnsavedChanges {
     if (this.dirtyBaseline && this.createDirtySnapshot() !== this.dirtyBaseline) {
       return;
     }
-
     this.dirtyBaseline = this.createDirtySnapshot();
     this.skipUnsavedPrompt = false;
   }
@@ -513,38 +502,12 @@ export default class DishEditPage implements HasUnsavedChanges {
       name: value.name.trim(),
       description: value.description.trim(),
       servings: value.servings ?? null,
+      meal_tag: value.meal_tag,
       items: value.items.map((item) => ({
         ingredient_id: item.ingredient_id,
-        amount_value: item.amount_value,
-        unit_id: item.unit_id,
+        gram_weight: item.gram_weight,
       })),
     });
-  }
-
-  private calculateItemNutrition(item: DishIngredientFormItem): {
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    fiber: number;
-  } {
-    const ingredient = this.availableIngredients().find(
-      (candidate) => candidate.id === item.ingredient_id,
-    );
-    const unit = this.findUnit(item);
-    if (!ingredient || !unit || item.amount_value <= 0) {
-      return { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
-    }
-
-    const normalizedAmount = item.amount_value * unit.factor_to_basis;
-    const multiplier = normalizedAmount / ingredient.nutrition_basis_quantity;
-    return {
-      calories: ingredient.calories * multiplier,
-      protein: ingredient.protein * multiplier,
-      carbs: ingredient.carbs * multiplier,
-      fat: ingredient.fat * multiplier,
-      fiber: ingredient.fiber * multiplier,
-    };
   }
 
   private focusFirstInvalidField(): void {
@@ -561,7 +524,6 @@ export default class DishEditPage implements HasUnsavedChanges {
       if (f.name().errors().length) {
         this.nameInput?.nativeElement.focus();
       }
-
       const target = firstErrorSelector
         ? (document.querySelector(firstErrorSelector) as HTMLElement | null)
         : null;
@@ -569,18 +531,8 @@ export default class DishEditPage implements HasUnsavedChanges {
     });
   }
 
-  private findUnit(item: DishIngredientFormItem): IngredientListItem['units'][number] | undefined {
-    return this.availableIngredients()
-      .find((candidate) => candidate.id === item.ingredient_id)
-      ?.units.find((candidate) => candidate.unit_id === item.unit_id);
-  }
-
   private readInputValue(event: Event): string {
     const target = event.target;
     return target instanceof HTMLInputElement ? target.value : '';
-  }
-
-  private createLocalId(prefix: string): string {
-    return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
   }
 }

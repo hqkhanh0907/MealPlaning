@@ -2,52 +2,32 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { FieldTree } from '@angular/forms/signals';
 import { form } from '@angular/forms/signals';
-import type {
-  IngredientEditFormValue,
-  IngredientEditUnitFormValue,
-} from '../../../features/management/ingredient-edit/ingredient-edit.types';
+import type { IngredientEditFormValue } from '../../../features/management/ingredient-edit/ingredient-edit.types';
 import { ingredientFormSchema } from './ingredient-form.schema';
-
-const baseUnit = (
-  overrides: Partial<IngredientEditUnitFormValue> = {},
-): IngredientEditUnitFormValue => ({
-  local_id: 'u-1',
-  unit_id: 'unit-g',
-  factor_to_basis: 1,
-  is_default: true,
-  display_label: 'g',
-  is_approximate: false,
-  short_name_vi: 'g',
-  ...overrides,
-});
 
 const baseValue = (overrides: Partial<IngredientEditFormValue> = {}): IngredientEditFormValue => ({
   name: 'Trứng gà',
   category: 'Trứng & Sữa',
-  nutrition_basis_unit: 'g',
   calories: 155,
   protein: 13,
   carbs: 1,
   fat: 11,
   fiber: 0,
-  density_g_per_ml: null,
-  units: [baseUnit()],
   ...overrides,
 });
 
-const buildForm = (initial: IngredientEditFormValue): FieldTree<IngredientEditFormValue> => {
-  return TestBed.runInInjectionContext(() => {
+const buildForm = (initial: IngredientEditFormValue): FieldTree<IngredientEditFormValue> =>
+  TestBed.runInInjectionContext(() => {
     const model = signal(initial);
     return form(model, ingredientFormSchema);
   });
-};
 
 const allErrorKinds = (f: FieldTree<IngredientEditFormValue>): string[] =>
   f()
     .errorSummary()
     .map((e) => e.kind);
 
-describe('ingredientFormSchema', () => {
+describe('ingredientFormSchema (gram-only)', () => {
   it('reports no errors for a fully valid model', () => {
     const f = buildForm(baseValue());
     expect(f().valid()).toBeTrue();
@@ -99,6 +79,46 @@ describe('ingredientFormSchema', () => {
     ).toBeTrue();
   });
 
+  it('flags negative protein', () => {
+    const f = buildForm(baseValue({ protein: -0.5 }));
+    expect(
+      f
+        .protein()
+        .errors()
+        .some((e) => e.kind === 'positive'),
+    ).toBeTrue();
+  });
+
+  it('flags negative carbs', () => {
+    const f = buildForm(baseValue({ carbs: -0.5 }));
+    expect(
+      f
+        .carbs()
+        .errors()
+        .some((e) => e.kind === 'positive'),
+    ).toBeTrue();
+  });
+
+  it('flags negative fat', () => {
+    const f = buildForm(baseValue({ fat: -0.5 }));
+    expect(
+      f
+        .fat()
+        .errors()
+        .some((e) => e.kind === 'positive'),
+    ).toBeTrue();
+  });
+
+  it('flags negative fiber', () => {
+    const f = buildForm(baseValue({ fiber: -0.5 }));
+    expect(
+      f
+        .fiber()
+        .errors()
+        .some((e) => e.kind === 'positive'),
+    ).toBeTrue();
+  });
+
   it('allows null nutrition values (optional)', () => {
     const f = buildForm(
       baseValue({ calories: null, protein: null, carbs: null, fat: null, fiber: null }),
@@ -106,38 +126,13 @@ describe('ingredientFormSchema', () => {
     expect(f().valid()).toBeTrue();
   });
 
-  it('flags empty units list', () => {
-    const f = buildForm(baseValue({ units: [] }));
-    expect(allErrorKinds(f)).toContain('unitsRequired');
+  it('flags macroOver100 when protein + carbs + fat > 100', () => {
+    const f = buildForm(baseValue({ protein: 40, carbs: 40, fat: 30 }));
+    expect(allErrorKinds(f)).toContain('macroOver100');
   });
 
-  it('flags zero default units', () => {
-    const f = buildForm(
-      baseValue({
-        units: [baseUnit({ is_default: false })],
-      }),
-    );
-    expect(allErrorKinds(f)).toContain('unitsDefault');
-  });
-
-  it('flags more than one default unit', () => {
-    const f = buildForm(
-      baseValue({
-        units: [
-          baseUnit({ local_id: 'u1', is_default: true }),
-          baseUnit({ local_id: 'u2', unit_id: 'unit-ml', is_default: true }),
-        ],
-      }),
-    );
-    expect(allErrorKinds(f)).toContain('unitsDefault');
-  });
-
-  it('flags non-positive factor_to_basis on a unit item', () => {
-    const f = buildForm(
-      baseValue({
-        units: [baseUnit({ factor_to_basis: 0 })],
-      }),
-    );
-    expect(allErrorKinds(f)).toContain('unitFactorPositive');
+  it('does not flag macroOver100 when sum equals 100 exactly', () => {
+    const f = buildForm(baseValue({ protein: 30, carbs: 40, fat: 30 }));
+    expect(allErrorKinds(f)).not.toContain('macroOver100');
   });
 });

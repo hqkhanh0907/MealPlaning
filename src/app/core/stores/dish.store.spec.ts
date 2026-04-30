@@ -76,7 +76,7 @@ describe('DishStore', () => {
       image_url: null,
     };
     const items: CreateDishIngredientInput[] = [
-      { ingredient_id: 'ingredient-1', amount_value: 2, unit_id: 'piece' },
+      { ingredient_id: 'ingredient-1', gram_weight: 100 },
     ];
 
     await store.addFromIngredients(input, items);

@@ -20,8 +20,7 @@ describe('DishRepository', () => {
   const ingredientItems = [
     {
       ingredient_id: 'ingredient-1',
-      amount_value: 2,
-      unit_id: 'piece',
+      gram_weight: 100,
     },
   ];
 

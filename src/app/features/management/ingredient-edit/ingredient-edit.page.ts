@@ -16,18 +16,14 @@ import {
   IonContent,
   IonHeader,
   IonIcon,
-  IonModal,
   IonTitle,
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { chevronDownOutline } from 'ionicons/icons';
 import { INGREDIENT_CATEGORIES } from '../../../core/models/management.constants';
-import type { UnitModel } from '../../../core/models/management.model';
-import type { NutritionBasisUnit } from '../../../core/models/management.types';
-import { UnitRepository } from '../../../core/repositories/unit.repository';
-import { IngredientStore } from '../../../core/stores/ingredient.store';
 import type { HasUnsavedChanges } from '../../../core/guards/unsaved-changes-guard';
+import { IngredientStore } from '../../../core/stores/ingredient.store';
 import {
   BottomSheetPicker,
   type PickerOption,
@@ -36,21 +32,18 @@ import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm
 import { DishesUsingSheet } from '../../../shared/components/dishes-using-sheet/dishes-using-sheet';
 import { AppFormField } from '../../../shared/forms';
 import { ingredientFormSchema } from '../../../shared/forms/schemas/ingredient-form.schema';
-import type { IngredientEditFormValue, IngredientEditUnitFormValue } from './ingredient-edit.types';
+import type { IngredientEditFormValue } from './ingredient-edit.types';
 
-export type { IngredientEditFormValue, IngredientEditUnitFormValue } from './ingredient-edit.types';
+export type { IngredientEditFormValue } from './ingredient-edit.types';
 
 const emptyForm = (): IngredientEditFormValue => ({
   name: '',
   category: '',
-  nutrition_basis_unit: 'g',
   calories: null,
   protein: null,
   carbs: null,
   fat: null,
   fiber: null,
-  density_g_per_ml: null,
-  units: [],
 });
 
 @Component({
@@ -67,7 +60,6 @@ const emptyForm = (): IngredientEditFormValue => ({
     IonButtons,
     IonBackButton,
     IonIcon,
-    IonModal,
     FormField,
     BottomSheetPicker,
     DishesUsingSheet,
@@ -77,12 +69,10 @@ const emptyForm = (): IngredientEditFormValue => ({
 })
 export default class IngredientEditPage implements HasUnsavedChanges {
   @ViewChild('categoryPicker') private categoryPicker?: BottomSheetPicker;
-  @ViewChild('unitPicker') private unitPicker?: BottomSheetPicker;
   @ViewChild('nameInput') private nameInput?: ElementRef<HTMLInputElement>;
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly unitRepository = inject(UnitRepository);
   private readonly ingredientStore = inject(IngredientStore);
 
   readonly categories = INGREDIENT_CATEGORIES;
@@ -90,13 +80,9 @@ export default class IngredientEditPage implements HasUnsavedChanges {
   readonly ingredientId = signal<string | null>(this.route.snapshot.paramMap.get('id'));
   readonly isEdit = computed(() => this.ingredientId() !== null);
 
-  /**
-   * Whether the "Đang dùng trong N món" sheet is currently open. Only meaningful
-   * in edit mode (we already have a persisted ingredient id to query against).
-   */
+  /** Whether the "Đang dùng trong N món" sheet is open. Edit mode only. */
   readonly isDishesSheetOpen = signal(false);
-  readonly activeUnitEditLocalId = signal<string | null>(null);
-  readonly unitDraft = signal<IngredientEditUnitFormValue | null>(null);
+
   readonly pendingDeleteId = signal<string | null>(null);
   readonly deleteReferenceCount = signal(0);
   readonly deleteReferenceLoading = signal(false);
@@ -105,7 +91,6 @@ export default class IngredientEditPage implements HasUnsavedChanges {
   private dirtyBaseline = '';
   private skipUnsavedPrompt = false;
 
-  readonly availableUnits = signal<UnitModel[]>([]);
   readonly saving = signal(false);
   protected readonly showErrors = signal(false);
 
@@ -118,7 +103,6 @@ export default class IngredientEditPage implements HasUnsavedChanges {
   }
 
   private async bootstrap(): Promise<void> {
-    this.availableUnits.set(await this.unitRepository.list());
     const id = this.ingredientId();
     if (!id) {
       this.resetDirtyBaseline();
@@ -138,22 +122,11 @@ export default class IngredientEditPage implements HasUnsavedChanges {
     this.formSignal.set({
       name: ingredient.name,
       category: ingredient.category,
-      nutrition_basis_unit: ingredient.nutrition_basis_unit,
       calories: ingredient.calories,
       protein: ingredient.protein,
       carbs: ingredient.carbs,
       fat: ingredient.fat,
       fiber: ingredient.fiber,
-      density_g_per_ml: ingredient.density_g_per_ml,
-      units: ingredient.units.map((unit) => ({
-        local_id: this.createLocalId('ingredient-unit'),
-        unit_id: unit.unit_id,
-        factor_to_basis: unit.factor_to_basis,
-        is_default: unit.is_default === 1,
-        display_label: unit.display_label ?? unit.short_name_vi,
-        is_approximate: unit.is_approximate === 1,
-        short_name_vi: unit.short_name_vi,
-      })),
     });
     this.resetDirtyBaseline();
   }
@@ -162,31 +135,14 @@ export default class IngredientEditPage implements HasUnsavedChanges {
     return this.categories.map((category) => ({ value: category, label: category }));
   }
 
-  get unitOptions(): PickerOption[] {
-    const usedIds = new Set(this.formSignal().units.map((unit) => unit.unit_id));
-    return this.availableUnits()
-      .filter((unit) => !usedIds.has(unit.id))
-      .map((unit) => ({
-        value: unit.id,
-        label: unit.display_name_vi,
-        description: unit.is_approximate === 1 ? 'Đơn vị ước lượng' : unit.short_name_vi,
-      }));
-  }
-
-  protected unitListErrorMessages(): string[] {
-    return this.ingredientForm
-      .units()
-      .errorSummary()
-      .map((e) => e.message)
-      .filter((m): m is string => typeof m === 'string' && m.length > 0);
+  /** Cross-field error surfaced from the calories path (macroOver100 etc.). */
+  protected caloriesErrorMessage(): string {
+    const errs = this.ingredientForm.calories().errors();
+    return errs[0]?.message ?? '';
   }
 
   openCategoryPicker(): void {
     this.categoryPicker?.open();
-  }
-
-  openUnitPicker(): void {
-    this.unitPicker?.open();
   }
 
   /** Open the "Đang dùng trong N món" sheet. No-op in create mode. */
@@ -197,12 +153,10 @@ export default class IngredientEditPage implements HasUnsavedChanges {
     this.isDishesSheetOpen.set(true);
   }
 
-  /** Sheet emitted dismiss — reset state. */
   onDishesSheetClosed(): void {
     this.isDishesSheetOpen.set(false);
   }
 
-  /** Sheet emitted dishSelected — navigate to the dish-edit route. */
   async onDishSelectedFromSheet(dishId: string): Promise<void> {
     this.isDishesSheetOpen.set(false);
     await this.router.navigate(['/tabs/management/dish/edit', dishId]);
@@ -210,140 +164,6 @@ export default class IngredientEditPage implements HasUnsavedChanges {
 
   onCategorySelected(category: string): void {
     this.formSignal.update((v) => ({ ...v, category }));
-  }
-
-  onUnitSelected(unitId: string): void {
-    const unit = this.availableUnits().find((item) => item.id === unitId);
-    if (!unit) {
-      return;
-    }
-
-    const factor = this.getSuggestedFactor(unit);
-    this.formSignal.update((v) => ({
-      ...v,
-      units: [
-        ...v.units,
-        {
-          local_id: `${unit.id}-${crypto.randomUUID()}`,
-          unit_id: unit.id,
-          factor_to_basis: factor,
-          is_default: v.units.length === 0,
-          display_label: unit.short_name_vi,
-          is_approximate: unit.is_approximate === 1,
-          short_name_vi: unit.short_name_vi,
-        },
-      ],
-    }));
-  }
-
-  setBasisUnit(unit: NutritionBasisUnit): void {
-    this.formSignal.update((v) => ({
-      ...v,
-      nutrition_basis_unit: unit,
-      units: v.units.map((item) => {
-        const definition = this.availableUnits().find((c) => c.id === item.unit_id);
-        if (!definition) {
-          return item;
-        }
-        const usesGlobalDefault =
-          (unit === 'g' && definition.unit_type === 'mass' && definition.base_factor_g !== null) ||
-          (unit === 'ml' &&
-            definition.unit_type === 'volume' &&
-            definition.base_factor_ml !== null);
-        return usesGlobalDefault
-          ? { ...item, factor_to_basis: this.getSuggestedFactor(definition, unit) }
-          : item;
-      }),
-    }));
-  }
-
-  markDefault(localId: string): void {
-    this.formSignal.update((v) => ({
-      ...v,
-      units: v.units.map((unit) => ({
-        ...unit,
-        is_default: unit.local_id === localId,
-      })),
-    }));
-  }
-
-  removeUnit(localId: string): void {
-    this.formSignal.update((v) => {
-      const nextUnits = v.units.filter((unit) => unit.local_id !== localId);
-      if (nextUnits.length === 1) {
-        nextUnits[0] = { ...nextUnits[0], is_default: true };
-      }
-      return { ...v, units: nextUnits };
-    });
-  }
-
-  unitTitle(unit: IngredientEditUnitFormValue): string {
-    return unit.is_approximate
-      ? `≈ ${unit.display_label || unit.short_name_vi}`
-      : unit.display_label || unit.short_name_vi;
-  }
-
-  unitExample(unit: IngredientEditUnitFormValue): string {
-    const label = unit.display_label || unit.short_name_vi;
-    return `Hiển thị: ${label} · 1 ${label} ≈ ${this.formatNumber(unit.factor_to_basis)}${this.formSignal().nutrition_basis_unit}`;
-  }
-
-  openUnitEditSheet(localId: string): void {
-    const unit = this.formSignal().units.find((item) => item.local_id === localId);
-    if (!unit) {
-      return;
-    }
-
-    this.activeUnitEditLocalId.set(localId);
-    this.unitDraft.set({ ...unit });
-  }
-
-  closeUnitEditSheet(): void {
-    this.activeUnitEditLocalId.set(null);
-    this.unitDraft.set(null);
-  }
-
-  updateUnitDraftDisplayLabel(event: Event): void {
-    const value = this.readInputValue(event);
-    this.unitDraft.update((draft) => (draft ? { ...draft, display_label: value } : draft));
-  }
-
-  updateUnitDraftFactor(event: Event): void {
-    const numeric = Number(this.readInputValue(event));
-    this.unitDraft.update((draft) =>
-      draft ? { ...draft, factor_to_basis: Number.isFinite(numeric) ? numeric : 0 } : draft,
-    );
-  }
-
-  saveUnitDraft(): void {
-    const draft = this.unitDraft();
-    if (!draft || draft.factor_to_basis <= 0) {
-      this.showErrors.set(true);
-      return;
-    }
-
-    this.formSignal.update((v) => ({
-      ...v,
-      units: v.units.map((unit) => ({
-        ...(unit.local_id === draft.local_id ? draft : unit),
-        is_default: draft.is_default ? unit.local_id === draft.local_id : unit.is_default,
-      })),
-    }));
-    this.closeUnitEditSheet();
-  }
-
-  markDraftDefault(): void {
-    this.unitDraft.update((current) => (current ? { ...current, is_default: true } : current));
-  }
-
-  removeDraftUnit(): void {
-    const draft = this.unitDraft();
-    if (!draft) {
-      return;
-    }
-
-    this.removeUnit(draft.local_id);
-    this.closeUnitEditSheet();
   }
 
   async openDeleteDialog(): Promise<void> {
@@ -389,8 +209,7 @@ export default class IngredientEditPage implements HasUnsavedChanges {
     if (this.skipUnsavedPrompt) {
       return false;
     }
-
-    return this.createDirtySnapshot() !== this.dirtyBaseline || this.unitDraft() !== null;
+    return this.createDirtySnapshot() !== this.dirtyBaseline;
   }
 
   confirmDiscardChanges(): Promise<boolean> {
@@ -423,46 +242,22 @@ export default class IngredientEditPage implements HasUnsavedChanges {
     this.saving.set(true);
     try {
       const value = untracked(() => this.formSignal());
-      const trimmedName = value.name.trim();
-      const trimmedCategory = value.category.trim();
-      const units = value.units.map((unit) => ({
-        unit_id: unit.unit_id,
-        factor_to_basis: unit.factor_to_basis,
-        is_default: unit.is_default ? 1 : 0,
-        display_label: unit.display_label.trim() || null,
-      }));
-
-      const nutrition = {
+      const payload = {
+        name: value.name.trim(),
+        category: value.category.trim(),
         calories: value.calories ?? 0,
         protein: value.protein ?? 0,
         carbs: value.carbs ?? 0,
         fat: value.fat ?? 0,
         fiber: value.fiber ?? 0,
+        source: 'manual' as const,
       };
 
       const editingId = this.ingredientId();
       if (editingId) {
-        await this.ingredientStore.edit(editingId, {
-          name: trimmedName,
-          category: trimmedCategory,
-          nutrition_basis_unit: value.nutrition_basis_unit,
-          nutrition_basis_quantity: 100,
-          ...nutrition,
-          density_g_per_ml: value.density_g_per_ml,
-          source: 'manual',
-          units,
-        });
+        await this.ingredientStore.edit(editingId, payload);
       } else {
-        await this.ingredientStore.add({
-          name: trimmedName,
-          category: trimmedCategory,
-          nutrition_basis_unit: value.nutrition_basis_unit,
-          nutrition_basis_quantity: 100,
-          ...nutrition,
-          density_g_per_ml: value.density_g_per_ml,
-          source: 'manual',
-          units,
-        });
+        await this.ingredientStore.add(payload);
       }
 
       this.resetDirtyBaseline();
@@ -481,10 +276,6 @@ export default class IngredientEditPage implements HasUnsavedChanges {
   }
 
   private resetDirtyBaseline(): void {
-    if (this.dirtyBaseline && this.createDirtySnapshot() !== this.dirtyBaseline) {
-      return;
-    }
-
     this.dirtyBaseline = this.createDirtySnapshot();
     this.skipUnsavedPrompt = false;
   }
@@ -494,71 +285,28 @@ export default class IngredientEditPage implements HasUnsavedChanges {
     return JSON.stringify({
       name: value.name.trim(),
       category: value.category.trim(),
-      nutrition_basis_unit: value.nutrition_basis_unit,
       calories: value.calories ?? null,
       protein: value.protein ?? null,
       carbs: value.carbs ?? null,
       fat: value.fat ?? null,
       fiber: value.fiber ?? null,
-      density_g_per_ml: value.density_g_per_ml ?? null,
-      units: value.units.map((unit) => ({
-        unit_id: unit.unit_id,
-        factor_to_basis: unit.factor_to_basis,
-        is_default: unit.is_default,
-        display_label: unit.display_label.trim(),
-        is_approximate: unit.is_approximate,
-        short_name_vi: unit.short_name_vi,
-      })),
     });
   }
 
   private focusFirstInvalidField(): void {
     const f = this.ingredientForm;
-    const firstErrorSelector = f.name().errors().length
-      ? 'input'
-      : f.category().errors().length
-        ? '.picker-trigger--floating'
-        : f.calories().errors().length
-          ? 'input[type="number"]'
-          : f.units().errorSummary().length
-            ? '.unit-empty, .unit-list'
-            : null;
-
     setTimeout(() => {
       if (f.name().errors().length) {
         this.nameInput?.nativeElement.focus();
+        return;
       }
-
-      const target = firstErrorSelector
-        ? (document.querySelector(firstErrorSelector) as HTMLElement | null)
-        : null;
+      const sel = f.category().errors().length
+        ? '.picker-trigger--floating'
+        : f.calories().errors().length
+          ? 'input[type="number"]'
+          : null;
+      const target = sel ? (document.querySelector(sel) as HTMLElement | null) : null;
       target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
-  }
-
-  private getSuggestedFactor(unit: UnitModel, basis?: NutritionBasisUnit): number {
-    const b = basis ?? this.formSignal().nutrition_basis_unit;
-    if (b === 'g' && unit.unit_type === 'mass' && unit.base_factor_g !== null) {
-      return unit.base_factor_g;
-    }
-    if (b === 'ml' && unit.unit_type === 'volume' && unit.base_factor_ml !== null) {
-      return unit.base_factor_ml;
-    }
-    return 1;
-  }
-
-  private formatNumber(value: number): string {
-    return Number.isInteger(value)
-      ? String(value)
-      : value.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
-  }
-
-  private readInputValue(event: Event): string {
-    const target = event.target;
-    return target instanceof HTMLInputElement ? target.value : '';
-  }
-
-  private createLocalId(prefix: string): string {
-    return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
   }
 }

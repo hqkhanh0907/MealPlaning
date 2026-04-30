@@ -11,8 +11,7 @@ import { dishFormSchema } from './dish-form.schema';
 const baseItem = (overrides: Partial<DishIngredientFormItem> = {}): DishIngredientFormItem => ({
   local_id: 'i-1',
   ingredient_id: 'ing-1',
-  amount_value: 100,
-  unit_id: 'unit-g',
+  gram_weight: 100,
   ...overrides,
 });
 
@@ -20,6 +19,7 @@ const baseValue = (overrides: Partial<DishEditFormValue> = {}): DishEditFormValu
   name: 'Cơm gà',
   description: '',
   servings: 2,
+  meal_tag: null,
   items: [baseItem()],
   ...overrides,
 });
@@ -36,7 +36,7 @@ const allErrorKinds = (f: FieldTree<DishEditFormValue>): string[] =>
     .errorSummary()
     .map((e) => e.kind);
 
-describe('dishFormSchema', () => {
+describe('dishFormSchema (gram-only)', () => {
   it('reports no errors for a fully valid model', () => {
     const f = buildForm(baseValue());
     expect(f().valid()).toBeTrue();
@@ -89,7 +89,7 @@ describe('dishFormSchema', () => {
   });
 
   it('flags servings above 20', () => {
-    const f = buildForm(baseValue({ servings: 20.1 }));
+    const f = buildForm(baseValue({ servings: 21 }));
     expect(
       f
         .servings()
@@ -111,18 +111,28 @@ describe('dishFormSchema', () => {
     ).toBe(0);
   });
 
-  it('flags empty items list', () => {
+  it('flags empty items list as itemsRequired', () => {
     const f = buildForm(baseValue({ items: [] }));
     expect(allErrorKinds(f)).toContain('itemsRequired');
   });
 
-  it('flags zero or negative amount_value on an item', () => {
-    const f = buildForm(baseValue({ items: [baseItem({ amount_value: 0 })] }));
-    expect(allErrorKinds(f)).toContain('amountPositive');
+  it('flags zero gram_weight as gramPositive', () => {
+    const f = buildForm(baseValue({ items: [baseItem({ gram_weight: 0 })] }));
+    expect(allErrorKinds(f)).toContain('gramPositive');
   });
 
-  it('flags missing unit_id on an item', () => {
-    const f = buildForm(baseValue({ items: [baseItem({ unit_id: '   ' })] }));
-    expect(allErrorKinds(f)).toContain('unitRequired');
+  it('flags negative gram_weight as gramPositive', () => {
+    const f = buildForm(baseValue({ items: [baseItem({ gram_weight: -10 })] }));
+    expect(allErrorKinds(f)).toContain('gramPositive');
+  });
+
+  it('accepts a positive gram_weight', () => {
+    const f = buildForm(baseValue({ items: [baseItem({ gram_weight: 50 })] }));
+    expect(allErrorKinds(f)).not.toContain('gramPositive');
+  });
+
+  it('flags missing ingredient_id as ingredientRequired', () => {
+    const f = buildForm(baseValue({ items: [baseItem({ ingredient_id: '   ' })] }));
+    expect(allErrorKinds(f)).toContain('ingredientRequired');
   });
 });

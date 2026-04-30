@@ -6,7 +6,7 @@ import { DishStore } from '../../../core/stores/dish.store';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
 import DishEditPage from './dish-edit.page';
 
-describe('DishEditPage', () => {
+describe('DishEditPage (gram-only)', () => {
   let fixture: ComponentFixture<DishEditPage>;
   let component: DishEditPage;
   let navigateSpy: jasmine.Spy;
@@ -15,38 +15,25 @@ describe('DishEditPage', () => {
     id: 'ingredient-1',
     name: 'Trứng gà',
     category: 'Trứng & Sữa',
-    nutrition_basis_unit: 'g',
-    nutrition_basis_quantity: 100,
     calories: 155,
     protein: 13,
     carbs: 1.1,
     fat: 11,
     fiber: 0,
-    density_g_per_ml: null,
     source: 'manual',
     created_at: '2026-04-26T00:00:00Z',
     updated_at: null,
-    units: [
-      {
-        ingredient_id: 'ingredient-1',
-        unit_id: 'g',
-        factor_to_basis: 1,
-        is_default: 1,
-        display_label: 'g',
-        is_approximate: 0,
-        short_name_vi: 'g',
-        display_name_vi: 'gram',
-      },
-    ],
   };
 
-  beforeEach(async () => {
+  const setup = async (paramMap: Record<string, string> = {}): Promise<void> => {
     const dishStore = {
       dishes: () => [],
       load: jasmine.createSpy().and.resolveTo(),
-      fetchById: jasmine.createSpy().and.resolveTo(null),
-      addFromIngredients: jasmine.createSpy().and.resolveTo(),
-      edit: jasmine.createSpy().and.resolveTo(),
+      fetchById: jasmine.createSpy('fetchById').and.resolveTo(null),
+      addFromIngredients: jasmine.createSpy('addFromIngredients').and.resolveTo(),
+      edit: jasmine.createSpy('edit').and.resolveTo(),
+      remove: jasmine.createSpy('remove').and.resolveTo(),
+      countReferences: jasmine.createSpy('countReferences').and.resolveTo(0),
     };
 
     const ingredientStore = {
@@ -59,7 +46,7 @@ describe('DishEditPage', () => {
     };
 
     const activatedRoute = {
-      snapshot: { paramMap: convertToParamMap({}) },
+      snapshot: { paramMap: convertToParamMap(paramMap) },
     };
 
     await TestBed.configureTestingModule({
@@ -80,70 +67,63 @@ describe('DishEditPage', () => {
     component = fixture.componentInstance;
     await fixture.whenStable();
     fixture.detectChanges();
+  };
+
+  beforeEach(async () => {
+    await setup();
   });
 
-  it('starts in create mode (no id param)', () => {
+  it('creates the component in create mode (no id param)', () => {
+    expect(component).toBeTruthy();
     expect(component.isEdit()).toBeFalse();
   });
 
-  it('loads recent ingredients into picker on bootstrap', async () => {
+  it('loads recent ingredients into picker on bootstrap', () => {
     const repo = TestBed.inject(IngredientRepository) as unknown as {
       findRecentlyUsed: jasmine.Spy;
     };
     expect(repo.findRecentlyUsed).toHaveBeenCalledWith(5);
-    // Default mock resolves to [] so MRU options are empty.
     expect(component.recentIngredientOptions.length).toBe(0);
   });
 
-  it('exposes recent ingredients as picker options when present', async () => {
-    const repo = TestBed.inject(IngredientRepository) as unknown as {
-      findRecentlyUsed: jasmine.Spy;
-    };
-    repo.findRecentlyUsed.and.resolveTo([sampleIngredient]);
-    // Force re-bootstrap by setting signal directly (covers transformation logic).
-    const access = component as unknown as {
-      recentIngredients: { set: (v: IngredientListItem[]) => void };
-    };
-    access.recentIngredients.set([sampleIngredient]);
-    expect(component.recentIngredientOptions.length).toBe(1);
-    expect(component.recentIngredientOptions[0].value).toBe('ingredient-1');
-    expect(component.recentIngredientOptions[0].label).toBe('Trứng gà');
-  });
-
-  it('rejects submit when required fields are empty', async () => {
-    await component.onSave();
-    const showErrorsAccess = component as unknown as { showErrors: () => boolean };
-    expect(showErrorsAccess.showErrors()).toBeTrue();
-    expect(navigateSpy).not.toHaveBeenCalled();
-  });
-
   it('rejects submit when items list is empty', async () => {
-    const access = component as unknown as {
-      formSignal: {
-        set: (v: { name: string; description: string; servings: number; items: never[] }) => void;
-      };
-    };
-    access.formSignal.set({ name: 'Cơm trứng', description: '', servings: 2, items: [] });
-
-    await component.onSave();
-    const dishStore = TestBed.inject(DishStore) as unknown as { addFromIngredients: jasmine.Spy };
-    expect(dishStore.addFromIngredients).not.toHaveBeenCalled();
-    expect(navigateSpy).not.toHaveBeenCalled();
-  });
-
-  it('saves new dish and navigates back to management', async () => {
     const access = component as unknown as {
       formSignal: {
         set: (v: {
           name: string;
           description: string;
           servings: number;
-          items: {
-            local_id: string;
-            ingredient_id: string;
-            amount_value: number;
-            unit_id: string;
-          }[];
+          meal_tag: null;
+          items: never[];
+        }) => void;
+      };
+    };
+    access.formSignal.set({
+      name: 'Cơm trứng',
+      description: '',
+      servings: 2,
+      meal_tag: null,
+      items: [],
+    });
+
+    await component.onSave();
+
+    const dishStore = TestBed.inject(DishStore) as unknown as {
+      addFromIngredients: jasmine.Spy;
+    };
+    expect(dishStore.addFromIngredients).not.toHaveBeenCalled();
+    expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  it('calls addFromIngredients with gram-only items in create mode', async () => {
+    const access = component as unknown as {
+      formSignal: {
+        set: (v: {
+          name: string;
+          description: string;
+          servings: number;
+          meal_tag: null;
+          items: { local_id: string; ingredient_id: string; gram_weight: number }[];
         }) => void;
       };
     };
@@ -152,19 +132,18 @@ describe('DishEditPage', () => {
       name: ' Cơm trứng ',
       description: ' nhanh ',
       servings: 1,
+      meal_tag: null,
       items: [
-        {
-          local_id: 'item-1',
-          ingredient_id: 'ingredient-1',
-          amount_value: 2,
-          unit_id: 'g',
-        },
+        { local_id: 'item-1', ingredient_id: 'ingredient-1', gram_weight: 50 },
+        { local_id: 'item-2', ingredient_id: 'ingredient-1', gram_weight: 25 },
       ],
     });
 
     await component.onSave();
 
-    const dishStore = TestBed.inject(DishStore) as unknown as { addFromIngredients: jasmine.Spy };
+    const dishStore = TestBed.inject(DishStore) as unknown as {
+      addFromIngredients: jasmine.Spy;
+    };
     expect(dishStore.addFromIngredients).toHaveBeenCalled();
     const [payload, items] = dishStore.addFromIngredients.calls.mostRecent().args;
     expect(payload.name).toBe('Cơm trứng');
@@ -172,8 +151,74 @@ describe('DishEditPage', () => {
     expect(payload.servings).toBe(1);
     expect(payload.type).toBe('ingredient_based');
     expect(payload.source).toBe('custom');
-    expect(items.length).toBe(1);
+    expect(payload.image_url).toBeNull();
+    expect(items.length).toBe(2);
     expect(items[0].ingredient_id).toBe('ingredient-1');
+    expect(items[0].gram_weight).toBe(50);
+    expect(items[0].sort_order).toBe(0);
+    expect(items[1].sort_order).toBe(1);
+    // Gram-only contract: legacy fields must NOT be present.
+    expect((items[0] as Record<string, unknown>)['amount_value']).toBeUndefined();
+    expect((items[0] as Record<string, unknown>)['unit_id']).toBeUndefined();
     expect(navigateSpy).toHaveBeenCalledWith(['/tabs/management']);
+  });
+
+  it('calls edit() with gram-only items in edit mode', async () => {
+    TestBed.resetTestingModule();
+    await setup({ id: 'dish-42' });
+
+    const access = component as unknown as {
+      formSignal: {
+        set: (v: {
+          name: string;
+          description: string;
+          servings: number;
+          meal_tag: null;
+          items: { local_id: string; ingredient_id: string; gram_weight: number }[];
+        }) => void;
+      };
+    };
+
+    access.formSignal.set({
+      name: 'Cơm trứng',
+      description: '',
+      servings: 2,
+      meal_tag: null,
+      items: [{ local_id: 'item-1', ingredient_id: 'ingredient-1', gram_weight: 80 }],
+    });
+
+    await component.onSave();
+
+    const dishStore = TestBed.inject(DishStore) as unknown as { edit: jasmine.Spy };
+    expect(dishStore.edit).toHaveBeenCalled();
+    const [id, payload, items] = dishStore.edit.calls.mostRecent().args;
+    expect(id).toBe('dish-42');
+    expect(payload.name).toBe('Cơm trứng');
+    expect(items.length).toBe(1);
+    expect(items[0].gram_weight).toBe(80);
+  });
+
+  it('computes preview totals as sum(calories * gram / 100)', () => {
+    const access = component as unknown as {
+      formSignal: {
+        set: (v: {
+          name: string;
+          description: string;
+          servings: number;
+          meal_tag: null;
+          items: { local_id: string; ingredient_id: string; gram_weight: number }[];
+        }) => void;
+      };
+    };
+    access.formSignal.set({
+      name: 'Test',
+      description: '',
+      servings: 1,
+      meal_tag: null,
+      items: [{ local_id: 'a', ingredient_id: 'ingredient-1', gram_weight: 200 }],
+    });
+    // 155 kcal/100g × 200g / 100 = 310
+    expect(component.previewTotals().calories).toBeCloseTo(310, 5);
+    expect(component.previewTotals().protein).toBeCloseTo(26, 5);
   });
 });

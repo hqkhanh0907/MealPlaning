@@ -62,6 +62,18 @@
       />
     </app-form-field>
 
+    <app-form-field label="Loại bữa" inputId="dish-field-meal-tag">
+      <button
+        type="button"
+        id="dish-field-meal-tag"
+        class="picker-trigger--floating"
+        (click)="openMealTagPicker()"
+      >
+        <span>{{ mealTagLabel }}</span>
+        <ion-icon name="chevron-down-outline" aria-hidden="true" />
+      </button>
+    </app-form-field>
+
     <div class="section-label">
       Nguyên liệu
       @if (formSignal().items.length > 0) {
@@ -81,19 +93,19 @@
       </div>
     } @else {
       <div class="ingredient-list">
-        @for (item of formSignal().items; track item.local_id; let i = $index) {
+        @for (item of formSignal().items; track item.local_id) {
           <article class="ingredient-item ingredient-item--summary">
             <button
               type="button"
               class="ingredient-item__main-action"
-              (click)="openAmountSheet(item.local_id)"
-              [attr.aria-label]="'Cập nhật số lượng ' + ingredientName(item.ingredient_id)"
+              (click)="openGramSheet(item.local_id)"
+              [attr.aria-label]="'Cập nhật trọng lượng ' + ingredientName(item.ingredient_id)"
             >
               <span class="ingredient-item__info">
                 <span class="ingredient-item__name">
                   {{ ingredientName(item.ingredient_id) }}
                 </span>
-                <span class="ingredient-item__detail">{{ ingredientDetail(item) }}</span>
+                <span class="ingredient-item__detail">{{ itemDetail(item) }}</span>
               </span>
               <span class="ingredient-item__kcal">{{ itemCalories(item) }}</span>
             </button>
@@ -120,28 +132,28 @@
       }
     }
 
-    <div class="section-label">Tổng dinh dưỡng (1 phần)</div>
-    <p class="section-hint">Dinh dưỡng được tính tự động từ danh sách nguyên liệu hiện tại.</p>
+    <div class="section-label">Tổng dinh dưỡng</div>
+    <p class="section-hint">Dinh dưỡng được tính tự động từ trọng lượng nguyên liệu.</p>
     <div class="nutrition-card">
       <div class="nutrition-row nutrition-row--calories">
         <span class="nutrition-label">Calories</span>
-        <strong class="nutrition-value">{{ formatNumber(previewTotals.calories) }} kcal</strong>
+        <strong class="nutrition-value">{{ formatNumber(previewTotals().calories) }} kcal</strong>
       </div>
       <div class="nutrition-row nutrition-row--protein">
         <span class="nutrition-label">Protein</span>
-        <strong class="nutrition-value">{{ formatNumber(previewTotals.protein) }}g</strong>
+        <strong class="nutrition-value">{{ formatNumber(previewTotals().protein) }}g</strong>
       </div>
       <div class="nutrition-row nutrition-row--carbs">
         <span class="nutrition-label">Carbs</span>
-        <strong class="nutrition-value">{{ formatNumber(previewTotals.carbs) }}g</strong>
+        <strong class="nutrition-value">{{ formatNumber(previewTotals().carbs) }}g</strong>
       </div>
       <div class="nutrition-row nutrition-row--fat">
         <span class="nutrition-label">Fat</span>
-        <strong class="nutrition-value">{{ formatNumber(previewTotals.fat) }}g</strong>
+        <strong class="nutrition-value">{{ formatNumber(previewTotals().fat) }}g</strong>
       </div>
       <div class="nutrition-row nutrition-row--fiber">
         <span class="nutrition-label">Chất xơ</span>
-        <strong class="nutrition-value">{{ formatNumber(previewTotals.fiber) }}g</strong>
+        <strong class="nutrition-value">{{ formatNumber(previewTotals().fiber) }}g</strong>
       </div>
     </div>
 
@@ -155,71 +167,49 @@
   </div>
 
   <ion-modal
-    [isOpen]="activeAmountRowId() !== null"
-    [breakpoints]="[0, 0.72, 0.9]"
-    [initialBreakpoint]="0.72"
+    [isOpen]="activeGramRowId() !== null"
+    [breakpoints]="[0, 0.6, 0.85]"
+    [initialBreakpoint]="0.6"
     [handle]="true"
-    (didDismiss)="closeAmountSheet()"
+    (didDismiss)="closeGramSheet()"
   >
     <ng-template>
       <ion-header class="sheet-header">
         <ion-toolbar>
           <div class="sheet-title-row">
-            <h2 class="sheet-title">Nhập số lượng nguyên liệu</h2>
-            <button
-              class="sheet-close"
-              type="button"
-              (click)="closeAmountSheet()"
-              aria-label="Đóng"
-            >
+            <h2 class="sheet-title">Nhập trọng lượng (g)</h2>
+            <button class="sheet-close" type="button" (click)="closeGramSheet()" aria-label="Đóng">
               <ion-icon name="chevron-down-outline" />
             </button>
           </div>
         </ion-toolbar>
       </ion-header>
       <ion-content class="sheet-content amount-sheet">
-        @if (amountDraft(); as draft) {
+        @if (gramDraft(); as draft) {
           <div class="sheet-card">
             <div class="amount-sheet__header">
               <div>
-                <div class="ingredient-item__name">{{ ingredientName(draft.ingredient_id) }}</div>
-                <div class="ingredient-item__detail">{{ amountPreviewText(draft) }}</div>
+                <div class="ingredient-item__name">{{ draftIngredientName(draft) }}</div>
+                <div class="ingredient-item__detail">{{ draftCalories(draft) }}</div>
               </div>
             </div>
 
-            <app-form-field label="Số lượng" inputId="amount-draft-value">
+            <app-form-field label="Trọng lượng (g)" inputId="gram-draft-value">
               <input
-                id="amount-draft-value"
+                id="gram-draft-value"
                 class="input-native"
                 type="number"
                 inputmode="decimal"
-                [value]="draft.amount_value"
-                step="0.1"
-                (input)="updateAmountDraftValue($event)"
+                [value]="draft.gram_weight"
+                step="1"
+                min="0"
+                (input)="updateGramDraftValue($event)"
               />
             </app-form-field>
-
-            <div class="section-label">Đơn vị</div>
-            <div class="unit-option-grid" role="group" aria-label="Chọn đơn vị">
-              @for (option of unitOptions; track option.value) {
-                <button
-                  type="button"
-                  class="unit-option-card"
-                  [class.selected]="draft.unit_id === option.value"
-                  [attr.aria-pressed]="draft.unit_id === option.value"
-                  (click)="updateAmountDraftUnit(option.value)"
-                >
-                  <span>{{ option.label }}</span>
-                  @if (option.description) {
-                    <small>{{ option.description }}</small>
-                  }
-                </button>
-              }
-            </div>
           </div>
           <div class="sheet-actions">
-            <button type="button" class="btn-outline" (click)="closeAmountSheet()">Hủy</button>
-            <button type="button" class="btn-cta" (click)="saveAmountDraft()">
+            <button type="button" class="btn-outline" (click)="closeGramSheet()">Hủy</button>
+            <button type="button" class="btn-cta" (click)="saveGramDraft()">
               {{ draft.mode === 'create' ? 'Thêm' : 'Cập nhật' }}
             </button>
           </div>
@@ -275,10 +265,10 @@
   />
 
   <app-bottom-sheet-picker
-    #unitPicker
-    title="Chọn đơn vị"
-    [value]="activeUnitValue"
-    [options]="unitOptions"
-    (valueChange)="onUnitSelected($event)"
+    #mealTagPicker
+    title="Chọn loại bữa"
+    [value]="formSignal().meal_tag"
+    [options]="mealTagOptions"
+    (valueChange)="onMealTagSelected($event)"
   />
 </ion-content>

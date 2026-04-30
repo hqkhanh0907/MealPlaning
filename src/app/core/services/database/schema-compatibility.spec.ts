@@ -3,23 +3,23 @@ import {
   type ManagementSchemaSnapshot,
 } from './schema-compatibility';
 
-describe('shouldResetLegacyManagementSchema', () => {
+describe('shouldResetLegacyManagementSchema (gram-only v6)', () => {
   const buildSnapshot = (
     overrides: Partial<ManagementSchemaSnapshot> = {},
   ): ManagementSchemaSnapshot => ({
     userVersion: 0,
-    ingredientColumns: ['id', 'name', 'category', 'nutrition_basis_unit', 'default_entry_unit'],
+    ingredientColumns: ['id', 'name', 'category', 'calories', 'protein', 'carbs', 'fat', 'fiber'],
     dishColumns: ['id', 'name', 'type', 'servings'],
-    dishIngredientColumns: ['id', 'dish_id', 'ingredient_id', 'amount_unit', 'normalized_amount'],
+    dishIngredientColumns: ['id', 'dish_id', 'ingredient_id', 'gram_weight', 'sort_order'],
     ...overrides,
   });
 
-  it('does not reset when schema already matches expected v1 baseline', () => {
+  it('does not reset when schema already matches gram-only baseline', () => {
     expect(shouldResetLegacyManagementSchema(buildSnapshot())).toBeFalse();
   });
 
   it('does not reset when user_version already advanced', () => {
-    expect(shouldResetLegacyManagementSchema(buildSnapshot({ userVersion: 2 }))).toBeFalse();
+    expect(shouldResetLegacyManagementSchema(buildSnapshot({ userVersion: 6 }))).toBeFalse();
   });
 
   it('requests reset for legacy ingredient table missing category', () => {
@@ -30,16 +30,75 @@ describe('shouldResetLegacyManagementSchema', () => {
     ).toBeTrue();
   });
 
+  it('requests reset for legacy ingredient table still carrying nutrition_basis_unit', () => {
+    expect(
+      shouldResetLegacyManagementSchema(
+        buildSnapshot({
+          ingredientColumns: [
+            'id',
+            'name',
+            'category',
+            'calories',
+            'protein',
+            'carbs',
+            'fat',
+            'fiber',
+            'nutrition_basis_unit',
+          ],
+        }),
+      ),
+    ).toBeTrue();
+  });
+
+  it('requests reset for legacy ingredient table still carrying density_g_per_ml', () => {
+    expect(
+      shouldResetLegacyManagementSchema(
+        buildSnapshot({
+          ingredientColumns: [
+            'id',
+            'name',
+            'category',
+            'calories',
+            'protein',
+            'carbs',
+            'fat',
+            'fiber',
+            'density_g_per_ml',
+          ],
+        }),
+      ),
+    ).toBeTrue();
+  });
+
   it('requests reset for legacy dish table missing type', () => {
     expect(
       shouldResetLegacyManagementSchema(buildSnapshot({ dishColumns: ['id', 'name'] })),
     ).toBeTrue();
   });
 
-  it('requests reset for legacy dish_ingredient table missing amount_unit', () => {
+  it('requests reset for legacy dish_ingredient table missing gram_weight', () => {
     expect(
       shouldResetLegacyManagementSchema(
-        buildSnapshot({ dishIngredientColumns: ['id', 'dish_id', 'ingredient_id'] }),
+        buildSnapshot({
+          dishIngredientColumns: [
+            'id',
+            'dish_id',
+            'ingredient_id',
+            'amount_value',
+            'unit_id',
+            'normalized_amount',
+          ],
+        }),
+      ),
+    ).toBeTrue();
+  });
+
+  it('requests reset for legacy dish_ingredient table still carrying amount_value', () => {
+    expect(
+      shouldResetLegacyManagementSchema(
+        buildSnapshot({
+          dishIngredientColumns: ['id', 'dish_id', 'ingredient_id', 'gram_weight', 'amount_value'],
+        }),
       ),
     ).toBeTrue();
   });

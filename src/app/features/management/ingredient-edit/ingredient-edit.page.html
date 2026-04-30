@@ -54,32 +54,15 @@
       </button>
     </app-form-field>
 
-    <div class="section-label">Tính dinh dưỡng theo</div>
-    <div class="segment-control" role="tablist" aria-label="Tính dinh dưỡng theo">
-      <button
-        type="button"
-        class="segment-button"
-        [class.selected]="formSignal().nutrition_basis_unit === 'g'"
-        (click)="setBasisUnit('g')"
-      >
-        100g
-      </button>
-      <button
-        type="button"
-        class="segment-button"
-        [class.selected]="formSignal().nutrition_basis_unit === 'ml'"
-        (click)="setBasisUnit('ml')"
-      >
-        100ml
-      </button>
-    </div>
+    <div class="section-label">Thông tin dinh dưỡng (per 100g)</div>
+    <p class="section-hint">Nhập trị số dinh dưỡng cho mỗi 100 g nguyên liệu.</p>
 
     <app-form-field
       label="Calories (kcal)"
       inputId="ingr-field-calories"
       errorId="err-ingr-calories"
       [invalid]="showErrors() && ingredientForm.calories().errors().length > 0"
-      [errorMessage]="ingredientForm.calories().errors()[0]?.message ?? ''"
+      [errorMessage]="caloriesErrorMessage()"
     >
       <input
         id="ingr-field-calories"
@@ -160,82 +143,6 @@
       </app-form-field>
     </div>
 
-    <div class="section-label">Đơn vị có thể nhập khi thêm vào món</div>
-    <p class="section-hint">
-      Mỗi nguyên liệu cần ít nhất 1 đơn vị hợp lệ và đúng 1 đơn vị mặc định.
-    </p>
-
-    @if (formSignal().units.length === 0) {
-      <div class="unit-empty" [class.invalid]="showErrors() && unitListErrorMessages().length > 0">
-        <div class="unit-empty-title">Chưa có đơn vị nào</div>
-        <div class="unit-empty-copy">
-          Thêm đơn vị quen thuộc như quả, g, ml hoặc đơn vị riêng của nguyên liệu này.
-        </div>
-        <button type="button" class="btn-outline" (click)="openUnitPicker()">
-          + Thêm đơn vị đầu tiên
-        </button>
-      </div>
-    } @else {
-      <div class="unit-list" [class.invalid]="showErrors() && unitListErrorMessages().length > 0">
-        @for (unit of formSignal().units; track unit.local_id) {
-          <article class="unit-card unit-card--summary">
-            <button
-              type="button"
-              class="unit-card__summary-action"
-              (click)="openUnitEditSheet(unit.local_id)"
-              [attr.aria-label]="'Sửa đơn vị ' + unitTitle(unit)"
-            >
-              <div class="unit-card__top">
-                <div class="unit-card__title">{{ unitTitle(unit) }}</div>
-                <div class="unit-card__badges">
-                  @if (unit.is_default) {
-                    <span class="unit-badge badge-default">mặc định</span>
-                  }
-                  <span
-                    class="unit-badge"
-                    [class.badge-approx]="unit.is_approximate"
-                    [class.badge-exact]="!unit.is_approximate"
-                  >
-                    {{ unit.is_approximate ? 'ước lượng' : 'chuẩn' }}
-                  </span>
-                </div>
-              </div>
-              <div class="unit-meta">
-                {{ unitExample(unit) }}
-              </div>
-              <span class="unit-edit-chip">Cập nhật quy đổi</span>
-            </button>
-          </article>
-        }
-      </div>
-      <button type="button" class="btn-outline" (click)="openUnitPicker()">+ Thêm đơn vị</button>
-    }
-
-    @if (showErrors() && unitListErrorMessages().length > 0) {
-      @for (msg of unitListErrorMessages(); track msg) {
-        <div class="field-error">{{ msg }}</div>
-      }
-    }
-
-    <div class="info-card">
-      <div class="info-card-title">Quy đổi g ↔ ml (tùy chọn)</div>
-      <div class="info-card-copy">
-        Chỉ nhập mật độ khi cần quy đổi giữa g và ml. Nếu chưa có quy đổi phù hợp, app sẽ báo không
-        thể dùng đơn vị đó.
-      </div>
-    </div>
-
-    <app-form-field label="Mật độ (g/ml) — tùy chọn" inputId="ingr-field-density">
-      <input
-        id="ingr-field-density"
-        class="input-native"
-        type="number"
-        inputmode="decimal"
-        [formField]="ingredientForm.density_g_per_ml"
-        step="0.001"
-      />
-    </app-form-field>
-
     @if (isEdit()) {
       <button
         type="button"
@@ -266,101 +173,6 @@
       (closed)="onDishesSheetClosed()"
     />
   }
-
-  <ion-modal
-    [isOpen]="activeUnitEditLocalId() !== null"
-    [breakpoints]="[0, 0.82, 0.95]"
-    [initialBreakpoint]="0.82"
-    [handle]="true"
-    (didDismiss)="closeUnitEditSheet()"
-  >
-    <ng-template>
-      <ion-header class="sheet-header">
-        <ion-toolbar>
-          <div class="sheet-title-row">
-            <h2 class="sheet-title">Cập nhật đơn vị</h2>
-            <button
-              class="sheet-close"
-              type="button"
-              (click)="closeUnitEditSheet()"
-              aria-label="Đóng"
-            >
-              <ion-icon name="chevron-down-outline" />
-            </button>
-          </div>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="sheet-content unit-edit-sheet">
-        @if (unitDraft(); as draft) {
-          <div class="sheet-card">
-            <div class="unit-card__top">
-              <div class="unit-card__title">{{ unitTitle(draft) }}</div>
-              <div class="unit-card__badges">
-                @if (draft.is_default) {
-                  <span class="unit-badge badge-default">mặc định</span>
-                }
-                <span
-                  class="unit-badge"
-                  [class.badge-approx]="draft.is_approximate"
-                  [class.badge-exact]="!draft.is_approximate"
-                >
-                  {{ draft.is_approximate ? 'ước lượng' : 'chuẩn' }}
-                </span>
-              </div>
-            </div>
-
-            <app-form-field label="Hiển thị" inputId="unit-draft-display">
-              <input
-                id="unit-draft-display"
-                class="input-native"
-                [value]="draft.display_label"
-                [placeholder]="draft.short_name_vi"
-                (input)="updateUnitDraftDisplayLabel($event)"
-              />
-            </app-form-field>
-
-            <app-form-field
-              label="1 đơn vị = ? {{ formSignal().nutrition_basis_unit }}"
-              inputId="unit-draft-factor"
-            >
-              <input
-                id="unit-draft-factor"
-                class="input-native"
-                type="number"
-                inputmode="decimal"
-                [value]="draft.factor_to_basis"
-                [class.input-native--readonly]="!draft.is_approximate"
-                [readOnly]="!draft.is_approximate"
-                step="0.001"
-                (input)="updateUnitDraftFactor($event)"
-              />
-              @if (!draft.is_approximate) {
-                <div class="unit-grid__hint">Đơn vị chuẩn — quy đổi cố định</div>
-              }
-            </app-form-field>
-
-            <div class="unit-meta">{{ unitExample(draft) }}</div>
-
-            <button
-              type="button"
-              class="btn-outline btn-outline--full"
-              [disabled]="draft.is_default"
-              (click)="markDraftDefault()"
-            >
-              {{ draft.is_default ? 'Đang là mặc định' : 'Đặt làm mặc định' }}
-            </button>
-            <button type="button" class="btn-danger-text" (click)="removeDraftUnit()">
-              Xóa đơn vị
-            </button>
-          </div>
-          <div class="sheet-actions">
-            <button type="button" class="btn-outline" (click)="closeUnitEditSheet()">Hủy</button>
-            <button type="button" class="btn-cta" (click)="saveUnitDraft()">Lưu đơn vị</button>
-          </div>
-        }
-      </ion-content>
-    </ng-template>
-  </ion-modal>
 
   <app-confirm-dialog
     [isOpen]="pendingDeleteId() !== null"
@@ -405,13 +217,5 @@
     [value]="formSignal().category"
     [options]="categoryOptions"
     (valueChange)="onCategorySelected($event)"
-  />
-
-  <app-bottom-sheet-picker
-    #unitPicker
-    title="Thêm đơn vị"
-    [options]="unitOptions"
-    [searchable]="true"
-    (valueChange)="onUnitSelected($event)"
   />
 </ion-content>
