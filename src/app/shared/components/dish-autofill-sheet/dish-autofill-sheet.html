@@ -1,0 +1,88 @@
+<ion-modal
+  [isOpen]="isOpen"
+  [breakpoints]="[0, 0.6, 0.95]"
+  [initialBreakpoint]="0.95"
+  [handle]="true"
+  (ionModalDidDismiss)="onIonDismiss()"
+>
+  <ng-template>
+    <ion-header class="dasf-header">
+      <ion-toolbar class="dasf-toolbar">
+        <ion-title class="dasf-title">Gợi ý nguyên liệu từ AI</ion-title>
+        <button slot="end" type="button" class="dasf-close" aria-label="Đóng" (click)="onCancel()">
+          <ion-icon name="close-outline" />
+        </button>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="dasf-content">
+      @if (resultView(); as r) {
+        <p class="dasf-dish">
+          Món: <strong>{{ r.dishName }}</strong>
+        </p>
+
+        <div class="dasf-summary" role="status">
+          <span class="dasf-chip dasf-chip--existing">{{ counts().existing }} đã có</span>
+          <span class="dasf-chip dasf-chip--new">{{ counts().created }} mới</span>
+          @if (counts().needsConfirm > 0) {
+            <span class="dasf-chip dasf-chip--fuzzy">
+              {{ counts().needsConfirm }} cần xác nhận
+            </span>
+          }
+        </div>
+
+        <ul class="dasf-list">
+          @for (item of rows(); track item.index) {
+            <li class="dasf-row" [class]="'dasf-row--' + item.row.kind">
+              <div class="dasf-row__head">
+                <span [class]="badgeClass(item.row)">{{ badgeLabel(item.row) }}</span>
+                <span class="dasf-row__name">{{ item.row.name }}</span>
+                <span class="dasf-row__gram">{{ item.row.gramWeight }}g</span>
+              </div>
+
+              @if (item.row.kind === 'fuzzyConfirm') {
+                <div class="dasf-fuzzy">
+                  <p class="dasf-fuzzy__hint">
+                    Có phải <strong>{{ item.row.suggestedMatchName }}</strong> không?
+                  </p>
+                  <div class="dasf-fuzzy__actions">
+                    <button
+                      type="button"
+                      class="dasf-pill"
+                      [class.dasf-pill--active]="decisionFor(item.index) === 'accept-suggestion'"
+                      (click)="acceptSuggestion(item.index)"
+                    >
+                      Dùng "{{ item.row.suggestedMatchName }}"
+                    </button>
+                    <button
+                      type="button"
+                      class="dasf-pill"
+                      [class.dasf-pill--active]="decisionFor(item.index) === 'reject-create-new'"
+                      (click)="rejectAndCreate(item.index)"
+                    >
+                      Tạo mới
+                    </button>
+                  </div>
+                </div>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </ion-content>
+
+    <div class="dasf-footer">
+      @if (unresolvedCount() > 0) {
+        <p class="dasf-footer__hint">
+          Còn {{ unresolvedCount() }} mục chưa xác nhận. Nếu bỏ qua, sẽ tạo mới.
+        </p>
+      }
+      <div class="dasf-actions">
+        <button type="button" class="dasf-btn dasf-btn--ghost" (click)="onCancel()">Hủy</button>
+        <button type="button" class="dasf-btn dasf-btn--primary" (click)="onApply()">
+          Áp dụng
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>
