@@ -20,7 +20,7 @@
 
 .search-icon {
   flex-shrink: 0;
-  font-size: 20px;
+  font-size: var(--font-size-icon-md);
   color: var(--text-tertiary);
 }
 
@@ -30,7 +30,7 @@
   border: none;
   background: transparent;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: var(--font-size-body);
   line-height: 1.5;
   outline: none;
 }
@@ -64,5 +64,5 @@
 }
 
 .search-clear ion-icon {
-  font-size: 14px;
+  font-size: var(--font-size-body);
 }

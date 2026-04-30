@@ -108,6 +108,23 @@
   // Display font (DS §3.1) — used for h1, hero metrics
   --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
 
+  // Type Scale (DS §3.3) — token-based font sizes. All UI font-size MUST
+  // reference one of these (enforced by scripts/check-design-tokens.mjs).
+  --font-size-display: 28px; // Dashboard hero number
+  --font-size-headline: 22px; // Page title (h1)
+  --font-size-title: 18px; // Card title (h2)
+  --font-size-subtitle: 16px; // Section header (h3)
+  --font-size-body: 14px; // Body text
+  --font-size-body-sm: 13px; // Body small / list item detail
+  --font-size-caption: 12px; // Meta / timestamp
+  --font-size-overline: 11px; // Tab label / chip
+  // Extras — used for icon-bearing UI / oversize hero numerics
+  --font-size-icon-sm: 15px;
+  --font-size-icon-md: 20px;
+  --font-size-icon-lg: 22px;
+  --font-size-icon-xl: 24px;
+  --font-size-hero: 48px; // Empty-state hero icon
+
   // Z-index scale (DS §12)
   --z-base: 0;
   --z-sticky: 10;

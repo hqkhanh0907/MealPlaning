@@ -13,7 +13,7 @@
 .als-title {
   color: var(--text-primary);
   font-weight: 600;
-  font-size: 18px;
+  font-size: var(--font-size-title);
 }
 
 .als-close {
@@ -21,7 +21,7 @@
   border: 0;
   padding: 8px 12px;
   ion-icon {
-    font-size: 22px;
+    font-size: var(--font-size-icon-lg);
     color: var(--text-tertiary);
   }
 }
@@ -48,14 +48,14 @@
   color: var(--ion-color-primary-shade);
   padding: 10px 14px;
   border-radius: var(--radius-sm, 8px);
-  font-size: 14px;
+  font-size: var(--font-size-body);
 }
 
 .als-confidence {
   display: inline-block;
   padding: 4px 12px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: var(--font-size-body-sm);
   font-weight: 600;
   align-self: flex-start;
 
@@ -77,12 +77,12 @@
   display: flex;
   align-items: flex-start;
   gap: 6px;
-  font-size: 13px;
+  font-size: var(--font-size-body-sm);
   color: var(--text-secondary);
   line-height: 1.4;
 
   ion-icon {
-    font-size: 16px;
+    font-size: var(--font-size-subtitle);
     flex: 0 0 auto;
     margin-top: 2px;
   }
@@ -104,7 +104,7 @@
     height: 44px;
     border-radius: var(--radius-sm, 10px);
     border: 0;
-    font-size: 15px;
+    font-size: var(--font-size-icon-sm);
     font-weight: 600;
 
     &:disabled {

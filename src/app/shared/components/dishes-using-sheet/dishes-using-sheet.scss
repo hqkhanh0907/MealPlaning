@@ -17,7 +17,7 @@
 }
 
 .dus-title {
-  font-size: 16px;
+  font-size: var(--font-size-subtitle);
   font-weight: 600;
   text-align: center;
   padding-inline: 56px; /* Reserve space for close button */
@@ -41,7 +41,7 @@
   }
 
   ion-icon {
-    font-size: 22px;
+    font-size: var(--font-size-icon-lg);
   }
 }
 
@@ -59,14 +59,14 @@
   gap: 12px;
 
   &__icon {
-    font-size: 48px;
+    font-size: var(--font-size-hero);
     color: var(--text-tertiary);
   }
 
   &__text {
     margin: 0;
     color: var(--text-secondary);
-    font-size: 14px;
+    font-size: var(--font-size-body);
     line-height: 1.5;
     max-width: 280px;
   }
@@ -78,7 +78,7 @@
   border-radius: 8px;
   background: rgba(var(--ion-color-danger-rgb), 0.1);
   color: var(--ion-color-danger);
-  font-size: 14px;
+  font-size: var(--font-size-body);
 }
 
 .dus-list {
@@ -117,7 +117,7 @@
   }
 
   &__name {
-    font-size: 15px;
+    font-size: var(--font-size-icon-sm);
     font-weight: 500;
     color: var(--text-primary);
     overflow: hidden;
@@ -126,7 +126,7 @@
   }
 
   &__desc {
-    font-size: 12px;
+    font-size: var(--font-size-caption);
     color: var(--text-tertiary);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -134,7 +134,7 @@
   }
 
   &__chevron {
-    font-size: 24px;
+    font-size: var(--font-size-icon-xl);
     color: var(--text-tertiary);
     line-height: 1;
     flex-shrink: 0;

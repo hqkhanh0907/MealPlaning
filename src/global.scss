@@ -80,7 +80,7 @@ app-management .fab {
 }
 
 app-management .fab ion-icon {
-  font-size: 24px;
+  font-size: var(--font-size-icon-xl);
 }
 
 app-management .fab-menu-backdrop {
@@ -122,7 +122,7 @@ app-management .fab-menu-item--primary .fab-menu-label {
 
 app-management .fab-menu-icon {
   flex-shrink: 0;
-  font-size: 18px;
+  font-size: var(--font-size-title);
   color: var(--text-secondary);
 }
 
@@ -133,13 +133,13 @@ app-management .fab-menu-text {
 }
 
 app-management .fab-menu-label {
-  font-size: 14px;
+  font-size: var(--font-size-body);
   line-height: 1.4;
   color: var(--text-primary);
 }
 
 app-management .fab-menu-sublabel {
-  font-size: 11px;
+  font-size: var(--font-size-overline);
   line-height: 1.4;
   color: var(--text-tertiary);
 }
@@ -166,7 +166,7 @@ app-management .options-sheet {
 app-management .options-sheet h2 {
   margin: 0 0 12px;
   color: var(--text-primary);
-  font-size: 16px;
+  font-size: var(--font-size-subtitle);
   font-weight: 600;
   line-height: 1.4;
 }
@@ -176,7 +176,7 @@ app-management .options-sheet__cancel {
   width: 100%;
   min-height: 44px;
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--font-size-body);
   font-weight: 500;
 }
 

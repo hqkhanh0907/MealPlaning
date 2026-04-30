@@ -17,7 +17,7 @@
   .btn-cta {
     min-height: 48px;
     border-radius: 12px;
-    font-size: 16px;
+    font-size: var(--font-size-subtitle);
     font-weight: 600;
     box-shadow:
       0 1px 2px rgba(196, 95, 63, 0.15),
@@ -41,7 +41,7 @@
 .info-card-copy,
 .unit-meta {
   color: var(--text-tertiary);
-  font-size: 13px;
+  font-size: var(--font-size-body-sm);
   line-height: 1.5;
   margin: 0;
 }
@@ -78,14 +78,14 @@
 .info-card-title,
 .unit-card__title {
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: var(--font-size-body);
   font-weight: 600;
   line-height: 1.4;
 }
 
 .unit-empty-copy {
   color: var(--text-tertiary);
-  font-size: 13px;
+  font-size: var(--font-size-body-sm);
   line-height: 1.5;
   margin: 8px 0 16px;
 }
@@ -116,7 +116,7 @@
   align-items: center;
   padding: 2px 8px;
   border-radius: var(--radius-xs);
-  font-size: 11px;
+  font-size: var(--font-size-overline);
   font-weight: 500;
   line-height: 1.4;
 }
@@ -144,7 +144,7 @@
 .unit-action {
   min-height: 44px;
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--font-size-body);
   padding: 10px 16px;
   border: 1px solid rgba(var(--ion-color-primary-rgb), 0.32);
   background: transparent;
@@ -179,7 +179,7 @@
 
 .unit-grid__hint {
   margin-top: 4px;
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   line-height: 1.4;
   color: var(--text-tertiary);
 }
@@ -216,7 +216,7 @@
   border-radius: var(--radius-full);
   background: rgba(var(--ion-color-primary-rgb), 0.12);
   color: var(--primary-700);
-  font-size: 12px;
+  font-size: var(--font-size-caption);
   font-weight: 600;
 }
 
@@ -232,7 +232,7 @@
   margin: 0;
   color: var(--text-primary);
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: var(--font-size-icon-md);
   font-style: italic;
   font-weight: 500;
   line-height: 1.3;
@@ -287,13 +287,13 @@
   color: var(--ion-color-primary-contrast, #fff);
   border: 0;
   border-radius: var(--radius-sm, 12px);
-  font-size: 15px;
+  font-size: var(--font-size-icon-sm);
   font-weight: 600;
   cursor: pointer;
   transition: opacity 120ms ease;
 
   ion-icon {
-    font-size: 20px;
+    font-size: var(--font-size-icon-md);
   }
 
   ion-spinner {
