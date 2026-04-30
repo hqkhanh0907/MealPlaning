@@ -1,8 +1,10 @@
 # AI Strategy — HealthMate AI
 
-**Version:** 1.0  
-**Date:** 2026-04-15  
+**Version:** 1.1 (gram-only revision)  
+**Date:** 2026-04-30  
 **Status:** Active
+
+> **Revision 1.1 (2026-04-30) — Gram-only absolute.** Ba prompt template ingredient-level đã được rewrite: §3.1 (Image Analysis), §3.2 (Dish Auto-fill), §3.9 (Ingredient Lookup). Output chỉ chứa `gram_weight` cho ingredient amount và 5 macro per 100g cho nutrition. Không còn `unit_id`, `amount_value`, `display_unit`, `density_g_per_ml`, `factor_to_basis`, `units[]`, `nutrition_basis_unit`. Xem PRD §F-01 và `docs/4-architecture/business-rules.md` (RULE-DI-GRAM-01..05) để biết lý do.
 
 ---
 
@@ -81,7 +83,7 @@ User hiện tại:
 - Meal type: auto-detect theo giờ hoặc user chọn
 - DB ingredient names: danh sách tên nguyên liệu trong DB (để match)
 
-**Prompt:**
+**Prompt (gram-only revision):**
 ```
 Nhận diện tất cả món ăn trong ảnh này.
 
@@ -95,36 +97,37 @@ Trả JSON theo schema:
 {
   "dishes": [
     {
-      "name": string,          // Tên món tiếng Việt
+      "name": string,                  // Tên món tiếng Việt
       "ingredients": [
         {
-          "name": string,      // Tên nguyên liệu (match DB nếu có)
-          "amount_value": number,
-          "unit_id": string,
-          "display_unit": string,   // Ví dụ: "g", "ml", "quả", "muỗng canh"
-          "is_in_db": boolean  // true nếu match được với DB
+          "name": string,              // Tên nguyên liệu (match DB nếu có)
+          "gram_weight": number,       // Lượng GRAM ước tính (luôn là gram)
+          "is_in_db": boolean          // true nếu match được với DB
         }
       ],
-      "total_calories": number,
+      "total_calories": number,        // Chỉ để preview, KHÔNG persist (xem RULE-DISH-TOTAL)
       "total_protein": number,
       "total_carbs": number,
       "total_fat": number,
-      "confidence": number     // 0.0-1.0
+      "confidence": number             // 0.0-1.0
     }
   ],
-  "meal_comment": string       // Nhận xét ngắn theo tone {user_level}
+  "meal_comment": string               // Nhận xét ngắn theo tone {user_level}
 }
 
-Nếu ảnh mờ hoặc không rõ, vẫn trả best-guess với confidence thấp.
-Nếu không phải đồ ăn, trả dishes: [].
+Rules:
+- Ước tính LUÔN bằng gram. Không trả unit khác (quả/cup/muỗng).
+- Liquid (sữa, dầu, nước chấm): cũng quy về gram. Quy ước: 1 ml ≈ 1 g cho nước; sữa 1.03 g/ml; dầu 0.92 g/ml.
+- Nếu ảnh mờ hoặc không rõ, vẫn trả best-guess với confidence thấp.
+- Nếu không phải đồ ăn, trả dishes: [].
 ```
 
 **Post-processing:**
 1. Lấy ingredient names từ response
 2. Match với DB local (tìm theo tên, fuzzy match)
-3. Nếu match: dùng nutrition data từ DB (chính xác hơn)
+3. Nếu match: dùng nutrition data từ DB (chính xác hơn). Total nutrition tính lại từ VIEW `dish_with_totals`.
 4. Nếu không match: hỏi user "Lưu nguyên liệu mới X?"
-5. Tạo dish (type: `ai_autofill`) + dish_ingredient
+5. Tạo dish (type: `ai_autofill`) + dish_ingredient (chỉ `gram_weight`)
 6. User review → sửa nếu sai → Confirm → Lưu vào planned_dish
 
 ---
@@ -137,9 +140,9 @@ Nếu không phải đồ ăn, trả dishes: [].
 - Tên món: user input
 - DB ingredient names: danh sách nguyên liệu trong DB
 
-**Prompt:**
+**Prompt (gram-only revision):**
 ```
-Cho món "{dish_name}", liệt kê nguyên liệu thông dụng và số lượng cho 1 phần ăn.
+Cho món "{dish_name}", liệt kê nguyên liệu thông dụng cho 1 phần ăn.
 
 Danh sách nguyên liệu trong database (ưu tiên match):
 {db_ingredient_names}
@@ -150,19 +153,22 @@ Trả JSON:
   "servings": 1,
   "ingredients": [
     {
-      "name": string,          // Ưu tiên match DB
-      "amount_value": number,
-      "unit_id": string,
-      "display_unit": string,  // Ví dụ: "g", "ml", "quả", "muỗng canh"
+      "name": string,                  // Ưu tiên match DB
+      "gram_weight": number,           // Lượng GRAM (luôn là gram, 0.1–10000)
       "is_in_db": boolean
     }
   ]
 }
+
+Rules:
+- LUÔN trả gram. Không có unit nào khác (không cup, không muỗng, không quả).
+- Liquid quy về gram bằng quy ước 1 ml ≈ 1 g cho nước (sữa/dầu xấp xỉ).
+- Không trả total nutrition — app sẽ tính từ ingredient nutrition canonical trong DB.
 ```
 
-**Post-processing:** Tương tự Image Analysis — match DB → hỏi user ingredient mới → tạo dish (`type = 'ai_autofill'`, `source = 'ai'`) + dish_ingredient rows.
+**Post-processing:** Tương tự Image Analysis — match DB → hỏi user ingredient mới → tạo dish (`type = 'ai_autofill'`, `source = 'ai'`) + dish_ingredient rows (chỉ `gram_weight`).
 
-> **Lưu ý kiến trúc (RULE-DISH-TOTAL-04):** AI auto-fill **CHỈ** trả về danh sách ingredient + amount. App **không bao giờ** persist total nutrition do AI tự sinh ra. Total nutrition của dish được tính derived từ `dish_with_totals` VIEW dựa trên ingredient nutrition canonical trong DB (tham khảo `docs/4-architecture/business-rules.md`). Nếu prompt tương lai có trường `total_*` thì phải bị strip khi lưu.
+> **Lưu ý kiến trúc (RULE-DISH-TOTAL-04):** AI auto-fill **CHỈ** trả về danh sách ingredient + `gram_weight`. App **không bao giờ** persist total nutrition do AI tự sinh ra. Total nutrition của dish được tính derived từ `dish_with_totals` VIEW dựa trên ingredient nutrition canonical trong DB (tham khảo `docs/4-architecture/business-rules.md`). Nếu prompt tương lai có trường `total_*` thì phải bị strip khi lưu.
 
 ---
 
@@ -421,55 +427,35 @@ Rules:
 
 **Input:**
 - Tên nguyên liệu: user input (VD "ức gà", "gạo trắng")
-- Locale: `vi-VN` (ưu tiên định danh tiếng Việt + unit mặc định tự nhiên)
+- Locale: `vi-VN` (ưu tiên định danh tiếng Việt)
 
-**Prompt:**
+**Prompt (gram-only revision):**
 ```
 Tra cứu thông tin dinh dưỡng canonical cho nguyên liệu "{ingredient_name}".
 
 Rules về basis:
-- Nguyên liệu rắn: trả nutrition theo `100g`
-- Nguyên liệu lỏng: trả nutrition theo `100ml`
-- Mỗi ingredient chỉ có 1 nutrition basis authoritative
-- AI phải trả danh sách `units[]` có thể nhập cho ingredient
-- Nếu có unit khác dimension với basis:
-  - ưu tiên factor curated trong `ingredient_unit`
-  - nếu không có thì mới dùng `density_g_per_ml`
-  - nếu vẫn không có thì không được bịa; loại unit đó khỏi output hoặc giảm confidence
-- Unit ước lượng (`pinch`, `bunch`, ...) được phép nếu có factor rõ ràng; phải gắn cờ approximate
+- LUÔN trả nutrition theo per 100 gram (cả nguyên liệu rắn lẫn lỏng).
+- Với liquid (sữa, dầu, nước chấm): tự quy đổi về 100g bằng quy ước 1ml ≈ 1g cho nước; sữa ~1.03 g/ml; dầu ~0.92 g/ml. Không trả per 100ml.
 
 Trả JSON:
 {
-  "name": string,              // Chuẩn hóa tên tiếng Việt
-  "category": string,          // Ví dụ: "Thịt", "Ngũ cốc", "Trứng & Sữa"
-  "nutrition_basis_unit": "g" | "ml",
-  "nutrition_basis_quantity": 100,
-  "calories": number,
-  "protein": number,
-  "carbs": number,
-  "fat": number,
-  "fiber": number,
-  "density_g_per_ml": number | null,
-  "units": [
-    {
-      "unit_id": string,
-      "display_label": string | null,
-      "factor_to_basis": number,
-      "is_default": boolean,
-      "is_approximate": boolean
-    }
-  ],
-  "confidence": "high" | "medium" | "low",  // Độ tin cậy của AI
-  "note": string               // Ghi chú nếu cần (VD: "đã nấu chín", "raw")
+  "name": string,                  // Chuẩn hóa tên tiếng Việt
+  "category": string,              // Ví dụ: "Thịt", "Ngũ cốc", "Trứng & Sữa"
+  "calories": number,              // kcal per 100g
+  "protein": number,               // g per 100g
+  "carbs": number,                 // g per 100g
+  "fat": number,                   // g per 100g
+  "fiber": number,                 // g per 100g
+  "confidence": "high" | "medium" | "low",
+  "note": string                   // Ghi chú nếu cần (VD: "đã nấu chín", "raw")
 }
 
 Rules:
 - Nếu tên mơ hồ (VD "thịt") → confidence: "low" + note yêu cầu rõ
 - Phase 1 ưu tiên USDA làm nutrition authority chính ở mức ingredient-level
 - Nguồn phụ tiếng Việt chỉ dùng để hỗ trợ naming/alias hoặc fill gap sau khi review thủ công
-- Không được bịa `density_g_per_ml` hoặc `factor_to_basis`
-- Nếu không xác định chắc conversion cho một unit → bỏ unit đó khỏi `units[]` hoặc hạ confidence
 - KHÔNG được bịa số — nếu không chắc, confidence: "low"
+- KHÔNG trả unit/measurement/density/conversion. Schema chỉ có 5 macro per 100g.
 ```
 
 **Post-processing:**

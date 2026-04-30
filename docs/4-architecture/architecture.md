@@ -1,8 +1,10 @@
 # Software Architecture Document (SAD) — HealthMate AI
 
-**Version:** 1.0  
-**Date:** 2026-04-14  
+**Version:** 1.1 (gram-only revision)  
+**Date:** 2026-04-30  
 **Status:** Active
+
+> **Revision 1.1 (2026-04-30) — Gram-only absolute.** Folder structure (§4) đã loại `unit-resolver.ts`, `unit.repository.ts`, `ingredient-unit.repository.ts`. Code example IngredientRepository (§ Data Access Pattern) cập nhật cột bảng `ingredient` theo schema mới — chỉ còn `calories_per_100g`, `protein_g_per_100g`, `carbs_g_per_100g`, `fat_g_per_100g`, `fiber_g_per_100g`. Bỏ tất cả tham chiếu `nutrition_basis_unit`, `default_entry_unit`, `grams_per_unit`, `ml_per_unit`.
 
 ---
 
@@ -122,17 +124,14 @@ src/
     │   │   │   ├── migrations.ts                  # Versioned migrations (TypeScript inline, KHÔNG phải .sql riêng)
     │   │   │   ├── migration-runner.ts
     │   │   │   └── legacy-sqljs-migrator.ts       # Migrate dữ liệu từ legacy DB
-    │   │   ├── unit-resolver.ts                   # Pure function (không decorator → không suffix)
-    │   │   └── (3 service khác có suffix .service.ts)
-    │   ├── repositories/                          # 5 file .repository.ts
+    │   │   └── (các service khác)
+    │   ├── repositories/                          # 3 file .repository.ts (gram-only revision)
     │   │   ├── ingredient.repository.ts
     │   │   ├── dish.repository.ts
-    │   │   ├── dish-ingredient.repository.ts
-    │   │   ├── unit.repository.ts
-    │   │   └── ingredient-unit.repository.ts
+    │   │   └── dish-ingredient.repository.ts
     │   ├── stores/                                # 3 file .store.ts (ingredient, dish, profile)
     │   ├── models/
-    │   │   ├── management.model.ts                # Gộp ingredient/dish/unit/dish-ingredient
+    │   │   ├── management.model.ts                # Gộp ingredient/dish/dish-ingredient (no unit)
     │   │   ├── management.types.ts
     │   │   ├── management.constants.ts
     │   │   └── user-profile.model.ts
@@ -381,26 +380,20 @@ export class IngredientRepository {
     const id = crypto.randomUUID();
     await this.db.execute(
       `INSERT INTO ingredient (
-         id, name, category,
-         nutrition_basis_unit, nutrition_basis_quantity,
-         calories, protein, carbs, fat, fiber,
-         default_entry_unit, grams_per_unit, ml_per_unit,
+         id, name, category, emoji,
+         calories_per_100g, protein_g_per_100g, carbs_g_per_100g, fat_g_per_100g, fiber_g_per_100g,
          source
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         data.name,
         data.category,
-        data.nutrition_basis_unit,
-        data.nutrition_basis_quantity,
-        data.calories,
-        data.protein,
-        data.carbs,
-        data.fat,
-        data.fiber,
-        data.default_entry_unit,
-        data.grams_per_unit ?? null,
-        data.ml_per_unit ?? null,
+        data.emoji ?? null,
+        data.calories_per_100g,
+        data.protein_g_per_100g,
+        data.carbs_g_per_100g,
+        data.fat_g_per_100g,
+        data.fiber_g_per_100g ?? null,
         data.source,
       ]
     );

@@ -1,8 +1,10 @@
 # Development Plan — HealthMate AI
 
-**Version:** 1.0
-**Date:** 2026-04-18
+**Version:** 1.1 (gram-only revision)
+**Date:** 2026-04-30
 **Status:** Active
+
+> **Revision 1.1 (2026-04-30) — Gram-only absolute.** Phase 1.5A (Pantry & Measurement) đã bị loại bỏ hoàn toàn. Roadmap còn 6 phase: 1 → 1.5B → 2 → 3 → 4 → 5 → 6. Xem PRD §F-01 và `docs/4-architecture/business-rules.md` để biết lý do.
 
 ---
 
@@ -105,7 +107,7 @@ AI features split 2 phases:
 | Phase | Tên | Features | Shared platform built | Deliverable |
 |-------|-----|----------|----------------------|-------------|
 | **1** | Management (dish-first) | F-01, F-02 (phần non-AI) | IngredientRepo, DishRepo, DishIngredientRepo, stores, migration system, seed data loader | User mở Quản lý thấy Món ăn trước; tạo/sửa món ingredient-based; tạo nhanh nguyên liệu khi thiếu; có Thư viện nguyên liệu hỗ trợ |
-| **1.5A** | Pantry & Measurement | F-02.5 Pantry + Ingredient Measurement | StorageLocation/PantryItem target schema, ingredient measurement, missing-conversion UX, conversion snapshots | User quản lý nguyên liệu đang có, hạn dùng, vị trí, unit theo từng nguyên liệu/product; chưa cần barcode/AI |
+| ~~**1.5A**~~ | ~~Pantry & Measurement~~ | **Đã loại bỏ (gram-only revision 2026-04-30).** F-02.5 không còn nằm trong roadmap. | — | — |
 | **1.5B** | AI Foundation | F-01 AI Lookup + F-02 AI Auto-fill | GeminiService (HTTP, retry, error handling), prompt template executor, AI error UI | F-01/F-02 complete-done với AI; infra sẵn cho các AI features sau |
 | **2** | Calendar & Tracking | F-03, F-04 | DayPlanRepo, MealSlotRepo, PlannedDishRepo, daily summary computation, AI Meal Plan templates (day+week, dùng Phase 1.5B infra) | User lên kế hoạch bữa ăn + track macro hàng ngày + AI meal plan |
 | **3** | Dashboard | F-12 | Dashboard store, shared macro/progress components | User có màn tổng quan: nutrition + streak + weight |
@@ -137,23 +139,9 @@ AI features split 2 phases:
 
 ---
 
-### Phase 1.5A: Pantry & Measurement (F-02.5)
+### ~~Phase 1.5A: Pantry & Measurement (F-02.5)~~ — Đã loại bỏ
 
-**Dependencies:** Phase 1 (ingredient + dish foundation).
-
-**Features:**
-- Pantry list/add stock: quản lý nguyên liệu đang có, số lượng, vị trí, hạn dùng.
-- Ingredient Measurement: conversion theo từng nguyên liệu/product/state/size cho `quả/trái/củ/tép/cup/tbsp/tsp/pack/bottle/serving`.
-- Gross vs edible handling: nutrition tính trên phần ăn được.
-- Missing conversion UX: hỏi user một câu cụ thể, lưu snapshot hoặc reusable measurement.
-
-**Shared platform built trong phase này:**
-- Target schema: `ingredient_variant`, `ingredient_measurement`, `storage_location`, `pantry_item`, optional `data_source`.
-- Resolver upgrade: returns resolved/needs-conversion state, not silent fallback.
-- Conversion snapshot model for pantry item and future recipe/dish line.
-- Mockup source: Chưa viết (tạo khi bắt đầu Phase 1.5A; tham chiếu schema canonical `docs/3-design/data-model.md` §4.0c).
-
-**Deliverable:** User thêm được nguyên liệu đang có vào kho, thấy hạn dùng/vị trí, nhập unit đời thực và preview dinh dưỡng sau khi app resolve conversion.
+> **Gram-only revision (2026-04-30).** Phase 1.5A đã bị loại bỏ hoàn toàn. F-02.5 không còn nằm trong PRD. Các target schema (`ingredient_variant`, `ingredient_measurement`, `storage_location`, `pantry_item`, `data_source`) đã bị xoá khỏi data-model.md. Tab Quản lý chỉ là catalog (ingredient + dish), không có pantry/measurement.
 
 ---
 

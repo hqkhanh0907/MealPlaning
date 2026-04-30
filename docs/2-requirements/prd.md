@@ -1,8 +1,10 @@
 # Product Requirements Document (PRD) — HealthMate AI
 
-**Version:** 1.0  
-**Date:** 2026-04-13  
+**Version:** 1.1 (gram-only revision)  
+**Date:** 2026-04-30  
 **Status:** Active
+
+> **Revision 1.1 (2026-04-30) — Gram-only absolute.** F-02.5 (Kho nguyên liệu & Measurement Layer) đã bị loại bỏ hoàn toàn. F-01 và F-02 đã được rewrite theo triết lý gram-only: mọi lượng là gram, mọi nutrition theo `100g`, không modifier, không edible yield, không density, không snapshot, không pantry. Xem F-01 §"Triết lý gram-only" để biết lý do và trade-off. Mockup cũ tham chiếu F-02.5 đã bị deprecate, sẽ refactor trong scope mockup phase-1.
 
 ---
 
@@ -33,82 +35,72 @@ Tài liệu này mô tả chi tiết **13 features** của HealthMate AI V1, bao
 
 ### F-01: Thư viện Nguyên liệu
 
-**Mô tả:** Quản lý thư viện nguyên liệu với thông tin dinh dưỡng canonical theo `100g` hoặc `100ml`. Đây là dữ liệu nền để tính calo cho món ăn, nhưng **không phải entry flow chính trong tab Quản lý**. UX mặc định của `Quản lý` là `Món ăn`; nguyên liệu chủ yếu được chọn/tạo nhanh trong ngữ cảnh tạo món và chỉ vào `Thư viện nguyên liệu` khi cần xem, sửa sai hoặc bảo trì dữ liệu.
+**Mô tả:** Quản lý thư viện nguyên liệu với thông tin dinh dưỡng canonical **theo `100g`**. Đây là dữ liệu nền để tính calo cho món ăn, nhưng **không phải entry flow chính trong tab Quản lý**. UX mặc định của `Quản lý` là `Món ăn`; nguyên liệu chủ yếu được chọn/tạo nhanh trong ngữ cảnh tạo món và chỉ vào `Thư viện nguyên liệu` khi cần xem, sửa sai hoặc bảo trì dữ liệu.
+
+**Triết lý gram-only (chốt 2026-04-30):**
+
+- **Mọi lượng đều là gram.** App không có đơn vị nào khác (không `quả`, `cup`, `tbsp`, `ml`, `pack`, `serving`). Mọi input và mọi output đều là gram.
+- **Mọi nutrition đều theo `100g`.** Không có `100ml`, không có per-piece, không có per-serving.
+- **Không modifier.** 1 ingredient = 1 bộ nutrition. Nếu user muốn track "Khoai tây chiên" khác với "Khoai tây luộc", tạo ingredient riêng.
+- **Không edible yield, không density, không snapshot.** User tự cân phần ăn được (gram). Tính realtime từ nutrition hiện tại của ingredient.
+- **Không pantry/inventory.** Tab Quản lý chỉ là catalog (ingredient + recipe). Không track tồn kho, HSD, vị trí lưu.
+- **Lý do:** giảm friction, schema phẳng nhất, UI ít field nhất, tránh bài toán quy đổi đơn vị per-ingredient (impossible to maintain accurate). Trade-off chấp nhận: user tự đoán "1 quả ~?g" hoặc dùng cân điện tử.
 
 **Chức năng chi tiết:**
 
 | Chức năng | Mô tả |
 |-----------|-------|
 | **Xem danh sách** | Hiển thị tất cả nguyên liệu, hỗ trợ tìm kiếm, sắp xếp theo tên/nhóm. Tap card mở màn chi tiết/read-only trước, không mở form sửa trực tiếp. |
-| **Thêm vào thư viện** | Form nhập: tên, category, calories/protein/carbs/fat/fiber + nutrition basis (`100g` hoặc `100ml`) + danh sách unit hợp lệ (`ingredient_unit[]`) + default unit. Đây là advanced/supporting flow; user thường tạo nguyên liệu từ flow tạo món. |
+| **Thêm vào thư viện** | Form nhập: tên, category, calories/protein/carbs/fat/fiber per `100g`. Đây là advanced/supporting flow; user thường tạo nguyên liệu từ flow tạo món. |
 | **Tạo nhanh trong món** | Khi tạo/sửa món và search không có nguyên liệu, user có thể tạo nhanh nguyên liệu rồi `Lưu và thêm vào món`. Nguyên liệu mới vẫn được lưu vào thư viện để sửa lại sau. |
-| **Sửa** | Chỉnh sửa thông tin nguyên liệu đã thêm từ màn chi tiết bằng CTA `Sửa thông tin`. V1 là sửa global; nếu nguyên liệu đang được dùng trong món, UI phải cảnh báo tổng calories/macro của các món liên quan có thể thay đổi trước khi vào form sửa hoặc trước khi lưu. |
+| **Sửa** | Chỉnh sửa thông tin nguyên liệu đã thêm từ màn chi tiết bằng CTA `Sửa thông tin`. V1 là sửa global; nếu nguyên liệu đang được dùng trong món, UI phải cảnh báo tổng calories/macro của các món liên quan sẽ thay đổi (vì nutrition tính realtime, không snapshot). |
 | **Xóa** | Xóa nguyên liệu nếu chưa được dùng; nếu đang dùng trong món thì chặn xóa và hiển thị danh sách/đếm số món liên quan. |
-| **AI Lookup** | Nhập tên nguyên liệu → AI tra cứu thông tin dinh dưỡng → user confirm |
-| **Vietnamese Core Seed** | App ship sẵn dataset nền cho **20 món Việt curated** (6 sáng / 7 trưa / 7 tối), không gồm snack |
-| **Measurement layer (Phase 1.5A)** | Mở rộng `ingredient_unit` thành measurement theo từng nguyên liệu/trạng thái/size để xử lý `quả`, `trái`, `củ`, `tép`, `cup`, `tbsp`, `tsp`, `pack`, `bottle`, `serving`; không dùng conversion global cho các unit này. |
+| **AI Lookup** | Nhập tên nguyên liệu → AI tra cứu kcal/P/C/F per 100g → user confirm. AI **không** trả về unit conversion, density, hay edible yield. |
+| **Vietnamese Core Seed** | App ship sẵn dataset nền cho **20 món Việt curated** (6 sáng / 7 trưa / 7 tối), không gồm snack. Mọi seed ingredient đã chuẩn hoá về kcal/100g. |
 
 **Dữ liệu nguyên liệu:**
 
 ```
 Ingredient {
-  id: string
+  id: string                      // UUID v4
   name: string                    // "Ức gà"
   category: string                // "Thịt"
-  nutrition_basis_unit: 'g' | 'ml'
-  nutrition_basis_quantity: 100
-  calories: number                // 165
-  protein: number                 // 31
-  carbs: number                   // 0
-  fat: number                     // 3.6
-  fiber: number                   // 0
-  density_g_per_ml?: number       // Optional bridge giữa g và ml khi có nguồn đáng tin
-  units: IngredientUnit[]         // Danh sách unit có thể nhập cho ingredient này
+  calories: number                // kcal per 100g, vd 165
+  protein: number                 // g per 100g, vd 31
+  carbs: number                   // g per 100g, vd 0
+  fat: number                     // g per 100g, vd 3.6
+  fiber: number                   // g per 100g, vd 0
   source: 'manual' | 'ai' | 'db' // Nguồn dữ liệu
   created_at: timestamp
   updated_at: timestamp
 }
-
-IngredientUnit {
-  unit_id: string                 // 'g', 'tbsp', 'piece', 'clove'...
-  display_label?: string          // "quả", "tép", "củ"
-  factor_to_basis: number         // 1 unit = ? basis unit của ingredient
-  is_default: boolean
-  is_approximate?: boolean
-}
 ```
 
-> Rule: macro values luôn canonical theo `100g` hoặc `100ml`. Unit nhập liệu chỉ là layer conversion về canonical basis. Nếu unit khác dimension với basis thì phải có `ingredient_unit.factor_to_basis` hoặc `density_g_per_ml`; nếu không thì reject.
-> Phase 1 cho phép một số `Ingredient` đóng vai trò **composite ingredient** cho nước dùng / nước chấm / base canh nếu cần để giữ seed dataset gọn và nhất quán.
-> Approximate unit (VD `pinch`, `bunch`) được phép trong Phase 1 nhưng UI phải hiển thị dấu `≈` / nhãn `ước lượng`.
-> `Ingredient.source` dùng để phân biệt provenance: seed mặc định = `db`, user tự tạo/sửa ingredient = `manual`, AI lookup tạo ingredient = `ai`. Khi user sửa một seed ingredient, record đó đổi từ `db` sang `manual`. Khi user sửa một AI-lookup ingredient, record đó đổi từ `ai` sang `manual`.
-> **AI Lookup duplicate handling:** Trước khi insert, app kiểm tra tên ingredient trùng/gần giống trong DB. Nếu trùng → cảnh báo user + cho chọn: cập nhật ingredient cũ hoặc tạo mới.
-> **Management UX principle:** Tab `Quản lý` mở `Món ăn` trước. Segment order là `Món ăn | Thư viện nguyên liệu`. `Thư viện nguyên liệu` là supporting library/master data, không phải bước bắt buộc trước khi tạo món.
-> **Ingredient library edit principle:** Tap nguyên liệu trong `Thư viện nguyên liệu` phải mở detail/read-only trước để user thấy dinh dưỡng, đơn vị thường dùng và món đang dùng. Chỉ khi user bấm `Sửa thông tin` mới mở form sửa. V1 `Sửa nguyên liệu` là sửa global; dish totals sẽ derive lại từ `dish_with_totals`, nên referenced ingredient phải có impact warning.
-> **Measurement specificity principle (Phase 1.5A):** Global conversion chỉ an toàn cho true mass/volume (`g`, `kg`, `ml`, `l`). Các unit `piece/quả/trái/củ/tép`, cooking volume khi cần gram (`cup`, `tbsp`, `tsp`), package (`pack`, `bottle`) và `serving` phải có conversion theo từng ingredient/product/state/size. Nếu thiếu conversion, UI phải hỏi user một câu cụ thể thay vì tự đoán.
-> **Gross vs edible principle (Phase 1.5A):** Nutrition luôn tính trên phần ăn được (`edible amount`). Nếu input là gross weight (ví dụ 1 trái dưa hấu có vỏ, khoai tây trước khi gọt), hệ thống phải có `edible_yield_ratio` hoặc hỏi user trước khi tính dinh dưỡng authoritative.
+> **Canonical rule:** Mọi macro luôn per `100g`. Không có basis nào khác. Liquid (sữa, dầu, nước chấm) cũng tính theo gram (1ml ≈ 1g cho nước; user tự cân hoặc estimate cho liquid khác).
+> **Phase 1 cho phép composite ingredient** cho nước dùng / nước chấm / base canh nếu cần để giữ seed dataset gọn — chúng vẫn tuân thủ kcal/100g.
+> `Ingredient.source` dùng để phân biệt provenance: seed mặc định = `db`, user tự tạo/sửa = `manual`, AI lookup tạo = `ai`. Khi user sửa seed/AI ingredient, record đổi sang `manual`.
+> **AI Lookup duplicate handling:** Trước khi insert, app kiểm tra tên trùng/gần giống. Nếu trùng → cảnh báo + cho chọn: cập nhật cũ hoặc tạo mới.
+> **Management UX principle:** Tab `Quản lý` mở `Món ăn` trước. Segment order: `Món ăn | Thư viện nguyên liệu`. `Thư viện nguyên liệu` là supporting master data.
+> **Ingredient library edit principle:** Tap nguyên liệu mở detail/read-only trước. Chỉ khi bấm `Sửa thông tin` mới vào form. V1 sửa global; vì không snapshot nên dish totals và meal log đã ghi sẽ tự cập nhật theo — UI cảnh báo trước khi save.
 
 **Tiêu chí chấp nhận:**
 - [ ] CRUD hoạt động đúng, data persist sau restart
 - [ ] Tìm kiếm real-time theo tên
-- [ ] AI lookup trả về kết quả và user có thể sửa trước khi lưu
+- [ ] AI lookup trả về kết quả (kcal/P/C/F per 100g) và user có thể sửa trước khi lưu
 - [ ] Core Vietnamese seed dataset hỗ trợ 20 món Việt curated (6 sáng / 7 trưa / 7 tối), không gồm snack
+- [ ] Không có UI nào cho phép nhập đơn vị khác gram (no unit picker, no measurement, no size, no modifier)
 
 **Validation rules (Phase 1):**
 
 | Field | Required | Min | Max | Default | Notes |
 |-------|:--------:|-----|-----|---------|-------|
-| `name` | ✅ | 1 char | 100 chars | — | — |
+| `name` | ✅ | 1 char | 100 chars | — | Unique check (case-insensitive) khi tạo mới |
 | `category` | ✅ | — | — | — | Từ enum chuẩn (xem danh sách bên dưới) |
-| `calories` | ✅ | 0 | 2000 | — | per 100g/ml |
-| `protein` | — | 0 | 100 | 0 | g per 100g/ml |
-| `carbs` | — | 0 | 100 | 0 | g per 100g/ml |
-| `fat` | — | 0 | 100 | 0 | g per 100g/ml |
-| `fiber` | — | 0 | 100 | 0 | g per 100g/ml |
-| `density_g_per_ml` | Optional | 0.001 | 10 | — | Chỉ dùng làm fallback bridge giữa g và ml khi có nguồn đáng tin |
-| `units[]` | ✅ | 1 item | — | — | Phải có ít nhất 1 unit hợp lệ; đúng 1 unit default |
-| `units[].factor_to_basis` | ✅ | 0.001 | 100000 | — | 1 unit = ? basis unit của ingredient |
-| `units[].is_approximate` | — | — | — | false | Nếu true, UI phải hiển thị `≈` / `ước lượng` |
+| `calories` | ✅ | 0 | 2000 | — | kcal per 100g |
+| `protein` | — | 0 | 100 | 0 | g per 100g |
+| `carbs` | — | 0 | 100 | 0 | g per 100g |
+| `fat` | — | 0 | 100 | 0 | g per 100g |
+| `fiber` | — | 0 | 100 | 0 | g per 100g |
 
 **Ingredient categories chuẩn (Phase 1):**
 
@@ -121,40 +113,46 @@ IngredientUnit {
 
 ### F-02: Quản lý Món ăn
 
-**Mô tả:** CRUD món ăn là flow chính của tab `Quản lý`. Mỗi món gồm danh sách nguyên liệu (với khối lượng) → dinh dưỡng tổng được **tính derived** từ nguyên liệu (single source of truth: SQL VIEW `dish_with_totals`). Không có cơ chế nhập tay total. Khi thiếu nguyên liệu, user tạo nhanh nguyên liệu ngay trong flow món và quay lại món với nguyên liệu vừa tạo được chọn sẵn.
+**Mô tả:** CRUD món ăn là flow chính của tab `Quản lý`. Mỗi món gồm danh sách nguyên liệu (với khối lượng **gram**) → dinh dưỡng tổng được **tính derived** từ nguyên liệu (single source of truth: SQL VIEW `dish_with_totals`). Không có cơ chế nhập tay total. Khi thiếu nguyên liệu, user tạo nhanh nguyên liệu ngay trong flow món và quay lại món với nguyên liệu vừa tạo được chọn sẵn.
+
+**Triết lý gram-only áp dụng cho món ăn:**
+
+- Mỗi `dish_ingredient` chỉ lưu **1 trường định lượng duy nhất: `gram_weight` (number, gram)**.
+- Không có `unit_id`, không có `amount_value`, không có `normalized_amount`/`normalized_unit`. UI không có unit picker.
+- Không có conversion snapshot, không có `applies_to`, không có `edible_yield_ratio`. Tính nutrition realtime: `gram_weight / 100 × ingredient.calories`.
+- Sửa nutrition của ingredient → mọi món tham chiếu sẽ cập nhật theo realtime (xem cảnh báo ở F-01 Sửa).
 
 **2 cách thêm món (V1):**
 
 | Cách | Mô tả | Khi nào dùng |
 |------|-------|-------------|
-| **Ingredient-based** | Chọn nguyên liệu + nhập số lượng theo unit hợp lệ của từng ingredient (`g`, `tbsp`, `piece`, `clove`, `pinch`...) → tự tính nutrition. Nếu nguyên liệu chưa có, tạo nhanh ngay trong flow món với CTA `Lưu và thêm vào món`. | Muốn chính xác, tự chọn |
-| **🤖 AI Auto-fill** | Nhập tên món → bấm AI → AI trả về nguyên liệu + khối lượng thông dụng → User confirm | Muốn chính xác nhưng không biết nguyên liệu |
+| **Ingredient-based** | Chọn nguyên liệu + nhập `gram_weight` → tự tính nutrition. Nếu nguyên liệu chưa có, tạo nhanh ngay trong flow món với CTA `Lưu và thêm vào món`. | Muốn chính xác, tự chọn |
+| **🤖 AI Auto-fill** | Nhập tên món → bấm AI → AI trả về nguyên liệu + gram thông dụng → User confirm | Muốn nhanh nhưng không biết nguyên liệu |
 
 > **Quick Add đã bị loại bỏ khỏi V1.** Mọi món ăn đều phải có danh sách `dish_ingredient`; total nutrition luôn derived từ ingredient (xem `docs/4-architecture/business-rules.md` — RULE-DISH-TOTAL).
-> **Missing conversion handling (Phase 1.5A):** Khi user nhập amount/unit mà resolver không convert được về `g/ml` canonical, app không được silent convert hoặc fallback `1g = 1ml`. UI phải hỏi conversion bằng ngôn ngữ đời thực, ví dụ “1 quả cà chua của bạn khoảng bao nhiêu gram?” với lựa chọn `Nhỏ / Vừa / Lớn / Tự nhập`.
-> **Conversion snapshot (Phase 1.5A):** Dòng nguyên liệu trong món/công thức nên lưu input gốc + normalized amount + snapshot conversion đã dùng (`quantity_per_unit`, `applies_to`, `edible_yield_ratio`, `confidence`, `version`) để tránh drift khi measurement master thay đổi sau này.
+> **Không có missing-conversion handling.** Vì mọi input là gram, không có khái niệm "thiếu conversion".
 
 **AI Auto-fill Flow:**
 
 ```
 1. User nhập tên món: "Phở bò"
 2. Bấm nút 🤖 AI
-3. AI trả về danh sách nguyên liệu thông dụng:
+3. AI trả về danh sách nguyên liệu thông dụng (gram):
    ┌────────────────────────────┐
    │ 🍜 Phở bò                  │
    │                            │
    │ Nguyên liệu AI gợi ý:     │
    │ ☑ Bánh phở    200g  190kcal│
    │ ☑ Thịt bò     100g  250kcal│
-   │ ☑ Giá đỗ      50g   15kcal │
-   │ ☑ Hành lá     10g    3kcal │
-   │ ☑ Nước dùng  300ml  30kcal │
+   │ ☑ Giá đỗ       50g   15kcal│
+   │ ☑ Hành lá      10g    3kcal│
+   │ ☑ Nước dùng   300g   30kcal│
    │────────────────────────────│
    │ Tổng: 488 kcal  |  28g pro │
    │                            │
    │ [Sửa] [✅ Lưu món + NL mới]│
    └────────────────────────────┘
-4. User review: sửa khối lượng, bỏ/thêm nguyên liệu
+4. User review: sửa gram, bỏ/thêm nguyên liệu
 5. Confirm → Lưu món
 6. Nếu có nguyên liệu mới (chưa có trong DB):
    → Hỏi: "Lưu 3 nguyên liệu mới vào DB chung?"
@@ -165,7 +163,7 @@ IngredientUnit {
 
 ```
 Dish {
-  id: string
+  id: string                         // UUID v4
   name: string                       // "Cơm gà xối mỡ"
   description?: string
   type: 'ingredient_based' | 'ai_autofill'
@@ -183,18 +181,15 @@ Dish {
 
 DishIngredient {
   ingredient_id: string
-  amount_value: number               // 150, 2, 300...
-  unit_id: string                    // 'g', 'tbsp', 'piece', 'clove', ...
-  normalized_amount: number          // Đã convert về basis unit của ingredient
-  normalized_unit: 'g' | 'ml'
+  gram_weight: number                // Bắt buộc, > 0, đơn vị duy nhất là gram
 }
 ```
 
 > Phase 1 cho phép `DishIngredient` trỏ tới ingredient thường hoặc composite ingredient đã curate sẵn cho broth/sauce/base.
 > Với 20 món seed của Phase 1, user sửa trực tiếp record seed gốc; app không tạo bản copy tự động trước khi sửa.
-> Khi app update, seeded dishes đã tồn tại trong DB không bị overwrite bởi seed artifact mới của Phase 1.
+> Khi app update, seeded dishes đã tồn tại trong DB không bị overwrite bởi seed artifact mới.
 > Seed dataset chỉ được nạp ở fresh install; các version sau không tự thêm lại seed đã bị xóa và cũng không tự thêm seed mới vào DB đã tồn tại.
-> `Dish.source` dùng để phân biệt provenance: seed mặc định = `db`, user tự tạo/sửa món = `custom`, AI tạo = `ai`. Khi user sửa một seed dish, record đó đổi từ `db` sang `custom`.
+> `Dish.source` dùng để phân biệt provenance: seed mặc định = `db`, user tự tạo/sửa = `custom`, AI tạo = `ai`. Khi user sửa seed dish, record đổi `db` → `custom`.
 
 **Validation rules — Dish (Phase 1):**
 
@@ -203,82 +198,23 @@ DishIngredient {
 | `dish.name` | ✅ | 1 char | 150 chars | — | — |
 | `dish.servings` | ✅ | 0.5 | 20 | 1 | — |
 | `dish.ingredients` | ✅ | 1 item | — | — | Phải có ít nhất 1 dish_ingredient (không cho lưu dish rỗng) |
-| `dish_ingredient.amount_value` | ✅ | 0.1 | 10000 | — | — |
+| `dish_ingredient.gram_weight` | ✅ | 0.1 | 10000 | — | Đơn vị gram, hỗ trợ 1 chữ số thập phân |
 
 **Tiêu chí chấp nhận:**
-- [ ] Ingredient-based: chọn nguyên liệu, nhập số lượng theo unit hợp lệ, tổng nutrition derived realtime từ VIEW
-- [ ] AI Auto-fill: nhập tên → AI trả về nguyên liệu → user confirm → lưu
+- [ ] Ingredient-based: chọn nguyên liệu, nhập gram_weight, tổng nutrition derived realtime từ VIEW
+- [ ] AI Auto-fill: nhập tên → AI trả về nguyên liệu + gram → user confirm → lưu
 - [ ] AI Auto-fill: nguyên liệu mới → hỏi user có lưu vào DB chung không
 - [ ] Hiển thị tổng nutrition mỗi món (đọc từ `dish_with_totals`)
 - [ ] Tìm kiếm món ăn theo tên
-- [ ] App ship sẵn 20 món Việt curated dưới dạng `1 serving` templates để user có dữ liệu nền ngay từ lần mở đầu tiên
+- [ ] App ship sẵn 20 món Việt curated dưới dạng `1 serving` templates
+- [ ] Form thêm/sửa món KHÔNG có unit picker, KHÔNG có size selector, KHÔNG có modifier picker
 
 ---
 
-### F-02.5: Kho nguyên liệu & Measurement Layer (Phase 1.5A)
-
-**Mô tả:** Bổ sung lớp quản lý nguyên liệu đang có trong nhà (pantry/stock) và lớp đo lường nguyên liệu giàu hơn để xử lý chính xác count unit, cooking unit, package/serving unit, gross weight và edible weight. Đây là extension trước khi implement barcode/product import hoặc AI nâng cao; runtime code chưa được sửa trong tài liệu này.
-
-**Lý do:** F-01/F-02 hiện đủ cho Phase 1 dish-first, nhưng chưa đáp ứng đầy đủ các case hằng ngày như “4 quả cà chua trong tủ lạnh”, “1 trái dưa hấu 5kg gross, ăn được 60%”, “1 cup bột mì khác 1 cup sữa”, “1 serving theo bao bì”.
-
-**Chức năng chi tiết:**
-
-| Chức năng | Mô tả |
-|---|---|
-| **Pantry list** | Hiển thị nguyên liệu/product đang có, số lượng còn lại, vị trí lưu trữ (`Tủ lạnh`, `Tủ đông`, `Kệ bếp`), hạn dùng và cảnh báo sắp hết hạn. |
-| **Add stock** | Thêm nguyên liệu bằng search, scan barcode (future), chọn từ DB hoặc manual input; lưu input gốc + normalized edible quantity. |
-| **Ingredient measurement** | Quản lý conversion theo từng ingredient/product/state/size: `1 quả cà chua vừa ≈ 120g`, `1 cup bột mì ≈ 120g`, `1 chai sữa = 1000ml`. |
-| **Gross/edible handling** | Phân biệt gross amount và edible amount; nếu nguyên liệu có vỏ/xương/hao hụt, dùng `edible_yield_ratio`. |
-| **Missing conversion** | Nếu user nhập unit chưa có conversion, UI hỏi một câu cụ thể và cho chọn “chỉ dùng lần này” hoặc “nhớ cho sau”. |
-| **Nutrition preview** | Sau khi nhập amount/unit, preview kcal/protein/carbs/fat theo normalized edible amount trước khi save. |
-| **Snapshot** | Pantry item / recipe line / meal log lưu conversion snapshot; meal/food log lịch sử lưu nutrition snapshot. |
-
-**Data target:**
-
-```ts
-IngredientMeasurement {
-  ingredient_id: string
-  variant_id?: string
-  unit_id: string                         // piece, cup, tbsp, serving, pack...
-  display_label?: string                  // "quả vừa", "cup bột mì"
-  size_option?: 'small' | 'medium' | 'large' | 'custom' | 'not_applicable'
-  quantity_per_unit: number               // 1 unit = ?
-  quantity_unit_id: 'g' | 'ml'
-  applies_to: 'gross' | 'edible'
-  edible_yield_ratio?: number             // 0..1 nếu applies_to = gross
-  is_default: boolean
-  is_approximate: boolean
-  confidence: 'verified' | 'estimated' | 'user_custom'
-  version: number
-}
-
-PantryItem {
-  ingredient_variant_id?: string
-  product_id?: string
-  input_quantity_value: number
-  input_unit_id: string
-  storage_location_id: string
-  expiry_date?: string
-  gross_quantity?: number
-  edible_quantity?: number
-  remaining_edible_quantity?: number
-  conversion_snapshot_json: string
-}
-```
-
-**Acceptance criteria (Phase 1.5A):**
-
-- [ ] User xem được pantry theo vị trí lưu trữ và hạn dùng.
-- [ ] User thêm stock bằng search/chọn ingredient có sẵn; manual create chỉ là fallback.
-- [ ] User nhập `g/kg/ml/l` bằng global conversion an toàn.
-- [ ] User nhập `quả/trái/củ/tép/cup/tbsp/tsp/pack/bottle/serving` chỉ khi có ingredient/product-specific measurement.
-- [ ] Nếu thiếu conversion, UI hỏi weight/size/yield trước khi tính nutrition.
-- [ ] Cà chua, trứng, dưa hấu, khoai tây, bột mì, sữa có example measurement rõ.
-- [ ] Pantry item lưu input gốc + normalized edible quantity + conversion snapshot.
-- [ ] Recipe line preview nutrition theo normalized edible amount.
-- [ ] Food log/meal history dùng nutrition snapshot để không drift khi ingredient/measurement đổi sau này.
-
-**Mockup spec:** Chưa viết (Phase 1.5A chưa implement). Khi bắt đầu Phase 1.5A, tạo mockup mới dựa trên schema canonical trong `docs/3-design/data-model.md` §4.0c (`ingredient_measurement`) + business rule (RULE-MEASUREMENT, RULE-PANTRY-STOCK, RULE-CS-01/02) trong `docs/4-architecture/business-rules.md`.
+<!-- F-02.5 (Kho nguyên liệu & Measurement Layer) đã bị loại bỏ ngày 2026-04-30. -->
+<!-- Lý do: chuyển sang triết lý gram-only absolute (xem F-01). Pantry, measurement, -->
+<!-- gross/edible, missing-conversion, snapshot — tất cả đều bị bỏ. Tab Quản lý chỉ -->
+<!-- là catalog (ingredient + recipe). -->
 
 ---
 
@@ -349,6 +285,8 @@ PlannedDish {
   is_completed: boolean           // Đã ăn bữa này chưa
 }
 ```
+
+> **Realtime nutrition (gram-only revision 2026-04-30):** `MealSlot.total_calories` và `DayPlan.total_calories` luôn derived realtime từ `dish_with_totals` × `PlannedDish.servings`. Không snapshot. Nếu user sửa nutrition của ingredient thì lịch sử meal log cập nhật theo. Đây là trade-off chấp nhận — đổi lấy schema phẳng và logic đơn giản.
 
 **Tiêu chí chấp nhận:**
 - [ ] Week view hiện 7 ngày với color indicator
@@ -867,6 +805,9 @@ Bước 2: Thông tin cơ bản
 | AI Image response | ≤ 5 giây |
 | Dashboard scroll | ≥ 60fps |
 | APK size | ≤ 30MB |
+| DB size sau 1 năm sử dụng | ≤ 20MB (gram-only schema phẳng — không snapshot, không pantry, không measurement table) |
+
+> **Storage note (gram-only revision 2026-04-30):** Schema sau revision có 4 entity chính (ingredient · dish · dish_ingredient · meal_log). Mỗi `dish_ingredient` chỉ 2 trường định lượng (`gram_weight`); mỗi `meal_log_item` chỉ 1 trường (`gram_weight`). Không có cột JSON snapshot, không có conversion table. Storage cost giảm ~40-60% so với spec Phase 1.5A trước đó.
 
 ### 7.3 Data Privacy
 
