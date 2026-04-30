@@ -1,4 +1,4 @@
-import { normalize } from './fuzzy-match';
+import { normalize, levenshtein } from './fuzzy-match';
 
 describe('fuzzy-match — normalize', () => {
   it('lowercases ASCII string', () => {
@@ -25,5 +25,46 @@ describe('fuzzy-match — normalize', () => {
 
   it('returns empty string for empty input', () => {
     expect(normalize('')).toBe('');
+  });
+});
+
+describe('fuzzy-match — levenshtein (early-exit ≤2)', () => {
+  it('returns 0 for equal strings', () => {
+    expect(levenshtein('abc', 'abc')).toBe(0);
+    expect(levenshtein('', '')).toBe(0);
+  });
+
+  it('returns 1 for single insert', () => {
+    expect(levenshtein('abc', 'abcd')).toBe(1);
+  });
+
+  it('returns 1 for single delete', () => {
+    expect(levenshtein('abcd', 'abc')).toBe(1);
+  });
+
+  it('returns 1 for single substitution', () => {
+    expect(levenshtein('abc', 'abd')).toBe(1);
+  });
+
+  it('returns 2 for distance exactly 2 (boundary)', () => {
+    expect(levenshtein('abc', 'aXY')).toBe(2);
+    expect(levenshtein('hanh la', 'hanh las')).toBe(1);
+    expect(levenshtein('hanh la', 'hanh laa')).toBe(1);
+  });
+
+  it('returns 3 for any distance > 2 (early-exit)', () => {
+    expect(levenshtein('abc', 'xyz')).toBe(3);
+    expect(levenshtein('', 'abc')).toBe(3);
+    expect(levenshtein('abcdef', 'xyzwvu')).toBe(3);
+    expect(levenshtein('hanh la', 'abcxyz')).toBe(3);
+  });
+
+  it('handles 1000 short pairs in < 100ms', () => {
+    const start = performance.now();
+    for (let i = 0; i < 1000; i++) {
+      levenshtein('hanh la', 'hanh las');
+    }
+    const elapsed = performance.now() - start;
+    expect(elapsed).toBeLessThan(100);
   });
 });

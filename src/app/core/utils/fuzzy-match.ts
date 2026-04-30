@@ -23,3 +23,71 @@ export function normalize(s: string): string {
     .trim()
     .replace(/\s+/g, ' ');
 }
+
+/**
+ * Levenshtein edit distance with early-exit at threshold 2.
+ *
+ * Returns the exact distance if ≤ 2; otherwise returns 3 (sentinel for
+ * "out of fuzzy-match range" per phase-1.5b §2-bis Q5-C). Implementation
+ * uses a single-row DP buffer (Uint8Array) for O(min(m,n)) memory; max
+ * useful length for ingredient names is well under 256 chars.
+ *
+ * Performance: < 100µs per call for short strings (typical ingredient name).
+ */
+export function levenshtein(a: string, b: string): number {
+  const THRESHOLD = 2;
+  const SENTINEL = 3;
+
+  if (a === b) return 0;
+
+  const m = a.length;
+  const n = b.length;
+
+  // Length difference alone exceeds threshold → early-exit.
+  if (Math.abs(m - n) > THRESHOLD) return SENTINEL;
+
+  if (m === 0) return n > THRESHOLD ? SENTINEL : n;
+  if (n === 0) return m > THRESHOLD ? SENTINEL : m;
+
+  // Defensive: if either string is unexpectedly long, still bound memory.
+  if (m > 255 || n > 255) {
+    // Fall back to plain string compare without DP allocation.
+    return a === b ? 0 : SENTINEL;
+  }
+
+  // prev[j] = distance(a[..i-1], b[..j-1]) for previous row i-1
+  // curr[j] = distance(a[..i],   b[..j-1]) for current  row i
+  let prev = new Uint8Array(n + 1);
+  let curr = new Uint8Array(n + 1);
+
+  for (let j = 0; j <= n; j++) prev[j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    curr[0] = i;
+    let rowMin = curr[0];
+    const aChar = a.charCodeAt(i - 1);
+
+    for (let j = 1; j <= n; j++) {
+      const cost = aChar === b.charCodeAt(j - 1) ? 0 : 1;
+      const del = prev[j] + 1;
+      const ins = curr[j - 1] + 1;
+      const sub = prev[j - 1] + cost;
+      let v = del < ins ? del : ins;
+      if (sub < v) v = sub;
+      curr[j] = v;
+      if (v < rowMin) rowMin = v;
+    }
+
+    // Early-exit: if every cell of this row > THRESHOLD, the final answer
+    // can only grow → return sentinel.
+    if (rowMin > THRESHOLD) return SENTINEL;
+
+    // Swap rows.
+    const tmp = prev;
+    prev = curr;
+    curr = tmp;
+  }
+
+  const dist = prev[n];
+  return dist > THRESHOLD ? SENTINEL : dist;
+}
