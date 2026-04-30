@@ -312,7 +312,7 @@ CREATE INDEX idx_meal_slot_day_plan ON meal_slot(day_plan_id);
 
 ### 4.6 planned_dish
 
-Món ăn đã thêm vào meal_slot (= "meal_log_item" trong ngữ cảnh tracking).
+Món ăn đã thêm vào meal_slot (= meal log entry). **Ngoại lệ duy nhất giữ nutrition snapshot** so với dish_ingredient (xem `business-rules.md` § RULE-PLANNED-DISH-SNAPSHOT).
 
 ```sql
 CREATE TABLE planned_dish (
@@ -321,7 +321,13 @@ CREATE TABLE planned_dish (
   dish_id         TEXT NOT NULL REFERENCES dish(id)      ON DELETE RESTRICT,
   servings        REAL NOT NULL DEFAULT 1 CHECK (servings BETWEEN 0.1 AND 20),
   is_completed    INTEGER NOT NULL DEFAULT 0 CHECK (is_completed IN (0,1)),
-  position        INTEGER NOT NULL DEFAULT 0,
+  sort_order      INTEGER NOT NULL DEFAULT 0,
+  -- Snapshot nutrition tại thời điểm log/plan (immutable history)
+  -- Tính = dish_with_totals.total_* * servings; không recompute khi dish_ingredient đổi
+  calories        REAL NOT NULL,
+  protein         REAL NOT NULL DEFAULT 0,
+  carbs           REAL NOT NULL DEFAULT 0,
+  fat             REAL NOT NULL DEFAULT 0,
   created_at      TEXT NOT NULL DEFAULT (datetime('now')),
   completed_at    TEXT
 );
@@ -329,6 +335,10 @@ CREATE TABLE planned_dish (
 CREATE INDEX idx_planned_dish_meal_slot ON planned_dish(meal_slot_id);
 CREATE INDEX idx_planned_dish_dish      ON planned_dish(dish_id);
 ```
+
+> **Tại sao snapshot ở `planned_dish` (mâu thuẫn với gram-only realtime)?**
+> `dish_ingredient` = công thức (mô tả) → realtime, sửa recipe thì dish total cập nhật ngay.
+> `planned_dish` = nhật ký bữa ăn → bằng chứng lịch sử, phải bất biến để report tuần/tháng đúng kể cả khi recipe đã đổi sau đó.
 
 **Ràng buộc:**
 - `is_completed` flag để mark "Đã ăn".

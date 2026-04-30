@@ -12,7 +12,7 @@
  * Source: docs/3-design/data-model.md
  */
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 /**
  * Array of DDL statements. Each string is a single CREATE TABLE / CREATE INDEX.
@@ -617,5 +617,171 @@ export function buildSeedArtifactMigration(): { version: number; statements: rea
   return {
     version: 5,
     statements: SEED_ARTIFACT_MIGRATION_DDL,
+  };
+}
+
+/**
+ * V6 — Gram-only revision (2026-04-30).
+ *
+ * Loại bỏ hoàn toàn lớp đơn vị/quy đổi/density. Mọi nutrition là per-100g,
+ * mọi dish_ingredient.gram_weight là gram tuyệt đối.
+ *
+ * Strategy:
+ *   - DROP table `unit`, `ingredient_unit`
+ *   - Rebuild `ingredient`: bỏ `nutrition_basis_unit/quantity`, `density_g_per_ml`
+ *   - Rebuild `dish_ingredient`: chỉ còn `gram_weight` + `sort_order`
+ *   - Convert nutrition của ingredient ml-based về g-based dùng density
+ *   - Convert dish_ingredient.normalized_amount (ml) về gram dùng density
+ *   - Rebuild VIEW `dish_with_totals`
+ *
+ * Conversion rules (data migration):
+ *   ingredient (basis_unit='g'):
+ *     calories_new = calories_old * 100 / nutrition_basis_quantity
+ *   ingredient (basis_unit='ml', density NOT NULL):
+ *     calories_per_100ml = calories_old * 100 / nutrition_basis_quantity
+ *     calories_new       = calories_per_100ml / density_g_per_ml
+ *   ingredient (basis_unit='ml', density NULL — fallback assume 1g/ml):
+ *     calories_new = calories_old * 100 / nutrition_basis_quantity
+ *
+ *   dish_ingredient.gram_weight:
+ *     basis_unit='g'                → normalized_amount (đã là g)
+ *     basis_unit='ml', density set  → normalized_amount * density_g_per_ml
+ *     basis_unit='ml', density NULL → normalized_amount (fallback 1g/ml)
+ *
+ * Xem: docs/2-requirements/prd.md §F-01, docs/3-design/data-model.md §4,
+ *      docs/4-architecture/business-rules.md § RULE-DISH-INGREDIENT-GRAM
+ */
+export const GRAM_ONLY_REVISION_MIGRATION_DDL: readonly string[] = [
+  `PRAGMA foreign_keys = OFF`,
+  `DROP VIEW IF EXISTS dish_with_totals`,
+
+  // ==========================================================================
+  // 1. Rebuild ingredient: drop basis_unit/basis_quantity/density,
+  //    convert nutrition về per-100g
+  // ==========================================================================
+  `CREATE TABLE ingredient_v6 (
+    id           TEXT PRIMARY KEY,
+    name         TEXT NOT NULL,
+    category     TEXT NOT NULL CHECK (category IN (
+                   'Thịt', 'Cá & Hải sản', 'Trứng & Sữa', 'Rau củ',
+                   'Ngũ cốc & Tinh bột', 'Đậu & Hạt', 'Dầu & Mỡ',
+                   'Gia vị', 'Nước dùng & Nước chấm', 'Trái cây', 'Khác'
+                 )),
+    calories     REAL NOT NULL CHECK (calories >= 0),
+    protein      REAL NOT NULL DEFAULT 0 CHECK (protein >= 0),
+    carbs        REAL NOT NULL DEFAULT 0 CHECK (carbs   >= 0),
+    fat          REAL NOT NULL DEFAULT 0 CHECK (fat     >= 0),
+    fiber        REAL NOT NULL DEFAULT 0 CHECK (fiber   >= 0),
+    source       TEXT NOT NULL DEFAULT 'manual' CHECK (source IN ('manual', 'ai', 'db')),
+    created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at   TEXT
+  )`,
+  `INSERT INTO ingredient_v6 (
+    id, name, category,
+    calories, protein, carbs, fat, fiber,
+    source, created_at, updated_at
+  )
+  SELECT
+    id, name, category,
+    calories * 100.0 / nutrition_basis_quantity
+      / CASE WHEN nutrition_basis_unit = 'ml' AND density_g_per_ml IS NOT NULL
+             THEN density_g_per_ml ELSE 1.0 END,
+    protein  * 100.0 / nutrition_basis_quantity
+      / CASE WHEN nutrition_basis_unit = 'ml' AND density_g_per_ml IS NOT NULL
+             THEN density_g_per_ml ELSE 1.0 END,
+    carbs    * 100.0 / nutrition_basis_quantity
+      / CASE WHEN nutrition_basis_unit = 'ml' AND density_g_per_ml IS NOT NULL
+             THEN density_g_per_ml ELSE 1.0 END,
+    fat      * 100.0 / nutrition_basis_quantity
+      / CASE WHEN nutrition_basis_unit = 'ml' AND density_g_per_ml IS NOT NULL
+             THEN density_g_per_ml ELSE 1.0 END,
+    fiber    * 100.0 / nutrition_basis_quantity
+      / CASE WHEN nutrition_basis_unit = 'ml' AND density_g_per_ml IS NOT NULL
+             THEN density_g_per_ml ELSE 1.0 END,
+    source, created_at, updated_at
+  FROM ingredient`,
+
+  // ==========================================================================
+  // 2. Rebuild dish_ingredient: chỉ còn gram_weight (convert ml → g nếu cần)
+  //    Cần JOIN với ingredient cũ để lấy basis_unit + density
+  // ==========================================================================
+  `CREATE TABLE dish_ingredient_v6 (
+    id            TEXT PRIMARY KEY,
+    dish_id       TEXT NOT NULL REFERENCES dish(id)          ON DELETE CASCADE,
+    ingredient_id TEXT NOT NULL REFERENCES ingredient_v6(id) ON DELETE RESTRICT,
+    gram_weight   REAL NOT NULL CHECK (gram_weight > 0),
+    sort_order    INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(dish_id, ingredient_id)
+  )`,
+  `INSERT INTO dish_ingredient_v6 (id, dish_id, ingredient_id, gram_weight, sort_order)
+   SELECT
+     di.id,
+     di.dish_id,
+     di.ingredient_id,
+     di.normalized_amount
+       * CASE WHEN i.nutrition_basis_unit = 'ml' AND i.density_g_per_ml IS NOT NULL
+              THEN i.density_g_per_ml ELSE 1.0 END,
+     0
+   FROM dish_ingredient di
+   JOIN ingredient i ON i.id = di.ingredient_id`,
+
+  // ==========================================================================
+  // 3. Drop legacy tables (order: child → parent)
+  // ==========================================================================
+  `DROP TABLE dish_ingredient`,
+  `DROP TABLE ingredient_unit`,
+  `DROP TABLE ingredient`,
+  `DROP TABLE unit`,
+
+  // ==========================================================================
+  // 4. Rename v6 → canonical names
+  // ==========================================================================
+  `ALTER TABLE ingredient_v6      RENAME TO ingredient`,
+  `ALTER TABLE dish_ingredient_v6 RENAME TO dish_ingredient`,
+
+  // ==========================================================================
+  // 5. Recreate indexes
+  // ==========================================================================
+  `CREATE INDEX idx_ingredient_name           ON ingredient(name COLLATE NOCASE)`,
+  `CREATE INDEX idx_ingredient_category       ON ingredient(category)`,
+  `CREATE INDEX idx_dish_ingredient_dish      ON dish_ingredient(dish_id)`,
+  `CREATE INDEX idx_dish_ingredient_ingredient ON dish_ingredient(ingredient_id)`,
+
+  // ==========================================================================
+  // 6. Rebuild dish_with_totals view (gram-only, per-100g)
+  // ==========================================================================
+  `CREATE VIEW dish_with_totals AS
+    SELECT
+      d.id,
+      d.name,
+      d.description,
+      d.type,
+      d.source,
+      d.servings,
+      d.image_url,
+      d.meal_tag,
+      d.is_favorite,
+      d.created_at,
+      d.updated_at,
+      COALESCE(SUM(i.calories * di.gram_weight / 100.0), 0) AS total_calories,
+      COALESCE(SUM(i.protein  * di.gram_weight / 100.0), 0) AS total_protein,
+      COALESCE(SUM(i.carbs    * di.gram_weight / 100.0), 0) AS total_carbs,
+      COALESCE(SUM(i.fat      * di.gram_weight / 100.0), 0) AS total_fat,
+      COALESCE(SUM(i.fiber    * di.gram_weight / 100.0), 0) AS total_fiber
+    FROM dish d
+    LEFT JOIN dish_ingredient di ON di.dish_id = d.id
+    LEFT JOIN ingredient      i  ON i.id       = di.ingredient_id
+    GROUP BY d.id`,
+
+  `PRAGMA foreign_keys = ON`,
+];
+
+export function buildGramOnlyRevisionMigration(): {
+  version: number;
+  statements: readonly string[];
+} {
+  return {
+    version: 6,
+    statements: GRAM_ONLY_REVISION_MIGRATION_DDL,
   };
 }

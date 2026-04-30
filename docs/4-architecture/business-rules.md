@@ -70,6 +70,24 @@ Tài liệu này tập trung các invariant nghiệp vụ mà mọi tầng (UI, 
 
 ---
 
+## RULE-PLANNED-DISH-SNAPSHOT — Lịch sử dinh dưỡng bất biến
+
+Đây là **ngoại lệ duy nhất** so với `RULE-DISH-INGREDIENT-GRAM` (Q8: realtime). Áp dụng cho table `planned_dish` (nhật ký bữa đã lên kế hoạch / đã ăn).
+
+| Rule | Mô tả |
+|------|-------|
+| SNAP-01 | `planned_dish.calories/protein/carbs/fat` là **snapshot** chụp tại thời điểm tạo `planned_dish` (khi user log bữa hoặc plan trước). |
+| SNAP-02 | Snapshot = `dish_with_totals.total_* * planned_dish.servings`. Tính 1 lần khi insert; không recompute khi `dish_ingredient` thay đổi. |
+| SNAP-03 | Khi user **edit recipe** (sửa `dish_ingredient`), `planned_dish` đã có **không bị ảnh hưởng**. Bằng chứng dinh dưỡng quá khứ là bất biến. |
+| SNAP-04 | Khi user **edit servings** trên 1 `planned_dish` đã tồn tại, snapshot được **recompute** từ dish hiện tại × servings mới. |
+| SNAP-05 | Khi user **xoá** `planned_dish` (unplan / undo log), record bị xoá hẳn — không soft-delete. |
+
+**Lý do giữ snapshot ở planned_dish (khác với dish_ingredient):**
+- `dish_ingredient` = công thức (mô tả). Realtime cho phép user sửa recipe và thấy dinh dưỡng cập nhật ngay.
+- `planned_dish` = nhật ký (sự kiện đã/sắp xảy ra). Phải bất biến để báo cáo lịch sử (tuần qua / tháng qua) chính xác kể cả khi recipe đã đổi.
+
+---
+
 ## RULE-INGREDIENT-DELETE — Xoá nguyên liệu phải mềm
 
 ### RULE-ID-DEL-01: Soft-delete bằng `deleted_at`
