@@ -18,7 +18,15 @@
 import { Injectable, inject } from '@angular/core';
 
 import { INGREDIENT_CATEGORIES, type IngredientCategory } from '../../models/management.constants';
+import { findFuzzyMatches, type FuzzyCandidate } from '../../utils/fuzzy-match';
 import { GeminiClient } from './gemini-client';
+import {
+  buildDishAutofillPrompt,
+  dishAutofillGeminiSchema,
+  dishAutofillResponseSchema,
+  DISH_AUTOFILL_SYSTEM_INSTRUCTION,
+  type DishAutofillResponse,
+} from './prompts/dish-autofill.prompt';
 import {
   buildIngredientLookupPrompt,
   ingredientLookupGeminiSchema,
@@ -50,6 +58,68 @@ export interface IngredientLookupResult {
   confidence: 'high' | 'medium' | 'low';
   /** Đã raw (chưa map) — giữ để debug nếu cần. */
   raw: IngredientLookupResponse;
+}
+
+/**
+ * Một row trong kết quả `autofillDish`.
+ *
+ * `kind` là discriminator phía client:
+ *   - `existing` — Gemini đã match được vào DB (is_in_db=true) HOẶC
+ *      fuzzy-match post-process tìm ra match (distance ≤ 2). Có
+ *      `matchedIngredientId`. KHÔNG có nutrition (lấy từ DB).
+ *   - `new` — không match → sẽ tạo ingredient mới trong Layer 4.
+ *      Có nutrition per-100g + category.
+ *   - `fuzzyConfirm` — Gemini báo is_in_db=false NHƯNG fuzzy-match local
+ *      tìm thấy candidate. UI cần hiển thị "Có phải X?" cho user
+ *      confirm trước khi xử lý như existing/new (Q5-C).
+ */
+export interface DishAutofillExistingRow {
+  readonly kind: 'existing';
+  readonly name: string;
+  readonly gramWeight: number;
+  readonly matchedIngredientId: string;
+  readonly confidence: 'high' | 'medium' | 'low';
+}
+
+export interface DishAutofillNewRow {
+  readonly kind: 'new';
+  readonly name: string;
+  readonly gramWeight: number;
+  readonly category: IngredientCategory;
+  readonly caloriesPer100g: number;
+  readonly proteinPer100g: number;
+  readonly carbsPer100g: number;
+  readonly fatPer100g: number;
+  readonly fiberPer100g: number;
+  readonly confidence: 'high' | 'medium' | 'low';
+}
+
+export interface DishAutofillFuzzyConfirmRow {
+  readonly kind: 'fuzzyConfirm';
+  readonly name: string;
+  readonly gramWeight: number;
+  /**
+   * Top-1 fuzzy candidate từ DB (distance ≤ 2). UI dùng cái này để hỏi user.
+   * Nếu user confirm → row trở thành `existing` với matchedIngredientId này.
+   * Nếu user reject → row trở thành `new` (Gemini đã cung cấp full nutrition
+   *   trong `pendingNew`).
+   */
+  readonly suggestedMatchId: string;
+  readonly suggestedMatchName: string;
+  readonly distance: number;
+  /** Nutrition Gemini đã sinh — dùng nếu user reject suggestion. */
+  readonly pendingNew: Omit<DishAutofillNewRow, 'kind'>;
+}
+
+export type DishAutofillRow =
+  | DishAutofillExistingRow
+  | DishAutofillNewRow
+  | DishAutofillFuzzyConfirmRow;
+
+export interface DishAutofillResult {
+  readonly dishName: string;
+  readonly rows: readonly DishAutofillRow[];
+  readonly raw: DishAutofillResponse;
 }
 
 // ---------------------------------------------------------------------------
@@ -146,6 +216,82 @@ export class NutritionAi {
       fat: response.fat,
       fiber: response.fiber,
       confidence: response.confidence,
+      raw: response,
+    };
+  }
+
+  /**
+   * F-02 — gọi Gemini với prompt dish-autofill, validate qua zod
+   * (discriminatedUnion `is_in_db`), sau đó chạy fuzzy-match local
+   * post-process (Q5-C):
+   *
+   *   - Row is_in_db=true → kind=`existing`.
+   *   - Row is_in_db=false:
+   *      - Tìm fuzzy match trong `dbIngredients` (distance ≤ 2).
+   *      - Có match → kind=`fuzzyConfirm` (UI hỏi user).
+   *      - Không match → kind=`new`.
+   *
+   * @param dishName Tên món để Gemini phân tích.
+   * @param dbIngredients Danh sách ingredient hiện có trong DB
+   *   (id + name) — dùng cho cả prompt context lẫn fuzzy post-process.
+   */
+  async autofillDish(
+    dishName: string,
+    dbIngredients: readonly FuzzyCandidate[],
+  ): Promise<DishAutofillResult> {
+    const prompt = buildDishAutofillPrompt(dishName, dbIngredients);
+
+    const response = await this.gemini.generateContent(prompt, {
+      feature: 'dish_autofill',
+      systemInstruction: DISH_AUTOFILL_SYSTEM_INSTRUCTION,
+      responseSchema: dishAutofillGeminiSchema,
+      schema: dishAutofillResponseSchema,
+    });
+
+    const rows: DishAutofillRow[] = response.ingredients.map((row) => {
+      if (row.is_in_db) {
+        return {
+          kind: 'existing',
+          name: row.name.trim().replace(/\s+/g, ' '),
+          gramWeight: row.gram_weight,
+          matchedIngredientId: row.matched_ingredient_id,
+          confidence: 'high',
+        } satisfies DishAutofillExistingRow;
+      } else {
+        // is_in_db=false → fuzzy match local
+        const matches = findFuzzyMatches(row.name, dbIngredients);
+        const pendingNew: Omit<DishAutofillNewRow, 'kind'> = {
+          name: row.name.trim().replace(/\s+/g, ' '),
+          gramWeight: row.gram_weight,
+          category: mapCategory(row.category),
+          caloriesPer100g: row.calories_per_100g,
+          proteinPer100g: row.protein_per_100g,
+          carbsPer100g: row.carbs_per_100g,
+          fatPer100g: row.fat_per_100g,
+          fiberPer100g: row.fiber_per_100g,
+          confidence: row.confidence,
+        };
+
+        if (matches.length > 0) {
+          const top = matches[0];
+          return {
+            kind: 'fuzzyConfirm',
+            name: pendingNew.name,
+            gramWeight: pendingNew.gramWeight,
+            suggestedMatchId: top.match.id,
+            suggestedMatchName: top.match.name,
+            distance: top.distance,
+            pendingNew,
+          } satisfies DishAutofillFuzzyConfirmRow;
+        }
+
+        return { kind: 'new', ...pendingNew } satisfies DishAutofillNewRow;
+      }
+    });
+
+    return {
+      dishName: dishName.trim(),
+      rows,
       raw: response,
     };
   }
