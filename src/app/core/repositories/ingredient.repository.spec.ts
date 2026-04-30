@@ -140,4 +140,33 @@ describe('IngredientRepository (gram-only v6)', () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe('findByExactName (F-02)', () => {
+    it('matches case-insensitively and ignores Vietnamese diacritics', async () => {
+      queryResponses.push([
+        { ...ingredientRow, id: 'ing-x', name: 'Cà Chua' } as never,
+        { ...ingredientRow, id: 'ing-y', name: 'Trứng Gà' } as never,
+      ]);
+
+      const result = await repo.findByExactName('ca chua');
+
+      expect(result?.id).toBe('ing-x');
+      expect(db.query).toHaveBeenCalledWith('SELECT * FROM ingredient');
+    });
+
+    it('returns null when no ingredient matches', async () => {
+      queryResponses.push([{ ...ingredientRow, id: 'ing-x', name: 'Cà chua' } as never]);
+
+      const result = await repo.findByExactName('thịt bò');
+
+      expect(result).toBeNull();
+    });
+
+    it('returns null for empty / whitespace input without querying', async () => {
+      const result = await repo.findByExactName('   ');
+
+      expect(result).toBeNull();
+      expect(db.query).not.toHaveBeenCalled();
+    });
+  });
 });

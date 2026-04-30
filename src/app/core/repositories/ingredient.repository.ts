@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { IngredientModel } from '../models/management.model';
 import type { IngredientSource } from '../models/management.types';
 import { Database } from '../services/database/database';
+import { normalize as normalizeForMatch } from '../utils/fuzzy-match';
 
 /**
  * Ingredient repository — gram-only revision (schema v6).
@@ -74,6 +75,28 @@ export class IngredientRepository {
       [id],
     );
     return ingredient ?? null;
+  }
+
+  /**
+   * Tìm ingredient có tên trùng (case-insensitive + bỏ dấu) với `name`.
+   * Dùng cho F-02 trước khi insert ingredient mới từ AI để tránh duplicate.
+   *
+   * Implementation: load list của tất cả ingredient + so sánh normalized
+   * client-side (SQLite không có hàm Vietnamese-aware built-in). Volume
+   * thực tế ~vài trăm row, cost negligible. Stop ở match đầu tiên.
+   */
+  async findByExactName(name: string): Promise<IngredientListItem | null> {
+    const normalizedTarget = normalizeForMatch(name);
+    if (normalizedTarget === '') {
+      return null;
+    }
+    const all = await this.db.query<IngredientRow>('SELECT * FROM ingredient');
+    for (const row of all) {
+      if (normalizeForMatch(row.name) === normalizedTarget) {
+        return row;
+      }
+    }
+    return null;
   }
 
   async insert(data: CreateIngredientInput): Promise<IngredientListItem> {
