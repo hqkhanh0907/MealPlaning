@@ -11,19 +11,33 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormField, form } from '@angular/forms/signals';
 import {
+  AlertController,
   IonBackButton,
   IonButtons,
   IonContent,
   IonHeader,
   IonIcon,
+  IonSpinner,
   IonTitle,
   IonToolbar,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { chevronDownOutline } from 'ionicons/icons';
+import { chevronDownOutline, sparklesOutline } from 'ionicons/icons';
 import { INGREDIENT_CATEGORIES } from '../../../core/models/management.constants';
 import type { HasUnsavedChanges } from '../../../core/guards/unsaved-changes-guard';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
+import { GEMINI_ERROR_TOAST, GeminiError } from '../../../core/services/ai/gemini-types';
+import {
+  NutritionAi,
+  normalizeIngredientName,
+  type IngredientLookupResult,
+} from '../../../core/services/ai/nutrition-ai';
+import { AiOfflineBanner } from '../../../shared/components/ai-offline-banner/ai-offline-banner';
+import {
+  AiLookupSheet,
+  type AiLookupSavePayload,
+} from '../../../shared/components/ai-lookup-sheet/ai-lookup-sheet';
 import {
   BottomSheetPicker,
   type PickerOption,
@@ -60,11 +74,14 @@ const emptyForm = (): IngredientEditFormValue => ({
     IonButtons,
     IonBackButton,
     IonIcon,
+    IonSpinner,
     FormField,
     BottomSheetPicker,
     DishesUsingSheet,
     ConfirmDialog,
     AppFormField,
+    AiOfflineBanner,
+    AiLookupSheet,
   ],
 })
 export default class IngredientEditPage implements HasUnsavedChanges {
@@ -74,6 +91,9 @@ export default class IngredientEditPage implements HasUnsavedChanges {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly ingredientStore = inject(IngredientStore);
+  private readonly nutritionAi = inject(NutritionAi);
+  private readonly toastCtrl = inject(ToastController);
+  private readonly alertCtrl = inject(AlertController);
 
   readonly categories = INGREDIENT_CATEGORIES;
 
@@ -94,11 +114,26 @@ export default class IngredientEditPage implements HasUnsavedChanges {
   readonly saving = signal(false);
   protected readonly showErrors = signal(false);
 
+  // ---------------------------------------------------------------------------
+  // F-01 AI Lookup state (Phase 1.5B.2 — Decisions #1–#11)
+  // ---------------------------------------------------------------------------
+
+  /** Loading flag while NutritionAi.lookupIngredient() is in flight (Decision #5). */
+  readonly aiLoading = signal(false);
+  /** Bottom sheet open flag — only true after AI returns a result. */
+  readonly aiSheetOpen = signal(false);
+  /** Latest AI lookup result (Decision #11 — confidence shown in sheet). */
+  readonly aiResult = signal<IngredientLookupResult | null>(null);
+  /** Sheet mode — 'update' when user picked existing duplicate (Decision #4). */
+  readonly aiSheetMode = signal<'create' | 'update'>('create');
+  /** Existing ingredient id when sheet mode = 'update'. */
+  readonly aiExistingId = signal<string | null>(null);
+
   protected readonly formSignal = signal<IngredientEditFormValue>(emptyForm());
   protected readonly ingredientForm = form(this.formSignal, ingredientFormSchema);
 
   constructor() {
-    addIcons({ chevronDownOutline });
+    addIcons({ chevronDownOutline, sparklesOutline });
     void this.bootstrap();
   }
 
@@ -308,5 +343,124 @@ export default class IngredientEditPage implements HasUnsavedChanges {
       const target = sel ? (document.querySelector(sel) as HTMLElement | null) : null;
       target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // F-01 AI Lookup actions (Phase 1.5B.2)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * User tapped "Hỏi AI". Read current `name` field — if empty, show toast asking
+   * for a name first. Else: normalize, check duplicates, either show alert or
+   * call NutritionAi directly.
+   */
+  async onAskAi(): Promise<void> {
+    const rawName = this.formSignal().name.trim();
+    if (!rawName) {
+      await this.presentToast('Nhập tên nguyên liệu trước khi hỏi AI');
+      return;
+    }
+    if (this.aiLoading()) {
+      return;
+    }
+
+    // Decision #2: normalize lowercase + collapse whitespace, KEEP diacritics.
+    const norm = normalizeIngredientName(rawName);
+    const existing = this.ingredientStore
+      .ingredients()
+      .find((i) => normalizeIngredientName(i.name) === norm);
+
+    if (existing) {
+      // Decision #3: alert with two CTAs.
+      const alert = await this.alertCtrl.create({
+        header: 'Đã có nguyên liệu này',
+        message: `"${existing.name}" đã có trong danh sách. Bạn muốn cập nhật dữ liệu cũ với kết quả AI mới, hay tạo nguyên liệu mới?`,
+        buttons: [
+          { text: 'Hủy', role: 'cancel' },
+          {
+            text: 'Tạo mới',
+            handler: () => {
+              void this.runAiLookup(rawName, 'create', null);
+            },
+          },
+          {
+            text: 'Cập nhật cũ',
+            handler: () => {
+              void this.runAiLookup(rawName, 'update', existing.id);
+            },
+          },
+        ],
+      });
+      await alert.present();
+      return;
+    }
+
+    await this.runAiLookup(rawName, 'create', null);
+  }
+
+  /** Internal: actually call NutritionAi.lookupIngredient with loading + error handling. */
+  private async runAiLookup(
+    name: string,
+    mode: 'create' | 'update',
+    existingId: string | null,
+  ): Promise<void> {
+    this.aiLoading.set(true);
+    try {
+      const result = await this.nutritionAi.lookupIngredient(name);
+      this.aiResult.set(result);
+      this.aiSheetMode.set(mode);
+      this.aiExistingId.set(existingId);
+      this.aiSheetOpen.set(true);
+    } catch (err) {
+      // Decision #6: show toast from GEMINI_ERROR_TOAST map.
+      const message =
+        err instanceof GeminiError
+          ? GEMINI_ERROR_TOAST[err.kind]
+          : 'Có lỗi xảy ra, vui lòng thử lại';
+      await this.presentToast(message);
+    } finally {
+      this.aiLoading.set(false);
+    }
+  }
+
+  /** Sheet emitted (saved) — write through IngredientStore. */
+  async onAiSheetSaved(payload: AiLookupSavePayload): Promise<void> {
+    const data = {
+      name: payload.name,
+      category: payload.category,
+      calories: payload.calories,
+      protein: payload.protein,
+      carbs: payload.carbs,
+      fat: payload.fat,
+      fiber: payload.fiber,
+      source: 'ai' as const,
+    };
+
+    if (payload.mode === 'update' && payload.existingIngredientId) {
+      await this.ingredientStore.edit(payload.existingIngredientId, data);
+    } else {
+      await this.ingredientStore.add(data);
+    }
+
+    this.aiSheetOpen.set(false);
+    this.aiResult.set(null);
+    this.skipUnsavedPrompt = true;
+    this.resetDirtyBaseline();
+    await this.router.navigate(['/tabs/management']);
+  }
+
+  onAiSheetDismissed(): void {
+    this.aiSheetOpen.set(false);
+    this.aiResult.set(null);
+  }
+
+  private async presentToast(message: string): Promise<void> {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 2400,
+      position: 'bottom',
+      color: 'medium',
+    });
+    await toast.present();
   }
 }

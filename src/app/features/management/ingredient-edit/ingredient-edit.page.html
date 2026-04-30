@@ -9,6 +9,25 @@
 
 <ion-content>
   <div class="form-content">
+    @if (!isEdit()) {
+      <app-ai-offline-banner />
+      <button
+        type="button"
+        class="btn-ai-lookup"
+        data-testid="btn-ask-ai"
+        [disabled]="aiLoading()"
+        (click)="onAskAi()"
+      >
+        @if (aiLoading()) {
+          <ion-spinner name="crescent" />
+          <span>Đang hỏi AI...</span>
+        } @else {
+          <ion-icon name="sparkles-outline" aria-hidden="true" />
+          <span>Hỏi AI điền dinh dưỡng</span>
+        }
+      </button>
+    }
+
     <app-form-field
       label="Tên nguyên liệu"
       inputId="ingr-field-name"
@@ -209,6 +228,15 @@
     confirmVariant="danger"
     (cancelled)="cancelDiscardChanges()"
     (confirmed)="confirmDiscardChangesDialog()"
+  />
+
+  <app-ai-lookup-sheet
+    [isOpen]="aiSheetOpen()"
+    [result]="aiResult()"
+    [mode]="aiSheetMode()"
+    [existingIngredientId]="aiExistingId()"
+    (saved)="onAiSheetSaved($event)"
+    (dismissed)="onAiSheetDismissed()"
   />
 
   <app-bottom-sheet-picker

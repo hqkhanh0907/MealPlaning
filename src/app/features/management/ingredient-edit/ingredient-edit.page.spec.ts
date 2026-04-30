@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
 import { DishRepository } from '../../../core/repositories/dish.repository';
+import { NutritionAi } from '../../../core/services/ai/nutrition-ai';
 import IngredientEditPage from './ingredient-edit.page';
 
 interface FormSignalAccessor {
@@ -43,6 +44,7 @@ describe('IngredientEditPage (gram-only)', () => {
           provideRouter([]),
           { provide: ActivatedRoute, useValue: activatedRoute },
           { provide: IngredientStore, useValue: ingredientStore },
+          { provide: NutritionAi, useValue: { lookupIngredient: jasmine.createSpy() } },
         ],
       }).compileComponents();
 
@@ -155,6 +157,7 @@ describe('IngredientEditPage (gram-only)', () => {
           provideRouter([]),
           { provide: ActivatedRoute, useValue: activatedRoute },
           { provide: IngredientStore, useValue: ingredientStore },
+          { provide: NutritionAi, useValue: { lookupIngredient: jasmine.createSpy() } },
           { provide: DishRepository, useValue: dishRepo },
         ],
       }).compileComponents();
