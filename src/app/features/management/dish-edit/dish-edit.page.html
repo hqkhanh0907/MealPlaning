@@ -74,11 +74,26 @@
       </button>
     </app-form-field>
 
-    <div class="section-label">
-      Nguyên liệu
-      @if (formSignal().items.length > 0) {
-        ({{ formSignal().items.length }})
-      }
+    <div class="section-label section-label--with-action">
+      <span>
+        Nguyên liệu
+        @if (formSignal().items.length > 0) {
+          ({{ formSignal().items.length }})
+        }
+      </span>
+      <button
+        type="button"
+        class="ai-autofill-trigger"
+        [disabled]="aiAutofillLoading()"
+        (click)="onAskAi()"
+      >
+        <ion-icon name="sparkles-outline" aria-hidden="true" />
+        @if (aiAutofillLoading()) {
+          Đang hỏi AI…
+        } @else {
+          Điền bằng AI
+        }
+      </button>
     </div>
 
     @if (formSignal().items.length === 0) {
@@ -270,5 +285,12 @@
     [value]="formSignal().meal_tag"
     [options]="mealTagOptions"
     (valueChange)="onMealTagSelected($event)"
+  />
+
+  <app-dish-autofill-sheet
+    [isOpen]="aiAutofillSheetOpen()"
+    [result]="aiAutofillResult()"
+    (applied)="onAutofillApplied($event)"
+    (dismissed)="onAutofillSheetDismissed()"
   />
 </ion-content>

@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import type { IngredientListItem } from '../../../core/repositories/ingredient.repository';
 import { IngredientRepository } from '../../../core/repositories/ingredient.repository';
+import { NutritionAi } from '../../../core/services/ai/nutrition-ai';
+import { DishAutofillApplier } from '../../../core/services/ai/dish-autofill-applier';
 import { DishStore } from '../../../core/stores/dish.store';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
 import DishEditPage from './dish-edit.page';
@@ -43,6 +45,21 @@ describe('DishEditPage (gram-only)', () => {
 
     const ingredientRepo = {
       findRecentlyUsed: jasmine.createSpy('findRecentlyUsed').and.resolveTo([]),
+      findAllForFuzzy: jasmine.createSpy('findAllForFuzzy').and.resolveTo([]),
+    };
+
+    const nutritionAi = {
+      autofillDish: jasmine.createSpy('autofillDish').and.resolveTo({
+        rows: [],
+        nameByLanguage: { en: '', vi: '' },
+        servings: 1,
+      }),
+    };
+
+    const autofillApplier = {
+      apply: jasmine
+        .createSpy('apply')
+        .and.resolveTo({ ingredientCreations: [], dishIngredients: [] }),
     };
 
     const activatedRoute = {
@@ -57,6 +74,8 @@ describe('DishEditPage (gram-only)', () => {
         { provide: DishStore, useValue: dishStore },
         { provide: IngredientStore, useValue: ingredientStore },
         { provide: IngredientRepository, useValue: ingredientRepo },
+        { provide: NutritionAi, useValue: nutritionAi },
+        { provide: DishAutofillApplier, useValue: autofillApplier },
       ],
     }).compileComponents();
 

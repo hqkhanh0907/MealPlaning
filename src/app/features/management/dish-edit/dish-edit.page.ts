@@ -26,9 +26,10 @@ import {
   IonModal,
   IonTitle,
   IonToolbar,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { chevronDownOutline, closeOutline } from 'ionicons/icons';
+import { chevronDownOutline, closeOutline, sparklesOutline } from 'ionicons/icons';
 import { v4 as uuidv4 } from 'uuid';
 import type { IngredientListItem } from '../../../core/repositories/ingredient.repository';
 import { IngredientRepository } from '../../../core/repositories/ingredient.repository';
@@ -36,11 +37,18 @@ import type { HasUnsavedChanges } from '../../../core/guards/unsaved-changes-gua
 import type { MealTag } from '../../../core/models/management.types';
 import { DishStore } from '../../../core/stores/dish.store';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
+import { DishAutofillApplier } from '../../../core/services/ai/dish-autofill-applier';
+import { NutritionAi, type DishAutofillResult } from '../../../core/services/ai/nutrition-ai';
+import { GEMINI_ERROR_TOAST, GeminiError } from '../../../core/services/ai/gemini-types';
 import {
   BottomSheetPicker,
   type PickerOption,
 } from '../../../shared/components/bottom-sheet-picker/bottom-sheet-picker';
 import { ConfirmDialog } from '../../../shared/components/confirm-dialog/confirm-dialog';
+import {
+  DishAutofillSheet,
+  type DishAutofillAppliedPayload,
+} from '../../../shared/components/dish-autofill-sheet/dish-autofill-sheet';
 import { AppFormField } from '../../../shared/forms';
 import { dishFormSchema } from '../../../shared/forms/schemas/dish-form.schema';
 import type { DishEditFormValue, DishIngredientFormItem } from './dish-edit.types';
@@ -87,6 +95,7 @@ const emptyForm = (): DishEditFormValue => ({
     BottomSheetPicker,
     ConfirmDialog,
     AppFormField,
+    DishAutofillSheet,
   ],
 })
 export default class DishEditPage implements HasUnsavedChanges {
@@ -99,6 +108,9 @@ export default class DishEditPage implements HasUnsavedChanges {
   private readonly dishStore = inject(DishStore);
   private readonly ingredientStore = inject(IngredientStore);
   private readonly ingredientRepo = inject(IngredientRepository);
+  private readonly nutritionAi = inject(NutritionAi);
+  private readonly autofillApplier = inject(DishAutofillApplier);
+  private readonly toastCtrl = inject(ToastController);
 
   readonly dishId = signal<string | null>(this.route.snapshot.paramMap.get('id'));
   readonly isEdit = computed(() => this.dishId() !== null);
@@ -130,6 +142,12 @@ export default class DishEditPage implements HasUnsavedChanges {
   readonly deleteReferenceCount = signal(0);
   readonly deleteReferenceLoading = signal(false);
   readonly discardDialogOpen = signal(false);
+
+  // F-02 AI Dish Autofill state
+  readonly aiAutofillLoading = signal(false);
+  readonly aiAutofillResult = signal<DishAutofillResult | null>(null);
+  readonly aiAutofillSheetOpen = signal(false);
+
   private discardDialogResolver: ((value: boolean) => void) | null = null;
   private dirtyBaseline = '';
   private skipUnsavedPrompt = false;
@@ -168,7 +186,7 @@ export default class DishEditPage implements HasUnsavedChanges {
   });
 
   constructor() {
-    addIcons({ chevronDownOutline, closeOutline });
+    addIcons({ chevronDownOutline, closeOutline, sparklesOutline });
     void this.bootstrap();
   }
 
@@ -481,6 +499,99 @@ export default class DishEditPage implements HasUnsavedChanges {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  // ───────── F-02 AI Dish Autofill ─────────
+
+  /**
+   * User tapped "Điền tự động bằng AI". Read current `name` field — empty
+   * → toast. Else: pull DB candidates, call NutritionAi.autofillDish, open
+   * sheet on success.
+   */
+  async onAskAi(): Promise<void> {
+    const dishName = this.formSignal().name.trim();
+    if (!dishName) {
+      await this.presentToast('Nhập tên món ăn trước khi hỏi AI');
+      return;
+    }
+    if (this.aiAutofillLoading()) {
+      return;
+    }
+
+    this.aiAutofillLoading.set(true);
+    try {
+      const candidates = this.availableIngredients().map((ing) => ({
+        id: ing.id,
+        name: ing.name,
+      }));
+      const result = await this.nutritionAi.autofillDish(dishName, candidates);
+      this.aiAutofillResult.set(result);
+      this.aiAutofillSheetOpen.set(true);
+    } catch (err) {
+      const message =
+        err instanceof GeminiError
+          ? GEMINI_ERROR_TOAST[err.kind]
+          : 'Có lỗi xảy ra, vui lòng thử lại';
+      await this.presentToast(message);
+    } finally {
+      this.aiAutofillLoading.set(false);
+    }
+  }
+
+  /**
+   * Sheet emitted (applied) — call applier để materialize ingredients +
+   * dish_ingredient list, append vào form (KHÔNG replace items hiện có).
+   */
+  async onAutofillApplied(payload: DishAutofillAppliedPayload): Promise<void> {
+    try {
+      const ops = await this.autofillApplier.apply(payload.result, {
+        fuzzyDecisions: payload.fuzzyDecisions,
+      });
+
+      // Refresh ingredient store (mới insert) để index trong form lookup được.
+      if (ops.createdIngredientIds.length > 0) {
+        await this.ingredientStore.load();
+        this.availableIngredients.set(this.ingredientStore.ingredients());
+      }
+
+      // Append AI rows vào cuối list hiện tại (Decision: AI bổ sung, không thay thế).
+      const newItems: DishIngredientFormItem[] = ops.dishIngredients.map((row) => ({
+        local_id: uuidv4(),
+        ingredient_id: row.ingredient_id,
+        gram_weight: row.gram_weight,
+      }));
+
+      this.formSignal.update((v) => ({ ...v, items: [...v.items, ...newItems] }));
+
+      this.aiAutofillSheetOpen.set(false);
+      this.aiAutofillResult.set(null);
+
+      const total = ops.dishIngredients.length;
+      const created = ops.createdIngredientIds.length;
+      const message =
+        created > 0
+          ? `Đã thêm ${total} nguyên liệu (${created} mới)`
+          : `Đã thêm ${total} nguyên liệu`;
+      await this.presentToast(message);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Có lỗi xảy ra, vui lòng thử lại';
+      await this.presentToast(message);
+    }
+  }
+
+  onAutofillSheetDismissed(): void {
+    this.aiAutofillSheetOpen.set(false);
+    this.aiAutofillResult.set(null);
+  }
+
+  private async presentToast(message: string): Promise<void> {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 2400,
+      position: 'bottom',
+      color: 'medium',
+    });
+    await toast.present();
   }
 
   // ───────── utils ─────────
