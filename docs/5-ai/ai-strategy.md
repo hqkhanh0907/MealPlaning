@@ -1,6 +1,6 @@
 # AI Strategy — HealthMate AI
 
-**Version:** 1.1 (gram-only revision)  
+**Version:** 1.3 (Phase 1.5B kickoff)  
 **Date:** 2026-04-30  
 **Status:** Active
 
@@ -16,8 +16,8 @@ HealthMate AI sử dụng **Google Gemini API** để cung cấp **9 prompt temp
 
 | Config | Value |
 |--------|-------|
-| Default model | `gemini-2.0-flash` |
-| Khi upgrade | Đổi sang stable mới nhất khi có GA (VD: `gemini-2.5-flash` khi thành stable) |
+| Default model | `gemini-2.5-flash` (chốt 2026-04-30 cho Phase 1.5B) |
+| Khi upgrade | Đổi sang stable mới nhất khi có GA (VD: `gemini-3.0-flash` khi thành stable) |
 | Rule | **Chỉ dùng model Stable (GA), KHÔNG dùng Preview cho production** |
 
 ### Prompt Architecture
@@ -493,18 +493,21 @@ Rules:
 
 ### 4.3 Rate Limiting
 
-**V1 strategy (theo Decision D3):**
-- **Không áp dụng per-call throttling UX** — user không bị chặn khi click AI
-- **Internal quota limit per user/day** (soft limit trong code) để bảo vệ dev key khỏi abuse — ví dụ: 50 requests/day/install
-- Khi đạt limit: hiển thị toast "Đã đạt giới hạn AI hôm nay, thử lại ngày mai" + disable AI buttons
+**V1 strategy (revision 2026-04-30 — Phase 1.5B chốt KHÔNG quota):**
+- **Không áp dụng per-call throttling** — user không bị chặn khi click AI
+- **Không áp dụng quota limit** — Gemini paid tier, dev tự chịu cost (phù hợp `product-vision.md` §248). Nếu V2+ cần hạn chế → cho user paste key riêng trong Settings.
+- Vẫn áp dụng exponential backoff retry (§5.2) để tránh hammer Gemini khi server lỗi.
+
+> **Changelog:** Spec gốc 1.1/1.2 đặt 50 requests/day/install. Phase 1.5B (2026-04-30) bỏ quota limit theo discussion với product owner. Xem `docs/5-development/phase-1.5b-ai-foundation.md` §2 quyết định #4.
 
 ### 4.4 API Key Management (theo Decision D3)
 
 **Strategy V1: Developer key ship trong APK**
-- Dev key bundle trong app (obfuscate — không plain text trong source)
+- Dev key bundle trong app, **obfuscation = XOR + base64** (xem `phase-1.5b-ai-foundation.md` §3.7 implementation)
+- Build-time script `scripts/obfuscate-gemini-key.mjs` đọc `process.env.GEMINI_API_KEY` → ghi `environment.prod.ts` với obfuscated string
+- Runtime decode trong `src/app/core/services/ai/gemini-key.ts`
 - User KHÔNG cần nhập API key (không có Settings UI cho API key trong V1)
-- Trade-off: key có thể bị extract khỏi APK → cần quota limit (4.3) để chống abuse
-- V2+ có thể cho user nhập key riêng để bỏ quota
+- Trade-off: key có thể bị extract khỏi APK → vì không có quota (§4.3) nên risk là dev burn cost. Acceptable cho V1 alpha/internal. V2+ migrate sang user-provided key.
 
 **Rules:**
 - Không commit plain key vào git (dùng env var tại build time + obfuscation)
@@ -519,25 +522,35 @@ Rules:
 
 | Error | Xử lý | UI |
 |-------|-------|-----|
-| Network offline | Không gọi AI, disable AI buttons | Toast: "Cần kết nối mạng để dùng AI" |
-| API timeout (>15s) | Retry 1 lần | Toast: "AI đang bận, thử lại sau" |
-| API error (500, 503) | Retry 1 lần, exponential backoff | Toast: "Lỗi server AI, thử lại sau" |
-| Rate limit (429) | Không retry, hiện cooldown | Toast: "Đã đạt giới hạn, thử lại sau X phút" |
-| Invalid API key | Log lỗi + disable AI features trong phiên đó (V1 không có Settings UI cho API key — xem §4.4) | Alert: "Lỗi cấu hình AI, vui lòng cập nhật app" |
-| JSON parse error | Retry 1 lần | Toast: "AI trả kết quả lạ, đang thử lại..." |
+| Network offline | Detect bằng Capacitor Network plugin → disable AI buttons + show `<app-ai-offline-banner>` | Banner: "Bạn đang offline · Cần kết nối để dùng AI" |
+| API timeout (>15s) | Retry 3 lần exp backoff (1s/2s/4s) | Toast: "AI đang bận, thử lại sau" |
+| API error (500, 502, 503, 504) | Retry 3 lần exp backoff (1s/2s/4s) | Toast: "Lỗi server AI, thử lại sau" |
+| Rate limit (429) | Không retry | Toast: "Đã đạt giới hạn, thử lại sau" |
+| Invalid API key (401, 403) | Log lỗi + disable AI features trong phiên đó | Alert: "Lỗi cấu hình AI, vui lòng cập nhật app" |
+| Bad request (400) | Không retry — prompt sai | Toast: "Lỗi gửi yêu cầu AI" |
+| JSON parse error / zod validation fail | Retry 3 lần | Toast: "AI trả kết quả lạ, đang thử lại..." |
 | Image too large | Auto resize max 1024px | Tự động, user không thấy |
-| Empty response | Hiện fallback | Toast: "AI không có gợi ý, hãy thử lại" |
+| Empty response (no candidates) | Không retry | Toast: "AI không có gợi ý, hãy thử lại" |
+
+> Phase 1.5B implementation: xem `docs/5-development/phase-1.5b-ai-foundation.md` §3.5 error taxonomy.
 
 ### 5.2 Retry Strategy
 
 ```
-Attempt 1: Gọi API
+Attempt 1: Gọi API (timeout 15s)
   → Success → return
-  → Fail → wait 1s → Attempt 2
-    → Success → return
-    → Fail → Show error toast
-      → User có thể bấm "Thử lại" (manual retry, unlimited)
+  → Fail (5xx / network / parse)
+      → wait 1s → Attempt 2
+        → Success → return
+        → Fail → wait 2s → Attempt 3
+            → Success → return
+            → Fail → wait 4s → throw → Show error toast
+              → User có thể bấm "Thử lại" (manual retry, unlimited)
+
+KHÔNG retry: 4xx (400/401/403/429), empty response
 ```
+
+> Phase 1.5B revision (2026-04-30): tăng từ 1 retry → 3 retries exponential backoff. Xem `phase-1.5b-ai-foundation.md` §2 quyết định #6 và §3.4 implementation.
 
 ### 5.3 Offline Fallback
 
@@ -654,3 +667,4 @@ Component → AI Strategy Service → GeminiService → Gemini API
 | 1.0 | 2026-04-15 | Initial AI Strategy — model, prompts, cost, error handling, behavior rules |
 | 1.1 | 2026-04-18 | §1 clarify "8 templates / 6 features", §4.3 internal quota limit thay Rate Limit, §4.4 Developer key ship trong APK (D3) |
 | 1.2 | 2026-04-18 | Thêm §3.9 AI Ingredient Lookup (F-01) → "9 templates / 7 features". §5.1 Invalid API key không còn redirect Settings. §7 Service Layer: thêm `lookupIngredient` + đánh dấu phase mapping cho mỗi method |
+| 1.3 | 2026-04-30 | Phase 1.5B kickoff. §1 default model → `gemini-2.5-flash`. §4.3 bỏ quota limit. §4.4 obfuscation = XOR + base64 (chi tiết). §5.1/5.2 retry 3 lần exp backoff (1s/2s/4s) thay vì 1 lần. Cross-link sang `docs/5-development/phase-1.5b-ai-foundation.md`. |

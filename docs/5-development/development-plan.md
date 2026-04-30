@@ -43,7 +43,7 @@ Tài liệu này mô tả **kế hoạch phát triển theo giai đoạn** để
 |---|--------|-----------|--------|
 | D1 | Seed nutrition data | Curated **20 món Việt core** (6 sáng / 7 trưa / 7 tối) + ingredient set liên quan; external datasets chỉ dùng để bootstrap/discovery | Cần seed pipeline cho `ingredients.json` + `dishes.json`, không seed đồ ăn vặt |
 | D2 | Seed exercise data | Scrape ExerciseDB/wger API + translate VN | Cần migration script + translate fields |
-| D3 | Gemini API key | Dev key ship trong APK (obfuscated + quota limit trong code) | ADR cần document security trade-off |
+| D3 | Gemini API key | Dev key ship trong APK (obfuscated XOR + base64). **Không quota limit** (paid tier, dev tự chịu cost — phù hợp product-vision §248). V2+ có thể cho user paste key riêng | ADR cần document security trade-off; revision 2026-04-30 bỏ quota limit theo phase-1.5b-ai-foundation.md §2 |
 | D4 | Photo storage (F-05) | Không lưu — AI analyze xong → discard ảnh | Đơn giản hóa Filesystem usage |
 | D5 | Backup/Export | Hoãn V2 — V1 communicate rõ với user | Onboarding + Settings cần disclaimer |
 | D6 | Schema migration | Version + sequential migrations (`db_version` field trong `app_config`) | Phase 1 cần setup migration system từ đầu |
@@ -160,7 +160,7 @@ AI features split 2 phases:
 
 **Deliverable:** F-01/F-02 PRD complete-done — user có thể dùng AI để lookup/autofill. Infra sẵn để Phase 2/5 plug templates mới mà không build lại.
 
-**Detail doc:** `phase-1.5b-ai-foundation.md` (sẽ viết khi bắt đầu Phase 1.5B)
+**Detail doc:** [`phase-1.5b-ai-foundation.md`](./phase-1.5b-ai-foundation.md) — chốt 10 quyết định kiến trúc + scope + flow + file list + test plan (2026-04-30).
 
 ---
 
@@ -333,3 +333,4 @@ Sau khi end phase:
 | 1.1 | 2026-04-18 | Audit round 1-2 fixes: dependency graph, Phase 3 card spec, migration naming sync với data-model.md, DishIngredientRepo typo, Document Map status tags |
 | 1.2 | 2026-04-18 | Audit round 3: **thêm Phase 1.5B "AI Foundation"** — tách GeminiService ra khỏi Phase 5 để F-01/F-02 PRD complete-done. 6 phases → 7 phases. Update Phase 1/2/5 scope accordingly. |
 | 1.3 | 2026-04-18 | Audit round 4: Phase 5 template count 4→5 (thêm Weekly Review), ADR-001 gating Phase 1.5B (thay Phase 5), Phase 2 explicit dependency note, Phase 3 Dashboard rationale clarify |
+| 1.4 | 2026-04-30 | Phase 1.5B kickoff: D3 bỏ quota limit (paid tier, dev tự chịu cost). Thêm link tới `phase-1.5b-ai-foundation.md` (chốt 10 quyết định kiến trúc). |
