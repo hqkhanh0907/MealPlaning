@@ -91,3 +91,45 @@ export function levenshtein(a: string, b: string): number {
   const dist = prev[n];
   return dist > THRESHOLD ? SENTINEL : dist;
 }
+
+/** Read-only candidate shape consumed by `findFuzzyMatches`. */
+export interface FuzzyCandidate {
+  readonly id: string;
+  readonly name: string;
+}
+
+/** Read-only result entry returned by `findFuzzyMatches`. */
+export interface FuzzyMatchResult {
+  readonly match: FuzzyCandidate;
+  readonly distance: number;
+}
+
+/**
+ * Find all candidates whose normalized name is within Levenshtein distance 2
+ * of the normalized target. Results are sorted by distance ascending; ties
+ * preserve original candidate order.
+ *
+ * Pre-normalizes target and every candidate exactly once. Candidates with
+ * distance > 2 (sentinel 3) are filtered out.
+ *
+ * Reference: phase-1.5b §2-bis Q5-C ("local fuzzy match post-process").
+ */
+export function findFuzzyMatches(
+  target: string,
+  candidates: readonly FuzzyCandidate[],
+): readonly FuzzyMatchResult[] {
+  const normalizedTarget = normalize(target);
+  const out: FuzzyMatchResult[] = [];
+
+  for (const c of candidates) {
+    const d = levenshtein(normalizedTarget, normalize(c.name));
+    if (d <= 2) {
+      out.push({ match: c, distance: d });
+    }
+  }
+
+  // Stable sort by distance ascending. Array.prototype.sort is stable in
+  // ES2019+, which is fine for our Angular 21 / TS 5+ target.
+  out.sort((a, b) => a.distance - b.distance);
+  return out;
+}
