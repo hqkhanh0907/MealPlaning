@@ -4,6 +4,8 @@
 **Date:** 2026-04-30  
 **Status:** Active
 
+> **Revision 1.4 (2026-04-30) — F-02 nutrition expansion (Q7-B).** §3.2 mở rộng JSON schema cho row `is_in_db=false`: thêm `category` + 5 `*_per_100g` + `confidence`. Phục vụ INSERT ingredient mới một round-trip mà không vi phạm RULE-DISH-TOTAL-04 (per-ingredient nutrition ≠ dish total). Xem `docs/5-development/phase-1.5b-ai-foundation.md` §2-bis (Q1-Q12 design decisions).
+>
 > **Revision 1.1 (2026-04-30) — Gram-only absolute.** Ba prompt template ingredient-level đã được rewrite: §3.1 (Image Analysis), §3.2 (Dish Auto-fill), §3.9 (Ingredient Lookup). Output chỉ chứa `gram_weight` cho ingredient amount và 5 macro per 100g cho nutrition. Không còn `unit_id`, `amount_value`, `display_unit`, `density_g_per_ml`, `factor_to_basis`, `units[]`, `nutrition_basis_unit`. Xem PRD §F-01 và `docs/4-architecture/business-rules.md` (RULE-DI-GRAM-01..05) để biết lý do.
 
 ---
@@ -134,28 +136,40 @@ Rules:
 
 ### 3.2 AI Dish Auto-fill (F-02)
 
-**Trigger:** User nhập tên món → bấm 🤖 AI Auto-fill
+**Trigger:** User nhập tên món → bấm 🤖 AI tự điền (Phase 1.5B Q1-A: nút trong form `dish-add`)
 
 **Input:**
 - Tên món: user input
-- DB ingredient names: danh sách nguyên liệu trong DB
+- DB ingredient list: `[{id, name, category}]` (truyền nguyên list, AI tự match)
 
-**Prompt (gram-only revision):**
+**Prompt (gram-only + Q7-B nutrition expansion, revision 1.2):**
 ```
 Cho món "{dish_name}", liệt kê nguyên liệu thông dụng cho 1 phần ăn.
 
 Danh sách nguyên liệu trong database (ưu tiên match):
-{db_ingredient_names}
+{db_ingredient_list}    // dạng "id | name | category", một dòng/ingredient
 
-Trả JSON:
+Trả JSON theo schema:
 {
   "dish_name": string,
   "servings": 1,
   "ingredients": [
     {
-      "name": string,                  // Ưu tiên match DB
-      "gram_weight": number,           // Lượng GRAM (luôn là gram, 0.1–10000)
-      "is_in_db": boolean
+      "name": string,                       // Ưu tiên tên đúng như DB nếu match
+      "gram_weight": number,                // Lượng GRAM (luôn là gram, 0.1–10000)
+      "is_in_db": boolean,                  // true nếu match DB
+      "matched_ingredient_id": string|null, // BẮT BUỘC khi is_in_db=true; lấy từ list
+
+      // CHỈ trả 6 field dưới khi is_in_db=false (ingredient sẽ được tạo mới):
+      "category": string|null,              // 'Thịt'|'Hải sản'|'Rau củ'|'Trái cây'|
+                                            // 'Ngũ cốc'|'Sữa & trứng'|'Gia vị'|
+                                            // 'Đồ uống'|'Khác'
+      "calories_per_100g": number|null,     // kcal/100g (PER-INGREDIENT, không phải total)
+      "protein_per_100g": number|null,      // g/100g
+      "carbs_per_100g": number|null,
+      "fat_per_100g": number|null,
+      "fiber_per_100g": number|null,
+      "confidence": "high"|"medium"|"low"|null   // độ tự tin số liệu nutrition
     }
   ]
 }
@@ -163,12 +177,21 @@ Trả JSON:
 Rules:
 - LUÔN trả gram. Không có unit nào khác (không cup, không muỗng, không quả).
 - Liquid quy về gram bằng quy ước 1 ml ≈ 1 g cho nước (sữa/dầu xấp xỉ).
-- Không trả total nutrition — app sẽ tính từ ingredient nutrition canonical trong DB.
+- KHÔNG trả total nutrition của dish. App sẽ tính total derived từ
+  dish_with_totals VIEW dựa trên gram_weight × ingredient nutrition canonical.
+- Khi is_in_db=true: BỎ TRỐNG (null) toàn bộ 6 field nutrition + category;
+  app sẽ dùng dữ liệu canonical từ DB qua matched_ingredient_id.
+- Khi is_in_db=false: BẮT BUỘC điền đủ category + 5 nutrition + confidence
+  (phục vụ INSERT ingredient mới).
+- confidence='low' khi nguyên liệu lạ/khó tra cứu, để app cảnh báo user.
 ```
 
-**Post-processing:** Tương tự Image Analysis — match DB → hỏi user ingredient mới → tạo dish (`type = 'ai_autofill'`, `source = 'ai'`) + dish_ingredient rows (chỉ `gram_weight`).
+**Post-processing (Phase 1.5B §4.2 F-02 flow):**
+1. Local fuzzy-match Q5-C (normalize + Levenshtein) cho row `is_in_db=false` để bắt case AI thiếu dấu / khác hoa thường khi DB đã có ingredient tương đương.
+2. Cho user xem sheet, sửa gram, xóa/thêm row, edit nutrition row "+" (Q8-C).
+3. Atomic transaction Q6-A: INSERT ingredient mới (`source='ai'`) → INSERT/UPDATE dish (`type='ai_autofill'`, `source='ai'`) → INSERT dish_ingredient (chỉ `gram_weight`).
 
-> **Lưu ý kiến trúc (RULE-DISH-TOTAL-04):** AI auto-fill **CHỈ** trả về danh sách ingredient + `gram_weight`. App **không bao giờ** persist total nutrition do AI tự sinh ra. Total nutrition của dish được tính derived từ `dish_with_totals` VIEW dựa trên ingredient nutrition canonical trong DB (tham khảo `docs/4-architecture/business-rules.md`). Nếu prompt tương lai có trường `total_*` thì phải bị strip khi lưu.
+> **Lưu ý kiến trúc (RULE-DISH-TOTAL-04 — không vi phạm):** Các field `*_per_100g` ở schema này là **nutrition canonical PER-INGREDIENT** (đơn vị /100g), được dùng để INSERT row mới vào bảng `ingredient` khi `is_in_db=false`. Đây KHÔNG phải total nutrition của dish. Total dish nutrition vẫn được tính derived từ `dish_with_totals` VIEW (gram_weight × per-100g) — không bao giờ persist từ AI. Nếu prompt tương lai có field `total_*` ở cấp dish thì phải bị strip khi lưu.
 
 ---
 
@@ -668,3 +691,4 @@ Component → AI Strategy Service → GeminiService → Gemini API
 | 1.1 | 2026-04-18 | §1 clarify "8 templates / 6 features", §4.3 internal quota limit thay Rate Limit, §4.4 Developer key ship trong APK (D3) |
 | 1.2 | 2026-04-18 | Thêm §3.9 AI Ingredient Lookup (F-01) → "9 templates / 7 features". §5.1 Invalid API key không còn redirect Settings. §7 Service Layer: thêm `lookupIngredient` + đánh dấu phase mapping cho mỗi method |
 | 1.3 | 2026-04-30 | Phase 1.5B kickoff. §1 default model → `gemini-2.5-flash`. §4.3 bỏ quota limit. §4.4 obfuscation = XOR + base64 (chi tiết). §5.1/5.2 retry 3 lần exp backoff (1s/2s/4s) thay vì 1 lần. Cross-link sang `docs/5-development/phase-1.5b-ai-foundation.md`. |
+| 1.4 | 2026-04-30 | Phase 1.5B F-02 design lock (Q1-Q8). §3.2 prompt schema mở rộng theo Q7-B: row `is_in_db=false` trả thêm `category` + 5 `*_per_100g` + `confidence`. Note rõ KHÔNG vi phạm RULE-DISH-TOTAL-04 (per-ingredient ≠ dish total). Trigger label đổi sang "AI tự điền" (Q1-A). Post-processing reference Phase 1.5B §4.2 cho fuzzy-match Q5-C, Q8-C edit, Q6-A atomic. |

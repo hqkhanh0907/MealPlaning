@@ -4,6 +4,8 @@
 **Date:** 2026-04-30  
 **Status:** Active
 
+> **Revision 1.2 (2026-04-30) — F-02 confirm modal nguyên liệu mới (Phase 1.5B Q11+Q12).** §F-02 step 6 (AI Auto-fill flow) cập nhật wording: từ "Hỏi: Lưu N nguyên liệu mới?" sang "Confirm modal với checkbox per-row, ràng buộc dish ≥ 1 ingredient sau filter, atomic transaction commit". Chi tiết tham khảo `docs/5-development/phase-1.5b-ai-foundation.md` §2-bis Q1-Q12.
+>
 > **Revision 1.1 (2026-04-30) — Gram-only absolute.** F-02.5 (Kho nguyên liệu & Measurement Layer) đã bị loại bỏ hoàn toàn. F-01 và F-02 đã được rewrite theo triết lý gram-only: mọi lượng là gram, mọi nutrition theo `100g`, không modifier, không edible yield, không density, không snapshot, không pantry. Xem F-01 §"Triết lý gram-only" để biết lý do và trade-off. Mockup cũ tham chiếu F-02.5 đã bị deprecate, sẽ refactor trong scope mockup phase-1.
 
 ---
@@ -155,8 +157,11 @@ Ingredient {
 4. User review: sửa gram, bỏ/thêm nguyên liệu
 5. Confirm → Lưu món
 6. Nếu có nguyên liệu mới (chưa có trong DB):
-   → Hỏi: "Lưu 3 nguyên liệu mới vào DB chung?"
-   → User chọn lưu hoặc bỏ qua
+   → Hiện confirm modal "Lưu N nguyên liệu mới vào DB?" với checkbox per-row
+     (default all-checked). Bỏ check = ingredient đó KHÔNG được tạo + KHÔNG vào dish.
+   → Ràng buộc: tổng nguyên liệu giữ lại (DB matched + checked new) ≥ 1.
+   → User bấm Tiếp tục → atomic transaction lưu cả ingredient mới + dish + dish_ingredient.
+   → Chi tiết design: `docs/5-development/phase-1.5b-ai-foundation.md` §2-bis Q11/Q12.
 ```
 
 **Dữ liệu món ăn:**
