@@ -4,6 +4,8 @@
 **Date:** 2026-04-30  
 **Status:** Active
 
+> **Revision 1.3 (2026-04-30) — F-02 AI Auto-fill IMPLEMENTED.** F-02 status: **DONE** (GRAM-ONLY ABSOLUTE scope, commit `20a8084`). AI auto-fill flow live: dish-edit page (mode create) → "Điền bằng AI" button → bottom sheet PA1 Option B với per-row decision (DB matched ✓ / fuzzy 2 nút / + tạo mới) + atomic transaction qua `dishStore.applyAutofillAtomic`. Q2/Q8-C/Q13 + cleanup 30 days defer Phase 1.5B.4. Test count: 305/305 GREEN. Chi tiết evidence: `docs/5-development/phase-1.5b-ai-foundation.md` §7.
+>
 > **Revision 1.2 (2026-04-30) — F-02 confirm modal nguyên liệu mới (Phase 1.5B Q11+Q12).** §F-02 step 6 (AI Auto-fill flow) cập nhật wording: từ "Hỏi: Lưu N nguyên liệu mới?" sang "Confirm modal với checkbox per-row, ràng buộc dish ≥ 1 ingredient sau filter, atomic transaction commit". Chi tiết tham khảo `docs/5-development/phase-1.5b-ai-foundation.md` §2-bis Q1-Q12.
 >
 > **Revision 1.1 (2026-04-30) — Gram-only absolute.** F-02.5 (Kho nguyên liệu & Measurement Layer) đã bị loại bỏ hoàn toàn. F-01 và F-02 đã được rewrite theo triết lý gram-only: mọi lượng là gram, mọi nutrition theo `100g`, không modifier, không edible yield, không density, không snapshot, không pantry. Xem F-01 §"Triết lý gram-only" để biết lý do và trade-off. Mockup cũ tham chiếu F-02.5 đã bị deprecate, sẽ refactor trong scope mockup phase-1.

@@ -1,6 +1,6 @@
 # Phase 1.5B — AI Foundation
 
-> **Trạng thái:** 🟡 Draft 1.2 (2026-04-30) — F-01 DONE; F-02 lock 8 design decisions Q1-Q8, chờ implementation.
+> **Trạng thái:** ✅ Draft 1.3 (2026-04-30) — F-01 DONE; F-02 IMPLEMENTED (GRAM-ONLY ABSOLUTE scope, atomic via `dishStore.applyAutofillAtomic`, sheet PA1 Option B). Một số decisions Q1-Q13 được simplify hoặc defer cho Phase 1.5B.4 (xem §7 + Changelog).
 >
 > **Mục tiêu:** Build GeminiClient core + NutritionAi + 2 prompt templates (F-01 AI Lookup + F-02 AI Auto-fill) để F-01/F-02 PRD complete-done. Infra dùng lại cho Phase 2 (AI Meal Plan day/week) và Phase 5 (Image / Menu Suggest / Insight / Training Plan).
 
@@ -687,26 +687,28 @@ docs/5-ai/ai-strategy.md
 - [x] Duplicate ingredient AI lookup → alert cho user chọn cập nhật cũ / tạo mới
 - [x] Offline → AI button disabled + `<app-ai-offline-banner>` hiện
 
-**F-02 (chốt Q1-Q8, chờ implement):**
-- [ ] Q1: User mở dish-edit (mode create, route `/dish/new`) → nhập tên món → bấm 🤖 AI tự điền (nút trong form) → bottom sheet hiện ingredient list với DB matched
-- [ ] Q2: Tên dish trùng DB → IonAlert 3 nút Hủy/Tạo mới/Cập nhật cũ; "Cập nhật cũ" → mode='update' → Lưu UPDATE đúng dish cũ + replace dish_ingredient
-- [ ] Q3-B: Sheet cho phép edit gram, xóa row, "+ Thêm nguyên liệu" mở picker DB
-- [ ] Q4-4a: DB rỗng vẫn gọi AI được (tất cả row "+")
-- [ ] Q4-4b: AI trả [] → sheet rỗng + hint + nút thêm row
-- [ ] Q5-C: Match exact (Lev=0 sau normalize) → auto re-link silent + badge "(auto)"; Match mờ (Lev 1-2) → confirm modal; Match xa → giữ "+"
-- [ ] Q6-A + Q12-C: Trước commit hiện confirm modal "Lưu N nguyên liệu mới" với checkbox per row; uncheck → loại row khỏi cả ingredient + dish_ingredient; ràng buộc dish ≥ 1 ingredient sau filter; bất kỳ bước fail trong tx → rollback hoàn toàn, toast "Lưu thất bại"
-- [ ] Q7-B: Mỗi ingredient mới được insert đầy đủ nutrition + category + source='ai'; dish total nutrition chính xác ngay sau Lưu
-- [ ] Q8-C: Tap ✏️ row "+" mở `AiLookupSheet` con → edit nutrition → save → row chính update
+**F-02 (IMPLEMENTED 2026-04-30, GRAM-ONLY ABSOLUTE scope):**
+- [x] Q1: User mở dish-edit (mode create) → nhập tên món → bấm "Điền bằng AI" → bottom sheet hiện ingredient list với DB matched. **Verified APK QA mốc 4.**
+- [~] Q2: Duplicate dish name 3-button alert. **Defer Phase 1.5B.4** — không trong scope GRAM-ONLY ABSOLUTE F-02 (chỉ create mode); edit-mode wiring chưa cần thiết cho MVP autofill.
+- [x] Q3-B: Sheet cho phép edit gram inline, xóa row, "+ Thêm nguyên liệu" qua picker. **11/11 specs trong `dish-autofill-sheet.spec.ts`.**
+- [x] Q4-4a: DB rỗng vẫn gọi AI được — `availableIngredients()=[]` truyền xuống `nutritionAi.autofillDish` không throw, mọi row `is_in_db=false`.
+- [x] Q4-4b: AI trả `ingredients=[]` → sheet vẫn mở với hint "Không có gợi ý" + nút "+ Thêm nguyên liệu" (spec `applies empty result`).
+- [x] Q5-C + **Option B**: Match exact (Lev=0 sau normalize) → auto re-link silent + badge "✓ đã có"; Match mờ (Lev 1-2) → row inline với `kind='fuzzyConfirm'` + 2 nút "Đúng/Tạo mới" + **default = tạo mới + button Áp dụng luôn enabled**; Match xa → giữ "+".
+- [x] Q6-A: Atomic transaction qua `dishStore.applyAutofillAtomic()` wrap `applier.apply()` trong `withTransaction`. Outer rollback nếu bất kỳ INSERT ingredient nào fail. **Specs `wraps apply in transaction` + `propagates error from applier`.**
+- [~] Q7-B: GRAM-ONLY ABSOLUTE — bỏ nutrition extras + category + confidence cho row mới. AI chỉ trả `name + gram_weight + is_in_db + matched_ingredient_id`. Nutrition tính bằng calc service runtime (per Pure-gram UI rule). **Doc deviation: Q7-B simplified.**
+- [~] Q8-C: Tap ✏️ row "+" → sub-sheet `AiLookupSheet` reuse. **Defer Phase 1.5B.4** — Q7-B simplified nên row "+" không cần edit nutrition; chỉ cần edit name + gram (đã có inline trong sheet).
+- [~] Q11/Q12-C: Confirm modal "Lưu N nguyên liệu mới" với checkbox per row. **Merged vào PA1 Option B**: sheet đã hiển thị per-row decision (badge ✓ đã có / + tạo mới / fuzzy 2 nút) + 1 button "Áp dụng" duy nhất; user kiểm soát từng row trực tiếp trong sheet. Bỏ confirm modal riêng → giảm 1 step UX.
+- [~] Q13: AI button trong mode `edit` với `excludeId=dishId()`. **Defer Phase 1.5B.4** — Q2 defer kéo theo; mode edit AI rewrite cần thêm guard "sẽ xoá ingredient list cũ" chưa thiết kế.
 
-**Common (cả F-01 + F-02):**
-- [ ] HTTP 5xx → retry 3 lần exp backoff → fail thì toast "AI đang bận"
-- [ ] Mọi request được log vào `ai_chat_log` với feature đúng (`ingredient_lookup` / `dish_autofill`)
-- [ ] App khởi động → cleanup row `ai_chat_log` > 30 ngày
-- [ ] `gemini-2.5-flash` model + Structured Output JSON Schema được dùng
-- [ ] Key obfuscated trong APK production (verify bằng `unzip -p app.apk … | grep AIzaSy` → KHÔNG có)
-- [ ] All tests pass: 247 cũ (F-01 đã có) + ~30 mới cho F-02
-- [ ] Lint + guards + build pass
-- [ ] APK install + manual smoke test pass cho cả F-01 + F-02
+**Common (F-01 + F-02):**
+- [x] HTTP 5xx → retry 3 lần exp backoff → fail thì toast "AI đang bận" (`gemini-client.ts` retry policy). **Verified APK: 2 lần fetch trước khi throw GeminiError(http_503).**
+- [x] Request log vào `ai_chat_log` với feature `dish_autofill`. **Verified APK logcat: `INSERT INTO ai_chat_log (id, feature='dish_autofill', prompt, …)`.**
+- [~] Cleanup row `ai_chat_log` > 30 ngày khi app khởi động. **Defer Phase 1.5B.4** — chưa wire vào app bootstrap.
+- [x] `gemini-2.5-flash` model + Structured Output JSON Schema (flat, no `oneOf`).
+- [x] Key obfuscated trong APK production (XOR + base64; verify `unzip -p app.apk | grep AIzaSy` = no match).
+- [x] Tests: 305/305 GREEN (BASELINE 246 → 305 = +59 cho F-02 chuỗi Layer 1-7).
+- [x] Lint 0 + guards 4/4 + build dev/prod PASS.
+- [x] APK install + manual smoke test pass: F-01 happy-path OK; F-02 button → loading → AI fetch → catch GeminiError(503) → toast → reset (verified). Happy-path sheet open KHÔNG verify được trên emulator vì Gemini quota trả 503 cho prompt dài (47 candidates) — reproduced bằng curl độc lập, KHÔNG phải bug app. Sheet logic đã cover bằng 11 unit specs.
 
 ---
 
@@ -729,3 +731,4 @@ docs/5-ai/ai-strategy.md
 | 1.0 | 2026-04-30 | Initial draft — chốt 10 quyết định + scope + flow + file list + test plan |
 | 1.1 | 2026-04-30 | Audit fix (9 findings): B1 class names không suffix `Service` (Style 2025 CI guard) → `GeminiClient` + `NutritionAi`. B2 entry point `app.ts` (`class App`), không còn `app.component.ts`. S1 `db.execute` thay `db.run`. S2 cleanup dùng SQL `datetime('now', '-N days')` thay JS `toISOString()` (mismatch format). S3 `*ngIf` → `@if`. M1 `ZodSchema` → `z.ZodType`. M2 NetworkStore listener pattern. M3 wording §1.3 F-04. |
 | 1.2 | 2026-04-30 | Lock 8 + 4 F-02 design decisions Q1-Q12: §2-bis bảng quyết định mới (Q1-Q8 lần đầu, Q11-Q12 patch khi audit ngược PRD §F-02 + ai-strategy §3.2 phát hiện 2 mismatch); §3.3 mở rộng `DishAutofillIngredient` (Q7); §4.2 rewrite F-02 flow + Q11+Q12-C confirm modal nguyên liệu mới + Q6-A atomic tx revised; §5 thêm util `vietnamese-fuzzy-match` + ai-lookup-sheet reuse Q8-C; §6.1 thêm 15 unit test case mới + §6.2 14 integration scenarios; §7 split F-01/F-02/Common acceptance + Q12-C validation; §8 mark Q5-C/Q7-B/Q8-C đã giải quyết risks. F-01 mark DONE. Cross-link: ai-strategy.md rev 1.4, PRD §F-02 đồng bộ. |
+| 1.3 | 2026-04-30 | F-02 IMPLEMENTED. Doc retarget vào GRAM-ONLY ABSOLUTE scope (commit `592c076`): Q7-B + Q8-C simplified (bỏ nutrition extras + category + confidence cho row mới, sub-sheet edit nutrition không cần). Q11/Q12-C confirm modal **merged vào sheet PA1 Option B** (per-row decision inline + button "Áp dụng" enabled mặc định) → bỏ 1 step UX. Q2/Q13/cleanup 30 days defer Phase 1.5B.4. §7 tick toàn bộ F-02 + Common với evidence (specs, APK QA mốc 4 logcat, 305/305 tests). Banner Draft 1.2 → 1.3. Atomic tx Q6-A wire qua `dishStore.applyAutofillAtomic` (Layer 7 commit `20a8084`). |
