@@ -15,7 +15,7 @@
 | 1 | `GeminiClient` (core) | HTTP client gọi Gemini REST API, retry, JSON parsing, log vào `ai_chat_log`, network detection |
 | 2 | `NutritionAi` (wrapper) | 2 method: `lookupIngredient(name)`, `autofillDish(name, dbIngredients)` |
 | 3 | 2 prompt templates | §3.2 Dish Auto-fill + §3.9 Ingredient Lookup (xem `docs/5-ai/ai-strategy.md`) |
-| 4 | UI: AI button trong `ingredient-add` + `dish-add` | Trigger AI flow + bottom sheet preview |
+| 4 | UI: AI button trong `ingredient-edit` + `dish-edit` (cả mode create + edit) | Trigger AI flow + bottom sheet preview. F-01 reuse `ingredient-edit.page`; F-02 reuse `dish-edit.page` (1 page xử cả 2 mode qua `dishId` signal). |
 | 5 | Bottom sheet preview | Sau khi AI trả → hiển thị form pre-fill, user edit + Lưu |
 | 6 | `<app-ai-offline-banner>` component | Hiển thị khi offline (Capacitor Network) |
 | 7 | Error handling | Toast theo §5.1 ai-strategy.md (đã update theo phase này) |
@@ -63,7 +63,7 @@
 
 | # | Topic | Chốt | Reasoning |
 |---|-------|------|-----------|
-| Q1 | UI entry point | **A** — Nút "🤖 AI tự điền" nằm TRONG form `dish-add` (giống F-01). FAB "AI tự điền từ tên món" ở `management.page.ts` → navigate sang `/tabs/management/dish/new`, user gõ tên rồi bấm nút trong page. | Nhất quán với F-01, reuse logic loading/offline banner/error toast. Khớp doc §4.2 nguyên văn. |
+| Q1 | UI entry point | **A** — Nút "🤖 AI tự điền" nằm TRONG form `dish-edit` page (giống F-01 thêm vào `ingredient-edit`). FAB "AI tự điền từ tên món" ở `management.page.ts` → navigate sang `/tabs/management/dish/new`, user gõ tên rồi bấm nút trong page. AI button HIỆN cả mode create + mode edit (xem Q13). | Nhất quán với F-01, reuse logic loading/offline banner/error toast. `dish-edit.page` đã xử cả create + edit qua `dishId` signal nên không tạo page mới. |
 | Q2 | Duplicate dish detection | **A** — Check trùng TRƯỚC khi gọi AI (Vietnamese-aware: `removeAccents` + lowercase + trim). Nếu match → IonAlert 3 nút: Hủy / Tạo mới / **Cập nhật cũ**. "Cập nhật cũ" → sheet ở `mode='update'` với banner "Đang cập nhật '<tên>' đã có trong DB", khi Lưu sẽ UPDATE dish + DELETE/INSERT dish_ingredient trong cùng transaction. | Nhất quán F-01. User được cảnh báo sớm, không tốn token AI nếu chỉ muốn xem. |
 | Q3 | Sheet edit scope (V1) | **B** — User có thể: (a) edit gram per row, (b) xóa row, (c) **thêm row mới** qua nút "+ Thêm nguyên liệu" mở picker chọn ingredient từ DB. KHÔNG cho edit tên dish, KHÔNG cho edit servings (giữ `=1` cứng theo §3.3). | Đủ dùng thực tế (AI thiếu ingredient → tự bổ sung), không phình scope. |
 | Q4 | Edge cases dữ liệu | **B** — (4a) DB rỗng: vẫn gọi AI với `dbIngredients=[]`, mọi row đều `isInDb=false` → "+" hết. (4b) AI trả `ingredients: []`: mở sheet RỖNG với header tên dish + hint "AI không có gợi ý, hãy tự thêm" → user dùng nút "+ Thêm nguyên liệu" build dish. | Tận dụng UI sheet, không mất tên user đã gõ. Phụ thuộc Q3=B. |
@@ -74,6 +74,7 @@
 | Q10 | Sync prompt template ai-strategy.md | **A** — Update `docs/5-ai/ai-strategy.md` §3.2 lên rev 1.4: mở rộng JSON schema cho row `is_in_db=false` (5 `*_per_100g` + `category` + `confidence`); ghi rõ KHÔNG vi phạm RULE-DISH-TOTAL-04 (per-ingredient ≠ dish total). | Canonical prompt template phải đồng bộ với schema TS §3.3. |
 | Q11 | Sync UX prompt PRD §F-02 step 6 | **B** — Giữ UX "Hỏi user lưu N nguyên liệu mới vào DB". Triển khai qua confirm modal Q12-C trước commit transaction. PRD §F-02 step 6 vẫn giữ wording. | User mất kiểm soát nếu auto-insert silent. UX giữ transparency với data sạch. |
 | Q12 | Cách hiện confirm modal nguyên liệu mới | **C** — Per-row checkbox + footer hint "Bỏ check = không tạo ingredient + không thêm vào món". Validation: tổng row giữ (matched DB + checked new) ≥ 1, nếu = 0 → disable "Tiếp tục" + hint "Món phải có ít nhất 1 nguyên liệu". User toàn quyền pick, dish không bao giờ rỗng. | Linh hoạt hơn all-or-none (Q12-A), explicit hơn auto-insert (Q11-A). Tích hợp gọn vào atomic tx Q6-A. |
+| Q13 | AI button khả dụng mode `edit` | **B** — AI button HIỆN cả khi `mode='create'` LẪN `mode='edit'`. Trong mode edit, duplicate check (Q2) phải `excludeId = dishId()` để KHÔNG tự coi mình là trùng. Khi bấm AI ở mode edit → flow giống create, sheet `mode='update'` thay thế ingredient list hiện tại; user vẫn có quyền hủy. | User edit món cũ vẫn cần AI gợi ý (vd nhập tay sai gram → muốn AI tính lại). Excluding self là invariant bắt buộc. |
 
 ---
 
@@ -347,7 +348,9 @@ async cleanupOldLogs(daysToKeep: number): Promise<void> {
 [Pop bottom sheet, refresh ingredient list]
 ```
 
-### 4.2 F-02 AI Auto-fill Flow (`dish-add` page)
+### 4.2 F-02 AI Auto-fill Flow (`dish-edit` page)
+
+> **Naming clarification (audit 2026-04-30):** code path là `src/app/features/management/dish-edit/dish-edit.page.{ts,html}`. Page này xử cả mode `create` (route `/dish/new`) lẫn mode `edit` (route `/dish/:id`) qua signal `dishId`. AI button hiện ở cả 2 mode (xem Q13).
 
 > Áp dụng 8 quyết định Q1-Q8 ở §2-bis. Flow này là source-of-truth cho implementation.
 
@@ -356,7 +359,7 @@ async cleanupOldLogs(daysToKeep: number): Promise<void> {
      │
      │ Navigate (giữ handler hiện tại)
      ▼
-[dish-add page (Q1: nút AI nằm trong form)]
+[dish-edit page, mode=create (Q1: nút AI nằm trong form)]
      │
      │ 1. User gõ tên "Phở bò"
      │ 2. User bấm 🤖 AI tự điền
@@ -594,7 +597,7 @@ src/environments/
 src/app/features/management/ingredient-add/ingredient-add.page.{ts,html}
   → Thêm 🤖 AI Lookup button + integrate NutritionAi
 
-src/app/features/management/dish-add/dish-add.page.{ts,html}
+src/app/features/management/dish-edit/dish-edit.page.{ts,html}
   → Thêm 🤖 AI Auto-fill button + integrate NutritionAi
 
 src/app/app.ts (class `App`)
@@ -640,13 +643,13 @@ docs/5-ai/ai-strategy.md
 | `ai-autofill-sheet.spec.ts` | User bấm "+ Thêm nguyên liệu" → picker → append row mới (Q3-B) | Add row |
 | `ai-autofill-sheet.spec.ts` | Tap ✏️ row "+" → mở AiLookupSheet con → save → row chính cập nhật (Q8-C) | Edit nutrition row "+" |
 | `ai-autofill-sheet.spec.ts` | mode='update' → banner "Đang cập nhật" hiện + Lưu → emit với existingDishId (Q2) | Update mode |
-| `dish-add.page.spec.ts` | Tên trùng DB → IonAlert 3 nút Hủy/Tạo mới/Cập nhật cũ (Q2-A) | Duplicate check |
-| `dish-add.page.spec.ts` | Q4-4a DB rỗng → vẫn gọi AI, mọi row "+" | Empty DB |
-| `dish-add.page.spec.ts` | Q4-4b AI trả [] → sheet rỗng + nút thêm row | Empty result |
-| `dish-add.page.spec.ts` | Q5-C Lev=0 → auto re-link, không show modal; Lev=1-2 → show confirm modal | Fuzzy match integration |
+| `dish-edit.page.spec.ts` | Tên trùng DB → IonAlert 3 nút Hủy/Tạo mới/Cập nhật cũ (Q2-A) | Duplicate check |
+| `dish-edit.page.spec.ts` | Q4-4a DB rỗng → vẫn gọi AI, mọi row "+" | Empty DB |
+| `dish-edit.page.spec.ts` | Q4-4b AI trả [] → sheet rỗng + nút thêm row | Empty result |
+| `dish-edit.page.spec.ts` | Q5-C Lev=0 → auto re-link, không show modal; Lev=1-2 → show confirm modal | Fuzzy match integration |
 | `ai-autofill-sheet.spec.ts` | Q11+Q12-C confirm modal: render N row "+" + checkbox default-checked; uncheck 1 → emit save với row đó loại khỏi cả ingredient mới + dish_ingredient | New ingredient confirm |
 | `ai-autofill-sheet.spec.ts` | Q12-C validation: uncheck hết + 0 row matched DB → "Tiếp tục" disabled + hint hiện | Empty dish guard |
-| `dish-add.page.spec.ts` | Q6-A: mock tx fail giữa chừng → rollback → không có ingredient/dish nào trong DB | Atomic transaction |
+| `dish-edit.page.spec.ts` | Q6-A: mock tx fail giữa chừng → rollback → không có ingredient/dish nào trong DB | Atomic transaction |
 
 ### 6.2 Integration tests (emulator)
 
@@ -666,7 +669,7 @@ docs/5-ai/ai-strategy.md
 11. Q8-C: tap ✏️ row "+" → sheet con mở → edit calories → Save → row chính update; Lưu sheet chính → ingredient mới có nutrition đã edit
 12. Q4-4b: nhập "abcxyz" → AI trả [] → sheet rỗng + hint "tự thêm" hiện
 13. Q6-A rollback: simulate FK error giữa transaction → toast "Lưu thất bại", DB không có dish/ingredient mới (cần test bằng mock service)
-14. Tắt wifi trong dish-add → button "AI tự điền" disabled + banner offline
+14. Tắt wifi trong dish-edit (mode create) → button "AI tự điền" disabled + banner offline
 
 ### 6.3 Coverage target
 
@@ -685,7 +688,7 @@ docs/5-ai/ai-strategy.md
 - [x] Offline → AI button disabled + `<app-ai-offline-banner>` hiện
 
 **F-02 (chốt Q1-Q8, chờ implement):**
-- [ ] Q1: User mở dish-add → nhập tên món → bấm 🤖 AI tự điền (nút trong form) → bottom sheet hiện ingredient list với DB matched
+- [ ] Q1: User mở dish-edit (mode create, route `/dish/new`) → nhập tên món → bấm 🤖 AI tự điền (nút trong form) → bottom sheet hiện ingredient list với DB matched
 - [ ] Q2: Tên dish trùng DB → IonAlert 3 nút Hủy/Tạo mới/Cập nhật cũ; "Cập nhật cũ" → mode='update' → Lưu UPDATE đúng dish cũ + replace dish_ingredient
 - [ ] Q3-B: Sheet cho phép edit gram, xóa row, "+ Thêm nguyên liệu" mở picker DB
 - [ ] Q4-4a: DB rỗng vẫn gọi AI được (tất cả row "+")
