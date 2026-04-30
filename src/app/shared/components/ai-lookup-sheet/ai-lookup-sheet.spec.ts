@@ -16,7 +16,6 @@ describe('AiLookupSheet', () => {
     fat: 3.6,
     fiber: 0,
     confidence: 'high',
-    note: 'USDA',
     raw: {
       name: 'Ức gà luộc',
       category: 'Thịt',
@@ -26,7 +25,6 @@ describe('AiLookupSheet', () => {
       fat: 3.6,
       fiber: 0,
       confidence: 'high',
-      note: 'USDA',
     },
   };
 

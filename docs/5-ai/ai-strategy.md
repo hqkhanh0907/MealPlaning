@@ -469,12 +469,11 @@ Trả JSON:
   "carbs": number,                 // g per 100g
   "fat": number,                   // g per 100g
   "fiber": number,                 // g per 100g
-  "confidence": "high" | "medium" | "low",
-  "note": string                   // Ghi chú nếu cần (VD: "đã nấu chín", "raw")
+  "confidence": "high" | "medium" | "low"
 }
 
 Rules:
-- Nếu tên mơ hồ (VD "thịt") → confidence: "low" + note yêu cầu rõ
+- Nếu tên mơ hồ (VD "thịt") → confidence: "low"
 - Phase 1 ưu tiên USDA làm nutrition authority chính ở mức ingredient-level
 - Nguồn phụ tiếng Việt chỉ dùng để hỗ trợ naming/alias hoặc fill gap sau khi review thủ công
 - KHÔNG được bịa số — nếu không chắc, confidence: "low"

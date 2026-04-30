@@ -53,7 +53,7 @@ describe('ingredient-lookup.prompt', () => {
   // -------------------------------------------------------------------------
 
   describe('ingredientLookupGeminiSchema', () => {
-    it('marks all 9 fields as required', () => {
+    it('marks all 8 fields as required', () => {
       expect(ingredientLookupGeminiSchema.required).toEqual([
         'name',
         'category',
@@ -63,7 +63,6 @@ describe('ingredient-lookup.prompt', () => {
         'fat',
         'fiber',
         'confidence',
-        'note',
       ]);
     });
 
@@ -99,18 +98,11 @@ describe('ingredient-lookup.prompt', () => {
       fat: 3.6,
       fiber: 0,
       confidence: 'high' as const,
-      note: 'Số liệu USDA, đã nấu chín',
     };
 
     it('parses a valid response', () => {
       const parsed = ingredientLookupResponseSchema.parse(valid);
       expect(parsed.name).toBe('Ức gà luộc');
-    });
-
-    it('defaults note to empty string when missing', () => {
-      const { note: _omit, ...without } = valid;
-      const parsed = ingredientLookupResponseSchema.parse(without);
-      expect(parsed.note).toBe('');
     });
 
     it('rejects negative calories', () => {

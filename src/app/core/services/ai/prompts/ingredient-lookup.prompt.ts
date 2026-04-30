@@ -5,7 +5,7 @@
  *   - docs/5-ai/ai-strategy.md §3.9 (gram-only revision)
  *   - docs/5-development/phase-1.5b-ai-foundation.md §4.1
  *
- * Output schema: 5 macro per 100g + name/category/confidence/note.
+ * Output schema: 5 macro per 100g + name/category/confidence.
  * KHÔNG có unit/density/conversion — gram-only absolute (RULE-DI-GRAM-01..05).
  *
  * Category strategy (Decision #10): AI được instruct list 11 enum value;
@@ -30,7 +30,6 @@ export const ingredientLookupResponseSchema = z.object({
   fat: z.number().min(0).max(100),
   fiber: z.number().min(0).max(100),
   confidence: z.enum(['high', 'medium', 'low']),
-  note: z.string().max(280).default(''),
 });
 
 export type IngredientLookupResponse = z.infer<typeof ingredientLookupResponseSchema>;
@@ -50,19 +49,8 @@ export const ingredientLookupGeminiSchema = {
     fat: { type: 'NUMBER' },
     fiber: { type: 'NUMBER' },
     confidence: { type: 'STRING', enum: ['high', 'medium', 'low'] },
-    note: { type: 'STRING' },
   },
-  required: [
-    'name',
-    'category',
-    'calories',
-    'protein',
-    'carbs',
-    'fat',
-    'fiber',
-    'confidence',
-    'note',
-  ],
+  required: ['name', 'category', 'calories', 'protein', 'carbs', 'fat', 'fiber', 'confidence'],
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -102,7 +90,7 @@ export function buildIngredientLookupPrompt(name: string): string {
     'Rules về số liệu:',
     '- Phase 1 ưu tiên USDA làm nutrition authority chính.',
     '- Nguồn phụ tiếng Việt chỉ dùng để hỗ trợ naming/alias.',
-    '- KHÔNG được bịa số — nếu không chắc, trả confidence: "low" + note giải thích.',
+    '- KHÔNG được bịa số — nếu không chắc, trả confidence: "low".',
     '- KHÔNG trả unit/measurement/density/conversion.',
     '',
     'Rules về confidence:',
@@ -119,8 +107,7 @@ export function buildIngredientLookupPrompt(name: string): string {
     '  "carbs": number,                 // g per 100g',
     '  "fat": number,                   // g per 100g',
     '  "fiber": number,                 // g per 100g',
-    '  "confidence": "high" | "medium" | "low",',
-    '  "note": string                   // Ghi chú nếu cần (VD: "đã nấu chín", "raw")',
+    '  "confidence": "high" | "medium" | "low"',
     '}',
   ].join('\n');
 }

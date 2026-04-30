@@ -80,7 +80,6 @@ describe('NutritionAi', () => {
       fat: 3.6,
       fiber: 0,
       confidence: 'high',
-      note: 'USDA',
     };
 
     beforeEach(() => {
@@ -112,7 +111,6 @@ describe('NutritionAi', () => {
       expect(result.category).toBe('Thịt');
       expect(result.calories).toBe(165);
       expect(result.confidence).toBe('high');
-      expect(result.note).toBe('USDA');
       expect(result.raw).toBe(validRaw);
     });
 

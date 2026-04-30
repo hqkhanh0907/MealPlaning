@@ -48,8 +48,6 @@ export interface IngredientLookupResult {
   fat: number;
   fiber: number;
   confidence: 'high' | 'medium' | 'low';
-  /** Empty string nếu AI không trả note. */
-  note: string;
   /** Đã raw (chưa map) — giữ để debug nếu cần. */
   raw: IngredientLookupResponse;
 }
@@ -148,7 +146,6 @@ export class NutritionAi {
       fat: response.fat,
       fiber: response.fiber,
       confidence: response.confidence,
-      note: response.note ?? '',
       raw: response,
     };
   }

@@ -33,7 +33,7 @@
   --padding-bottom: 24px;
 }
 
-// Stack form blocks (banner, badge, note, fields, grid, actions) bằng flex+gap
+// Stack form blocks (banner, badge, fields, grid, actions) bằng flex+gap
 // để có spacing đồng nhất giữa các .input-wrapper. `.form-field` host được
 // form-field.scss set `margin-bottom: 0`, nên cha PHẢI gánh gap (xem
 // design-system §8.6 spacing model).
@@ -70,21 +70,6 @@
   &.als-confidence--low {
     background: rgba(var(--ion-color-danger-rgb), 0.16);
     color: var(--ion-color-danger-shade);
-  }
-}
-
-.als-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  font-size: var(--font-size-body-sm);
-  color: var(--text-secondary);
-  line-height: 1.4;
-
-  ion-icon {
-    font-size: var(--font-size-subtitle);
-    flex: 0 0 auto;
-    margin-top: 2px;
   }
 }
 
