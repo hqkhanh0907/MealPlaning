@@ -1,0 +1,88 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"/>
+<title>Phase 1 — Management Empty</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_tokens.css">
+<style>
+.hdr{padding:8px 22px 6px;display:flex;justify-content:space-between;align-items:center}
+.hdr h1{font-family:var(--font-display);font-size:30px;font-style:italic;font-weight:500;letter-spacing:-0.02em;margin:0;color:var(--ink-1);line-height:1.05}
+.hdr-actions{display:flex;gap:8px}
+.hdr-icon{width:40px;height:40px;border-radius:99px;background:var(--bg-card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-1);box-shadow:var(--sh-xs)}
+.hdr-icon svg{width:18px;height:18px}
+.seg{margin:8px 22px 4px;background:var(--bg-card-soft);padding:4px;border-radius:99px;display:flex;border:1px solid var(--line)}
+.seg span{flex:1;text-align:center;font-size:13px;padding:9px 12px;border-radius:99px;color:var(--ink-2);font-weight:500;cursor:pointer}
+.seg span.act{background:var(--bg-card);color:var(--primary-deep);box-shadow:var(--sh-sm);font-weight:600}
+.search{margin:10px 22px;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r-md);padding:13px 16px;display:flex;align-items:center;gap:10px;color:var(--ink-3);font-size:14px;box-shadow:var(--sh-xs)}
+.search svg{width:16px;height:16px}
+.chips{margin:8px 22px 0;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;font-size:12px;padding:7px 14px;border-radius:99px;background:var(--bg-card);border:1px solid var(--line);color:var(--ink-2);font-weight:500;cursor:pointer;white-space:nowrap}
+.chip.act{background:var(--primary-soft);border-color:var(--primary-soft);color:var(--primary-ink);font-weight:600}
+.meta{padding:10px 22px 0;display:flex;justify-content:space-between;align-items:baseline}
+.meta .count{font-size:11px;color:var(--ink-2);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.meta .sort{font-size:12px;color:var(--primary);font-weight:600;display:flex;align-items:center;gap:4px}
+.list{flex:1;overflow-y:auto;scrollbar-width:none;padding:8px 22px 180px;display:flex;flex-direction:column;gap:10px}
+.list::-webkit-scrollbar{display:none}
+.ig-card{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;display:flex;align-items:center;gap:14px;box-shadow:var(--sh-xs);position:relative}
+.ig-emoji{width:48px;height:48px;border-radius:14px;background:var(--bg-card-soft);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.ig-info{flex:1;min-width:0}
+.ig-name{font-family:var(--font-display);font-size:17px;font-weight:500;font-style:italic;color:var(--ink-1);margin:0 0 2px;letter-spacing:-0.01em}
+.ig-meta{font-size:12px;color:var(--ink-2);display:flex;gap:6px;align-items:center}
+.ig-meta .dot{color:var(--ink-3)}
+.ig-meta b{color:var(--ink-1);font-weight:700;font-variant-numeric:tabular-nums}
+.ig-kcal{font-family:var(--font-display);font-size:20px;font-weight:500;color:var(--ink-1);font-variant-numeric:tabular-nums;letter-spacing:-0.02em}
+.ig-kcal sub{font-size:10px;color:var(--ink-2);font-family:var(--font-body);font-weight:500;margin-left:2px}
+.warn-dot{position:absolute;top:10px;right:12px;width:8px;height:8px;border-radius:99px;background:var(--warn)}
+.fab{position:absolute;right:20px;bottom:104px;background:var(--accent);color:#FFFCF6;border:0;height:56px;padding:0 22px;border-radius:var(--r-pill);display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:var(--sh-cta);font-family:inherit}
+.fab svg{width:18px;height:18px;stroke-width:2.4}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 40px 100px;text-align:center;gap:18px}
+.empty-art{width:120px;height:120px;border-radius:50%;background:var(--bg-card);border:2px dashed var(--line-strong);display:flex;align-items:center;justify-content:center;font-size:56px}
+.empty h2{font-family:var(--font-display);font-size:24px;font-style:italic;font-weight:500;color:var(--ink-1);margin:0;letter-spacing:-0.01em}
+.empty p{font-size:14px;color:var(--ink-2);margin:0;line-height:1.55;max-width:280px}
+.empty-cta{margin-top:8px;background:var(--accent);color:#FFFCF6;border:0;padding:14px 28px;border-radius:var(--r-pill);font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;font-family:inherit;box-shadow:var(--sh-cta);cursor:pointer}
+.empty-cta svg{width:16px;height:16px;stroke-width:2.4}
+.empty-link{font-size:13px;color:var(--primary);font-weight:600;text-decoration:underline;cursor:pointer}
+
+</style></head><body>
+
+<div class="head">
+<p class="tag">Phase 1 · Tab Quản lý</p>
+<h1>Empty State — Chưa có nguyên liệu</h1>
+<p>First-run hoặc sau khi xoá hết. CTA chính + link nhập thư viện gợi ý.</p>
+</div>
+
+<div class="suite-nav">
+<a href="index.html">← Gallery</a>
+<a href="01-management-overview.html" class="act">Overview</a>
+<a href="02-management-empty.html">Empty</a>
+<a href="03-ingredient-list.html">Ing List</a>
+<a href="04-ingredient-detail.html">Ing Detail</a>
+<a href="05-ingredient-add.html">Ing Add</a>
+</div>
+
+<div style="position:relative"><div class="notch"></div><div class="phone"><div class="app">
+<div class="sb"><span>9:41</span><span class="r">●●● 84%</span></div>
+<div class="hdr">
+  <h1>Quản lý ✿</h1>
+  <div class="hdr-actions">
+    <button class="hdr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg></button>
+  </div>
+</div>
+<div class="seg"><span class="act">Nguyên liệu</span><span>Món ăn</span></div>
+<div class="empty">
+  <div class="empty-art">🌱</div>
+  <h2>Chưa có nguyên liệu nào</h2>
+  <p>Thêm nguyên liệu đầu tiên để bắt đầu xây kho và tính dinh dưỡng cho bữa ăn của bạn.</p>
+  <button class="empty-cta">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    Thêm nguyên liệu đầu tiên
+  </button>
+  <span class="empty-link">Hoặc nhập từ thư viện gợi ý →</span>
+</div>
+<nav class="tabbar">
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1Z"/></svg>Tổng quan</span>
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Lịch ăn</span>
+<span class="tab act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14h12v6H6zM7 14a4 4 0 0 1-2-7 4 4 0 0 1 7-2 4 4 0 0 1 7 2 4 4 0 0 1-2 7"/></svg>Quản lý</span>
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5M3 7l4-4M21 17l-4 4M9 3 3 9M21 15l-6 6M4 13l3 3M17 7l3 3"/></svg>Tập luyện</span>
+</nav>
+</div></div></div>
+</body></html>

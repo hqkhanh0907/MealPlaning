@@ -1,0 +1,92 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"/>
+<title>Phase 1 — Search No Results</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_tokens.css">
+<style>.hdr{padding:8px 22px 6px;display:flex;justify-content:space-between;align-items:center}
+.hdr h1{font-family:var(--font-display);font-size:30px;font-style:italic;font-weight:500;letter-spacing:-0.02em;margin:0;color:var(--ink-1);line-height:1.05}
+.hdr-actions{display:flex;gap:8px}
+.hdr-icon{width:40px;height:40px;border-radius:99px;background:var(--bg-card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-1);box-shadow:var(--sh-xs)}
+.hdr-icon svg{width:18px;height:18px}
+.seg{margin:8px 22px 4px;background:var(--bg-card-soft);padding:4px;border-radius:99px;display:flex;border:1px solid var(--line)}
+.seg span{flex:1;text-align:center;font-size:13px;padding:9px 12px;border-radius:99px;color:var(--ink-2);font-weight:500}
+.seg span.act{background:var(--bg-card);color:var(--primary-deep);box-shadow:var(--sh-sm);font-weight:600}
+.search{margin:10px 22px;background:#FFFCF6;border:1px solid var(--primary-soft);border-radius:var(--r-md);padding:13px 16px;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-1)}
+.search svg{width:16px;height:16px;color:var(--primary)}
+.search .clear{margin-left:auto;width:18px;height:18px;border-radius:99px;background:var(--ink-3);color:#FFFCF6;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.empty-search{flex:1;display:flex;flex-direction:column;align-items:center;padding:40px 32px 0;text-align:center;gap:14px}
+.empty-art{width:80px;height:80px;border-radius:50%;background:var(--bg-card);border:2px dashed var(--line-strong);display:flex;align-items:center;justify-content:center;font-size:36px}
+.empty-search h2{font-family:var(--font-display);font-size:22px;font-style:italic;font-weight:500;color:var(--ink-1);margin:0;letter-spacing:-0.01em}
+.empty-search p{font-size:13px;color:var(--ink-2);margin:0;line-height:1.5;max-width:260px}
+.suggest-card{margin-top:16px;width:100%;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 18px 16px;text-align:left;box-shadow:var(--sh-xs)}
+.suggest-card h4{font-size:11px;font-weight:700;color:var(--ink-2);letter-spacing:.08em;text-transform:uppercase;margin:0 0 10px}
+.suggest-action{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.suggest-action:last-child{border-bottom:0}
+.suggest-icon{width:36px;height:36px;border-radius:10px;background:var(--primary-soft);color:var(--primary-deep);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.suggest-icon svg{width:18px;height:18px}
+.suggest-info{flex:1;display:flex;flex-direction:column;gap:1px}
+.suggest-info b{font-size:14px;color:var(--ink-1);font-weight:600}
+.suggest-info span{font-size:12px;color:var(--ink-2)}
+.suggest-info b em{font-style:normal;background:var(--accent-soft);padding:0 4px;border-radius:4px;color:var(--accent-ink)}
+.suggest-arrow{color:var(--ink-3)}
+.tabbar{position:absolute;bottom:0;left:0;right:0;background:rgba(247,242,234,.85);backdrop-filter:blur(20px) saturate(140%);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 16px 28px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink-3);font-size:10px;font-weight:500}
+.tab svg{width:22px;height:22px}
+.tab.act{color:var(--primary)}</style></head><body>
+<div class="head">
+<p class="tag">Phase 1 · Tab Quản lý</p>
+<h1>Search Empty — Không có kết quả</h1>
+<p>Search "măng tây trắng" không có trong kho. 3 hành động gợi ý: thêm mới, hỏi AI, search lỏng hơn.</p>
+</div>
+<div class="suite-nav"><a href="index.html">← Gallery</a>
+<a href="06-ingredient-edit.html">Ing Edit</a>
+<a href="07-measurement-add.html">Meas Add</a>
+<a href="08-measurement-edit.html">Meas Edit</a>
+<a href="09-soft-delete.html" class="act">Soft Delete</a>
+<a href="10-ingredient-search-empty.html">Search Empty</a>
+</div>
+<div style="position:relative"><div class="notch"></div><div class="phone"><div class="app">
+<div class="sb"><span>9:41</span><span class="r">●●● 84%</span></div>
+<div class="hdr">
+  <h1>Nguyên liệu</h1>
+  <div class="hdr-actions"><button class="hdr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg></button></div>
+</div>
+<div class="seg"><span class="act">Nguyên liệu</span><span>Món ăn</span></div>
+<div class="search">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+  <span style="flex:1;font-weight:500">măng tây trắng</span>
+  <span class="clear">×</span>
+</div>
+
+<div class="empty-search">
+  <div class="empty-art">🔎</div>
+  <h2>Không tìm thấy nguyên liệu</h2>
+  <p>Trong kho của bạn chưa có "măng tây trắng".</p>
+
+  <div class="suggest-card">
+    <h4>Bạn có thể</h4>
+    <div class="suggest-action">
+      <div class="suggest-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+      <div class="suggest-info"><b>Thêm "<em>măng tây trắng</em>" mới</b><span>Tự nhập hoặc dò USDA</span></div>
+      <span class="suggest-arrow">›</span>
+    </div>
+    <div class="suggest-action">
+      <div class="suggest-icon" style="background:var(--ai-soft);color:var(--ai-ink)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v4M3 5h4M19 17v4M17 19h4M9 11l3-8 3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/></svg></div>
+      <div class="suggest-info"><b>Tìm bằng AI</b><span>Hỏi Gemini về món gần giống</span></div>
+      <span class="suggest-arrow">›</span>
+    </div>
+    <div class="suggest-action">
+      <div class="suggest-icon" style="background:var(--bg-card-soft);color:var(--ink-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m21 21-4.3-4.3M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"/></svg></div>
+      <div class="suggest-info"><b>Thử "măng tây" thường</b><span>3 kết quả gần đúng</span></div>
+      <span class="suggest-arrow">›</span>
+    </div>
+  </div>
+</div>
+
+<nav class="tabbar">
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1Z"/></svg>Tổng quan</span>
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Lịch ăn</span>
+<span class="tab act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 14h12v6H6zM7 14a4 4 0 0 1-2-7 4 4 0 0 1 7-2 4 4 0 0 1 7 2 4 4 0 0 1-2 7"/></svg>Quản lý</span>
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6.5 6.5 17.5 17.5"/></svg>Tập luyện</span>
+</nav>
+</div></div></div>
+</body></html>

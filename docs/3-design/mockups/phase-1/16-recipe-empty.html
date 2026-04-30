@@ -1,0 +1,64 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"/>
+<title>Phase 1 — Recipe Empty</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_tokens.css">
+<style>.hdr{padding:8px 22px 6px;display:flex;justify-content:space-between;align-items:center}
+.hdr h1{font-family:var(--font-display);font-size:30px;font-style:italic;font-weight:500;letter-spacing:-0.02em;margin:0;color:var(--ink-1)}
+.hdr-icon{width:40px;height:40px;border-radius:99px;background:var(--bg-card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-1);box-shadow:var(--sh-xs)}
+.hdr-icon svg{width:18px;height:18px}
+.seg{margin:8px 22px 4px;background:var(--bg-card-soft);padding:4px;border-radius:99px;display:flex;border:1px solid var(--line)}
+.seg span{flex:1;text-align:center;font-size:13px;padding:9px 12px;border-radius:99px;color:var(--ink-2);font-weight:500}
+.seg span.act{background:var(--bg-card);color:var(--primary-deep);box-shadow:var(--sh-sm);font-weight:600}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 36px 100px;text-align:center;gap:16px}
+.empty-art{width:120px;height:120px;border-radius:50%;background:var(--bg-card);border:2px dashed var(--line-strong);display:flex;align-items:center;justify-content:center;font-size:56px}
+.empty h2{font-family:var(--font-display);font-size:24px;font-style:italic;font-weight:500;color:var(--ink-1);margin:0;letter-spacing:-0.01em}
+.empty p{font-size:14px;color:var(--ink-2);margin:0;line-height:1.5;max-width:280px}
+.empty-cta{margin-top:8px;background:var(--accent);color:#FFFCF6;border:0;padding:14px 28px;border-radius:var(--r-pill);font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;font-family:inherit;box-shadow:var(--sh-cta)}
+.empty-cta svg{width:16px;height:16px;stroke-width:2.4}
+.empty-link{font-size:13px;color:var(--primary);font-weight:600;text-decoration:underline}
+.tip{margin-top:18px;background:var(--ai-soft);border:1px solid #E0CFA8;border-radius:var(--r-md);padding:12px 14px;font-size:12px;color:var(--ai-ink);display:flex;gap:10px;text-align:left;max-width:300px}
+.tip svg{width:16px;height:16px;flex-shrink:0;margin-top:2px}
+.tabbar{position:absolute;bottom:0;left:0;right:0;background:rgba(247,242,234,.85);backdrop-filter:blur(20px) saturate(140%);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:10px 16px 28px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink-3);font-size:10px;font-weight:500}
+.tab svg{width:22px;height:22px}
+.tab.act{color:var(--primary)}</style></head><body>
+<div class="head"><p class="tag">Phase 1 · Tab Quản lý</p><h1>Recipe Empty State</h1><p>Sub-tab Món ăn khi chưa có món nào. CTA tạo món, link gợi ý AI, tip điều kiện cần có nguyên liệu trước.</p></div>
+<div class="suite-nav"><a href="index.html">← Gallery</a>
+<a href="11-recipe-list.html">Recipe List</a>
+<a href="12-recipe-detail.html">Recipe Detail</a>
+<a href="13-recipe-add.html">Recipe Add</a>
+<a href="14-recipe-edit.html">Recipe Edit</a>
+<a href="15-recipe-add-ingredient.html" class="act">Add Ing</a>
+<a href="16-recipe-empty.html">Recipe Empty</a>
+</div>
+<div style="position:relative"><div class="notch"></div><div class="phone"><div class="app">
+<div class="sb"><span>9:41</span><span class="r">●●● 84%</span></div>
+<div class="hdr">
+  <h1>Quản lý ✿</h1>
+  <button class="hdr-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg></button>
+</div>
+<div class="seg"><span>Nguyên liệu</span><span class="act">Món ăn</span></div>
+
+<div class="empty">
+  <div class="empty-art">🍽️</div>
+  <h2>Chưa có món nào</h2>
+  <p>Tạo món đầu tiên từ các nguyên liệu sẵn có để log nhanh hơn vào bữa ăn.</p>
+  <button class="empty-cta">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    Tạo món đầu tiên
+  </button>
+  <span class="empty-link">Hoặc nhờ AI gợi ý món →</span>
+  <div class="tip">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    <span><b>Mẹo:</b> Bạn cần ít nhất 1 nguyên liệu trong kho trước khi tạo món. Hiện kho có 8 nguyên liệu.</span>
+  </div>
+</div>
+
+<nav class="tabbar">
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1Z"/></svg>Tổng quan</span>
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Lịch ăn</span>
+<span class="tab act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 14h12v6H6zM7 14a4 4 0 0 1-2-7"/></svg>Quản lý</span>
+<span class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6.5 6.5 17.5 17.5"/></svg>Tập luyện</span>
+</nav>
+</div></div></div>
+</body></html>

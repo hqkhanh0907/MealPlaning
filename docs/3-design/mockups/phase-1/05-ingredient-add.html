@@ -1,0 +1,123 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"/>
+<title>Phase 1 — Ingredient Add</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_tokens.css">
+<style>
+.dhdr{padding:14px 20px 8px;display:flex;align-items:center;gap:14px}
+.back{width:40px;height:40px;border-radius:99px;background:var(--bg-card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-1);box-shadow:var(--sh-xs);cursor:pointer}
+.back svg{width:18px;height:18px}
+.dhdr h2{font-family:var(--font-display);font-size:22px;font-style:italic;font-weight:500;margin:0;color:var(--ink-1);letter-spacing:-0.01em;flex:1}
+.save{background:var(--primary);color:#FFFCF6;border:0;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:var(--sh-sm)}
+.scroll{flex:1;overflow-y:auto;scrollbar-width:none;padding:8px 20px 120px}
+.scroll::-webkit-scrollbar{display:none}
+.section-title{font-size:11px;font-weight:700;color:var(--ink-2);letter-spacing:.1em;text-transform:uppercase;margin:18px 0 10px}
+.input-wrapper{position:relative;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 16px 10px;margin-bottom:10px;box-shadow:var(--sh-xs)}
+.input-wrapper.invalid{border-color:var(--danger);background:#FCF1EF}
+.input-label{position:absolute;top:7px;left:16px;font-size:10px;color:var(--ink-2);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.input-label.invalid{color:var(--danger)}
+.input-native{border:0;outline:0;width:100%;background:transparent;font-family:inherit;font-size:15px;color:var(--ink-1);font-weight:500;padding:0}
+.input-native::placeholder{color:var(--ink-3)}
+.input-suffix{position:absolute;right:16px;top:50%;transform:translateY(-25%);font-size:13px;color:var(--ink-2);font-weight:500}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.row2 .input-wrapper{margin-bottom:0}
+.picker-trigger--floating{display:flex;justify-content:space-between;align-items:center;width:100%;background:transparent;border:0;padding:0;font-family:inherit;font-size:15px;color:var(--ink-1);font-weight:500;cursor:pointer;text-align:left}
+.picker-trigger--floating svg{width:14px;height:14px;color:var(--ink-3)}
+.help{font-size:12px;color:var(--ink-2);margin:4px 4px 14px;line-height:1.45}
+.help a{color:var(--primary);font-weight:600;text-decoration:none}
+.banner{margin:0 0 14px;background:var(--ai-soft);border:1px solid #E0CFA8;border-radius:var(--r-md);padding:12px 14px;display:flex;gap:10px;align-items:flex-start}
+.banner svg{width:16px;height:16px;color:var(--ai-ink);flex-shrink:0;margin-top:2px}
+.banner-text{font-size:12px;color:var(--ai-ink);line-height:1.45}
+.banner-text b{font-weight:700}
+.preview{margin-top:14px;background:var(--primary-soft);border-radius:var(--r-md);padding:14px 16px;border:1px solid rgba(107,142,111,.3)}
+.preview-lbl{font-size:10px;color:var(--primary-ink);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.preview-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.preview-row .k{font-size:13px;color:var(--primary-ink);font-weight:500}
+.preview-row .v{font-family:var(--font-display);font-size:18px;font-style:italic;font-weight:500;color:var(--primary-ink);font-variant-numeric:tabular-nums}
+.toggle{display:flex;justify-content:space-between;align-items:center;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px;margin-bottom:10px;box-shadow:var(--sh-xs)}
+.toggle-info{display:flex;flex-direction:column;gap:2px}
+.toggle-name{font-size:14px;font-weight:600;color:var(--ink-1)}
+.toggle-desc{font-size:11px;color:var(--ink-2)}
+.sw{width:42px;height:24px;border-radius:99px;background:var(--primary);position:relative;flex-shrink:0}
+.sw::after{content:"";width:18px;height:18px;border-radius:99px;background:#FFFCF6;position:absolute;top:3px;right:3px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.sw.off{background:var(--line-strong)}
+.sw.off::after{left:3px;right:auto}
+
+</style></head><body>
+<div class="head">
+<p class="tag">Phase 1 · Tab Quản lý</p>
+<h1>Ingredient Add — Form-1 Quick</h1>
+<p>Form nhập nguyên liệu mới. Banner USDA auto-fill, floating-label inputs (theo design-system §8.6), preview dinh dưỡng theo đơn vị mặc định, toggle size & edible weight.</p>
+</div>
+<div class="suite-nav">
+<a href="index.html">← Gallery</a>
+<a href="01-management-overview.html">Overview</a>
+<a href="02-management-empty.html">Empty</a>
+<a href="03-ingredient-list.html">Ing List</a>
+<a href="04-ingredient-detail.html">Ing Detail</a>
+<a href="05-ingredient-add.html">Ing Add</a>
+</div>
+<div style="position:relative"><div class="notch"></div><div class="phone"><div class="app">
+<div class="sb"><span>9:41</span><span class="r">●●● 84%</span></div>
+<div class="dhdr">
+  <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  <h2>Thêm nguyên liệu</h2>
+  <button class="save">Lưu</button>
+</div>
+
+<div class="scroll">
+  <div class="banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    <span class="banner-text"><b>Mẹo:</b> Nhập tên rồi chạm <b>Tự điền dinh dưỡng</b> để gợi ý từ USDA. Bạn có thể chỉnh sửa các macro nếu USDA chưa khớp.</span>
+  </div>
+
+  <div class="section-title">Thông tin cơ bản</div>
+
+  <div class="input-wrapper">
+    <label class="input-label">Tên nguyên liệu</label>
+    <input class="input-native" value="Cà chua" />
+  </div>
+
+  <div class="input-wrapper">
+    <label class="input-label">Category</label>
+    <button class="picker-trigger--floating">
+      <span>Rau củ</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+  </div>
+
+  <div class="input-wrapper">
+    <label class="input-label">Emoji / Icon</label>
+    <button class="picker-trigger--floating">
+      <span>🍅 Cà chua</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+  </div>
+
+  <div class="section-title">Dinh dưỡng / 100g</div>
+
+  <div class="banner" style="background:var(--primary-soft);border-color:rgba(107,142,111,.4)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary-deep)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+    <span class="banner-text" style="color:var(--primary-ink)"><b>Đã tự điền từ USDA #170457</b> — Cà chua. 5 macro per 100g. Bạn có thể chỉnh sửa nếu cần.</span>
+  </div>
+
+  <div class="row2">
+    <div class="input-wrapper"><label class="input-label">Calories</label><input class="input-native" value="18" /><span class="input-suffix">kcal</span></div>
+    <div class="input-wrapper"><label class="input-label">Protein</label><input class="input-native" value="0.9" /><span class="input-suffix">g</span></div>
+  </div>
+  <div class="row2">
+    <div class="input-wrapper"><label class="input-label">Carb</label><input class="input-native" value="3.9" /><span class="input-suffix">g</span></div>
+    <div class="input-wrapper"><label class="input-label">Fat</label><input class="input-native" value="0.2" /><span class="input-suffix">g</span></div>
+  </div>
+  <div class="input-wrapper"><label class="input-label">Fiber (tuỳ chọn)</label><input class="input-native" value="1.2" /><span class="input-suffix">g</span></div>
+
+  <div class="preview">
+    <div class="preview-lbl">Preview · 100g</div>
+    <div class="preview-row"><span class="k">Calories</span><span class="v">18 kcal</span></div>
+    <div class="preview-row"><span class="k">Protein · Carb · Fat</span><span class="v">0.9 · 3.9 · 0.2 g</span></div>
+  </div>
+
+  <p class="help">Mọi nguyên liệu đều lưu nutrition theo <b>per 100g</b>. Khi log món, bạn nhập <b>khối lượng tính bằng gram</b> — app tự nhân để ra calo cho lượng đã ăn.</p>
+</div>
+
+</div></div></div>
+</body></html>

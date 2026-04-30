@@ -1,0 +1,248 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"/>
+<title>Phase 1 — Tab Quản lý · Mockup Gallery</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#1A1612;color:#E5DED0;min-height:100vh;padding:48px 32px 80px}
+.head{max-width:760px;margin:0 auto 40px;text-align:center}
+.tag{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#E07856;margin:0 0 10px;font-weight:700}
+h1{font-family:'Fraunces',serif;font-size:48px;font-weight:500;font-style:italic;letter-spacing:-0.02em;margin:0 0 12px;color:#F7F2EA}
+.head p{font-size:15px;opacity:.7;margin:0 0 18px;line-height:1.6}
+.head .stats{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;font-size:12px;opacity:.55}
+.head .stats span b{color:#F7F2EA;font-family:'Fraunces';font-style:italic;font-size:18px;font-weight:500;margin-right:4px}
+
+.section-hdr{max-width:1280px;margin:36px auto 14px;display:flex;align-items:baseline;gap:14px}
+.section-hdr h2{font-family:'Fraunces';font-size:22px;font-style:italic;font-weight:500;margin:0;color:#F7F2EA;letter-spacing:-0.01em}
+.section-hdr span{font-size:11px;letter-spacing:.15em;text-transform:uppercase;opacity:.4}
+.divider{flex:1;height:1px;background:rgba(255,255,255,.08)}
+
+.grid{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.card:hover{transform:translateY(-4px);border-color:rgba(224,120,86,.5);background:rgba(255,255,255,.05)}
+.thumb{aspect-ratio:1.1/1;display:flex;align-items:flex-start;justify-content:space-between;padding:18px;position:relative}
+.thumb .num{font-family:'Fraunces';font-size:42px;font-style:italic;font-weight:500;color:#2D2A1F;letter-spacing:-0.04em;line-height:1}
+.thumb .dot{width:14px;height:14px;border-radius:99px;flex-shrink:0;box-shadow:0 0 0 4px rgba(255,255,255,.4)}
+.meta{padding:14px 18px 16px}
+.grp{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;display:block;margin-bottom:6px}
+.meta h3{font-family:'Fraunces';font-size:18px;font-style:italic;font-weight:500;margin:0 0 4px;color:#F7F2EA;letter-spacing:-0.01em;line-height:1.2}
+.meta p{font-size:12px;opacity:.6;margin:0;line-height:1.45}
+
+.foot{max-width:760px;margin:64px auto 0;text-align:center;padding-top:32px;border-top:1px solid rgba(255,255,255,.08);font-size:12px;opacity:.5;line-height:1.6}
+.foot code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;font-family:ui-monospace,monospace;font-size:11px}
+</style></head><body>
+
+<div class="head">
+  <p class="tag">Phase 1 · Tab Quản lý</p>
+  <h1>Mockup Gallery — Quản lý nguyên liệu &amp; món ăn</h1>
+  <p>17 màn cho tab Quản lý (gram-only revision 2026-04-30): từ landing/empty, ingredient CRUD, recipe CRUD, edge case forms, đến modifier UI cho size và trạng thái. Theo DNA Sage Wellness · gram-only canonical · floating-label form pattern.</p>
+  <div class="stats">
+    <span><b>22</b>màn</span>
+    <span><b>5</b>nhóm</span>
+    <span><b>1</b>DNA · Sage</span>
+    <span><b>390×844</b>iPhone frame</span>
+  </div>
+</div>
+<div class="section-hdr"><h2>A · Landing</h2><span>2 màn</span><div class="divider"></div></div>
+<div class="grid">
+<a class="card" href="01-management-overview.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#D4DFCE 0%,#FFFCF6 100%)">
+    <span class="num">01</span>
+    <span class="dot" style="background:#6B8E6F"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#6B8E6F">A · Landing</span>
+    <h3>Management Overview</h3>
+    <p>Tab Quản lý + segment Nguyên liệu/Món ăn</p>
+  </div>
+</a>
+<a class="card" href="02-management-empty.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#D4DFCE 0%,#FFFCF6 100%)">
+    <span class="num">02</span>
+    <span class="dot" style="background:#6B8E6F"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#6B8E6F">A · Landing</span>
+    <h3>Management Empty</h3>
+    <p>First-run · chưa có data</p>
+  </div>
+</a></div>
+<div class="section-hdr"><h2>B · Ingredient</h2><span>8 màn</span><div class="divider"></div></div>
+<div class="grid">
+<a class="card" href="03-ingredient-list.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#F5DCD0 0%,#FFFCF6 100%)">
+    <span class="num">03</span>
+    <span class="dot" style="background:#E07856"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#E07856">B · Ingredient</span>
+    <h3>Ingredient List · Search</h3>
+    <p>Search + filter chip active</p>
+  </div>
+</a>
+<a class="card" href="04-ingredient-detail.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#F5DCD0 0%,#FFFCF6 100%)">
+    <span class="num">04</span>
+    <span class="dot" style="background:#E07856"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#E07856">B · Ingredient</span>
+    <h3>Ingredient Detail</h3>
+    <p>Hero + 5 quy đổi + modifier + pantry</p>
+  </div>
+</a>
+<a class="card" href="05-ingredient-add.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#F5DCD0 0%,#FFFCF6 100%)">
+    <span class="num">05</span>
+    <span class="dot" style="background:#E07856"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#E07856">B · Ingredient</span>
+    <h3>Ingredient Add (Quick)</h3>
+    <p>Form-1 với USDA auto banner + preview</p>
+  </div>
+</a>
+<a class="card" href="06-ingredient-edit.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#F5DCD0 0%,#FFFCF6 100%)">
+    <span class="num">06</span>
+    <span class="dot" style="background:#E07856"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#E07856">B · Ingredient</span>
+    <h3>Ingredient Edit (Full)</h3>
+    <p>Manage measurements inline + danger zone</p>
+  </div>
+</a>
+<a class="card" href="09-soft-delete.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#F5DCD0 0%,#FFFCF6 100%)">
+    <span class="num">09</span>
+    <span class="dot" style="background:#E07856"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#E07856">B · Ingredient</span>
+    <h3>Soft Delete Confirm</h3>
+    <p>Show usage stats + thùng rác 30 ngày</p>
+  </div>
+</a>
+<a class="card" href="10-ingredient-search-empty.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#F5DCD0 0%,#FFFCF6 100%)">
+    <span class="num">10</span>
+    <span class="dot" style="background:#E07856"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#E07856">B · Ingredient</span>
+    <h3>Search · No Results</h3>
+    <p>3 hành động gợi ý: thêm/AI/loose search</p>
+  </div>
+</a></div>
+<div class="section-hdr"><h2>C · Recipe</h2><span>6 màn</span><div class="divider"></div></div>
+<div class="grid">
+<a class="card" href="11-recipe-list.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#EFE4D0 0%,#FFFCF6 100%)">
+    <span class="num">11</span>
+    <span class="dot" style="background:#B89968"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#B89968">C · Recipe</span>
+    <h3>Recipe List</h3>
+    <p>Sub-tab Món ăn với macro breakdown</p>
+  </div>
+</a>
+<a class="card" href="12-recipe-detail.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#EFE4D0 0%,#FFFCF6 100%)">
+    <span class="num">12</span>
+    <span class="dot" style="background:#B89968"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#B89968">C · Recipe</span>
+    <h3>Recipe Detail · Phở bò</h3>
+    <p>Hero kcal/phần + stepper + 8 ingredient</p>
+  </div>
+</a>
+<a class="card" href="13-recipe-add.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#EFE4D0 0%,#FFFCF6 100%)">
+    <span class="num">13</span>
+    <span class="dot" style="background:#B89968"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#B89968">C · Recipe</span>
+    <h3>Recipe Add (Empty)</h3>
+    <p>Form trống · save disabled</p>
+  </div>
+</a>
+<a class="card" href="14-recipe-edit.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#EFE4D0 0%,#FFFCF6 100%)">
+    <span class="num">14</span>
+    <span class="dot" style="background:#B89968"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#B89968">C · Recipe</span>
+    <h3>Recipe Edit · Manage</h3>
+    <p>Drag-handle + edit/delete inline</p>
+  </div>
+</a>
+<a class="card" href="15-recipe-add-ingredient.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#EFE4D0 0%,#FFFCF6 100%)">
+    <span class="num">15</span>
+    <span class="dot" style="background:#B89968"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#B89968">C · Recipe</span>
+    <h3>Add Ingredient to Recipe</h3>
+    <p>Sheet pick + quantity + kcal preview</p>
+  </div>
+</a>
+<a class="card" href="16-recipe-empty.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#EFE4D0 0%,#FFFCF6 100%)">
+    <span class="num">16</span>
+    <span class="dot" style="background:#B89968"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#B89968">C · Recipe</span>
+    <h3>Recipe Empty</h3>
+    <p>Sub-tab Món ăn lần đầu</p>
+  </div>
+</a></div>
+<div class="section-hdr"><h2>D · Edge</h2><span>4 màn</span><div class="divider"></div></div>
+<div class="grid">
+<a class="card" href="18-form-validation.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#F4E5B8 0%,#FFFCF6 100%)">
+    <span class="num">18</span>
+    <span class="dot" style="background:#C9A227"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#C9A227">D · Edge</span>
+    <h3>Form Validation Errors</h3>
+    <p>3 lỗi block + 1 warn + summary</p>
+  </div>
+</a>
+<a class="card" href="19-usda-autofill.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#F4E5B8 0%,#FFFCF6 100%)">
+    <span class="num">19</span>
+    <span class="dot" style="background:#C9A227"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#C9A227">D · Edge</span>
+    <h3>USDA Auto-fill</h3>
+    <p>AI gợi ý 3 USDA match + preview values</p>
+  </div>
+</a>
+<a class="card" href="20-category-suggest.html">
+  <div class="thumb" style="background:linear-gradient(155deg,#F4E5B8 0%,#FFFCF6 100%)">
+    <span class="num">20</span>
+    <span class="dot" style="background:#C9A227"></span>
+  </div>
+  <div class="meta">
+    <span class="grp" style="color:#C9A227">D · Edge</span>
+    <h3>Category Suggest Defaults</h3>
+    <p>Pick category → tự suggest 5 macro typical</p>
+  </div>
+</a></div>
+
+<div class="foot">
+  <p>DNA: <code>Lifesum / Sage Wellness</code> · Tokens: <code>_tokens.css</code> (sync với <code>03-sage-suite/_tokens.css</code>)<br>
+  Reference docs: <code>docs/2-requirements/prd.md</code> v1.1 · <code>docs/3-design/data-model.md</code> v1.1 · <code>docs/4-architecture/business-rules.md</code> v1.1 (gram-only revision)<br>
+  Roadmap: <code>docs/5-development/development-plan.md</code> v1.1 (Phase 1.5A loại bỏ)</p>
+</div>
+
+</body></html>

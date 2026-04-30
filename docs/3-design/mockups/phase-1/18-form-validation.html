@@ -1,0 +1,109 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"/>
+<title>Phase 1 — Form Validation</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_tokens.css">
+<style>.dhdr{padding:14px 20px 8px;display:flex;align-items:center;gap:14px}
+.back{width:40px;height:40px;border-radius:99px;background:var(--bg-card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-1);box-shadow:var(--sh-xs)}
+.back svg{width:18px;height:18px}
+.dhdr h2{font-family:var(--font-display);font-size:22px;font-style:italic;font-weight:500;margin:0;color:var(--ink-1);flex:1;letter-spacing:-0.01em}
+.save{background:var(--line-strong);color:#FFFCF6;border:0;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;cursor:not-allowed;font-family:inherit}
+.scroll{flex:1;overflow-y:auto;scrollbar-width:none;padding:8px 20px 120px}
+.scroll::-webkit-scrollbar{display:none}
+.section-title{font-size:11px;font-weight:700;color:var(--ink-2);letter-spacing:.1em;text-transform:uppercase;margin:18px 0 10px}
+.input-wrapper{position:relative;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 16px 10px;margin-bottom:6px;box-shadow:var(--sh-xs)}
+.input-wrapper.invalid{border-color:var(--danger);background:#FCF1EF}
+.input-label{position:absolute;top:7px;left:16px;font-size:10px;color:var(--ink-2);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.input-label.invalid{color:var(--danger)}
+.input-native{border:0;outline:0;width:100%;background:transparent;font-family:inherit;font-size:15px;color:var(--ink-1);font-weight:500}
+.input-suffix{position:absolute;right:16px;top:50%;transform:translateY(-25%);font-size:13px;color:var(--ink-2);font-weight:500}
+.error-msg{font-size:12px;color:var(--danger);margin:0 4px 14px;display:flex;align-items:center;gap:6px;line-height:1.45}
+.error-msg svg{width:13px;height:13px;flex-shrink:0}
+.warn-msg{font-size:12px;color:var(--warn);margin:0 4px 14px;display:flex;align-items:center;gap:6px;line-height:1.45}
+.warn-msg svg{width:13px;height:13px;flex-shrink:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+.row2 .input-wrapper{margin-bottom:0}
+.error-summary{margin-top:18px;background:#FCF1EF;border:1px solid #E8C7C0;border-radius:var(--r-md);padding:12px 14px;display:flex;gap:10px;align-items:flex-start}
+.error-summary svg{width:16px;height:16px;color:var(--danger);flex-shrink:0;margin-top:2px}
+.error-summary div{flex:1}
+.error-summary b{font-size:12px;font-weight:700;color:var(--danger);display:block;margin-bottom:4px}
+.error-summary ul{margin:0;padding-left:16px;font-size:12px;color:var(--ink-2);line-height:1.55}</style></head><body>
+<div class="head"><p class="tag">Phase 1 · Tab Quản lý · Edge case</p><h1>Edge — Form validation errors</h1><p>3 loại lỗi cùng lúc (gram-only revision): duplicate name (block), calo âm (block), tổng macro vượt 100g (block), kcal nghi vấn so với macro (warn). Save disabled, summary tổng kết.</p></div>
+<div class="suite-nav"><a href="index.html">← Gallery</a>
+<a href="18-form-validation.html">Validation</a>
+<a href="19-usda-autofill.html">USDA Auto</a>
+<a href="20-category-suggest.html">Category Suggest</a>
+</div>
+<div style="position:relative"><div class="notch"></div><div class="phone"><div class="app">
+<div class="sb"><span>9:41</span><span class="r">●●● 84%</span></div>
+<div class="dhdr">
+  <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  <h2>Sửa nguyên liệu</h2>
+  <button class="save">Lưu</button>
+</div>
+<div class="scroll">
+  <div class="section-title">Thông tin cơ bản</div>
+
+  <div class="input-wrapper invalid">
+    <label class="input-label invalid">Tên nguyên liệu</label>
+    <input class="input-native" value="Cà chua"/>
+  </div>
+  <p class="error-msg">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    Tên này đã tồn tại trong danh sách. Đổi tên cụ thể hơn như "Cà chua bi", "Cà chua đóng hộp".
+  </p>
+
+  <div class="section-title">Dinh dưỡng / 100g</div>
+
+  <div class="row2">
+    <div class="input-wrapper invalid">
+      <label class="input-label invalid">Calories</label>
+      <input class="input-native" value="-12"/>
+      <span class="input-suffix">kcal</span>
+    </div>
+    <div class="input-wrapper">
+      <label class="input-label">Protein</label>
+      <input class="input-native" value="0.9"/>
+      <span class="input-suffix">g</span>
+    </div>
+  </div>
+  <p class="error-msg" style="margin-top:-2px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    Calories phải ≥ 0. Nhập giá trị hợp lệ.
+  </p>
+
+  <div class="row2">
+    <div class="input-wrapper invalid">
+      <label class="input-label invalid">Carb</label>
+      <input class="input-native" value="80"/>
+      <span class="input-suffix">g</span>
+    </div>
+    <div class="input-wrapper invalid">
+      <label class="input-label invalid">Fat</label>
+      <input class="input-native" value="35"/>
+      <span class="input-suffix">g</span>
+    </div>
+  </div>
+  <p class="error-msg">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    Tổng Protein + Carb + Fat = 115.9g vượt quá 100g (giá trị tính theo per 100g). Kiểm tra lại các macro.
+  </p>
+
+  <p class="warn-msg">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+    Calories âm (–12) không khớp với macro (0.9P + 80C + 35F → ~638 kcal). Bạn có nhầm dấu trừ không?
+  </p>
+
+  <div class="error-summary">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    <div>
+      <b>3 lỗi cần sửa trước khi lưu:</b>
+      <ul>
+        <li>Tên trùng với nguyên liệu đã có</li>
+        <li>Calories âm (phải ≥ 0)</li>
+        <li>Tổng Protein + Carb + Fat > 100g (phải ≤ 100g)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div></div></div>
+</body></html>
