@@ -1,8 +1,8 @@
 # Phase 1.5B — AI Foundation
 
-> **Trạng thái:** 🟡 Draft 1.0 (2026-04-30) — chốt scope, chờ implementation.
+> **Trạng thái:** 🟡 Draft 1.1 (2026-04-30) — chốt scope + fix audit findings, chờ implementation.
 >
-> **Mục tiêu:** Build GeminiService core + NutritionAiService + 2 prompt templates (F-01 AI Lookup + F-02 AI Auto-fill) để F-01/F-02 PRD complete-done. Infra dùng lại cho Phase 2 (AI Meal Plan day/week) và Phase 5 (Image / Menu Suggest / Insight / Training Plan).
+> **Mục tiêu:** Build GeminiClient core + NutritionAi + 2 prompt templates (F-01 AI Lookup + F-02 AI Auto-fill) để F-01/F-02 PRD complete-done. Infra dùng lại cho Phase 2 (AI Meal Plan day/week) và Phase 5 (Image / Menu Suggest / Insight / Training Plan).
 
 ---
 
@@ -12,8 +12,8 @@
 
 | # | Deliverable | Detail |
 |---|-------------|--------|
-| 1 | `GeminiService` (core) | HTTP client gọi Gemini REST API, retry, JSON parsing, log vào `ai_chat_log`, network detection |
-| 2 | `NutritionAiService` (wrapper) | 2 method: `lookupIngredient(name)`, `autofillDish(name, dbIngredients)` |
+| 1 | `GeminiClient` (core) | HTTP client gọi Gemini REST API, retry, JSON parsing, log vào `ai_chat_log`, network detection |
+| 2 | `NutritionAi` (wrapper) | 2 method: `lookupIngredient(name)`, `autofillDish(name, dbIngredients)` |
 | 3 | 2 prompt templates | §3.2 Dish Auto-fill + §3.9 Ingredient Lookup (xem `docs/5-ai/ai-strategy.md`) |
 | 4 | UI: AI button trong `ingredient-add` + `dish-add` | Trigger AI flow + bottom sheet preview |
 | 5 | Bottom sheet preview | Sau khi AI trả → hiển thị form pre-fill, user edit + Lưu |
@@ -21,7 +21,7 @@
 | 7 | Error handling | Toast theo §5.1 ai-strategy.md (đã update theo phase này) |
 | 8 | API key obfuscation build step | Theo D3 — XOR + base64, runtime decode |
 | 9 | Auto-cleanup `ai_chat_log` | Xóa row > 30 ngày khi app khởi động |
-| 10 | Test suite | Unit test GeminiService (mock fetch) + NutritionAiService + integration emulator |
+| 10 | Test suite | Unit test GeminiClient (mock fetch) + NutritionAi + integration emulator |
 
 ### 1.2 Out of scope (Phase 5)
 
@@ -31,10 +31,10 @@
 - F-11 Training Plan
 - Settings UI cho user paste API key (V2+)
 
-### 1.3 Out of scope (Phase 2)
+### 1.3 Out of scope (Phase 2 — sẽ DÙNG infra này, không build trong 1.5B)
 
-- F-03 AI Meal Plan day/week (sẽ dùng infra Phase 1.5B + thêm method `planDay` / `planWeek` trong NutritionAiService)
-- F-04 Daily summary computation
+- F-03 AI Meal Plan day/week — Phase 2 sẽ thêm method `planDay` / `planWeek` trong `NutritionAi`, dùng lại `GeminiClient` infra
+- F-04 Daily summary computation — Phase 2 (non-AI, chỉ aggregate dish_with_totals)
 
 ---
 
@@ -44,11 +44,11 @@
 
 | # | Quyết định | Giá trị | Lý do |
 |---|-----------|---------|-------|
-| 1 | Service layer hierarchy | **2 layer**: `GeminiService` (core HTTP/retry/log) + `NutritionAiService` (business wrapper) | Đúng theo development-plan.md §155-156. Phase 5 thêm `FitnessAiService` / `InsightAiService` song song. |
+| 1 | Service layer hierarchy | **2 layer**: `GeminiClient` (core HTTP/retry/log) + `NutritionAi` (business wrapper). **Style 2025**: không dùng `Service` suffix (CI guard `check-style-2025-naming.mjs` cấm). | Phase 5 thêm `FitnessAi` / `InsightAi` song song. |
 | 2 | Gemini model | `gemini-2.5-flash` (cho cả 2 prompt) | Mới hơn 2.0-flash, accuracy tốt hơn cho tiếng Việt + ingredient matching, giá tương đương. |
 | 3 | API key strategy | `environment.ts` + obfuscation (D3) | Ship dev key trong APK, XOR + base64. Không có Settings UI cho user paste key (V2+). |
 | 4 | Quota limit | **Không quota** | Update D3 — Gemini paid tier không cap, dev tự chịu cost. Phù hợp với product-vision §248. |
-| 5 | Logging strategy | Log full request/response + auto-cleanup row > 30 ngày | Cân bằng debug/audit + storage. Cleanup chạy trong `app.component` lúc init. |
+| 5 | Logging strategy | Log full request/response + auto-cleanup row > 30 ngày | Cân bằng debug/audit + storage. Cleanup chạy trong `app.ts` (`class App`) qua `afterNextRender`. |
 | 6 | Retry strategy | Exponential backoff: 1s → 2s → 4s, max 3 attempts, chỉ retry 5xx + network timeout | Update §5.2 ai-strategy.md (cũ là 1 retry). Không retry 4xx (400/401/403/429 = user/key error). |
 | 7 | Network detection | `@capacitor/network` plugin + `NetworkStore` (signal-based) | Pre-emptive guard: offline → disable AI button + show banner ngay. |
 | 8 | Output format | Structured Output JSON Schema (`responseMimeType: 'application/json'` + `responseSchema`) + zod validate sau parse | Giảm fail rate parse JSON. Zod validate là defense-in-depth. |
@@ -64,13 +64,13 @@
 ```
 features/management/ingredient-add (UI)
         │
-        │ inject NutritionAiService
+        │ inject NutritionAi
         ▼
-NutritionAiService.lookupIngredient(name)
+NutritionAi.lookupIngredient(name)
         │
-        │ inject GeminiService
+        │ inject GeminiClient
         ▼
-GeminiService.generateContent(prompt, options)
+GeminiClient.generateContent(prompt, options)
         │
         ├──► HTTP fetch (with retry) ──► Gemini API
         │
@@ -82,10 +82,10 @@ GeminiService.generateContent(prompt, options)
         Return IngredientLookupResult
 ```
 
-### 3.2 GeminiService — interface
+### 3.2 GeminiClient — interface
 
 ```typescript
-// src/app/core/services/ai/gemini-service.ts
+// src/app/core/services/ai/gemini-client.ts
 
 export interface GeminiOptions {
   systemInstruction?: string;
@@ -101,16 +101,16 @@ export type AiFeature =
   | 'image_analysis' | 'menu_suggestion'
   | 'daily_insight' | 'weekly_review' | 'training_plan';  // Phase 5
 
-export class GeminiService {
-  generateContent<T>(prompt: string, options: GeminiOptions, schema: ZodSchema<T>): Promise<T>;
+export class GeminiClient {
+  generateContent<T>(prompt: string, options: GeminiOptions, schema: z.ZodType<T>): Promise<T>;
   cleanupOldLogs(daysToKeep: number = 30): Promise<void>;
 }
 ```
 
-### 3.3 NutritionAiService — interface
+### 3.3 NutritionAi — interface
 
 ```typescript
-// src/app/core/services/ai/nutrition-ai-service.ts
+// src/app/core/services/ai/nutrition-ai.ts
 
 export interface IngredientLookupResult {
   name: string;
@@ -135,7 +135,7 @@ export interface DishAutofillResult {
   }>;
 }
 
-export class NutritionAiService {
+export class NutritionAi {
   lookupIngredient(name: string): Promise<IngredientLookupResult>;
   autofillDish(dishName: string, dbIngredients: IngredientRef[]): Promise<DishAutofillResult>;
 }
@@ -188,15 +188,21 @@ export class NetworkStore {
   readonly isOnline = this._isOnline.asReadonly();
 
   constructor() {
-    Network.getStatus().then(s => this._isOnline.set(s.connected));
-    Network.addListener('networkStatusChange', s => this._isOnline.set(s.connected));
+    Network.getStatus().then((s) => this._isOnline.set(s.connected));
+    // Root singleton — listener sống cùng app lifecycle.
+    // Lưu handle để cleanup nếu service bị destroy (defensive).
+    void Network.addListener('networkStatusChange', (s) =>
+      this._isOnline.set(s.connected),
+    );
   }
 }
 ```
 
-UI usage:
+UI usage (Angular 21 default control-flow `@if`/`@for`/`@switch` — `*ngIf` cấm):
 ```html
-<app-ai-offline-banner *ngIf="!network.isOnline()" />
+@if (!network.isOnline()) {
+  <app-ai-offline-banner />
+}
 <ion-button [disabled]="!network.isOnline() || loading()" (click)="onAiLookup()">
   🤖 AI Lookup
 </ion-button>
@@ -232,15 +238,29 @@ export function decodeApiKey(obfuscated: string): string {
 ### 3.8 Auto-cleanup ai_chat_log
 
 ```typescript
-// app.component.ts
-async ngOnInit() {
-  await this.geminiService.cleanupOldLogs(30);
+// src/app/app.ts (entry point — class `App`, đã migrate Style 2025)
+import { afterNextRender, inject } from '@angular/core';
+
+export class App {
+  private readonly gemini = inject(GeminiClient);
+
+  constructor() {
+    afterNextRender(() => {
+      // Cleanup chạy 1 lần mỗi khi app khởi động (idle, không block UI).
+      void this.gemini.cleanupOldLogs(30);
+    });
+  }
 }
 
-// gemini-service.ts
+// src/app/core/services/ai/gemini-client.ts
 async cleanupOldLogs(daysToKeep: number): Promise<void> {
-  const cutoff = new Date(Date.now() - daysToKeep * 86400_000).toISOString();
-  await this.db.run(`DELETE FROM ai_chat_log WHERE created_at < ?`, [cutoff]);
+  // S2 fix: ai_chat_log.created_at lưu format SQLite "YYYY-MM-DD HH:MM:SS"
+  // (datetime('now')) — KHÔNG phải ISO 8601. Dùng SQL datetime() để so sánh
+  // đúng lexicographic, tránh mismatch 'T' vs ' '.
+  await this.db.execute(
+    `DELETE FROM ai_chat_log WHERE created_at < datetime('now', ?)`,
+    [`-${daysToKeep} days`],
+  );
 }
 ```
 
@@ -261,7 +281,7 @@ async cleanupOldLogs(daysToKeep: number): Promise<void> {
      ▼
 [Show inline loader trên button]
      │
-     │ NutritionAiService.lookupIngredient("Ức gà luộc")
+     │ NutritionAi.lookupIngredient("Ức gà luộc")
      │
      ├─► [Duplicate check trong DB by name (Vietnamese-aware)]
      │      │
@@ -302,7 +322,7 @@ async cleanupOldLogs(daysToKeep: number): Promise<void> {
 [Lấy DB ingredient list (id + name + category)]
      │
      ▼
-[GeminiService.generateContent với prompt §3.2]
+[GeminiClient.generateContent với prompt §3.2]
      │
      ▼
 [AI trả ingredient list]
@@ -346,12 +366,12 @@ async cleanupOldLogs(daysToKeep: number): Promise<void> {
 
 ```
 src/app/core/services/ai/
-  ├─ gemini-service.ts                  # GeminiService (HTTP/retry/log)
-  ├─ gemini-service.spec.ts
+  ├─ gemini-client.ts                   # class GeminiClient (HTTP/retry/log)
+  ├─ gemini-client.spec.ts
   ├─ gemini-key.ts                      # decodeApiKey runtime
   ├─ gemini-types.ts                    # AiFeature, GeminiError, GeminiOptions
-  ├─ nutrition-ai-service.ts            # NutritionAiService (lookupIngredient + autofillDish)
-  ├─ nutrition-ai-service.spec.ts
+  ├─ nutrition-ai.ts                    # class NutritionAi (lookupIngredient + autofillDish)
+  ├─ nutrition-ai.spec.ts
   └─ prompts/
      ├─ ingredient-lookup.prompt.ts     # buildPrompt() + responseSchema + zodSchema
      ├─ ingredient-lookup.prompt.spec.ts
@@ -390,13 +410,13 @@ src/environments/
 
 ```
 src/app/features/management/ingredient-add/ingredient-add.page.{ts,html}
-  → Thêm 🤖 AI Lookup button + integrate NutritionAiService
+  → Thêm 🤖 AI Lookup button + integrate NutritionAi
 
 src/app/features/management/dish-add/dish-add.page.{ts,html}
-  → Thêm 🤖 AI Auto-fill button + integrate NutritionAiService
+  → Thêm 🤖 AI Auto-fill button + integrate NutritionAi
 
-src/app/app.component.ts
-  → ngOnInit: gọi geminiService.cleanupOldLogs(30)
+src/app/app.ts (class `App`)
+  → afterNextRender: gọi geminiClient.cleanupOldLogs(30)
 
 docs/5-development/development-plan.md
   → Update D3: bỏ quota limit
@@ -418,14 +438,14 @@ docs/5-ai/ai-strategy.md
 
 | File | Test | Goal |
 |------|------|------|
-| `gemini-service.spec.ts` | Mock fetch → verify retry logic 5xx (1s→2s→4s, max 3) | Retry algorithm |
-| `gemini-service.spec.ts` | Mock fetch → verify NO retry trên 4xx | Error classification |
-| `gemini-service.spec.ts` | Mock DB → verify ai_chat_log insert sau success/fail | Logging |
-| `gemini-service.spec.ts` | Mock DB → cleanupOldLogs(30) → verify DELETE WHERE created_at < cutoff | Cleanup |
-| `gemini-service.spec.ts` | Mock fetch → invalid JSON → zod fail → retry → final throw | Parse error path |
+| `gemini-client.spec.ts` | Mock fetch → verify retry logic 5xx (1s→2s→4s, max 3) | Retry algorithm |
+| `gemini-client.spec.ts` | Mock fetch → verify NO retry trên 4xx | Error classification |
+| `gemini-client.spec.ts` | Mock DB → verify ai_chat_log insert sau success/fail | Logging |
+| `gemini-client.spec.ts` | Mock DB → cleanupOldLogs(30) → verify DELETE WHERE created_at < datetime('now','-30 days') | Cleanup (S2 fix) |
+| `gemini-client.spec.ts` | Mock fetch → invalid JSON → zod fail → retry → final throw | Parse error path |
 | `gemini-key.spec.ts` | Round-trip obfuscate/decode | Key obfuscation |
-| `nutrition-ai-service.spec.ts` | Mock GeminiService → call lookupIngredient → assert prompt contains tên | Prompt building |
-| `nutrition-ai-service.spec.ts` | Mock → call autofillDish → assert prompt contains DB ingredient list | Pass-DB-list strategy |
+| `nutrition-ai.spec.ts` | Mock GeminiClient → call lookupIngredient → assert prompt contains tên | Prompt building |
+| `nutrition-ai.spec.ts` | Mock → call autofillDish → assert prompt contains DB ingredient list | Pass-DB-list strategy |
 | `network.store.spec.ts` | Mock Capacitor Network → assert isOnline signal sync | NetworkStore |
 | `ai-offline-banner.spec.ts` | Render khi `isOnline=false` | UI |
 | `ai-lookup-sheet.spec.ts` | Render với data → user edit field → emit save | Bottom sheet F-01 |
@@ -442,7 +462,7 @@ docs/5-ai/ai-strategy.md
 
 ### 6.3 Coverage target
 
-- GeminiService + NutritionAiService: ≥ 90% line coverage (core infra)
+- GeminiClient + NutritionAi: ≥ 90% line coverage (core infra)
 - Bottom sheet components: ≥ 80%
 - NetworkStore: 100%
 
@@ -483,3 +503,4 @@ docs/5-ai/ai-strategy.md
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-04-30 | Initial draft — chốt 10 quyết định + scope + flow + file list + test plan |
+| 1.1 | 2026-04-30 | Audit fix (9 findings): B1 class names không suffix `Service` (Style 2025 CI guard) → `GeminiClient` + `NutritionAi`. B2 entry point `app.ts` (`class App`), không còn `app.component.ts`. S1 `db.execute` thay `db.run`. S2 cleanup dùng SQL `datetime('now', '-N days')` thay JS `toISOString()` (mismatch format). S3 `*ngIf` → `@if`. M1 `ZodSchema` → `z.ZodType`. M2 NetworkStore listener pattern. M3 wording §1.3 F-04. |
