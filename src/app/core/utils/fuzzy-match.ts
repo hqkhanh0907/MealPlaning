@@ -6,6 +6,18 @@
  * IMPORTANT: This is a SEPARATE utility from `nutrition-ai.normalizeIngredientName`
  * (F-01 ingredient lookup). F-01 keeps Vietnamese diacritics; F-02 strips them
  * for fuzzy matching. Per audit finding A6, do NOT consolidate.
+ *
+ * THRESHOLD POLICY (revised 2026-05-01 after E2E false-positive review):
+ * Distance threshold scales with the shorter of the two normalized strings.
+ * A flat threshold of 2 was matching short Vietnamese words across totally
+ * different ingredients ("bún" vs "bơ" dist=2, "tôm" vs "tỏi" dist=1, "hẹ"
+ * vs "bơ" dist=2). For 2-3 char words, even a 1-edit difference flips the
+ * meaning, so we require an exact match. Empirically validated across 4 real
+ * Gemini calls (Bun bo Hue / Sinh to bo / Goi cuon / Banh xeo).
+ *
+ *   minLen ≤ 3  → threshold 0 (exact match only after normalize)
+ *   minLen 4-6  → threshold 1 (single typo tolerance)
+ *   minLen ≥ 7  → threshold 2 (two typos / minor variants like trailing 's')
  */
 
 /**
@@ -25,18 +37,33 @@ export function normalize(s: string): string {
 }
 
 /**
- * Levenshtein edit distance with early-exit at threshold 2.
+ * Maximum allowed Levenshtein distance for two normalized strings whose
+ * shorter length is `minLen`. See THRESHOLD POLICY in the file header.
+ */
+export function thresholdForLength(minLen: number): 0 | 1 | 2 {
+  if (minLen <= 3) return 0;
+  if (minLen <= 6) return 1;
+  return 2;
+}
+
+/** Hard upper bound on the dynamic threshold — used to size the DP buffer. */
+const MAX_THRESHOLD = 2;
+
+/**
+ * Levenshtein edit distance with early-exit.
  *
- * Returns the exact distance if ≤ 2; otherwise returns 3 (sentinel for
- * "out of fuzzy-match range" per phase-1.5b §2-bis Q5-C). Implementation
- * uses a single-row DP buffer (Uint8Array) for O(min(m,n)) memory; max
- * useful length for ingredient names is well under 256 chars.
+ * Returns the exact distance if ≤ `threshold`; otherwise returns
+ * `threshold + 1` as a sentinel for "out of fuzzy-match range".
+ *
+ * `threshold` defaults to 2 (the historical contract). Implementation uses
+ * a single-row DP buffer (Uint8Array) for O(min(m,n)) memory; max useful
+ * length for ingredient names is well under 256 chars.
  *
  * Performance: < 100µs per call for short strings (typical ingredient name).
  */
-export function levenshtein(a: string, b: string): number {
-  const THRESHOLD = 2;
-  const SENTINEL = 3;
+export function levenshtein(a: string, b: string, threshold: number = MAX_THRESHOLD): number {
+  const t = threshold < 0 ? 0 : threshold;
+  const sentinel = t + 1;
 
   if (a === b) return 0;
 
@@ -44,15 +71,14 @@ export function levenshtein(a: string, b: string): number {
   const n = b.length;
 
   // Length difference alone exceeds threshold → early-exit.
-  if (Math.abs(m - n) > THRESHOLD) return SENTINEL;
+  if (Math.abs(m - n) > t) return sentinel;
 
-  if (m === 0) return n > THRESHOLD ? SENTINEL : n;
-  if (n === 0) return m > THRESHOLD ? SENTINEL : m;
+  if (m === 0) return n > t ? sentinel : n;
+  if (n === 0) return m > t ? sentinel : m;
 
   // Defensive: if either string is unexpectedly long, still bound memory.
   if (m > 255 || n > 255) {
-    // Fall back to plain string compare without DP allocation.
-    return a === b ? 0 : SENTINEL;
+    return a === b ? 0 : sentinel;
   }
 
   // prev[j] = distance(a[..i-1], b[..j-1]) for previous row i-1
@@ -78,9 +104,9 @@ export function levenshtein(a: string, b: string): number {
       if (v < rowMin) rowMin = v;
     }
 
-    // Early-exit: if every cell of this row > THRESHOLD, the final answer
+    // Early-exit: if every cell of this row > threshold, the final answer
     // can only grow → return sentinel.
-    if (rowMin > THRESHOLD) return SENTINEL;
+    if (rowMin > t) return sentinel;
 
     // Swap rows.
     const tmp = prev;
@@ -89,7 +115,7 @@ export function levenshtein(a: string, b: string): number {
   }
 
   const dist = prev[n];
-  return dist > THRESHOLD ? SENTINEL : dist;
+  return dist > t ? sentinel : dist;
 }
 
 /** Read-only candidate shape consumed by `findFuzzyMatches`. */
@@ -105,25 +131,32 @@ export interface FuzzyMatchResult {
 }
 
 /**
- * Find all candidates whose normalized name is within Levenshtein distance 2
- * of the normalized target. Results are sorted by distance ascending; ties
- * preserve original candidate order.
+ * Find all candidates whose normalized name is within the dynamic Levenshtein
+ * threshold (see `thresholdForLength`) of the normalized target. Results are
+ * sorted by distance ascending; ties preserve original candidate order.
  *
- * Pre-normalizes target and every candidate exactly once. Candidates with
- * distance > 2 (sentinel 3) are filtered out.
+ * Pre-normalizes target and every candidate exactly once. Per-candidate
+ * threshold is computed from `min(target.length, candidate.length)` AFTER
+ * normalization, so short Vietnamese words ("bơ", "tôm", "hẹ") require an
+ * exact match and do not collide with unrelated ingredients.
  *
- * Reference: phase-1.5b §2-bis Q5-C ("local fuzzy match post-process").
+ * Reference: phase-1.5b §2-bis Q5-C ("local fuzzy match post-process") +
+ * 2026-05-01 false-positive review.
  */
 export function findFuzzyMatches(
   target: string,
   candidates: readonly FuzzyCandidate[],
 ): readonly FuzzyMatchResult[] {
   const normalizedTarget = normalize(target);
+  const targetLen = normalizedTarget.length;
   const out: FuzzyMatchResult[] = [];
 
   for (const c of candidates) {
-    const d = levenshtein(normalizedTarget, normalize(c.name));
-    if (d <= 2) {
+    const normalizedName = normalize(c.name);
+    const minLen = Math.min(targetLen, normalizedName.length);
+    const threshold = thresholdForLength(minLen);
+    const d = levenshtein(normalizedTarget, normalizedName, threshold);
+    if (d <= threshold) {
       out.push({ match: c, distance: d });
     }
   }
