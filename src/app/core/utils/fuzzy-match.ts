@@ -15,9 +15,16 @@
  * meaning, so we require an exact match. Empirically validated across 4 real
  * Gemini calls (Bun bo Hue / Sinh to bo / Goi cuon / Banh xeo).
  *
- *   minLen ≤ 3  → threshold 0 (exact match only after normalize)
- *   minLen 4-6  → threshold 1 (single typo tolerance)
- *   minLen ≥ 7  → threshold 2 (two typos / minor variants like trailing 's')
+ *   minLen ≤ 3   → threshold 0  (exact match only after normalize)
+ *   minLen 4-9   → threshold 1  (single typo / trailing-letter tolerance)
+ *   minLen ≥ 10  → threshold 2  (multi-edit tolerance for long phrases)
+ *
+ * The 7-9 bucket was tightened from threshold 2 → 1 after a second-pass
+ * E2E review surfaced "Sữa tươi" ↔ "bún tươi" matching at dist=2 (shared
+ * " tươi" suffix masking 2 substitutions in the head). Same logic also
+ * blocks "Thịt heo" ↔ "Thịt bò" (dist 2, minLen 7) — same-category but
+ * different protein causes a real ~30% protein/fat shift, so erring
+ * on "Tạo mới" is the safe default.
  */
 
 /**
@@ -42,7 +49,7 @@ export function normalize(s: string): string {
  */
 export function thresholdForLength(minLen: number): 0 | 1 | 2 {
   if (minLen <= 3) return 0;
-  if (minLen <= 6) return 1;
+  if (minLen <= 9) return 1;
   return 2;
 }
 

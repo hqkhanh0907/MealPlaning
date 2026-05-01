@@ -36,14 +36,17 @@ describe('fuzzy-match — thresholdForLength', () => {
     expect(thresholdForLength(3)).toBe(0);
   });
 
-  it('returns 1 for short words (4-6 chars) — single-typo tolerance', () => {
+  it('returns 1 for short-to-medium words (4-9 chars) — single-typo tolerance', () => {
     expect(thresholdForLength(4)).toBe(1);
     expect(thresholdForLength(5)).toBe(1);
     expect(thresholdForLength(6)).toBe(1);
+    expect(thresholdForLength(7)).toBe(1);
+    expect(thresholdForLength(8)).toBe(1);
+    expect(thresholdForLength(9)).toBe(1);
   });
 
-  it('returns 2 for longer words (≥7 chars)', () => {
-    expect(thresholdForLength(7)).toBe(2);
+  it('returns 2 for long phrases (≥10 chars)', () => {
+    expect(thresholdForLength(10)).toBe(2);
     expect(thresholdForLength(20)).toBe(2);
   });
 });
@@ -111,16 +114,18 @@ describe('fuzzy-match — findFuzzyMatches (dynamic threshold)', () => {
     expect(result[0].match.id).toBe('a');
   });
 
-  it('returns multiple matches sorted by distance ascending (long words)', () => {
-    // "hanh la" (7 chars) → threshold 2; "hanh las" diff 1, "hanh lass" diff 2
-    const result = findFuzzyMatches('hanh la', [
-      { id: 'a', name: 'Hành lá' },
-      { id: 'b', name: 'Hành la khô' }, // length diff 4 → out
-      { id: 'c', name: 'Hanh las' },
+  it('returns multiple matches sorted by distance ascending (long words ≥10)', () => {
+    // "ca chua bi do" (13 chars after normalize) → threshold 2
+    const result = findFuzzyMatches('Cà chua bi đỏ', [
+      { id: 'a', name: 'Cà chua bi đỏ' }, // dist 0
+      { id: 'b', name: 'Cà chua bi đỏ khô' }, // length diff 4 → out
+      { id: 'c', name: 'Ca chua bi dos' }, // dist 1
+      { id: 'd', name: 'Ca chua bi doss' }, // dist 2
     ]);
-    expect(result.map((r) => r.match.id)).toEqual(['a', 'c']);
+    expect(result.map((r) => r.match.id)).toEqual(['a', 'c', 'd']);
     expect(result[0].distance).toBe(0);
     expect(result[1].distance).toBe(1);
+    expect(result[2].distance).toBe(2);
   });
 
   it('returns empty array when no candidate is within fuzzy range', () => {
@@ -165,15 +170,20 @@ describe('fuzzy-match — findFuzzyMatches (dynamic threshold)', () => {
     expect(findFuzzyMatches('hanhx', [{ id: '1', name: 'hành' }]).length).toBe(1);
   });
 
-  it('matches "Thịt heo" against "Thịt bò" (long-word bucket, dist 2)', () => {
-    // normalize: "thit heo" (8) vs "thit bo" (7) → minLen 7 → threshold 2.
-    // Levenshtein dist = 2 (sub h→b, delete e, keep o) → MATCH.
-    // This is intentional same-category fuzzy matching: AI may confuse
-    // pork/beef but user always sees the "Có phải X không?" confirmation
-    // dialog with a "Tạo mới" escape hatch. Risk is contained by UX.
-    const r = findFuzzyMatches('Thịt heo', [{ id: '1', name: 'Thịt bò' }]);
-    expect(r.length).toBe(1);
-    expect(r[0].distance).toBe(2);
+  it('matches "Thịt heo" against "Thịt bò" → REJECTED (dist 2 > new thr 1 for minLen 7)', () => {
+    // "thit heo" (8) vs "thit bo" (7) → minLen 7 → threshold 1.
+    // Levenshtein dist = 2 → above threshold → no match.
+    // Same-category-but-different-protein causes ~30% protein/fat shift,
+    // so erring on "Tạo mới" is the safe default. User keeps full control.
+    expect(findFuzzyMatches('Thịt heo', [{ id: '1', name: 'Thịt bò' }])).toEqual([]);
+  });
+
+  it('rejects "Sữa tươi" ↔ "bún tươi" (shared suffix masking 2 head subs)', () => {
+    // Real E2E false positive (Sinh to bo, 2026-05-01 v2):
+    // "sua tuoi" (8) vs "bun tuoi" (8) → minLen 8 → threshold 1.
+    // Dist = 2 (s→b, u→u, a→n) → REJECTED. Without dynamic threshold this
+    // matched at flat thr 2 because shared " tuoi" hid head divergence.
+    expect(findFuzzyMatches('Sữa tươi', [{ id: '1', name: 'bún tươi' }])).toEqual([]);
   });
 
   it('still matches plural / trailing-letter variants on long names', () => {
