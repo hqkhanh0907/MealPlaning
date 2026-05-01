@@ -105,6 +105,22 @@
   font-variant-numeric: tabular-nums;
 }
 
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  // Grid items must shrink within their tracks; ensure the input-wrapper
+  // fills its column instead of hugging its content.
+  > app-form-field {
+    min-width: 0;
+  }
+
+  .input-wrapper {
+    width: 100%;
+  }
+}
+
 .nutrition-hero__header {
   display: flex;
   flex-direction: column;

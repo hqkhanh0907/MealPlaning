@@ -152,40 +152,42 @@
       ></textarea>
     </app-form-field>
 
-    <app-form-field
-      label="Số phần ăn"
-      inputId="dish-field-servings"
-      errorId="err-dish-servings"
-      [invalid]="showErrors() && dishForm.servings().errors().length > 0"
-      [errorMessage]="dishForm.servings().errors()[0]?.message ?? ''"
-    >
-      <input
-        id="dish-field-servings"
-        class="input-native"
-        type="number"
-        inputmode="decimal"
-        [formField]="dishForm.servings"
-        step="0.5"
-        [attr.aria-invalid]="
-          showErrors() && dishForm.servings().errors().length > 0 ? 'true' : null
-        "
-        [attr.aria-describedby]="
-          showErrors() && dishForm.servings().errors().length > 0 ? 'err-dish-servings' : null
-        "
-      />
-    </app-form-field>
+    <div class="form-row-2col">
+      <app-form-field label="Loại bữa" inputId="dish-field-meal-tag">
+        <button
+          type="button"
+          id="dish-field-meal-tag"
+          class="picker-trigger--floating"
+          (click)="openMealTagPicker()"
+        >
+          <span>{{ mealTagLabel }}</span>
+          <ion-icon name="chevron-down-outline" aria-hidden="true" />
+        </button>
+      </app-form-field>
 
-    <app-form-field label="Loại bữa" inputId="dish-field-meal-tag">
-      <button
-        type="button"
-        id="dish-field-meal-tag"
-        class="picker-trigger--floating"
-        (click)="openMealTagPicker()"
+      <app-form-field
+        label="Số phần ăn"
+        inputId="dish-field-servings"
+        errorId="err-dish-servings"
+        [invalid]="showErrors() && dishForm.servings().errors().length > 0"
+        [errorMessage]="dishForm.servings().errors()[0]?.message ?? ''"
       >
-        <span>{{ mealTagLabel }}</span>
-        <ion-icon name="chevron-down-outline" aria-hidden="true" />
-      </button>
-    </app-form-field>
+        <input
+          id="dish-field-servings"
+          class="input-native"
+          type="number"
+          inputmode="decimal"
+          [formField]="dishForm.servings"
+          step="0.5"
+          [attr.aria-invalid]="
+            showErrors() && dishForm.servings().errors().length > 0 ? 'true' : null
+          "
+          [attr.aria-describedby]="
+            showErrors() && dishForm.servings().errors().length > 0 ? 'err-dish-servings' : null
+          "
+        />
+      </app-form-field>
+    </div>
 
     <div class="section-label">
       <span>
