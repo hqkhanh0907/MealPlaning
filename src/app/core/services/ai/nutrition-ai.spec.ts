@@ -155,4 +155,140 @@ describe('NutritionAi', () => {
       await expectAsync(nutritionAi.lookupIngredient('cà chua')).toBeRejectedWith(err);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // autofillDish — F-02 rev 1.5 (app-side fuzzy match, AI = content provider)
+  // -------------------------------------------------------------------------
+
+  describe('autofillDish', () => {
+    let geminiSpy: jasmine.SpyObj<GeminiClient>;
+    let nutritionAi: NutritionAi;
+
+    const newRowResp = {
+      name: 'Hành lá',
+      gram_weight: 5,
+      category: 'Rau củ',
+      calories_per_100g: 32,
+      protein_per_100g: 1.8,
+      carbs_per_100g: 7.3,
+      fat_per_100g: 0.2,
+      fiber_per_100g: 2.6,
+      confidence: 'high' as const,
+    };
+
+    beforeEach(() => {
+      geminiSpy = jasmine.createSpyObj<GeminiClient>('GeminiClient', ['generateContent']);
+      TestBed.configureTestingModule({
+        providers: [NutritionAi, { provide: GeminiClient, useValue: geminiSpy }],
+      });
+      nutritionAi = TestBed.inject(NutritionAi);
+    });
+
+    it('does NOT inject DB ingredient list into the prompt (rev 1.5)', async () => {
+      geminiSpy.generateContent.and.resolveTo({ ingredients: [newRowResp] });
+
+      await nutritionAi.autofillDish('Phở bò', [
+        { id: 'ing-aaa', name: 'Bánh phở' },
+        { id: 'ing-bbb', name: 'Hành lá' },
+      ]);
+
+      const [prompt] = geminiSpy.generateContent.calls.mostRecent().args as [string, unknown];
+      expect(prompt).not.toContain('ing-aaa');
+      expect(prompt).not.toContain('ing-bbb');
+      expect(prompt).not.toContain('DB nguyên liệu');
+    });
+
+    it('distance == 0 → kind="existing" (auto-link, dùng DB id + tên DB)', async () => {
+      geminiSpy.generateContent.and.resolveTo({ ingredients: [newRowResp] });
+
+      const result = await nutritionAi.autofillDish('Test', [
+        { id: 'ing-hanh', name: 'Hành lá' }, // exact normalized match
+      ]);
+
+      expect(result.rows.length).toBe(1);
+      const row = result.rows[0];
+      expect(row.kind).toBe('existing');
+      if (row.kind === 'existing') {
+        expect(row.matchedIngredientId).toBe('ing-hanh');
+        expect(row.name).toBe('Hành lá');
+        expect(row.gramWeight).toBe(5);
+      }
+    });
+
+    it('distance ∈ {1,2} → kind="fuzzyConfirm" (carry pendingNew nutrition)', async () => {
+      geminiSpy.generateContent.and.resolveTo({ ingredients: [newRowResp] });
+
+      // DB tên gần đúng: "Hanh la" vs "Hành lá" — distance 0 sau normalize → existing.
+      // Cần candidate distance 1 thật: "Hành la" (thiếu dấu trên la nhưng "hanh la" → distance 1 với "hanh la")
+      // Đơn giản: dùng "Hành lát" (Lev=1 với "hành lá").
+      const result = await nutritionAi.autofillDish('Test', [{ id: 'ing-near', name: 'Hành lát' }]);
+
+      const row = result.rows[0];
+      expect(row.kind).toBe('fuzzyConfirm');
+      if (row.kind === 'fuzzyConfirm') {
+        expect(row.suggestedMatchId).toBe('ing-near');
+        expect(row.distance).toBeGreaterThan(0);
+        expect(row.distance).toBeLessThanOrEqual(2);
+        expect(row.pendingNew.caloriesPer100g).toBe(32);
+        expect(row.pendingNew.category).toBe('Rau củ');
+      }
+    });
+
+    it('distance > 2 → kind="new" (full nutrition + mapped category)', async () => {
+      geminiSpy.generateContent.and.resolveTo({ ingredients: [newRowResp] });
+
+      const result = await nutritionAi.autofillDish('Test', [
+        { id: 'ing-far', name: 'Bánh phở' }, // distance > 2
+      ]);
+
+      const row = result.rows[0];
+      expect(row.kind).toBe('new');
+      if (row.kind === 'new') {
+        expect(row.name).toBe('Hành lá');
+        expect(row.category).toBe('Rau củ');
+        expect(row.caloriesPer100g).toBe(32);
+        expect(row.proteinPer100g).toBe(1.8);
+      }
+    });
+
+    it('empty DB → all rows are kind="new"', async () => {
+      geminiSpy.generateContent.and.resolveTo({ ingredients: [newRowResp] });
+
+      const result = await nutritionAi.autofillDish('Test', []);
+
+      expect(result.rows[0].kind).toBe('new');
+    });
+
+    it('fuzzy-maps non-canonical category from AI', async () => {
+      geminiSpy.generateContent.and.resolveTo({
+        ingredients: [{ ...newRowResp, category: 'rau' }], // shorthand
+      });
+
+      const result = await nutritionAi.autofillDish('Test', []);
+
+      const row = result.rows[0];
+      if (row.kind === 'new') {
+        expect(row.category).toBe('Rau củ');
+      }
+    });
+
+    it('forwards dish_autofill feature flag to GeminiClient', async () => {
+      geminiSpy.generateContent.and.resolveTo({ ingredients: [] });
+
+      await nutritionAi.autofillDish('Phở bò', []);
+
+      const [, options] = geminiSpy.generateContent.calls.mostRecent().args as [
+        string,
+        { feature: string },
+      ];
+      expect(options.feature).toBe('dish_autofill');
+    });
+
+    it('propagates GeminiClient errors verbatim', async () => {
+      const err = new Error('quota exceeded');
+      geminiSpy.generateContent.and.rejectWith(err);
+
+      await expectAsync(nutritionAi.autofillDish('Phở bò', [])).toBeRejectedWith(err);
+    });
+  });
 });

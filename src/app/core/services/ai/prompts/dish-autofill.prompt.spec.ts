@@ -6,83 +6,59 @@ import {
   DISH_AUTOFILL_SYSTEM_INSTRUCTION,
 } from './dish-autofill.prompt';
 
-const VALID_UUID = '11111111-2222-4333-8444-555555555555';
+describe('dish-autofill.prompt — Zod flat row schema (rev 1.5)', () => {
+  const validRow = {
+    name: 'Bánh phở',
+    gram_weight: 200,
+    category: 'Ngũ cốc & Tinh bột',
+    calories_per_100g: 110,
+    protein_per_100g: 3.2,
+    carbs_per_100g: 25,
+    fat_per_100g: 0.2,
+    fiber_per_100g: 0.5,
+    confidence: 'high' as const,
+  };
 
-describe('dish-autofill.prompt — Zod discriminatedUnion(is_in_db)', () => {
-  it('parses OK row is_in_db=true with matched_ingredient_id', () => {
-    const result = dishAutofillRowSchema.safeParse({
-      name: 'Hành lá',
-      gram_weight: 5,
-      is_in_db: true,
-      matched_ingredient_id: VALID_UUID,
-    });
+  it('parses OK row with full nutrition + category + confidence', () => {
+    const result = dishAutofillRowSchema.safeParse(validRow);
     expect(result.success).toBe(true);
   });
 
-  it('parses OK row is_in_db=false with full nutrition + category + confidence', () => {
-    const result = dishAutofillRowSchema.safeParse({
-      name: 'Bánh phở',
-      gram_weight: 200,
-      is_in_db: false,
-      category: 'Ngũ cốc & Tinh bột',
-      calories_per_100g: 110,
-      protein_per_100g: 3.2,
-      carbs_per_100g: 25,
-      fat_per_100g: 0.2,
-      fiber_per_100g: 0.5,
-      confidence: 'high',
-    });
-    expect(result.success).toBe(true);
-  });
-
-  it('rejects row is_in_db=false missing calories_per_100g', () => {
-    const result = dishAutofillRowSchema.safeParse({
-      name: 'X',
-      gram_weight: 10,
-      is_in_db: false,
-      category: 'Khác',
-      // calories_per_100g missing
-      protein_per_100g: 0,
-      carbs_per_100g: 0,
-      fat_per_100g: 0,
-      fiber_per_100g: 0,
-      confidence: 'low',
-    });
+  it('rejects row missing calories_per_100g', () => {
+    const { calories_per_100g: _drop, ...rest } = validRow;
+    const result = dishAutofillRowSchema.safeParse(rest);
     expect(result.success).toBe(false);
   });
 
-  it('rejects row is_in_db=true with extra field calories_per_100g (strict)', () => {
+  it('rejects row with unexpected field is_in_db (strict)', () => {
+    const result = dishAutofillRowSchema.safeParse({ ...validRow, is_in_db: true });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects row with unexpected field matched_ingredient_id (strict)', () => {
     const result = dishAutofillRowSchema.safeParse({
-      name: 'Hành lá',
-      gram_weight: 5,
-      is_in_db: true,
-      matched_ingredient_id: VALID_UUID,
-      calories_per_100g: 30,
+      ...validRow,
+      matched_ingredient_id: '11111111-2222-4333-8444-555555555555',
     });
     expect(result.success).toBe(false);
   });
 
   it('rejects gram_weight = 0 (must be positive)', () => {
-    const result = dishAutofillRowSchema.safeParse({
-      name: 'X',
-      gram_weight: 0,
-      is_in_db: true,
-      matched_ingredient_id: VALID_UUID,
-    });
+    const result = dishAutofillRowSchema.safeParse({ ...validRow, gram_weight: 0 });
     expect(result.success).toBe(false);
   });
 
+  it('rejects nutrition values out of range', () => {
+    expect(dishAutofillRowSchema.safeParse({ ...validRow, calories_per_100g: 1500 }).success).toBe(
+      false,
+    );
+    expect(dishAutofillRowSchema.safeParse({ ...validRow, protein_per_100g: 200 }).success).toBe(
+      false,
+    );
+  });
+
   it('parses response wrapper { ingredients: [...] }', () => {
-    const result = dishAutofillResponseSchema.safeParse({
-      ingredients: [
-        {
-          name: 'Hành lá',
-          gram_weight: 5,
-          is_in_db: true,
-          matched_ingredient_id: VALID_UUID,
-        },
-      ],
-    });
+    const result = dishAutofillResponseSchema.safeParse({ ingredients: [validRow] });
     expect(result.success).toBe(true);
   });
 
@@ -92,71 +68,23 @@ describe('dish-autofill.prompt — Zod discriminatedUnion(is_in_db)', () => {
   });
 });
 
-describe('dish-autofill.prompt — buildDishAutofillPrompt', () => {
+describe('dish-autofill.prompt — buildDishAutofillPrompt (rev 1.5)', () => {
   it('includes the dish name verbatim', () => {
-    const prompt = buildDishAutofillPrompt('Phở bò', []);
+    const prompt = buildDishAutofillPrompt('Phở bò');
     expect(prompt).toContain('Phở bò');
   });
 
-  it('lists DB ingredients as "id | name" lines', () => {
-    const prompt = buildDishAutofillPrompt('Phở bò', [
-      { id: 'aaa-111', name: 'Hành lá' },
-      { id: 'bbb-222', name: 'Bánh phở' },
-    ]);
-    expect(prompt).toContain('aaa-111 | Hành lá');
-    expect(prompt).toContain('bbb-222 | Bánh phở');
+  it('does NOT contain DB ingredient hint list (rev 1.5 — app matches local)', () => {
+    const prompt = buildDishAutofillPrompt('Phở bò');
+    expect(prompt).not.toContain('DB nguyên liệu hiện có');
+    expect(prompt).not.toContain('matched_ingredient_id');
+    expect(prompt).not.toContain('is_in_db');
   });
 
-  it('emits explicit empty-DB hint when dbIngredients is empty', () => {
-    const prompt = buildDishAutofillPrompt('Phở bò', []);
-    expect(prompt).toContain('chưa có nguyên liệu nào trong DB');
-  });
-
-  it('contains snake_case JSON schema field names matching Zod', () => {
-    const prompt = buildDishAutofillPrompt('X', []);
+  it('contains snake_case JSON schema field names matching Zod flat schema', () => {
+    const prompt = buildDishAutofillPrompt('X');
     for (const f of [
       'gram_weight',
-      'is_in_db',
-      'matched_ingredient_id',
-      'calories_per_100g',
-      'protein_per_100g',
-      'carbs_per_100g',
-      'fat_per_100g',
-      'fiber_per_100g',
-    ]) {
-      expect(prompt).toContain(f);
-    }
-  });
-
-  it('lists 11 INGREDIENT_CATEGORIES enum values for is_in_db=false rows', () => {
-    const prompt = buildDishAutofillPrompt('X', []);
-    expect(prompt).toContain('"Khác"');
-    expect(prompt).toContain('"Ngũ cốc & Tinh bột"');
-  });
-
-  it('reminds RULE-DISH-TOTAL-04 invariant', () => {
-    const prompt = buildDishAutofillPrompt('X', []);
-    expect(prompt).toContain('RULE-DISH-TOTAL-04');
-  });
-});
-
-describe('dish-autofill.prompt — Gemini responseSchema', () => {
-  it('exposes flat OBJECT with `ingredients` array', () => {
-    expect(dishAutofillGeminiSchema.type).toBe('OBJECT');
-    expect(
-      (dishAutofillGeminiSchema.properties as { ingredients: { type: string } }).ingredients.type,
-    ).toBe('ARRAY');
-  });
-
-  it('marks discriminator-dependent fields as nullable for FLAT schema (A7=A)', () => {
-    const item = (
-      dishAutofillGeminiSchema.properties as {
-        ingredients: { items: { properties: Record<string, { nullable?: boolean }> } };
-      }
-    ).ingredients.items.properties;
-    for (const f of [
-      'matched_ingredient_id',
-      'category',
       'calories_per_100g',
       'protein_per_100g',
       'carbs_per_100g',
@@ -164,17 +92,72 @@ describe('dish-autofill.prompt — Gemini responseSchema', () => {
       'fiber_per_100g',
       'confidence',
     ]) {
-      expect(item[f].nullable).toBe(true);
+      expect(prompt).toContain(f);
     }
   });
 
-  it('keeps name + gram_weight + is_in_db as required (NOT nullable)', () => {
+  it('lists 11 INGREDIENT_CATEGORIES enum values for category', () => {
+    const prompt = buildDishAutofillPrompt('X');
+    expect(prompt).toContain('"Khác"');
+    expect(prompt).toContain('"Ngũ cốc & Tinh bột"');
+  });
+
+  it('reminds RULE-DISH-TOTAL-04 invariant', () => {
+    const prompt = buildDishAutofillPrompt('X');
+    expect(prompt).toContain('RULE-DISH-TOTAL-04');
+  });
+
+  it('instructs canonical ingredient names without cooking state', () => {
+    const prompt = buildDishAutofillPrompt('X');
+    expect(prompt).toContain('app sẽ tự dò trùng');
+  });
+
+  it('takes only dishName parameter (no dbIngredients param)', () => {
+    // Type-level check: should compile with just one arg.
+    expect(buildDishAutofillPrompt.length).toBe(1);
+  });
+
+  it('produces a prompt under 2 KB (significantly smaller than rev 1.4)', () => {
+    const prompt = buildDishAutofillPrompt('Phở bò');
+    expect(prompt.length).toBeLessThan(2048);
+  });
+});
+
+describe('dish-autofill.prompt — Gemini responseSchema (rev 1.5 flat)', () => {
+  it('exposes flat OBJECT with `ingredients` array', () => {
+    expect(dishAutofillGeminiSchema.type).toBe('OBJECT');
+    expect(
+      (dishAutofillGeminiSchema.properties as { ingredients: { type: string } }).ingredients.type,
+    ).toBe('ARRAY');
+  });
+
+  it('marks ALL row fields as required (no nullable since flat schema)', () => {
     const items = (
       dishAutofillGeminiSchema.properties as {
         ingredients: { items: { required: readonly string[] } };
       }
     ).ingredients.items;
-    expect([...items.required]).toEqual(['name', 'gram_weight', 'is_in_db']);
+    expect([...items.required]).toEqual([
+      'name',
+      'gram_weight',
+      'category',
+      'calories_per_100g',
+      'protein_per_100g',
+      'carbs_per_100g',
+      'fat_per_100g',
+      'fiber_per_100g',
+      'confidence',
+    ]);
+  });
+
+  it('does NOT declare is_in_db / matched_ingredient_id fields', () => {
+    const props = (
+      dishAutofillGeminiSchema.properties as {
+        ingredients: { items: { properties: Record<string, unknown> } };
+      }
+    ).ingredients.items.properties;
+    expect(props['is_in_db']).toBeUndefined();
+    expect(props['matched_ingredient_id']).toBeUndefined();
   });
 });
 
