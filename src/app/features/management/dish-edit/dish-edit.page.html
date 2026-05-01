@@ -9,6 +9,24 @@
 
 <ion-content>
   <div class="form-content">
+    @if (!isEdit()) {
+      <button
+        type="button"
+        class="btn-ai-lookup"
+        data-testid="btn-ask-ai"
+        [disabled]="aiAutofillLoading()"
+        (click)="onAskAi()"
+      >
+        @if (aiAutofillLoading()) {
+          <ion-spinner name="crescent" />
+          <span>Đang hỏi AI...</span>
+        } @else {
+          <ion-icon name="sparkles-outline" aria-hidden="true" />
+          <span>Hỏi AI điền nguyên liệu</span>
+        }
+      </button>
+    }
+
     <div class="section-label">Thông tin cơ bản</div>
 
     <app-form-field
@@ -74,26 +92,13 @@
       </button>
     </app-form-field>
 
-    <div class="section-label section-label--with-action">
+    <div class="section-label">
       <span>
         Nguyên liệu
         @if (formSignal().items.length > 0) {
           ({{ formSignal().items.length }})
         }
       </span>
-      <button
-        type="button"
-        class="ai-autofill-trigger"
-        [disabled]="aiAutofillLoading()"
-        (click)="onAskAi()"
-      >
-        <ion-icon name="sparkles-outline" aria-hidden="true" />
-        @if (aiAutofillLoading()) {
-          Đang hỏi AI…
-        } @else {
-          Điền bằng AI
-        }
-      </button>
     </div>
 
     @if (formSignal().items.length === 0) {

@@ -19,6 +19,20 @@
  *     hàng phòng thủ nếu model trả lệch (vd thiếu `matched_ingredient_id` cho
  *     row is_in_db=true, hay thiếu nutrition cho row is_in_db=false).
  *
+ * Divergence vs F-01 ingredient-lookup prompt (cố ý, audit 2026-04-30):
+ *   - F-02 KHÔNG copy "liquid density rule" (nước/sữa/dầu g/ml) từ F-01: row
+ *     liquid trong dish hiếm + AI 2.5 Flash đã hiểu basis "per 100g" trong
+ *     context dish.
+ *   - F-02 KHÔNG copy "confidence definition high/medium/low" từ F-01: F-02
+ *     row được user verify inline trong sheet trước Save, hậu quả mis-grading
+ *     thấp hơn F-01 (ingredient lưu thẳng DB).
+ *   - F-02 dùng `_per_100g` suffix trong field name (vs F-01 root `calories`):
+ *     F-02 row có 2 nhánh + cần nhấn basis để model không nhầm với "tổng cho
+ *     1 serving"; F-01 root object không có ambiguity nên giữ tên ngắn.
+ *   - Mục tiêu: giữ prompt F-02 ngắn (~3.9 KB cho 40 candidates, 53% là DB
+ *     hint block); thêm rules sẽ đẩy lên >4.2 KB không có evidence cải thiện
+ *     output quality.
+ *
  * Naming convention (audit A7):
  *   - Gemini & Zod input: snake_case (đồng bộ output Gemini thường thấy).
  *   - NutritionAi map sang camelCase TS sau khi parse (Layer 3).

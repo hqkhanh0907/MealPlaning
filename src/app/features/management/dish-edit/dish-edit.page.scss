@@ -264,38 +264,43 @@
   margin-top: 16px;
 }
 
-// F-02 — AI Dish Autofill trigger nằm trong section-label
-.section-label--with-action {
+// F-02 — AI autofill trigger: full-width gradient button (đồng nhất với ingredient-edit)
+.btn-ai-lookup {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.ai-autofill-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--accent-500);
-  background: var(--bg-card);
-  color: var(--accent-500);
-  font-size: var(--font-size-body-sm);
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  margin-bottom: 16px;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--ion-color-primary-rgb), 0.95),
+    rgba(var(--ion-color-tertiary-rgb, var(--ion-color-primary-rgb)), 0.95)
+  );
+  color: var(--ion-color-primary-contrast, #fff); // allow-hardcode: fallback for primary contrast
+  border: 0;
+  border-radius: var(--radius-sm, 12px);
+  font-size: var(--font-size-icon-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  transition: opacity 120ms ease;
 
   ion-icon {
-    font-size: var(--font-size-icon-sm);
+    font-size: var(--font-size-icon-md);
+  }
+
+  ion-spinner {
+    --color: var(
+      --ion-color-primary-contrast,
+      #fff
+    ); // allow-hardcode: fallback for primary contrast
+    width: 18px;
+    height: 18px;
   }
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
-  }
-
-  &:active:not(:disabled) {
-    opacity: 0.7;
   }
 }
