@@ -45,6 +45,7 @@ describe('DishStore', () => {
       'getById',
       'countReferences',
       'searchByName',
+      'findByNormalizedName',
     ]);
     repo.list.and.resolveTo([dish]);
     repo.searchByName.and.resolveTo([dish]);
@@ -52,6 +53,7 @@ describe('DishStore', () => {
     repo.update.and.resolveTo(dish);
     repo.delete.and.resolveTo();
     repo.countReferences.and.resolveTo(0);
+    repo.findByNormalizedName.and.resolveTo(null);
 
     db = jasmine.createSpyObj<Pick<Database, 'withTransaction'>>('Database', ['withTransaction']);
     // Default: pass-through (executes callback as if inside tx).
@@ -130,6 +132,21 @@ describe('DishStore', () => {
 
     expect(repo.delete).toHaveBeenCalledWith('dish-1');
     expect(store.dishes()).toEqual([]);
+  });
+
+  describe('findByNormalizedName', () => {
+    it('delegates to repo and returns the matched dish', async () => {
+      repo.findByNormalizedName.and.resolveTo(dish);
+      const result = await store.findByNormalizedName('Cơm trứng');
+      expect(repo.findByNormalizedName).toHaveBeenCalledWith('Cơm trứng');
+      expect(result).toBe(dish);
+    });
+
+    it('returns null when repo finds no match', async () => {
+      repo.findByNormalizedName.and.resolveTo(null);
+      const result = await store.findByNormalizedName('Món lạ');
+      expect(result).toBeNull();
+    });
   });
 
   describe('applyAutofillAtomic (F-02 Layer 7)', () => {

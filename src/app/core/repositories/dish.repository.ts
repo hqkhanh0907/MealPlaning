@@ -48,6 +48,23 @@ export class DishRepository {
     );
   }
 
+  /**
+   * Exact case-insensitive name lookup (TRIM both sides). Returns first match
+   * or `null`. Used by AI autofill pre-check to block creating a dish whose
+   * name already exists. NOTE: only normalizes case + edge whitespace; does
+   * NOT strip diacritics ("Phở" vs "Pho" stays distinct).
+   */
+  async findByNormalizedName(name: string): Promise<DishListItem | null> {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return null;
+    }
+    return this.db.getOne<DishListItem>(
+      'SELECT * FROM dish_with_totals WHERE LOWER(TRIM(name)) = LOWER(?) LIMIT 1',
+      [trimmed],
+    );
+  }
+
   async getById(id: string): Promise<DishWithIngredients | null> {
     const dish = await this.db.getOne<DishListItem>('SELECT * FROM dish_with_totals WHERE id = ?', [
       id,

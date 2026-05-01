@@ -53,6 +53,15 @@ export class DishStore {
     return this.repo.getById(id);
   }
 
+  /**
+   * Pre-check trùng tên cho AI autofill flow. Trả về dish trùng (case-insensitive,
+   * exact normalized) hoặc null. KHÔNG dùng cho fuzzy/contains search — đã có
+   * `search()` riêng cho UI list filter.
+   */
+  async findByNormalizedName(name: string): Promise<DishListItem | null> {
+    return this.repo.findByNormalizedName(name);
+  }
+
   async addFromIngredients(
     input: CreateDishInput,
     items: CreateDishIngredientInput[],

@@ -137,4 +137,29 @@ describe('DishRepository', () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe('findByNormalizedName', () => {
+    it('queries dish_with_totals with LOWER+TRIM exact match', async () => {
+      db.getOne.and.resolveTo({ id: 'dish-9', name: 'Phở bò' } as never);
+      const result = await repo.findByNormalizedName('  Phở bò  ');
+      expect(db.getOne).toHaveBeenCalledWith(
+        'SELECT * FROM dish_with_totals WHERE LOWER(TRIM(name)) = LOWER(?) LIMIT 1',
+        ['Phở bò'],
+      );
+      expect(result?.id).toBe('dish-9');
+    });
+
+    it('returns null for empty/whitespace-only name without hitting DB', async () => {
+      db.getOne.calls.reset();
+      const result = await repo.findByNormalizedName('   ');
+      expect(result).toBeNull();
+      expect(db.getOne).not.toHaveBeenCalled();
+    });
+
+    it('returns null when DB has no exact match', async () => {
+      db.getOne.and.resolveTo(null as never);
+      const result = await repo.findByNormalizedName('Món chưa có');
+      expect(result).toBeNull();
+    });
+  });
 });

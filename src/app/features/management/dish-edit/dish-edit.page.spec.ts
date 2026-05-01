@@ -36,6 +36,7 @@ describe('DishEditPage (gram-only)', () => {
       edit: jasmine.createSpy('edit').and.resolveTo(),
       remove: jasmine.createSpy('remove').and.resolveTo(),
       countReferences: jasmine.createSpy('countReferences').and.resolveTo(0),
+      findByNormalizedName: jasmine.createSpy('findByNormalizedName').and.resolveTo(null),
     };
 
     const ingredientStore = {
@@ -263,5 +264,65 @@ describe('DishEditPage (gram-only)', () => {
     // 310 kcal total / 2 servings = 155
     expect(component.previewTotals().calories).toBeCloseTo(155, 5);
     expect(component.previewTotals().protein).toBeCloseTo(13, 5);
+  });
+
+  describe('onAskAi pre-check (duplicate dish name)', () => {
+    const setName = (name: string): void => {
+      const access = component as unknown as {
+        formSignal: {
+          set: (v: {
+            name: string;
+            description: string;
+            servings: number;
+            meal_tag: null;
+            items: never[];
+          }) => void;
+        };
+      };
+      access.formSignal.set({
+        name,
+        description: '',
+        servings: 1,
+        meal_tag: null,
+        items: [],
+      });
+    };
+
+    it('blocks AI call and toasts when an existing dish has the same normalized name', async () => {
+      const dishStore = TestBed.inject(DishStore) as unknown as {
+        findByNormalizedName: jasmine.Spy;
+      };
+      const nutritionAi = TestBed.inject(NutritionAi) as unknown as {
+        autofillDish: jasmine.Spy;
+      };
+      dishStore.findByNormalizedName.and.resolveTo({ id: 'dish-existing', name: 'Phở bò' });
+      const toastSpy = spyOn(
+        component as unknown as { presentToast: (m: string) => Promise<void> },
+        'presentToast',
+      ).and.resolveTo();
+
+      setName('  phở bò  ');
+      await component.onAskAi();
+
+      expect(dishStore.findByNormalizedName).toHaveBeenCalledWith('phở bò');
+      expect(nutritionAi.autofillDish).not.toHaveBeenCalled();
+      expect(toastSpy).toHaveBeenCalledWith('Món "Phở bò" đã tồn tại');
+    });
+
+    it('proceeds to AI when name is not used by any other dish', async () => {
+      const dishStore = TestBed.inject(DishStore) as unknown as {
+        findByNormalizedName: jasmine.Spy;
+      };
+      const nutritionAi = TestBed.inject(NutritionAi) as unknown as {
+        autofillDish: jasmine.Spy;
+      };
+      dishStore.findByNormalizedName.and.resolveTo(null);
+
+      setName('Món hoàn toàn mới');
+      await component.onAskAi();
+
+      expect(dishStore.findByNormalizedName).toHaveBeenCalled();
+      expect(nutritionAi.autofillDish).toHaveBeenCalled();
+    });
   });
 });

@@ -520,6 +520,15 @@ export default class DishEditPage implements HasUnsavedChanges {
       return;
     }
 
+    // Pre-check: dish trùng tên (case-insensitive) → block, không gọi AI.
+    // Mode 'edit': bỏ qua chính dish đang edit (so id), chỉ block nếu trùng
+    // tên với dish KHÁC trong DB.
+    const existing = await this.dishStore.findByNormalizedName(dishName);
+    if (existing && existing.id !== this.dishId()) {
+      await this.presentToast(`Món "${existing.name}" đã tồn tại`);
+      return;
+    }
+
     this.aiAutofillLoading.set(true);
     try {
       const candidates = this.availableIngredients().map((ing) => ({
