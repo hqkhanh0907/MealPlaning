@@ -18,8 +18,24 @@ describe('NativeDatabaseService transaction behavior', () => {
       await service.execute('INSERT INTO dish VALUES (?)', ['1']);
     });
 
-    expect(db.execute.calls.argsFor(0)[0]).toBe('BEGIN TRANSACTION;');
+    expect(db.execute).toHaveBeenCalledWith('BEGIN TRANSACTION;', false);
     expect(db.run).toHaveBeenCalledWith('INSERT INTO dish VALUES (?)', ['1'], false);
-    expect(db.execute.calls.argsFor(1)[0]).toBe('COMMIT;');
+    expect(db.execute).toHaveBeenCalledWith('COMMIT;', false);
+  });
+
+  it('passes transaction=false on ROLLBACK so the plugin does not auto-wrap it', async () => {
+    const service = new NativeDatabase();
+    const db = createDb();
+    (service as unknown as { db: ReturnType<typeof createDb> }).db = db;
+
+    await expectAsync(
+      service.withTransaction(async () => {
+        throw new Error('boom');
+      }),
+    ).toBeRejectedWithError('boom');
+
+    expect(db.execute).toHaveBeenCalledWith('BEGIN TRANSACTION;', false);
+    expect(db.execute).toHaveBeenCalledWith('ROLLBACK;', false);
+    expect(db.execute).not.toHaveBeenCalledWith('COMMIT;', false);
   });
 });

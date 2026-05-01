@@ -239,6 +239,15 @@ export class NutritionAi {
       systemInstruction: DISH_AUTOFILL_SYSTEM_INSTRUCTION,
       responseSchema: dishAutofillGeminiSchema,
       schema: dishAutofillResponseSchema,
+      // Gemini 2.5-flash burns ~2k internal "thinking" tokens before content.
+      // Default 2048 caps content mid-array → JSON.parse fail. Dish autofill
+      // can return up to ~25 ingredients × ~120 tokens = 3k content + 2k think.
+      // Bumping to 8192 leaves headroom for complex dishes (Bún bò Huế 18 rows).
+      maxOutputTokens: 8192,
+      // Generating 8k tokens with thinking on 2.5-flash regularly takes 25-45s
+      // on real network. Default 15s timeout fires before first token. 60s
+      // gives enough buffer; if it still times out, the network is genuinely down.
+      timeoutMs: 60_000,
     });
 
     const rows: DishAutofillRow[] = response.ingredients.map((row) => {

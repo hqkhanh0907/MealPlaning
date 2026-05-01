@@ -120,23 +120,32 @@ export class NativeDatabase extends Database {
   override async withTransaction<T>(callback: () => Promise<T>): Promise<T> {
     this.ensureDb();
     const isOuterTransaction = this.transactionDepth === 0;
-    if (isOuterTransaction) {
-      await this.db!.execute('BEGIN TRANSACTION;');
-    }
-
+    // BUG FIX: pass `transaction=false` for BEGIN/COMMIT/ROLLBACK so the
+    // capacitor-sqlite plugin does NOT auto-wrap them in its own implicit
+    // transaction (which would auto-commit BEGIN immediately, leaving no
+    // active transaction for subsequent INSERTs and breaking COMMIT/ROLLBACK
+    // with "no current transaction").
     this.transactionDepth += 1;
     try {
-      const result = await callback();
-      this.transactionDepth -= 1;
       if (isOuterTransaction) {
-        await this.db!.execute('COMMIT;');
+        await this.db!.execute('BEGIN TRANSACTION;', false);
       }
+      const result = await callback();
+      if (isOuterTransaction) {
+        await this.db!.execute('COMMIT;', false);
+      }
+      this.transactionDepth -= 1;
       return result;
     } catch (error) {
-      this.transactionDepth = Math.max(0, this.transactionDepth - 1);
       if (isOuterTransaction) {
-        await this.db!.execute('ROLLBACK;');
+        try {
+          await this.db!.execute('ROLLBACK;', false);
+        } catch {
+          // ROLLBACK can fail if BEGIN never took effect; swallow so
+          // the original error propagates.
+        }
       }
+      this.transactionDepth = Math.max(0, this.transactionDepth - 1);
       throw error;
     }
   }
