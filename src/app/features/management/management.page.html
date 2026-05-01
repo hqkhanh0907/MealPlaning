@@ -167,10 +167,12 @@
                 <div class="dish-calories">{{ formatNumber(dish.total_calories) }} kcal</div>
                 <p class="dish-macros">
                   <span class="macro macro--protein"
-                    >P: {{ formatNumber(dish.total_protein) }}g</span
+                    >Protein {{ formatNumber(dish.total_protein) }}g</span
                   >
-                  <span class="macro macro--carbs">C: {{ formatNumber(dish.total_carbs) }}g</span>
-                  <span class="macro macro--fat">F: {{ formatNumber(dish.total_fat) }}g</span>
+                  <span class="macro macro--carbs"
+                    >Carbs {{ formatNumber(dish.total_carbs) }}g</span
+                  >
+                  <span class="macro macro--fat">Fat {{ formatNumber(dish.total_fat) }}g</span>
                 </p>
                 <p class="item-card__detail item-card__detail--dish">
                   {{ formatNumber(dish.servings) }} phần ·

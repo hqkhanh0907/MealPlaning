@@ -65,7 +65,7 @@ export const ingredientFormSchema = schema<IngredientEditFormValue>((p) => {
     optionalNonNegative(value(), 'positive', 'Fat không được nhỏ hơn 0'),
   );
   validate(p.fiber, ({ value }) =>
-    optionalNonNegative(value(), 'positive', 'Chất xơ không được nhỏ hơn 0'),
+    optionalNonNegative(value(), 'positive', 'Fiber không được nhỏ hơn 0'),
   );
 
   // Cross-field sanity check: protein + carbs + fat ≤ 100 g per 100 g.
@@ -81,7 +81,7 @@ export const ingredientFormSchema = schema<IngredientEditFormValue>((p) => {
     if (protein + carbs + fat > 100) {
       return {
         kind: 'macroOver100',
-        message: 'Protein + Carb + Fat trên 100 g không được vượt 100 g.',
+        message: 'Protein + Carbs + Fat trên 100 g không được vượt 100 g.',
       };
     }
     return null;

@@ -1,114 +1,308 @@
 <!doctype html><html lang="vi"><head><meta charset="utf-8"/>
-<title>Phase 1 — Recipe Edit</title>
+<title>Phase 1 — Recipe Edit (Hero Nutrition v2)</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="_tokens.css">
-<style>.dhdr{padding:14px 20px 8px;display:flex;align-items:center;gap:14px}
+<style>
+/* —— Macro nutrient palette (sync với design-system.md §2.6) —— */
+:root{
+  --macro-protein: #6F8B6E; /* sage */
+  --macro-carbs:   #C99B6E; /* warm amber */
+  --macro-fat:     #D97757; /* coral */
+  --macro-fiber:   #7AB0B5; /* pale aqua — Fiber (proposed, theo Q5=c) */
+}
+
+/* —— Layout 3-phone row —— */
+body{flex-direction:column}
+.row3{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.phone-wrap{display:flex;flex-direction:column;gap:10px;align-items:center}
+.state-tag{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:700;padding:6px 14px;border-radius:99px;background:rgba(224,120,86,.1);border:1px solid rgba(224,120,86,.3)}
+.state-tag .sub{display:block;font-size:10px;letter-spacing:.05em;text-transform:none;color:#E5DED0;opacity:.7;margin-top:2px;font-weight:500}
+
+/* —— Header —— */
+.dhdr{padding:14px 20px 8px;display:flex;align-items:center;gap:14px}
 .back{width:40px;height:40px;border-radius:99px;background:var(--bg-card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-1);box-shadow:var(--sh-xs)}
 .back svg{width:18px;height:18px}
 .dhdr h2{font-family:var(--font-display);font-size:22px;font-style:italic;font-weight:500;margin:0;color:var(--ink-1);letter-spacing:-0.01em;flex:1}
 .save{background:var(--primary);color:#FFFCF6;border:0;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:var(--sh-sm)}
-.save.disabled{background:var(--line-strong);box-shadow:none;cursor:not-allowed;color:#FFFCF6}
 .scroll{flex:1;overflow-y:auto;scrollbar-width:none;padding:8px 20px 120px}
 .scroll::-webkit-scrollbar{display:none}
-.section-title{font-size:11px;font-weight:700;color:var(--ink-2);letter-spacing:.1em;text-transform:uppercase;margin:18px 0 10px;display:flex;justify-content:space-between;align-items:center}
-.section-title .add-link{color:var(--primary);font-size:11px;font-weight:700;text-transform:none;letter-spacing:0}
+.section-title{font-size:11px;font-weight:700;color:var(--ink-2);letter-spacing:.1em;text-transform:uppercase;margin:14px 0 10px;display:flex;justify-content:space-between;align-items:center}
+
+/* —— Form input —— */
 .input-wrapper{position:relative;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 16px 10px;margin-bottom:10px;box-shadow:var(--sh-xs)}
 .input-label{position:absolute;top:7px;left:16px;font-size:10px;color:var(--ink-2);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
 .input-native{border:0;outline:0;width:100%;background:transparent;font-family:inherit;font-size:15px;color:var(--ink-1);font-weight:500;padding:0}
-.input-native::placeholder{color:var(--ink-3)}
-.input-suffix{position:absolute;right:16px;top:50%;transform:translateY(-25%);font-size:13px;color:var(--ink-2);font-weight:500}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .row2 .input-wrapper{margin-bottom:0}
 .picker-trigger--floating{display:flex;justify-content:space-between;align-items:center;width:100%;background:transparent;border:0;padding:0;font-family:inherit;font-size:15px;color:var(--ink-1);font-weight:500;cursor:pointer;text-align:left}
 .picker-trigger--floating svg{width:14px;height:14px;color:var(--ink-3)}
+
+/* —— HERO NUTRITION CARD (mới) —— */
+.nutrition-hero{
+  background:var(--bg-card);
+  border:1px solid var(--line);
+  border-radius:var(--r-lg);
+  padding:18px 18px 16px;
+  margin:6px 0 14px;
+  box-shadow:var(--sh-sm);
+}
+.hero-top{display:flex;align-items:center;gap:16px}
+
+/* Ring — conic-gradient */
+.hero-ring{
+  --pct: 23;
+  --ring-track: var(--bg-card-soft);
+  --ring-fill: var(--primary);
+  width:96px;height:96px;border-radius:99px;flex-shrink:0;
+  background: conic-gradient(var(--ring-fill) calc(var(--pct) * 1%), var(--ring-track) 0);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.hero-ring::before{
+  content:"";position:absolute;inset:7px;border-radius:99px;background:var(--bg-card);
+}
+.hero-ring__inner{position:relative;text-align:center;line-height:1.05}
+.hero-ring__num{font-family:var(--font-display);font-style:italic;font-weight:500;font-size:24px;color:var(--ink-1);font-variant-numeric:tabular-nums}
+.hero-ring__lbl{font-size:11px;color:var(--ink-2);font-weight:500;margin-top:2px}
+
+/* Khi không có target — hiển thị calo lớn ở trung tâm thay ring */
+.hero-cal-only{
+  width:96px;height:96px;border-radius:var(--r-md);flex-shrink:0;
+  background:var(--bg-card-soft);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+}
+.hero-cal-only .num{font-family:var(--font-display);font-style:italic;font-weight:500;font-size:26px;color:var(--ink-1);font-variant-numeric:tabular-nums;line-height:1}
+.hero-cal-only .unit{font-size:11px;color:var(--ink-2);font-weight:500}
+
+.hero-meta{flex:1;min-width:0}
+.hero-meta__title{font-size:11px;font-weight:700;color:var(--ink-2);letter-spacing:.1em;text-transform:uppercase;margin:0 0 4px}
+.hero-meta__primary{font-family:var(--font-display);font-style:italic;font-weight:500;font-size:22px;color:var(--ink-1);font-variant-numeric:tabular-nums;line-height:1.1}
+.hero-meta__sub{font-size:12px;color:var(--ink-2);margin-top:4px;line-height:1.4}
+.hero-meta__sub b{color:var(--primary-deep);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* Stacked bar */
+.hero-bar{display:flex;height:8px;border-radius:99px;overflow:hidden;margin:14px 0 8px;background:var(--bg-card-soft)}
+.hero-bar__seg{height:100%}
+.hero-bar__seg--protein{background:var(--macro-protein)}
+.hero-bar__seg--carbs{background:var(--macro-carbs)}
+.hero-bar__seg--fat{background:var(--macro-fat)}
+.hero-bar-legend{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;font-weight:500;margin-bottom:12px}
+.hero-bar-legend b{color:var(--ink-1);font-weight:700;margin-right:3px}
+
+/* Pill row */
+.hero-pills{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hero-pill{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px;border-radius:var(--r-md);
+  background:var(--bg-card-soft);
+}
+.hero-pill__dot{width:10px;height:10px;border-radius:99px;flex-shrink:0}
+.hero-pill__dot--protein{background:var(--macro-protein)}
+.hero-pill__dot--carbs{background:var(--macro-carbs)}
+.hero-pill__dot--fat{background:var(--macro-fat)}
+.hero-pill__dot--fiber{background:var(--macro-fiber)}
+.hero-pill__lbl{font-size:12px;color:var(--ink-2);font-weight:500;flex:1}
+.hero-pill__val{font-family:var(--font-display);font-style:italic;font-weight:500;font-size:14px;color:var(--ink-1);font-variant-numeric:tabular-nums}
+
+/* State-C empty hint */
+.hero-empty-hint{
+  margin-top:12px;
+  padding:12px 14px;
+  background:var(--bg-card-soft);
+  border-radius:var(--r-md);
+  font-size:12px;color:var(--ink-2);text-align:center;line-height:1.5;
+}
+.hero-empty-hint b{color:var(--ink-1);font-weight:600}
+
+/* Ingredient row (compact, just to show context after hero) */
 .ing-row{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--sh-xs);margin-bottom:8px}
 .ing-emoji{width:36px;height:36px;border-radius:10px;background:var(--bg-card-soft);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .ing-info{flex:1;min-width:0}
 .ing-name{font-size:14px;font-weight:600;color:var(--ink-1)}
 .ing-qty{font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .ing-qty b{color:var(--ink-1);font-weight:700}
-.ing-handle{color:var(--ink-3);width:24px;display:flex;flex-direction:column;gap:3px;align-items:center}
-.ing-handle span{width:18px;height:2px;background:currentColor;border-radius:99px}
-.ing-actions{display:flex;gap:6px}
-.ing-icon-btn{width:30px;height:30px;border-radius:99px;background:var(--bg-card-soft);border:0;color:var(--ink-2);display:flex;align-items:center;justify-content:center}
-.ing-icon-btn svg{width:13px;height:13px}
-.ing-icon-btn.danger{color:var(--danger)}
-.preview-card{margin-top:14px;background:var(--primary-soft);border-radius:var(--r-md);padding:14px 16px;border:1px solid rgba(107,142,111,.3)}
-.preview-lbl{font-size:10px;color:var(--primary-ink);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
-.preview-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
-.preview-row .k{font-size:13px;color:var(--primary-ink);font-weight:500}
-.preview-row .v{font-family:var(--font-display);font-size:18px;font-style:italic;font-weight:500;color:var(--primary-ink);font-variant-numeric:tabular-nums}
-.preview-macros{display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(107,142,111,.3)}
-.preview-macros .pm{flex:1;font-size:11px;color:var(--primary-ink);text-align:center}
-.preview-macros .pm b{display:block;font-family:var(--font-display);font-style:italic;font-size:14px}</style></head><body>
-<div class="head"><p class="tag">Phase 1 · Tab Quản lý</p><h1>Recipe Edit — Manage ingredients</h1><p>Sửa món có data. Drag handle để sắp xếp, edit/delete nguyên liệu inline. Live preview kcal/phần khi đổi quantity.</p></div>
+
+.ing-empty{
+  padding:18px;border-radius:var(--r-md);border:1px dashed var(--line-strong);
+  text-align:center;color:var(--ink-2);font-size:13px;
+}
+.ing-empty .btn{display:inline-block;margin-top:10px;padding:8px 18px;border-radius:99px;background:var(--primary);color:#FFFCF6;font-size:12px;font-weight:600}
+</style></head><body>
+<div class="head">
+  <p class="tag">Phase 1 · Tab Quản lý · Demo Step 0</p>
+  <h1>Recipe Edit — Hero Nutrition Card</h1>
+  <p>3 state của hero card mới, đặt ngay sau tên món. Tokens macro: <code>--macro-protein/carbs/fat/fiber</code>. <br/>Naming: <b>Protein / Carbs / Fat / Fiber</b> (full, không viết tắt).</p>
+</div>
 <div class="suite-nav"><a href="index.html">← Gallery</a>
 <a href="11-recipe-list.html">Recipe List</a>
 <a href="13-recipe-add.html">Recipe Add</a>
 <a href="14-recipe-edit.html" class="act">Recipe Edit</a>
 <a href="15-recipe-add-ingredient.html">Add Ing</a>
-<a href="16-recipe-empty.html">Recipe Empty</a>
 </div>
-<div style="position:relative"><div class="notch"></div><div class="phone"><div class="app">
-<div class="sb"><span>9:41</span><span class="r">●●● 84%</span></div>
-<div class="dhdr">
-  <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
-  <h2>Sửa món</h2>
-  <button class="save">Lưu</button>
+
+<div class="row3">
+
+  <!-- ============== STATE A ============== -->
+  <div class="phone-wrap">
+    <span class="state-tag">State A<span class="sub">target=2200, có nguyên liệu</span></span>
+    <div style="position:relative"><div class="notch"></div><div class="phone"><div class="app">
+    <div class="sb"><span>9:41</span><span class="r">●●● 84%</span></div>
+    <div class="dhdr">
+      <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h2>Sửa món</h2>
+      <button class="save">Lưu</button>
+    </div>
+    <div class="scroll">
+      <div class="section-title">Thông tin món</div>
+      <div class="input-wrapper"><label class="input-label">Tên món ăn</label><input class="input-native" value="Phở bò Hà Nội"/></div>
+
+      <!-- HERO NUTRITION CARD — ngay sau tên món -->
+      <div class="nutrition-hero">
+        <div class="hero-top">
+          <div class="hero-ring" style="--pct:22">
+            <div class="hero-ring__inner">
+              <div class="hero-ring__num">488</div>
+              <div class="hero-ring__lbl">kcal</div>
+            </div>
+          </div>
+          <div class="hero-meta">
+            <div class="hero-meta__title">Dinh dưỡng / 1 phần</div>
+            <div class="hero-meta__primary">22% mục tiêu</div>
+            <div class="hero-meta__sub"><b>2.200 kcal</b> hôm nay</div>
+          </div>
+        </div>
+        <div class="hero-bar">
+          <div class="hero-bar__seg hero-bar__seg--protein" style="flex:23"></div>
+          <div class="hero-bar__seg hero-bar__seg--carbs" style="flex:43"></div>
+          <div class="hero-bar__seg hero-bar__seg--fat" style="flex:22"></div>
+        </div>
+        <div class="hero-bar-legend">
+          <span><b>23%</b>Protein</span>
+          <span><b>43%</b>Carbs</span>
+          <span><b>22%</b>Fat</span>
+        </div>
+        <div class="hero-pills">
+          <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--protein"></span><span class="hero-pill__lbl">Protein</span><span class="hero-pill__val">28g</span></div>
+          <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--carbs"></span><span class="hero-pill__lbl">Carbs</span><span class="hero-pill__val">52g</span></div>
+          <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--fat"></span><span class="hero-pill__lbl">Fat</span><span class="hero-pill__val">12g</span></div>
+          <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--fiber"></span><span class="hero-pill__lbl">Fiber</span><span class="hero-pill__val">3g</span></div>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="input-wrapper"><label class="input-label">Loại bữa</label><button class="picker-trigger--floating"><span>Bữa trưa</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button></div>
+        <div class="input-wrapper"><label class="input-label">Số phần ăn</label><input class="input-native" value="4"/></div>
+      </div>
+
+      <div class="section-title"><span>Nguyên liệu (3)</span></div>
+      <div class="ing-row"><div class="ing-emoji">🍜</div><div class="ing-info"><span class="ing-name">Bánh phở tươi</span><span class="ing-qty"><b>800g</b> · 880 kcal</span></div></div>
+      <div class="ing-row"><div class="ing-emoji">🥩</div><div class="ing-info"><span class="ing-name">Thịt bò nạm</span><span class="ing-qty"><b>400g</b> · 880 kcal</span></div></div>
+    </div>
+    </div></div></div>
+  </div>
+
+  <!-- ============== STATE B ============== -->
+  <div class="phone-wrap">
+    <span class="state-tag">State B<span class="sub">target=0 (chưa onboarding) — ẩn ring</span></span>
+    <div style="position:relative"><div class="notch"></div><div class="phone"><div class="app">
+    <div class="sb"><span>9:41</span><span class="r">●●● 84%</span></div>
+    <div class="dhdr">
+      <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h2>Sửa món</h2>
+      <button class="save">Lưu</button>
+    </div>
+    <div class="scroll">
+      <div class="section-title">Thông tin món</div>
+      <div class="input-wrapper"><label class="input-label">Tên món ăn</label><input class="input-native" value="Phở bò Hà Nội"/></div>
+
+      <div class="nutrition-hero">
+        <div class="hero-top">
+          <div class="hero-cal-only">
+            <span class="num">488</span>
+            <span class="unit">kcal</span>
+          </div>
+          <div class="hero-meta">
+            <div class="hero-meta__title">Dinh dưỡng / 1 phần</div>
+            <div class="hero-meta__primary">488 kcal</div>
+            <div class="hero-meta__sub">Chưa thiết lập mục tiêu calo</div>
+          </div>
+        </div>
+        <div class="hero-bar">
+          <div class="hero-bar__seg hero-bar__seg--protein" style="flex:23"></div>
+          <div class="hero-bar__seg hero-bar__seg--carbs" style="flex:43"></div>
+          <div class="hero-bar__seg hero-bar__seg--fat" style="flex:22"></div>
+        </div>
+        <div class="hero-bar-legend">
+          <span><b>23%</b>Protein</span>
+          <span><b>43%</b>Carbs</span>
+          <span><b>22%</b>Fat</span>
+        </div>
+        <div class="hero-pills">
+          <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--protein"></span><span class="hero-pill__lbl">Protein</span><span class="hero-pill__val">28g</span></div>
+          <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--carbs"></span><span class="hero-pill__lbl">Carbs</span><span class="hero-pill__val">52g</span></div>
+          <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--fat"></span><span class="hero-pill__lbl">Fat</span><span class="hero-pill__val">12g</span></div>
+          <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--fiber"></span><span class="hero-pill__lbl">Fiber</span><span class="hero-pill__val">3g</span></div>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="input-wrapper"><label class="input-label">Loại bữa</label><button class="picker-trigger--floating"><span>Bữa trưa</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button></div>
+        <div class="input-wrapper"><label class="input-label">Số phần ăn</label><input class="input-native" value="4"/></div>
+      </div>
+
+      <div class="section-title"><span>Nguyên liệu (3)</span></div>
+      <div class="ing-row"><div class="ing-emoji">🍜</div><div class="ing-info"><span class="ing-name">Bánh phở tươi</span><span class="ing-qty"><b>800g</b> · 880 kcal</span></div></div>
+    </div>
+    </div></div></div>
+  </div>
+
+  <!-- ============== STATE C ============== -->
+  <div class="phone-wrap">
+    <span class="state-tag">State C<span class="sub">món chưa có nguyên liệu — totals=0</span></span>
+    <div style="position:relative"><div class="notch"></div><div class="phone"><div class="app">
+    <div class="sb"><span>9:41</span><span class="r">●●● 84%</span></div>
+    <div class="dhdr">
+      <button class="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h2>Thêm món</h2>
+      <button class="save" style="background:var(--line-strong);box-shadow:none">Lưu</button>
+    </div>
+    <div class="scroll">
+      <div class="section-title">Thông tin món</div>
+      <div class="input-wrapper"><label class="input-label">Tên món ăn</label><input class="input-native" placeholder="VD: Cơm gà Hải Nam" value=""/></div>
+
+      <div class="nutrition-hero">
+        <div class="hero-top">
+          <div class="hero-ring" style="--pct:0;--ring-fill:var(--line-strong)">
+            <div class="hero-ring__inner">
+              <div class="hero-ring__num" style="color:var(--ink-3)">0</div>
+              <div class="hero-ring__lbl">kcal</div>
+            </div>
+          </div>
+          <div class="hero-meta">
+            <div class="hero-meta__title">Dinh dưỡng / 1 phần</div>
+            <div class="hero-meta__primary" style="color:var(--ink-3)">— %</div>
+            <div class="hero-meta__sub">Tự tính từ trọng lượng nguyên liệu</div>
+          </div>
+        </div>
+        <div class="hero-empty-hint">
+          <b>Chưa có nguyên liệu</b><br/>
+          Thêm nguyên liệu để xem chi tiết Protein, Carbs, Fat, Fiber.
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="input-wrapper"><label class="input-label">Loại bữa</label><button class="picker-trigger--floating"><span>Chọn bữa</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button></div>
+        <div class="input-wrapper"><label class="input-label">Số phần ăn</label><input class="input-native" value="1"/></div>
+      </div>
+
+      <div class="section-title"><span>Nguyên liệu</span></div>
+      <div class="ing-empty">
+        Chưa có nguyên liệu nào<br/>
+        <span class="btn">+ Thêm nguyên liệu đầu tiên</span>
+      </div>
+    </div>
+    </div></div></div>
+  </div>
+
 </div>
-<div class="scroll">
-  <div class="section-title">Thông tin món</div>
-  <div class="input-wrapper"><label class="input-label">Tên món ăn</label><input class="input-native" value="Phở bò Hà Nội"/></div>
-  <div class="row2">
-    <div class="input-wrapper"><label class="input-label">Loại bữa</label><button class="picker-trigger--floating"><span>Bữa sáng / trưa</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button></div>
-    <div class="input-wrapper"><label class="input-label">Số phần ăn</label><input class="input-native" value="4"/></div>
-  </div>
-
-  <div class="section-title"><span>Nguyên liệu (3 hiển thị)</span><span class="add-link">+ Thêm</span></div>
-
-  <div class="ing-row">
-    <div class="ing-handle"><span></span><span></span><span></span></div>
-    <div class="ing-emoji">🍜</div>
-    <div class="ing-info"><span class="ing-name">Bánh phở tươi</span><span class="ing-qty"><b>800g</b> · 880 kcal</span></div>
-    <div class="ing-actions">
-      <button class="ing-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
-      <button class="ing-icon-btn danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
-    </div>
-  </div>
-
-  <div class="ing-row">
-    <div class="ing-handle"><span></span><span></span><span></span></div>
-    <div class="ing-emoji">🥩</div>
-    <div class="ing-info"><span class="ing-name">Thịt bò nạm</span><span class="ing-qty"><b>400g raw</b> · 880 kcal</span></div>
-    <div class="ing-actions">
-      <button class="ing-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
-      <button class="ing-icon-btn danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
-    </div>
-  </div>
-
-  <div class="ing-row">
-    <div class="ing-handle"><span></span><span></span><span></span></div>
-    <div class="ing-emoji">🧅</div>
-    <div class="ing-info"><span class="ing-name">Hành tây</span><span class="ing-qty"><b>1 củ M (110g)</b> · 44 kcal</span></div>
-    <div class="ing-actions">
-      <button class="ing-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
-      <button class="ing-icon-btn danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
-    </div>
-  </div>
-
-  <p style="font-size:12px;color:var(--ink-2);text-align:center;margin:6px 0 14px">+ 5 nguyên liệu khác · Kéo để sắp xếp lại</p>
-
-  <div class="section-title">Dinh dưỡng dự kiến · 1 phần</div>
-  <div class="preview-card">
-    <div class="preview-row"><span class="k">Calories</span><span class="v">488 kcal</span></div>
-    <div class="preview-row"><span class="k">Tổng món</span><span class="v">1.952 kcal · 4 phần</span></div>
-    <div class="preview-macros">
-      <div class="pm"><b style="color:#4A6B4E">28g</b>Protein</div>
-      <div class="pm"><b style="color:#8E6F2D">52g</b>Carb</div>
-      <div class="pm"><b style="color:#A85A3F">12g</b>Fat</div>
-      <div class="pm"><b style="color:#6B3D9C">3g</b>Fiber</div>
-    </div>
-  </div>
-</div>
-</div></div></div>
 </body></html>

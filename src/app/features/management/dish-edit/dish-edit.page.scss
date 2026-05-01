@@ -60,8 +60,7 @@
 }
 
 .ingredient-empty,
-.ingredient-item,
-.nutrition-card {
+.ingredient-item {
   border-radius: var(--radius-lg);
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -95,27 +94,168 @@
   flex: 1;
 }
 
-.nutrition-card {
+.nutrition-hero {
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-.nutrition-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
   font-variant-numeric: tabular-nums;
 }
 
-.nutrition-label {
+.nutrition-hero__header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nutrition-hero__label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.nutrition-hero__sub {
   color: var(--text-secondary);
   font-size: var(--font-size-body);
 }
 
-.nutrition-value {
+.nutrition-hero__top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Conic-gradient ring (Capacitor 8 WebView Chromium ≥88, safe). */
+.nutrition-hero__ring {
+  --ring-percent: 0;
+  flex-shrink: 0;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--macro-protein) 0% calc(var(--ring-percent) * 1%),
+    var(--bg-muted) calc(var(--ring-percent) * 1%) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nutrition-hero__ring-inner {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.nutrition-hero__ring-value {
   color: var(--text-primary);
   font-size: var(--font-size-subtitle);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.nutrition-hero__ring-unit {
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+  font-weight: 400;
+}
+
+.nutrition-hero__kcal-block {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-muted);
+}
+
+.nutrition-hero__kcal-value {
+  color: var(--text-primary);
+  font-size: var(--font-size-icon-lg);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.nutrition-hero__kcal-unit {
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+  font-weight: 400;
+}
+
+.nutrition-hero__bar {
+  flex: 1;
+  display: flex;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: var(--bg-muted);
+  gap: 2px;
+}
+
+.nutrition-hero__bar-seg {
+  height: 100%;
+  min-width: 0;
+}
+.nutrition-hero__bar-seg--protein {
+  background: var(--macro-protein);
+}
+.nutrition-hero__bar-seg--carbs {
+  background: var(--macro-carbs);
+}
+.nutrition-hero__bar-seg--fat {
+  background: var(--macro-fat);
+}
+
+.nutrition-hero__pills {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.nutrition-hero__pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: var(--bg-muted);
+}
+
+.nutrition-hero__pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.nutrition-hero__pill--protein .nutrition-hero__pill-dot {
+  background: var(--macro-protein);
+}
+.nutrition-hero__pill--carbs .nutrition-hero__pill-dot {
+  background: var(--macro-carbs);
+}
+.nutrition-hero__pill--fat .nutrition-hero__pill-dot {
+  background: var(--macro-fat);
+}
+.nutrition-hero__pill--fiber .nutrition-hero__pill-dot {
+  background: var(--macro-fiber);
+}
+
+.nutrition-hero__pill-text {
+  color: var(--text-primary);
+  font-size: var(--font-size-body);
   font-weight: 600;
 }
 
@@ -159,31 +299,6 @@
   position: absolute;
   top: 14px;
   right: 8px;
-}
-
-.nutrition-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.nutrition-label::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--ion-color-secondary);
-}
-.nutrition-row--protein .nutrition-label::before {
-  background: var(--ion-color-success);
-}
-.nutrition-row--carbs .nutrition-label::before {
-  background: var(--ion-color-warning);
-}
-.nutrition-row--fat .nutrition-label::before {
-  background: var(--ion-color-danger);
-}
-.nutrition-row--fiber .nutrition-label::before {
-  background: var(--ion-color-primary);
 }
 
 .sheet-title-row {

@@ -48,6 +48,101 @@
       />
     </app-form-field>
 
+    <!-- Nutrition Hero Card (DS §2.6) — shows up high so user sees impact of edits. -->
+    <section
+      class="nutrition-hero"
+      [attr.data-state]="nutritionState()"
+      aria-label="Tóm tắt dinh dưỡng / 1 phần"
+    >
+      <div class="nutrition-hero__header">
+        <div class="nutrition-hero__label">Dinh dưỡng / 1 phần</div>
+        @if (nutritionState() === 'with-target') {
+          <div class="nutrition-hero__sub">
+            {{ caloriePercent() }}% mục tiêu hôm nay · {{ formatNumber(targetCalories()) }} kcal
+          </div>
+        } @else if (nutritionState() === 'no-target') {
+          <div class="nutrition-hero__sub">Chưa có mục tiêu calo — cập nhật trong hồ sơ</div>
+        } @else {
+          <div class="nutrition-hero__sub">Thêm nguyên liệu để xem tóm tắt</div>
+        }
+      </div>
+
+      <div class="nutrition-hero__top">
+        @if (nutritionState() === 'with-target') {
+          <div
+            class="nutrition-hero__ring"
+            [style.--ring-percent]="caloriePercent()"
+            role="img"
+            [attr.aria-label]="
+              'Calo: ' +
+              formatNumber(previewTotals().calories) +
+              ' / ' +
+              formatNumber(targetCalories()) +
+              ' kcal (' +
+              caloriePercent() +
+              '%)'
+            "
+          >
+            <div class="nutrition-hero__ring-inner">
+              <strong class="nutrition-hero__ring-value">{{
+                formatNumber(previewTotals().calories)
+              }}</strong>
+              <span class="nutrition-hero__ring-unit">kcal</span>
+            </div>
+          </div>
+        } @else {
+          <div class="nutrition-hero__kcal-block">
+            <strong class="nutrition-hero__kcal-value">{{
+              formatNumber(previewTotals().calories)
+            }}</strong>
+            <span class="nutrition-hero__kcal-unit">kcal</span>
+          </div>
+        }
+
+        <div class="nutrition-hero__bar" aria-hidden="true">
+          <div
+            class="nutrition-hero__bar-seg nutrition-hero__bar-seg--protein"
+            [style.flex-grow]="macroKcalShares().protein"
+          ></div>
+          <div
+            class="nutrition-hero__bar-seg nutrition-hero__bar-seg--carbs"
+            [style.flex-grow]="macroKcalShares().carbs"
+          ></div>
+          <div
+            class="nutrition-hero__bar-seg nutrition-hero__bar-seg--fat"
+            [style.flex-grow]="macroKcalShares().fat"
+          ></div>
+        </div>
+      </div>
+
+      <div class="nutrition-hero__pills" role="list">
+        <div class="nutrition-hero__pill nutrition-hero__pill--protein" role="listitem">
+          <span class="nutrition-hero__pill-dot" aria-hidden="true"></span>
+          <span class="nutrition-hero__pill-text"
+            >Protein {{ formatNumber(previewTotals().protein) }}g</span
+          >
+        </div>
+        <div class="nutrition-hero__pill nutrition-hero__pill--carbs" role="listitem">
+          <span class="nutrition-hero__pill-dot" aria-hidden="true"></span>
+          <span class="nutrition-hero__pill-text"
+            >Carbs {{ formatNumber(previewTotals().carbs) }}g</span
+          >
+        </div>
+        <div class="nutrition-hero__pill nutrition-hero__pill--fat" role="listitem">
+          <span class="nutrition-hero__pill-dot" aria-hidden="true"></span>
+          <span class="nutrition-hero__pill-text"
+            >Fat {{ formatNumber(previewTotals().fat) }}g</span
+          >
+        </div>
+        <div class="nutrition-hero__pill nutrition-hero__pill--fiber" role="listitem">
+          <span class="nutrition-hero__pill-dot" aria-hidden="true"></span>
+          <span class="nutrition-hero__pill-text"
+            >Fiber {{ formatNumber(previewTotals().fiber) }}g</span
+          >
+        </div>
+      </div>
+    </section>
+
     <app-form-field label="Mô tả" inputId="dish-field-description">
       <textarea
         id="dish-field-description"
@@ -151,31 +246,6 @@
         <div id="err-dish-items" class="field-error" role="alert">{{ msg }}</div>
       }
     }
-
-    <div class="section-label">Dinh dưỡng / 1 phần</div>
-    <p class="section-hint">Tự tính từ trọng lượng nguyên liệu, chia theo số phần ăn.</p>
-    <div class="nutrition-card">
-      <div class="nutrition-row nutrition-row--calories">
-        <span class="nutrition-label">Calories</span>
-        <strong class="nutrition-value">{{ formatNumber(previewTotals().calories) }} kcal</strong>
-      </div>
-      <div class="nutrition-row nutrition-row--protein">
-        <span class="nutrition-label">Protein</span>
-        <strong class="nutrition-value">{{ formatNumber(previewTotals().protein) }}g</strong>
-      </div>
-      <div class="nutrition-row nutrition-row--carbs">
-        <span class="nutrition-label">Carbs</span>
-        <strong class="nutrition-value">{{ formatNumber(previewTotals().carbs) }}g</strong>
-      </div>
-      <div class="nutrition-row nutrition-row--fat">
-        <span class="nutrition-label">Fat</span>
-        <strong class="nutrition-value">{{ formatNumber(previewTotals().fat) }}g</strong>
-      </div>
-      <div class="nutrition-row nutrition-row--fiber">
-        <span class="nutrition-label">Chất xơ</span>
-        <strong class="nutrition-value">{{ formatNumber(previewTotals().fiber) }}g</strong>
-      </div>
-    </div>
 
     <button type="button" class="btn-cta" [disabled]="saving()" (click)="onSave()">
       {{ saving() ? 'Đang lưu...' : isEdit() ? 'Lưu thay đổi' : 'Lưu món ăn' }}

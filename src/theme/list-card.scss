@@ -512,13 +512,13 @@
 }
 
 .macro--protein {
-  color: var(--ion-color-success);
+  color: var(--macro-protein);
 }
 
 .macro--carbs {
-  color: var(--ion-color-warning);
+  color: var(--macro-carbs);
 }
 
 .macro--fat {
-  color: var(--ion-color-danger);
+  color: var(--macro-fat);
 }

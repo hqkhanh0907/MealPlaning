@@ -38,6 +38,7 @@ import type { HasUnsavedChanges } from '../../../core/guards/unsaved-changes-gua
 import type { MealTag } from '../../../core/models/management.types';
 import { DishStore } from '../../../core/stores/dish.store';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
+import { ProfileStore } from '../../../core/stores/profile.store';
 import { DishAutofillApplier } from '../../../core/services/ai/dish-autofill-applier';
 import { NutritionAi, type DishAutofillResult } from '../../../core/services/ai/nutrition-ai';
 import { GEMINI_ERROR_TOAST, GeminiError } from '../../../core/services/ai/gemini-types';
@@ -109,6 +110,7 @@ export default class DishEditPage implements HasUnsavedChanges {
   private readonly router = inject(Router);
   private readonly dishStore = inject(DishStore);
   private readonly ingredientStore = inject(IngredientStore);
+  private readonly profileStore = inject(ProfileStore);
   private readonly ingredientRepo = inject(IngredientRepository);
   private readonly nutritionAi = inject(NutritionAi);
   private readonly autofillApplier = inject(DishAutofillApplier);
@@ -185,6 +187,62 @@ export default class DishEditPage implements HasUnsavedChanges {
       fat: totals.fat / divisor,
       fiber: totals.fiber / divisor,
     };
+  });
+
+  /**
+   * Daily calorie target from user profile (DS §2.6 nutrition hero).
+   * Returns 0 when profile not loaded — hero card uses this to switch to
+   * "no-target" state (hides ring, shows kcal block only).
+   */
+  readonly targetCalories = computed<number>(
+    () => this.profileStore.profile()?.target_calories ?? 0,
+  );
+
+  /**
+   * Calorie ring percent (0–100). 0 when target unavailable or zero, capped
+   * at 100 when totals exceed target. Used by hero card conic-gradient
+   * via `[style.--ring-percent.%]`.
+   */
+  readonly caloriePercent = computed<number>(() => {
+    const target = this.targetCalories();
+    if (target <= 0) {
+      return 0;
+    }
+    const pct = (this.previewTotals().calories / target) * 100;
+    return Math.max(0, Math.min(100, Math.round(pct)));
+  });
+
+  /**
+   * Macro kcal share percentages for stacked bar (P×4 + C×4 + F×9).
+   * All zero when totals=0 (renders empty bar).
+   */
+  readonly macroKcalShares = computed<{ protein: number; carbs: number; fat: number }>(() => {
+    const t = this.previewTotals();
+    const pKcal = t.protein * 4;
+    const cKcal = t.carbs * 4;
+    const fKcal = t.fat * 9;
+    const total = pKcal + cKcal + fKcal;
+    if (total <= 0) {
+      return { protein: 0, carbs: 0, fat: 0 };
+    }
+    return {
+      protein: Math.round((pKcal / total) * 100),
+      carbs: Math.round((cKcal / total) * 100),
+      fat: Math.round((fKcal / total) * 100),
+    };
+  });
+
+  /**
+   * Hero card display state (DS §2.6 nutrition hero):
+   *  - 'with-target' = profile loaded with target>0 → show ring + bar + pills
+   *  - 'no-target'   = profile null/target=0 → show kcal block + bar + pills
+   *  - 'empty'       = totals.calories=0 → show ring/block at 0, bar empty
+   */
+  readonly nutritionState = computed<'with-target' | 'no-target' | 'empty'>(() => {
+    if (this.previewTotals().calories <= 0) {
+      return 'empty';
+    }
+    return this.targetCalories() > 0 ? 'with-target' : 'no-target';
   });
 
   constructor() {

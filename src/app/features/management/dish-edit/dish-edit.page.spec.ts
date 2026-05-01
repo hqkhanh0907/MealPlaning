@@ -1,11 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import type { IngredientListItem } from '../../../core/repositories/ingredient.repository';
 import { IngredientRepository } from '../../../core/repositories/ingredient.repository';
+import type { UserProfile } from '../../../core/models/user-profile.model';
 import { NutritionAi } from '../../../core/services/ai/nutrition-ai';
 import { DishAutofillApplier } from '../../../core/services/ai/dish-autofill-applier';
 import { DishStore } from '../../../core/stores/dish.store';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
+import { ProfileStore } from '../../../core/stores/profile.store';
 import DishEditPage from './dish-edit.page';
 
 describe('DishEditPage (gram-only)', () => {
@@ -27,7 +30,10 @@ describe('DishEditPage (gram-only)', () => {
     updated_at: null,
   };
 
-  const setup = async (paramMap: Record<string, string> = {}): Promise<void> => {
+  const setup = async (
+    paramMap: Record<string, string> = {},
+    profile: UserProfile | null = null,
+  ): Promise<void> => {
     const dishStore = {
       dishes: () => [],
       load: jasmine.createSpy().and.resolveTo(),
@@ -42,6 +48,10 @@ describe('DishEditPage (gram-only)', () => {
     const ingredientStore = {
       ingredients: () => [sampleIngredient],
       load: jasmine.createSpy().and.resolveTo(),
+    };
+
+    const profileStore = {
+      profile: signal<UserProfile | null>(profile),
     };
 
     const ingredientRepo = {
@@ -74,6 +84,7 @@ describe('DishEditPage (gram-only)', () => {
         { provide: ActivatedRoute, useValue: activatedRoute },
         { provide: DishStore, useValue: dishStore },
         { provide: IngredientStore, useValue: ingredientStore },
+        { provide: ProfileStore, useValue: profileStore },
         { provide: IngredientRepository, useValue: ingredientRepo },
         { provide: NutritionAi, useValue: nutritionAi },
         { provide: DishAutofillApplier, useValue: autofillApplier },
@@ -264,6 +275,68 @@ describe('DishEditPage (gram-only)', () => {
     // 310 kcal total / 2 servings = 155
     expect(component.previewTotals().calories).toBeCloseTo(155, 5);
     expect(component.previewTotals().protein).toBeCloseTo(13, 5);
+  });
+
+  describe('Nutrition Hero (DS §2.6)', () => {
+    const setItems = (gramWeight: number): void => {
+      const access = component as unknown as {
+        formSignal: {
+          set: (v: {
+            name: string;
+            description: string;
+            servings: number;
+            meal_tag: null;
+            items: { local_id: string; ingredient_id: string; gram_weight: number }[];
+          }) => void;
+        };
+      };
+      access.formSignal.set({
+        name: 'Test',
+        description: '',
+        servings: 1,
+        meal_tag: null,
+        items: [{ local_id: 'a', ingredient_id: 'ingredient-1', gram_weight: gramWeight }],
+      });
+    };
+
+    it('returns "with-target" state and computes ring percent when profile target>0', async () => {
+      TestBed.resetTestingModule();
+      await setup({}, {
+        id: 'p-1',
+        target_calories: 2000,
+        onboarding_completed: true,
+      } as unknown as UserProfile);
+      setItems(200); // 310 kcal total
+      expect(component.targetCalories()).toBe(2000);
+      expect(component.nutritionState()).toBe('with-target');
+      // 310 / 2000 = 15.5% → rounded 16
+      expect(component.caloriePercent()).toBe(16);
+      // shares: P 26g×4=104, C 2.2g×4=8.8, F 22g×9=198 → total 310.8 → P≈33%, C≈3%, F≈64%
+      const shares = component.macroKcalShares();
+      expect(shares.protein + shares.carbs + shares.fat).toBeGreaterThan(95);
+    });
+
+    it('returns "no-target" state and 0 percent when profile target=0', async () => {
+      TestBed.resetTestingModule();
+      await setup({}, {
+        id: 'p-1',
+        target_calories: 0,
+        onboarding_completed: false,
+      } as unknown as UserProfile);
+      setItems(200);
+      expect(component.targetCalories()).toBe(0);
+      expect(component.nutritionState()).toBe('no-target');
+      expect(component.caloriePercent()).toBe(0);
+    });
+
+    it('returns "empty" state when totals.calories=0 (no items)', () => {
+      // Default beforeEach setup: profile=null, no items.
+      expect(component.previewTotals().calories).toBe(0);
+      expect(component.nutritionState()).toBe('empty');
+      expect(component.caloriePercent()).toBe(0);
+      const shares = component.macroKcalShares();
+      expect(shares).toEqual({ protein: 0, carbs: 0, fat: 0 });
+    });
   });
 
   describe('onAskAi pre-check (duplicate dish name)', () => {

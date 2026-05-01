@@ -117,8 +117,40 @@ Coral là **màu CTA chính** (form submit, FAB, save, primary action). Lý do t
 | Protein | `#6F8B6E` (sage) | `#8AA086` | `--macro-protein` |
 | Carbs   | `#C99B6E` (warm amber) | `#D4AF85` | `--macro-carbs` |
 | Fat     | `#D97757` (coral) | `#E8A287` | `--macro-fat` |
+| Fiber   | `#7AB0B5` (pale aqua) | `#9DC4C8` | `--macro-fiber` |
 
-Cả 3 cùng hue family ấm (~30–80°) → biểu đồ stacked nhìn cohesive thay vì rời rạc như Material RYB.
+3 macro chính (Protein/Carbs/Fat) cùng hue family ấm (~30–80°) → biểu đồ stacked nhìn cohesive thay vì rời rạc như Material RYB. **Fiber** dùng pale aqua (cool, ~185°) để phân biệt rõ với 3 macro chính khi hiển thị cùng pill row — Fiber là vi chất bổ trợ, không phải macro năng lượng.
+
+#### 2.6.1 Macro Naming Convention
+
+**BẮT BUỘC** trong template, string hiển thị, mockup HTML và doc dùng tên đầy đủ:
+
+| ✅ Đúng | ❌ Sai |
+|---------|--------|
+| `Protein` | `P:`, `Pro` |
+| `Carbs` | `C:`, `Carb` (singular) |
+| `Fat` | `F:` |
+| `Fiber` | `Chất xơ`, `Fib` |
+
+- Format giá trị: `<Tên> <số>g`, không có dấu `:` (vd `Protein 22.5g`).
+- Số gram dùng 1 chữ số thập phân.
+- Lý do: accessibility (screen reader đọc rõ), tránh ambiguity, đồng bộ 4 macro cùng English.
+- CI guard: `scripts/check-macro-naming.mjs` chặn `\bCarb\b(?!s)`, `\b[PCF]:\s`, `Chất xơ` trong `src/**/*.{html,ts,scss}`.
+
+#### 2.6.2 Pill Grid Spec
+
+Khi hiển thị 4 macro pill (Protein / Carbs / Fat / Fiber) trong nutrition card:
+
+| Property | Value |
+|----------|-------|
+| Layout | `display: grid; grid-template-columns: 1fr 1fr; gap: 8px` |
+| Pill padding | `8px 12px` |
+| Pill bg | `var(--surface-2)` |
+| Pill radius | `var(--radius-md)` |
+| Dot size | `8px` × `8px`, `border-radius: 50%` |
+| Dot color | `var(--macro-protein|carbs|fat|fiber)` tương ứng |
+| Label font | `var(--text-sm)`, `font-weight: 600`, `font-variant-numeric: tabular-nums` |
+| Order | Protein → Carbs → Fat → Fiber (P/C/F là macro năng lượng, Fiber cuối)
 
 ### 2.7 Data-Viz / Category Badges
 
@@ -168,7 +200,7 @@ Loading: Google Fonts CDN preconnect + display=swap (xem `src/index.html`).
 |--------|-------|----------|
 | Regular | 400 | Body text, mô tả, caption |
 | Medium | 500 | Card title, subtitle, button, link |
-| SemiBold | 600 | Macro values (P/C/F), dish card title, emphasis text |
+| SemiBold | 600 | Macro values (Protein/Carbs/Fat), dish card title, emphasis text |
 | Bold | 700 | Heading, số liệu lớn (calories), streak number |
 
 ### 3.3 Type Scale
@@ -229,14 +261,14 @@ font-variant-numeric: tabular-nums diagonal-fractions;
 
 ### 3.7 Calorie Visual Hierarchy
 
-Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi bật hơn** P/C/F:
+Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi bật hơn** Protein/Carbs/Fat:
 
 | Element | Size | Weight | Dùng cho |
 |---------|------|--------|----------|
 | Calories value | `24px` | `700` | Số kcal — luôn lớn nhất, đậm nhất |
 | Calories label | `12px` | `400` | "kcal" dưới số |
-| Macro (P/C/F) value | `16px` | `600` | Giá trị gram — nhỏ hơn calories |
-| Macro (P/C/F) label | `11px` | `400` | "Protein" / "Carbs" / "Fat" |
+| Macro (Protein/Carbs/Fat) value | `16px` | `600` | Giá trị gram — nhỏ hơn calories |
+| Macro (Protein/Carbs/Fat) label | `11px` | `400` | "Protein" / "Carbs" / "Fat" |
 
 ---
 
