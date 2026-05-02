@@ -3,16 +3,11 @@ import {
   calculateTdee,
   calculateTargetCalories,
   calculateTargetProtein,
+  getActivityLevelFromFactor,
 } from '../../../features/onboarding/onboarding-calculation';
-import { ActivityLevel, Goal } from '../../models/user-profile.types';
+import { Goal } from '../../models/user-profile.types';
 
-const FACTOR_TO_LEVEL: Record<number, ActivityLevel> = {
-  1.2: 'sedentary',
-  1.375: 'light',
-  1.55: 'moderate',
-  1.725: 'heavy',
-};
-
+// snake_case fields are intentional at this boundary: they match the DB row shape.
 export interface RecalcInput {
   weight_kg: number;
   height_cm: number;
@@ -36,7 +31,7 @@ export function recalcTargets(i: RecalcInput): RecalcOutput {
     age: i.age,
     gender: i.gender,
   });
-  const level: ActivityLevel = FACTOR_TO_LEVEL[i.activity_factor] ?? 'moderate';
+  const level = getActivityLevelFromFactor(i.activity_factor) ?? 'moderate';
   const tdee = calculateTdee(bmr, level);
   return {
     bmr,

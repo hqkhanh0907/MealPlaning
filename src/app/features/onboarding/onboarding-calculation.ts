@@ -60,3 +60,14 @@ export function deriveFitnessLevel(
 ): 'beginner' | 'intermediate' | 'advanced' {
   return GYM_TO_LEVEL[gymExperience];
 }
+
+const FACTOR_TO_LEVEL: Record<string, ActivityLevel> = Object.fromEntries(
+  Object.entries(ACTIVITY_FACTOR).map(([level, factor]) => [
+    String(factor),
+    level as ActivityLevel,
+  ]),
+);
+
+export function getActivityLevelFromFactor(factor: number): ActivityLevel | undefined {
+  return FACTOR_TO_LEVEL[String(factor)];
+}

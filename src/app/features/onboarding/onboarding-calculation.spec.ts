@@ -5,6 +5,7 @@ import {
   calculateTdee,
   deriveFitnessLevel,
   getActivityFactor,
+  getActivityLevelFromFactor,
 } from './onboarding-calculation';
 
 describe('onboarding-calculation', () => {
@@ -40,5 +41,13 @@ describe('onboarding-calculation', () => {
     expect(deriveFitnessLevel('under_6m')).toBe('beginner');
     expect(deriveFitnessLevel('6m_2y')).toBe('intermediate');
     expect(deriveFitnessLevel('over_2y')).toBe('advanced');
+  });
+
+  it('derives activity level from factor (inverse of ACTIVITY_FACTOR)', () => {
+    expect(getActivityLevelFromFactor(1.2)).toBe('sedentary');
+    expect(getActivityLevelFromFactor(1.375)).toBe('light');
+    expect(getActivityLevelFromFactor(1.55)).toBe('moderate');
+    expect(getActivityLevelFromFactor(1.725)).toBe('heavy');
+    expect(getActivityLevelFromFactor(1.4)).toBeUndefined();
   });
 });
