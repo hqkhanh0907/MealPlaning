@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { UserProfile } from '../models/user-profile.model';
 import { UserProfileRepository } from '../repositories/user-profile.repository';
 
@@ -10,7 +10,7 @@ export class ProfileStore {
   readonly profile = signal<UserProfile | null>(null);
 
   /** Whether onboarding has been completed */
-  readonly isOnboardingComplete = (): boolean => !!this.profile()?.onboarding_completed;
+  readonly isOnboardingComplete = computed(() => !!this.profile()?.onboarding_completed);
 
   /** Load profile from database. Called once at app startup. */
   async loadProfile(): Promise<void> {
@@ -26,7 +26,13 @@ export class ProfileStore {
     this.profile.set(saved);
   }
 
-  /** Apply a partial update to the profile and refresh the signal */
+  /**
+   * Apply a partial patch to the user profile and refresh the signal.
+   *
+   * @throws if repo.update or repo.getProfile throws. On failure of either,
+   * the signal is NOT updated. On success of both, the signal is set to the
+   * latest row returned by getProfile.
+   */
   async updateProfile(patch: Partial<UserProfile>): Promise<void> {
     await this.repo.update(patch);
     const fresh = await this.repo.getProfile();
