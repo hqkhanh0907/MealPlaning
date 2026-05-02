@@ -112,7 +112,7 @@ adb -s emulator-5554 shell am force-stop com.healthmate.ai   # required after to
 
 ### Architecture Guards (CI-enforced)
 
-Four Node guards run on every `npm run build`, every `git commit` (via Husky pre-commit), and on GitHub Actions for `push` / `pull_request`:
+Five Node guards run on every `npm run build`, every `git commit` (via Husky pre-commit), and on GitHub Actions for `push` / `pull_request`:
 
 | Script | Purpose | Reference |
 |--------|---------|-----------|
@@ -120,6 +120,7 @@ Four Node guards run on every `npm run build`, every `git commit` (via Husky pre
 | `scripts/check-pc1-external-templates.mjs` | PC-1 binary rule — every `@Component` MUST use external `templateUrl` + `styleUrl`; inline `template:` / `styles:` forbidden. | coding-conventions §2.2 |
 | `scripts/check-style-2025-naming.mjs` | No `.component.ts` / `.service.ts` / `.directive.ts` / `.pipe.ts` file suffix; no `Component` / `Service` / `Directive` / `Pipe` class suffix. | coding-conventions §1 |
 | `scripts/check-design-tokens.mjs` | All `color` / `background` / `background-color` / `font-size` use `var(--*)` tokens; raw literals require `// allow-hardcode: <reason>` escape. | design-system §2 / §6 |
+| `scripts/check-macro-naming.mjs` | Full English macro names in UI surface code (`src/**/*.{html,ts,scss}`). Forbids `P:`/`C:`/`F:` abbrevs, singular `Carb`, and Vietnamese `Chất xơ` — must be `Protein` / `Carbs` / `Fat` / `Fiber`. Escape hatch: `// allow-macro-naming: <reason>`. | design-system §2.6.1 |
 
 Run all guards manually: `npm run check:guards`.
 
