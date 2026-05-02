@@ -6,6 +6,67 @@
     <ion-title>Mục tiêu</ion-title>
   </ion-toolbar>
 </ion-header>
+
 <ion-content class="ion-padding">
-  <p>Đang phát triển</p>
+  <div class="form-content">
+    <span class="section-label segment-label">Mục tiêu</span>
+    <div class="goal-list" role="radiogroup" aria-label="Mục tiêu">
+      @for (opt of goalOptions; track opt.value) {
+        <button
+          type="button"
+          class="goal-button"
+          [class.selected]="goal() === opt.value"
+          role="radio"
+          [attr.aria-checked]="goal() === opt.value"
+          (click)="setGoal(opt.value)"
+        >
+          {{ opt.label }}
+        </button>
+      }
+    </div>
+
+    <div class="input-wrapper" [class.invalid]="caloInvalid()">
+      <label class="input-label" [class.invalid]="caloInvalid()">Calo (kcal)</label>
+      <input
+        class="input-native"
+        type="number"
+        inputmode="numeric"
+        [ngModel]="calo()"
+        (ngModelChange)="setCalo($event)"
+      />
+    </div>
+
+    <div class="input-wrapper" [class.invalid]="proteinInvalid()">
+      <label class="input-label" [class.invalid]="proteinInvalid()">Protein (g)</label>
+      <input
+        class="input-native"
+        type="number"
+        inputmode="numeric"
+        [ngModel]="protein()"
+        (ngModelChange)="setProtein($event)"
+      />
+    </div>
+
+    <ion-button fill="outline" size="small" class="reset-button" (click)="reset()">
+      Reset về đề xuất
+    </ion-button>
+
+    <p class="form-hint">
+      Khi đổi mục tiêu, hệ thống đề xuất Calo và Protein mới. Bạn có thể chỉnh tay sau đó.
+    </p>
+  </div>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-button
+      expand="block"
+      class="save-button"
+      [color]="formInvalid() ? 'medium' : 'secondary'"
+      [disabled]="formInvalid()"
+      (click)="save()"
+    >
+      Lưu
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

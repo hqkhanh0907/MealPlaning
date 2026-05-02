@@ -1,0 +1,49 @@
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.goal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.goal-button {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  text-align: left;
+  font: 500 15px/1.4 var(--ion-font-family);
+  color: var(--text-primary);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--radius-md, 12px);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &.selected {
+    background: var(--ion-color-secondary);
+    border-color: var(--ion-color-secondary);
+    color: var(--ion-color-secondary-contrast);
+  }
+}
+
+.reset-button {
+  align-self: flex-start;
+  margin: 0;
+}
+
+.form-hint {
+  margin: 4px 0 0;
+  font: 400 12px/1.4 var(--ion-font-family);
+  color: var(--text-tertiary);
+}
+
+.save-button {
+  margin: 8px 16px;
+}
