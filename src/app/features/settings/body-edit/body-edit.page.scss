@@ -1,0 +1,45 @@
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preview-card {
+  margin-top: 8px;
+  padding: 16px;
+  background: var(--bg-elevated, var(--input-bg));
+  border-radius: var(--radius-md, 12px);
+  border: 1px solid var(--input-border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.preview-label {
+  font: 600 13px/1.4 var(--ion-font-family);
+  color: var(--text-secondary, var(--text-tertiary));
+}
+
+.preview-value {
+  font: 400 14px/1.4 var(--ion-font-family);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.preview-hint {
+  margin: 4px 0 0;
+  font: 400 12px/1.4 var(--ion-font-family);
+  color: var(--text-tertiary);
+}
+
+.save-button {
+  margin: 8px 16px;
+}

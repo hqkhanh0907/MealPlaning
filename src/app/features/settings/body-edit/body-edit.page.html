@@ -6,6 +6,106 @@
     <ion-title>Cơ thể</ion-title>
   </ion-toolbar>
 </ion-header>
+
 <ion-content class="ion-padding">
-  <p>Đang phát triển</p>
+  <div class="form-content">
+    <div class="input-wrapper" [class.invalid]="heightInvalid()">
+      <label class="input-label" [class.invalid]="heightInvalid()">Chiều cao (cm)</label>
+      <input
+        class="input-native"
+        type="number"
+        inputmode="decimal"
+        step="0.1"
+        [ngModel]="height()"
+        (ngModelChange)="height.set($event)"
+      />
+    </div>
+
+    <div class="input-wrapper" [class.invalid]="weightInvalid()">
+      <label class="input-label" [class.invalid]="weightInvalid()">Cân nặng (kg)</label>
+      <input
+        class="input-native"
+        type="number"
+        inputmode="decimal"
+        step="0.1"
+        [ngModel]="weight()"
+        (ngModelChange)="weight.set($event)"
+      />
+    </div>
+
+    <div class="input-wrapper" [class.invalid]="ageInvalid()">
+      <label class="input-label" [class.invalid]="ageInvalid()">Tuổi</label>
+      <input
+        class="input-native"
+        type="number"
+        inputmode="numeric"
+        [ngModel]="age()"
+        (ngModelChange)="age.set($event)"
+      />
+    </div>
+
+    <span class="section-label segment-label">Giới tính</span>
+    <div
+      class="segment-control segment-control--inverse-sage"
+      role="radiogroup"
+      aria-label="Giới tính"
+    >
+      <button
+        type="button"
+        class="segment-button"
+        [class.selected]="gender() === 'male'"
+        role="radio"
+        [attr.aria-checked]="gender() === 'male'"
+        (click)="gender.set('male')"
+      >
+        Nam
+      </button>
+      <button
+        type="button"
+        class="segment-button"
+        [class.selected]="gender() === 'female'"
+        role="radio"
+        [attr.aria-checked]="gender() === 'female'"
+        (click)="gender.set('female')"
+      >
+        Nữ
+      </button>
+    </div>
+
+    @if (preview(); as r) {
+      <div class="preview-card">
+        <div class="preview-row">
+          <span class="preview-label">BMR</span>
+          <span class="preview-value">{{ r.bmr }} kcal</span>
+        </div>
+        <div class="preview-row">
+          <span class="preview-label">TDEE</span>
+          <span class="preview-value">{{ r.tdee }} kcal ({{ activityLabel() }})</span>
+        </div>
+        <div class="preview-row">
+          <span class="preview-label">Mục tiêu mới</span>
+          <span class="preview-value"
+            >Calo {{ r.target_calories }} kcal · Protein {{ r.target_protein }}g</span
+          >
+        </div>
+        <p class="preview-hint">
+          Nếu bạn đã chỉnh tay Calo/Protein, giá trị đã chỉnh sẽ được giữ nguyên.
+        </p>
+      </div>
+    }
+  </div>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-button
+      expand="block"
+      class="save-button"
+      [color]="formInvalid() ? 'medium' : 'secondary'"
+      [disabled]="formInvalid()"
+      (click)="save()"
+    >
+      Lưu
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
