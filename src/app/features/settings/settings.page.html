@@ -6,7 +6,132 @@
     <ion-title>Cài đặt</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content class="ion-padding">
-  <h2>Cài đặt</h2>
-  <p>Settings — Coming soon</p>
+
+<ion-content class="settings-content">
+  <ion-list lines="full" class="settings-list">
+    <ion-list-header>
+      <ion-label><h2>Hồ sơ</h2></ion-label>
+    </ion-list-header>
+
+    <ion-item button detail="false" routerLink="body">
+      <ion-label>
+        <h3>Cơ thể</h3>
+        <p>{{ bodySummary() }}</p>
+      </ion-label>
+      <ion-icon slot="end" name="chevron-forward-outline" aria-hidden="true" />
+    </ion-item>
+
+    <ion-item button detail="false" routerLink="goals">
+      <ion-label>
+        <h3>Mục tiêu</h3>
+        <p>{{ goalSummary() }}</p>
+      </ion-label>
+      <ion-icon slot="end" name="chevron-forward-outline" aria-hidden="true" />
+    </ion-item>
+
+    <ion-item button detail="false" routerLink="activity">
+      <ion-label>
+        <h3>Hoạt động</h3>
+        <p>{{ activitySummary() }}</p>
+      </ion-label>
+      <ion-icon slot="end" name="chevron-forward-outline" aria-hidden="true" />
+    </ion-item>
+  </ion-list>
+
+  <ion-list lines="full" class="settings-list">
+    <ion-list-header>
+      <ion-label><h2>Mục tiêu hằng ngày</h2></ion-label>
+    </ion-list-header>
+
+    <ion-item>
+      <ion-label>Calo</ion-label>
+      <ion-note slot="end">{{ profile()?.target_calories }} kcal</ion-note>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Protein</ion-label>
+      <ion-note slot="end">{{ profile()?.target_protein }} g</ion-note>
+    </ion-item>
+
+    <ion-item lines="none">
+      <ion-label class="settings-hint">Chỉnh sửa ở mục Mục tiêu</ion-label>
+    </ion-item>
+  </ion-list>
+
+  <ion-list lines="full" class="settings-list">
+    <ion-list-header>
+      <ion-label><h2>Giao diện</h2></ion-label>
+    </ion-list-header>
+
+    <ion-radio-group [value]="themeMode()" (ionChange)="onThemeChange($any($event))">
+      <ion-item>
+        <ion-radio justify="space-between" value="system">Theo hệ thống</ion-radio>
+      </ion-item>
+      <ion-item>
+        <ion-radio justify="space-between" value="light">Sáng</ion-radio>
+      </ion-item>
+      <ion-item>
+        <ion-radio justify="space-between" value="dark">Tối</ion-radio>
+      </ion-item>
+    </ion-radio-group>
+  </ion-list>
+
+  <ion-list lines="full" class="settings-list">
+    <ion-list-header>
+      <ion-label><h2>Nhắc nhở</h2></ion-label>
+    </ion-list-header>
+
+    <ion-item>
+      <ion-toggle
+        [checked]="morningEnabled()"
+        (ionChange)="onToggleChange('morning', $any($event))"
+      >
+        <ion-label>
+          <h3>Bữa sáng</h3>
+          <p>07:30</p>
+        </ion-label>
+      </ion-toggle>
+    </ion-item>
+
+    <ion-item>
+      <ion-toggle [checked]="lunchEnabled()" (ionChange)="onToggleChange('lunch', $any($event))">
+        <ion-label>
+          <h3>Bữa trưa</h3>
+          <p>12:00</p>
+        </ion-label>
+      </ion-toggle>
+    </ion-item>
+
+    <ion-item>
+      <ion-toggle
+        [checked]="eveningEnabled()"
+        (ionChange)="onToggleChange('evening', $any($event))"
+      >
+        <ion-label>
+          <h3>Bữa tối</h3>
+          <p>18:30</p>
+        </ion-label>
+      </ion-toggle>
+    </ion-item>
+
+    <ion-item>
+      <ion-toggle [checked]="weeklyEnabled()" (ionChange)="onToggleChange('weekly', $any($event))">
+        <ion-label>
+          <h3>Tổng kết tuần</h3>
+          <p>CN 20:00</p>
+        </ion-label>
+      </ion-toggle>
+    </ion-item>
+  </ion-list>
+
+  <ion-list lines="full" class="settings-list">
+    <ion-list-header>
+      <ion-label><h2>Giới thiệu</h2></ion-label>
+    </ion-list-header>
+
+    <ion-item lines="none">
+      <ion-label>Phiên bản</ion-label>
+      <ion-note slot="end">{{ appVersion }}</ion-note>
+    </ion-item>
+  </ion-list>
 </ion-content>
