@@ -25,4 +25,11 @@ export class ProfileStore {
     const saved = await this.repo.insert(data);
     this.profile.set(saved);
   }
+
+  /** Apply a partial update to the profile and refresh the signal */
+  async updateProfile(patch: Partial<UserProfile>): Promise<void> {
+    await this.repo.update(patch);
+    const fresh = await this.repo.getProfile();
+    this.profile.set(fresh);
+  }
 }
