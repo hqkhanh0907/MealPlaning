@@ -6,6 +6,52 @@
     <ion-title>Mức hoạt động</ion-title>
   </ion-toolbar>
 </ion-header>
+
 <ion-content class="ion-padding">
-  <p>Đang phát triển</p>
+  <div class="form-content">
+    <ion-radio-group [value]="factor()" (ionChange)="factor.set($event.detail.value)">
+      <ion-list lines="none" class="activity-list">
+        @for (opt of options; track opt.factor) {
+          <ion-item class="activity-item">
+            <ion-radio slot="start" [value]="opt.factor" labelPlacement="end" justify="start">
+              <ion-label class="activity-label">
+                <strong>{{ opt.label }}</strong>
+                <p>{{ opt.desc }}</p>
+              </ion-label>
+            </ion-radio>
+          </ion-item>
+        }
+      </ion-list>
+    </ion-radio-group>
+
+    @if (preview(); as r) {
+      <div class="preview-card">
+        <div class="preview-row">
+          <span class="preview-label">BMR</span>
+          <span class="preview-value">{{ r.bmr }} kcal</span>
+        </div>
+        <div class="preview-row">
+          <span class="preview-label">TDEE</span>
+          <span class="preview-value">{{ r.tdee }} kcal ({{ activeLabel() }})</span>
+        </div>
+        <div class="preview-row">
+          <span class="preview-label">Mục tiêu mới</span>
+          <span class="preview-value"
+            >Calo {{ r.target_calories }} kcal · Protein {{ r.target_protein }}g</span
+          >
+        </div>
+        <p class="preview-hint">
+          Nếu bạn đã chỉnh tay Calo/Protein, giá trị đã chỉnh sẽ được giữ nguyên.
+        </p>
+      </div>
+    }
+  </div>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-button expand="block" class="save-button" color="secondary" (click)="save()">
+      Lưu
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>
