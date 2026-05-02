@@ -22,6 +22,8 @@
  * If a component needs a deviation, update §8.6 first AND get explicit user approval.
  */
 
+@use './dark-mode' as *;
+
 /*
  * SPACING MODEL (post-B1):
  * Cha (.form-content, .step-content, .nutrition-grid, .unit-grid…) đảm nhiệm
@@ -174,7 +176,7 @@ textarea.input-native {
 /* Trong .form-content (modal flex-gap layout) — error vẫn bám sát input
    bên trên, không cần margin-top âm vì nó ở trong cùng .form-field wrapper. */
 
-@media (prefers-color-scheme: dark) {
+@include dark-root {
   .input-wrapper {
     background: var(--input-bg);
     border-color: var(--input-border-color);

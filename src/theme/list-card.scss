@@ -20,6 +20,8 @@
  * Page-local rules (e.g. .management-shell) stay in the component.
  */
 
+@use './dark-mode' as *;
+
 .filter-strip {
   display: flex;
   gap: 8px;
@@ -193,7 +195,7 @@
   color: #4f6a4f; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
-@media (prefers-color-scheme: dark) {
+@include dark-root {
   .badge--source,
   .badge--source-inline {
     background: rgba(
@@ -330,7 +332,7 @@
   color: var(--ion-color-secondary-shade);
 }
 
-@media (prefers-color-scheme: dark) {
+@include dark-root {
   .badge--category-cat-thit {
     background: rgba(
       168,

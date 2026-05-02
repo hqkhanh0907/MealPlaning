@@ -27,6 +27,8 @@
  * never silently re-introduce a parallel pattern.
  */
 
+@use './dark-mode' as *;
+
 .segment-control {
   display: flex;
   gap: 4px;
@@ -74,7 +76,7 @@
   outline-offset: 2px;
 }
 
-@media (prefers-color-scheme: dark) {
+@include dark-root {
   .segment-control.invalid {
     box-shadow: 0 0 0 1px var(--ion-color-danger) inset;
   }
@@ -117,7 +119,7 @@
   font-weight: 600;
 }
 
-@media (prefers-color-scheme: dark) {
+@include dark-root {
   .segment-control--inverse-sage {
     /* Dark mode dùng sage shade tối hơn cho track + sage tint sáng cho selected text */
     background: rgba(

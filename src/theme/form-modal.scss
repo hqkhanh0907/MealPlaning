@@ -10,6 +10,8 @@
  * etc.) still live in the component's `styles:` block.
  */
 
+@use './dark-mode' as *;
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -50,7 +52,7 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-@media (prefers-color-scheme: dark) {
+@include dark-root {
   .modal-toolbar {
     background: var(--bg-page);
     border-bottom-color: var(--border-color);

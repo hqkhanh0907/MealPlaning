@@ -7,6 +7,8 @@
  * để đồng bộ với phần còn lại của app (DS §2.5, global.scss).
  */
 
+@use '../../../../theme/dark-mode' as *;
+
 ion-modal {
   --background: var(--bg-card);
   --border-radius: 20px 20px 0 0;
@@ -155,7 +157,7 @@ ion-modal {
 }
 
 /* Dark mode — selected highlight slightly stronger để compensate cho contrast bg */
-@media (prefers-color-scheme: dark) {
+@include dark-root {
   .sheet-option.selected {
     background: rgba(var(--ion-color-primary-rgb), 0.16);
   }
