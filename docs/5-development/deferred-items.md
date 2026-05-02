@@ -1,7 +1,7 @@
 # Deferred Items — MealPlaning / HealthMate AI
 
 **Status:** Living document
-**Last updated:** 2026-05-01
+**Last updated:** 2026-05-01 (B4/B5/B7/B9 cancelled per cleanup `646aacc`)
 **Owner:** Khanh Huynh (solo dev)
 
 ## Mục đích
@@ -50,12 +50,12 @@ Các item phát hiện qua các session nhưng chưa có nơi track formal trư�
 | B1 | Global `--bg-page` cream alignment `#fafaf7 → #F7F2EA` (Sage Wellness DNA) | Token-level đụng tất cả pages, cần cross-page contrast test cho cards/search bar/segment track | Task riêng "Sage global bg alignment" — trước khi mở Phase 2 nếu user yêu cầu visual consistency |
 | B2 | Radio-circle 18px filled indicator trong onboarding | Code đang dùng 3-cue alternative (bg tint + check icon + bold label) — đã accessible đủ | Chỉ revisit khi user yêu cầu pixel-perfect mockup match |
 | B3 | Unify form input style Phase 1 modals vs Onboarding (option A normalize floating-label, hoặc option B formalize compact variant trong design-system) | Quyết định giữa A vs B chưa chốt; cả hai đều cần effort medium | Trước khi Phase 2 mở thêm modal mới |
-| B4 | 5 mockup HTML files thiếu (Phase 1 pre-flight debt) | Phase 1 đã implement code trước mockup — D8 rule deviation | Cleanup khi đóng formal Phase 1 |
-| B5 | ADR-002 migration strategy doc chưa viết | Phase 1 pre-flight debt | Cleanup khi đóng formal Phase 1 |
-| B6 | E2E tool decision (O2): Playwright / Cypress / Detox? | Plan nói quyết Phase 1, vẫn unresolved | Trước khi viết E2E tests đầu tiên |
-| B7 | Manual QA 14/15 items Phase 1 (RESTRICT delete, unit conversions, dark mode toggle, restart persistence, ...) | Mới pass §5.2.8 smoke test | Đóng formal Phase 1 |
-| B8 | Test coverage ≥60% verify | Chưa đo bằng `--code-coverage` | Đóng formal Phase 1 |
-| B9 | Phase 1 Retro §8 + `docs/6-testing/phase-1-qa.md` | Phase 1 chưa formal close, doc still says "Status: Draft" | Đóng formal Phase 1 |
+| ~~B4~~ | ~~5 mockup HTML files thiếu (Phase 1 pre-flight debt)~~ | **CANCELLED** per cleanup commit `646aacc` Q2 (2026-04-29) — phase-1 mockups đã bị xoá có chủ đích, source of truth chuyển sang `design-system.md` + code thực tế. Không tạo lại. | — |
+| ~~B5~~ | ~~ADR-002 migration strategy doc chưa viết~~ | **CANCELLED** per cleanup commit `646aacc` Q1 (2026-04-29) — repo không dùng ADR pattern nữa; decisions kiến trúc sống trực tiếp trong `architecture.md` / `data-model.md` / `business-rules.md`. | — |
+| B6 | E2E tool decision (O2): Playwright / Cypress / Detox? | Plan nói quyết Phase 1, vẫn unresolved. **Sau cleanup `646aacc`**: track quyết định trong `development-plan.md` thay vì ADR riêng. | Trước khi viết E2E tests đầu tiên |
+| ~~B7~~ | ~~Manual QA 14/15 items Phase 1 (RESTRICT delete, unit conversions, dark mode toggle, restart persistence, ...)~~ | **CANCELLED** per cleanup commit `646aacc` Q3 (2026-04-29) — `phase-1-management.md` (chứa checklist 15 items) đã bị xoá có chủ đích. Code Phase 1 đang chạy production, được coi implicitly DONE; không tạo QA checklist formal. | — |
+| B8 | Test coverage ≥60% verify | Chưa đo bằng `--code-coverage`. **Sau cleanup `646aacc`**: nếu đo, ghi số vào `development-plan.md` Phase 1 section thay vì QA report riêng. | Khi muốn baseline cho Phase 2 regression |
+| ~~B9~~ | ~~Phase 1 Retro §8 + `docs/6-testing/phase-1-qa.md`~~ | **CANCELLED** per cleanup commit `646aacc` Q3 (2026-04-29) — không dùng phase-detail spec docs nữa; `development-plan.md` là roadmap-level duy nhất. Không có Retro formal. | — |
 
 ---
 
@@ -76,9 +76,13 @@ Các item phát hiện qua các session nhưng chưa có nơi track formal trư�
 
 ## §4 — Done log
 
-| Mã | Item | Done date | Commit | Ghi chú |
-|----|------|-----------|--------|---------|
+| Mã | Item | Done date | Commit / Decision | Ghi chú |
+|----|------|-----------|-------------------|---------|
 | C6 | Boy-scout prettier fixes 4 files (`schema-compatibility.ts`, `unit-resolver.ts`, `dish.store.ts`, `onboarding-calculation.ts`) | ≤ 2026-05-01 | (tree clean, không xác định commit cụ thể) | Verify: `git status` working tree clean |
+| B4 | 5 mockup HTML files thiếu | 2026-04-29 | `646aacc` Q2 — CANCELLED | Phase-1 mockups xoá có chủ đích; source of truth = `design-system.md` + code |
+| B5 | ADR-002 migration strategy doc | 2026-04-29 | `646aacc` Q1 — CANCELLED | Repo không dùng ADR pattern nữa |
+| B7 | Manual QA 14/15 items Phase 1 | 2026-04-29 | `646aacc` Q3 — CANCELLED | `phase-1-management.md` xoá có chủ đích; code production = implicitly DONE |
+| B9 | Phase 1 Retro §8 + `phase-1-qa.md` | 2026-04-29 | `646aacc` Q3 — CANCELLED | Không dùng phase-detail spec docs |
 
 ---
 
