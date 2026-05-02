@@ -6,6 +6,8 @@ import { Capacitor } from '@capacitor/core';
 
 import { Database } from './core/services/database/database';
 import { NetworkStore } from './core/stores/network.store';
+import { ProfileStore } from './core/stores/profile.store';
+import { Theme } from './core/services/theme/theme-service';
 import { cleanupOldAiLogs } from './core/services/ai/gemini-client';
 
 @Component({
@@ -16,8 +18,15 @@ import { cleanupOldAiLogs } from './core/services/ai/gemini-client';
 export class App {
   private readonly db = inject(Database);
   private readonly network = inject(NetworkStore);
+  private readonly profileStore = inject(ProfileStore);
+  private readonly themeService = inject(Theme);
 
   constructor() {
+    // Profile is loaded by APP_INITIALIZER (xem database.provider.ts) before
+    // the App component is instantiated, so the signal is already populated
+    // (or null if onboarding hasn't been completed).
+    this.themeService.apply(this.profileStore.profile()?.theme ?? 'system');
+
     afterNextRender(() => {
       SplashScreen.hide();
 
