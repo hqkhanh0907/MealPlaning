@@ -250,6 +250,9 @@ AI features split 2 phases:
 
 **Deliverable:** APK signed + upload Play Store internal testing.
 
+**Status:**
+- Settings hub + 3 sub-pages (Body / Goals / Activity edit) — ✅ DONE (commits `345049d`→`3c85d96`, 12 commits, 401 tests, emulator-5554 verified: live recalc preview, goal auto-suggest + manual-override regression fix, reset, theme Sáng/Tối toggle). NotificationService permission grant flow + release prep vẫn pending — xem deferred-items §3.1 (D1).
+
 ---
 
 ## 7. Cross-cutting Concerns

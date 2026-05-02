@@ -1,7 +1,7 @@
 # Deferred Items — MealPlaning / HealthMate AI
 
 **Status:** Living document
-**Last updated:** 2026-05-01 (B4/B5/B7/B9 cancelled per cleanup `646aacc`)
+**Last updated:** 2026-05-02 (D1/D2/D3 added — Settings T10/T11 follow-ups)
 **Owner:** Khanh Huynh (solo dev)
 
 ## Mục đích
@@ -71,6 +71,16 @@ Các item phát hiện qua các session nhưng chưa có nơi track formal trư�
 | C7 | Mockup-first workflow (D8) áp dụng từ Phase 1.5 trở đi | Phase 1 và 1.5B đã skip, không truy cứu | Phase 2 trở đi |
 
 > Mã C6 (boy-scout prettier 4 files) đã DONE — xem §4.
+
+---
+
+## §3.1 — Nhóm D: Phát hiện trong Phase 6 Settings (T10/T11 emulator QA, 2026-05-02)
+
+| Mã | Item | Lý do hoãn | Trigger nên làm |
+|----|------|-----------|----------------|
+| D1 | Settings — POST_NOTIFICATIONS permission grant flow | Toggle UI responsive nhưng emulator-5554 throw "Notifications not enabled on this device" — Capacitor `LocalNotifications.requestPermissions()` chưa được wire. Không có system permission dialog popup. Cần explicit `requestPermissions()` call + handle "denied" state với toast guide user vào system settings. | Trước Phase 6 release prep / khi user cần actual reminder notifications. Source: commit `5c65e83` review follow-up. |
+| D2 | Project-wide audit `styleUrl` trên page components | `body-edit` / `goals-edit` / `activity-edit` đã có `styleUrl`, nhưng `settings.page.html` + một số tab/dashboard pages match older pattern không có `styleUrl`. PC-1 guard (`check-pc1-external-templates.mjs`) chỉ enforce khi có inline `styles:`, không catch missing `styleUrl` với empty stylesheet. Cần audit toàn repo + hoặc add `styleUrl` hoặc document empty-styles exemption. | Khi mở Phase 2 page mới hoặc khi tighten PC-1 guard. Source: commit `5c65e83` review follow-up. |
+| D3 | Activity label inconsistency giữa onboarding và Settings | Onboarding step 3 hiển thị "Trung bình (3-5 ngày/tuần)", Settings hub row hiển thị "Vừa". Pick one (Settings short label phù hợp cho row). Cosmetic only. | Polish pass trước release. Source: T10 emulator QA 2026-05-02. |
 
 ---
 
