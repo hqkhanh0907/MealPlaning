@@ -200,6 +200,21 @@ describe('GoalsEditPage', () => {
     expect(location.back).toHaveBeenCalled();
   });
 
+  it('ngOnInit with non-default goal does NOT overwrite stored manual targets', async () => {
+    // Regression: persisted goal !== signal default ('maintain') used to trigger
+    // the auto-suggest effect on initial load and clobber manual targets.
+    await setup(
+      makeProfile({
+        goal: 'lose_weight',
+        target_calories: 9999, // intentionally unrealistic to detect overwrite
+        target_protein: 999,
+      }),
+    );
+    expect(component.goal()).toBe('lose_weight');
+    expect(component.calo()).toBe(9999);
+    expect(component.protein()).toBe(999);
+  });
+
   it('save() bails when form invalid', async () => {
     await setup(makeProfile());
     component.setCalo(50);

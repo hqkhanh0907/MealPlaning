@@ -89,6 +89,11 @@ export default class GoalsEditPage implements OnInit {
   ngOnInit(): void {
     const p = this.profileStore.profile();
     if (!p) return;
+    // Seed prevGoal BEFORE goal.set so the auto-suggest effect treats this as
+    // "no change" and skips recalc. Otherwise stored manual target_calories/
+    // target_protein would be overwritten on every load when persisted goal
+    // differs from the signal default ('maintain').
+    this.prevGoal = p.goal;
     this.goal.set(p.goal);
     this.calo.set(p.target_calories);
     this.protein.set(p.target_protein);
