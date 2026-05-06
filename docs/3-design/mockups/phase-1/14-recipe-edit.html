@@ -45,7 +45,10 @@ body{flex-direction:column}
   padding:18px 18px 16px;
   margin:6px 0 14px;
   box-shadow:var(--sh-sm);
+  display:flex;flex-direction:column;gap:14px;
 }
+.hero-header{display:flex;flex-direction:column;gap:2px}
+.hero-header__label{font-size:11px;font-weight:700;color:var(--ink-2);letter-spacing:.1em;text-transform:uppercase}
 .hero-top{display:flex;align-items:center;gap:16px}
 
 /* Ring — conic-gradient */
@@ -74,20 +77,16 @@ body{flex-direction:column}
 .hero-cal-only .num{font-family:var(--font-display);font-style:italic;font-weight:500;font-size:26px;color:var(--ink-1);font-variant-numeric:tabular-nums;line-height:1}
 .hero-cal-only .unit{font-size:11px;color:var(--ink-2);font-weight:500}
 
-.hero-meta{flex:1;min-width:0}
-.hero-meta__title{font-size:11px;font-weight:700;color:var(--ink-2);letter-spacing:.1em;text-transform:uppercase;margin:0 0 4px}
-.hero-meta__primary{font-family:var(--font-display);font-style:italic;font-weight:500;font-size:22px;color:var(--ink-1);font-variant-numeric:tabular-nums;line-height:1.1}
-.hero-meta__sub{font-size:12px;color:var(--ink-2);margin-top:4px;line-height:1.4}
-.hero-meta__sub b{color:var(--primary-deep);font-weight:600;font-variant-numeric:tabular-nums}
+.hero-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.hero-meta__primary{font-family:var(--font-display);font-style:italic;font-weight:500;font-size:22px;color:var(--ink-1);font-variant-numeric:tabular-nums;line-height:1.15}
+.hero-meta__sub{font-size:12px;color:var(--ink-2);line-height:1.4}
 
-/* Stacked bar */
-.hero-bar{display:flex;height:8px;border-radius:99px;overflow:hidden;margin:14px 0 8px;background:var(--bg-card-soft)}
-.hero-bar__seg{height:100%}
+/* Stacked bar — full width, hàng riêng */
+.hero-bar{display:flex;height:8px;border-radius:99px;overflow:hidden;background:var(--bg-card-soft);width:100%}
+.hero-bar__seg{height:100%;min-width:0}
 .hero-bar__seg--protein{background:var(--macro-protein)}
 .hero-bar__seg--carbs{background:var(--macro-carbs)}
 .hero-bar__seg--fat{background:var(--macro-fat)}
-.hero-bar-legend{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;font-weight:500;margin-bottom:12px}
-.hero-bar-legend b{color:var(--ink-1);font-weight:700;margin-right:3px}
 
 /* Pill row */
 .hero-pills{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -103,16 +102,6 @@ body{flex-direction:column}
 .hero-pill__dot--fiber{background:var(--macro-fiber)}
 .hero-pill__lbl{font-size:12px;color:var(--ink-2);font-weight:500;flex:1}
 .hero-pill__val{font-family:var(--font-display);font-style:italic;font-weight:500;font-size:14px;color:var(--ink-1);font-variant-numeric:tabular-nums}
-
-/* State-C empty hint */
-.hero-empty-hint{
-  margin-top:12px;
-  padding:12px 14px;
-  background:var(--bg-card-soft);
-  border-radius:var(--r-md);
-  font-size:12px;color:var(--ink-2);text-align:center;line-height:1.5;
-}
-.hero-empty-hint b{color:var(--ink-1);font-weight:600}
 
 /* Ingredient row (compact, just to show context after hero) */
 .ing-row{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--sh-xs);margin-bottom:8px}
@@ -156,8 +145,11 @@ body{flex-direction:column}
       <div class="section-title">Thông tin món</div>
       <div class="input-wrapper"><label class="input-label">Tên món ăn</label><input class="input-native" value="Phở bò Hà Nội"/></div>
 
-      <!-- HERO NUTRITION CARD — ngay sau tên món -->
+      <!-- HERO NUTRITION CARD — ngay sau tên món (4-row layout: label → ring+meta → bar → pills) -->
       <div class="nutrition-hero">
+        <div class="hero-header">
+          <div class="hero-header__label">Dinh dưỡng / 1 phần</div>
+        </div>
         <div class="hero-top">
           <div class="hero-ring" style="--pct:22">
             <div class="hero-ring__inner">
@@ -166,20 +158,14 @@ body{flex-direction:column}
             </div>
           </div>
           <div class="hero-meta">
-            <div class="hero-meta__title">Dinh dưỡng / 1 phần</div>
             <div class="hero-meta__primary">22% mục tiêu</div>
-            <div class="hero-meta__sub"><b>2.200 kcal</b> hôm nay</div>
+            <div class="hero-meta__sub">2.200 kcal hôm nay</div>
           </div>
         </div>
         <div class="hero-bar">
           <div class="hero-bar__seg hero-bar__seg--protein" style="flex:23"></div>
           <div class="hero-bar__seg hero-bar__seg--carbs" style="flex:43"></div>
           <div class="hero-bar__seg hero-bar__seg--fat" style="flex:22"></div>
-        </div>
-        <div class="hero-bar-legend">
-          <span><b>23%</b>Protein</span>
-          <span><b>43%</b>Carbs</span>
-          <span><b>22%</b>Fat</span>
         </div>
         <div class="hero-pills">
           <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--protein"></span><span class="hero-pill__lbl">Protein</span><span class="hero-pill__val">28g</span></div>
@@ -216,26 +202,23 @@ body{flex-direction:column}
       <div class="input-wrapper"><label class="input-label">Tên món ăn</label><input class="input-native" value="Phở bò Hà Nội"/></div>
 
       <div class="nutrition-hero">
+        <div class="hero-header">
+          <div class="hero-header__label">Dinh dưỡng / 1 phần</div>
+        </div>
         <div class="hero-top">
           <div class="hero-cal-only">
             <span class="num">488</span>
             <span class="unit">kcal</span>
           </div>
           <div class="hero-meta">
-            <div class="hero-meta__title">Dinh dưỡng / 1 phần</div>
-            <div class="hero-meta__primary">488 kcal</div>
-            <div class="hero-meta__sub">Chưa thiết lập mục tiêu calo</div>
+            <div class="hero-meta__primary">Chưa có mục tiêu calo</div>
+            <div class="hero-meta__sub">Cập nhật trong hồ sơ</div>
           </div>
         </div>
         <div class="hero-bar">
           <div class="hero-bar__seg hero-bar__seg--protein" style="flex:23"></div>
           <div class="hero-bar__seg hero-bar__seg--carbs" style="flex:43"></div>
           <div class="hero-bar__seg hero-bar__seg--fat" style="flex:22"></div>
-        </div>
-        <div class="hero-bar-legend">
-          <span><b>23%</b>Protein</span>
-          <span><b>43%</b>Carbs</span>
-          <span><b>22%</b>Fat</span>
         </div>
         <div class="hero-pills">
           <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--protein"></span><span class="hero-pill__lbl">Protein</span><span class="hero-pill__val">28g</span></div>
@@ -271,6 +254,9 @@ body{flex-direction:column}
       <div class="input-wrapper"><label class="input-label">Tên món ăn</label><input class="input-native" placeholder="VD: Cơm gà Hải Nam" value=""/></div>
 
       <div class="nutrition-hero">
+        <div class="hero-header">
+          <div class="hero-header__label">Dinh dưỡng / 1 phần</div>
+        </div>
         <div class="hero-top">
           <div class="hero-ring" style="--pct:0;--ring-fill:var(--line-strong)">
             <div class="hero-ring__inner">
@@ -279,14 +265,18 @@ body{flex-direction:column}
             </div>
           </div>
           <div class="hero-meta">
-            <div class="hero-meta__title">Dinh dưỡng / 1 phần</div>
-            <div class="hero-meta__primary" style="color:var(--ink-3)">— %</div>
-            <div class="hero-meta__sub">Tự tính từ trọng lượng nguyên liệu</div>
+            <div class="hero-meta__primary" style="color:var(--ink-3)">Chưa có dữ liệu</div>
+            <div class="hero-meta__sub">Thêm nguyên liệu để xem tóm tắt</div>
           </div>
         </div>
-        <div class="hero-empty-hint">
-          <b>Chưa có nguyên liệu</b><br/>
-          Thêm nguyên liệu để xem chi tiết Protein, Carbs, Fat, Fiber.
+        <div class="hero-bar">
+          <div class="hero-bar__seg" style="flex:1;background:var(--bg-card-soft)"></div>
+        </div>
+        <div class="hero-pills">
+          <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--protein"></span><span class="hero-pill__lbl">Protein</span><span class="hero-pill__val" style="color:var(--ink-3)">0g</span></div>
+          <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--carbs"></span><span class="hero-pill__lbl">Carbs</span><span class="hero-pill__val" style="color:var(--ink-3)">0g</span></div>
+          <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--fat"></span><span class="hero-pill__lbl">Fat</span><span class="hero-pill__val" style="color:var(--ink-3)">0g</span></div>
+          <div class="hero-pill"><span class="hero-pill__dot hero-pill__dot--fiber"></span><span class="hero-pill__lbl">Fiber</span><span class="hero-pill__val" style="color:var(--ink-3)">0g</span></div>
         </div>
       </div>
 
