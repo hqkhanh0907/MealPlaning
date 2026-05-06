@@ -6,7 +6,7 @@
 user_skill_level: intermediate
 planning_artifacts: "{project-root}/{output_folder}/planning-artifacts"
 implementation_artifacts: "{project-root}/{output_folder}/implementation-artifacts"
-project_knowledge: "{project-root}/docs"
+project_knowledge: "{project-root}/docs/.bmad"
 
 # Core Configuration Values
 user_name: Khánh
