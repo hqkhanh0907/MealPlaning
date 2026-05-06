@@ -688,6 +688,8 @@ WorkoutSet {
 
 #### 13.1 Profile & Goals
 
+> **Cố ý không thu thập tên người dùng** — app offline single-user, không auth/sync/multi-profile. UI copy dùng "bạn". Xem chi tiết quyết định ở `docs/3-design/data-model.md` §3.1.
+
 | Field | Mô tả | Sửa được |
 |-------|-------|:--------:|
 | Chiều cao (cm) | Dùng tính BMR/TDEE | ✅ |

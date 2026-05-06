@@ -80,6 +80,8 @@
 
 Singleton — chỉ có 1 row. Lưu thông tin user từ Onboarding + Settings.
 
+> **Quyết định thiết kế: KHÔNG thu thập tên người dùng.** App là offline-first, single-user, chạy local trên thiết bị; không có auth, không có sync, không có multi-profile. Vì vậy `user_profile` cố ý không có cột `display_name` / `nickname` / `full_name`. Mọi copy UI (greeting Dashboard, notification, summary) dùng đại từ trung tính **"bạn"** thay vì gọi tên. Nếu sau này thêm multi-profile / family mode / cloud sync, mới mở lại quyết định này (sẽ cần migration thêm cột `display_name TEXT` + step Onboarding tương ứng).
+
 ```sql
 CREATE TABLE user_profile (
   id                TEXT PRIMARY KEY,

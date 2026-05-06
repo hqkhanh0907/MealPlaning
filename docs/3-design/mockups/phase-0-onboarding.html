@@ -378,6 +378,11 @@ body.dark .small, body.dark .sub, body.dark .subtle { color: #C9C2B4 !important;
 <h1 class="page-title">HealthMate AI — Onboarding Mockup</h1>
 <p class="page-subtitle">Phase 0 · 9 States · Light/Dark · Design System Compliant</p>
 
+<div style="max-width:900px;margin:0 auto 24px;padding:14px 18px;background:#FFF8E7;border-left:4px solid #C8A951;border-radius:8px;font:14px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;color:#3A2F12;">
+  <strong>📝 Design note — Không hỏi tên người dùng (cố ý).</strong><br>
+  App offline-first, single-user, chạy local trên thiết bị: không auth, không sync, không multi-profile → <code>user_profile</code> không có cột <code>display_name</code>. Mọi copy UI (greeting Dashboard, notification, summary) dùng đại từ <strong>"bạn"</strong>. Onboarding chỉ thu thập dữ liệu cần cho công thức BMR/TDEE: gender · body (h/w/age) · activity+fitness · goal. Nguồn: <code>docs/3-design/data-model.md</code> §3.1, <code>docs/2-requirements/prd.md</code> §13.1.
+</div>
+
 <div class="theme-toggle">
   <button class="active" onclick="setTheme('light')">☀️ Light</button>
   <button onclick="setTheme('dark')">🌙 Dark</button>
