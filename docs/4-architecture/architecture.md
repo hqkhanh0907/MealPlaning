@@ -542,10 +542,10 @@ export class NutritionAiService {
 
   async lookupIngredient(name: string): Promise<IngredientLookupResult> { /* F-01 — Phase 1.5 */ }
   async autofillDish(dishName: string, dbIngredients: string[]): Promise<DishIngredient[]> { /* F-02 — Phase 1.5 */ }
-  async analyzeImage(image: Blob, mealType: string, dbIngredients: string[]): Promise<FoodRecognition> { /* F-05 — Phase 5 */ }
-  async suggestMenu(remaining: MacroRemaining, mealType: string, dbDishes: DishSummary[]): Promise<MenuSuggestion[]> { /* F-06 — Phase 5 */ }
-  async planDay(date: string, targets: MacroTargets, dbDishes: DishSummary[]): Promise<DayMealPlan> { /* F-03 — Phase 2 */ }
-  async planWeek(startDate: string, targets: MacroTargets, dbDishes: DishSummary[]): Promise<WeekMealPlan> { /* F-03 — Phase 2 */ }
+  async analyzeImage(image: Blob, mealType: string, dbIngredients: string[]): Promise<FoodRecognition> { /* F-05 — Phase 6 */ }
+  async suggestMenu(remaining: MacroRemaining, mealType: string, dbDishes: DishSummary[]): Promise<MenuSuggestion[]> { /* F-06 — Phase 6 */ }
+  async planDay(date: string, targets: MacroTargets, dbDishes: DishSummary[]): Promise<DayMealPlan> { /* F-03 — Phase 3 */ }
+  async planWeek(startDate: string, targets: MacroTargets, dbDishes: DishSummary[]): Promise<WeekMealPlan> { /* F-03 — Phase 3 */ }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -553,7 +553,7 @@ export class FitnessAiService {
   private readonly gemini = inject(GeminiService);
   private readonly profile = inject(ProfileStore);
 
-  async generateTrainingPlan(profile: UserProfile, frequency: number, equipment: string[], dbExercises: ExerciseSummary[]): Promise<TrainingPlan> { /* F-11 — Phase 5 */ }
+  async generateTrainingPlan(profile: UserProfile, frequency: number, equipment: string[], dbExercises: ExerciseSummary[]): Promise<TrainingPlan> { /* F-11 — Phase 6 */ }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -561,8 +561,8 @@ export class InsightAiService {
   private readonly gemini = inject(GeminiService);
   private readonly profile = inject(ProfileStore);
 
-  async dailyInsight(dayData: DaySummary, profile: UserProfile): Promise<DailyInsightResult> { /* F-07 — Phase 5 */ }
-  async weeklyReview(weekData: WeekSummary, profile: UserProfile): Promise<WeeklyReviewResult> { /* F-07 — Phase 5 */ }
+  async dailyInsight(dayData: DaySummary, profile: UserProfile): Promise<DailyInsightResult> { /* F-07 — Phase 6 */ }
+  async weeklyReview(weekData: WeekSummary, profile: UserProfile): Promise<WeeklyReviewResult> { /* F-07 — Phase 6 */ }
 }
 ```
 

@@ -1,10 +1,12 @@
 # Development Plan — HealthMate AI
 
-**Version:** 1.1 (gram-only revision)
-**Date:** 2026-04-30
+**Version:** 1.5 (Settings reorder)
+**Date:** 2026-05-07
 **Status:** Active
 
 > **Revision 1.1 (2026-04-30) — Gram-only absolute.** Phase 1.5A (Pantry & Measurement) đã bị loại bỏ hoàn toàn. Roadmap còn 6 phase: 1 → 1.5B → 2 → 3 → 4 → 5 → 6. Xem PRD §F-01 và `docs/4-architecture/business-rules.md` để biết lý do.
+>
+> **Revision 1.5 (2026-05-07) — Settings reorder.** Phase Settings & Polish (F-13) được đẩy lên thành **Phase 2 mới** (trước Calendar/Tracking). Lý do: settings hub + 3 sub-page đã ship sẵn ở Phase 0/1; phần còn lại (NotificationService, theme persist, release prep) cần đóng sớm trước khi mở Phase Calendar — F-03 cần notification để nhắc bữa, theme service làm sớm để các phase sau dùng được. Roadmap renumber: 1 → 1.5B → **2 Settings** → **3 Calendar/Tracking** → **4 Dashboard** → **5 Fitness** → **6 AI Suite**.
 
 ---
 
@@ -84,10 +86,10 @@ AI features split 2 phases:
     F-01 AI Lookup   ─► Ingredient table (tra cứu dinh dưỡng)
     F-02 AI Autofill ─► Dish table (gợi ý nguyên liệu)
 
-  Phase 2 (dùng lại Phase 1.5B infra):
+  Phase 3 (dùng lại Phase 1.5B infra):
     F-03 AI Meal Plan (Day + Week)
 
-  Phase 5 (dùng lại infra + thêm Camera):
+  Phase 6 (dùng lại infra + thêm Camera):
     F-05 AI Image    ─► F-02       (tạo món từ ảnh)
     F-06 AI Menu     ─► F-03       (gợi ý món)
     F-07 AI Insight  ─► F-04       (phân tích tracking)
@@ -97,8 +99,9 @@ AI features split 2 phases:
 **Insight:**
 - **F-01 + F-02** là foundation cho Nutrition cluster (F-03, F-04, F-06, F-07)
 - **F-08 + F-09** là foundation cho Fitness cluster (F-10, F-11)
-- **Dashboard (F-12)** là consumer — đọc data từ F-04 (nutrition) + F-09 (workout) + F-10 (progress). AI Insight Card render tạm placeholder, chỉ fill data thật sau Phase 5.
+- **Dashboard (F-12)** là consumer — đọc data từ F-04 (nutrition) + F-09 (workout) + F-10 (progress). AI Insight Card render tạm placeholder, chỉ fill data thật sau Phase 6.
 - **AI features** phụ thuộc vào data có sẵn → làm sau khi có F-01, F-02, F-03, F-08
+- **Settings (F-13)** đẩy lên Phase 2 — semi-independent, chỉ phụ thuộc Phase 0 onboarding profile; NotificationService cần sẵn trước Phase 3 để Calendar có thể nhắc bữa.
 
 ---
 
@@ -109,11 +112,11 @@ AI features split 2 phases:
 | **1** | Management (dish-first) | F-01, F-02 (phần non-AI) | IngredientRepo, DishRepo, DishIngredientRepo, stores, migration system, seed data loader | User mở Quản lý thấy Món ăn trước; tạo/sửa món ingredient-based; tạo nhanh nguyên liệu khi thiếu; có Thư viện nguyên liệu hỗ trợ |
 | ~~**1.5A**~~ | ~~Pantry & Measurement~~ | **Đã loại bỏ (gram-only revision 2026-04-30).** F-02.5 không còn nằm trong roadmap. | — | — |
 | **1.5B** | AI Foundation | F-01 AI Lookup + F-02 AI Auto-fill | GeminiService (HTTP, retry, error handling), prompt template executor, AI error UI | F-01/F-02 complete-done với AI; infra sẵn cho các AI features sau |
-| **2** | Calendar & Tracking | F-03, F-04 | DayPlanRepo, MealSlotRepo, PlannedDishRepo, daily summary computation, AI Meal Plan templates (day+week, dùng Phase 1.5B infra) | User lên kế hoạch bữa ăn + track macro hàng ngày + AI meal plan |
-| **3** | Dashboard | F-12 | Dashboard store, shared macro/progress components | User có màn tổng quan: nutrition + streak + weight |
-| **4** | Fitness | F-08, F-09, F-10 | TrainingPlanRepo, WorkoutRepo, ExerciseRepo, chart component | User follow training plan + log workout + xem progress |
-| **5** | AI Suite (remaining) | F-05, F-06, F-07, F-11 | Camera service, 5 prompt templates mới (Image, Menu Suggest, Daily Insight, Weekly Review, Training Plan) | 4 AI features còn lại hoạt động (kế thừa infra từ Phase 1.5B) |
-| **6** | Settings & Polish | F-13 | Notification service, theme service, profile editor | Full Settings + release prep (app icon, splash, Play Store assets) |
+| **2** | Settings & Polish | F-13 | NotificationService (Capacitor LocalNotifications), theme service, profile editor finalization, release prep (icon/splash/Play Store) | Full Settings (notification, theme, profile, about); APK signed sẵn để Play Store internal testing; NotificationService hook cho Phase 3 dùng |
+| **3** | Calendar & Tracking | F-03, F-04 | DayPlanRepo, MealSlotRepo, PlannedDishRepo, daily summary computation, AI Meal Plan templates (day+week, dùng Phase 1.5B infra) | User lên kế hoạch bữa ăn + track macro hàng ngày + AI meal plan |
+| **4** | Dashboard | F-12 | Dashboard store, shared macro/progress components | User có màn tổng quan: nutrition + streak + weight |
+| **5** | Fitness | F-08, F-09, F-10 | TrainingPlanRepo, WorkoutRepo, ExerciseRepo, chart component | User follow training plan + log workout + xem progress |
+| **6** | AI Suite (remaining) | F-05, F-06, F-07, F-11 | Camera service, 5 prompt templates mới (Image, Menu Suggest, Daily Insight, Weekly Review, Training Plan) | 4 AI features còn lại hoạt động (kế thừa infra từ Phase 1.5B) |
 
 ---
 
@@ -164,9 +167,32 @@ AI features split 2 phases:
 
 ---
 
-### Phase 2: Calendar & Tracking (F-03 + F-04)
+### Phase 2: Settings & Polish (F-13 + Release)
 
-**Dependencies:** Phase 1 (dish data cần có trong DB để thêm vào bữa + làm input cho AI Meal Plan templates) + Phase 1.5B (GeminiService infra).
+**Dependencies:** Phase 0 onboarding (user_profile đã tồn tại) + Phase 1 (UI conventions/design tokens stable). Không đụng dish/ingredient data layer.
+
+**Features:**
+- F-13 Settings: Profile editor, Goal settings, Notification toggles, Theme picker, About
+- Release prep: App icon, splash screen, Play Store assets, Android signing, CI workflow
+
+**Shared platform built trong phase này:**
+- NotificationService (Capacitor LocalNotifications) — permission grant flow + scheduled reminders API (sẽ được Phase 3 Calendar dùng để nhắc bữa)
+- Theme toggle persistence (đã partial trong schema, finalize)
+- About screen
+- Release pipeline: signing config, app icon/splash assets, Play Store internal testing build
+
+**Status hiện tại (đã ship một phần):**
+- ✅ Settings hub + 3 sub-pages (Body / Goals / Activity edit) — DONE (commits `345049d`→`3c85d96`, 12 commits, 401 tests, emulator-5554 verified: live recalc preview, goal auto-suggest + manual-override regression fix, reset, theme Sáng/Tối toggle)
+- ⏳ NotificationService permission grant flow — pending (xem deferred-items §3.1 D1)
+- ⏳ Release prep (icon, splash, signing, Play Store assets) — pending
+
+**Deliverable:** Full Settings F-13 closed; NotificationService API ready cho Phase 3; APK signed + upload Play Store internal testing.
+
+---
+
+### Phase 3: Calendar & Tracking (F-03 + F-04)
+
+**Dependencies:** Phase 1 (dish data cần có trong DB để thêm vào bữa + làm input cho AI Meal Plan templates) + Phase 1.5B (GeminiService infra) + Phase 2 (NotificationService cho meal reminders).
 
 **Features:**
 - F-03 Calendar & Meal Planning: Lịch tuần/ngày, thêm món vào bữa, AI lên plan ngày/tuần
@@ -183,13 +209,13 @@ AI features split 2 phases:
 
 ---
 
-### Phase 3: Dashboard (F-12)
+### Phase 4: Dashboard (F-12)
 
 **Features:**
 - F-12 Dashboard: Feed card stack — 5 cards theo PRD F-12:
-  1. **AI Insight Card** — placeholder hard-coded tĩnh (data thật sẽ fill ở Phase 5 sau khi có F-07 Daily Insight template — GeminiService đã có từ Phase 1.5B)
-  2. **Nutrition Card** — data thật từ Phase 2 (calo + protein progress bars)
-  3. **Workout Card** — placeholder "Chưa có lịch tập" (data thật fill ở Phase 4)
+  1. **AI Insight Card** — placeholder hard-coded tĩnh (data thật sẽ fill ở Phase 6 sau khi có F-07 Daily Insight template — GeminiService đã có từ Phase 1.5B)
+  2. **Nutrition Card** — data thật từ Phase 3 (calo + protein progress bars)
+  3. **Workout Card** — placeholder "Chưa có lịch tập" (data thật fill ở Phase 5)
   4. **Streak + Weight Card** — data thật (streak từ F-04, weight từ weight_log)
   5. **Quick Actions** — 4 nút (2 nút dẫn đến feature đã có, 2 nút dẫn đến placeholder route)
 
@@ -202,7 +228,7 @@ AI features split 2 phases:
 
 ---
 
-### Phase 4: Fitness (F-08 + F-09 + F-10)
+### Phase 5: Fitness (F-08 + F-09 + F-10)
 
 **Features:**
 - F-08 Training Plan System (chọn PPL/Upper-Lower/Full Body)
@@ -219,7 +245,7 @@ AI features split 2 phases:
 
 ---
 
-### Phase 5: AI Suite — Remaining (F-05 + F-06 + F-07 + F-11)
+### Phase 6: AI Suite — Remaining (F-05 + F-06 + F-07 + F-11)
 
 **Features:**
 - F-05 AI Image Analysis (chụp ảnh → Gemini Vision)
@@ -231,27 +257,9 @@ AI features split 2 phases:
 - Camera service wrapper (Capacitor Camera) — mới
 - **5 prompt templates mới**: §3.1 Image Analysis, §3.3 Menu Suggest, §3.6 Daily Insight, §3.7 Weekly Review, §3.8 Training Plan
 - FitnessAiService, InsightAiService (plug vào GeminiService core)
-- AI Insight Card trên Dashboard nay fill data thật (thay placeholder từ Phase 3)
+- AI Insight Card trên Dashboard nay fill data thật (thay placeholder từ Phase 4)
 
 **Deliverable:** 4 AI features còn lại hoạt động online. Tổng cộng 7 features có AI + 9 prompt templates.
-
----
-
-### Phase 6: Settings & Polish (F-13 + Release)
-
-**Features:**
-- F-13 Settings: Profile editor, Goal settings, Notification toggles, Theme picker, About
-- Release prep: App icon, splash screen, Play Store assets, Android signing, CI workflow
-
-**Shared platform built trong phase này:**
-- NotificationService (Capacitor LocalNotifications)
-- Theme toggle persistence (already partial in schema)
-- About screen
-
-**Deliverable:** APK signed + upload Play Store internal testing.
-
-**Status:**
-- Settings hub + 3 sub-pages (Body / Goals / Activity edit) — ✅ DONE (commits `345049d`→`3c85d96`, 12 commits, 401 tests, emulator-5554 verified: live recalc preview, goal auto-suggest + manual-override regression fix, reset, theme Sáng/Tối toggle). NotificationService permission grant flow + release prep vẫn pending — xem deferred-items §3.1 (D1).
 
 ---
 
@@ -299,12 +307,12 @@ Sau khi end phase:
 
 | # | Item | Khi nào cần quyết |
 |---|------|-------------------|
-| O1 | Chart library (Chart.js vs ng2-charts vs D3) | Phase 4 start |
+| O1 | Chart library (Chart.js vs ng2-charts vs D3) | Phase 5 start |
 | O2 | E2E tool (Cypress vs Playwright) | Phase 1 (khi setup testing) |
-| O3 | Gemini model version (2.0-flash vs 2.5-pro) | Phase 5 start |
-| O4 | App icon + splash screen design | Phase 6 |
-| O5 | Play Store listing (mô tả, screenshots, categories) | Phase 6 |
-| O6 | Analytics (Firebase, Plausible, không có) | Phase 6 |
+| O3 | Gemini model version (2.0-flash vs 2.5-pro) | Phase 6 start |
+| O4 | App icon + splash screen design | Phase 2 |
+| O5 | Play Store listing (mô tả, screenshots, categories) | Phase 2 |
+| O6 | Analytics (Firebase, Plausible, không có) | Phase 2 |
 
 ---
 
@@ -315,11 +323,11 @@ Sau khi end phase:
 | `5-development/development-plan.md` (file này) | ✅ Active | — |
 | `5-development/signal-forms-migration-plan.md` | ✅ Active | — |
 | `5-development/phase-1.5b-ai-foundation.md` | ⏳ Chưa viết | Trước khi start Phase 1.5B |
-| `5-development/phase-2-calendar.md` | ⏳ Chưa viết | Trước khi start Phase 2 |
-| `5-development/phase-3-dashboard.md` | ⏳ Chưa viết | Trước khi start Phase 3 |
-| `5-development/phase-4-fitness.md` | ⏳ Chưa viết | Trước khi start Phase 4 |
-| `5-development/phase-5-ai-suite.md` | ⏳ Chưa viết | Trước khi start Phase 5 |
-| `5-development/phase-6-settings-polish.md` | ⏳ Chưa viết | Trước khi start Phase 6 |
+| `5-development/phase-2-settings-polish.md` | ⏳ Chưa viết | Trước khi start Phase 2 (Settings reorder) |
+| `5-development/phase-3-calendar.md` | ⏳ Chưa viết | Trước khi start Phase 3 |
+| `5-development/phase-4-dashboard.md` | ⏳ Chưa viết | Trước khi start Phase 4 |
+| `5-development/phase-5-fitness.md` | ⏳ Chưa viết | Trước khi start Phase 5 |
+| `5-development/phase-6-ai-suite.md` | ⏳ Chưa viết | Trước khi start Phase 6 |
 | `6-testing/testing-strategy.md` | ⏳ Chưa viết | Trước Phase 1 (setup Karma + E2E) |
 | `6-decisions/ADR-001-ai-key-strategy.md` | ⏳ Chưa viết | Trước Phase 1.5B (obfuscation setup) |
 | `6-decisions/ADR-002-migration-strategy.md` | ⏳ Chưa viết | Phase 1 |
@@ -337,3 +345,4 @@ Sau khi end phase:
 | 1.2 | 2026-04-18 | Audit round 3: **thêm Phase 1.5B "AI Foundation"** — tách GeminiService ra khỏi Phase 5 để F-01/F-02 PRD complete-done. 6 phases → 7 phases. Update Phase 1/2/5 scope accordingly. |
 | 1.3 | 2026-04-18 | Audit round 4: Phase 5 template count 4→5 (thêm Weekly Review), ADR-001 gating Phase 1.5B (thay Phase 5), Phase 2 explicit dependency note, Phase 3 Dashboard rationale clarify |
 | 1.4 | 2026-04-30 | Phase 1.5B kickoff: D3 bỏ quota limit (paid tier, dev tự chịu cost). Thêm link tới `phase-1.5b-ai-foundation.md` (chốt 10 quyết định kiến trúc). |
+| 1.5 | 2026-05-07 | **Settings reorder.** Phase 6 (Settings & Polish) đẩy lên Phase 2; Calendar/Tracking → Phase 3; Dashboard → Phase 4; Fitness → Phase 5; AI Suite → Phase 6. Lý do: Settings hub partial đã ship sẵn ở Phase 0/1, cần đóng nốt NotificationService + release prep sớm để Phase Calendar có notification dùng + theme service ổn định trước các phase UI heavy. Update bảng 7 Phases Overview, Per-phase Details, Dependency Graph, Open Items, Document Map. |

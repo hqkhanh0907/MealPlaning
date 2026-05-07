@@ -657,17 +657,17 @@ GeminiService (core)
 NutritionAiService (strategy)
   ├─ lookupIngredient(name)                              [F-01 — Phase 1.5]
   ├─ autofillDish(dishName, dbIngredients)               [F-02 — Phase 1.5]
-  ├─ planDay(date, targets, dbDishes)                    [F-03 — Phase 2]
-  ├─ planWeek(startDate, targets, dbDishes)              [F-03 — Phase 2]
-  ├─ analyzeImage(image, mealType, dbIngredients)        [F-05 — Phase 5]
-  └─ suggestMenu(remaining, mealType, dbDishes)          [F-06 — Phase 5]
+  ├─ planDay(date, targets, dbDishes)                    [F-03 — Phase 3]
+  ├─ planWeek(startDate, targets, dbDishes)              [F-03 — Phase 3]
+  ├─ analyzeImage(image, mealType, dbIngredients)        [F-05 — Phase 6]
+  └─ suggestMenu(remaining, mealType, dbDishes)          [F-06 — Phase 6]
 
 FitnessAiService (strategy)
-  └─ generateTrainingPlan(profile, frequency, equipment, dbExercises)   [F-11 — Phase 5]
+  └─ generateTrainingPlan(profile, frequency, equipment, dbExercises)   [F-11 — Phase 6]
 
 InsightAiService (strategy)
-  ├─ dailyInsight(dayData, profile)                                     [F-07 — Phase 5]
-  └─ weeklyReview(weekData, profile)                                    [F-07 — Phase 5]
+  ├─ dailyInsight(dayData, profile)                                     [F-07 — Phase 6]
+  └─ weeklyReview(weekData, profile)                                    [F-07 — Phase 6]
 ```
 
 ### Flow Diagram

@@ -183,7 +183,7 @@ src/app/
 
 ### 2.4 Empty placeholder folders
 
-KHÔNG tạo thư mục rỗng "để dành". Tạo khi có file đầu tiên thực sự cần. Hiện trạng `shared/pipes/` và `shared/directives/` rỗng được giữ tạm vì doc lịch sử đã reference — sẽ xoá nếu Phase 2 vẫn không có content.
+KHÔNG tạo thư mục rỗng "để dành". Tạo khi có file đầu tiên thực sự cần. Hiện trạng `shared/pipes/` và `shared/directives/` rỗng được giữ tạm vì doc lịch sử đã reference — sẽ xoá nếu Phase 3 (Calendar) vẫn không có content.
 
 ---
 

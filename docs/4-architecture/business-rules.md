@@ -61,7 +61,7 @@ Tài liệu này tập trung các invariant nghiệp vụ mà mọi tầng (UI, 
 ### RULE-DI-GRAM-04: Trade-off realtime được chấp nhận
 
 - Khi user sửa `ingredient.calories`, mọi `planned_dish` lịch sử cập nhật theo (vì tính qua VIEW × `planned_dish.servings`).
-- Phase 1 chấp nhận hành vi này. Sửa nutrition được coi là hành động hiếm; nếu cần "khoá lịch sử" sẽ là Phase 2 (snapshot tuỳ chọn).
+- Phase 1 chấp nhận hành vi này. Sửa nutrition được coi là hành động hiếm; nếu cần "khoá lịch sử" sẽ là Phase 3 (snapshot tuỳ chọn).
 
 ### RULE-DI-GRAM-05: Liquid không có exception
 

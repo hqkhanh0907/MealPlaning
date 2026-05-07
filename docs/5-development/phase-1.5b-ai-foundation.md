@@ -2,7 +2,7 @@
 
 > **Trạng thái:** ✅ Draft 1.3 (2026-04-30) — F-01 DONE; F-02 IMPLEMENTED (GRAM-ONLY ABSOLUTE scope, atomic via `dishStore.applyAutofillAtomic`, sheet PA1 Option B). Một số decisions Q1-Q13 được simplify hoặc defer cho Phase 1.5B.4 (xem §7 + Changelog).
 >
-> **Mục tiêu:** Build GeminiClient core + NutritionAi + 2 prompt templates (F-01 AI Lookup + F-02 AI Auto-fill) để F-01/F-02 PRD complete-done. Infra dùng lại cho Phase 2 (AI Meal Plan day/week) và Phase 5 (Image / Menu Suggest / Insight / Training Plan).
+> **Mục tiêu:** Build GeminiClient core + NutritionAi + 2 prompt templates (F-01 AI Lookup + F-02 AI Auto-fill) để F-01/F-02 PRD complete-done. Infra dùng lại cho Phase 3 (AI Meal Plan day/week) và Phase 6 (Image / Menu Suggest / Insight / Training Plan).
 
 ---
 
@@ -23,7 +23,7 @@
 | 9 | Auto-cleanup `ai_chat_log` | Xóa row > 30 ngày khi app khởi động |
 | 10 | Test suite | Unit test GeminiClient (mock fetch) + NutritionAi + integration emulator |
 
-### 1.2 Out of scope (Phase 5)
+### 1.2 Out of scope (Phase 6)
 
 - F-05 Image Analysis (`generateContentWithImage`)
 - F-06 Menu Suggestions
@@ -31,10 +31,10 @@
 - F-11 Training Plan
 - Settings UI cho user paste API key (V2+)
 
-### 1.3 Out of scope (Phase 2 — sẽ DÙNG infra này, không build trong 1.5B)
+### 1.3 Out of scope (Phase 3 — sẽ DÙNG infra này, không build trong 1.5B)
 
-- F-03 AI Meal Plan day/week — Phase 2 sẽ thêm method `planDay` / `planWeek` trong `NutritionAi`, dùng lại `GeminiClient` infra
-- F-04 Daily summary computation — Phase 2 (non-AI, chỉ aggregate dish_with_totals)
+- F-03 AI Meal Plan day/week — Phase 3 sẽ thêm method `planDay` / `planWeek` trong `NutritionAi`, dùng lại `GeminiClient` infra
+- F-04 Daily summary computation — Phase 3 (non-AI, chỉ aggregate dish_with_totals)
 
 ---
 
@@ -44,7 +44,7 @@
 
 | # | Quyết định | Giá trị | Lý do |
 |---|-----------|---------|-------|
-| 1 | Service layer hierarchy | **2 layer**: `GeminiClient` (core HTTP/retry/log) + `NutritionAi` (business wrapper). **Style 2025**: không dùng `Service` suffix (CI guard `check-style-2025-naming.mjs` cấm). | Phase 5 thêm `FitnessAi` / `InsightAi` song song. |
+| 1 | Service layer hierarchy | **2 layer**: `GeminiClient` (core HTTP/retry/log) + `NutritionAi` (business wrapper). **Style 2025**: không dùng `Service` suffix (CI guard `check-style-2025-naming.mjs` cấm). | Phase 6 thêm `FitnessAi` / `InsightAi` song song. |
 | 2 | Gemini model | `gemini-2.5-flash` (cho cả 2 prompt) | Mới hơn 2.0-flash, accuracy tốt hơn cho tiếng Việt + ingredient matching, giá tương đương. |
 | 3 | API key strategy | `environment.ts` + obfuscation (D3) | Ship dev key trong APK, XOR + base64. Không có Settings UI cho user paste key (V2+). |
 | 4 | Quota limit | **Không quota** | Update D3 — Gemini paid tier không cap, dev tự chịu cost. Phù hợp với product-vision §248. |
@@ -118,9 +118,9 @@ export interface GeminiOptions {
 
 export type AiFeature =
   | 'ingredient_lookup' | 'dish_autofill'
-  | 'meal_plan_day' | 'meal_plan_week'              // Phase 2
+  | 'meal_plan_day' | 'meal_plan_week'              // Phase 3
   | 'image_analysis' | 'menu_suggestion'
-  | 'daily_insight' | 'weekly_review' | 'training_plan';  // Phase 5
+  | 'daily_insight' | 'weekly_review' | 'training_plan';  // Phase 6
 
 export class GeminiClient {
   generateContent<T>(prompt: string, options: GeminiOptions, schema: z.ZodType<T>): Promise<T>;
@@ -712,15 +712,15 @@ docs/5-ai/ai-strategy.md
 
 ---
 
-## 8. Out-of-scope risks (theo dõi cho Phase 2/5)
+## 8. Out-of-scope risks (theo dõi cho Phase 3/6)
 
 | Risk | Mitigation tương lai |
 |------|----------------------|
-| Token cost tăng khi DB ingredient list lớn (>200 items) | Phase 5: implement DB context pruning §4.2 ai-strategy.md (top-50 by recency) |
+| Token cost tăng khi DB ingredient list lớn (>200 items) | Phase 6: implement DB context pruning §4.2 ai-strategy.md (top-50 by recency) |
 | AI confidence "low" rate cao | UX cảnh báo + khuyến khích user verify (đã trong flow §4.1 cho F-01; F-02 Q8-C cho phép edit row "+" trước Lưu) |
 | Key bị extract khỏi APK → abuse | V2+: cho user paste key riêng trong Settings (Google API Console quota limit) |
 | AI trả ingredient name không khớp Vietnamese chuẩn | **Đã giải quyết V1 qua Q5-C**: local fuzzy-match (normalize + Levenshtein) auto re-link Lev=0, confirm modal cho Lev∈{1,2}. |
-| AI hallucinate nutrition cho ingredient lạ | **Mitigation V1 qua Q7-B + Q8-C**: confidence per ingredient + cho user edit nutrition trước Lưu qua sheet con. Phase 2: cross-check với F-01 lookup nếu confidence='low'. |
+| AI hallucinate nutrition cho ingredient lạ | **Mitigation V1 qua Q7-B + Q8-C**: confidence per ingredient + cho user edit nutrition trước Lưu qua sheet con. Phase 3: cross-check với F-01 lookup nếu confidence='low'. |
 
 ---
 
