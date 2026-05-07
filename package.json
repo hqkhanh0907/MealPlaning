@@ -6,6 +6,8 @@
   "scripts": {
     "ng": "ng",
     "qa:tap": "node scripts/qa-tap.mjs",
+    "cap:sync": "npx cap sync && node scripts/postsync-android.mjs",
+    "postsync:android": "node scripts/postsync-android.mjs",
     "start": "ng serve",
     "build": "npm run check:guards && ng build",
     "check:guards": "npm run check:form-pattern && npm run check:pc1 && npm run check:style-2025 && npm run check:design-tokens && npm run check:macro-naming",

@@ -73,5 +73,10 @@ describe('LocalNotifications', () => {
       requestSpy.and.returnValue(Promise.resolve({ display: 'denied' }));
       expect(await svc.requestPermission()).toBeFalse();
     });
+
+    it('returns false when display is prompt (user has not yet decided)', async () => {
+      requestSpy.and.returnValue(Promise.resolve({ display: 'prompt' }));
+      expect(await svc.requestPermission()).toBeFalse();
+    });
   });
 });

@@ -1,6 +1,6 @@
 # Story 2.2: Hoàn tất permission flow nhắc nhở (đóng D1)
 
-Status: ready-for-dev
+Status: ready-for-review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -193,3 +193,86 @@ _(Sẽ được fill — predicted):_
 - `docs/5-development/deferred-items.md` (modify — D1 DONE marker)
 - `docs/6-testing/screenshots/story-2.2/dialog-allow.png` (new)
 - `docs/6-testing/screenshots/story-2.2/toast-deny.png` (new)
+
+
+---
+
+## Dev Agent Record
+
+**Status:** ready-for-review
+**Implementer:** Amelia (Dev)
+**Date:** 2026-05-07
+
+### Tasks executed
+
+- [x] Task 1 — AndroidManifest POST_NOTIFICATIONS (AC1) ✓
+- [x] Task 2 — capacitor.config.ts smallIcon Option B → ic_launcher_round (AC2) ✓
+- [x] Task 3 — npx cap sync android → manifest merged xác nhận POST_NOTIFICATIONS (AC1) ✓
+- [x] Task 4 — local-notifications.spec.ts thêm test `requestPermission` returns false khi `display='prompt'` — 7/7 PASS (AC8) ✓
+- [x] Task 5 — settings.page.ts toast message "Vui lòng vào Cài đặt > Ứng dụng > HealthMate AI > Thông báo để bật quyền." duration 4000ms (AC5) ✓
+- [x] Task 6 — Build + emulator QA (AC3, AC4, AC9, AC10) ✓
+  - `npm run check:guards` 5/5 ✓
+  - `ng test` local-notifications + settings.page 14/14 ✓
+  - `npx ng build` development OK
+  - `./gradlew assembleDebug` BUILD SUCCESSFUL
+  - APK install emulator-5554 (Android SDK 36)
+  - Permission grant flow: tap Bữa sáng toggle → dialog system permission xuất hiện → tap Allow → `granted=true` + 4 alarm scheduled (07:30/12:00/18:30/CN 20:00) ✓
+  - Deny path: covered bằng unit test `display='denied' → false` (emulator walk-through fragile, đã verify code path)
+- [x] Task 7 — Update story Status ready-for-review (AC11 chuyển sang Task 8) ✓
+- [ ] Task 8 — D1 DONE marker `docs/5-development/deferred-items.md` (sẽ làm sau commit code, link SHA)
+
+### Files modified
+
+- `android/app/src/main/AndroidManifest.xml` (+1 line POST_NOTIFICATIONS)
+- `capacitor.config.ts` (smallIcon `ic_notification` → `ic_launcher_round`, comment Option B)
+- `src/app/features/settings/settings.page.ts` (toast string + duration 2500→4000)
+- `src/app/core/services/notifications/local-notifications.spec.ts` (+5 lines prompt test)
+
+### QA evidence
+
+- `docs/6-testing/screenshots/story-2.2/01-permission-dialog.png` — Android system permission dialog "Cho phép HealthMate AI gửi thông báo?"
+- `docs/6-testing/screenshots/story-2.2/02-onboarding-restart.png` — fresh install state proof
+- Alarm scheduling verified via `dumpsys alarm | grep com.healthmate`:
+  - 2026-05-08 07:30:02 (morning, ID 101)
+  - 2026-05-08 12:00:02 (lunch, ID 102)
+  - 2026-05-08 18:30:02 (evening, ID 103)
+  - 2026-05-10 20:00:02 (Sunday weekly, ID 201)
+
+### Verification commands
+
+```bash
+npm run check:guards                            # 5/5 ✓
+npx ng test --watch=false --browsers=ChromeHeadless --include='**/local-notifications.spec.ts'  # 7/7 ✓
+npx ng test --watch=false --browsers=ChromeHeadless --include='**/settings.page.spec.ts'        # 7/7 ✓
+npx ng build --configuration=development        # OK
+cd android && ./gradlew assembleDebug           # BUILD SUCCESSFUL
+adb -s emulator-5554 shell dumpsys package com.healthmate.ai | grep POST_NOTIFICATIONS
+# → granted=true ✓
+adb -s emulator-5554 shell dumpsys alarm | grep com.healthmate
+# → 4 alarms scheduled ✓
+```
+
+### Notes / Deviations
+
+- AC2 chọn Option B (asset đã có `ic_launcher_round`) thay vì tạo ic_notification proper — defer asset thiết kế chuẩn (white silhouette transparent) sang sprint sau, ghi vào `deferred-items.md` D-NOTIF-ICON.
+- AC5 deny path verify bằng unit test thay vì emulator (walk-through onboarding fragile do `keyevent 4` đôi khi pop screen). Code path đã cover đầy đủ qua `requestPermission` spec — risk acceptable.
+- AC11 (D1 DONE marker) sẽ commit ở Task 8 sau khi commit code lấy SHA.
+
+
+### Post-sync persistence (CRITICAL — phát hiện trong dev)
+
+**Vấn đề**: `/android/` được gitignore (Capacitor convention), nên edit trực tiếp `AndroidManifest.xml` sẽ MẤT khi clone fresh hoặc `cap add android` regenerate.
+
+**Giải pháp đã apply**:
+- Thêm `scripts/postsync-android.mjs` — idempotent script re-apply POST_NOTIFICATIONS sau mỗi `cap sync`
+- Thêm npm script `cap:sync` (alias chạy `cap sync` + `postsync:android`)
+- Verified 2 path: idempotent (chạy 2 lần OK) + auto-apply (xóa rồi chạy lại OK)
+
+**Onboarding rule mới cho team**:
+- Thay vì `npx cap sync` → dùng `npm run cap:sync` (đảm bảo manifest patch)
+- Hoặc chạy thủ công `npm run postsync:android` sau mỗi `cap sync`
+- File `scripts/postsync-android.mjs` extensible cho các custom manifest entries tương lai
+
+### Commit SHA
+
+`bae2d17` — feat(notifications): wire POST_NOTIFICATIONS grant flow (Story 2.2)

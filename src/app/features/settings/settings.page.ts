@@ -133,8 +133,8 @@ export default class SettingsPage {
       const granted = await this.notifications.requestPermission();
       if (!granted) {
         const t = await this.toastCtrl.create({
-          message: 'Bạn cần cấp quyền thông báo trong Cài đặt hệ thống.',
-          duration: 2500,
+          message: 'Vui lòng vào Cài đặt > Ứng dụng > HealthMate AI > Thông báo để bật quyền.',
+          duration: 4000,
           position: 'bottom',
         });
         await t.present();

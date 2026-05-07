@@ -18,7 +18,11 @@ const config: CapacitorConfig = {
       androidSplashResourceName: 'splash',
     },
     LocalNotifications: {
-      smallIcon: 'ic_notification',
+      // Story 2.2 Option B: dùng ic_launcher_round có sẵn (đã verify trong res/mipmap*).
+      // ic_notification asset proper (white silhouette transparent) sẽ tạo ở Story 2.5
+      // release prep cùng design system. Không để config trỏ asset không tồn tại
+      // — gây notification fail render khi schedule.
+      smallIcon: 'ic_launcher_round',
       iconColor: '#4CAF50',
     },
   },
