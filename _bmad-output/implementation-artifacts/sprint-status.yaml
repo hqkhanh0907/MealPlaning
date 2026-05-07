@@ -1,0 +1,44 @@
+# generated: 2026-05-07
+# last_updated: 2026-05-07
+# project: HealthMate AI (MealPlaning)
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in implementation-artifacts/
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+generated: 2026-05-07
+last_updated: 2026-05-07
+project: HealthMate AI (MealPlaning)
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  # Phase 1 (MVP) — implicitly DONE (code in production, no story files retro-created)
+  # Phase 1.5B (Onboarding polish) — implicitly DONE
+  # Tracking starts at Phase 2 (Settings & Polish)
+
+  epic-2: in-progress
+  2-1-profile-goals-expose-carbs-fat-optional-fields: backlog
+  2-2-notification-permission-flow: ready-for-dev
+  2-3-theme-switch-no-flash-dark-mode-qa-pass-4-man: backlog
+  2-4-pc-1-styleurl-audit-tighten-guard-d2: backlog
+  2-5-release-prep-app-icon-splash-signed-apk-version-policy: backlog
+  epic-2-retrospective: optional
