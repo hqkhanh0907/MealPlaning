@@ -39,7 +39,7 @@ story_location: _bmad-output/implementation-artifacts
 
 development_status:
   epic-2: in-progress
-  2-1-profile-goals-carbs-fat-goal-label-selected-card: backlog
+  2-1-profile-goals-carbs-fat: ready-for-dev
   2-2-notification-permission-flow: ready-for-dev
   2-3-theme-switch-no-flash-dark-mode-qa: backlog
   2-4-pc-1-styleurl-audit-activity-label-normalization: backlog
