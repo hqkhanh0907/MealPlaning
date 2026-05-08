@@ -200,6 +200,93 @@ describe('GoalsEditPage', () => {
     expect(location.back).toHaveBeenCalled();
   });
 
+  // === Story 2.1: carbs/fat targets, label canonical, selected card ===
+
+  it('ngOnInit seeds carbs/fat from profile (number values)', async () => {
+    await setup(makeProfile({ target_carbs: 250, target_fat: 70 }));
+    expect(component.carbs()).toBe(250);
+    expect(component.fat()).toBe(70);
+  });
+
+  it('ngOnInit seeds carbs/fat as null when profile has null', async () => {
+    await setup(makeProfile({ target_carbs: null, target_fat: null }));
+    expect(component.carbs()).toBeNull();
+    expect(component.fat()).toBeNull();
+  });
+
+  it('save() persists target_carbs and target_fat from inputs', async () => {
+    await setup(makeProfile({ target_carbs: null, target_fat: null }));
+    component.setCarbs(250);
+    component.setFat(70);
+    await component.save();
+    const patch = profileStore.updateProfile.calls.mostRecent().args[0] as Partial<UserProfile>;
+    expect(patch.target_carbs).toBe(250);
+    expect(patch.target_fat).toBe(70);
+  });
+
+  it('save() persists null when carbs/fat input cleared', async () => {
+    await setup(makeProfile({ target_carbs: 250, target_fat: 70 }));
+    component.setCarbs(null);
+    component.setFat(null);
+    await component.save();
+    const patch = profileStore.updateProfile.calls.mostRecent().args[0] as Partial<UserProfile>;
+    expect(patch.target_carbs).toBeNull();
+    expect(patch.target_fat).toBeNull();
+  });
+
+  it('setCarbs treats NaN as null (cleared input emits NaN)', async () => {
+    await setup(makeProfile());
+    component.setCarbs(Number.NaN);
+    expect(component.carbs()).toBeNull();
+  });
+
+  it('carbsInvalid: null valid, -1 invalid, 0 valid, 1000 valid, 1001 invalid', async () => {
+    await setup(makeProfile());
+    component.carbs.set(null);
+    expect(component.carbsInvalid()).toBe(false);
+    component.carbs.set(-1);
+    expect(component.carbsInvalid()).toBe(true);
+    component.carbs.set(0);
+    expect(component.carbsInvalid()).toBe(false);
+    component.carbs.set(1000);
+    expect(component.carbsInvalid()).toBe(false);
+    component.carbs.set(1001);
+    expect(component.carbsInvalid()).toBe(true);
+  });
+
+  it('fatInvalid: null valid, -1 invalid, 0 valid, 1000 valid, 1001 invalid', async () => {
+    await setup(makeProfile());
+    component.fat.set(null);
+    expect(component.fatInvalid()).toBe(false);
+    component.fat.set(-1);
+    expect(component.fatInvalid()).toBe(true);
+    component.fat.set(0);
+    expect(component.fatInvalid()).toBe(false);
+    component.fat.set(1000);
+    expect(component.fatInvalid()).toBe(false);
+    component.fat.set(1001);
+    expect(component.fatInvalid()).toBe(true);
+  });
+
+  it('formInvalid is true when carbs out of range', async () => {
+    await setup(makeProfile());
+    component.carbs.set(1500);
+    expect(component.formInvalid()).toBe(true);
+  });
+
+  it('formInvalid is true when fat out of range', async () => {
+    await setup(makeProfile());
+    component.fat.set(-10);
+    expect(component.formInvalid()).toBe(true);
+  });
+
+  it('goalOptions has performance label = "Tăng sức mạnh" (canonical)', async () => {
+    await setup(makeProfile());
+    const performanceOpt = component.goalOptions.find((o) => o.value === 'performance');
+    expect(performanceOpt?.label).toBe('Tăng sức mạnh');
+    expect(component.goalOptions.some((o) => o.label === 'Tăng hiệu suất')).toBe(false);
+  });
+
   it('ngOnInit with non-default goal does NOT overwrite stored manual targets', async () => {
     // Regression: persisted goal !== signal default ('maintain') used to trigger
     // the auto-suggest effect on initial load and clobber manual targets.

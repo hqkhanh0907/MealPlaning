@@ -34,7 +34,7 @@ const GOAL_LABELS: Record<UserProfile['goal'], string> = {
   lose_weight: 'Giảm cân',
   gain_muscle: 'Tăng cơ',
   maintain: 'Duy trì',
-  performance: 'Tăng hiệu suất',
+  performance: 'Tăng sức mạnh',
 };
 
 function activityLabel(factor: number): string {

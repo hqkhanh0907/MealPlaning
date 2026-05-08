@@ -20,7 +20,10 @@
           [attr.aria-checked]="goal() === opt.value"
           (click)="setGoal(opt.value)"
         >
-          {{ opt.label }}
+          <span class="goal-button__label">{{ opt.label }}</span>
+          @if (goal() === opt.value) {
+            <ion-icon class="goal-button__check" name="checkmark-circle" aria-hidden="true" />
+          }
         </button>
       }
     </div>
@@ -47,12 +50,43 @@
       />
     </div>
 
+    <div class="input-wrapper" [class.invalid]="carbsInvalid()">
+      <label class="input-label" [class.invalid]="carbsInvalid()">Carbs (g/ngày)</label>
+      <input
+        class="input-native"
+        type="number"
+        inputmode="numeric"
+        placeholder="Tự động"
+        [ngModel]="carbs()"
+        (ngModelChange)="setCarbs($event)"
+      />
+      @if (carbsInvalid()) {
+        <p class="input-error">Giá trị phải từ 0 đến 1000</p>
+      }
+    </div>
+
+    <div class="input-wrapper" [class.invalid]="fatInvalid()">
+      <label class="input-label" [class.invalid]="fatInvalid()">Fat (g/ngày)</label>
+      <input
+        class="input-native"
+        type="number"
+        inputmode="numeric"
+        placeholder="Tự động"
+        [ngModel]="fat()"
+        (ngModelChange)="setFat($event)"
+      />
+      @if (fatInvalid()) {
+        <p class="input-error">Giá trị phải từ 0 đến 1000</p>
+      }
+    </div>
+
     <ion-button fill="outline" size="small" class="reset-button" (click)="reset()">
       Reset về đề xuất
     </ion-button>
 
     <p class="form-hint">
-      Khi đổi mục tiêu, hệ thống đề xuất Calo và Protein mới. Bạn có thể chỉnh tay sau đó.
+      Khi đổi mục tiêu, hệ thống đề xuất Calo và Protein mới. Bạn có thể chỉnh tay sau đó. Carbs và
+      Fat luôn nhập tay (để trống = tự động theo Phase 3 tracking).
     </p>
   </div>
 </ion-content>

@@ -92,6 +92,31 @@ describe('SettingsPage', () => {
     expect(component.goalSummary()).toBe('Giảm cân');
   });
 
+  it('goalSummary renders "Tăng sức mạnh" for performance enum (canonical)', () => {
+    profileSignal.set(makeProfile({ goal: 'performance' }));
+    fixture.detectChanges();
+    expect(component.goalSummary()).toBe('Tăng sức mạnh');
+  });
+
+  it('renders Carbs and Fat rows with values when set', () => {
+    profileSignal.set(makeProfile({ target_carbs: 250, target_fat: 70 }));
+    fixture.detectChanges();
+    const html = (fixture.nativeElement as HTMLElement).innerHTML;
+    expect(html).toContain('Carbs');
+    expect(html).toContain('250 g');
+    expect(html).toContain('Fat');
+    expect(html).toContain('70 g');
+  });
+
+  it('renders em-dash for Carbs/Fat when null', () => {
+    profileSignal.set(makeProfile({ target_carbs: null, target_fat: null }));
+    fixture.detectChanges();
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    // Both rows should show — (em-dash). Match at least 2 occurrences.
+    const matches = text.match(/—/g) ?? [];
+    expect(matches.length).toBeGreaterThanOrEqual(2);
+  });
+
   it('activitySummary maps activity_factor 1.55 to "Vừa"', () => {
     expect(component.activitySummary()).toBe('Vừa');
   });

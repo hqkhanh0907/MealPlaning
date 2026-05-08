@@ -10,7 +10,10 @@ import {
   IonBackButton,
   IonButton,
   IonFooter,
+  IonIcon,
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { checkmarkCircle } from 'ionicons/icons';
 import { ProfileStore } from '../../../core/stores/profile.store';
 import { recalcTargets } from '../../../core/services/profile/recalc-targets';
 import { Goal } from '../../../core/models/user-profile.types';
@@ -34,6 +37,7 @@ interface GoalOption {
     IonBackButton,
     IonButton,
     IonFooter,
+    IonIcon,
   ],
 })
 export default class GoalsEditPage implements OnInit {
@@ -43,6 +47,8 @@ export default class GoalsEditPage implements OnInit {
   readonly goal = signal<Goal>('maintain');
   readonly calo = signal(0);
   readonly protein = signal(0);
+  readonly carbs = signal<number | null>(null);
+  readonly fat = signal<number | null>(null);
 
   // Tracks whether user manually edited targets in this session.
   // While false, changing the goal auto-suggests new targets via recalc.
@@ -56,14 +62,25 @@ export default class GoalsEditPage implements OnInit {
     { value: 'lose_weight', label: 'Giảm cân' },
     { value: 'maintain', label: 'Duy trì' },
     { value: 'gain_muscle', label: 'Tăng cơ' },
-    { value: 'performance', label: 'Tăng hiệu suất' },
+    { value: 'performance', label: 'Tăng sức mạnh' },
   ];
 
   readonly caloInvalid = computed(() => this.calo() < 800 || this.calo() > 6000);
   readonly proteinInvalid = computed(() => this.protein() < 20 || this.protein() > 400);
-  readonly formInvalid = computed(() => this.caloInvalid() || this.proteinInvalid());
+  readonly carbsInvalid = computed(() => {
+    const v = this.carbs();
+    return v !== null && (v < 0 || v > 1000);
+  });
+  readonly fatInvalid = computed(() => {
+    const v = this.fat();
+    return v !== null && (v < 0 || v > 1000);
+  });
+  readonly formInvalid = computed(
+    () => this.caloInvalid() || this.proteinInvalid() || this.carbsInvalid() || this.fatInvalid(),
+  );
 
   constructor() {
+    addIcons({ checkmarkCircle });
     // Auto-suggest calo/protein when goal CHANGES (not on initial run),
     // unless user has manually edited targets.
     effect(() => {
@@ -97,6 +114,8 @@ export default class GoalsEditPage implements OnInit {
     this.goal.set(p.goal);
     this.calo.set(p.target_calories);
     this.protein.set(p.target_protein);
+    this.carbs.set(p.target_carbs ?? null);
+    this.fat.set(p.target_fat ?? null);
   }
 
   setGoal(g: Goal): void {
@@ -111,6 +130,19 @@ export default class GoalsEditPage implements OnInit {
   setProtein(v: number): void {
     this.userTouchedTargets.set(true);
     this.protein.set(v);
+  }
+
+  setCarbs(v: number | null): void {
+    // Treat empty/NaN/0-string as null so we persist "unset" rather than 0.
+    const norm = v === null || (typeof v === 'number' && Number.isNaN(v)) ? null : v;
+    if (norm !== null) this.userTouchedTargets.set(true);
+    this.carbs.set(norm);
+  }
+
+  setFat(v: number | null): void {
+    const norm = v === null || (typeof v === 'number' && Number.isNaN(v)) ? null : v;
+    if (norm !== null) this.userTouchedTargets.set(true);
+    this.fat.set(norm);
   }
 
   reset(): void {
@@ -135,6 +167,8 @@ export default class GoalsEditPage implements OnInit {
       goal: this.goal(),
       target_calories: this.calo(),
       target_protein: this.protein(),
+      target_carbs: this.carbs(),
+      target_fat: this.fat(),
     });
     this.location.back();
   }

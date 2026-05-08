@@ -53,6 +53,20 @@
       <ion-note slot="end">{{ profile()?.target_protein }} g</ion-note>
     </ion-item>
 
+    <ion-item>
+      <ion-label>Carbs</ion-label>
+      <ion-note slot="end">{{
+        profile()?.target_carbs != null ? profile()!.target_carbs + ' g' : '—'
+      }}</ion-note>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Fat</ion-label>
+      <ion-note slot="end">{{
+        profile()?.target_fat != null ? profile()!.target_fat + ' g' : '—'
+      }}</ion-note>
+    </ion-item>
+
     <ion-item lines="none">
       <ion-label class="settings-hint">Chỉnh sửa ở mục Mục tiêu</ion-label>
     </ion-item>

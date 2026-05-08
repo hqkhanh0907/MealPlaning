@@ -11,7 +11,10 @@
 }
 
 .goal-button {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   width: 100%;
   padding: 14px 16px;
   text-align: left;
@@ -26,11 +29,31 @@
     border-color 0.15s ease,
     color 0.15s ease;
 
+  // Selected state: brand-primary border + 8% tint (NOT secondary/orange).
+  // Avoids visual clash with the orange "LƯU" footer button (Story 2.1 / P0-4).
   &.selected {
-    background: var(--ion-color-secondary);
-    border-color: var(--ion-color-secondary);
-    color: var(--ion-color-secondary-contrast);
+    background: rgba(var(--ion-color-primary-rgb), 0.08);
+    border: 2px solid var(--ion-color-primary);
+    color: var(--text-primary);
+    // Compensate for the +1px border so layout doesn't shift.
+    padding: 13px 15px;
   }
+}
+
+.goal-button__label {
+  flex: 1;
+}
+
+.goal-button__check {
+  flex: none;
+  font-size: var(--font-size-icon-md);
+  color: var(--ion-color-primary);
+}
+
+.input-error {
+  margin: 4px 0 0;
+  font: 400 12px/1.4 var(--ion-font-family);
+  color: var(--ion-color-danger);
 }
 
 .reset-button {
