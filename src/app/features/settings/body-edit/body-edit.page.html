@@ -9,40 +9,64 @@
 
 <ion-content class="ion-padding">
   <div class="form-content">
-    <div class="input-wrapper" [class.invalid]="heightInvalid()">
-      <label class="input-label" [class.invalid]="heightInvalid()">Chiều cao (cm)</label>
+    <app-form-field
+      label="Chiều cao (cm)"
+      inputId="body-field-height"
+      errorId="err-body-height"
+      [invalid]="heightInvalid()"
+      errorMessage="Chiều cao cần từ 100 đến 250 cm"
+    >
       <input
+        id="body-field-height"
         class="input-native"
         type="number"
         inputmode="decimal"
         step="0.1"
+        [attr.aria-invalid]="heightInvalid() ? 'true' : null"
+        [attr.aria-describedby]="heightInvalid() ? 'err-body-height' : null"
         [ngModel]="height()"
         (ngModelChange)="height.set($event)"
       />
-    </div>
+    </app-form-field>
 
-    <div class="input-wrapper" [class.invalid]="weightInvalid()">
-      <label class="input-label" [class.invalid]="weightInvalid()">Cân nặng (kg)</label>
+    <app-form-field
+      label="Cân nặng (kg)"
+      inputId="body-field-weight"
+      errorId="err-body-weight"
+      [invalid]="weightInvalid()"
+      errorMessage="Cân nặng cần từ 30 đến 300 kg"
+    >
       <input
+        id="body-field-weight"
         class="input-native"
         type="number"
         inputmode="decimal"
         step="0.1"
+        [attr.aria-invalid]="weightInvalid() ? 'true' : null"
+        [attr.aria-describedby]="weightInvalid() ? 'err-body-weight' : null"
         [ngModel]="weight()"
         (ngModelChange)="weight.set($event)"
       />
-    </div>
+    </app-form-field>
 
-    <div class="input-wrapper" [class.invalid]="ageInvalid()">
-      <label class="input-label" [class.invalid]="ageInvalid()">Tuổi</label>
+    <app-form-field
+      label="Tuổi"
+      inputId="body-field-age"
+      errorId="err-body-age"
+      [invalid]="ageInvalid()"
+      errorMessage="Tuổi cần từ 10 đến 120"
+    >
       <input
+        id="body-field-age"
         class="input-native"
         type="number"
         inputmode="numeric"
+        [attr.aria-invalid]="ageInvalid() ? 'true' : null"
+        [attr.aria-describedby]="ageInvalid() ? 'err-body-age' : null"
         [ngModel]="age()"
         (ngModelChange)="age.set($event)"
       />
-    </div>
+    </app-form-field>
 
     <h3 class="section-caption">Giới tính</h3>
     <div

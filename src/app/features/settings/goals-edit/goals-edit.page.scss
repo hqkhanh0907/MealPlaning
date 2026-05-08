@@ -2,6 +2,10 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  // Pre-existing bug surfaced by B3 visual QA: the sticky save bar
+  // (footer ~88px) overlapped the trailing `.form-hint`. Add bottom
+  // breathing room so the hint stays scrollable into view.
+  padding-bottom: 96px;
 }
 
 .goal-list {

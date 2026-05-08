@@ -15,6 +15,7 @@ import { ProfileStore } from '../../../core/stores/profile.store';
 import { recalcTargets } from '../../../core/services/profile/recalc-targets';
 import { activityLabelShort } from '../../../core/services/profile/activity-label';
 import { getActivityLevelFromFactor } from '../../onboarding/onboarding-calculation';
+import { AppFormField } from '../../../shared/forms/form-field/form-field';
 
 @Component({
   selector: 'app-body-edit',
@@ -30,6 +31,7 @@ import { getActivityLevelFromFactor } from '../../onboarding/onboarding-calculat
     IonBackButton,
     IonButton,
     IonFooter,
+    AppFormField,
   ],
 })
 export default class BodyEditPage implements OnInit {

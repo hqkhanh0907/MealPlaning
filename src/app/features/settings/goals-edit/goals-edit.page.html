@@ -29,57 +29,83 @@
 
     <h3 class="section-caption">Chỉ số dinh dưỡng</h3>
 
-    <div class="input-wrapper" [class.invalid]="caloInvalid()">
-      <label class="input-label" [class.invalid]="caloInvalid()">Calo (kcal)</label>
+    <app-form-field
+      label="Calo (kcal)"
+      inputId="goals-field-calo"
+      errorId="err-goals-calo"
+      [invalid]="caloInvalid()"
+      errorMessage="Calo cần từ 800 đến 6000 kcal"
+    >
       <input
+        id="goals-field-calo"
         class="input-native"
         type="number"
         inputmode="numeric"
+        [attr.aria-invalid]="caloInvalid() ? 'true' : null"
+        [attr.aria-describedby]="caloInvalid() ? 'err-goals-calo' : null"
         [ngModel]="calo()"
         (ngModelChange)="setCalo($event)"
       />
-    </div>
+    </app-form-field>
 
-    <div class="input-wrapper" [class.invalid]="proteinInvalid()">
-      <label class="input-label" [class.invalid]="proteinInvalid()">Protein (g)</label>
+    <app-form-field
+      label="Protein (g)"
+      inputId="goals-field-protein"
+      errorId="err-goals-protein"
+      [invalid]="proteinInvalid()"
+      errorMessage="Protein cần từ 20 đến 400 g"
+    >
       <input
+        id="goals-field-protein"
         class="input-native"
         type="number"
         inputmode="numeric"
+        [attr.aria-invalid]="proteinInvalid() ? 'true' : null"
+        [attr.aria-describedby]="proteinInvalid() ? 'err-goals-protein' : null"
         [ngModel]="protein()"
         (ngModelChange)="setProtein($event)"
       />
-    </div>
+    </app-form-field>
 
-    <div class="input-wrapper" [class.invalid]="carbsInvalid()">
-      <label class="input-label" [class.invalid]="carbsInvalid()">Carbs (g/ngày)</label>
+    <app-form-field
+      label="Carbs (g/ngày)"
+      inputId="goals-field-carbs"
+      errorId="err-goals-carbs"
+      [invalid]="carbsInvalid()"
+      errorMessage="Carbs cần từ 0 đến 1000 g"
+    >
       <input
+        id="goals-field-carbs"
         class="input-native"
         type="number"
         inputmode="numeric"
         placeholder="Tự động"
+        [attr.aria-invalid]="carbsInvalid() ? 'true' : null"
+        [attr.aria-describedby]="carbsInvalid() ? 'err-goals-carbs' : null"
         [ngModel]="carbs()"
         (ngModelChange)="setCarbs($event)"
       />
-      @if (carbsInvalid()) {
-        <p class="input-error">Giá trị phải từ 0 đến 1000</p>
-      }
-    </div>
+    </app-form-field>
 
-    <div class="input-wrapper" [class.invalid]="fatInvalid()">
-      <label class="input-label" [class.invalid]="fatInvalid()">Fat (g/ngày)</label>
+    <app-form-field
+      label="Fat (g/ngày)"
+      inputId="goals-field-fat"
+      errorId="err-goals-fat"
+      [invalid]="fatInvalid()"
+      errorMessage="Fat cần từ 0 đến 1000 g"
+    >
       <input
+        id="goals-field-fat"
         class="input-native"
         type="number"
         inputmode="numeric"
         placeholder="Tự động"
+        [attr.aria-invalid]="fatInvalid() ? 'true' : null"
+        [attr.aria-describedby]="fatInvalid() ? 'err-goals-fat' : null"
         [ngModel]="fat()"
         (ngModelChange)="setFat($event)"
       />
-      @if (fatInvalid()) {
-        <p class="input-error">Giá trị phải từ 0 đến 1000</p>
-      }
-    </div>
+    </app-form-field>
 
     <ion-button fill="clear" size="small" class="reset-button reset-button--text" (click)="reset()">
       Reset về đề xuất

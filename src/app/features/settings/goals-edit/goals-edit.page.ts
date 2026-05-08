@@ -17,6 +17,7 @@ import { checkmarkCircle } from 'ionicons/icons';
 import { ProfileStore } from '../../../core/stores/profile.store';
 import { recalcTargets } from '../../../core/services/profile/recalc-targets';
 import { Goal } from '../../../core/models/user-profile.types';
+import { AppFormField } from '../../../shared/forms/form-field/form-field';
 
 interface GoalOption {
   readonly value: Goal;
@@ -38,6 +39,7 @@ interface GoalOption {
     IonButton,
     IonFooter,
     IonIcon,
+    AppFormField,
   ],
 })
 export default class GoalsEditPage implements OnInit {
