@@ -3,7 +3,7 @@ import {
   type ManagementSchemaSnapshot,
 } from './schema-compatibility';
 
-describe('shouldResetLegacyManagementSchema (gram-only v6)', () => {
+describe('shouldResetLegacyManagementSchema (canonical v1, gram-only)', () => {
   const buildSnapshot = (
     overrides: Partial<ManagementSchemaSnapshot> = {},
   ): ManagementSchemaSnapshot => ({
@@ -19,7 +19,7 @@ describe('shouldResetLegacyManagementSchema (gram-only v6)', () => {
   });
 
   it('does not reset when user_version already advanced', () => {
-    expect(shouldResetLegacyManagementSchema(buildSnapshot({ userVersion: 6 }))).toBeFalse();
+    expect(shouldResetLegacyManagementSchema(buildSnapshot({ userVersion: 1 }))).toBeFalse();
   });
 
   it('requests reset for legacy ingredient table missing category', () => {

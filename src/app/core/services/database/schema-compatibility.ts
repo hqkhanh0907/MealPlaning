@@ -1,9 +1,12 @@
 /**
- * Schema compatibility check — gram-only revision (schema v6+).
+ * Schema compatibility check — single canonical schema (v1, gram-only).
  *
- * Nếu app gặp DB cũ ở v0 (không có user_version stamp) nhưng table đã tồn tại với
- * cấu trúc legacy (thiếu cột canonical hoặc còn cột bị drop ở v6), trả về true để
- * ép initializer drop & recreate. Migration runner có path riêng cho v≥1 → 6.
+ * Pre-release migration history was collapsed on 2026-05-08 (Story 2.6),
+ * so SCHEMA_VERSION is now `1`. This guard still protects users who never
+ * stamped `PRAGMA user_version` (any DB at v0) but already have legacy
+ * tables on disk: when columns reflect pre-collapse shapes (basis_unit,
+ * density, amount_value, unit_id, …), drop & recreate via the canonical
+ * DDL. Migration runner handles the `userVersion < SCHEMA_VERSION` path.
  */
 export interface ManagementSchemaSnapshot {
   userVersion: number;

@@ -1,104 +1,70 @@
 import { Database } from './database';
-import {
-  buildInitialSchemaMigration,
-  buildMealTagMigration,
-  buildNutritionSchemaFinalizationMigration,
-  buildNutritionUnitsMigration,
-  buildSeedArtifactMigration,
-} from './schema';
+import { buildInitialSchemaMigration, SCHEMA_DDL, SCHEMA_VERSION } from './schema';
 
 describe('buildInitialSchemaMigration', () => {
-  it('builds a V1 migration with all schema statements in order', () => {
+  it('builds a single migration matching SCHEMA_VERSION with all DDL statements', () => {
     const migration = buildInitialSchemaMigration();
 
-    expect(migration.version).toBe(1);
+    expect(migration.version).toBe(SCHEMA_VERSION);
+    expect(migration.statements).toBe(SCHEMA_DDL);
     expect(migration.statements.length).toBeGreaterThan(10);
     expect(migration.statements[0]).toContain('CREATE TABLE IF NOT EXISTS user_profile');
+  });
+
+  it('declares user_profile.theme as light-only via CHECK constraint', () => {
+    const migration = buildInitialSchemaMigration();
+    const userProfileStatement = migration.statements.find((statement: string) =>
+      statement.includes('CREATE TABLE IF NOT EXISTS user_profile'),
+    );
+    expect(userProfileStatement).toBeDefined();
+    expect(userProfileStatement).toContain("DEFAULT 'light'");
+    expect(userProfileStatement).toContain("CHECK (theme = 'light')");
+    // Legacy 'dark' / 'system' must not appear in the canonical schema.
+    expect(userProfileStatement).not.toContain("'dark'");
+    expect(userProfileStatement).not.toContain("'system'");
+  });
+
+  it('uses gram-only nutrition (no nutrition_basis_unit, density, unit table)', () => {
+    const migration = buildInitialSchemaMigration();
+    const joined = migration.statements.join('\n');
+    expect(joined).not.toContain('nutrition_basis_unit');
+    expect(joined).not.toContain('density_g_per_ml');
+    expect(joined).not.toContain('CREATE TABLE IF NOT EXISTS unit ');
+    expect(joined).not.toContain('CREATE TABLE IF NOT EXISTS ingredient_unit');
+    expect(joined).toContain('gram_weight   REAL NOT NULL CHECK (gram_weight > 0)');
+  });
+
+  it('exposes dish_with_totals view with gram-based macro projection', () => {
+    const migration = buildInitialSchemaMigration();
     expect(
       migration.statements.some((statement: string) =>
         statement.includes('CREATE VIEW IF NOT EXISTS dish_with_totals'),
       ),
     ).toBeTrue();
+    const view = migration.statements.find((statement: string) =>
+      statement.includes('CREATE VIEW IF NOT EXISTS dish_with_totals'),
+    );
+    expect(view).toContain('di.gram_weight / 100.0');
+    expect(view).toContain('d.meal_tag');
+    expect(view).toContain('d.is_favorite');
   });
-});
 
-describe('buildNutritionUnitsMigration', () => {
-  it('builds a V2 migration for unit registry and ingredient-specific units', () => {
-    const migration = buildNutritionUnitsMigration();
-
-    expect(migration.version).toBe(2);
-    expect(
-      migration.statements.some((statement: string) =>
-        statement.includes('CREATE TABLE IF NOT EXISTS unit'),
-      ),
-    ).toBeTrue();
-    expect(
-      migration.statements.some((statement: string) =>
-        statement.includes('CREATE TABLE IF NOT EXISTS ingredient_unit'),
-      ),
-    ).toBeTrue();
-    expect(
-      migration.statements.some((statement: string) =>
-        statement.includes('ALTER TABLE dish_ingredient ADD COLUMN unit_id'),
-      ),
-    ).toBeTrue();
-  });
-});
-
-describe('buildNutritionSchemaFinalizationMigration', () => {
-  it('builds a V3 migration that removes legacy runtime columns and tables', () => {
-    const migration = buildNutritionSchemaFinalizationMigration();
-
-    expect(migration.version).toBe(3);
-    expect(
-      migration.statements.some((statement: string) =>
-        statement.includes('CREATE TABLE IF NOT EXISTS ingredient_v3'),
-      ),
-    ).toBeTrue();
-    expect(
-      migration.statements.some((statement: string) => statement.includes('DROP TABLE ingredient')),
-    ).toBeTrue();
-    expect(
-      migration.statements.some((statement: string) =>
-        statement.includes('ALTER TABLE ingredient_v3 RENAME TO ingredient'),
-      ),
-    ).toBeTrue();
-  });
-});
-
-describe('buildMealTagMigration', () => {
-  it('builds a V4 migration that adds dish.meal_tag with CHECK constraint and index', () => {
-    const migration = buildMealTagMigration();
-
-    expect(migration.version).toBe(4);
-    expect(
-      migration.statements.some((statement: string) =>
-        statement.includes('ALTER TABLE dish ADD COLUMN meal_tag'),
-      ),
-    ).toBeTrue();
-    expect(
-      migration.statements.some((statement: string) =>
-        statement.includes("CHECK (meal_tag IN ('breakfast', 'lunch', 'dinner'))"),
-      ),
-    ).toBeTrue();
+  it('includes meal_tag CHECK + index on dish for seed-grouping queries', () => {
+    const migration = buildInitialSchemaMigration();
+    const dishStatement = migration.statements.find((statement: string) =>
+      statement.includes('CREATE TABLE IF NOT EXISTS dish '),
+    );
+    expect(dishStatement).toBeDefined();
+    expect(dishStatement).toContain("meal_tag IN ('breakfast', 'lunch', 'dinner')");
     expect(
       migration.statements.some((statement: string) =>
         statement.includes('CREATE INDEX IF NOT EXISTS idx_dish_meal_tag ON dish(meal_tag)'),
       ),
     ).toBeTrue();
   });
-});
 
-describe('buildSeedArtifactMigration', () => {
-  it('builds a V5 migration that creates seed_artifact table + index', () => {
-    const migration = buildSeedArtifactMigration();
-
-    expect(migration.version).toBe(5);
-    expect(
-      migration.statements.some((statement: string) =>
-        statement.includes('ALTER TABLE dish ADD COLUMN is_favorite INTEGER NOT NULL DEFAULT 0'),
-      ),
-    ).toBeTrue();
+  it('creates seed_artifact table with allowed artifact_type values', () => {
+    const migration = buildInitialSchemaMigration();
     expect(
       migration.statements.some((statement: string) =>
         statement.includes('CREATE TABLE IF NOT EXISTS seed_artifact'),
@@ -119,7 +85,7 @@ describe('buildSeedArtifactMigration', () => {
   });
 });
 
-describe('schema migration compatibility smoke test', () => {
+describe('schema migration replay smoke test', () => {
   let db: jasmine.SpyObj<Database>;
 
   beforeEach(() => {
@@ -127,7 +93,7 @@ describe('schema migration compatibility smoke test', () => {
     db.execute.and.resolveTo();
   });
 
-  it('can replay the generated V1 migration sequentially without custom branching', async () => {
+  it('can replay the canonical migration sequentially without custom branching', async () => {
     const migration = buildInitialSchemaMigration();
 
     for (const statement of migration.statements) {
@@ -136,34 +102,9 @@ describe('schema migration compatibility smoke test', () => {
 
     expect(db.execute.calls.count()).toBe(migration.statements.length);
     expect(db.execute.calls.first().args[0]).toContain('CREATE TABLE IF NOT EXISTS user_profile');
+    // Last statement is the seed_artifact_type index after collapse.
     expect(db.execute.calls.mostRecent().args[0]).toContain(
-      'CREATE INDEX IF NOT EXISTS idx_app_config_key',
+      'CREATE INDEX IF NOT EXISTS idx_seed_artifact_type',
     );
-  });
-
-  it('can replay the generated V2 migration sequentially without custom branching', async () => {
-    const migration = buildNutritionUnitsMigration();
-
-    for (const statement of migration.statements) {
-      await db.execute(statement);
-    }
-
-    expect(db.execute.calls.count()).toBe(migration.statements.length);
-    expect(db.execute.calls.first().args[0]).toContain('CREATE TABLE IF NOT EXISTS unit');
-    expect(db.execute.calls.mostRecent().args[0]).toContain(
-      'CREATE VIEW IF NOT EXISTS dish_with_totals',
-    );
-  });
-
-  it('can replay the generated V3 migration sequentially without custom branching', async () => {
-    const migration = buildNutritionSchemaFinalizationMigration();
-
-    for (const statement of migration.statements) {
-      await db.execute(statement);
-    }
-
-    expect(db.execute.calls.count()).toBe(migration.statements.length);
-    expect(db.execute.calls.first().args[0]).toContain('PRAGMA foreign_keys = OFF');
-    expect(db.execute.calls.mostRecent().args[0]).toContain('PRAGMA foreign_keys = ON');
   });
 });

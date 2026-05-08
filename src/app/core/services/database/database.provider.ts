@@ -8,12 +8,8 @@ import { Capacitor } from '@capacitor/core';
 import { Database } from './database';
 import { WebDatabase } from './web-database';
 import { NativeDatabase } from './native-database';
-import { LegacySqlJsMigrator } from './legacy-sqljs-migrator';
 import { ProfileStore } from '../../stores/profile.store';
 import { SeedLoader } from '../seed/seed-loader';
-
-/** Upper bound for legacy import — never block startup longer than this. */
-const LEGACY_MIGRATION_TIMEOUT_MS = 3000;
 
 /**
  * Provides DatabaseService with platform-specific implementation
@@ -21,9 +17,13 @@ const LEGACY_MIGRATION_TIMEOUT_MS = 3000;
  *
  * Initialization order:
  *   1. DatabaseService.initialize() — open DB, run schema DDL + migrations
- *   2. (native only) LegacySqlJsMigrator — import legacy sql.js localStorage
- *      profile into native SQLite, if any. Never overwrites existing rows.
+ *   2. SeedLoader.run() — insert curated Vietnamese seed (idempotent via
+ *      `seed_artifact` fingerprints)
  *   3. ProfileStore.loadProfile() — load user profile into signal
+ *
+ * NOTE: Legacy sql.js → native SQLite import was removed on 2026-05-08
+ * (Story 2.6, pre-release migration collapse). The app never shipped
+ * a sql.js build to real users, so there is no legacy state to import.
  */
 export function provideDatabaseService(): EnvironmentProviders {
   return makeEnvironmentProviders([
@@ -39,14 +39,6 @@ export function provideDatabaseService(): EnvironmentProviders {
         const seedLoader = inject(SeedLoader);
         return async () => {
           await db.initialize();
-
-          if (Capacitor.isNativePlatform()) {
-            await runWithTimeout(
-              new LegacySqlJsMigrator(db).migrate(),
-              LEGACY_MIGRATION_TIMEOUT_MS,
-              'legacy-sqljs-migration',
-            ).catch((err) => console.warn('[DatabaseProvider] legacy migration skipped:', err));
-          }
 
           try {
             const inserted = await seedLoader.run();
@@ -66,17 +58,4 @@ export function provideDatabaseService(): EnvironmentProviders {
       multi: true,
     },
   ]);
-}
-
-function runWithTimeout<T>(p: Promise<T>, ms: number, tag: string): Promise<T | undefined> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const timeout = new Promise<undefined>((resolve) => {
-    timer = setTimeout(() => {
-      console.warn(`[DatabaseProvider] ${tag} timed out after ${ms}ms`);
-      resolve(undefined);
-    }, ms);
-  });
-  return Promise.race([p, timeout]).finally(() => {
-    if (timer) clearTimeout(timer);
-  });
 }
