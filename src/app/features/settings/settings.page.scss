@@ -3,7 +3,23 @@
 }
 
 .settings-list {
-  margin-bottom: 16px;
+  margin-bottom: 0;
+}
+
+// P1-1 — Section caption tier on hub. Override default ion-list-header h2 so
+// labels read as captions, not page headings — keeps focus on row content.
+.settings-list ion-list-header {
+  min-height: auto;
+  padding-top: var(--space-sm);
+  padding-bottom: var(--space-xs);
+
+  ion-label h2 {
+    margin: 0;
+    font: 600 var(--font-size-caption) / 1.4 var(--ion-font-family) !important;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
 }
 
 .settings-hint {

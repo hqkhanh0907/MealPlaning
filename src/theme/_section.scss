@@ -1,0 +1,86 @@
+/**
+ * Section + sticky-save patterns — Story 2.5 (Settings Phase 2 polish).
+ *
+ * Shared classes used by Settings hub + body/goals/activity edit pages so
+ * typography tier, section rhythm, and the LƯU button look identical.
+ *
+ * Tokens consumed:
+ *   --spacing-section, --space-*, --text-tertiary, --bg-page, --bg-card-accent,
+ *   --ion-color-primary, --font-size-caption.
+ */
+
+// P1-1 — Section caption tier (UPPERCASE 12px / 0.6 letter-spacing / tertiary).
+// Apply to plain header rows where we don't want the heavy ion-list-header tier.
+.section-caption {
+  margin: var(--spacing-section) 0 var(--space-sm);
+  padding: 0;
+  font: 600 var(--font-size-caption) / 1.4 var(--ion-font-family);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+
+  // First child shouldn't push down content (ion-padding already gives top).
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+// P1-2 — Section group rhythm. Wrap a stack of related rows/cards in
+// `.section-group` so vertical spacing between sections is constant 24px
+// regardless of which surface (list vs card) we're rendering.
+.section-group + .section-group {
+  margin-top: var(--spacing-section);
+}
+
+// Tighten ion-list section spacing to match the section-group rhythm.
+ion-content .settings-list + .settings-list {
+  margin-top: var(--spacing-section);
+}
+
+// P1-7 — Sticky save bar. Drop into <ion-footer> or as a wrapper around the
+// Lưu button so it always sits on top of content with brand color + safe-area.
+.sticky-save-bar {
+  display: block;
+  padding: var(--space-md) var(--space-lg) calc(var(--space-md) + env(safe-area-inset-bottom));
+  background: var(--bg-page);
+  // Subtle top divider so the bar reads as a separate surface when content
+  // scrolls under it. Token-only — no raw hex.
+  box-shadow: 0 -1px 0 var(--ion-border-color);
+
+  ion-button.save-button {
+    margin: 0;
+    --background: var(--ion-color-primary);
+    --background-activated: var(--ion-color-primary-shade);
+    --background-hover: var(--ion-color-primary-tint);
+    --color: var(--ion-color-primary-contrast);
+  }
+}
+
+// P1-6 — Result block accent (Mục tiêu mới). Highlight the row that the user
+// most cares about so it doesn't blend with BMR/TDEE.
+.preview-row.preview-row--accent {
+  margin: var(--space-sm) calc(var(--space-md) * -1) 0;
+  padding: var(--space-md);
+  background: var(--bg-card-accent);
+  border-radius: var(--radius-sm);
+
+  .preview-label,
+  .preview-value {
+    color: var(--ion-color-primary);
+  }
+
+  .preview-value {
+    font-weight: 600;
+  }
+}
+
+// P1-11 — Reset as a quiet text button (no border, Title Case is set in HTML).
+ion-button.reset-button--text {
+  --background: transparent;
+  --background-activated: transparent;
+  --background-hover: transparent;
+  --box-shadow: none;
+  --color: var(--text-secondary);
+  text-transform: none;
+  letter-spacing: 0;
+}

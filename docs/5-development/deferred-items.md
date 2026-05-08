@@ -1,7 +1,7 @@
 # Deferred Items — MealPlaning / HealthMate AI
 
 **Status:** Living document
-**Last updated:** 2026-05-08 (D2/D3 resolved by Story 2.4)
+**Last updated:** 2026-05-08 (Phase 2 exit — Story 2.5 closes D1 + Phase 2 polish)
 **Owner:** Khanh Huynh (solo dev)
 
 ## Mục đích
@@ -78,7 +78,7 @@ Các item phát hiện qua các session nhưng chưa có nơi track formal trư�
 
 | Mã | Item | Lý do hoãn | Trigger nên làm |
 |----|------|-----------|----------------|
-| D1 ✅ DONE | Settings — POST_NOTIFICATIONS permission grant flow | Resolved Story 2.2 (commit `ba0781b`). AndroidManifest POST_NOTIFICATIONS, capacitor.config.ts smallIcon → `ic_launcher_round`, toast guide, postsync script for `/android/` gitignore persistence. QA emulator-5554 verified: dialog → Allow → 4 alarms scheduled. | DONE 2026-05-07. |
+| ~~D1~~ ✅ DONE (Story 2.2 + 2.5) | ~~Settings — POST_NOTIFICATIONS permission grant flow~~ | Resolved Story 2.2 (commit `ba0781b`). AndroidManifest POST_NOTIFICATIONS, capacitor.config.ts smallIcon → `ic_launcher_round`, toast guide, postsync script for `/android/` gitignore persistence. Story 2.5 added release-time hardening: build.gradle signing config + version sync guard + postsync extended. Resolved 2026-05-07 / 2026-05-08. | — |
 | ~~D2~~ ✅ DONE (Story 2.4) | ~~Project-wide audit `styleUrl` trên page components~~ | Story 2.4 đã add `styleUrl` + empty `.scss` cho 6 components còn thiếu (`app.ts`, `calendar.page.ts`, `dashboard.page.ts`, `fitness.page.ts`, `form-field.ts`, `segmented-control.ts`) và tighten guard `check-pc1-external-templates.mjs` để require cả `templateUrl` + `styleUrl`. Resolved 2026-05-08. | — |
 | ~~D3~~ ✅ DONE (Story 2.4) | ~~Activity label inconsistency giữa onboarding và Settings~~ | Story 2.4 introduce `core/services/profile/activity-label.ts` với canonical short labels parallel `Ít vận động / Vận động nhẹ / Vận động vừa / Vận động nặng`. Wired onboarding (long), settings hub + body-edit + activity-edit (short). Bracket TDEE row fixed (body-edit `· activityLabel`, activity-edit drops redundant). Resolved 2026-05-08. | — |
 | D-UX-AUDIT-202605 | Settings UI/UX audit — 4 P2 nice-to-have findings | Audit Sally lens trên 4 màn Settings (hub/body/goals/activity) phát hiện 21 findings; 5 P0 + 12 P1 đã fold vào Stories 2.1/2.4/2.5 (epic-2 rev 2), riêng 4 P2 defer. **P2-1**: hub label `Cơ thể` → `Thông số cơ thể`. **P2-2**: hub `Calo 1946 kcal` dư đơn vị → đổi `Năng lượng` hoặc bỏ kcal value. **P2-3**: `Mục tiêu mới` mơ hồ → before/after (`~~1900~~ → 1946`) hoặc `Mục tiêu đề xuất`. **P2-4**: hub scroll dài → collapse nhóm `Nhắc nhở` thành 1 row → bottom-sheet. Source: `_bmad-output/implementation-artifacts/settings-uiux-audit.md` (commit `6dd6db5`). | Polish pass sau Phase 2 release, hoặc khi mở rộng Settings (vd thêm sub-page Privacy/Backup). Cosmetic only, không block ship. |

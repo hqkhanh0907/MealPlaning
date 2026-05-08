@@ -9,12 +9,11 @@
 
 <ion-content class="ion-padding">
   <div class="form-content">
-    <span class="section-label segment-label">Mục tiêu</span>
     <div class="goal-list" role="radiogroup" aria-label="Mục tiêu">
       @for (opt of goalOptions; track opt.value) {
         <button
           type="button"
-          class="goal-button"
+          class="goal-button goal-button--compact"
           [class.selected]="goal() === opt.value"
           role="radio"
           [attr.aria-checked]="goal() === opt.value"
@@ -27,6 +26,8 @@
         </button>
       }
     </div>
+
+    <h3 class="section-caption">Chỉ số dinh dưỡng</h3>
 
     <div class="input-wrapper" [class.invalid]="caloInvalid()">
       <label class="input-label" [class.invalid]="caloInvalid()">Calo (kcal)</label>
@@ -80,7 +81,7 @@
       }
     </div>
 
-    <ion-button fill="outline" size="small" class="reset-button" (click)="reset()">
+    <ion-button fill="clear" size="small" class="reset-button reset-button--text" (click)="reset()">
       Reset về đề xuất
     </ion-button>
 
@@ -91,16 +92,16 @@
   </div>
 </ion-content>
 
-<ion-footer>
-  <ion-toolbar>
+<ion-footer class="ion-no-border">
+  <div class="sticky-save-bar">
     <ion-button
       expand="block"
       class="save-button"
-      [color]="formInvalid() ? 'medium' : 'secondary'"
+      [color]="formInvalid() ? 'medium' : 'primary'"
       [disabled]="formInvalid()"
       (click)="save()"
     >
       Lưu
     </ion-button>
-  </ion-toolbar>
+  </div>
 </ion-footer>

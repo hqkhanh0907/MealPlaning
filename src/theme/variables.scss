@@ -210,6 +210,17 @@
   --space-2xl: 24px;
   --space-3xl: 32px;
 
+  // Semantic spacing aliases — Story 2.5 (P1-2 rhythm fix)
+  // `--spacing-section`: gap between Settings sections (Hồ sơ ↔ Mục tiêu ↔ Giao diện…).
+  // Use this token everywhere a section-level vertical separator is needed so
+  // rhythm stays consistent across hub + edit pages.
+  --spacing-section: var(--space-2xl); // 24px
+
+  // Bg accent — Story 2.5 (P1-6 Mục tiêu mới block highlight)
+  // Subtle sage tint over --bg-card so the "result" block stands out from
+  // BMR/TDEE rows without breaking light/dark contrast budget.
+  --bg-card-accent: rgba(111, 139, 110, 0.08);
+
   // Border Radius (DS §5)
   --radius-micro: 4px;
   --radius-xs: 8px;
@@ -298,6 +309,8 @@
   // Sunken (dark) — sáng hơn --bg-page (#1c1a17) một nấc để tách layer
   // (trong dark mode, "sunken/track" sáng hơn page, ngược chiều light).
   --bg-sunken: #2a2620;
+  // Dark variant of accent — Story 2.5 (P1-6)
+  --bg-card-accent: rgba(138, 160, 134, 0.14); // sage-tint over dark card
   --text-primary: #f5f1e8;
   --text-secondary: #c9c2b4;
   --text-tertiary: #918876;

@@ -1,6 +1,6 @@
 {
   "name": "HealthMateAI",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
   "scripts": {
@@ -10,12 +10,13 @@
     "postsync:android": "node scripts/postsync-android.mjs",
     "start": "ng serve",
     "build": "npm run check:guards && ng build",
-    "check:guards": "npm run check:form-pattern && npm run check:pc1 && npm run check:style-2025 && npm run check:design-tokens && npm run check:macro-naming",
+    "check:guards": "npm run check:form-pattern && npm run check:pc1 && npm run check:style-2025 && npm run check:design-tokens && npm run check:macro-naming && npm run check:version-sync",
     "check:form-pattern": "node scripts/check-form-input-pattern.mjs",
     "check:pc1": "node scripts/check-pc1-external-templates.mjs",
     "check:style-2025": "node scripts/check-style-2025-naming.mjs",
     "check:design-tokens": "node scripts/check-design-tokens.mjs",
     "check:macro-naming": "node scripts/check-macro-naming.mjs",
+    "check:version-sync": "node scripts/check-version-sync.mjs",
     "seed:build": "tsx scripts/seed/build.ts",
     "seed:typecheck": "tsc -p tsconfig.seed.json",
     "seed:test": "node --import tsx --test scripts/seed/__tests__/*.test.ts",

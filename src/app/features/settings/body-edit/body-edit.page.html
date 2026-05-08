@@ -44,7 +44,7 @@
       />
     </div>
 
-    <span class="section-label segment-label">Giới tính</span>
+    <h3 class="section-caption">Giới tính</h3>
     <div
       class="segment-control segment-control--inverse-sage"
       role="radiogroup"
@@ -73,6 +73,7 @@
     </div>
 
     @if (preview(); as r) {
+      <h3 class="section-caption">Kết quả tính toán</h3>
       <div class="preview-card">
         <div class="preview-row">
           <span class="preview-label">BMR</span>
@@ -82,7 +83,7 @@
           <span class="preview-label">TDEE</span>
           <span class="preview-value">{{ r.tdee }} kcal · {{ activityLabel() }}</span>
         </div>
-        <div class="preview-row">
+        <div class="preview-row preview-row--accent">
           <span class="preview-label">Mục tiêu mới</span>
           <span class="preview-value"
             >Calo {{ r.target_calories }} kcal · Protein {{ r.target_protein }}g</span
@@ -96,16 +97,16 @@
   </div>
 </ion-content>
 
-<ion-footer>
-  <ion-toolbar>
+<ion-footer class="ion-no-border">
+  <div class="sticky-save-bar">
     <ion-button
       expand="block"
       class="save-button"
-      [color]="formInvalid() ? 'medium' : 'secondary'"
+      [color]="formInvalid() ? 'medium' : 'primary'"
       [disabled]="formInvalid()"
       (click)="save()"
     >
       Lưu
     </ion-button>
-  </ion-toolbar>
+  </div>
 </ion-footer>

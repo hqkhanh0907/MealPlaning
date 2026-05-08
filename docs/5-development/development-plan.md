@@ -181,12 +181,15 @@ AI features split 2 phases:
 - About screen
 - Release pipeline: signing config, app icon/splash assets, Play Store internal testing build
 
-**Status hiện tại (đã ship một phần):**
-- ✅ Settings hub + 3 sub-pages (Body / Goals / Activity edit) — DONE (commits `345049d`→`3c85d96`, 12 commits, 401 tests, emulator-5554 verified: live recalc preview, goal auto-suggest + manual-override regression fix, reset, theme Sáng/Tối toggle)
-- ⏳ NotificationService permission grant flow — pending (xem deferred-items §3.1 D1)
-- ⏳ Release prep (icon, splash, signing, Play Store assets) — pending
+**Status hiện tại (Phase 2 — ✅ EXIT 2026-05-08, version 0.2.0):**
+- ✅ Settings hub + 3 sub-pages (Body / Goals / Activity edit) — DONE (commits `345049d`→`3c85d96`, 12 commits, emulator-5554 verified: live recalc preview, goal auto-suggest + manual-override regression fix, reset, theme Sáng/Tối toggle)
+- ✅ Story 2.1 Profile carbs/fat editing (commit `8e83bc4`) — Goals Edit nhận manual carbs/fat input, Phase 3 tracking sẽ tự auto khi để trống
+- ✅ Story 2.2 NotificationService POST_NOTIFICATIONS grant flow (commits `ba0781b` + `e7ed80e`) — runtime permission, smallIcon canonical, postsync infra cho `/android/` regen, 14/14 spec tests
+- ✅ Story 2.3 Theme persistence + dark mode finalize (commit `605a438`)
+- ✅ Story 2.4 PC-1 styleUrl audit + activity label normalization (commit `23b9bd6`) — guards 5/5 → 6/6, parallel labels, +8 tests (426/426)
+- ✅ Story 2.5 Release prep + Phase 2 polish (commit `<this-story>`) — section caption tier, sticky LƯU brand-color, spacing rhythm tokens, adaptive icon verified, version sync guard, signing config + signed APK pipeline (`scripts/release/build-signed-apk.sh`), version policy doc
 
-**Deliverable:** Full Settings F-13 closed; NotificationService API ready cho Phase 3; APK signed + upload Play Store internal testing.
+**Deliverable:** Full Settings F-13 closed; NotificationService API ready cho Phase 3; release pipeline (signing config + version sync guard) live; signed APK procedure documented in `release-signing.md` + `release-versioning.md`. Phase 2 exit version: `0.2.0` (versionCode `2`).
 
 ---
 

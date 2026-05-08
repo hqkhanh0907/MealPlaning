@@ -25,6 +25,7 @@
     </ion-radio-group>
 
     @if (preview(); as r) {
+      <h3 class="section-caption">Kết quả tính toán</h3>
       <div class="preview-card">
         <div class="preview-row">
           <span class="preview-label">BMR</span>
@@ -34,7 +35,7 @@
           <span class="preview-label">TDEE</span>
           <span class="preview-value">{{ r.tdee }} kcal</span>
         </div>
-        <div class="preview-row">
+        <div class="preview-row preview-row--accent">
           <span class="preview-label">Mục tiêu mới</span>
           <span class="preview-value"
             >Calo {{ r.target_calories }} kcal · Protein {{ r.target_protein }}g</span
@@ -48,10 +49,10 @@
   </div>
 </ion-content>
 
-<ion-footer>
-  <ion-toolbar>
-    <ion-button expand="block" class="save-button" color="secondary" (click)="save()">
+<ion-footer class="ion-no-border">
+  <div class="sticky-save-bar">
+    <ion-button expand="block" class="save-button" color="primary" (click)="save()">
       Lưu
     </ion-button>
-  </ion-toolbar>
+  </div>
 </ion-footer>

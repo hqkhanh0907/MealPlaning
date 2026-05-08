@@ -10,6 +10,7 @@
  */
 
 @use './theme/dark-mode' as *;
+@use './theme/section' as *;
 
 /* Core CSS required for Ionic components to work properly */
 @import '@ionic/angular/css/core.css';
