@@ -13,7 +13,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ProfileStore } from '../../../core/stores/profile.store';
 import { recalcTargets } from '../../../core/services/profile/recalc-targets';
-import { ACTIVITY_LABEL } from '../../onboarding/onboarding.page';
+import { activityLabelShort } from '../../../core/services/profile/activity-label';
 import { getActivityLevelFromFactor } from '../../onboarding/onboarding-calculation';
 
 @Component({
@@ -74,7 +74,7 @@ export default class BodyEditPage implements OnInit {
     const p = this.profileStore.profile();
     if (!p) return '';
     const level = getActivityLevelFromFactor(p.activity_factor) ?? 'moderate';
-    return ACTIVITY_LABEL[level];
+    return activityLabelShort(level);
   });
 
   async save(): Promise<void> {

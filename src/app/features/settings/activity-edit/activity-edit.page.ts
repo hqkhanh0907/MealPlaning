@@ -18,12 +18,27 @@ import {
 } from '@ionic/angular/standalone';
 import { ProfileStore } from '../../../core/stores/profile.store';
 import { recalcTargets } from '../../../core/services/profile/recalc-targets';
+import { activityLabelShort } from '../../../core/services/profile/activity-label';
+import { getActivityFactor } from '../../onboarding/onboarding-calculation';
+import type { ActivityLevel } from '../../../core/models/user-profile.types';
 
 interface ActivityOption {
   readonly factor: number;
   readonly label: string;
   readonly desc: string;
 }
+
+/**
+ * Long-form descriptions for the activity option cards. Kept here (not in the
+ * shared `activity-label` module) because they're surface-specific copy: only
+ * the picker screen uses them.
+ */
+const ACTIVITY_DESCRIPTIONS: Readonly<Record<ActivityLevel, string>> = {
+  sedentary: 'Ngồi nhiều, ít hoặc không tập',
+  light: 'Tập nhẹ 1–3 buổi/tuần',
+  moderate: 'Tập vừa 3–5 buổi/tuần',
+  heavy: 'Tập nặng 6–7 buổi/tuần',
+};
 
 @Component({
   selector: 'app-activity-edit',
@@ -52,12 +67,13 @@ export default class ActivityEditPage implements OnInit {
 
   readonly factor = signal(1.55);
 
-  readonly options: readonly ActivityOption[] = [
-    { factor: 1.2, label: 'Ít vận động', desc: 'Ngồi nhiều, ít hoặc không tập' },
-    { factor: 1.375, label: 'Nhẹ', desc: 'Tập nhẹ 1–3 buổi/tuần' },
-    { factor: 1.55, label: 'Vừa', desc: 'Tập vừa 3–5 buổi/tuần' },
-    { factor: 1.725, label: 'Nặng', desc: 'Tập nặng 6–7 buổi/tuần' },
-  ];
+  readonly options: readonly ActivityOption[] = (
+    ['sedentary', 'light', 'moderate', 'heavy'] as const
+  ).map<ActivityOption>((level) => ({
+    factor: getActivityFactor(level),
+    label: activityLabelShort(level),
+    desc: ACTIVITY_DESCRIPTIONS[level],
+  }));
 
   ngOnInit(): void {
     const p = this.profileStore.profile();

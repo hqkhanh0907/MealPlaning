@@ -117,8 +117,8 @@ describe('SettingsPage', () => {
     expect(matches.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('activitySummary maps activity_factor 1.55 to "Vừa"', () => {
-    expect(component.activitySummary()).toBe('Vừa');
+  it('activitySummary maps activity_factor 1.55 to "Vận động vừa"', () => {
+    expect(component.activitySummary()).toBe('Vận động vừa');
   });
 
   it('setTheme updates store and applies theme service', async () => {

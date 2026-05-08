@@ -18,6 +18,7 @@ export interface SegmentedControlOption<T extends string> {
   standalone: true,
   imports: [],
   templateUrl: './segmented-control.html',
+  styleUrl: './segmented-control.scss',
 })
 export class SegmentedControl<T extends string> {
   @Input({ required: true }) options: SegmentedControlOption<T>[] = [];

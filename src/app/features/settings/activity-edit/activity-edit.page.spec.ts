@@ -106,11 +106,11 @@ describe('ActivityEditPage', () => {
     component.factor.set(1.2);
     expect(component.activeLabel()).toBe('Ít vận động');
     component.factor.set(1.375);
-    expect(component.activeLabel()).toBe('Nhẹ');
+    expect(component.activeLabel()).toBe('Vận động nhẹ');
     component.factor.set(1.55);
-    expect(component.activeLabel()).toBe('Vừa');
+    expect(component.activeLabel()).toBe('Vận động vừa');
     component.factor.set(1.725);
-    expect(component.activeLabel()).toBe('Nặng');
+    expect(component.activeLabel()).toBe('Vận động nặng');
   });
 
   it('save() updates targets when they were auto-computed', async () => {

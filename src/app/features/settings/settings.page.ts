@@ -24,6 +24,8 @@ import { ProfileStore } from '../../core/stores/profile.store';
 import { Theme, ThemeMode } from '../../core/services/theme/theme-service';
 import { LocalNotifications, SlotKey } from '../../core/services/notifications/local-notifications';
 import { UserProfile } from '../../core/models/user-profile.model';
+import { activityLabelShort } from '../../core/services/profile/activity-label';
+import { getActivityLevelFromFactor } from '../onboarding/onboarding-calculation';
 
 const GENDER_LABELS: Record<UserProfile['gender'], string> = {
   male: 'Nam',
@@ -38,10 +40,8 @@ const GOAL_LABELS: Record<UserProfile['goal'], string> = {
 };
 
 function activityLabel(factor: number): string {
-  if (factor <= 1.2) return 'Ít vận động';
-  if (factor <= 1.375) return 'Nhẹ';
-  if (factor <= 1.55) return 'Vừa';
-  return 'Nặng';
+  const level = getActivityLevelFromFactor(factor) ?? 'sedentary';
+  return activityLabelShort(level);
 }
 
 @Component({

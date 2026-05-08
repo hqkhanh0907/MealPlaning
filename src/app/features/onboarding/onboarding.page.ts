@@ -38,12 +38,18 @@ import {
   getActivityFactor,
 } from './onboarding-calculation';
 import { EMPTY_2B, Step2bErrors, validateStep2b } from './onboarding-validation';
+import { activityLabelLong } from '../../core/services/profile/activity-label';
 
+/**
+ * @deprecated Use `activityLabelLong` / `activityLabelShort` from
+ * `core/services/profile/activity-label`. Kept as a re-export shim during the
+ * Story 2.4 migration; remove once no callsites import this symbol.
+ */
 export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
-  sedentary: 'Ít vận động (ngồi nhiều)',
-  light: 'Nhẹ (1-3 ngày/tuần)',
-  moderate: 'Trung bình (3-5 ngày/tuần)',
-  heavy: 'Nặng (6-7 ngày/tuần)',
+  sedentary: activityLabelLong('sedentary'),
+  light: activityLabelLong('light'),
+  moderate: activityLabelLong('moderate'),
+  heavy: activityLabelLong('heavy'),
 };
 
 @Component({

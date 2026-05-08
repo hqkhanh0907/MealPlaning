@@ -43,6 +43,7 @@ import type { FormError } from '../types';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './form-field.html',
+  styleUrl: './form-field.scss',
 })
 export class AppFormField {
   /** Visible label text. Empty string hides the label. */

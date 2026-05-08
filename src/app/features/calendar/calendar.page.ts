@@ -15,6 +15,7 @@ import { settingsOutline } from 'ionicons/icons';
 @Component({
   selector: 'app-calendar',
   templateUrl: './calendar.page.html',
+  styleUrl: './calendar.page.scss',
   imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon],
 })
 export default class CalendarPage {

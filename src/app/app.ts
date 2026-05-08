@@ -14,6 +14,7 @@ import { cleanupOldAiLogs } from './core/services/ai/gemini-client';
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
+  styleUrl: './app.scss',
   imports: [IonApp, IonRouterOutlet],
 })
 export class App {
