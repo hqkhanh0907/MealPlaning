@@ -12,8 +12,6 @@ import {
   IonLabel,
   IonNote,
   IonIcon,
-  IonRadioGroup,
-  IonRadio,
   IonToggle,
   ToastController,
 } from '@ionic/angular/standalone';
@@ -21,7 +19,6 @@ import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { chevronForwardOutline } from 'ionicons/icons';
 import { ProfileStore } from '../../core/stores/profile.store';
-import { Theme, ThemeMode } from '../../core/services/theme/theme-service';
 import { LocalNotifications, SlotKey } from '../../core/services/notifications/local-notifications';
 import { UserProfile } from '../../core/models/user-profile.model';
 import { activityLabelShort } from '../../core/services/profile/activity-label';
@@ -61,15 +58,12 @@ function activityLabel(factor: number): string {
     IonLabel,
     IonNote,
     IonIcon,
-    IonRadioGroup,
-    IonRadio,
     IonToggle,
     RouterLink,
   ],
 })
 export default class SettingsPage {
   private profileStore = inject(ProfileStore);
-  private theme = inject(Theme);
   private notifications = inject(LocalNotifications);
   private toastCtrl = inject(ToastController);
 
@@ -91,8 +85,6 @@ export default class SettingsPage {
     return p ? activityLabel(p.activity_factor) : '';
   });
 
-  readonly themeMode = computed<ThemeMode>(() => this.profile()?.theme ?? 'system');
-
   readonly morningEnabled = computed(() => !!this.profile()?.notif_morning);
   readonly lunchEnabled = computed(() => !!this.profile()?.notif_lunch);
   readonly eveningEnabled = computed(() => !!this.profile()?.notif_evening);
@@ -102,16 +94,6 @@ export default class SettingsPage {
 
   constructor() {
     addIcons({ chevronForwardOutline });
-  }
-
-  async setTheme(mode: ThemeMode): Promise<void> {
-    if (mode === this.themeMode()) return;
-    this.theme.apply(mode);
-    await this.profileStore.updateProfile({ theme: mode });
-  }
-
-  async onThemeChange(event: CustomEvent<{ value: ThemeMode }>): Promise<void> {
-    await this.setTheme(event.detail.value);
   }
 
   async onToggleChange(key: SlotKey, event: CustomEvent<{ checked: boolean }>): Promise<void> {

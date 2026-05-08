@@ -3,7 +3,6 @@ import { signal } from '@angular/core';
 import { ToastController } from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
 import { ProfileStore } from '../../core/stores/profile.store';
-import { Theme } from '../../core/services/theme/theme-service';
 import { LocalNotifications } from '../../core/services/notifications/local-notifications';
 import { UserProfile } from '../../core/models/user-profile.model';
 import SettingsPage from './settings.page';
@@ -24,7 +23,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     target_protein: 154,
     target_carbs: 200,
     target_fat: 60,
-    theme: 'system',
+    theme: 'light',
     notif_morning: 0,
     notif_lunch: 0,
     notif_evening: 0,
@@ -41,7 +40,6 @@ describe('SettingsPage', () => {
   let component: SettingsPage;
   let profileSignal: ReturnType<typeof signal<UserProfile | null>>;
   let profileStore: { profile: typeof profileSignal; updateProfile: jasmine.Spy };
-  let theme: jasmine.SpyObj<Theme>;
   let notifications: jasmine.SpyObj<LocalNotifications>;
   let toastCtrl: jasmine.SpyObj<ToastController>;
   let toastEl: { present: jasmine.Spy };
@@ -57,7 +55,6 @@ describe('SettingsPage', () => {
           if (cur) profileSignal.set({ ...cur, ...patch });
         }),
     };
-    theme = jasmine.createSpyObj<Theme>('Theme', ['apply']);
     notifications = jasmine.createSpyObj<LocalNotifications>('LocalNotifications', [
       'requestPermission',
       'sync',
@@ -72,7 +69,6 @@ describe('SettingsPage', () => {
       providers: [
         provideRouter([]),
         { provide: ProfileStore, useValue: profileStore },
-        { provide: Theme, useValue: theme },
         { provide: LocalNotifications, useValue: notifications },
         { provide: ToastController, useValue: toastCtrl },
       ],
@@ -119,12 +115,6 @@ describe('SettingsPage', () => {
 
   it('activitySummary maps activity_factor 1.55 to "Vận động vừa"', () => {
     expect(component.activitySummary()).toBe('Vận động vừa');
-  });
-
-  it('setTheme updates store and applies theme service', async () => {
-    await component.setTheme('dark');
-    expect(theme.apply).toHaveBeenCalledWith('dark');
-    expect(profileStore.updateProfile).toHaveBeenCalledWith({ theme: 'dark' });
   });
 
   it('toggleNotif denied path does not update profile', async () => {

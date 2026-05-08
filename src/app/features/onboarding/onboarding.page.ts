@@ -244,7 +244,7 @@ export default class OnboardingPage {
         target_protein: targetProtein,
         target_carbs: null,
         target_fat: null,
-        theme: 'system',
+        theme: 'light',
         notif_morning: 1,
         notif_lunch: 1,
         notif_evening: 1,

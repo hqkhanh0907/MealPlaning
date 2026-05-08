@@ -19,9 +19,6 @@
  *
  * Page-local rules (e.g. .management-shell) stay in the component.
  */
-
-@use './dark-mode' as *;
-
 .filter-strip {
   display: flex;
   gap: 8px;
@@ -195,18 +192,6 @@
   color: #4f6a4f; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
-@include dark-root {
-  .badge--source,
-  .badge--source-inline {
-    background: rgba(
-      138,
-      160,
-      134,
-      0.18
-    ); // allow-hardcode: DS §2.7 source-badge sage tint — intentional, no semantic token
-    color: #c8d2c5; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
-  }
-}
 
 // Category & Type badges (DS §2.7 Data-viz palette — Sage Wellness)
 // 10 hues spread quanh color wheel, low chroma (~25-40%), tone trầm để hài hòa
@@ -332,115 +317,6 @@
   color: var(--ion-color-secondary-shade);
 }
 
-@include dark-root {
-  .badge--category-cat-thit {
-    background: rgba(
-      168,
-      85,
-      68,
-      0.18
-    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-    color: #d49e8e; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
-  }
-  .badge--category-cat-ca {
-    background: rgba(
-      74,
-      122,
-      138,
-      0.18
-    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-    color: #9ab8c4; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
-  }
-  .badge--category-cat-trung {
-    background: rgba(
-      176,
-      122,
-      62,
-      0.18
-    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-    color: #d4b48a; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
-  }
-  .badge--category-cat-rau {
-    background: rgba(
-      111,
-      139,
-      110,
-      0.18
-    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-    color: #a8b7a5; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
-  }
-  .badge--category-cat-ngu-coc {
-    background: rgba(
-      166,
-      102,
-      56,
-      0.18
-    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-    color: #cfa688; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
-  }
-  .badge--category-cat-dau-hat {
-    background: rgba(
-      138,
-      106,
-      140,
-      0.18
-    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-    color: #b8a4ba; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
-  }
-  .badge--category-cat-dau-mo {
-    background: rgba(
-      201,
-      168,
-      71,
-      0.18
-    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-    color: #ddc78a; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
-  }
-  .badge--category-cat-gia-vi {
-    background: rgba(
-      176,
-      74,
-      106,
-      0.18
-    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-    color: #d49ab1; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
-  }
-  .badge--category-cat-nuoc-dung {
-    background: rgba(
-      90,
-      138,
-      122,
-      0.18
-    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-    color: #a4c4b8; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
-  }
-  .badge--category-cat-trai-cay {
-    background: rgba(
-      194,
-      73,
-      62,
-      0.18
-    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-    color: #d98980; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
-  }
-  .badge--category-cat-khac {
-    background: rgba(
-      128,
-      119,
-      106,
-      0.18
-    ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-    color: #b5ac9c; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
-  }
-  .badge--type-ingredient {
-    background: var(--quick-action-bg);
-    color: var(--quick-action-text);
-  }
-  .badge--type-ai {
-    background: var(--streak-card-bg);
-    color: var(--ion-color-secondary);
-  }
-}
 
 .kebab-button {
   position: absolute;

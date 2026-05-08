@@ -13,7 +13,7 @@ export interface UserProfile {
   target_protein: number;
   target_carbs: number | null;
   target_fat: number | null;
-  theme: 'light' | 'dark' | 'system';
+  theme: 'light';
   notif_morning: number;
   notif_lunch: number;
   notif_evening: number;

@@ -26,9 +26,6 @@
  * If a deviation is needed, update §8.8 first AND get explicit user approval —
  * never silently re-introduce a parallel pattern.
  */
-
-@use './dark-mode' as *;
-
 .segment-control {
   display: flex;
   gap: 4px;
@@ -76,17 +73,6 @@
   outline-offset: 2px;
 }
 
-@include dark-root {
-  .segment-control.invalid {
-    box-shadow: 0 0 0 1px var(--ion-color-danger) inset;
-  }
-  .segment-button.selected {
-    /* Dark mode keeps the same solid sage fill — the sage primary token
-       already targets ≥4.5:1 contrast against white text in both schemes. */
-    background: var(--ion-color-primary);
-    color: var(--ion-color-primary-contrast);
-  }
-}
 
 /* ─────────────────────────────────────────────────────────────────
  * MODIFIER: .segment-control--inverse-sage
@@ -119,22 +105,3 @@
   font-weight: 600;
 }
 
-@include dark-root {
-  .segment-control--inverse-sage {
-    /* Dark mode dùng sage shade tối hơn cho track + sage tint sáng cho selected text */
-    background: rgba(
-      138,
-      160,
-      134,
-      0.16
-    ); // allow-hardcode: sage-tint @16% — inverse-sage dark track, no token
-  }
-  .segment-control--inverse-sage .segment-button {
-    color: #b6c9b3; // allow-hardcode: sage-tint-300 — inverse-sage dark text, intentional brand
-  }
-  .segment-control--inverse-sage .segment-button.selected {
-    background: var(--bg-card);
-    color: #b6c9b3; // allow-hardcode: sage-tint-300 — inverse-sage dark text, intentional brand
-    box-shadow: var(--shadow-md);
-  }
-}

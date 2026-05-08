@@ -9,9 +9,6 @@
  * Component-specific rules (segmented controls, ingredient rows, unit cards,
  * etc.) still live in the component's `styles:` block.
  */
-
-@use './dark-mode' as *;
-
 .overlay {
   position: fixed;
   inset: 0;
@@ -52,12 +49,6 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-@include dark-root {
-  .modal-toolbar {
-    background: var(--bg-page);
-    border-bottom-color: var(--border-color);
-  }
-}
 
 .modal-toolbar h2 {
   margin: 0;

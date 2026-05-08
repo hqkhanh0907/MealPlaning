@@ -28,7 +28,8 @@ export class App {
     // Profile is loaded by APP_INITIALIZER (xem database.provider.ts) before
     // the App component is instantiated, so the signal is already populated
     // (or null if onboarding hasn't been completed).
-    this.themeService.apply(this.profileStore.profile()?.theme ?? 'system');
+    // Light-only since Story 2.6 (2026-05-08). Theme service is a no-op shim.
+    this.themeService.apply('light');
 
     const p = this.profileStore.profile();
     if (p) {

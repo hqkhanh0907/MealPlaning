@@ -21,9 +21,6 @@
  * DO NOT inline these styles in component .ts files.
  * If a component needs a deviation, update §8.6 first AND get explicit user approval.
  */
-
-@use './dark-mode' as *;
-
 /*
  * SPACING MODEL (post-B1):
  * Cha (.form-content, .step-content, .nutrition-grid, .unit-grid…) đảm nhiệm
@@ -176,22 +173,3 @@ textarea.input-native {
 /* Trong .form-content (modal flex-gap layout) — error vẫn bám sát input
    bên trên, không cần margin-top âm vì nó ở trong cùng .form-field wrapper. */
 
-@include dark-root {
-  .input-wrapper {
-    background: var(--input-bg);
-    border-color: var(--input-border-color);
-  }
-  .input-wrapper.invalid {
-    border-color: var(--ion-color-danger);
-  }
-  .input-native,
-  .picker-trigger--floating {
-    color: var(--text-primary);
-  }
-  .input-label.invalid {
-    color: var(--ion-color-danger);
-  }
-  .field-error {
-    color: var(--ion-color-danger);
-  }
-}

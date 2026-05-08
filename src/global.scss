@@ -8,8 +8,6 @@
  * For more information on global stylesheets, visit the documentation:
  * https://ionicframework.com/docs/layout/global-stylesheets
  */
-
-@use './theme/dark-mode' as *;
 @use './theme/section' as *;
 
 /* Core CSS required for Ionic components to work properly */
@@ -29,28 +27,10 @@
 @import '@ionic/angular/css/flex-utils.css';
 
 /**
- * Ionic Dark Mode
+ * Ionic Dark Mode (removed Story 2.6, 2026-05-08)
  * -----------------------------------------------------
- * Dark mode is handled entirely in src/theme/variables.scss
- * using @media (prefers-color-scheme: dark).
- * Do NOT import Ionic's dark palettes to avoid double-application.
+ * App is light-only. No dark palette imports, no transitions, no media query.
  */
-
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-/* @import '@ionic/angular/css/palettes/dark.system.css'; */
-
-// Theme switch — smooth transition to avoid white flash when toggling
-// Light/Dark/System (Story 2.3 / NFR-PERF-01). Transition only background +
-// text color of root surfaces; component-level animations remain untouched.
-html,
-body,
-ion-app,
-ion-content {
-  transition:
-    background-color 150ms var(--ease-out-quart),
-    color 150ms var(--ease-out-quart);
-}
 
 // Global ion-radio styling — match design system radio circle (DS §8.7)
 // Override Ionic defaults so radio circles render per mockup.
@@ -68,11 +48,6 @@ ion-radio::part(mark) {
   border-radius: 50%;
 }
 
-@include dark-root {
-  ion-radio::part(container) {
-    border-color: var(--input-border-color);
-  }
-}
 
 app-management .fab {
   position: fixed;

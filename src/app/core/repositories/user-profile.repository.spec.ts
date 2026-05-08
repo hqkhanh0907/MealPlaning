@@ -27,7 +27,7 @@ describe('UserProfileRepository (singleton semantics)', () => {
     target_protein: 130,
     target_carbs: null,
     target_fat: null,
-    theme: 'system',
+    theme: 'light',
     notif_morning: 1,
     notif_lunch: 1,
     notif_evening: 1,

@@ -3,26 +3,6 @@
  * Inherits §8.10 (Bottom Sheet) + §8.7 (Radio Items).
  *
  * v2 Sage Wellness: dùng design tokens (--bg-card, --text-*, --border-color,
- * --ion-color-primary). Dark mode chuyển sang @media (prefers-color-scheme: dark)
- * để đồng bộ với phần còn lại của app (DS §2.5, global.scss).
- */
-
-@use '../../../../theme/dark-mode' as *;
-
-ion-modal {
-  --background: var(--bg-card);
-  --border-radius: 20px 20px 0 0;
-  --height: 70vh;
-  --max-height: 70vh;
-
-  &::part(handle) {
-    background: var(--border-color);
-    width: 36px;
-    height: 4px;
-    border-radius: 2px;
-    margin: 8px 0 12px;
-  }
-}
 
 .sheet-header {
   ion-toolbar {
@@ -157,11 +137,6 @@ ion-modal {
 }
 
 /* Dark mode — selected highlight slightly stronger để compensate cho contrast bg */
-@include dark-root {
-  .sheet-option.selected {
-    background: rgba(var(--ion-color-primary-rgb), 0.16);
-  }
-}
 
 /* ===========================================================================
    MRU "Gần đây" section — design-system §8l

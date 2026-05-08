@@ -1,5 +1,3 @@
-@use '../../../theme/dark-mode' as *;
-
 /* ====================================================================
    PAGE CONTAINER — DS §4 spacing: 12px top, 16px horizontal
    ==================================================================== */
@@ -69,15 +67,6 @@
     background: var(--primary-100); /* selected wins */
   }
 }
-@include dark-root {
-  .radio-item {
-    background: var(--bg-card);
-  }
-  .radio-item.selected {
-    background: var(--bg-elevated);
-    box-shadow: inset 0 0 0 1px var(--ion-color-primary);
-  }
-}
 
 /* ====================================================================
    RADIO CIRCLE — 18px circle bên trái (sage-wellness 4-cue selected state):
@@ -111,15 +100,6 @@
   border-radius: 50%;
   background: var(--ion-color-primary-contrast);
 }
-@include dark-root {
-  .radio-circle {
-    border-color: var(--input-border-color);
-  }
-  .radio-item.selected .radio-circle {
-    border-color: var(--ion-color-primary);
-    background: var(--ion-color-primary);
-  }
-}
 
 /* ====================================================================
    RADIO ICON — 22px, primary color (Step 1 goals only)
@@ -140,11 +120,6 @@
 }
 .radio-item.selected .radio-label {
   font-weight: 700;
-}
-@include dark-root {
-  .radio-label {
-    color: var(--text-secondary);
-  }
 }
 
 /* ====================================================================

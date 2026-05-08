@@ -23,7 +23,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     target_protein: 154,
     target_carbs: 200,
     target_fat: 60,
-    theme: 'system',
+    theme: 'light',
     notif_morning: 0,
     notif_lunch: 0,
     notif_evening: 0,
