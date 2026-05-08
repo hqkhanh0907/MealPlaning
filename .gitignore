@@ -90,3 +90,6 @@ src/environments/environment.local.ts
 # Phase 1.5B AI Foundation
 .env
 src/environments/environment.prod.ts
+
+# E2E test artifacts (screenshots, page-source dumps)
+/e2e/artifacts/
