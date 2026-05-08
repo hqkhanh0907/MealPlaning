@@ -182,12 +182,12 @@ AI features split 2 phases:
 - Release pipeline: signing config, app icon/splash assets, Play Store internal testing build
 
 **Status hiện tại (Phase 2 — ✅ EXIT 2026-05-08, version 0.2.0):**
-- ✅ Settings hub + 3 sub-pages (Body / Goals / Activity edit) — DONE (commits `345049d`→`3c85d96`, 12 commits, emulator-5554 verified: live recalc preview, goal auto-suggest + manual-override regression fix, reset, theme Sáng/Tối toggle)
+- ✅ Settings hub + 3 sub-pages (Body / Goals / Activity edit) — DONE (commits `345049d`→`3c85d96`, 12 commits, emulator-5554 verified: live recalc preview, goal auto-suggest + manual-override regression fix, reset, theme toggle (since superseded by Story 2.6 — light-only))
 - ✅ Story 2.1 Profile carbs/fat editing (commit `8e83bc4`) — Goals Edit nhận manual carbs/fat input, Phase 3 tracking sẽ tự auto khi để trống
 - ✅ Story 2.2 NotificationService POST_NOTIFICATIONS grant flow (commits `ba0781b` + `e7ed80e`) — runtime permission, smallIcon canonical, postsync infra cho `/android/` regen, 14/14 spec tests
 - ✅ Story 2.3 Theme persistence + dark mode finalize (commit `605a438`) — superseded by Story 2.6 (commit `fcc7dd4`): dark mode removed, app is light-only.
 - ✅ Story 2.4 PC-1 styleUrl audit + activity label normalization (commit `23b9bd6`) — guards 5/5 → 6/6, parallel labels, +8 tests (426/426)
-- ✅ Story 2.5 Release prep + Phase 2 polish (commit `<this-story>`) — section caption tier, sticky LƯU brand-color, spacing rhythm tokens, adaptive icon verified, version sync guard, signing config + signed APK pipeline (`scripts/release/build-signed-apk.sh`), version policy doc
+- ✅ Story 2.5 Release prep + Phase 2 polish (commit `9ccca1b`) — section caption tier, sticky LƯU brand-color, spacing rhythm tokens, adaptive icon verified, version sync guard, signing config + signed APK pipeline (`scripts/release/build-signed-apk.sh`), version policy doc
 - ✅ Story 2.6 Remove dark mode + collapse migrations (commits `c49f4b5` + `fcc7dd4`) — pre-release schema reset (6 migrations → 1 canonical v1, gram-only, theme CHECK 'light'); legacy sql.js migrator deleted; SCSS `_dark-mode.scss` + 12 `@include dark-root` blocks + 9 `@use dark-mode` imports + 2 `prefers-color-scheme` blocks stripped; Settings "Giao diện" radio group removed; `Theme` service kept as deprecated no-op shim; v0.2.1 (versionCode 3); 418/418 tests + 6/6 guards + emulator force-night-mode QA verified light-only.
 
 **Deliverable:** Full Settings F-13 closed; NotificationService API ready cho Phase 3; release pipeline (signing config + version sync guard) live; signed APK procedure documented in `release-signing.md` + `release-versioning.md`. Phase 2 exit version: `0.2.0` (versionCode `2`).

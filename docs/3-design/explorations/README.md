@@ -13,7 +13,7 @@ Folder này lưu các mockup HTML so sánh nhiều phương án (A/B/C) cho colo
 
 | Lĩnh vực | File exploration | Phương án đã chọn |
 |----------|------------------|--------------------|
-| Color | `color-palette.html` | Material Blue (#2196F3) primary, Orange (#FF9800) accent, neutral blue-tinted hue ~230, dark mode đầy đủ |
+| Color | `color-palette.html` | Material Blue (#2196F3) primary, Orange (#FF9800) accent, neutral blue-tinted hue ~230, dark mode (deprecated v0.2.1 — superseded by Story 2.6, kept here as historical exploration) |
 | Typography | `typography.html` | Roboto, scale Display 28 / Headline 22 / Title 18 / Subtitle 16 / Body 15 / Body-sm 13 / Label 12 / Caption 11; Vietnamese line-height ≥1.45 cho body; tabular-nums cho số liệu |
 | Spacing | `spacing.html` | 4px grid: xs=4, sm=8, md=12, lg=16, xl=20, 2xl=24, 3xl=32 |
 

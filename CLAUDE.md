@@ -56,7 +56,7 @@ src/app/
 ### Coding Guidelines
 - **Language:** TypeScript in strict mode. No `any` allowed.
 - **Components:** Standalone Angular components (no NgModule). **All components MUST use external `templateUrl` + `styleUrl` — inline `template:` / `styles:` is forbidden** (project convention PC-1 binary, no exceptions; see `docs/4-architecture/coding-conventions.md` §2.2).
-- **Styling:** Ionic CSS custom properties via `src/theme/variables.scss`. Dark mode via `@media (prefers-color-scheme: dark)`.
+- **Styling:** Ionic CSS custom properties via `src/theme/variables.scss`. **App is light-only** as of v0.2.1 (Story 2.6) — do not introduce dark palette tokens, `prefers-color-scheme`, or theme switching.
 - **State Management:** Angular Signals — `signal()`, `computed()`, `effect()`.
 - **Routing:** Lazy-loaded feature routes via `loadChildren()` / `loadComponent()`.
 - **Database:** All data goes through Repository → DatabaseService abstraction.
@@ -102,17 +102,11 @@ background: rgba(168, 85, 68, 0.1); // allow-hardcode: data-viz category 1 (DS �
 
 The reason is mandatory. Bare `// allow-hardcode` without explanation is rejected by review.
 
-Verify with `npm run check:design-tokens`. Always test new UI under both light AND dark mode (Pitfall 12 in `mealplaning-emulator-fast-qa`):
-
-```bash
-adb -s emulator-5554 shell cmd uimode night yes   # dark
-adb -s emulator-5554 shell cmd uimode night no    # light
-adb -s emulator-5554 shell am force-stop com.healthmate.ai   # required after toggle
-```
+Verify with `npm run check:design-tokens`. The app is light-only (Story 2.6); historical dual-theme test guidance was removed.
 
 ### Architecture Guards (CI-enforced)
 
-Five Node guards run on every `npm run build`, every `git commit` (via Husky pre-commit), and on GitHub Actions for `push` / `pull_request`:
+Seven Node guards run on every `npm run build`, every `git commit` (via Husky pre-commit), and on GitHub Actions for `push` / `pull_request`:
 
 | Script | Purpose | Reference |
 |--------|---------|-----------|
@@ -121,6 +115,8 @@ Five Node guards run on every `npm run build`, every `git commit` (via Husky pre
 | `scripts/check-style-2025-naming.mjs` | No `.component.ts` / `.service.ts` / `.directive.ts` / `.pipe.ts` file suffix; no `Component` / `Service` / `Directive` / `Pipe` class suffix. | coding-conventions §1 |
 | `scripts/check-design-tokens.mjs` | All `color` / `background` / `background-color` / `font-size` use `var(--*)` tokens; raw literals require `// allow-hardcode: <reason>` escape. | design-system §2 / §6 |
 | `scripts/check-macro-naming.mjs` | Full English macro names in UI surface code (`src/**/*.{html,ts,scss}`). Forbids `P:`/`C:`/`F:` abbrevs, singular `Carb`, and Vietnamese `Chất xơ` — must be `Protein` / `Carbs` / `Fat` / `Fiber`. Escape hatch: `// allow-macro-naming: <reason>`. | design-system §2.6.1 |
+| `scripts/check-status-ssot.mjs` | Story status SSOT — `sprint-status.yaml` is the single source. Forbids placeholder `<this-story>` / `<TBD>` / `<commit-sha>` and forbids `story-key: status` pairs in non-SSOT docs. | investigation 2026-05-08 §G1 |
+| `scripts/check-no-dark-mode.mjs` | Light-only invariant (Story 2.6). Forbids `dark mode`, `prefers-color-scheme`, `[data-theme="dark"]`, `@include dark-root`, `@use dark-mode` in canonical docs/source. Historical record: `docs/6-decisions/superseded-features.md`. | investigation 2026-05-08 §G2 |
 
 Run all guards manually: `npm run check:guards`.
 

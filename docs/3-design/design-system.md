@@ -6,17 +6,7 @@
 **Previous:** 2.0 (2026-04-27, dark-mode capable). 1.x — Material Blue (deprecated).
 Migration notes ở §16 Changelog.
 
-> **2026-05-08 — Story 2.6 addendum (dark mode removed):**
-> The app is now **light-only**. All references in this document to dark
-> palettes, `@media (prefers-color-scheme: dark)`, `[data-theme="dark"]`,
-> `@include dark-root`, and the Theme service `dark`/`system` modes are
-> **historical only** — they describe the pre-2.6 architecture and do not
-> reflect shipping code. The `Theme` service is retained as a deprecated
-> no-op shim. The `user_profile.theme` column is locked to `'light'` via
-> `CHECK (theme = 'light')`. New surfaces MUST NOT introduce theme
-> switching, dark variants, or system-preference media queries. See
-> `_bmad-output/planning-artifacts/sprint-change-proposal-2026-05-08-remove-dark-mode.md`
-> for rationale.
+> **Theme:** **Light-only** as of v0.2.1 (Story 2.6, 2026-05-08). Dark mode is permanently removed — see `docs/6-decisions/superseded-features.md`.
 
 ---
 
@@ -32,7 +22,7 @@ Design System của HealthMate AI dựa trên **Ionic 8 + Angular 21**, tối ư
 | **Đơn giản** | UI dễ hiểu cho Persona Lan (tech savvy 2/5). Layout nhiều khoảng trắng. |
 | **Data-friendly** | Số liệu (calo, macro, weight) dùng `Fraunces` display + `Inter` tabular-nums. |
 | **Offline-aware** | Mọi trạng thái offline rõ ràng (toast + banner + disable AI). |
-| **Dark mode first** | Mọi component đều phải có dark variant (warm charcoal, không blue-grey). |
+| **Light only** | App là light-only, palette sage-on-cream. Không thêm dark variant cho component mới. |
 | **Tinted warm neutrals** | Mọi neutral đều tinted warm (hue ~30°), không pure gray. |
 
 ---
@@ -47,18 +37,14 @@ Sage là màu chủ đạo của brand: gợi cảm giác wellness, trầm, tự
 
 | Token | Hex | Dùng cho |
 |-------|-----|----------|
-| `--primary-900` | `#1F2820` | Status bar (dark mode darkest) |
-| `--primary-800` | `#324033` | Surface depth (dark mode) |
-| `--primary-700` | `#455B45` | AI text dark mode, sage on dark |
+| `--primary-700` | `#455B45` | Body text on light bg (high contrast 8.25:1) |
 | `--primary-600` | `#5A745A` | Hover/pressed primary |
 | `--primary-500` | `#6F8B6E` | **Primary — nav active, link, selected, success** |
-| `--primary-400` | `#8AA086` | Dark mode primary (lighter for contrast) |
-| `--primary-300` | `#A8B7A5` | Dark mode AI text |
 | `--primary-200` | `#C8D2C5` | AI card border (light), divider on sage surface |
 | `--primary-100` | `#E5EAE3` | AI card hint background |
 | `--primary-50`  | `#F2F4F1` | AI card background, quick action bg (light) |
 
-> **Contrast:** `--primary-500` (#6F8B6E) trên white = **4.06:1** — pass WCAG AA cho text 18pt+ và icons. Cho body-size primary text trên white, dùng `--primary-600` (#5A745A, 5.45:1) hoặc `--primary-700` (#455B45, 8.25:1). `--primary-400` trên charcoal `#1C1A17` = **6.3:1** — pass AA all text sizes.
+> **Contrast:** `--primary-500` (#6F8B6E) trên white = **4.06:1** — pass WCAG AA cho text 18pt+ và icons. Cho body-size primary text trên white, dùng `--primary-600` (#5A745A, 5.45:1) hoặc `--primary-700` (#455B45, 8.25:1).
 
 ### 2.2 Secondary — Coral CTA
 
@@ -69,7 +55,6 @@ Coral là **màu CTA chính** (form submit, FAB, save, primary action). Lý do t
 | `--accent-700` | `#9A4F36` | Coral pressed state |
 | `--accent-600` | `#C26344` | Coral hover state, CTA on light surface (text) |
 | `--accent-500` | `#D97757` | **CTA fill — submit, FAB, save**, streak number |
-| `--accent-300` | `#E8A287` | Dark mode CTA fill |
 | `--accent-100` | `#F8DDD2` | Streak/AI badge bg |
 | `--accent-50`  | `#FCF1ED` | Streak card background (light) |
 
@@ -79,10 +64,10 @@ Coral là **màu CTA chính** (form submit, FAB, save, primary action). Lý do t
 
 > **Color-blind note:** ~8% nam giới không phân biệt rõ đỏ/xanh lá. Khi hiển thị macros (Protein=sage, Fat=coral) cạnh nhau, PHẢI kèm text label hoặc icon — KHÔNG dựa vào màu alone.
 
-| Vai trò | Light Mode | Dark Mode | Dùng cho |
-|---------|-----------|-----------|----------|
-| **Success** | `#6F8B6E` (sage) | `#8AA086` | Đạt mục tiêu, progress đủ, weight giảm |
-| **Warning** | `#D9A857` (warm gold) | `#E3BB7A` | Thiếu macro, gần giới hạn, approx badge |
+| Vai trò | Color | Dùng cho |
+|---------|-------|----------|
+| **Success** | `#6F8B6E` | Đạt mục tiêu, progress đủ, weight giảm |
+| **Warning** | `#D9A857` | Thiếu macro, gần giới hạn, approx badge |
 | **Danger**  | `#C2493E` (warm cherry) | `#D06B62` | Vượt calo, lỗi hệ thống, destructive |
 | **Info**    | `#5A8A7A` (teal-sage) | `#A4C4B8` | Thông báo, hint phụ (rarely used) |
 
@@ -92,45 +77,45 @@ Coral là **màu CTA chính** (form submit, FAB, save, primary action). Lý do t
 
 > **Rule: Warm Tinted Neutrals.** Pure gray (`#E8E8E8`, `#999`) thiếu personality và clash với palette warm. Mọi neutral đều tinted warm (hue ~30°, chroma ~0.005–0.015). Background light là warm cream `#FAFAF7`, dark là warm charcoal `#1C1A17` — **không** blue-grey `#121218`.
 
-| Token | Light Mode | Dark Mode | Dùng cho |
-|-------|-----------|-----------|----------|
-| `--bg-page` | `#F7F2EA` | `#14110E` | Page background (warm cream / deep warm charcoal — sage-wellness foundation 2026-04-28) |
-| `--bg-card` | `#FFFFFF` | `#28251F` | Card background |
-| `--bg-elevated` | `#F2F2EE` | `#34302A` | Modal, bottom sheet, segment selected |
-| `--bg-muted` | `#E8E3D9` | `#34302A` | Skeleton shimmer, disabled surfaces, search bg |
-| `--bg-sunken` | `#DED5C2` | `#2A2620` | Segment track, surface "chìm" hơn `--bg-page` (diff ~12% lightness vs page để tách layer) |
-| `--text-primary` | `#1C1A17` | `#F5F1E8` | Heading, số liệu |
-| `--text-secondary` | `#4A453E` | `#C9C2B4` | Body text |
-| `--text-tertiary` | `#80776A` | `#918876` | Subtitle, mô tả phụ |
-| `--text-disabled` | `#B5AC9C` | `#5E574C` | Disabled, ::placeholder ONLY |
-| `--border-color` | `#E8E3D9` | `#3E3A33` | Divider, card border |
-| `--input-border-color` | `#D4CCBC` | `#4A463E` | Input field border (slightly darker) |
+| Token | Color | Dùng cho |
+|-------|-------|----------|
+| `--bg-page` | `#F7F2EA` | Page background (warm cream / deep warm charcoal — sage-wellness foundation 2026-04-28) |
+| `--bg-card` | `#FFFFFF` | Card background |
+| `--bg-elevated` | `#F2F2EE` | Modal, bottom sheet, segment selected |
+| `--bg-muted` | `#E8E3D9` | Skeleton shimmer, disabled surfaces, search bg |
+| `--bg-sunken` | `#DED5C2` | Segment track, surface "chìm" hơn `--bg-page` (diff ~12% lightness vs page để tách layer) |
+| `--text-primary` | `#1C1A17` | Heading, số liệu |
+| `--text-secondary` | `#4A453E` | Body text |
+| `--text-tertiary` | `#80776A` | Subtitle, mô tả phụ |
+| `--text-disabled` | `#B5AC9C` | Disabled, ::placeholder ONLY |
+| `--border-color` | `#E8E3D9` | Divider, card border |
+| `--input-border-color` | `#D4CCBC` | Input field border (slightly darker) |
 
 > **⚠️ Token Usage — text-tertiary vs text-disabled:**
-> - `--text-tertiary` (#80776A light / #918876 dark): Subtitles, hints, section descriptions, search icons, ⋮ more icons, inactive tabs, meta info, result counts, empty state descriptions, input suffixes (kcal, g). Contrast ≥4.5:1 — WCAG AA safe.
-> - `--text-disabled` (#B5AC9C light / #5E574C dark): **ONLY** cho actual `[disabled]` elements và `::placeholder`. Contrast ~3:1 — chỉ acceptable cho placeholder per WCAG exception.
+> - `--text-tertiary` (#80776A light): Subtitles, hints, section descriptions, search icons, ⋮ more icons, inactive tabs, meta info, result counts, empty state descriptions, input suffixes (kcal, g). Contrast ≥4.5:1 — WCAG AA safe.
+> - `--text-disabled` (#B5AC9C light): **ONLY** cho actual `[disabled]` elements và `::placeholder`. Contrast ~3:1 — chỉ acceptable cho placeholder per WCAG exception.
 
 ### 2.5 AI Card & Surfaces
 
-| Element | Light Mode | Dark Mode |
-|---------|-----------|-----------|
-| AI card bg | `#F2F4F1` (`--ai-card-bg`) | `#2C3A2E` |
-| AI card border | `#C8D2C5` (`--ai-card-border`) | `#455B45` |
-| AI avatar bg | `#6F8B6E` | `#8AA086` |
-| AI text color | `#455B45` | `#C8D2C5` |
-| Quick action bg | `#F2F4F1` | `#2C3A2E` |
-| Quick action text | `#455B45` | `#C8D2C5` |
-| Streak card bg | `#FCF1ED` | `#3A2D26` |
-| Streak number color | `#D97757` | `#E8A287` |
+| Element | Color |
+|---------|-------|
+| AI card bg | `#F2F4F1` (`--ai-card-bg`) |
+| AI card border | `#C8D2C5` (`--ai-card-border`) |
+| AI avatar bg | `#6F8B6E` |
+| AI text color | `#455B45` |
+| Quick action bg | `#F2F4F1` |
+| Quick action text | `#455B45` |
+| Streak card bg | `#FCF1ED` |
+| Streak number color | `#D97757` |
 
 ### 2.6 Macro Nutrient Palette
 
-| Macro | Light | Dark | Token |
-|-------|-------|------|-------|
-| Protein | `#6F8B6E` (sage) | `#8AA086` | `--macro-protein` |
-| Carbs   | `#C99B6E` (warm amber) | `#D4AF85` | `--macro-carbs` |
-| Fat     | `#D97757` (coral) | `#E8A287` | `--macro-fat` |
-| Fiber   | `#7AB0B5` (pale aqua) | `#9DC4C8` | `--macro-fiber` |
+| Macro | Color | Token |
+|-------|-------|-------|
+| Protein | `#6F8B6E` (sage) | `--macro-protein` |
+| Carbs   | `#C99B6E` (warm amber) | `--macro-carbs` |
+| Fat     | `#D97757` (coral) | `--macro-fat` |
+| Fiber   | `#7AB0B5` (pale aqua) | `--macro-fiber` |
 
 3 macro chính (Protein/Carbs/Fat) cùng hue family ấm (~30–80°) → biểu đồ stacked nhìn cohesive thay vì rời rạc như Material RYB. **Fiber** dùng pale aqua (cool, ~185°) để phân biệt rõ với 3 macro chính khi hiển thị cùng pill row — Fiber là vi chất bổ trợ, không phải macro năng lượng.
 
@@ -349,7 +334,6 @@ Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi 
 | `--shadow-md` | `0 2px 8px rgba(60, 40, 20, 0.06)` | **Tier Prominent**: primary cards (light mode) |
 | `--shadow-lg` | `0 4px 16px rgba(60, 40, 20, 0.08)` | Bottom sheet handle area, elevated menus |
 | `--shadow-xl` | `0 12px 32px rgba(60, 40, 20, 0.12)` | **Overlay**: confirm dialog, toast, FAB |
-| Dark mode | **Không dùng shadow** | Dùng background elevation thay thế (§6 Dark Mode) |
 
 > **Warm shadow:** rgba dùng warm-tinted dark `(60, 40, 20)` thay vì pure black `(0,0,0)` — match warm neutrals và tránh cảm giác "card cắt giấy" lạnh.
 
@@ -364,16 +348,6 @@ Trong các màn hình nhập/hiển thị dinh dưỡng, **Calories luôn nổi 
 
 > **Note:** Focus rings use box-shadow (not outline) cho border-radius compatibility. Chỉ hiện trên `:focus-visible`, không trên `:focus`.
 
-### Dark Mode Elevation
-
-| Level | Background | Dùng cho |
-|-------|-----------|----------|
-| Base    | `#1C1A17` | Page background (warm charcoal) |
-| Level 1 | `#28251F` | Cards |
-| Level 2 | `#34302A` | Modal, elevated components |
-| Level 3 | `#3E3A33` | Dropdown, tooltip, border |
-
-> **Note:** Dark mode dùng warm-tinted charcoal (hue ~30°) thay vì blue-grey (hue ~230° như v1). Tạo visual connection với palette warm và tone xuyên suốt.
 
 ---
 
@@ -448,7 +422,7 @@ Theo PRD F-12 (Dashboard Quick Actions):
 | Dialog Action | varies | varies | `--radius-xs` (8px) | 10px 20px | **44px** |
 | Text/Link | transparent | `#2196F3` / `#64B5F6` | — | 4px 8px | **44px** (via padding) |
 
-> **Rule:** Mọi button PHẢI có `min-height: 44px` (touch target §8c). Button radius dùng `--radius-sm` (12px) — trên 4px grid, nhất quán với input fields. Dark mode: CTA dùng `#FFB74D` (cam nhạt), text trên CTA dùng `var(--bg-page)`. Format: `light / dark`.
+> **Rule:** Mọi button PHẢI có `min-height: 44px` (touch target §8c). Button radius dùng `--radius-sm` (12px) — trên 4px grid, nhất quán với input fields. 
 >
 > **Padding rationale:** Full-width CTA dùng `14px` (uniform) vì `14+14+16=44px` đạt touch target chính xác không cần `min-height` fallback. Inline CTA dùng `12px 24px` cho dáng ngang rộng hơn. Dialog buttons dùng `10px 20px` vì nằm trong container hẹp. Secondary/Outline giữ `10px 16px` kết hợp `min-height: 44px`.
 >
@@ -962,7 +936,7 @@ trong `form-field.scss`.
 | Property | Light | Dark |
 |----------|-------|------|
 | Base color | `var(--bg-muted)` (#E2E4EC) | `var(--bg-muted)` (#2C2E36) |
-| Highlight | `#F5F7FA` | `#3A3C44` |
+| Highlight | `#F5F7FA` |
 | Animation | `pulse 1.5s ease-in-out infinite` | same |
 | Border radius | Match target component (card = 16px, text = 4px) | same |
 | Reduced motion | Static `var(--bg-muted)`, no animation | same |
@@ -1374,37 +1348,6 @@ After adding an ingredient, bottom sheet stays open:
 
 > **Toolbar pattern (v3 — sage wellness, 2026-04-28):** Toolbar bg = SAGE `#6B8E6F` + text WHITE. Status bar Android cũng tinted sage qua `@capacitor/status-bar` (style LIGHT). v2 dùng cream bg trắng-trong-suốt, đã đổi vì identity sage-wellness mạnh hơn cho mockup phase-0+.
 
-### 9.2 Dark Mode
-
-```scss
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ion-color-primary: #8AA086;          // lighter sage cho contrast trên charcoal
-    --ion-color-primary-rgb: 138, 160, 134;
-    --ion-color-primary-shade: #6F8B6E;
-    --ion-color-primary-tint: #A8B7A5;
-
-    --ion-color-secondary: #E8A287;        // lighter coral
-    --ion-color-secondary-rgb: 232, 162, 135;
-    --ion-color-secondary-shade: #D97757;
-    --ion-color-secondary-tint: #F0BBA6;
-
-    --ion-color-warning: #E3BB7A;
-    --ion-color-danger:  #D06B62;
-
-    // Warm charcoal neutrals (KHÔNG blue-tinted)
-    --ion-background-color: #14110E;
-    --ion-card-background: #28251F;
-    --ion-toolbar-background: #4A6B4E;
-    --ion-tab-bar-background: #28251F;
-
-    --ion-text-color: #F5F1E8;
-    --ion-text-color-rgb: 245, 241, 232;
-
-    --ion-border-color: #3E3A33;
-  }
-}
-```
 
 ### 9.3 Removed / Renamed Tokens (v1 → v2)
 
@@ -1476,18 +1419,6 @@ ion-tab-bar {
 }
 ```
 
-### 10.2 Dark Mode Typography Adjustment
-
-> Text trên dark background có perceived weight nhẹ hơn. Giảm font-weight nhẹ cho body text.
-
-```css
-@media (prefers-color-scheme: dark) {
-  body { font-weight: 350; }  /* Thay vì 400 — dark text nhìn mảnh hơn light */
-  .bold-text { font-weight: 600; }  /* Thay vì 700 */
-}
-```
-
-> **Optional:** Tăng `line-height` thêm 0.05-0.1 cho dark mode body text.
 
 ### 10.3 Accessibility Labels (ARIA)
 

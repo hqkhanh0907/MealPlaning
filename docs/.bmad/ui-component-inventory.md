@@ -1,5 +1,7 @@
 # UI Component Inventory — HealthMate AI
 
+> **⚠️ STALE NOTICE (2026-05-08):** This is a BMAD brownfield snapshot from 2026-05-07. Sections referencing `dark mode`, `_dark-mode.scss`, `prefers-color-scheme`, or theme switching are **out of date** as of v0.2.1 (Story 2.6 removed dark mode). Treat dark-mode references as historical context.
+
 **Date:** 2026-05-06
 **Source-of-truth design:** `docs/3-design/design-system.md` (tokens v2025) + `src/theme/`. File này là tóm tắt BMAD-friendly.
 

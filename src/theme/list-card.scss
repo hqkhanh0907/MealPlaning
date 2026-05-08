@@ -13,7 +13,7 @@
  *   .item-card[--ingredient] / .item-card__main-action / .item-card__split /
  *   .item-card__heading[--dish] / .item-card__detail[--dish] / .item-card__metric
  *   .badge-row / .badge / .badge--type-* / .badge--source[-inline] /
- *   .badge--category-cat-* (incl. dark-mode variants)
+ *   .badge--category-cat-* (single-theme variants)
  *   .kebab-button
  *   .dish-calories / .dish-macros / .macro--protein|carbs|fat
  *
@@ -192,7 +192,6 @@
   color: #4f6a4f; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
 }
 
-
 // Category & Type badges (DS §2.7 Data-viz palette — Sage Wellness)
 // 10 hues spread quanh color wheel, low chroma (~25-40%), tone trầm để hài hòa
 // với warm cream background. Background = color @ 10% alpha.
@@ -316,7 +315,6 @@
   background: var(--streak-card-bg);
   color: var(--ion-color-secondary-shade);
 }
-
 
 .kebab-button {
   position: absolute;

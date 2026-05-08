@@ -1,6 +1,8 @@
 # Story 2.1: Profile & Goals — carbs/fat targets + goal label normalize + selected-card color fix
 
-Status: ready-for-dev
+Status: done
+
+> **Backfill note (2026-05-08):** Story file authored 2026-05-07; implementation shipped commit `8e83bc4` (`feat(settings): add carbs/fat goals + canonical "Tăng sức mạnh" label (Story 2.1)`). Status promoted to `done` 2026-05-08 to match SSOT.
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 

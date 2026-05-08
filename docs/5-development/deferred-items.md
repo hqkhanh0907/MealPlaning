@@ -1,8 +1,49 @@
 # Deferred Items — MealPlaning / HealthMate AI
 
 **Status:** Living document
-**Last updated:** 2026-05-08 (Phase 2 exit — Story 2.5 closes D1 + Phase 2 polish)
+**Last updated:** 2026-05-08 (post-investigation cleanup — added at-a-glance status table)
 **Owner:** Khanh Huynh (solo dev)
+
+---
+
+## At-a-glance status (rev 2026-05-08)
+
+> Per investigation 2026-05-08 §G4 — give a fast read of OPEN vs DONE vs CANCELLED without scanning all 4 sections.
+
+### OPEN (active deferrals)
+
+| Mã | Item | Section | Trigger phase |
+|---|---|---|---|
+| A1-A8 | F-02 cascade delete, F-03/F-04, F-12, D5, dataset, signal-forms, AI insight | §1 | Phase 3+ / V2 |
+| B1 | Sage cream alignment `--bg-page` | §2 | Pre-Phase 3 if requested |
+| B2 | Radio-circle 18px filled | §2 | On user request only |
+| B3 | Phase 1 modals vs Onboarding form-input style unify | §2 | Pre-Phase 3 |
+| B6 | E2E tool decision (Playwright/Cypress/Detox) | §2 | Before first E2E test |
+| B8 | Test coverage ≥60% verify | §2 | Phase 3 baseline |
+| C1-C5, C7 | Phase 1.5B AI tuning, WebView 147 SIGTRAP, mockup-first workflow | §3 | Phase 3+ / on signal |
+| D-UX-AUDIT-202605 | 4 P2 Settings polish findings | §3.1 | Phase 2 polish or Settings expansion |
+
+### DONE (logged in §4)
+
+- C6 — Boy-scout prettier 4 files
+- D1 — POST_NOTIFICATIONS flow (Story 2.2 + 2.5)
+- D2 — styleUrl audit (Story 2.4)
+- D3 — Activity label normalization (Story 2.4)
+
+### CANCELLED (per cleanup `646aacc` 2026-04-29)
+
+- B4 — 5 mockup HTML files (mockups deleted intentionally)
+- B5 — ADR-002 migration strategy (no ADR pattern in repo)
+- B7 — Manual QA 14/15 items Phase 1 (no phase-detail QA docs)
+- B9 — Phase 1 Retro + phase-1-qa.md (no phase-detail spec docs)
+
+### Convention
+
+- New deferrals → append to §2 (B-codes) or §3.1 (D-codes); never reuse codes.
+- Done → move row to §4 with commit + date; strikethrough the original row.
+- Cancelled → strikethrough + add CANCELLED reason inline; do not delete (audit trail).
+
+---
 
 ## Mục đích
 

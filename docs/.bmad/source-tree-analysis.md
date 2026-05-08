@@ -1,5 +1,7 @@
 # Source Tree Analysis — HealthMate AI
 
+> **⚠️ STALE NOTICE (2026-05-08):** This is a BMAD brownfield snapshot from 2026-05-07. Sections referencing `dark mode`, `_dark-mode.scss`, `prefers-color-scheme`, or theme switching are **out of date** as of v0.2.1 (Story 2.6 removed dark mode). Treat dark-mode references as historical context.
+
 **Date:** 2026-05-06
 **Scan Level:** Deep
 **Source root:** `src/`

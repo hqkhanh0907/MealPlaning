@@ -1,5 +1,5 @@
 # generated: 2026-05-07
-# last_updated: 2026-05-07 (rev 2 after UI/UX audit fold-in)
+# last_updated: 2026-05-08 (rev 3 — close epic-2 + add Story 2.6 backfill)
 # project: HealthMate AI (MealPlaning)
 # project_key: NOKEY
 # tracking_system: file-system
@@ -24,28 +24,50 @@
 #   - done: Retrospective has been completed
 
 generated: 2026-05-07
-last_updated: 2026-05-07
+last_updated: 2026-05-08
 project: HealthMate AI (MealPlaning)
 project_key: NOKEY
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
 
+# SSOT NOTE (rev 3 — 2026-05-08):
+# This file is the SINGLE SOURCE OF TRUTH for epic + story status.
+# Other docs (development-plan.md, epic-*.md) MUST link here, not duplicate status.
+# Pre-commit guard `scripts/check-status-ssot.mjs` enforces:
+#   - No `<this-story>` / `<TBD>` placeholders in canonical docs
+#   - No story status duplication outside this file
+#
 # Phase 1 (MVP) — implicitly DONE (code in production, no story files retro-created)
 # Phase 1.5B (Onboarding polish) — implicitly DONE
 # Tracking starts at Phase 2 (Settings & Polish)
 #
 # Rev 2 (2026-05-07): Story 2.1 + 2.4 + 2.5 titles updated after UI/UX audit fold-in.
-# Story keys reflect new titles per BMAD slug convention.
+# Rev 3 (2026-05-08): Epic-2 closed; Story 2.6 (remove dark mode + collapse migrations)
+#   added as backfill post-ship per BMAD convention. Story 2.3 marked superseded by 2.6.
 
 development_status:
-  epic-2: in-progress
-  2-1-profile-goals-carbs-fat: ready-for-review
-  2-2-notification-permission-flow: ready-for-review
-  2-3-theme-switch-no-flash-dark-mode-qa: ready-for-review
-  2-4-pc-1-styleurl-audit-activity-label-normalization: ready-for-review
-  2-5-release-prep-phase-2-polish-pass: ready-for-review
+  epic-2: done
+  2-1-profile-goals-carbs-fat: done
+  2-2-notification-permission-flow: done
+  2-3-theme-switch-no-flash-dark-mode-qa: superseded-by-2-6
+  2-4-pc-1-styleurl-audit-activity-label-normalization: done
+  2-5-release-prep-phase-2-polish-pass: done
+  2-6-remove-dark-mode-collapse-migrations: done
   epic-2-retrospective: optional
+
+# Epic-2 closure metadata
+epic_2_closure:
+  exit_version: 0.2.1
+  exit_versionCode: 3
+  exit_tag: v0.2.1
+  exit_date: 2026-05-08
+  total_stories: 6  # 2.1, 2.2, 2.4, 2.5, 2.6 done; 2.3 superseded
+  total_commits: 7  # 8e83bc4, ba0781b, e7ed80e, 605a438, 23b9bd6, 9ccca1b, c49f4b5, fcc7dd4, 126b860 (605a438 superseded)
+  tests_passing: 418
+  guards_passing: 6
 
 # Audit references:
 # - _bmad-output/implementation-artifacts/settings-uiux-audit.md (21 findings)
 # - docs/qa-annotated/settings-uiux-audit/ (4 annotated screenshots baseline)
+# - _bmad-output/planning-artifacts/sprint-change-proposal-2026-05-08-remove-dark-mode.md (Story 2.6 origin)
+# - .hermes/plans/2026-05-08_project-rối-investigation.md (process improvement plan)

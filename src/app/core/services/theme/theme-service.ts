@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 /**
- * @deprecated Story 2.6 (2026-05-08) — dark mode was removed; the app is
+ * @deprecated Story 2.6 (2026-05-08) — the dark theme was removed; the app is
  * light-only. This service is kept as a no-op shim so existing call sites
  * compile while we wait to delete it in a future cleanup. New code MUST
  * NOT introduce theme switching: the user_profile.theme column is locked

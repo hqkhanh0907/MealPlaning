@@ -28,7 +28,7 @@
   --ion-color-secondary-tint: #e8a287;
 
   // ---------------------------------------------------------------------------
-  // Tertiary — Plum (rare accent, e.g. dark-mode AI gradient)
+  // Tertiary — Plum (rare accent)
   // ---------------------------------------------------------------------------
   --ion-color-tertiary: #8a6a8c;
   --ion-color-tertiary-rgb: 138, 106, 140;
@@ -244,6 +244,5 @@
 }
 
 // =============================================================================
-// DARK MODE — warm charcoal (hue ~30°, NOT cool blue-grey)
+// (Removed Story 2.6, 2026-05-08 — app is light-only; no dark palette tokens.)
 // =============================================================================
-

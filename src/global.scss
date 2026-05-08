@@ -27,9 +27,9 @@
 @import '@ionic/angular/css/flex-utils.css';
 
 /**
- * Ionic Dark Mode (removed Story 2.6, 2026-05-08)
+ * Light-only app (per Story 2.6, 2026-05-08).
  * -----------------------------------------------------
- * App is light-only. No dark palette imports, no transitions, no media query.
+ * No dark palette imports, no transitions, no media query.
  */
 
 // Global ion-radio styling — match design system radio circle (DS §8.7)
@@ -47,7 +47,6 @@ ion-radio::part(mark) {
   height: 8px;
   border-radius: 50%;
 }
-
 
 app-management .fab {
   position: fixed;
