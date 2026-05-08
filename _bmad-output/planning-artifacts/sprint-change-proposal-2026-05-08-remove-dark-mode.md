@@ -112,7 +112,7 @@
 
 ```
 Story:   2.6 Remove dark mode + collapse migrations (Phase 2.1 hotfix)
-Status:  ready-for-dev
+Status:  ✅ DONE (2026-05-08, commits c49f4b5 + fcc7dd4)
 Owner:   Amelia
 Epic:    2 (Settings & Polish) — Addendum
 Effort:  0.75d dev + 0.25d docs

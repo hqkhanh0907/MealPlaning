@@ -108,7 +108,7 @@ CREATE TABLE user_profile (
   target_fat        REAL,                         -- g/ngày (optional)
   
   -- Settings
-  theme             TEXT NOT NULL DEFAULT 'system' CHECK (theme IN ('light', 'dark', 'system')),
+  theme             TEXT NOT NULL DEFAULT 'light' CHECK (theme = 'light'),  -- Story 2.6 (2026-05-08): light-only; column kept for compat, locked by CHECK
   notif_morning     INTEGER NOT NULL DEFAULT 1,   -- 7:30 Plan hôm nay
   notif_lunch       INTEGER NOT NULL DEFAULT 1,   -- 12:30 Nhắc log
   notif_evening     INTEGER NOT NULL DEFAULT 1,   -- 21:00 Tổng kết

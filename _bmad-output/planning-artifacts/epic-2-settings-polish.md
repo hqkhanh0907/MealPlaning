@@ -328,6 +328,27 @@ Settings polish (gộp tất cả P1 còn lại sau khi 2.1 + 2.4 đã ăn 4 P0)
 
 ---
 
+### Story 2.6: Remove dark mode + collapse migrations (Phase 2.1 hotfix)
+
+**Status:** ✅ DONE (2026-05-08, commits `c49f4b5` + `fcc7dd4`, v0.2.1 versionCode 3)
+
+**Scope:**
+- Remove the dark theme entirely (light-only app). Brand identity is sage-on-cream; dark variant never reached visual parity and pre-release telemetry showed no demand.
+- Pre-release schema reset: collapse 6 incremental migrations into a single canonical v1 (gram-only, `theme CHECK = 'light'`); delete legacy sql.js migrator.
+
+**Outcome (vs Story 2.3):**
+Story 2.3 finalized dark mode with Theme persistence + no-flash transitions; Story 2.6 supersedes it. The `Theme` service is now a deprecated no-op shim (kept to preserve call sites); `setTheme` and `data-theme` attribute paths removed; `_dark-mode.scss` deleted; 12 `@include dark-root`, 9 `@use dark-mode`, 2 `prefers-color-scheme` blocks stripped; Settings "Giao diện" radio group removed.
+
+**Verification:**
+- 6/6 guards PASS (form-pattern, pc1, style-2025, design-tokens, macro-naming, version-sync).
+- 418/418 tests PASS (down from 426: -14 legacy migrator + -6 schema specs collapsed; net consistent).
+- `ng build` + `cap sync` + `gradlew assembleDebug` ✅; APK installed to emulator-5554; force-night-mode (`cmd uimode night yes`) verified light surfaces preserved.
+- Settings vision audit: HỒ SƠ → MỤC TIÊU → NHẮC NHỞ (no GIAO DIỆN section).
+
+**Refs:** `_bmad-output/planning-artifacts/sprint-change-proposal-2026-05-08-remove-dark-mode.md`, `.qa-evidence/2026-05-08-story-2.6/`.
+
+---
+
 ## Phase 2 Exit Checklist
 
 - [ ] Story 2.1–2.5 acceptance criteria đều ✅

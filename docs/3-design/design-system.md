@@ -1,9 +1,22 @@
 # Design System — HealthMate AI
 
-**Version:** 2.0 (Sage Wellness)  
-**Date:** 2026-04-27  
-**Status:** Active  
-**Previous:** 1.x — Material Blue (deprecated). Migration notes ở §16 Changelog.
+**Version:** 2.1 (Sage Wellness — light-only)
+**Date:** 2026-05-08
+**Status:** Active
+**Previous:** 2.0 (2026-04-27, dark-mode capable). 1.x — Material Blue (deprecated).
+Migration notes ở §16 Changelog.
+
+> **2026-05-08 — Story 2.6 addendum (dark mode removed):**
+> The app is now **light-only**. All references in this document to dark
+> palettes, `@media (prefers-color-scheme: dark)`, `[data-theme="dark"]`,
+> `@include dark-root`, and the Theme service `dark`/`system` modes are
+> **historical only** — they describe the pre-2.6 architecture and do not
+> reflect shipping code. The `Theme` service is retained as a deprecated
+> no-op shim. The `user_profile.theme` column is locked to `'light'` via
+> `CHECK (theme = 'light')`. New surfaces MUST NOT introduce theme
+> switching, dark variants, or system-preference media queries. See
+> `_bmad-output/planning-artifacts/sprint-change-proposal-2026-05-08-remove-dark-mode.md`
+> for rationale.
 
 ---
 
