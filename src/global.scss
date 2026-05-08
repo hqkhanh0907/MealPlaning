@@ -39,6 +39,18 @@
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 /* @import '@ionic/angular/css/palettes/dark.system.css'; */
 
+// Theme switch — smooth transition to avoid white flash when toggling
+// Light/Dark/System (Story 2.3 / NFR-PERF-01). Transition only background +
+// text color of root surfaces; component-level animations remain untouched.
+html,
+body,
+ion-app,
+ion-content {
+  transition:
+    background-color 150ms var(--ease-out-quart),
+    color 150ms var(--ease-out-quart);
+}
+
 // Global ion-radio styling — match design system radio circle (DS §8.7)
 // Override Ionic defaults so radio circles render per mockup.
 // Radio circle: 18px, border-radius 50%, 2px border.

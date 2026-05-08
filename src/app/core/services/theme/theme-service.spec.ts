@@ -29,4 +29,25 @@ describe('Theme', () => {
     theme.apply('system');
     expect(document.documentElement.hasAttribute('data-theme')).toBe(false);
   });
+
+  it("apply('system') is a no-op when attribute already absent", () => {
+    expect(document.documentElement.hasAttribute('data-theme')).toBe(false);
+    theme.apply('system');
+    expect(document.documentElement.hasAttribute('data-theme')).toBe(false);
+  });
+
+  it('switching modes overwrites previous attribute (dark → light → system)', () => {
+    theme.apply('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    theme.apply('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    theme.apply('system');
+    expect(document.documentElement.hasAttribute('data-theme')).toBe(false);
+  });
+
+  it('apply is idempotent — calling twice with same mode keeps attribute', () => {
+    theme.apply('dark');
+    theme.apply('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+  });
 });
