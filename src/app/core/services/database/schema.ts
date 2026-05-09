@@ -1,12 +1,18 @@
 /**
  * Database Schema — HealthMate AI
  *
- * Single canonical schema (v1). The app is pre-release; the prior
- * 6-step migration history was collapsed on 2026-05-08 (Story 2.6) into
- * one final DDL set. Devs upgrading from a stale local DB should run
- * `adb shell pm clear com.healthmate.ai` (or uninstall + reinstall).
+ * Schema versioning:
+ *   v1 (2026-05-08, Story 2.6) — gram-only canonical schema
+ *   v2 (2026-05-09, D8 audit)  — Hybrid policy enforcement + drop ghost columns
  *
- * 18 tables, 1 view:
+ * SCHEMA_DDL below is the *current canonical* shape (post-v2). It is applied
+ * with `CREATE TABLE IF NOT EXISTS` at startup so a fresh install lands on
+ * the final state in one go. For dev DBs already at user_version=1, the
+ * MigrationRunner will execute `buildHybridPolicySchemaMigration()` (v2)
+ * which DROPs and recreates the 3 affected tables. Shipped migrations are
+ * immutable from v2 onward.
+ *
+ * 18 tables, 1 view (unchanged):
  *   User (2)       : user_profile, weight_log
  *   Nutrition (5)  : ingredient, dish, dish_ingredient, day_plan, meal_slot, planned_dish
  *   Fitness (7)    : exercise, training_plan, training_plan_day, planned_exercise,
@@ -14,14 +20,15 @@
  *   AI & Streak (2): ai_chat_log, streak_log
  *   Config (1)     : app_config
  *   Seed (1)       : seed_artifact
- *   View (1)       : dish_with_totals (single source of truth for dish macros)
+ *   View (1)       : dish_with_totals
  *
  * Sources of truth:
  *   docs/3-design/data-model.md
- *   docs/4-architecture/business-rules.md (RULE-DISH-INGREDIENT-GRAM, theme = light only)
+ *   docs/4-architecture/business-rules.md
+ *   docs/4-architecture/decisions/calendar-tracking.md (D8 v2)
  */
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /**
  * Final DDL — gram-only nutrition, light-only theme. Idempotent
@@ -152,10 +159,6 @@ export const SCHEMA_DDL: readonly string[] = [
     date              TEXT NOT NULL,
     target_calories   REAL NOT NULL,
     target_protein    REAL NOT NULL,
-    total_calories    REAL NOT NULL DEFAULT 0,
-    total_protein     REAL NOT NULL DEFAULT 0,
-    total_carbs       REAL NOT NULL DEFAULT 0,
-    total_fat         REAL NOT NULL DEFAULT 0,
     created_at        TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at        TEXT,
     UNIQUE(date)
@@ -167,31 +170,49 @@ export const SCHEMA_DDL: readonly string[] = [
     id                TEXT PRIMARY KEY,
     day_plan_id       TEXT NOT NULL REFERENCES day_plan(id) ON DELETE CASCADE,
     meal_type         TEXT NOT NULL CHECK (meal_type IN ('breakfast', 'lunch', 'dinner', 'snack')),
-    total_calories    REAL NOT NULL DEFAULT 0,
-    total_protein     REAL NOT NULL DEFAULT 0,
-    total_carbs       REAL NOT NULL DEFAULT 0,
-    total_fat         REAL NOT NULL DEFAULT 0,
+    position          INTEGER NOT NULL DEFAULT 0,
+    created_at        TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE(day_plan_id, meal_type)
   )`,
 
-  `CREATE INDEX IF NOT EXISTS idx_meal_slot_day ON meal_slot(day_plan_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_meal_slot_day_plan ON meal_slot(day_plan_id)`,
 
   `CREATE TABLE IF NOT EXISTS planned_dish (
     id                TEXT PRIMARY KEY,
     meal_slot_id      TEXT NOT NULL REFERENCES meal_slot(id) ON DELETE CASCADE,
     dish_id           TEXT NOT NULL REFERENCES dish(id)      ON DELETE RESTRICT,
-    servings          REAL NOT NULL DEFAULT 1,
+    servings          REAL NOT NULL DEFAULT 1
+                      CHECK (servings BETWEEN 0.1 AND 20),
     sort_order        INTEGER NOT NULL DEFAULT 0,
-    is_completed      INTEGER NOT NULL DEFAULT 0,
+    is_completed      INTEGER NOT NULL DEFAULT 0
+                      CHECK (is_completed IN (0, 1)),
     completed_at      TEXT,
-    calories          REAL NOT NULL,
-    protein           REAL NOT NULL DEFAULT 0,
-    carbs             REAL NOT NULL DEFAULT 0,
-    fat               REAL NOT NULL DEFAULT 0,
-    created_at        TEXT NOT NULL DEFAULT (datetime('now'))
+    calories          REAL,
+    protein           REAL,
+    carbs             REAL,
+    fat               REAL,
+    created_at        TEXT NOT NULL DEFAULT (datetime('now')),
+    CHECK (
+      (is_completed = 0
+         AND calories IS NULL AND protein IS NULL
+         AND carbs IS NULL AND fat IS NULL
+         AND completed_at IS NULL)
+      OR
+      (is_completed = 1
+         AND calories IS NOT NULL AND protein IS NOT NULL
+         AND carbs IS NOT NULL AND fat IS NOT NULL
+         AND completed_at IS NOT NULL)
+    )
   )`,
 
-  `CREATE INDEX IF NOT EXISTS idx_planned_dish_slot ON planned_dish(meal_slot_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_planned_dish_meal_slot   ON planned_dish(meal_slot_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_planned_dish_dish        ON planned_dish(dish_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_planned_dish_completed
+     ON planned_dish(is_completed, meal_slot_id) WHERE is_completed = 1`,
+  `CREATE INDEX IF NOT EXISTS idx_planned_dish_completed_at
+     ON planned_dish(completed_at DESC) WHERE is_completed = 1`,
+  `CREATE INDEX IF NOT EXISTS idx_dish_favorite
+     ON dish(is_favorite) WHERE is_favorite = 1`,
 
   // =========================================================================
   // FITNESS
@@ -353,15 +374,115 @@ export const SCHEMA_DDL: readonly string[] = [
 ];
 
 /**
- * Single migration that materializes the canonical schema.
- * Pre-release: no per-version evolution kept.
+ * Migration v1 — initial schema (canonical, IMMUTABLE).
+ *
+ * Re-applies SCHEMA_DDL idempotently (`IF NOT EXISTS`). On dev DBs already
+ * at user_version=1 this is a no-op; only fresh installs hit it. The
+ * subsequent v2 migration (`buildHybridPolicySchemaMigration`) corrects
+ * planned_dish/meal_slot/day_plan for the Hybrid policy.
  */
 export function buildInitialSchemaMigration(): {
   version: number;
   statements: readonly string[];
 } {
   return {
-    version: SCHEMA_VERSION,
+    version: 1,
     statements: SCHEMA_DDL,
+  };
+}
+
+/**
+ * Migration v2 (2026-05-09, D8 DEC-11) — Hybrid policy enforcement.
+ *
+ * Drops legacy planned_dish/meal_slot/day_plan and recreates them with:
+ *  - planned_dish: bidirectional CHECK (RULE-PLANNED-DISH-HYBRID), servings
+ *    BETWEEN 0.1 AND 20, snapshot columns nullable, partial indexes for
+ *    completed-only access patterns (D8 DEC-06).
+ *  - meal_slot: drops cached total_* columns (DEC-07), adds position +
+ *    created_at (sync data-model §4.5), index renamed to
+ *    idx_meal_slot_day_plan.
+ *  - day_plan: drops cached total_* columns (DEC-07).
+ *  - dish: adds idx_dish_favorite partial index (DEC-08, supports F-04 M3).
+ *
+ * Pre-release: dev DBs lose seed data in the 3 affected tables. dish/
+ * ingredient/exercise/etc. remain untouched.
+ */
+export const HYBRID_POLICY_DDL: readonly string[] = [
+  // Drop in dependency order (planned_dish → meal_slot → day_plan)
+  'DROP INDEX IF EXISTS idx_planned_dish_slot',
+  'DROP INDEX IF EXISTS idx_meal_slot_day',
+  'DROP INDEX IF EXISTS idx_day_plan_date',
+  'DROP TABLE IF EXISTS planned_dish',
+  'DROP TABLE IF EXISTS meal_slot',
+  'DROP TABLE IF EXISTS day_plan',
+
+  // Recreate per data-model §4.4–4.6 (current canonical shape)
+  `CREATE TABLE day_plan (
+    id                TEXT PRIMARY KEY,
+    date              TEXT NOT NULL,
+    target_calories   REAL NOT NULL,
+    target_protein    REAL NOT NULL,
+    created_at        TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at        TEXT,
+    UNIQUE(date)
+  )`,
+  `CREATE INDEX idx_day_plan_date ON day_plan(date)`,
+
+  `CREATE TABLE meal_slot (
+    id                TEXT PRIMARY KEY,
+    day_plan_id       TEXT NOT NULL REFERENCES day_plan(id) ON DELETE CASCADE,
+    meal_type         TEXT NOT NULL CHECK (meal_type IN ('breakfast', 'lunch', 'dinner', 'snack')),
+    position          INTEGER NOT NULL DEFAULT 0,
+    created_at        TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(day_plan_id, meal_type)
+  )`,
+  `CREATE INDEX idx_meal_slot_day_plan ON meal_slot(day_plan_id)`,
+
+  `CREATE TABLE planned_dish (
+    id                TEXT PRIMARY KEY,
+    meal_slot_id      TEXT NOT NULL REFERENCES meal_slot(id) ON DELETE CASCADE,
+    dish_id           TEXT NOT NULL REFERENCES dish(id)      ON DELETE RESTRICT,
+    servings          REAL NOT NULL DEFAULT 1
+                      CHECK (servings BETWEEN 0.1 AND 20),
+    sort_order        INTEGER NOT NULL DEFAULT 0,
+    is_completed      INTEGER NOT NULL DEFAULT 0
+                      CHECK (is_completed IN (0, 1)),
+    completed_at      TEXT,
+    calories          REAL,
+    protein           REAL,
+    carbs             REAL,
+    fat               REAL,
+    created_at        TEXT NOT NULL DEFAULT (datetime('now')),
+    CHECK (
+      (is_completed = 0
+         AND calories IS NULL AND protein IS NULL
+         AND carbs IS NULL AND fat IS NULL
+         AND completed_at IS NULL)
+      OR
+      (is_completed = 1
+         AND calories IS NOT NULL AND protein IS NOT NULL
+         AND carbs IS NOT NULL AND fat IS NOT NULL
+         AND completed_at IS NOT NULL)
+    )
+  )`,
+  `CREATE INDEX idx_planned_dish_meal_slot   ON planned_dish(meal_slot_id)`,
+  `CREATE INDEX idx_planned_dish_dish        ON planned_dish(dish_id)`,
+  `CREATE INDEX idx_planned_dish_completed
+     ON planned_dish(is_completed, meal_slot_id) WHERE is_completed = 1`,
+  `CREATE INDEX idx_planned_dish_completed_at
+     ON planned_dish(completed_at DESC) WHERE is_completed = 1`,
+
+  // DEC-08: dish.is_favorite already exists (v1) — partial index for F-04 M3.
+  `CREATE INDEX IF NOT EXISTS idx_dish_favorite
+     ON dish(is_favorite) WHERE is_favorite = 1`,
+];
+
+export function buildHybridPolicySchemaMigration(): {
+  version: number;
+  statements: readonly string[];
+} {
+  return {
+    version: 2,
+    statements: HYBRID_POLICY_DDL,
   };
 }
