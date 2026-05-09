@@ -293,7 +293,12 @@ PlannedDish {
 }
 ```
 
-> **Realtime nutrition (gram-only revision 2026-04-30):** `MealSlot.total_calories` và `DayPlan.total_calories` luôn derived realtime từ `dish_with_totals` × `PlannedDish.servings`. Không snapshot. Nếu user sửa nutrition của ingredient thì lịch sử meal log cập nhật theo. Đây là trade-off chấp nhận — đổi lấy schema phẳng và logic đơn giản.
+> **Hybrid nutrition policy (revision 2026-05-09 — Phase 3 prep):** Mỗi `PlannedDish` có 2 trạng thái nutrition tuỳ `is_completed`:
+>
+> - **`is_completed=0` (kế hoạch chưa ăn)** → `MealSlot.total_calories` và `DayPlan.total_calories` derived **realtime** từ `dish_with_totals × PlannedDish.servings`. User sửa recipe → kế hoạch cập nhật ngay theo recipe mới.
+> - **`is_completed=1` (đã ăn / đã log)** → `PlannedDish.calories/protein/carbs/fat` là **snapshot bất biến**, chốt tại thời điểm flip flag. User sửa recipe sau đó **không** ảnh hưởng nhật ký quá khứ. Báo cáo tuần/tháng luôn đúng với bằng chứng đã ăn.
+>
+> Trade-off: schema có 4 cột `calories/protein/carbs/fat` nullable (NULL khi chưa ăn, NOT NULL khi đã ăn). Repo logic phức tạp hơn (3 path: insert plan / mark completed / edit servings) đổi lấy mental model đúng cho cả 2 mode user (planning ≠ logging). Xem `business-rules.md § RULE-PLANNED-DISH-HYBRID` để biết chi tiết SNAP/RT rules.
 
 **Tiêu chí chấp nhận:**
 - [ ] Week view hiện 7 ngày với color indicator

@@ -56,12 +56,15 @@ Tài liệu này tập trung các invariant nghiệp vụ mà mọi tầng (UI, 
 
 - Không lưu trạng thái nguyên liệu (raw/cooked/peeled) như entity riêng. 1 ingredient = 1 bộ nutrition/100g.
 - Không lưu `edible_yield_ratio`. User tự cân phần ăn được.
-- Không snapshot nutrition tại thời điểm log meal hoặc add ingredient vào recipe. Mọi thứ tính realtime.
+- Snapshot nutrition **chỉ áp dụng cho `planned_dish` khi `is_completed=1`** (xem RULE-PLANNED-DISH-HYBRID). Mọi tầng khác (dish, dish_ingredient, dish_with_totals) tính realtime tuyệt đối.
 
-### RULE-DI-GRAM-04: Trade-off realtime được chấp nhận
+### RULE-DI-GRAM-04: Recipe edit cascade (hybrid với planned_dish)
 
-- Khi user sửa `ingredient.calories`, mọi `planned_dish` lịch sử cập nhật theo (vì tính qua VIEW × `planned_dish.servings`).
-- Phase 1 chấp nhận hành vi này. Sửa nutrition được coi là hành động hiếm; nếu cần "khoá lịch sử" sẽ là Phase 3 (snapshot tuỳ chọn).
+- Khi user sửa `ingredient.calories` hoặc `dish_ingredient.gram_weight`:
+  - Mọi `dish_with_totals` cập nhật realtime ngay.
+  - `planned_dish` với `is_completed=0` (kế hoạch) — cập nhật realtime theo (vì query JOIN VIEW).
+  - `planned_dish` với `is_completed=1` (đã ăn) — **giữ nguyên snapshot**, không bị ảnh hưởng (xem SNAP-03).
+- Lý do tách hành vi: kế hoạch cần phản ánh recipe mới (số sẽ ăn); nhật ký cần bất biến (số đã ăn).
 
 ### RULE-DI-GRAM-05: Liquid không có exception
 
@@ -70,21 +73,44 @@ Tài liệu này tập trung các invariant nghiệp vụ mà mọi tầng (UI, 
 
 ---
 
-## RULE-PLANNED-DISH-SNAPSHOT — Lịch sử dinh dưỡng bất biến
+## RULE-PLANNED-DISH-HYBRID — Hybrid nutrition: realtime khi plan, snapshot khi log
 
-Đây là **ngoại lệ duy nhất** so với `RULE-DISH-INGREDIENT-GRAM` (Q8: realtime). Áp dụng cho table `planned_dish` (nhật ký bữa đã lên kế hoạch / đã ăn).
+Áp dụng cho table `planned_dish`. Đây là **ngoại lệ có điều kiện** so với `RULE-DISH-INGREDIENT-GRAM` (realtime tuyệt đối). Switch giữa 2 mode dựa trên cờ `is_completed`.
+
+### Mode chốt
+
+| `is_completed` | Mode | Nguồn nutrition | Khi user sửa recipe |
+|---|---|---|---|
+| `0` (kế hoạch chưa ăn) | **Realtime (RT)** | `dish_with_totals.total_* × servings` (JOIN VIEW) | Plan cập nhật ngay theo recipe mới |
+| `1` (đã ăn / đã log) | **Snapshot (SNAP)** | `planned_dish.calories/protein/carbs/fat` (4 cột frozen) | Nhật ký giữ nguyên, không ảnh hưởng |
+
+### Sub-rules
 
 | Rule | Mô tả |
 |------|-------|
-| SNAP-01 | `planned_dish.calories/protein/carbs/fat` là **snapshot** chụp tại thời điểm tạo `planned_dish` (khi user log bữa hoặc plan trước). |
-| SNAP-02 | Snapshot = `dish_with_totals.total_* * planned_dish.servings`. Tính 1 lần khi insert; không recompute khi `dish_ingredient` thay đổi. |
-| SNAP-03 | Khi user **edit recipe** (sửa `dish_ingredient`), `planned_dish` đã có **không bị ảnh hưởng**. Bằng chứng dinh dưỡng quá khứ là bất biến. |
-| SNAP-04 | Khi user **edit servings** trên 1 `planned_dish` đã tồn tại, snapshot được **recompute** từ dish hiện tại × servings mới. |
-| SNAP-05 | Khi user **xoá** `planned_dish` (unplan / undo log), record bị xoá hẳn — không soft-delete. |
+| RT-01 | Khi `is_completed=0`, 4 cột `calories/protein/carbs/fat` của `planned_dish` **phải là NULL** (DB CHECK constraint enforce). Mọi UI/repo query effective nutrition phải dùng pattern `CASE WHEN is_completed=1 THEN calories ELSE dwt.total_calories * servings END`. |
+| RT-02 | Khi user thêm dish vào meal_slot (insert plan), repo set `is_completed=0` + 4 cột nutrition = NULL. Không tính snapshot ngay. |
+| SNAP-01 | Khi user flip `is_completed` từ 0 → 1 (mark "Đã ăn"), repo **bắt buộc** snapshot 4 cột nutrition từ `dish_with_totals.total_* × servings` tại thời điểm flip. Set `completed_at = datetime('now')`. |
+| SNAP-02 | Khi `is_completed=1`, 4 cột nutrition **phải NOT NULL** (DB CHECK constraint enforce). UI hiển thị badge "🔒 Đã log" để user biết số liệu đã khoá. |
+| SNAP-03 | Khi user **edit recipe** (sửa `ingredient.calories` hoặc `dish_ingredient.gram_weight`), `planned_dish` với `is_completed=1` **không bị ảnh hưởng**. Báo cáo tuần/tháng vẫn đúng với bằng chứng đã ăn. |
+| SNAP-04 | Khi user **edit servings** trên `planned_dish` có `is_completed=1`, snapshot được **recompute** từ recipe HIỆN TẠI × servings mới. Trade-off: ưu tiên servings mới × recipe hiện tại, không cố giữ recipe cũ. UI nên warn nếu recipe đã đổi sau khi log. |
+| SNAP-05 | Khi user flip `is_completed` từ 1 → 0 (bỏ đánh dấu đã ăn / undo log), repo **phải clear** 4 cột nutrition về NULL + set `completed_at = NULL`. Quay về mode RT. |
+| DEL-01 | Khi user xoá `planned_dish` (unplan / undo log), record bị xoá hẳn — không soft-delete. Cascade từ `meal_slot` (ON DELETE CASCADE). |
+| DEL-02 | Dish có `planned_dish` (bất kỳ mode) không xoá được — `ON DELETE RESTRICT` từ `planned_dish.dish_id → dish.id`. UI phải block + hiện thông báo "Món này có trong N bữa đã plan/ăn".  |
 
-**Lý do giữ snapshot ở planned_dish (khác với dish_ingredient):**
-- `dish_ingredient` = công thức (mô tả). Realtime cho phép user sửa recipe và thấy dinh dưỡng cập nhật ngay.
-- `planned_dish` = nhật ký (sự kiện đã/sắp xảy ra). Phải bất biến để báo cáo lịch sử (tuần qua / tháng qua) chính xác kể cả khi recipe đã đổi.
+### Lý do hybrid
+
+- **Mode RT cho kế hoạch**: User plan "Tuần sau ăn cơm gà" → 2 ngày sau sửa recipe cơm gà thêm rau (calo tăng). Kỳ vọng tự nhiên là kế hoạch tuần sau show calo mới (số sẽ ăn thật), không phải số cũ tại thời điểm plan. Snapshot ở mode này = sai mental model.
+- **Mode SNAP cho nhật ký**: User mark "Đã ăn" lúc 12h30 → calo tại thời điểm đó là bằng chứng ăn thật. Sau này sửa recipe không được làm thay đổi nhật ký quá khứ. Realtime ở mode này = báo cáo lịch sử bị thay đổi = sai.
+- **Switch tự động qua `is_completed` flag**: User flip flag là action có chủ đích → trigger transition giữa 2 mode rõ ràng, không phải hidden side-effect.
+
+### Trade-off đã chấp nhận
+
+- Schema có 4 cột nullable + 1 CHECK constraint phức tạp (so với A: 4 cột NOT NULL, hoặc B: 0 cột).
+- Repo logic 3 path: insert plan, mark completed (SNAP-01), edit servings (SNAP-04 sub-case logged) — vs 1 path nếu chọn A hoặc B.
+- Test surface lớn: ~15-20 unit test repo (so với ~5-7 cho A/B) × 2 backend (sql.js + capacitor-community-sqlite).
+- UI complexity: mỗi `planned_dish` card có 2 visual state (planned vs logged) → mockup count ~10 file (so với ~6 nếu A/B).
+- Đổi lại: đáp ứng đúng user mental model "plan ≠ log" cho cả 2 mode.
 
 ---
 
@@ -137,3 +163,4 @@ Tài liệu này tập trung các invariant nghiệp vụ mà mọi tầng (UI, 
 | 2026-04-25 | Audit C-02 | Tạo file. Codify RULE-DISH-TOTAL-01..04, RULE-DI-NORM-01..02, RULE-*-PROVENANCE. Sync với commit drop `dish.total_*` + drop `'quick'` từ `dish.type`. |
 | 2026-04-29 | Pantry/measurement audit | Thêm rules Phase 1.5A cho measurement specificity, gross/edible yield, conversion snapshot, missing conversion UX và pantry stock. |
 | 2026-04-30 | Gram-only revision | **Xoá hẳn** 6 rule: `RULE-DISH-INGREDIENT-NORMALIZE`, `RULE-MEASUREMENT-SPECIFICITY`, `RULE-GROSS-EDIBLE-YIELD`, `RULE-CONVERSION-SNAPSHOT`, `RULE-MISSING-CONVERSION-UX`, `RULE-PANTRY-STOCK`. **Thay** bằng `RULE-DISH-INGREDIENT-GRAM` (5 sub-rule). Thêm `RULE-INGREDIENT-DELETE`. |
+| 2026-05-09 | Phase 3 prep — Hybrid policy | **Rewrite** `RULE-PLANNED-DISH-SNAPSHOT` → `RULE-PLANNED-DISH-HYBRID`. Trước: snapshot luôn (5 sub-rule SNAP-01..05). Sau: switch giữa realtime (RT-01..02) và snapshot (SNAP-01..05) dựa trên `is_completed` flag + delete rules (DEL-01..02). Lý do: user-first mental model — plan cần realtime để phản ánh recipe mới, log cần snapshot để lịch sử bất biến. Sync `data-model.md §4.6` (4 cột nutrition NULL → NOT NULL switch + CHECK constraint) + `prd.md §F-03` (realtime+snapshot policy thay realtime-only). Update `RULE-DI-GRAM-04` (cascade tách hành vi theo `is_completed`). |

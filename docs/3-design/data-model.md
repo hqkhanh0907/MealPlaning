@@ -324,28 +324,37 @@ CREATE TABLE planned_dish (
   servings        REAL NOT NULL DEFAULT 1 CHECK (servings BETWEEN 0.1 AND 20),
   is_completed    INTEGER NOT NULL DEFAULT 0 CHECK (is_completed IN (0,1)),
   sort_order      INTEGER NOT NULL DEFAULT 0,
-  -- Snapshot nutrition tại thời điểm log/plan (immutable history)
-  -- Tính = dish_with_totals.total_* * servings; không recompute khi dish_ingredient đổi
-  calories        REAL NOT NULL,
-  protein         REAL NOT NULL DEFAULT 0,
-  carbs           REAL NOT NULL DEFAULT 0,
-  fat             REAL NOT NULL DEFAULT 0,
+  -- HYBRID nutrition policy (xem business-rules § RULE-PLANNED-DISH-HYBRID):
+  --   is_completed=0 (kế hoạch): 4 cột này = NULL → query JOIN dish_with_totals × servings (realtime).
+  --   is_completed=1 (đã ăn):    4 cột NOT NULL → snapshot frozen tại thời điểm flip flag.
+  -- Lý do hybrid: kế hoạch cần realtime (sửa recipe → plan cập nhật);
+  --              nhật ký cần snapshot (báo cáo lịch sử bất biến).
+  calories        REAL,
+  protein         REAL,
+  carbs           REAL,
+  fat             REAL,
   created_at      TEXT NOT NULL DEFAULT (datetime('now')),
-  completed_at    TEXT
+  completed_at    TEXT,                                                  -- NULL khi chưa ăn
+  CHECK (
+    is_completed = 0
+    OR (is_completed = 1 AND calories IS NOT NULL AND protein IS NOT NULL
+                          AND carbs IS NOT NULL AND fat IS NOT NULL)
+  )
 );
 
 CREATE INDEX idx_planned_dish_meal_slot ON planned_dish(meal_slot_id);
 CREATE INDEX idx_planned_dish_dish      ON planned_dish(dish_id);
 ```
 
-> **Tại sao snapshot ở `planned_dish` (mâu thuẫn với gram-only realtime)?**
+> **Tại sao hybrid (snapshot khi đã ăn, realtime khi chưa)?**
 > `dish_ingredient` = công thức (mô tả) → realtime, sửa recipe thì dish total cập nhật ngay.
-> `planned_dish` = nhật ký bữa ăn → bằng chứng lịch sử, phải bất biến để report tuần/tháng đúng kể cả khi recipe đã đổi sau đó.
+> `planned_dish` có 2 mode: kế hoạch (chưa ăn) cần phản ánh recipe mới nhất để user thấy số sẽ ăn thật; nhật ký (đã ăn) cần bất biến để báo cáo lịch sử đúng kể cả khi recipe đã đổi sau đó.
 
 **Ràng buộc:**
-- `is_completed` flag để mark "Đã ăn".
-- Không snapshot nutrition. Khi user xem dashboard "tuần trước ăn ?kcal", app tính realtime: SUM(dish_with_totals.total_calories × planned_dish.servings) WHERE is_completed=1.
-- Trade-off: nếu user sửa nutrition của ingredient/dish thì lịch sử cập nhật theo. Đây là chấp nhận được vì sửa nutrition là hành động hiếm.
+- `is_completed` flag là switch giữa 2 mode — flip 0→1 trigger snapshot freeze (repo populate 4 cột); flip 1→0 trigger NULL out (repo phải clear snapshot).
+- **Query effective nutrition** dùng pattern `CASE WHEN is_completed=1 THEN calories ELSE dwt.total_calories * servings END`.
+- **Edit servings khi đã log** → recompute snapshot từ recipe HIỆN TẠI × servings mới (không cố giữ recipe cũ — trade-off chấp nhận, xem RULE-PLANNED-DISH-HYBRID SNAP-04).
+- **Không soft-delete** — xoá hẳn record khi user unplan/undo log.
 
 ---
 
