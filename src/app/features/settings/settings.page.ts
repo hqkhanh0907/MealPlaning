@@ -90,7 +90,7 @@ export default class SettingsPage {
   readonly eveningEnabled = computed(() => !!this.profile()?.notif_evening);
   readonly weeklyEnabled = computed(() => !!this.profile()?.notif_weekly);
 
-  readonly appVersion = '1.0.0';
+  readonly appVersion = '0.2.2';
 
   constructor() {
     addIcons({ chevronForwardOutline });
