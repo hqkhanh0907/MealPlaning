@@ -336,14 +336,26 @@ CREATE TABLE planned_dish (
   created_at      TEXT NOT NULL DEFAULT (datetime('now')),
   completed_at    TEXT,                                                  -- NULL khi chưa ăn
   CHECK (
-    is_completed = 0
-    OR (is_completed = 1 AND calories IS NOT NULL AND protein IS NOT NULL
-                          AND carbs IS NOT NULL AND fat IS NOT NULL)
+    -- Bidirectional Hybrid policy enforcement (sync với business-rules RT-01..02 + SNAP-01..05)
+    (is_completed = 0
+       AND calories IS NULL AND protein IS NULL
+       AND carbs IS NULL AND fat IS NULL
+       AND completed_at IS NULL)
+    OR
+    (is_completed = 1
+       AND calories IS NOT NULL AND protein IS NOT NULL
+       AND carbs IS NOT NULL AND fat IS NOT NULL
+       AND completed_at IS NOT NULL)
   )
 );
 
-CREATE INDEX idx_planned_dish_meal_slot ON planned_dish(meal_slot_id);
-CREATE INDEX idx_planned_dish_dish      ON planned_dish(dish_id);
+CREATE INDEX idx_planned_dish_meal_slot   ON planned_dish(meal_slot_id);
+CREATE INDEX idx_planned_dish_dish        ON planned_dish(dish_id);
+-- Performance partials (D8 DEC-06):
+CREATE INDEX idx_planned_dish_completed
+  ON planned_dish(is_completed, meal_slot_id) WHERE is_completed = 1;
+CREATE INDEX idx_planned_dish_completed_at
+  ON planned_dish(completed_at DESC)          WHERE is_completed = 1;
 ```
 
 > **Tại sao hybrid (snapshot khi đã ăn, realtime khi chưa)?**

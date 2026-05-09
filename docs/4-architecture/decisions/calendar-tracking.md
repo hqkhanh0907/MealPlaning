@@ -18,6 +18,16 @@
 
 ---
 
+> **Revision 1.1 (2026-05-09 audit pass) — Triệt để sync 4 lớp.**
+> Sau D8 hoàn tất, audit phát hiện 10 vấn đề (3 critical) liên quan drift giữa `business-rules.md ⇄ data-model.md ⇄ schema.ts ⇄ DEC`. Phương án B "triệt để" được chọn:
+> - **DEC-01 revised**: CHECK bidirectional + sync với data-model `servings BETWEEN 0.1 AND 20` + `completed_at` đồng bộ
+> - **DEC-07 revised**: DROP hẳn 8 cột `total_*` thay vì kept-as-deprecated
+> - **DEC-10 revised**: thêm `position`/`created_at` cho `meal_slot`, sync index naming
+> - **DEC-11 NEW**: Migration v2 (bump `SCHEMA_VERSION` 1→2, KHÔNG in-place edit v1) — auto-run cho dev DB, không cần manual wipe
+> Audit log đầy đủ ở §17.
+
+---
+
 ## 1. Tổng quan kiến trúc cho Calendar + Tracking
 
 ```
@@ -68,7 +78,7 @@
 
 ---
 
-## 2. Decision DEC-01 — Schema fix (Hybrid policy enforcement)
+## 2. Decision DEC-01 (revised) — Schema fix Hybrid policy enforcement
 
 **Context:** Schema hiện tại (`src/app/core/services/database/schema.ts:187-190`):
 ```sql
@@ -78,24 +88,22 @@ carbs     REAL NOT NULL DEFAULT 0,
 fat       REAL NOT NULL DEFAULT 0,
 ```
 
-UX spec F-04 §13 acceptance criterion + business-rules RULE-PLANNED-DISH-HYBRID + data-model §4.6 đều yêu cầu:
-- `is_completed = 0` → 4 cột nutrition phải `NULL` (no snapshot tồn tại)
-- `is_completed = 1` → 4 cột nutrition phải `NOT NULL` (snapshot frozen)
+`data-model.md §4.6` + `business-rules RULE-PLANNED-DISH-HYBRID` đòi hybrid: `is_completed=0`→4 cột NULL, `is_completed=1`→4 cột NOT NULL. Schema hiện vi phạm cả 2 chiều và `NOT NULL` mặc định chặn insert kế hoạch.
 
-Schema hiện không enforce constraint này, và `NOT NULL` ngăn không cho insert dish kế hoạch (`is_completed=0`).
+**Audit drift (xem §17):** `data-model.md` chỉ enforce 1 chiều CHECK; `business-rules RT-01` đòi 2 chiều. DEC-01 chốt theo **business-rules** (strictest, source of truth cho run-time invariants).
 
 ### Quyết định
 
-Fix schema theo **pre-release collapse rule** (đang ở v1 init, chưa ship Play Store → không bump `SCHEMA_VERSION`, sửa trực tiếp `buildInitialSchemaMigration()`):
-
 ```sql
-CREATE TABLE IF NOT EXISTS planned_dish (
+CREATE TABLE planned_dish (
   id              TEXT PRIMARY KEY,
   meal_slot_id    TEXT NOT NULL REFERENCES meal_slot(id) ON DELETE CASCADE,
   dish_id         TEXT NOT NULL REFERENCES dish(id)      ON DELETE RESTRICT,
-  servings        REAL NOT NULL DEFAULT 1 CHECK (servings > 0),
+  servings        REAL NOT NULL DEFAULT 1
+                  CHECK (servings BETWEEN 0.1 AND 20),
   sort_order      INTEGER NOT NULL DEFAULT 0,
-  is_completed    INTEGER NOT NULL DEFAULT 0 CHECK (is_completed IN (0, 1)),
+  is_completed    INTEGER NOT NULL DEFAULT 0
+                  CHECK (is_completed IN (0, 1)),
   completed_at    TEXT,
   -- Snapshot columns: NULL khi chưa log, NOT NULL khi đã log
   calories        REAL,
@@ -103,10 +111,11 @@ CREATE TABLE IF NOT EXISTS planned_dish (
   carbs           REAL,
   fat             REAL,
   created_at      TEXT NOT NULL DEFAULT (datetime('now')),
-  -- Hybrid policy enforcement (RULE-PLANNED-DISH-HYBRID + SNAP-01..05)
+  -- Hybrid policy bidirectional enforcement (RT-01..02 + SNAP-01..05)
   CHECK (
     (is_completed = 0
-       AND calories IS NULL AND protein IS NULL AND carbs IS NULL AND fat IS NULL
+       AND calories IS NULL AND protein IS NULL
+       AND carbs IS NULL AND fat IS NULL
        AND completed_at IS NULL)
     OR
     (is_completed = 1
@@ -116,33 +125,31 @@ CREATE TABLE IF NOT EXISTS planned_dish (
   )
 );
 
--- Indexes (existing + new)
-CREATE INDEX IF NOT EXISTS idx_planned_dish_slot
-  ON planned_dish(meal_slot_id);
+-- Indexes (sync với data-model §4.6 naming)
+CREATE INDEX idx_planned_dish_meal_slot ON planned_dish(meal_slot_id);
+CREATE INDEX idx_planned_dish_dish      ON planned_dish(dish_id);
 
--- New: tăng tốc S3 Week + S4 Trend (filter is_completed=1 + range scan dp.date)
-CREATE INDEX IF NOT EXISTS idx_planned_dish_completed
+-- Performance partials (D8 add):
+CREATE INDEX idx_planned_dish_completed
   ON planned_dish(is_completed, meal_slot_id)
   WHERE is_completed = 1;
 
--- New: tăng tốc M1 Tab "Gần đây" (ORDER BY completed_at DESC LIMIT 30)
-CREATE INDEX IF NOT EXISTS idx_planned_dish_completed_at
+CREATE INDEX idx_planned_dish_completed_at
   ON planned_dish(completed_at DESC)
   WHERE is_completed = 1;
 ```
 
-**Lý do partial index `WHERE is_completed = 1`:**
-- Most queries chỉ quan tâm logged dishes (S3 Week color, S4 Trend, M1 Recent).
-- Partial index giảm size đáng kể (tỷ lệ logged/planned thường ~20-50%).
-- SQLite hỗ trợ partial index từ v3.8.0; Capacitor SQLite + sql.js đều OK.
-
-**`servings > 0` CHECK:** không phải mới (đã align với data-model §4.6) — chốt thêm vào schema để tránh negative servings từ bug client-side.
+**Khác biệt vs revision đầu:**
+- `servings` CHECK strict hơn: `BETWEEN 0.1 AND 20` (match data-model §4.6 + UX spec F-04 M2 stepper range), thay cho `> 0` quá lỏng.
+- Index naming: `idx_planned_dish_meal_slot` + `idx_planned_dish_dish` (sync data-model), thay cho `idx_planned_dish_slot` đơn lẻ.
+- Migration: KHÔNG in-place edit (xem **DEC-11**) — bump version v1→v2 để runner auto-execute trên dev DB cũ.
 
 ### Migration impact
 
-Pre-release → sửa trong `buildInitialSchemaMigration()`. KHÔNG tạo migration v2. Người dev nuốt schema mới qua dev DB reset. Test:
-- `schema.spec.ts` — assert CHECK constraint với 4 trường hợp (0+null OK, 0+notnull FAIL, 1+null FAIL, 1+notnull OK).
-- `migrations.spec.ts` — vẫn 1 migration version 1.
+Xem **DEC-11**. Test:
+- `schema.spec.ts` — truth-table CHECK 4 case (00 OK, 01 FAIL, 10 FAIL, 11 OK).
+- `schema.spec.ts` — `servings` CHECK boundary 0.1, 0.05 (FAIL), 20, 20.1 (FAIL).
+- `migrations.spec.ts` — 2 migrations registered, version match `SCHEMA_VERSION=2`.
 
 ---
 
@@ -645,32 +652,48 @@ LIMIT 30;
 
 ---
 
-## 8. Decision DEC-07 — Deprecate `meal_slot.total_*` and `day_plan.total_*` columns
+## 8. Decision DEC-07 (revised) — DROP `meal_slot.total_*` and `day_plan.total_*` columns
 
-**Context:** Schema (line 155-158, 170-173) có 4 cột `total_calories/protein/carbs/fat` trên `day_plan` VÀ 4 cột tương tự trên `meal_slot`. Đây là cached aggregates.
+**Context:** Schema (line 155-158, 170-173) có 4 cột `total_calories/protein/carbs/fat` trên `day_plan` VÀ 4 cột tương tự trên `meal_slot`. Đây là cached aggregates **không xuất hiện trong `data-model.md §4.4-4.5`** — drift schema vs doc (audit §17).
 
-### Quyết định
+### Quyết định (revision: DROP HẲN, không kept-as-deprecated)
 
-**Deprecate cả 8 cột này trong v1**, không dùng trong app code. Mọi aggregate đi qua `NutritionQueryService` (DEC-03).
+8 cột này bị **drop hoàn toàn** trong migration v2 (DEC-11). Không kept-as-deprecated. Mọi aggregate đi qua `NutritionQueryService` (DEC-03).
 
-**Lý do:**
-1. **Stale cache risk:** mỗi mutation (add/edit/delete/markCompleted/unmark/editServings) phải UPDATE 8 cột này → bug magnet.
-2. **Recipe edit invalidation:** F-02 sửa recipe → realtime nutrition đổi cho planned dishes → cần update `day_plan.total_*`/`meal_slot.total_*` của EVERY day_plan có planned_dish → cascade nightmare.
+**Lý do triệt để:**
+1. **Stale cache risk:** mỗi mutation phải UPDATE 8 cột → bug magnet.
+2. **Recipe edit invalidation cascade:** F-02 sửa recipe → realtime nutrition đổi cho planned dishes → cần update `day_plan.total_*`/`meal_slot.total_*` của EVERY day_plan có planned_dish → cascade nightmare.
 3. **Performance không cần:** query SUM trên ~12 row/day là negligible (DEC-06.1).
-4. **dish_with_totals VIEW pattern** đã chứng minh approach "compute-on-read" hoạt động tốt cho dish — extend cho day_plan/meal_slot logic-wise.
+4. **dish_with_totals VIEW pattern** đã chứng minh approach "compute-on-read" hoạt động tốt cho dish — extend cho day_plan/meal_slot.
+5. **Pre-release** → cost migration v2 = gần 0; không có lý do giữ ghost columns.
 
-**Migration:** vẫn để cột trong schema (pre-release nhưng không đáng risk schema reset chỉ để xoá cột không dùng). Code KHÔNG đọc/ghi 8 cột này. Comment trong `schema.ts`:
+**Migration v2 rewrite (xem DEC-11):**
 
-```typescript
-// DEPRECATED v1 (DEC-07): aggregates computed via NutritionQueryService.
-// Columns retained for now to avoid schema reset; will be dropped in v1.x cleanup.
-total_calories REAL NOT NULL DEFAULT 0,
-total_protein  REAL NOT NULL DEFAULT 0,
-total_carbs    REAL NOT NULL DEFAULT 0,
-total_fat      REAL NOT NULL DEFAULT 0,
+```sql
+-- day_plan: bỏ 4 cột total_*
+CREATE TABLE day_plan (
+  id              TEXT PRIMARY KEY,
+  date            TEXT NOT NULL UNIQUE,
+  target_calories REAL NOT NULL,
+  target_protein  REAL NOT NULL,
+  created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at      TEXT
+);
+CREATE INDEX idx_day_plan_date ON day_plan(date);
+
+-- meal_slot: bỏ 4 cột total_*, thêm position + created_at theo data-model §4.5
+CREATE TABLE meal_slot (
+  id           TEXT PRIMARY KEY,
+  day_plan_id  TEXT NOT NULL REFERENCES day_plan(id) ON DELETE CASCADE,
+  meal_type    TEXT NOT NULL CHECK (meal_type IN ('breakfast', 'lunch', 'dinner', 'snack')),
+  position     INTEGER NOT NULL DEFAULT 0,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (day_plan_id, meal_type)
+);
+CREATE INDEX idx_meal_slot_day_plan ON meal_slot(day_plan_id);
 ```
 
-**Lint guard (Phase 4):** add `check:deprecated-columns` CI script kiểm tra `INSERT INTO day_plan` / `UPDATE day_plan SET total_*` không tồn tại trong code base. Defer khi có capacity.
+**Lưu ý naming:** index renamed từ `idx_meal_slot_day` → `idx_meal_slot_day_plan` (sync data-model §4.5).
 
 ---
 
@@ -908,7 +931,7 @@ src/app/
 | **R-A4 Trend 365-day query slow** trên Android low-tier | F-04 §16 PRD performance check | Partial index `idx_planned_dish_completed`; KHÔNG query >90 day cùng lúc; Phase 4 add aggregate snapshot table nếu cần |
 | **R-A5 dish_with_totals VIEW recompute mỗi query** | Repeat compute trên 1 dish 5 ingredient | Negligible (~5 row/dish). Materialize chỉ khi profiling thấy bottleneck. |
 | **R-A6 SQL CASE syntax khác nhau** giữa sql.js và Capacitor SQLite | Spec test pass web fail native | Test full E2E trên emulator (mobile-qa-toolkit), ko chỉ Karma. CI guard add cross-DB schema test (Phase 4). |
-| **R-A7 Migration replay cho existing dev DBs** | Sửa init migration in-place không trigger rerun → dev local DB inconsistent | Pre-release rule: dev wipe DB. Tài liệu hoá trong dev README + post-DEC-01 commit message. |
+| **R-A7 ~~Migration replay cho existing dev DBs~~ RESOLVED bởi DEC-11** | ~~Sửa init migration in-place không trigger rerun~~ | ✅ Bump `SCHEMA_VERSION` 1→2, runner auto-execute `buildHybridPolicySchemaMigration` cho dev DB cũ. Không cần manual wipe. |
 
 ---
 
@@ -1015,9 +1038,121 @@ EP-CT-1 + EP-CT-4 có thể parallel. EP-CT-5/6/7 yêu cầu EP-CT-2 + EP-CT-3 +
 
 ---
 
-## 16. Winston signing off
+## 16. Decision DEC-11 (NEW) — Migration v2: bump `SCHEMA_VERSION` 1→2 thay vì in-place edit
 
-D8 architecture decisions hoàn tất. **10 decisions chốt** (DEC-01..10), **7 risks** (R-A1..7), **6 open issues** defer (O-A1..6).
+**Context:** Audit phát hiện DEC-01 ban đầu đề xuất "in-place edit `buildInitialSchemaMigration()`". Vấn đề:
+- `MigrationRunner.run()` (`src/app/core/services/database/migration-runner.ts:14-26`) check `PRAGMA user_version` rồi chỉ chạy migration với `version > currentVersion`.
+- Dev DB local đã có `user_version = 1` → sửa nội dung v1 KHÔNG re-execute.
+- Hậu quả: mỗi dev phải `adb shell pm clear` thủ công → footgun trên team >1 người, dev mới onboard hay miss step này.
+
+### Quyết định
+
+**Bump `SCHEMA_VERSION` 1→2.** Tạo migration v2 mới (`buildHybridPolicySchemaMigration`) chứa DROP + recreate cho 3 bảng affected (`day_plan`, `meal_slot`, `planned_dish`). KHÔNG sửa `buildInitialSchemaMigration()` v1 — coi như shipped-immutable theo migration discipline chuẩn.
+
+### File changes
+
+**`schema.ts`:**
+```typescript
+export const SCHEMA_VERSION = 2; // bump from 1
+
+export function buildHybridPolicySchemaMigration(): Migration {
+  return {
+    version: 2,
+    statements: HYBRID_POLICY_DDL,
+  };
+}
+
+export const HYBRID_POLICY_DDL: readonly string[] = [
+  // Drop in dependency order (planned_dish → meal_slot → day_plan)
+  'DROP INDEX IF EXISTS idx_planned_dish_slot',
+  'DROP INDEX IF EXISTS idx_meal_slot_day',
+  'DROP INDEX IF EXISTS idx_day_plan_date',
+  'DROP TABLE IF EXISTS planned_dish',
+  'DROP TABLE IF EXISTS meal_slot',
+  'DROP TABLE IF EXISTS day_plan',
+
+  // Recreate per DEC-01 + DEC-07 (synced với data-model §4.4-4.6)
+  `CREATE TABLE day_plan (...)`,
+  `CREATE INDEX idx_day_plan_date ON day_plan(date)`,
+  `CREATE TABLE meal_slot (...)`,
+  `CREATE INDEX idx_meal_slot_day_plan ON meal_slot(day_plan_id)`,
+  `CREATE TABLE planned_dish (...)`,
+  `CREATE INDEX idx_planned_dish_meal_slot ON planned_dish(meal_slot_id)`,
+  `CREATE INDEX idx_planned_dish_dish      ON planned_dish(dish_id)`,
+  `CREATE INDEX idx_planned_dish_completed ON planned_dish(is_completed, meal_slot_id) WHERE is_completed = 1`,
+  `CREATE INDEX idx_planned_dish_completed_at ON planned_dish(completed_at DESC) WHERE is_completed = 1`,
+
+  // DEC-08: dish.is_favorite already exists in v1 — chỉ thêm partial index
+  `CREATE INDEX idx_dish_favorite ON dish(is_favorite) WHERE is_favorite = 1`,
+];
+```
+
+**`migrations.ts`:**
+```typescript
+import { buildInitialSchemaMigration, buildHybridPolicySchemaMigration, SCHEMA_VERSION } from './schema';
+
+export const MIGRATION_REGISTRY: readonly Migration[] = [
+  buildInitialSchemaMigration(),       // v1 — IMMUTABLE (do not edit shipped migrations)
+  buildHybridPolicySchemaMigration(),  // v2 — DEC-01/07/11
+];
+
+if (MIGRATION_REGISTRY[MIGRATION_REGISTRY.length - 1]?.version !== SCHEMA_VERSION) {
+  throw new Error('Latest migration version must match SCHEMA_VERSION.');
+}
+```
+
+### Trade-offs
+
+- **Mất pre-release dev seed data trong 3 bảng affected** — chấp nhận (planned_dish/meal_slot/day_plan chưa có production usage; dish/ingredient giữ nguyên).
+- **+1 migration trong chuỗi** — tăng surface test, nhưng đổi lại dev workflow zero-footgun.
+- **Idempotent re-run:** clean install chạy v1 + v2 tuần tự → identical kết quả với install kế tiếp đã ở v2 → idempotent.
+
+### Test coverage
+
+- `migration-runner.spec.ts`: assert v1→v2 sequential execution, `PRAGMA user_version = 2` sau khi xong, idempotent (re-run không thay đổi).
+- `migration-runner.spec.ts`: case clean v0 → run cả v1 + v2 → cùng kết quả với v1-only-then-v2.
+- `migrations.spec.ts`: assert `MIGRATION_REGISTRY.length === 2` + `latest.version === SCHEMA_VERSION === 2`.
+- `schema.spec.ts`: 4 truth-table case CHECK Hybrid + 4 boundary case `servings`.
+
+### Convention được lock cho future
+
+**Shipped migration = immutable.** Mọi schema change post-ship → bump version, viết migration mới. Áp dụng kể cả khi đang pre-release (nếu dev DB đã có user_version > 0). Document trong `docs/4-architecture/architecture.md` (Phase 4).
+
+---
+
+## 17. Audit log (revision 1.1)
+
+Audit chạy 2026-05-09 sau D8 v1 commit. Phát hiện **10 vấn đề**, 3 critical. Tất cả đều resolved trong revision 1.1.
+
+| ID | Severity | Loại | Mô tả | Fix |
+|---|---|---|---|---|
+| **A1** | 🔴 Critical | Doc-doc drift | `data-model §4.6` CHECK 1-chiều vs `business-rules RT-01` 2-chiều | DEC-01 chốt theo business-rules; data-model.md sync |
+| **A2** | 🔴 Critical | Doc-code drift | 8 cột `total_*` trong schema.ts không có trong `data-model §4.4-4.5` | DEC-07 DROP hẳn trong v2 |
+| **A3** | 🟠 High | Doc-code drift | `data-model §4.5` có `position`/`created_at`, schema.ts thiếu | DEC-07 v2 thêm |
+| **A4** | 🟠 High | Index naming drift | Schema `idx_meal_slot_day`/`idx_planned_dish_slot` vs data-model `idx_meal_slot_day_plan`/`idx_planned_dish_meal_slot` + thiếu `idx_planned_dish_dish` | DEC-01/07 v2 sync naming |
+| **A5** | 🟠 High | Constraint drift | Data-model CHECK không có `completed_at` clause; business-rules ngầm yêu cầu | DEC-01 add `completed_at IS (NULL/NOT NULL)` vào CHECK; data-model.md sync |
+| **A6** | 🟡 Medium | Constraint loose | DEC-01 v0 viết `servings > 0`, data-model viết `BETWEEN 0.1 AND 20` | DEC-01 revised dùng `BETWEEN 0.1 AND 20` |
+| **A7** | 🟡 Medium | Spec self-contradiction | F-04 §12 list `effective-nutrition-pipe` + §16 đề xuất SQL | F-04 §12 xoá pipe (commit riêng "F-04 sync"); DEC-02 chốt SQL |
+| **A8** | 🟡 Medium | Spec wrong assumption | F-04 §11 nói `dish.is_favorite` cần migration Phase 4 — thực tế cột đã tồn tại | DEC-08 + F-04 §11/§15 sync |
+| **A9** | 🟡 Medium | Decision nửa vời | DEC-07 v0 "kept-as-deprecated" — pre-release thì sao giữ stale? | DEC-07 revised DROP hẳn |
+| **A10** | 🔴 Critical | Footgun | DEC-01 v0 in-place edit migration v1, runner không re-run trên dev DB cũ | DEC-11 NEW: bump version v2 |
+
+**Audit method:**
+1. Cross-read 4 lớp: `business-rules.md` (SNAP/RT clauses) ⇄ `data-model.md` §4.4-4.6 ⇄ `schema.ts` lines 150-194 ⇄ DEC-01/07/10.
+2. Liệt kê drift theo bảng truth-table: clause nào ở đâu, có sync không.
+3. Verify migration-runner mechanism trên `migration-runner.ts` để confirm in-place edit không re-run.
+4. Verify F-04 spec self-consistency (§12 vs §16, §11 vs schema.ts).
+
+**Lessons learned:**
+- Phải đọc migration-runner mechanism trước khi đề xuất "in-place edit pre-release". Đây là footgun đặc thù mỗi project.
+- Phải cross-read 3-4 doc layer cùng lúc cho schema decisions, không chỉ data-model.md.
+- "Pre-release" không phải lý do giữ ghost columns — gợi ý bump version mới triệt để.
+
+---
+
+## 18. Winston signing off
+
+D8 architecture decisions hoàn tất. **11 decisions chốt** (DEC-01..11), **7 risks** (R-A1..7 — R-A7 resolved bởi DEC-11), **6 open issues** defer (O-A1..6). Revision 1.1 sau audit pass đã sync triệt để 4 lớp doc/code.
 
 **Tổng output:**
 - Schema fix + 3 partial indexes mới

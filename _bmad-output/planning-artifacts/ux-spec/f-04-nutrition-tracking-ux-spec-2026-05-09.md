@@ -499,8 +499,8 @@ status_color(day) = pick by:
 - Empty state: "Chưa có món nào gần đây. Bắt đầu thêm món để tạo lịch sử."
 
 #### 6.3. Tab "Đã lưu" (Favorites)
-- **Phase 3 implementation note:** Hiện tại data-model chưa có `dish.is_favorite` flag. **Defer favoriting feature Phase 4.** Phase 3 ship tab này với empty state placeholder + CTA "Sẽ ra mắt Phase 4".
-- **Open issue cho D8 Architect:** Có cần thêm `dish.is_favorite INTEGER DEFAULT 0` vào schema không? Phase 3 không, defer Phase 4 nếu user feedback yêu cầu.
+- **Phase 3 implementation note:** `dish.is_favorite INTEGER DEFAULT 0` đã tồn tại trong schema v1 (`src/app/core/services/database/schema.ts:104`). D8 DEC-08 confirm wire UI ngay Phase 3 (không defer). DEC-11 add partial index `idx_dish_favorite WHERE is_favorite = 1` để hỗ trợ tab này.
+- **Behavior Phase 3:** ListView mặc định query `dish` WHERE `is_favorite = 1` ORDER BY `name`. Empty state: "Chưa có món yêu thích. Bấm ⭐ trên món bất kỳ để thêm." Toggle ⭐ bằng F-02 dish detail (out-of-scope F-04 — wire qua DishStore signal).
 
 #### 6.4. Tab "📷 Chụp ảnh" (F-05, defer Phase 5+)
 - Phase 3 ship tab + redirect "Tính năng AI sẽ ra mắt Phase 5"
@@ -878,7 +878,7 @@ FROM daily_totals;
 
 | ID | Question | Defer to | Why defer |
 |---|---|---|---|
-| **O-F04-5** | `dish.is_favorite` flag cho Tab "Đã lưu" — add Phase 3 hay Phase 4? | D8 Architect / Phase 4 user feedback | Phase 3 ship empty placeholder; nếu user yêu cầu favoriting Phase 4 mới schema migration |
+| **O-F04-5** | ~~`dish.is_favorite` flag cho Tab "Đã lưu" — add Phase 3 hay Phase 4?~~ | ✅ **RESOLVED D8 DEC-08** | Cột đã tồn tại schema v1; Phase 3 wire UI ngay + DEC-11 add partial index |
 | **O-F04-6** | Performance variant Smart Key Metric (2 ring 48px equal weight) — design pattern? | Phase 4 redesign | Phase 3 fall back về Tăng cơ pattern; số user "performance" goal rất ít, defer |
 | **O-F04-7** | Trend View export/share (PDF, image)? | Phase 5+ | Phase 3 view-only |
 | **O-F04-8** | Macro % donut breakdown (cho Advanced) — implement Phase 3? | Phase 4 polish | Phase 3 chỉ show 4 ring + Fiber row. Donut breakdown defer. |
@@ -915,7 +915,7 @@ FROM daily_totals;
 | `app-status-pill` | `shared/components/status-pill/` | M2 status pill (planned/logged variants) |
 | `app-servings-stepper` | `shared/components/servings-stepper/` | M2 + M1 sub-modal stepper |
 | `app-key-metric-router` | (utility, not component) `core/utils/key-metric-router.ts` | Smart Key Metric pure function |
-| `app-effective-nutrition-pipe` | `shared/pipes/effective-nutrition.pipe.ts` | Pipe để compute effective_nutrition trong template |
+| ~~`app-effective-nutrition-pipe`~~ | **REMOVED — D8 DEC-02:** effective nutrition tính tại SQL layer (`CASE WHEN is_completed=1 THEN calories ELSE dwt.total_calories * servings END`). Không tạo Angular pipe. |
 
 ### Data services / repository (defer cho D8 Architect)
 
@@ -1049,7 +1049,7 @@ FROM daily_totals;
 - ✅ All microcopy §10.2
 
 **Defer Phase 4:**
-- Tab "Đã lưu" actual favoriting (`dish.is_favorite` schema migration)
+- ~~Tab "Đã lưu" actual favoriting (`dish.is_favorite` schema migration)~~ — ✅ resolved D8 DEC-08, ship Phase 3
 - Performance variant dual-equal-ring layout
 - S4 export/share PDF/image
 - Macro % donut breakdown (Advanced)
@@ -1068,16 +1068,16 @@ FROM daily_totals;
 - DB query patterns §9 — verify performance với realistic data (~365 days × 4 slots × 3 dishes = 4380 records)
 - New shared components 12 (ring, macro-row, stepper, banner, status-pill) — design system token usage
 
-**Open issues for D8 review:**
-- O-F04-5: `dish.is_favorite` schema decision (Phase 3 NO; Phase 4 if user feedback)
-- D-TECH-1 (from research): Repository pattern strict? Mary recommended YES; Winston confirm
-- Effective nutrition: SQL CASE (single query) vs computed-pipe (template-side) — recommend SQL
+**Open issues — RESOLVED bởi D8 architecture (2026-05-09):**
+- ~~O-F04-5: `dish.is_favorite` schema decision~~ → ✅ DEC-08 (cột đã có v1, wire Phase 3)
+- ~~D-TECH-1: Repository pattern strict?~~ → ✅ DEC-03 (2 repo `DayPlanRepository` + `PlannedDishRepository` + `NutritionQueryService`)
+- ~~Effective nutrition: SQL CASE vs pipe?~~ → ✅ DEC-02 (SQL CASE only, không pipe)
 
-**D8 acceptance criteria:**
-- [ ] Architect review §9 SQL patterns (correctness + index usage)
-- [ ] Component design §12 split (which is signal store vs pure component)
-- [ ] Caching strategy for S1/S2 (re-query each tick vs effect-driven)
-- [ ] Migration: `dish.is_favorite` confirm DEFER hay add now (collapse vào v1 init schema theo pre-release rule)
+**Architect review checklist — DONE (D8 DEC-01..11):**
+- [x] §9 SQL patterns + index usage → DEC-06 (4 query patterns + 3 partial indexes + EXPLAIN spec)
+- [x] §12 component split signal store vs pure → DEC-04 (`CalendarStore` + `NutritionStore`) + DEC-09
+- [x] Caching strategy S1/S2 → DEC-05 (effect-driven, share `today` signal, TTL 5min S4 trend)
+- [x] Migration `dish.is_favorite` → DEC-08 (cột đã có, DEC-11 add partial index)
 
 ---
 
