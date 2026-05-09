@@ -1,7 +1,7 @@
 # Deferred Items — MealPlaning / HealthMate AI
 
 **Status:** Living document
-**Last updated:** 2026-05-09 (post v0.2.2 A-milestone ship — B1/B6/B8/B3-Settings/D-UX P2-1/2/3 closed)
+**Last updated:** 2026-05-09 (post v0.2.2 + B3 closure correction — audit revealed Phase 1 modals already unified)
 **Owner:** Khanh Huynh (solo dev)
 
 ---
@@ -16,7 +16,6 @@
 |---|---|---|---|
 | A1-A8 | F-02 cascade delete, F-03/F-04, F-12, D5, dataset, signal-forms, AI insight | §1 | Phase 3+ / V2 |
 | B2 | Radio-circle 18px filled | §2 | On user request only |
-| B3 | Phase 1 modals (ingredient-edit, dish-edit) form unify — Settings portion DONE | §2 | Pre-Phase 3 |
 | C1-C5, C7 | Phase 1.5B AI tuning, WebView 147 SIGTRAP, mockup-first workflow | §3 | Phase 3+ / on signal |
 | C10 | P2-4 Settings hub `Nhắc nhở` collapse → bottom-sheet | §3.1 | Settings expansion or user feedback |
 
@@ -28,7 +27,7 @@
 - D3 — Activity label normalization (Story 2.4)
 - B6 — E2E tool decision (Appium 2 + WDIO 9, ADR-001 Accepted, `030ceb4`, 2026-05-08)
 - B8 — Coverage baseline 74.24% statements (`3a9fd42`, 2026-05-09)
-- B3 (Settings portion) — body-edit + goals-edit normalized to `<app-form-field>` (`a64eacf`, 2026-05-09)
+- B3 — Phase 1 modals + Settings forms all unified to `<app-form-field>`. Settings portion via `a64eacf` (2026-05-09); Phase 1 modals (`ingredient-edit`, `dish-edit`) discovered already unified per audit 2026-05-09 (no leftover `input-wrapper` in feature pages).
 - B1 — Sage cream alignment cleanup `#fafaf7` → `#fbf7ef` (`3f8d3c1`, 2026-05-09)
 - D-UX-AUDIT-202605 P2-1/2/3 — Settings hub copy polish (`3f8d3c1`, 2026-05-09)
 
@@ -92,8 +91,7 @@ Các item phát hiện qua các session nhưng chưa có nơi track formal trư�
 |----|------|-----------|-------------------------|
 | ~~B1~~ ✅ DONE (v0.2.2) | ~~Global `--bg-page` cream alignment `#fafaf7 → #F7F2EA` (Sage Wellness DNA)~~ | Resolved: `--bg-page` đã set `#f7f2ea` từ trước; cleanup commit `3f8d3c1` (2026-05-09) fix 2 stale `#fafaf7` references còn lại (`--ion-color-light-tint` → `#fbf7ef`, comment ref trong `--bg-sunken`). Cross-page contrast verified live trên emulator-5554 v0.2.2 install. | — |
 | B2 | Radio-circle 18px filled indicator trong onboarding | Code đang dùng 3-cue alternative (bg tint + check icon + bold label) — đã accessible đủ | Chỉ revisit khi user yêu cầu pixel-perfect mockup match |
-| B3 (Settings portion) ✅ DONE | Settings forms (`body-edit`, `goals-edit`) normalize to `<app-form-field>` (Boolean mode + AppFormField import). Resolved commit `a64eacf` (2026-05-09); guard `check-form-input-pattern.mjs` enforces. | — |
-| B3 (remaining) | Phase 1 modals (`ingredient-edit`, `dish-edit`) form input unify — quyết định A (normalize floating-label) đã chốt qua Settings precedent, áp tương tự cho 2 modal Phase 1 | Cần touch dish-picker + macro inputs; risk medium vì các modal phức tạp hơn Settings | Trước khi Phase 3 mở thêm modal mới |
+| B3 ✅ DONE | Settings forms (`body-edit`, `goals-edit`) normalize to `<app-form-field>` (commit `a64eacf`, 2026-05-09). Phase 1 modals (`ingredient-edit`, `dish-edit`) audit 2026-05-09 confirmed đã 100% dùng `<app-form-field>` từ trước (không leftover `input-wrapper` ở feature pages). Toàn app form input nay 1 pattern duy nhất. Guard `check-form-input-pattern.mjs` enforces. | — |
 | ~~B4~~ | ~~5 mockup HTML files thiếu (Phase 1 pre-flight debt)~~ | **CANCELLED** per cleanup commit `646aacc` Q2 (2026-04-29) — phase-1 mockups đã bị xoá có chủ đích, source of truth chuyển sang `design-system.md` + code thực tế. Không tạo lại. | — |
 | ~~B5~~ | ~~ADR-002 migration strategy doc chưa viết~~ | **CANCELLED** per cleanup commit `646aacc` Q1 (2026-04-29) — repo không dùng ADR pattern nữa; decisions kiến trúc sống trực tiếp trong `architecture.md` / `data-model.md` / `business-rules.md`. | — |
 | ~~B6~~ ✅ DONE (v0.2.2) | ~~E2E tool decision (O2): Playwright / Cypress / Detox?~~ | Resolved: chọn **Appium 2 + WebdriverIO 9 + UiAutomator2 4** (NATIVE_APP context). Lý do: Capacitor WebView không nhận `adb input tap` raw; Detox không support Ionic/Angular; Playwright thiếu native layer. ADR-001 Accepted. Smoke + onboarding-persist + b3-form-unify-visual = 4/4 pass. Commit `030ceb4` (2026-05-08). | — |
@@ -142,7 +140,7 @@ Các item phát hiện qua các session nhưng chưa có nơi track formal trư�
 | B9 | Phase 1 Retro §8 + `phase-1-qa.md` | 2026-04-29 | `646aacc` Q3 — CANCELLED | Không dùng phase-detail spec docs |
 | B6 | E2E tool decision → Appium 2 + WDIO 9 + UiAutomator2 4 | 2026-05-08 | `030ceb4` + ADR-001 Accepted | Smoke + onboarding-persist + b3-form-unify-visual = 4/4 pass |
 | B8 | Test coverage baseline | 2026-05-09 | `3a9fd42` | 74.24% stmts / 60% br / 70% fn / 74.30% lines; gap report `test-coverage-baseline.md` |
-| B3 (Settings) | Settings forms unify to `<app-form-field>` | 2026-05-09 | `a64eacf` | body-edit + goals-edit; remaining = Phase 1 modals (ingredient-edit, dish-edit) |
+| B3 | Phase 1 modals + Settings forms unify to `<app-form-field>` | 2026-05-09 | `a64eacf` + audit | Settings via commit; Phase 1 modals đã unified từ trước (audit-confirmed) |
 | B1 | Sage cream `--bg-page` alignment cleanup | 2026-05-09 | `3f8d3c1` | `--ion-color-light-tint` `#fafaf7` → `#fbf7ef`; stale comment ref fixed |
 | D-UX-AUDIT-202605 P2-1/2/3 | Settings hub copy polish (Thông số cơ thể / Năng lượng / Mục tiêu đề xuất) | 2026-05-09 | `3f8d3c1` | Live verified emulator-5554 v0.2.2; P2-4 spun off as C10 |
 
