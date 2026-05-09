@@ -104,12 +104,15 @@ First-run wizard 5-7 step: welcome → body → goals → activity → review �
 
 ## 7. Mockups Reference
 
-`docs/3-design/mockups/` chứa HTML mockup gốc cho các phase.
-Mockup mới gần nhất:
-- `phase-1/14-recipe-edit.html` — recipe edit hero refactor
-- `settings-redesign.html` — settings v3 dark-mode mockup
+`docs/3-design/mockups/` từng chứa HTML mockup các phase. **Tính đến 2026-05-09, toàn bộ mockup phase-0/1/Settings đã bị xoá** (Phase 0/1/2 đã ship → code là source of truth duy nhất; mockup cũ drift quá xa).
 
-> ⚠️ **Mockup là HTML thuần, KHÔNG phải code chạy.** Khi implement, dùng mockup làm reference visual + đối chiếu design tokens.
+Phase 3+ design pipeline mới dùng BMAD UX Designer (xem `docs/3-design/mockups/README.md`):
+1. UX spec markdown → `docs/3-design/specs/f<NN>-spec.md`
+2. HTML mockup pixel-perfect Sage DNA → `docs/3-design/mockups/phase-<N>/`
+3. Design review + vision verify → patch
+4. Architecture + stories breakdown → implementation
+
+Khi cần xem mockup lịch sử: `git log --diff-filter=D --name-only -- 'docs/3-design/**/*.html'`.
 
 ## 8. Accessibility & i18n
 

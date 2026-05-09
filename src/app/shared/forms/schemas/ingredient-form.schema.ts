@@ -10,7 +10,7 @@
  *  - calories/protein/carbs/fat/fiber: optional, nếu nhập phải finite & ≥ 0
  *  - cross-field: protein + carbs + fat ≤ 100 (per-100g sanity check)
  *
- * @see docs/3-design/mockups/phase-1/18-form-validation.html
+ * @see docs/3-design/design-system.md §8.6 Form Field Pattern (mockup phase-1 đã xoá 2026-05-09 — code là source of truth)
  */
 
 import { schema, validate, type ValidationError } from '@angular/forms/signals';
