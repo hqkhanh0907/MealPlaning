@@ -76,7 +76,7 @@
   --ion-color-light-contrast: #1c1a17;
   --ion-color-light-contrast-rgb: 28, 26, 23;
   --ion-color-light-shade: #e5e1d6;
-  --ion-color-light-tint: #fafaf7;
+  --ion-color-light-tint: #fbf7ef;
 
   // ---------------------------------------------------------------------------
   // Background & Surfaces (warm hue ~30°, very low chroma)
@@ -166,7 +166,7 @@
   --bg-muted: #e8e3d9;
   // Sunken — surface "chìm" hơn --bg-page, dùng cho segment track + search bar
   // (cần tách layer rõ với page khi không có border). Đậm hơn --bg-muted một
-  // nấc để diff lightness vs --bg-page (#fafaf7) đạt ~12%, đủ visible.
+  // nấc để diff lightness vs --bg-page (#f7f2ea) đạt ~12%, đủ visible.
   --bg-sunken: #ded5c2;
   --text-primary: #1c1a17;
   --text-secondary: #4a453e;
