@@ -1,7 +1,7 @@
 # Deferred Items — MealPlaning / HealthMate AI
 
 **Status:** Living document
-**Last updated:** 2026-05-08 (post-investigation cleanup — added at-a-glance status table)
+**Last updated:** 2026-05-09 (post v0.2.2 A-milestone ship — B1/B6/B8/B3-Settings/D-UX P2-1/2/3 closed)
 **Owner:** Khanh Huynh (solo dev)
 
 ---
@@ -15,13 +15,10 @@
 | Mã | Item | Section | Trigger phase |
 |---|---|---|---|
 | A1-A8 | F-02 cascade delete, F-03/F-04, F-12, D5, dataset, signal-forms, AI insight | §1 | Phase 3+ / V2 |
-| B1 | Sage cream alignment `--bg-page` | §2 | Pre-Phase 3 if requested |
 | B2 | Radio-circle 18px filled | §2 | On user request only |
-| B3 | Phase 1 modals vs Onboarding form-input style unify | §2 | Pre-Phase 3 |
-| B6 | E2E tool decision (Playwright/Cypress/Detox) | §2 | Before first E2E test |
-| B8 | Test coverage ≥60% verify | §2 | Phase 3 baseline |
+| B3 | Phase 1 modals (ingredient-edit, dish-edit) form unify — Settings portion DONE | §2 | Pre-Phase 3 |
 | C1-C5, C7 | Phase 1.5B AI tuning, WebView 147 SIGTRAP, mockup-first workflow | §3 | Phase 3+ / on signal |
-| D-UX-AUDIT-202605 | 4 P2 Settings polish findings | §3.1 | Phase 2 polish or Settings expansion |
+| C10 | P2-4 Settings hub `Nhắc nhở` collapse → bottom-sheet | §3.1 | Settings expansion or user feedback |
 
 ### DONE (logged in §4)
 
@@ -29,6 +26,11 @@
 - D1 — POST_NOTIFICATIONS flow (Story 2.2 + 2.5)
 - D2 — styleUrl audit (Story 2.4)
 - D3 — Activity label normalization (Story 2.4)
+- B6 — E2E tool decision (Appium 2 + WDIO 9, ADR-001 Accepted, `030ceb4`, 2026-05-08)
+- B8 — Coverage baseline 74.24% statements (`3a9fd42`, 2026-05-09)
+- B3 (Settings portion) — body-edit + goals-edit normalized to `<app-form-field>` (`a64eacf`, 2026-05-09)
+- B1 — Sage cream alignment cleanup `#fafaf7` → `#fbf7ef` (`3f8d3c1`, 2026-05-09)
+- D-UX-AUDIT-202605 P2-1/2/3 — Settings hub copy polish (`3f8d3c1`, 2026-05-09)
 
 ### CANCELLED (per cleanup `646aacc` 2026-04-29)
 
@@ -88,14 +90,15 @@ Các item phát hiện qua các session nhưng chưa có nơi track formal trư�
 
 | Mã | Item | Lý do hoãn | Trigger / Phase dự kiến |
 |----|------|-----------|-------------------------|
-| B1 | Global `--bg-page` cream alignment `#fafaf7 → #F7F2EA` (Sage Wellness DNA) | Token-level đụng tất cả pages, cần cross-page contrast test cho cards/search bar/segment track | Task riêng "Sage global bg alignment" — trước khi mở Phase 3 nếu user yêu cầu visual consistency |
+| ~~B1~~ ✅ DONE (v0.2.2) | ~~Global `--bg-page` cream alignment `#fafaf7 → #F7F2EA` (Sage Wellness DNA)~~ | Resolved: `--bg-page` đã set `#f7f2ea` từ trước; cleanup commit `3f8d3c1` (2026-05-09) fix 2 stale `#fafaf7` references còn lại (`--ion-color-light-tint` → `#fbf7ef`, comment ref trong `--bg-sunken`). Cross-page contrast verified live trên emulator-5554 v0.2.2 install. | — |
 | B2 | Radio-circle 18px filled indicator trong onboarding | Code đang dùng 3-cue alternative (bg tint + check icon + bold label) — đã accessible đủ | Chỉ revisit khi user yêu cầu pixel-perfect mockup match |
-| B3 | Unify form input style Phase 1 modals vs Onboarding (option A normalize floating-label, hoặc option B formalize compact variant trong design-system) | Quyết định giữa A vs B chưa chốt; cả hai đều cần effort medium | Trước khi Phase 3 mở thêm modal mới |
+| B3 (Settings portion) ✅ DONE | Settings forms (`body-edit`, `goals-edit`) normalize to `<app-form-field>` (Boolean mode + AppFormField import). Resolved commit `a64eacf` (2026-05-09); guard `check-form-input-pattern.mjs` enforces. | — |
+| B3 (remaining) | Phase 1 modals (`ingredient-edit`, `dish-edit`) form input unify — quyết định A (normalize floating-label) đã chốt qua Settings precedent, áp tương tự cho 2 modal Phase 1 | Cần touch dish-picker + macro inputs; risk medium vì các modal phức tạp hơn Settings | Trước khi Phase 3 mở thêm modal mới |
 | ~~B4~~ | ~~5 mockup HTML files thiếu (Phase 1 pre-flight debt)~~ | **CANCELLED** per cleanup commit `646aacc` Q2 (2026-04-29) — phase-1 mockups đã bị xoá có chủ đích, source of truth chuyển sang `design-system.md` + code thực tế. Không tạo lại. | — |
 | ~~B5~~ | ~~ADR-002 migration strategy doc chưa viết~~ | **CANCELLED** per cleanup commit `646aacc` Q1 (2026-04-29) — repo không dùng ADR pattern nữa; decisions kiến trúc sống trực tiếp trong `architecture.md` / `data-model.md` / `business-rules.md`. | — |
-| B6 | E2E tool decision (O2): Playwright / Cypress / Detox? | Plan nói quyết Phase 1, vẫn unresolved. **Sau cleanup `646aacc`**: track quyết định trong `development-plan.md` thay vì ADR riêng. | Trước khi viết E2E tests đầu tiên |
+| ~~B6~~ ✅ DONE (v0.2.2) | ~~E2E tool decision (O2): Playwright / Cypress / Detox?~~ | Resolved: chọn **Appium 2 + WebdriverIO 9 + UiAutomator2 4** (NATIVE_APP context). Lý do: Capacitor WebView không nhận `adb input tap` raw; Detox không support Ionic/Angular; Playwright thiếu native layer. ADR-001 Accepted. Smoke + onboarding-persist + b3-form-unify-visual = 4/4 pass. Commit `030ceb4` (2026-05-08). | — |
 | ~~B7~~ | ~~Manual QA 14/15 items Phase 1 (RESTRICT delete, unit conversions, dark mode toggle, restart persistence, ...)~~ | **CANCELLED** per cleanup commit `646aacc` Q3 (2026-04-29) — `phase-1-management.md` (chứa checklist 15 items) đã bị xoá có chủ đích. Code Phase 1 đang chạy production, được coi implicitly DONE; không tạo QA checklist formal. | — |
-| B8 | Test coverage ≥60% verify | Chưa đo bằng `--code-coverage`. **Sau cleanup `646aacc`**: nếu đo, ghi số vào `development-plan.md` Phase 1 section thay vì QA report riêng. | Khi muốn baseline cho Phase 3 regression |
+| ~~B8~~ ✅ DONE (v0.2.2) | ~~Test coverage ≥60% verify~~ | Resolved commit `3a9fd42` (2026-05-09): baseline **74.24% statements / 60% branches / 70% functions / 74.30% lines** (418/418 unit pass). `karma.conf.js` patched với `json-summary` + `lcovonly` reporters. Gap report: `docs/5-development/test-coverage-baseline.md` (risk-weighted gaps: 🔴 native-database.ts 44%, web-database.ts 59%; 🟠 dish-edit 55%, ingredient-edit 45%, management.page 49%). | — |
 | ~~B9~~ | ~~Phase 1 Retro §8 + `docs/6-testing/phase-1-qa.md`~~ | **CANCELLED** per cleanup commit `646aacc` Q3 (2026-04-29) — không dùng phase-detail spec docs nữa; `development-plan.md` là roadmap-level duy nhất. Không có Retro formal. | — |
 
 ---
@@ -137,6 +140,11 @@ Các item phát hiện qua các session nhưng chưa có nơi track formal trư�
 | B5 | ADR-002 migration strategy doc | 2026-04-29 | `646aacc` Q1 — CANCELLED | Repo không dùng ADR pattern nữa |
 | B7 | Manual QA 14/15 items Phase 1 | 2026-04-29 | `646aacc` Q3 — CANCELLED | `phase-1-management.md` xoá có chủ đích; code production = implicitly DONE |
 | B9 | Phase 1 Retro §8 + `phase-1-qa.md` | 2026-04-29 | `646aacc` Q3 — CANCELLED | Không dùng phase-detail spec docs |
+| B6 | E2E tool decision → Appium 2 + WDIO 9 + UiAutomator2 4 | 2026-05-08 | `030ceb4` + ADR-001 Accepted | Smoke + onboarding-persist + b3-form-unify-visual = 4/4 pass |
+| B8 | Test coverage baseline | 2026-05-09 | `3a9fd42` | 74.24% stmts / 60% br / 70% fn / 74.30% lines; gap report `test-coverage-baseline.md` |
+| B3 (Settings) | Settings forms unify to `<app-form-field>` | 2026-05-09 | `a64eacf` | body-edit + goals-edit; remaining = Phase 1 modals (ingredient-edit, dish-edit) |
+| B1 | Sage cream `--bg-page` alignment cleanup | 2026-05-09 | `3f8d3c1` | `--ion-color-light-tint` `#fafaf7` → `#fbf7ef`; stale comment ref fixed |
+| D-UX-AUDIT-202605 P2-1/2/3 | Settings hub copy polish (Thông số cơ thể / Năng lượng / Mục tiêu đề xuất) | 2026-05-09 | `3f8d3c1` | Live verified emulator-5554 v0.2.2; P2-4 spun off as C10 |
 
 ---
 
