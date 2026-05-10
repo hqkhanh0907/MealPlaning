@@ -61,3 +61,50 @@
     gap: var(--spacing-xs);
   }
 }
+
+.undo-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--spacing-lg));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 12px 16px;
+  background: var(--surface-inverse, #2c2c2e);
+  color: var(--on-inverse, #fff);
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  max-width: min(92vw, 480px);
+  z-index: var(--z-toast, 9000);
+}
+
+.undo-toast__msg {
+  flex: 1 1 auto;
+  // allow-hardcode: undo toast inverse-surface typography fixed at 0.95rem per design spec
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.undo-toast__btn {
+  background: transparent;
+  border: 0;
+  color: var(--accent-on-inverse, #4cc9f0);
+  font-weight: 700;
+  padding: 6px 8px;
+  min-height: 36px;
+  cursor: pointer;
+}
+
+.undo-toast__close {
+  background: transparent;
+  border: 0;
+  color: var(--on-inverse, #fff);
+  opacity: 0.7;
+  // allow-hardcode: close-icon glyph at 1rem inside inverse toast
+  font-size: 1rem;
+  padding: 6px;
+  min-width: 32px;
+  min-height: 32px;
+  cursor: pointer;
+}

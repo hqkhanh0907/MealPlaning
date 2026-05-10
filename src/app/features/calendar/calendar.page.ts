@@ -5,6 +5,7 @@ import {
   DestroyRef,
   ElementRef,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
@@ -24,13 +25,26 @@ import {
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { calendarOutline, settingsOutline, sparklesOutline } from 'ionicons/icons';
-import type { MealSlotWithDishes, MealType } from '../../core/models/meal-plan.types';
+import type {
+  DeletedDishSnapshot,
+  MealSlotWithDishes,
+  MealType,
+  PlannedDishWithEffective,
+} from '../../core/models/meal-plan.types';
 import { CalendarStore } from '../../core/stores/calendar.store';
+import { DayPlanRepository } from '../../core/repositories/day-plan.repository';
+import { UndoToastQueue } from '../../core/services/undo-toast-queue';
 import { relativeDateLabel } from '../../core/utils/relative-date-label';
 import {
   ConfirmEatModal,
   type ConfirmEatMode,
 } from '../../shared/components/confirm-eat-modal/confirm-eat-modal';
+import { DatePickerModal } from '../../shared/components/date-picker-modal/date-picker-modal';
+import {
+  DishContextMenuModal,
+  type DishContextMenuAction,
+} from '../../shared/components/dish-context-menu-modal/dish-context-menu-modal';
+import { MealSlotPickerModal } from '../../shared/components/meal-slot-picker-modal/meal-slot-picker-modal';
 import { DaySummaryCard } from './components/day-summary-card/day-summary-card';
 import { DayRow } from './components/day-row/day-row';
 import { EmptyDayState } from './components/empty-day-state/empty-day-state';
@@ -39,12 +53,21 @@ import { MealSlotCard } from './components/meal-slot-card/meal-slot-card';
 const MEAL_ORDER: readonly MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
 const SWIPE_THRESHOLD_PX = 60;
 const DAY_MS = 86_400_000;
+const UNDO_DURATION_MS = 8_000;
 
 interface PendingConfirm {
   mode: ConfirmEatMode;
   plannedDishId: string;
   dishName: string;
 }
+
+interface ContextMenuState {
+  plannedDishId: string;
+  dishName: string;
+  mealType: MealType;
+}
+
+type SlotPickerMode = 'move' | null;
 
 function todayIso(): string {
   const now = new Date();
@@ -78,6 +101,9 @@ function shiftIsoDate(iso: string, deltaDays: number): string {
     IonButton,
     IonIcon,
     ConfirmEatModal,
+    DatePickerModal,
+    DishContextMenuModal,
+    MealSlotPickerModal,
     DayRow,
     DaySummaryCard,
     EmptyDayState,
@@ -89,6 +115,8 @@ export default class CalendarPage implements AfterViewInit {
   private readonly toastCtrl = inject(ToastController);
   private readonly gestureCtrl = inject(GestureController);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly dayPlanRepo = inject(DayPlanRepository);
+  private readonly undoQueue = inject(UndoToastQueue);
   protected readonly store = inject(CalendarStore);
 
   private readonly today = todayIso();
@@ -121,8 +149,42 @@ export default class CalendarPage implements AfterViewInit {
   readonly confirmMode = computed<ConfirmEatMode>(() => this.pendingConfirm()?.mode ?? 'mark');
   readonly confirmDishName = computed<string>(() => this.pendingConfirm()?.dishName ?? '');
 
+  // Story 3.7 modal state ----------------------------------------------------
+  readonly datePickerOpen = signal(false);
+  readonly contextMenu = signal<ContextMenuState | null>(null);
+  readonly contextMenuOpen = computed<boolean>(() => this.contextMenu() !== null);
+  readonly contextMenuDishName = computed<string>(() => this.contextMenu()?.dishName ?? '');
+
+  /**
+   * When set, the meal-slot picker is open. `move` is the only consumer for
+   * now (copy uses date picker first, then implicit same-meal-type copy).
+   */
+  readonly slotPickerMode = signal<SlotPickerMode>(null);
+  readonly slotPickerOpen = computed<boolean>(() => this.slotPickerMode() !== null);
+  readonly slotPickerCurrent = computed<MealType | null>(
+    () => this.contextMenu()?.mealType ?? null,
+  );
+
+  /** Date picker for "copy to date" flow. */
+  readonly copyToDatePickerOpen = signal(false);
+
+  /** Active undo toast (head of FIFO queue) — drives the bottom toast UI. */
+  readonly activeUndo = this.undoQueue.activeToast;
+
   constructor() {
     addIcons({ calendarOutline, settingsOutline, sparklesOutline });
+    // Probe yesterday whenever current date changes so canCopyYesterday stays accurate.
+    effect(() => {
+      const today = this.store.currentDate();
+      void this.probeYesterday(today);
+    });
+  }
+
+  private async probeYesterday(today: string): Promise<void> {
+    const yesterday = shiftIsoDate(today, -1);
+    const dp = await this.dayPlanRepo.findByDate(yesterday);
+    const hasDishes = !!dp && dp.meal_slots.some((s) => s.planned_dishes.length > 0);
+    this.store.yesterdayHint.set(hasDishes);
   }
 
   ngAfterViewInit(): void {
@@ -139,15 +201,28 @@ export default class CalendarPage implements AfterViewInit {
       },
     });
     this.gesture.enable(true);
-    this.destroyRef.onDestroy(() => this.gesture?.destroy());
+    this.destroyRef.onDestroy(() => {
+      this.gesture?.destroy();
+      this.undoQueue.clear();
+    });
   }
 
   openSettings(): void {
     void this.router.navigate(['/settings']);
   }
 
+  // -- Date picker (AC-1) ----------------------------------------------------
   onDateChipTap(): void {
-    void this.showToast('Date picker sẽ ra mắt ở Story 3.7');
+    this.datePickerOpen.set(true);
+  }
+
+  onDatePicked(date: string): void {
+    this.datePickerOpen.set(false);
+    this.store.setDate(date);
+  }
+
+  onDatePickerDismiss(): void {
+    this.datePickerOpen.set(false);
   }
 
   onWeekToggle(): void {
@@ -217,20 +292,143 @@ export default class CalendarPage implements AfterViewInit {
     this.onMealAddTap('breakfast');
   }
 
-  onCopyFromYesterdayDeferred(): void {
-    void this.showToast('Sao chép từ hôm qua sẽ ra mắt ở Story 3.7');
+  // -- Empty-state copy-from-yesterday (AC-2) --------------------------------
+  async onCopyFromYesterday(): Promise<void> {
+    const result = await this.store.copyFromYesterday();
+    if (result.copiedCount === 0) {
+      void this.showToast('Hôm qua không có món để sao chép');
+    } else {
+      void this.showToast(`Đã sao chép ${result.copiedCount} món từ hôm qua`);
+    }
   }
 
   onAiFromEmpty(): void {
     this.onAiCta();
   }
 
-  private findDish(plannedDishId: string) {
+  // -- Long-press → context menu (AC-3) --------------------------------------
+  onDishLongPress(plannedDishId: string, mealType: MealType): void {
+    const dish = this.findDish(plannedDishId);
+    if (!dish) return;
+    this.contextMenu.set({ plannedDishId, dishName: dish.dish_name, mealType });
+  }
+
+  onContextMenuDismiss(): void {
+    this.contextMenu.set(null);
+  }
+
+  onContextAction(action: DishContextMenuAction): void {
+    const ctx = this.contextMenu();
+    if (!ctx) return;
+    this.contextMenu.set(null);
+    if (action === 'delete') {
+      void this.handleDelete(ctx);
+    } else if (action === 'move') {
+      this.slotPickerMode.set('move');
+    } else if (action === 'copy') {
+      this.copyToDatePickerOpen.set(true);
+    }
+  }
+
+  // -- Move flow -------------------------------------------------------------
+  async onSlotPicked(target: MealType): Promise<void> {
+    const ctx = this.contextMenu();
+    const mode = this.slotPickerMode();
+    this.slotPickerMode.set(null);
+    if (!ctx || mode !== 'move') {
+      this.contextMenu.set(null);
+      return;
+    }
+    if (target === ctx.mealType) {
+      // No-op: same slot. Just close.
+      this.contextMenu.set(null);
+      return;
+    }
+    const targetSlot = this.slotsInOrder().find((s) => s.meal_type === target);
+    if (!targetSlot) {
+      void this.showToast('Bữa đích không tồn tại');
+      this.contextMenu.set(null);
+      return;
+    }
+    await this.store.moveDish(ctx.plannedDishId, targetSlot.id);
+    void this.showToast(`Đã chuyển "${ctx.dishName}" sang ${this.mealLabel(target)}`);
+    this.contextMenu.set(null);
+  }
+
+  onSlotPickerDismiss(): void {
+    this.slotPickerMode.set(null);
+  }
+
+  // -- Copy flow -------------------------------------------------------------
+  async onCopyDatePicked(targetDate: string): Promise<void> {
+    const ctx = this.contextMenu();
+    this.copyToDatePickerOpen.set(false);
+    if (!ctx) return;
+    await this.store.copyToDate(ctx.plannedDishId, targetDate, ctx.mealType);
+    void this.showToast(`Đã sao chép "${ctx.dishName}" sang ${targetDate}`);
+    this.contextMenu.set(null);
+  }
+
+  onCopyDatePickerDismiss(): void {
+    this.copyToDatePickerOpen.set(false);
+    this.contextMenu.set(null);
+  }
+
+  // -- Delete + undo (AC-4, AC-5) --------------------------------------------
+  private async handleDelete(ctx: ContextMenuState): Promise<void> {
+    const snapshot = await this.store.deleteDish(ctx.plannedDishId);
+    if (!snapshot) {
+      void this.showToast(`Đã xoá "${ctx.dishName}"`);
+      return;
+    }
+    this.enqueueUndo(ctx.dishName, snapshot);
+  }
+
+  private enqueueUndo(dishName: string, snapshot: DeletedDishSnapshot): void {
+    const id = `undo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    this.undoQueue.enqueue({
+      id,
+      message: `Đã xoá "${dishName}"`,
+      durationMs: UNDO_DURATION_MS,
+      undo: async () => {
+        await this.store.restoreDish(snapshot);
+        void this.showToast(`Đã hoàn tác xoá "${dishName}"`);
+      },
+    });
+  }
+
+  async onUndoTap(): Promise<void> {
+    const head = this.activeUndo();
+    if (!head) return;
+    await this.undoQueue.undo(head.id);
+  }
+
+  onUndoDismiss(): void {
+    const head = this.activeUndo();
+    if (!head) return;
+    this.undoQueue.expire(head.id);
+  }
+
+  // -- helpers ---------------------------------------------------------------
+  private findDish(plannedDishId: string): PlannedDishWithEffective | undefined {
     for (const slot of this.slotsInOrder()) {
       const found = slot.planned_dishes.find((d) => d.id === plannedDishId);
       if (found) return found;
     }
     return undefined;
+  }
+
+  private mealLabel(t: MealType): string {
+    switch (t) {
+      case 'breakfast':
+        return 'bữa sáng';
+      case 'lunch':
+        return 'bữa trưa';
+      case 'dinner':
+        return 'bữa chiều';
+      case 'snack':
+        return 'bữa phụ';
+    }
   }
 
   private async showToast(message: string): Promise<void> {

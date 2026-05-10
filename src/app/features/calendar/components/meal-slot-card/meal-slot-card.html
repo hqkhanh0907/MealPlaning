@@ -18,7 +18,15 @@
   } @else {
     <ul class="meal-slot__list">
       @for (dish of slot().planned_dishes; track dish.id) {
-        <li class="meal-slot__row" [class.meal-slot__row--planned]="dish.is_completed === 0">
+        <li
+          class="meal-slot__row"
+          [class.meal-slot__row--planned]="dish.is_completed === 0"
+          (pointerdown)="onPressStart(dish.id)"
+          (pointerup)="onPressCancel()"
+          (pointerleave)="onPressCancel()"
+          (pointermove)="onPressCancel()"
+          (pointercancel)="onPressCancel()"
+        >
           <span class="meal-slot__name">{{ dish.dish_name }}</span>
           @if (dish.is_completed === 1) {
             <app-status-pill status="logged" [completedAt]="dish.completed_at" />

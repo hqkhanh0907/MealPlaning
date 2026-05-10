@@ -223,4 +223,204 @@ describe('CalendarStore', () => {
       expect(store.dayPlan()).toEqual(sampleDayPlan);
     });
   });
+
+  describe('Story 3.7 — context menu mutations', () => {
+    it('moveDish forwards to repo.moveToSlot and bumps tick', async () => {
+      plannedDishRepo.moveToSlot.and.returnValue(Promise.resolve());
+      const before = store.invalidationTick();
+
+      await store.moveDish('pd-1', 's-target');
+
+      expect(plannedDishRepo.moveToSlot).toHaveBeenCalledWith('pd-1', 's-target');
+      expect(store.invalidationTick()).toBe(before + 1);
+    });
+
+    it('deleteDish returns null snapshot when dish not in current dayPlan', async () => {
+      const snapshot = await store.deleteDish('pd-not-loaded');
+      expect(snapshot).toBeNull();
+      expect(plannedDishRepo.delete).toHaveBeenCalledWith('pd-not-loaded');
+    });
+
+    it('deleteDish captures snapshot of currently-loaded dish (planned)', async () => {
+      const populated: DayPlanWithSlots = {
+        ...sampleDayPlan,
+        meal_slots: [
+          {
+            id: 's-1',
+            day_plan_id: 'dp-1',
+            meal_type: 'lunch',
+            position: 1,
+            created_at: 'x',
+            planned_dishes: [
+              {
+                ...samplePlanned,
+                id: 'pd-1',
+                meal_slot_id: 's-1',
+                dish_id: 'd-1',
+                servings: 1.5,
+                is_completed: 0,
+                dish_name: 'Phở bò',
+                effective_calories: 300,
+                effective_protein: 20,
+                effective_carbs: 30,
+                effective_fat: 10,
+              },
+            ],
+          },
+        ],
+      };
+      dayPlanRepo.findByDate.and.returnValue(Promise.resolve(populated));
+      store.setDate(store.currentDate()); // re-trigger hydration
+      await flush();
+
+      const snapshot = await store.deleteDish('pd-1');
+
+      expect(snapshot).toEqual({
+        meal_slot_id: 's-1',
+        dish_id: 'd-1',
+        dish_name: 'Phở bò',
+        servings: 1.5,
+        is_completed: 0,
+      });
+    });
+
+    it('restoreDish replays addToSlot only for planned snapshot', async () => {
+      plannedDishRepo.addToSlot.and.returnValue(Promise.resolve(samplePlanned));
+      const snap = {
+        meal_slot_id: 's-1',
+        dish_id: 'd-1',
+        dish_name: 'Phở',
+        servings: 2,
+        is_completed: 0 as const,
+      };
+
+      await store.restoreDish(snap);
+
+      expect(plannedDishRepo.addToSlot).toHaveBeenCalledWith('s-1', 'd-1', 2);
+      expect(plannedDishRepo.markCompleted).not.toHaveBeenCalled();
+    });
+
+    it('restoreDish chains markCompleted when snapshot was logged', async () => {
+      plannedDishRepo.addToSlot.and.returnValue(
+        Promise.resolve({ ...samplePlanned, id: 'pd-new' }),
+      );
+      plannedDishRepo.markCompleted.and.returnValue(Promise.resolve());
+      const snap = {
+        meal_slot_id: 's-1',
+        dish_id: 'd-1',
+        dish_name: 'Phở',
+        servings: 1,
+        is_completed: 1 as const,
+      };
+
+      const created = await store.restoreDish(snap);
+
+      expect(created.id).toBe('pd-new');
+      expect(plannedDishRepo.addToSlot).toHaveBeenCalledWith('s-1', 'd-1', 1);
+      expect(plannedDishRepo.markCompleted).toHaveBeenCalledWith('pd-new');
+    });
+
+    it('restoreDish bumps tick once per restore', async () => {
+      plannedDishRepo.addToSlot.and.returnValue(Promise.resolve(samplePlanned));
+      const before = store.invalidationTick();
+      await store.restoreDish({
+        meal_slot_id: 's-1',
+        dish_id: 'd-1',
+        dish_name: 'Phở',
+        servings: 1,
+        is_completed: 0,
+      });
+      expect(store.invalidationTick()).toBe(before + 1);
+    });
+  });
+
+  describe('Story 3.7 — copyFromYesterday', () => {
+    it('returns 0 when yesterday day_plan does not exist', async () => {
+      dayPlanRepo.findByDate.and.callFake(async (date: string) => {
+        if (date === store.currentDate()) return sampleDayPlan;
+        return null as never;
+      });
+
+      const result = await store.copyFromYesterday();
+      expect(result.copiedCount).toBe(0);
+      expect(plannedDishRepo.copyToDate).not.toHaveBeenCalled();
+    });
+
+    it('copies every dish from yesterday into today preserving meal_type', async () => {
+      const today = store.currentDate();
+      const yesterdayIso = (() => {
+        const [y, m, d] = today.split('-').map(Number);
+        const dt = new Date(y, m - 1, d - 1);
+        return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(
+          dt.getDate(),
+        ).padStart(2, '0')}`;
+      })();
+      const yesterdayPlan: DayPlanWithSlots = {
+        ...sampleDayPlan,
+        date: yesterdayIso,
+        meal_slots: [
+          {
+            id: 's-y-lunch',
+            day_plan_id: 'dp-y',
+            meal_type: 'lunch',
+            position: 2,
+            created_at: 'x',
+            planned_dishes: [
+              {
+                ...samplePlanned,
+                id: 'pd-y-1',
+                meal_slot_id: 's-y-lunch',
+                dish_name: 'D1',
+                effective_calories: 100,
+                effective_protein: 5,
+                effective_carbs: 10,
+                effective_fat: 2,
+              },
+              {
+                ...samplePlanned,
+                id: 'pd-y-2',
+                meal_slot_id: 's-y-lunch',
+                dish_name: 'D2',
+                effective_calories: 100,
+                effective_protein: 5,
+                effective_carbs: 10,
+                effective_fat: 2,
+              },
+            ],
+          },
+        ],
+      };
+      dayPlanRepo.findByDate.and.callFake(async (date: string) => {
+        if (date === yesterdayIso) return yesterdayPlan;
+        return sampleDayPlan;
+      });
+      plannedDishRepo.copyToDate.and.returnValue(Promise.resolve(samplePlanned));
+
+      const result = await store.copyFromYesterday();
+
+      expect(result.copiedCount).toBe(2);
+      expect(plannedDishRepo.copyToDate).toHaveBeenCalledTimes(2);
+      const calls = plannedDishRepo.copyToDate.calls.allArgs();
+      for (const args of calls) {
+        expect(args[1]).toBe(today);
+        expect(args[2]).toBe('lunch');
+      }
+    });
+  });
+
+  describe('Story 3.7 — yesterdayHint signal', () => {
+    it('canCopyYesterday is false until hint flips true', () => {
+      // dayPlan is null until hydration kicks; force a hydration first.
+      expect(store.canCopyYesterday()).toBe(false);
+    });
+
+    it('canCopyYesterday becomes true when hint=true AND dayPlan loaded', async () => {
+      store.setDate(store.currentDate());
+      await flush();
+      store.yesterdayHint.set(true);
+      expect(store.canCopyYesterday()).toBe(true);
+      store.yesterdayHint.set(false);
+      expect(store.canCopyYesterday()).toBe(false);
+    });
+  });
 });

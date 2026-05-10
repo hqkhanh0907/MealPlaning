@@ -13,7 +13,8 @@ export class ConfirmEatModal {
   readonly isOpen = input<boolean>(false);
   readonly dishName = input.required<string>();
   readonly mode = input.required<ConfirmEatMode>();
-  readonly confirmed = output<boolean>();
+  readonly confirmed = output<void>();
+  readonly cancelled = output<void>();
 
   readonly title = computed<string>(() =>
     this.mode() === 'mark'
@@ -35,6 +36,10 @@ export class ConfirmEatModal {
   );
 
   emit(decision: boolean): void {
-    this.confirmed.emit(decision);
+    if (decision) {
+      this.confirmed.emit();
+    } else {
+      this.cancelled.emit();
+    }
   }
 }

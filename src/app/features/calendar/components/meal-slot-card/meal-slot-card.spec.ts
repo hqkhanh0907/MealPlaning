@@ -153,6 +153,50 @@ describe('MealSlotCard', () => {
     });
   });
 
+  describe('long-press (Story 3.7 AC-3)', () => {
+    beforeEach(() => jasmine.clock().install());
+    afterEach(() => jasmine.clock().uninstall());
+
+    it('emits dishLongPress after 500ms hold', () => {
+      setInputs(makeSlot([makeDish({ id: 'pd-99' })]), 'breakfast');
+      const spy = jasmine.createSpy('long');
+      component.dishLongPress.subscribe(spy);
+      component.onPressStart('pd-99');
+      jasmine.clock().tick(499);
+      expect(spy).not.toHaveBeenCalled();
+      jasmine.clock().tick(2);
+      expect(spy).toHaveBeenCalledWith('pd-99');
+    });
+
+    it('cancel before 500ms suppresses emit', () => {
+      setInputs(makeSlot([]), 'breakfast');
+      const spy = jasmine.createSpy('long');
+      component.dishLongPress.subscribe(spy);
+      component.onPressStart('pd-1');
+      jasmine.clock().tick(200);
+      component.onPressCancel();
+      jasmine.clock().tick(1000);
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('subsequent tap is suppressed once if long-press fired', () => {
+      setInputs(makeSlot([makeDish({ id: 'pd-1', is_completed: 0 })]), 'breakfast');
+      const longSpy = jasmine.createSpy('long');
+      const markSpy = jasmine.createSpy('mark');
+      component.dishLongPress.subscribe(longSpy);
+      component.markEaten.subscribe(markSpy);
+      component.onPressStart('pd-1');
+      jasmine.clock().tick(600);
+      expect(longSpy).toHaveBeenCalled();
+      // Click event after long-press should be eaten:
+      component.onActionTap('pd-1', 0);
+      expect(markSpy).not.toHaveBeenCalled();
+      // Next tap goes through normally:
+      component.onActionTap('pd-1', 0);
+      expect(markSpy).toHaveBeenCalledWith('pd-1');
+    });
+  });
+
   describe('rendered DOM', () => {
     it('renders empty hint when no dishes', () => {
       setInputs(makeSlot([]), 'breakfast');

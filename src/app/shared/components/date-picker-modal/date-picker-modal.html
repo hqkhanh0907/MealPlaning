@@ -1,0 +1,28 @@
+@if (isOpen()) {
+  <div class="dp-backdrop" role="presentation" (click)="cancel()">
+    <section
+      class="dp-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dp-title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="dp-header">
+        <h2 id="dp-title" class="dp-title">Chọn ngày</h2>
+        <button type="button" class="dp-today" (click)="jumpToday()">Hôm nay</button>
+      </header>
+      <ion-datetime
+        presentation="date"
+        [locale]="locale"
+        [min]="minIso()"
+        [max]="maxIso()"
+        [value]="selection()"
+        (ionChange)="onIonChange($event)"
+      ></ion-datetime>
+      <footer class="dp-actions">
+        <button type="button" class="dp-btn-cancel" (click)="cancel()">Huỷ</button>
+        <button type="button" class="dp-btn-primary" (click)="confirm()">Chọn</button>
+      </footer>
+    </section>
+  </div>
+}

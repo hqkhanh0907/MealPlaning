@@ -1,6 +1,7 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import type {
   DayPlanWithSlots,
+  DeletedDishSnapshot,
   MealType,
   PlannedDish,
   WeekDayTotal,
@@ -133,9 +134,97 @@ export class CalendarStore {
     this.invalidationTick.update((n) => n + 1);
   }
 
-  async deleteDish(plannedDishId: string): Promise<void> {
+  async deleteDish(plannedDishId: string): Promise<DeletedDishSnapshot | null> {
+    const snapshot = this.captureSnapshot(plannedDishId);
     await this.plannedDishRepo.delete(plannedDishId);
     this.invalidationTick.update((n) => n + 1);
+    return snapshot;
+  }
+
+  /**
+   * Move a planned/logged dish to a different meal slot inside the SAME day.
+   * Cross-day move is expressed via `copyToDate` + `deleteDish` from the UI
+   * because the slot-id alone does not encode the day.
+   */
+  async moveDish(plannedDishId: string, targetSlotId: string): Promise<void> {
+    await this.plannedDishRepo.moveToSlot(plannedDishId, targetSlotId);
+    this.invalidationTick.update((n) => n + 1);
+  }
+
+  /**
+   * Restore a deleted dish from snapshot (Story 3.7 undo flow).
+   * Re-inserts as planned via `addToSlot`, then re-applies `markCompleted`
+   * if the snapshot was logged. The restored row gets a NEW uuid (cannot
+   * resurrect the original PK because schema CASCADE may have referenced it).
+   */
+  async restoreDish(snapshot: DeletedDishSnapshot): Promise<PlannedDish> {
+    const created = await this.plannedDishRepo.addToSlot(
+      snapshot.meal_slot_id,
+      snapshot.dish_id,
+      snapshot.servings,
+    );
+    if (snapshot.is_completed === 1) {
+      await this.plannedDishRepo.markCompleted(created.id);
+    }
+    this.invalidationTick.update((n) => n + 1);
+    return created;
+  }
+
+  /** True when yesterday has at least one dish to copy from (Story 3.7 §AC-2). */
+  readonly canCopyYesterday = computed<boolean>(() => {
+    const dp = this.dayPlan();
+    if (!dp) return false;
+    // hydration is only for currentDate, so can only check yesterday by hint.
+    // Real check happens in `copyFromYesterday` via repo round-trip — this
+    // signal is a heuristic only used for disabling the CTA. The empty-state
+    // CTA should still ATTEMPT and report "tuần trước không có món" if hint
+    // proved wrong (parity with copyPreviousWeek toast).
+    return this.yesterdayHint();
+  });
+
+  /** Mutable hint flag set by the page after probing yesterday on hydration. */
+  readonly yesterdayHint = signal(false);
+
+  /**
+   * Copy every planned dish from yesterday into today (same meal_type).
+   * Returns count so the caller can toast.
+   */
+  async copyFromYesterday(): Promise<{ copiedCount: number }> {
+    const today = this.currentDate();
+    const yesterday = formatIsoDate(new Date(parseIsoDate(today).getTime() - DAY_MS));
+    const yDayPlan = await this.dayPlanRepo.findByDate(yesterday);
+    if (!yDayPlan) return { copiedCount: 0 };
+    let copiedCount = 0;
+    for (const slot of yDayPlan.meal_slots) {
+      for (const pd of slot.planned_dishes) {
+        await this.plannedDishRepo.copyToDate(pd.id, today, slot.meal_type);
+        copiedCount += 1;
+      }
+    }
+    if (copiedCount > 0) this.invalidationTick.update((n) => n + 1);
+    return { copiedCount };
+  }
+
+  /**
+   * Snapshot helper for undo. Looks up the dish in the currently loaded
+   * dayPlan; returns null if not found (caller decides whether to skip undo).
+   */
+  private captureSnapshot(plannedDishId: string): DeletedDishSnapshot | null {
+    const dp = this.dayPlan();
+    if (!dp) return null;
+    for (const slot of dp.meal_slots) {
+      const pd = slot.planned_dishes.find((d) => d.id === plannedDishId);
+      if (pd) {
+        return {
+          meal_slot_id: pd.meal_slot_id,
+          dish_id: pd.dish_id,
+          dish_name: pd.dish_name,
+          servings: pd.servings,
+          is_completed: pd.is_completed,
+        };
+      }
+    }
+    return null;
   }
 
   async copyToDate(

@@ -1,0 +1,28 @@
+@if (isOpen()) {
+  <div class="msp-backdrop" role="presentation" (click)="dismiss()">
+    <section
+      class="msp-sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="msp-title"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="msp-title" class="msp-title">{{ title() }}</h2>
+      <div class="msp-grid">
+        @for (choice of choices; track choice.type) {
+          <button
+            type="button"
+            class="msp-chip"
+            [class.is-current]="current() === choice.type"
+            (click)="pick(choice.type)"
+            [attr.aria-pressed]="current() === choice.type"
+          >
+            <span class="msp-chip-emoji" aria-hidden="true">{{ choice.emoji }}</span>
+            <span class="msp-chip-label">{{ choice.label }}</span>
+          </button>
+        }
+      </div>
+      <button type="button" class="msp-cancel" (click)="dismiss()">Huỷ</button>
+    </section>
+  </div>
+}

@@ -52,7 +52,7 @@
       } @else if (isEmpty()) {
         <app-empty-day-state
           (planClicked)="onPlanFromEmpty()"
-          (copyDeferred)="onCopyFromYesterdayDeferred()"
+          (copyDeferred)="onCopyFromYesterday()"
           (aiDeferred)="onAiFromEmpty()"
         />
       } @else {
@@ -63,6 +63,7 @@
             (markEaten)="onMarkEaten($event)"
             (unmarkEaten)="onUnmarkEaten($event)"
             (openLog)="onMealAddTap($event)"
+            (dishLongPress)="onDishLongPress($event, slot.meal_type)"
           />
         }
       }
@@ -78,6 +79,45 @@
   [isOpen]="confirmModalOpen()"
   [mode]="confirmMode()"
   [dishName]="confirmDishName()"
-  (confirm)="onConfirm()"
-  (cancel)="onCancel()"
+  (confirmed)="onConfirm()"
+  (cancelled)="onCancel()"
 />
+
+<app-date-picker-modal
+  [isOpen]="datePickerOpen()"
+  [initialDate]="store.currentDate()"
+  (dateSelected)="onDatePicked($event)"
+  (dismissed)="onDatePickerDismiss()"
+/>
+
+<app-dish-context-menu-modal
+  [isOpen]="contextMenuOpen()"
+  [dishName]="contextMenuDishName()"
+  (actionSelected)="onContextAction($event)"
+  (dismissed)="onContextMenuDismiss()"
+/>
+
+<app-meal-slot-picker-modal
+  [isOpen]="slotPickerOpen()"
+  [current]="slotPickerCurrent()"
+  title="Di chuyển sang bữa nào?"
+  (slotSelected)="onSlotPicked($event)"
+  (dismissed)="onSlotPickerDismiss()"
+/>
+
+<app-date-picker-modal
+  [isOpen]="copyToDatePickerOpen()"
+  [initialDate]="store.currentDate()"
+  (dateSelected)="onCopyDatePicked($event)"
+  (dismissed)="onCopyDatePickerDismiss()"
+/>
+
+@if (activeUndo(); as toast) {
+  <div class="undo-toast" role="status" aria-live="polite">
+    <span class="undo-toast__msg">{{ toast.message }}</span>
+    <button type="button" class="undo-toast__btn" (click)="onUndoTap()">Hoàn tác</button>
+    <button type="button" class="undo-toast__close" aria-label="Đóng" (click)="onUndoDismiss()">
+      ✕
+    </button>
+  </div>
+}

@@ -1,6 +1,6 @@
 # Story 3.7: Date Picker + Long-press Context Menu + Undo Toast
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Source: _bmad-output/planning-artifacts/epic-3-calendar.md (rev 1) lines 425-470 -->
 

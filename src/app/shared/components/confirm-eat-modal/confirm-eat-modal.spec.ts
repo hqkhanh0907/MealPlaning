@@ -52,21 +52,27 @@ describe('ConfirmEatModal', () => {
     });
   });
 
-  describe('confirmed output', () => {
-    it('emits true when emit(true) is called', () => {
+  describe('confirm/cancel outputs', () => {
+    it('emits confirm when emit(true) is called', () => {
       setInputs('mark');
-      const spy = jasmine.createSpy('confirmed');
-      component.confirmed.subscribe(spy);
+      const confirmSpy = jasmine.createSpy('confirm');
+      const cancelSpy = jasmine.createSpy('cancel');
+      component.confirmed.subscribe(confirmSpy);
+      component.cancelled.subscribe(cancelSpy);
       component.emit(true);
-      expect(spy).toHaveBeenCalledWith(true);
+      expect(confirmSpy).toHaveBeenCalledTimes(1);
+      expect(cancelSpy).not.toHaveBeenCalled();
     });
 
-    it('emits false when emit(false) is called', () => {
+    it('emits cancel when emit(false) is called', () => {
       setInputs('mark');
-      const spy = jasmine.createSpy('confirmed');
-      component.confirmed.subscribe(spy);
+      const confirmSpy = jasmine.createSpy('confirm');
+      const cancelSpy = jasmine.createSpy('cancel');
+      component.confirmed.subscribe(confirmSpy);
+      component.cancelled.subscribe(cancelSpy);
       component.emit(false);
-      expect(spy).toHaveBeenCalledWith(false);
+      expect(cancelSpy).toHaveBeenCalledTimes(1);
+      expect(confirmSpy).not.toHaveBeenCalled();
     });
   });
 
