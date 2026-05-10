@@ -134,6 +134,49 @@ describe('DishStore', () => {
     expect(store.dishes()).toEqual([]);
   });
 
+  describe('dishChanged invalidation bus (Story 3.3 AC-4)', () => {
+    it('bumps dishChanged after addFromIngredients', async () => {
+      const before = store.dishChanged();
+      await store.addFromIngredients(
+        {
+          name: 'Cơm trứng',
+          description: '',
+          type: 'ingredient_based',
+          source: 'custom',
+          servings: 1,
+          image_url: null,
+        },
+        [{ ingredient_id: 'ingredient-1', gram_weight: 100 }],
+      );
+      expect(store.dishChanged()).toBe(before + 1);
+    });
+
+    it('bumps dishChanged after edit', async () => {
+      await store.load();
+      const before = store.dishChanged();
+      await store.edit(
+        'dish-1',
+        {
+          name: 'Cơm trứng',
+          description: '',
+          type: 'ingredient_based',
+          source: 'custom',
+          servings: 1,
+          image_url: null,
+        },
+        [{ ingredient_id: 'ingredient-1', gram_weight: 100 }],
+      );
+      expect(store.dishChanged()).toBe(before + 1);
+    });
+
+    it('bumps dishChanged after remove', async () => {
+      await store.load();
+      const before = store.dishChanged();
+      await store.remove('dish-1');
+      expect(store.dishChanged()).toBe(before + 1);
+    });
+  });
+
   describe('findByNormalizedName', () => {
     it('delegates to repo and returns the matched dish', async () => {
       repo.findByNormalizedName.and.resolveTo(dish);

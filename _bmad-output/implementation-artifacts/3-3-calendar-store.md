@@ -1,6 +1,6 @@
 # Story 3.3: CalendarStore — signals + invalidation bus + cross-store wiring
 
-Status: ready-for-dev
+Status: ready-for-review
 
 <!-- Source: _bmad-output/planning-artifacts/epic-3-calendar.md (rev 1, 2026-05-10) -->
 
@@ -57,11 +57,11 @@ so that **Calendar pages render purely from signals; mutations route through sto
 
 ## Tasks
 
-- [ ] **T1**: Add `dishChanged = signal(0)` to `DishStore` + bump after `insert`/`update`/`delete`. Update `dish.store.spec.ts` with 3 assertions (insert/update/delete bump).
-- [ ] **T2**: Implement `CalendarStore` per AC-1..AC-7.
-- [ ] **T3**: Spec `calendar.store.spec.ts` ≥14 tests per AC-8.
-- [ ] **T4**: `ng test` ≥487 pass; guards 5/5; build; APK.
-- [ ] **T5**: Sprint status rev bump + commit.
+- [x] **T1**: Add `dishChanged = signal(0)` to `DishStore` + bump after `insert`/`update`/`delete`. Update `dish.store.spec.ts` with 3 assertions (insert/update/delete bump).
+- [x] **T2**: Implement `CalendarStore` per AC-1..AC-7.
+- [x] **T3**: Spec `calendar.store.spec.ts` ≥14 tests per AC-8.
+- [x] **T4**: `ng test` ≥487 pass; guards 5/5; build; APK.
+- [x] **T5**: Sprint status rev bump + commit.
 
 ## Dev Notes
 
@@ -84,3 +84,4 @@ so that **Calendar pages render purely from signals; mutations route through sto
 | Date | Change |
 |------|--------|
 | 2026-05-10 | Story created (`ready-for-dev`). |
+| 2026-05-10 | Dev complete: DishStore.dishChanged + 3 bumps; CalendarStore (5 signals + 7 mutations + cross-store wiring); 489/489 tests pass; 5/5 guards; APK BUILD SUCCESSFUL. Status → `ready-for-review`. |

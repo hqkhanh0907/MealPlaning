@@ -27,6 +27,14 @@ export class DishStore {
   readonly loading = signal(false);
   readonly searchQuery = signal('');
 
+  /**
+   * Cross-store invalidation bus — bumped after every successful insert /
+   * update / delete. Downstream stores (e.g. CalendarStore, NutritionStore)
+   * `effect()` on this signal to refresh derived state when a recipe changes
+   * (F-02 → F-03 reload). One-way: DishStore does NOT read consumers.
+   */
+  readonly dishChanged = signal(0);
+
   async load(): Promise<void> {
     this.loading.set(true);
     try {
@@ -68,6 +76,7 @@ export class DishStore {
   ): Promise<void> {
     const saved = await this.repo.insert(input, items);
     this.dishes.set([this.toListItem(saved), ...this.dishes()]);
+    this.dishChanged.update((n) => n + 1);
   }
 
   async edit(
@@ -81,11 +90,13 @@ export class DishStore {
     if (!this.dishes().some((item) => item.id === id)) {
       this.dishes.set([nextItem, ...this.dishes()]);
     }
+    this.dishChanged.update((n) => n + 1);
   }
 
   async remove(id: string): Promise<void> {
     await this.repo.delete(id);
     this.dishes.set(this.dishes().filter((item) => item.id !== id));
+    this.dishChanged.update((n) => n + 1);
   }
 
   /**
