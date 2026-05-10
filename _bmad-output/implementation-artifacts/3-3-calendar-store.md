@@ -85,7 +85,7 @@ so that **Calendar pages render purely from signals; mutations route through sto
 |------|--------|
 | 2026-05-10 | Story created (`ready-for-dev`). |
 | 2026-05-10 | Dev complete: DishStore.dishChanged + 3 bumps; CalendarStore (5 signals + 7 mutations + cross-store wiring); 489/489 tests pass; 5/5 guards; APK BUILD SUCCESSFUL. Status → `ready-for-review`. |
-| 2026-05-10 | Code-review: 3-layer (Blind/Edge/Auditor). 0 PATCH, 3 DEFER (today-snapshot, invalid-iso fallback), 3 DISMISS (DST/perf/monotonic). All 8 ACs covered. Status → `done`. |
+| 2026-05-10 | Code-review: 3-layer (Blind/Edge/Auditor). 0 PATCH, 3 DEFER (today-snapshot, invalid-iso fallback), 3 DISMISS (DST/perf/monotonic). All 8 ACs covered. Status → `done` (commit `f6ce979`). |
 
 ## Review Findings
 
