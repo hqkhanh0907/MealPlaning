@@ -1,6 +1,6 @@
 # Story 3.4: Shared primitives — CalorieRing + ServingsStepper + StatusPill + ConfirmEatModal + band-color util
 
-Status: ready-for-review
+Status: done
 
 <!-- Source: _bmad-output/planning-artifacts/epic-3-calendar.md (rev 1, 2026-05-10) lines 265-316 -->
 
@@ -60,4 +60,14 @@ so that **F-03 pages (Story 3.5/3.6/3.7) and Epic 4 surfaces consume the same vi
 | Date | Change |
 |------|--------|
 | 2026-05-10 | Story created (`ready-for-dev`). |
-| 2026-05-10 | Dev complete: 5 artifacts (`band-color` util + `CalorieRing` + `ServingsStepper` + `StatusPill` + `ConfirmEatModal`); 66 new specs added (558/558 total PASS); `check:guards` 9/9 PASS; web build + APK debug BUILD SUCCESSFUL. Status → `ready-for-review`. |
+| 2026-05-10 | Dev complete: 5 artifacts (`band-color` util + `CalorieRing` + `ServingsStepper` + `StatusPill` + `ConfirmEatModal`); 66 new specs added (558/558 total PASS); `check:guards` 9/9 PASS; web build + APK debug BUILD SUCCESSFUL. Status → `ready-for-review` (commit `e72d27a`). |
+| 2026-05-10 | Code-review: 3-layer (Blind/Edge/Auditor). 0 PATCH, 2 DEFER (step-grid float drift, dishName quote nesting), 1 DISMISS (wasted ticks at clamp boundary). All 8 ACs PASS. Status → `done`. |
+
+## Review Findings
+
+| ID | Layer | Severity | Description | Action |
+|----|-------|----------|-------------|--------|
+| B1 | Blind Hunter | LOW | `ServingsStepper.clamp` uses `Math.round(raw/step)*step` — drifts for non-decimal-friendly step values (e.g. step=0.3) | DEFER — current usage only step=0.1; revisit if servings policy changes |
+| E1 | Edge Case Hunter | LOW | `ConfirmEatModal` dishName containing `"` produces nested quotes in title | DEFER — cosmetic; Angular auto-escapes so no XSS |
+| E2 | Edge Case Hunter | INFO | `holdInterval` keeps firing increments while value clamped at max | DISMISS — clamp hard-stops, no observable side-effect |
+| A1–A8 | Acceptance Auditor | — | All 8 acceptance criteria covered (inputs, computed states, output emissions, design tokens, PC-1, ≥4 specs/component) | PASS |
