@@ -6,7 +6,7 @@ describe('createTestDatabase helper', () => {
   let db: WebDatabase;
 
   afterEach(() => {
-    teardownTestDatabase(db);
+    teardownTestDatabase();
   });
 
   it('boots a fresh sql.js DB at the canonical SCHEMA_VERSION', async () => {
@@ -24,7 +24,7 @@ describe('createTestDatabase helper', () => {
       `INSERT INTO day_plan (id, date, target_calories, target_protein) VALUES (?, ?, ?, ?)`,
       ['test-day-1', '2026-05-10', 2000, 150],
     );
-    teardownTestDatabase(db);
+    teardownTestDatabase();
 
     db = await createTestDatabase();
     const rows = await db.query<{ count: number }>('SELECT COUNT(*) AS count FROM day_plan');

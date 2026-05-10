@@ -12,7 +12,7 @@ import { WebDatabase } from '../web-database';
  *   forces sql.js into a pristine state — schema migrations run from
  *   `user_version=0` up to the current `SCHEMA_VERSION` (2) every call.
  *
- * Pair with `afterEach(async () => { await teardownTestDatabase(db); })` so
+ * Pair with `afterEach(() => { teardownTestDatabase(); })` so
  * the persisted blob does not leak into the next spec's bootstrap.
  *
  * @returns A `WebDatabase` already at `user_version=2`, foreign keys ON.
@@ -32,6 +32,6 @@ export async function createTestDatabase(): Promise<WebDatabase> {
  * cheapest deterministic teardown is dropping the persisted blob — the next
  * `createTestDatabase()` call cannot inherit any state from this spec.
  */
-export function teardownTestDatabase(_db: WebDatabase | null): void {
+export function teardownTestDatabase(): void {
   localStorage.removeItem(`sqljs_${environment.dbName}`);
 }

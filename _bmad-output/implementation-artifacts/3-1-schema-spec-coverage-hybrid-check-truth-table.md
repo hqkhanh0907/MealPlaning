@@ -1,6 +1,6 @@
 # Story 3.1: Schema spec coverage — Hybrid CHECK truth-table + partial index EXPLAIN
 
-Status: review
+Status: done
 
 <!-- Source: _bmad-output/planning-artifacts/epic-3-calendar.md (rev 1, 2026-05-10) -->
 
@@ -191,7 +191,14 @@ Phase 2 closure (commit fcc7dd4): 418 test pass. Story 3.1 thêm:
 - [x] APK build pass (sanity, `gradlew assembleDebug` BUILD SUCCESSFUL)
 - [x] Sprint status updated: `3-1-...: review` (will flip to `done` after code-review)
 - [x] Commit message follows Conventional
-- [ ] Code review pass (BMAD `code-review` skill — pending)
+- [x] Code review pass (BMAD `code-review` skill — 4 findings resolved: 3 patches + 1 strengthened idempotency test)
+
+### Review Findings
+
+- [x] [Review][Patch] Substring collision ở EXPLAIN Query A — added `expect(planJson).not.toContain('idx_planned_dish_completed_at')` để guard prefix match nếu sql.js bỏ qua `INDEXED BY` directive [schema.spec.ts:412]
+- [x] [Review][Patch] Mid-file ES import vi phạm `import/first` — moved `createTestDatabase` + `WebDatabase` imports lên top file [schema.spec.ts:3-4]
+- [x] [Review][Patch] `teardownTestDatabase(_db)` signature gây hiểu lầm — đổi sang `teardownTestDatabase()` no-param + cập nhật 6 callsites [create-test-database.ts:35, schema.spec.ts × 3, create-test-database.spec.ts × 2, migration-runner.spec.ts × 1]
+- [x] [Review][Patch] Idempotency test không phát hiện DROP+CREATE regression — strengthened bằng sentinel rows (1 day_plan + 1 meal_slot) insert trước replay, assert rows survive sau MigrationRunner.run() lần 2. Bonus: rename `db` → `liveDb` để fix W1 (shadow outer-scope `let db`) [migration-runner.spec.ts:67-122]
 
 
 ## Dev Agent Record
@@ -239,3 +246,4 @@ Phase 2 closure (commit fcc7dd4): 418 test pass. Story 3.1 thêm:
 |------------|-------------------------------------------------------------------------------------------------|
 | 2026-05-10 | Story created (`ready-for-dev`).                                                                |
 | 2026-05-10 | Implementation complete: +28 specs, 446/446 passing, 5/5 guards, APK build OK. Status → review. |
+| 2026-05-10 | Code review: 4 findings resolved (3 patches + strengthened idempotency w/ sentinel rows). 446/446 passing, 5/5 guards. Status → done. |

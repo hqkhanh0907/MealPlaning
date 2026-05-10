@@ -1,5 +1,7 @@
 import { Database } from './database';
 import { buildInitialSchemaMigration, SCHEMA_DDL } from './schema';
+import { createTestDatabase, teardownTestDatabase } from './__test__/create-test-database';
+import type { WebDatabase } from './web-database';
 
 describe('buildInitialSchemaMigration', () => {
   it('builds a single migration at version 1 (immutable) with all DDL statements', () => {
@@ -189,9 +191,6 @@ describe('schema migration replay smoke test', () => {
 // sql.js instance and asserts CHECK / partial-index behavior.
 // =============================================================================
 
-import { createTestDatabase, teardownTestDatabase } from './__test__/create-test-database';
-import type { WebDatabase } from './web-database';
-
 interface PlannedDishRow {
   id: string;
   is_completed: number;
@@ -277,7 +276,7 @@ describe('Hybrid CHECK truth-table — runtime (Story 3.1)', () => {
   });
 
   afterEach(() => {
-    teardownTestDatabase(db);
+    teardownTestDatabase();
   });
 
   it('Case 1 — is_completed=0 + 4 nutrition cols NULL + completed_at NULL → resolves', async () => {
@@ -338,7 +337,7 @@ describe('servings boundary — runtime (Story 3.1)', () => {
   });
 
   afterEach(() => {
-    teardownTestDatabase(db);
+    teardownTestDatabase();
   });
 
   it('servings=0 → REJECT', async () => {
@@ -394,7 +393,7 @@ describe('partial index hit — EXPLAIN QUERY PLAN (Story 3.1)', () => {
   });
 
   afterEach(() => {
-    teardownTestDatabase(db);
+    teardownTestDatabase();
   });
 
   async function explain(sql: string, params: unknown[] = []): Promise<string> {
@@ -420,6 +419,11 @@ describe('partial index hit — EXPLAIN QUERY PLAN (Story 3.1)', () => {
       ['anything'],
     );
     expect(planJson).toContain('idx_planned_dish_completed');
+    // Guard against substring collision with idx_planned_dish_completed_at —
+    // INDEXED BY locks the contract today, but if a future sql.js build
+    // ignored the directive, the bare `toContain` above would silently match
+    // the wrong partial index. This negative assertion enforces specificity.
+    expect(planJson).not.toContain('idx_planned_dish_completed_at');
   });
 
   it('Query B — completed dishes ORDER BY completed_at uses idx_planned_dish_completed_at', async () => {

@@ -66,29 +66,59 @@ describe('MigrationRunner', () => {
 
 describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
   it('is idempotent when MigrationRunner.run() executes a second time', async () => {
-    const db = await createTestDatabase();
+    const liveDb = await createTestDatabase();
     try {
       // First run already happened inside `WebDatabase.initialize()`; capture
       // the post-init footprint to compare against.
-      const beforeVersion = await db.query<{ user_version: number }>('PRAGMA user_version;');
+      const beforeVersion = await liveDb.query<{ user_version: number }>('PRAGMA user_version;');
       expect(beforeVersion[0].user_version).toBe(SCHEMA_VERSION);
 
-      const beforeTables = await db.query<{ count: number }>(
+      const beforeTables = await liveDb.query<{ count: number }>(
         `SELECT COUNT(*) AS count FROM sqlite_master WHERE type IN ('table', 'index', 'view') AND name NOT LIKE 'sqlite_%'`,
       );
 
-      // Run the registry again on the same DB — must not redo migrations.
-      await new MigrationRunner(db, MIGRATION_REGISTRY).run();
+      // Insert a sentinel row so the test can detect a hidden DROP+CREATE
+      // regression: if the runner ever stops filtering `version > current`
+      // and replays v2 (which DROPs planned_dish/meal_slot/day_plan), this
+      // row disappears even though `user_version` and table count remain
+      // unchanged. Counting rows survives that regression where counting
+      // tables does not.
+      const dayId = crypto.randomUUID();
+      const slotId = crypto.randomUUID();
+      await liveDb.execute(
+        `INSERT INTO day_plan (id, date, target_calories, target_protein) VALUES (?, ?, ?, ?)`,
+        [dayId, '2026-05-10', 2000, 150],
+      );
+      await liveDb.execute(`INSERT INTO meal_slot (id, day_plan_id, meal_type) VALUES (?, ?, ?)`, [
+        slotId,
+        dayId,
+        'breakfast',
+      ]);
 
-      const afterVersion = await db.query<{ user_version: number }>('PRAGMA user_version;');
-      const afterTables = await db.query<{ count: number }>(
+      // Run the registry again on the same DB — must not redo migrations.
+      await new MigrationRunner(liveDb, MIGRATION_REGISTRY).run();
+
+      const afterVersion = await liveDb.query<{ user_version: number }>('PRAGMA user_version;');
+      const afterTables = await liveDb.query<{ count: number }>(
         `SELECT COUNT(*) AS count FROM sqlite_master WHERE type IN ('table', 'index', 'view') AND name NOT LIKE 'sqlite_%'`,
+      );
+      const afterDayPlanCount = await liveDb.query<{ count: number }>(
+        `SELECT COUNT(*) AS count FROM day_plan WHERE id = ?`,
+        [dayId],
+      );
+      const afterMealSlotCount = await liveDb.query<{ count: number }>(
+        `SELECT COUNT(*) AS count FROM meal_slot WHERE id = ?`,
+        [slotId],
       );
 
       expect(afterVersion[0].user_version).toBe(SCHEMA_VERSION);
       expect(afterTables[0].count).toBe(beforeTables[0].count);
+      // Sentinel rows survive — proves replay was actually skipped, not
+      // re-executed-and-recreated-with-same-shape.
+      expect(afterDayPlanCount[0].count).toBe(1);
+      expect(afterMealSlotCount[0].count).toBe(1);
     } finally {
-      teardownTestDatabase(db);
+      teardownTestDatabase();
     }
   });
 });
