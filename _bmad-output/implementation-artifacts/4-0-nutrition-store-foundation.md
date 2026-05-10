@@ -1,6 +1,6 @@
 # Story 4.0: NutritionStore + NutritionQueryService + KeyMetricRouter foundation
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Source: _bmad-output/planning-artifacts/epic-4-nutrition-tracking.md (rev 1) lines 132-200 -->
 
