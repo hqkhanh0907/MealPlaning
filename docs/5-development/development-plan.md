@@ -328,7 +328,12 @@ Sau khi end phase:
 | `5-development/signal-forms-migration-plan.md` | ✅ Active | — |
 | `5-development/phase-1.5b-ai-foundation.md` | ⏳ Chưa viết | Trước khi start Phase 1.5B |
 | `5-development/phase-2-settings-polish.md` | ⏳ Chưa viết | Trước khi start Phase 2 (Settings reorder) |
-| `5-development/phase-3-calendar.md` | ⏳ Chưa viết | Trước khi start Phase 3 |
+| `5-development/phase-3-calendar.md` | 🟡 Replaced by epic files | Phase 3 dùng BMAD epic-as-spec pattern (xem 2 file dưới) |
+| `_bmad-output/planning-artifacts/epic-3-calendar.md` | ✅ Active | Phase 3 partition 1: Calendar foundation (8 stories) |
+| `_bmad-output/planning-artifacts/epic-4-nutrition-tracking.md` | ✅ Active | Phase 3 partition 2: Nutrition Tracking & Display (7 stories) |
+| `_bmad-output/planning-artifacts/architecture/calendar-tracking-2026-05-09.md` | ✅ Active | Phase 3 architecture (DEC-01..11, R-A1..7) |
+| `_bmad-output/planning-artifacts/ux-spec/f-03-calendar-plan-ux-spec-2026-05-09.md` | ✅ Active | Phase 3 UX spec — F-03 Calendar |
+| `_bmad-output/planning-artifacts/ux-spec/f-04-nutrition-tracking-ux-spec-2026-05-09.md` | ✅ Active | Phase 3 UX spec — F-04 Nutrition |
 | `5-development/phase-4-dashboard.md` | ⏳ Chưa viết | Trước khi start Phase 4 |
 | `5-development/phase-5-fitness.md` | ⏳ Chưa viết | Trước khi start Phase 5 |
 | `5-development/phase-6-ai-suite.md` | ⏳ Chưa viết | Trước khi start Phase 6 |
@@ -350,3 +355,4 @@ Sau khi end phase:
 | 1.3 | 2026-04-18 | Audit round 4: Phase 5 template count 4→5 (thêm Weekly Review), ADR-001 gating Phase 1.5B (thay Phase 5), Phase 2 explicit dependency note, Phase 3 Dashboard rationale clarify |
 | 1.4 | 2026-04-30 | Phase 1.5B kickoff: D3 bỏ quota limit (paid tier, dev tự chịu cost). Thêm link tới `phase-1.5b-ai-foundation.md` (chốt 10 quyết định kiến trúc). |
 | 1.5 | 2026-05-07 | **Settings reorder.** Phase 6 (Settings & Polish) đẩy lên Phase 2; Calendar/Tracking → Phase 3; Dashboard → Phase 4; Fitness → Phase 5; AI Suite → Phase 6. Lý do: Settings hub partial đã ship sẵn ở Phase 0/1, cần đóng nốt NotificationService + release prep sớm để Phase Calendar có notification dùng + theme service ổn định trước các phase UI heavy. Update bảng 7 Phases Overview, Per-phase Details, Dependency Graph, Open Items, Document Map. |
+| 1.6 | 2026-05-10 | **Phase 3 kickoff (BMAD D9).** Readiness audit pass (0 critical gap). Tạo 2 epic file thay phase-3-calendar.md monolith: `epic-3-calendar.md` (8 stories: schema spec → repos → store → shared primitives → Day/Week View + Date Picker + Undo + Reminders) và `epic-4-nutrition-tracking.md` (7 stories: NutritionStore + 3 shared → S1 Dashboard 4 variant → S2/S3 fill → S4 Trend → M1 Logging Modal → M2 Edit Modal + Hybrid banner). 15 stories, ~19-27 ngày dev. Performance variant Smart Key Metric + aggregate snapshot table defer Phase 4. |

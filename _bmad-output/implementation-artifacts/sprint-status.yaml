@@ -1,5 +1,5 @@
 # generated: 2026-05-07
-# last_updated: 2026-05-08 (rev 3 — close epic-2 + add Story 2.6 backfill)
+# last_updated: 2026-05-10 (rev 4 — open epic-3 + epic-4 from D9 planning pipeline)
 # project: HealthMate AI (MealPlaning)
 # project_key: NOKEY
 # tracking_system: file-system
@@ -24,7 +24,7 @@
 #   - done: Retrospective has been completed
 
 generated: 2026-05-07
-last_updated: 2026-05-08
+last_updated: 2026-05-10
 project: HealthMate AI (MealPlaning)
 project_key: NOKEY
 tracking_system: file-system
@@ -44,8 +44,14 @@ story_location: _bmad-output/implementation-artifacts
 # Rev 2 (2026-05-07): Story 2.1 + 2.4 + 2.5 titles updated after UI/UX audit fold-in.
 # Rev 3 (2026-05-08): Epic-2 closed; Story 2.6 (remove dark mode + collapse migrations)
 #   added as backfill post-ship per BMAD convention. Story 2.3 marked superseded by 2.6.
+# Rev 4 (2026-05-10): Phase 3 opened. Epic-3 (Calendar Foundation) + Epic-4 (Nutrition
+#   Tracking & Display) drafted from D9 readiness audit (0 critical gap). 8 + 7 = 15
+#   stories in backlog. Story files (epic-3-calendar.md / epic-4-nutrition-tracking.md)
+#   live in _bmad-output/planning-artifacts/. Implementation artifacts (per-story files)
+#   to be created Just-In-Time before each story dev (BMAD context-rich pattern).
 
 development_status:
+  # Phase 2 — DONE
   epic-2: done
   2-1-profile-goals-carbs-fat: done
   2-2-notification-permission-flow: done
@@ -54,6 +60,16 @@ development_status:
   2-5-release-prep-phase-2-polish-pass: done
   2-6-remove-dark-mode-collapse-migrations: done
   epic-2-retrospective: optional
+
+  # Phase 3 — Calendar + Nutrition Tracking (drafted 2026-05-10)
+  # Note: Individual story entries (3-1..3-8, 4-0..4-6) sẽ được add khi story file
+  # JIT-created trong _bmad-output/implementation-artifacts/ (BMAD context-rich pattern).
+  # Guard `check-story-scope-stability` enforce: key trong yaml ↔ file phải tồn tại.
+  # Source-of-truth tạm thời cho story breakdown: epic-3-calendar.md + epic-4-nutrition-tracking.md.
+  epic-3: backlog
+  epic-3-retrospective: optional
+  epic-4: backlog
+  epic-4-retrospective: optional
 
 # Epic-2 closure metadata
 epic_2_closure:
