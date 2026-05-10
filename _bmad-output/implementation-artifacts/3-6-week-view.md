@@ -89,3 +89,5 @@ so that **review pattern ăn uống cả tuần và quick-jump vào ngày bất 
 | Date | Change |
 |------|--------|
 | 2026-05-10 | Story created (`ready-for-dev`). |
+| 2026-05-10 | Dev complete: util week-day-status (11 specs) + WeekDayTotal type + repo `copyPreviousWeek` (5 specs) + CalendarStore.weekData/copyPreviousWeek + DayRow component (6 specs) + calendar.page integration. 612/612 specs PASS (was 590, +22). `check:guards` 9/9 PASS. Web build + APK BUILD SUCCESSFUL. Status → `ready-for-review`. Commit `66b10e0`. |
+| 2026-05-10 | Code-review: 0 PATCH, 2 DEFER (B1 weekday alignment assumption documented; E1 effective_calories=null silent → log warning at Story 3.7), 2 DISMISS (B2 currentDate-week semantics correct; E2 dotCount cap=6 cosmetic). Status → `done`. Commit `6a9a977`. |
