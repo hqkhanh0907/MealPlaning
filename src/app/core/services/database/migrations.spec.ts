@@ -7,6 +7,7 @@ import { MIGRATION_REGISTRY } from './migrations';
 
 describe('MIGRATION_REGISTRY', () => {
   it('exposes v1 + v2 migrations matching SCHEMA_VERSION', () => {
+    expect(SCHEMA_VERSION).toBe(2);
     expect(MIGRATION_REGISTRY.length).toBe(2);
     expect(MIGRATION_REGISTRY[0].version).toBe(1);
     expect(MIGRATION_REGISTRY[1].version).toBe(2);

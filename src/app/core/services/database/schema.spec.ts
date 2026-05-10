@@ -1,5 +1,5 @@
 import { Database } from './database';
-import { buildInitialSchemaMigration, SCHEMA_DDL, SCHEMA_VERSION } from './schema';
+import { buildInitialSchemaMigration, SCHEMA_DDL } from './schema';
 
 describe('buildInitialSchemaMigration', () => {
   it('builds a single migration at version 1 (immutable) with all DDL statements', () => {
@@ -112,9 +112,13 @@ describe('buildInitialSchemaMigration', () => {
       const stmt = findPlannedDishDdl();
       expect(stmt).toBeDefined();
       // is_completed=0 branch — all snapshot columns must be NULL
-      expect(stmt).toMatch(/is_completed = 0[\s\S]*?calories IS NULL[\s\S]*?protein IS NULL[\s\S]*?carbs IS NULL[\s\S]*?fat IS NULL[\s\S]*?completed_at IS NULL/);
+      expect(stmt).toMatch(
+        /is_completed = 0[\s\S]*?calories IS NULL[\s\S]*?protein IS NULL[\s\S]*?carbs IS NULL[\s\S]*?fat IS NULL[\s\S]*?completed_at IS NULL/,
+      );
       // is_completed=1 branch — all snapshot columns must be NOT NULL
-      expect(stmt).toMatch(/is_completed = 1[\s\S]*?calories IS NOT NULL[\s\S]*?protein IS NOT NULL[\s\S]*?carbs IS NOT NULL[\s\S]*?fat IS NOT NULL[\s\S]*?completed_at IS NOT NULL/);
+      expect(stmt).toMatch(
+        /is_completed = 1[\s\S]*?calories IS NOT NULL[\s\S]*?protein IS NOT NULL[\s\S]*?carbs IS NOT NULL[\s\S]*?fat IS NOT NULL[\s\S]*?completed_at IS NOT NULL/,
+      );
     });
 
     it('drops cached total_* columns from day_plan and meal_slot (DEC-07)', () => {
@@ -177,5 +181,259 @@ describe('schema migration replay smoke test', () => {
     expect(allStatements.some((s: string) => s.includes('idx_dish_favorite'))).toBeTrue();
     // Legacy seed_artifact index still present.
     expect(allStatements.some((s: string) => s.includes('idx_seed_artifact_type'))).toBeTrue();
+  });
+});
+
+// =============================================================================
+// Runtime spec coverage (Story 3.1) — applies SCHEMA_DDL + migrations on a real
+// sql.js instance and asserts CHECK / partial-index behavior.
+// =============================================================================
+
+import { createTestDatabase, teardownTestDatabase } from './__test__/create-test-database';
+import type { WebDatabase } from './web-database';
+
+interface PlannedDishRow {
+  id: string;
+  is_completed: number;
+  servings: number;
+  calories: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+  completed_at: string | null;
+}
+
+async function seedDayPlanAndSlot(db: WebDatabase): Promise<{ slotId: string; dishId: string }> {
+  const dayId = crypto.randomUUID();
+  const slotId = crypto.randomUUID();
+  const dishId = crypto.randomUUID();
+
+  await db.execute(
+    `INSERT INTO day_plan (id, date, target_calories, target_protein) VALUES (?, ?, ?, ?)`,
+    [dayId, '2026-05-10', 2000, 150],
+  );
+  await db.execute(`INSERT INTO meal_slot (id, day_plan_id, meal_type) VALUES (?, ?, ?)`, [
+    slotId,
+    dayId,
+    'breakfast',
+  ]);
+  await db.execute(`INSERT INTO dish (id, name, type, source) VALUES (?, ?, ?, ?)`, [
+    dishId,
+    'Cháo gà',
+    'ingredient_based',
+    'custom',
+  ]);
+  return { slotId, dishId };
+}
+
+async function insertPlannedDish(
+  db: WebDatabase,
+  slotId: string,
+  dishId: string,
+  overrides: Partial<Omit<PlannedDishRow, 'id'>> = {},
+): Promise<string> {
+  const id = crypto.randomUUID();
+  const row: Omit<PlannedDishRow, 'id'> = {
+    is_completed: 0,
+    servings: 1,
+    calories: null,
+    protein: null,
+    carbs: null,
+    fat: null,
+    completed_at: null,
+    ...overrides,
+  };
+  await db.execute(
+    `INSERT INTO planned_dish
+       (id, meal_slot_id, dish_id, servings, is_completed,
+        calories, protein, carbs, fat, completed_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      id,
+      slotId,
+      dishId,
+      row.servings,
+      row.is_completed,
+      row.calories,
+      row.protein,
+      row.carbs,
+      row.fat,
+      row.completed_at,
+    ],
+  );
+  return id;
+}
+
+describe('Hybrid CHECK truth-table — runtime (Story 3.1)', () => {
+  let db: WebDatabase;
+  let slotId: string;
+  let dishId: string;
+
+  beforeEach(async () => {
+    db = await createTestDatabase();
+    const seed = await seedDayPlanAndSlot(db);
+    slotId = seed.slotId;
+    dishId = seed.dishId;
+  });
+
+  afterEach(() => {
+    teardownTestDatabase(db);
+  });
+
+  it('Case 1 — is_completed=0 + 4 nutrition cols NULL + completed_at NULL → resolves', async () => {
+    const id = await insertPlannedDish(db, slotId, dishId, { is_completed: 0 });
+    const rows = await db.query<{ id: string }>('SELECT id FROM planned_dish WHERE id = ?', [id]);
+    expect(rows.length).toBe(1);
+  });
+
+  it('Case 2 — is_completed=0 + non-NULL calories → REJECT (CHECK fails)', async () => {
+    await expectAsync(
+      insertPlannedDish(db, slotId, dishId, { is_completed: 0, calories: 500 }),
+    ).toBeRejectedWithError(/check.*constraint.*failed/i);
+
+    const count = await db.query<{ count: number }>('SELECT COUNT(*) AS count FROM planned_dish');
+    expect(count[0].count).toBe(0);
+  });
+
+  it('Case 3 — is_completed=1 + 4 nutrition non-NULL + completed_at non-NULL → resolves', async () => {
+    const id = await insertPlannedDish(db, slotId, dishId, {
+      is_completed: 1,
+      calories: 500,
+      protein: 30,
+      carbs: 40,
+      fat: 10,
+      completed_at: '2026-05-10 12:00:00',
+    });
+    const rows = await db.query<{ id: string }>('SELECT id FROM planned_dish WHERE id = ?', [id]);
+    expect(rows.length).toBe(1);
+  });
+
+  it('Case 4 — is_completed=1 + protein NULL → REJECT (CHECK fails on missing snapshot)', async () => {
+    await expectAsync(
+      insertPlannedDish(db, slotId, dishId, {
+        is_completed: 1,
+        calories: 500,
+        protein: null,
+        carbs: 40,
+        fat: 10,
+        completed_at: '2026-05-10 12:00:00',
+      }),
+    ).toBeRejectedWithError(/check.*constraint.*failed/i);
+
+    const count = await db.query<{ count: number }>('SELECT COUNT(*) AS count FROM planned_dish');
+    expect(count[0].count).toBe(0);
+  });
+});
+
+describe('servings boundary — runtime (Story 3.1)', () => {
+  let db: WebDatabase;
+  let slotId: string;
+  let dishId: string;
+
+  beforeEach(async () => {
+    db = await createTestDatabase();
+    const seed = await seedDayPlanAndSlot(db);
+    slotId = seed.slotId;
+    dishId = seed.dishId;
+  });
+
+  afterEach(() => {
+    teardownTestDatabase(db);
+  });
+
+  it('servings=0 → REJECT', async () => {
+    await expectAsync(insertPlannedDish(db, slotId, dishId, { servings: 0 })).toBeRejectedWithError(
+      /check.*constraint.*failed/i,
+    );
+  });
+
+  it('servings=0.1 → pass', async () => {
+    const id = await insertPlannedDish(db, slotId, dishId, { servings: 0.1 });
+    expect(id).toBeTruthy();
+  });
+
+  it('servings=20 → pass', async () => {
+    const id = await insertPlannedDish(db, slotId, dishId, { servings: 20 });
+    expect(id).toBeTruthy();
+  });
+
+  it('servings=20.01 → REJECT', async () => {
+    await expectAsync(
+      insertPlannedDish(db, slotId, dishId, { servings: 20.01 }),
+    ).toBeRejectedWithError(/check.*constraint.*failed/i);
+  });
+
+  it('servings=-1 → REJECT', async () => {
+    await expectAsync(
+      insertPlannedDish(db, slotId, dishId, { servings: -1 }),
+    ).toBeRejectedWithError(/check.*constraint.*failed/i);
+  });
+});
+
+describe('partial index hit — EXPLAIN QUERY PLAN (Story 3.1)', () => {
+  let db: WebDatabase;
+
+  beforeEach(async () => {
+    db = await createTestDatabase();
+    const { slotId, dishId } = await seedDayPlanAndSlot(db);
+
+    // Mark dish favorite to feed idx_dish_favorite.
+    await db.execute('UPDATE dish SET is_favorite = 1 WHERE id = ?', [dishId]);
+
+    // 1 not-completed, 1 completed planned_dish — feeds completed-only partial indexes.
+    await insertPlannedDish(db, slotId, dishId, { is_completed: 0 });
+    await insertPlannedDish(db, slotId, dishId, {
+      is_completed: 1,
+      servings: 2,
+      calories: 600,
+      protein: 35,
+      carbs: 60,
+      fat: 12,
+      completed_at: '2026-05-10 13:00:00',
+    });
+  });
+
+  afterEach(() => {
+    teardownTestDatabase(db);
+  });
+
+  async function explain(sql: string, params: unknown[] = []): Promise<string> {
+    const plan = await db.query<Record<string, unknown>>(`EXPLAIN QUERY PLAN ${sql}`, params);
+    return JSON.stringify(plan);
+  }
+
+  // Why INDEXED BY:
+  //   With a single seeded row and no ANALYZE statistics, the SQLite query
+  //   planner's natural choice between two partial indexes covering the same
+  //   WHERE predicate (`is_completed = 1`) is not deterministic across builds.
+  //   `INDEXED BY` *locks the contract*: each test asserts that the named
+  //   partial index is *structurally usable* for the access pattern (matching
+  //   columns, satisfying the partial WHERE). If the index were missing,
+  //   dropped, or its partial predicate diverged from the query, sql.js would
+  //   throw `no query solution`. That is exactly the regression Story 3.1
+  //   guards against.
+
+  it('Query A — completed lookup by meal_slot uses idx_planned_dish_completed', async () => {
+    const planJson = await explain(
+      `SELECT * FROM planned_dish INDEXED BY idx_planned_dish_completed
+        WHERE is_completed = 1 AND meal_slot_id = ?`,
+      ['anything'],
+    );
+    expect(planJson).toContain('idx_planned_dish_completed');
+  });
+
+  it('Query B — completed dishes ORDER BY completed_at uses idx_planned_dish_completed_at', async () => {
+    const planJson = await explain(
+      `SELECT * FROM planned_dish INDEXED BY idx_planned_dish_completed_at
+        WHERE is_completed = 1 ORDER BY completed_at DESC LIMIT 30`,
+    );
+    expect(planJson).toContain('idx_planned_dish_completed_at');
+  });
+
+  it('Query C — favorite dish lookup uses idx_dish_favorite', async () => {
+    const planJson = await explain(
+      `SELECT * FROM dish INDEXED BY idx_dish_favorite WHERE is_favorite = 1`,
+    );
+    expect(planJson).toContain('idx_dish_favorite');
   });
 });

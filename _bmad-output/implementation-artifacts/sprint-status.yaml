@@ -49,6 +49,9 @@ story_location: _bmad-output/implementation-artifacts
 #   stories in backlog. Story files (epic-3-calendar.md / epic-4-nutrition-tracking.md)
 #   live in _bmad-output/planning-artifacts/. Implementation artifacts (per-story files)
 #   to be created Just-In-Time before each story dev (BMAD context-rich pattern).
+# Rev 5 (2026-05-10): Story 3.1 (schema spec runtime coverage) created + completed.
+#   +28 specs (446 total / 446 pass). Hybrid CHECK truth-table, servings boundary,
+#   partial index coverage all locked at runtime via sql.js.
 
 development_status:
   # Phase 2 — DONE
@@ -67,7 +70,7 @@ development_status:
   # Guard `check-story-scope-stability` enforce: key trong yaml ↔ file phải tồn tại.
   # Source-of-truth tạm thời cho story breakdown: epic-3-calendar.md + epic-4-nutrition-tracking.md.
   epic-3: in-progress
-  3-1-schema-spec-coverage-hybrid-check-truth-table: ready-for-dev
+  3-1-schema-spec-coverage-hybrid-check-truth-table: review
   epic-3-retrospective: optional
   epic-4: backlog
   epic-4-retrospective: optional

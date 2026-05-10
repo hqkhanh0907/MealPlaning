@@ -1,5 +1,8 @@
 import { Database } from './database';
 import { MigrationRunner, type Migration } from './migration-runner';
+import { createTestDatabase, teardownTestDatabase } from './__test__/create-test-database';
+import { MIGRATION_REGISTRY } from './migrations';
+import { SCHEMA_VERSION } from './schema';
 
 describe('MigrationRunner', () => {
   let db: jasmine.SpyObj<Database>;
@@ -58,5 +61,34 @@ describe('MigrationRunner', () => {
       ['CREATE TABLE first (id INTEGER PRIMARY KEY)'],
       ['PRAGMA user_version = 1;'],
     ]);
+  });
+});
+
+describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
+  it('is idempotent when MigrationRunner.run() executes a second time', async () => {
+    const db = await createTestDatabase();
+    try {
+      // First run already happened inside `WebDatabase.initialize()`; capture
+      // the post-init footprint to compare against.
+      const beforeVersion = await db.query<{ user_version: number }>('PRAGMA user_version;');
+      expect(beforeVersion[0].user_version).toBe(SCHEMA_VERSION);
+
+      const beforeTables = await db.query<{ count: number }>(
+        `SELECT COUNT(*) AS count FROM sqlite_master WHERE type IN ('table', 'index', 'view') AND name NOT LIKE 'sqlite_%'`,
+      );
+
+      // Run the registry again on the same DB — must not redo migrations.
+      await new MigrationRunner(db, MIGRATION_REGISTRY).run();
+
+      const afterVersion = await db.query<{ user_version: number }>('PRAGMA user_version;');
+      const afterTables = await db.query<{ count: number }>(
+        `SELECT COUNT(*) AS count FROM sqlite_master WHERE type IN ('table', 'index', 'view') AND name NOT LIKE 'sqlite_%'`,
+      );
+
+      expect(afterVersion[0].user_version).toBe(SCHEMA_VERSION);
+      expect(afterTables[0].count).toBe(beforeTables[0].count);
+    } finally {
+      teardownTestDatabase(db);
+    }
   });
 });
