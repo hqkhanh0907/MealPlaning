@@ -1,6 +1,6 @@
 # Story 3.5: F-03 Day View — meal slot list + per-dish actions + DaySummaryCard placeholder
 
-Status: ready-for-review
+Status: done
 
 <!-- Source: _bmad-output/planning-artifacts/epic-3-calendar.md (rev 1) lines 319-370 -->
 
@@ -71,4 +71,15 @@ so that **quản lý kế hoạch ăn uống + log thực tế hàng ngày**.
 | Date | Change |
 |------|--------|
 | 2026-05-10 | Story created (`ready-for-dev`). |
-| 2026-05-10 | Dev complete: 4 components/util implemented; 32 new specs added (590/590 total PASS, was 558 → +32); `check:guards` 9/9 PASS; web build + APK debug BUILD SUCCESSFUL. Status → `ready-for-review`. |
+| 2026-05-10 | Dev complete: 4 components/util implemented; 32 new specs added (590/590 total PASS, was 558 → +32); `check:guards` 9/9 PASS; web build + APK debug BUILD SUCCESSFUL. Status → `ready-for-review` (commit `f5f41ee`). |
+| 2026-05-10 | Code-review: 3-layer (Blind/Edge/Auditor). 0 PATCH, 3 DEFER (findDish-on-null-dayPlan, shiftIsoDate dup, swipe debounce), 1 DISMISS (empty-state flash). All 9 ACs PASS. Status → `done`. |
+
+## Review Findings
+
+| ID | Layer | Severity | Description | Action |
+|----|-------|----------|-------------|--------|
+| B1 | Blind Hunter | LOW | `findDish` no-ops silently when `dayPlan()===null`; mark/unmark click during hydration is dropped | DEFER — race window is sub-second; revisit if QA reproduces |
+| B2 | Blind Hunter | INFO | `shiftIsoDate` duplicates CalendarStore's date arithmetic (clamp + formatIso) | DEFER — consolidate into shared `core/utils/iso-date.ts` during Story 3.7 (datepicker work) |
+| E1 | Edge Case Hunter | LOW | Rapid 5-swipe burst issues 5 hydrate queries — stale-result guard drops 4 results but the SQL still runs | DEFER — add debounce in Story 3.6 (week view) or 3.7 |
+| E2 | Edge Case Hunter | INFO | Possible empty-state flash before initial hydrate | DISMISS — `dayPlan()===null` branch shows "Đang tải kế hoạch ngày…" before either branch renders |
+| A1–A9 | Acceptance Auditor | — | All 9 ACs covered (layout, MealSlotCard, mark/unmark flow, empty 3-CTA, header label, swipe gesture, AI toast, file structure, ≥18 specs → 32) | PASS |
