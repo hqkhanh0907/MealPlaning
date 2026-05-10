@@ -1,6 +1,6 @@
 # Story 3.7: Date Picker + Long-press Context Menu + Undo Toast
 
-Status: in-progress
+Status: done
 
 <!-- Source: _bmad-output/planning-artifacts/epic-3-calendar.md (rev 1) lines 425-470 -->
 
@@ -47,3 +47,4 @@ AC-7 Manual QA → deferred (CI/automated only).
 | Date | Change |
 |------|--------|
 | 2026-05-10 | Story created (`ready-for-dev`). |
+| 2026-05-10 | Implemented T1-T9 + boy-scout fix; 653 specs PASS, prod build + APK OK. Commit `30e5938`. Status → `done`. |
