@@ -1,6 +1,6 @@
 # Story 3.2: Repository layer — DayPlanRepository + PlannedDishRepository
 
-Status: ready-for-dev
+Status: ready-for-review
 
 <!-- Source: _bmad-output/planning-artifacts/epic-3-calendar.md (rev 1, 2026-05-10) -->
 
@@ -178,3 +178,4 @@ src/app/core/
 | Date       | Change                                            |
 |------------|---------------------------------------------------|
 | 2026-05-10 | Story created (`ready-for-dev`).                  |
+| 2026-05-10 | Dev complete (`ready-for-review`). 472/472 tests pass (446+26). 5/5 guards. Build + APK pass. |

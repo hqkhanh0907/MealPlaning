@@ -79,7 +79,7 @@ development_status:
   # Source-of-truth tạm thời cho story breakdown: epic-3-calendar.md + epic-4-nutrition-tracking.md.
   epic-3: in-progress
   3-1-schema-spec-coverage-hybrid-check-truth-table: done
-  3-2-repos-day-plan-planned-dish: ready-for-dev
+  3-2-repos-day-plan-planned-dish: ready-for-review
   epic-3-retrospective: optional
   epic-4: backlog
   epic-4-retrospective: optional
