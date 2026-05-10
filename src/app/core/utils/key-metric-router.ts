@@ -1,6 +1,7 @@
 import type { UserProfile } from '../models/user-profile.model';
+import type { KeyMetric } from './band-color';
 
-export type KeyMetric = 'calories' | 'protein' | 'carbs' | 'fat';
+export type { KeyMetric };
 
 /**
  * One bucket per (level, goal) combination. Drives Smart Key Metric routing
