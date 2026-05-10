@@ -1,6 +1,6 @@
 # Story 4.0: NutritionStore + NutritionQueryService + KeyMetricRouter foundation
 
-Status: in-progress
+Status: done
 
 <!-- Source: _bmad-output/planning-artifacts/epic-4-nutrition-tracking.md (rev 1) lines 132-200 -->
 
@@ -51,3 +51,4 @@ Cung cấp foundation Phase-3 layer 1 cho F-04: aggregate query service (`Nutrit
 | Date | Change |
 |------|--------|
 | 2026-05-10 | Story created (`ready-for-dev`) — drafted from epic-4-nutrition-tracking.md §Story 4.0 sau khi Story 3.7 đóng (epic-3 complete). |
+| 2026-05-10 | Implemented T1-T6: NutritionQuery (3 method + 3 EXPLAIN spec), KeyMetricRouter (5×4 matrix + null fallback), NutritionStore (signals + effect + trend cache). 696/696 PASS, prod build + APK OK. Commit `a5df46a`. Status → `done`. |
