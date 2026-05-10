@@ -1,6 +1,6 @@
 # Story 4.1: Shared components — MacroRow + RecipeChangedBanner + TrendBarChart
 
-Status: in-progress
+Status: done
 
 <!-- Source: _bmad-output/planning-artifacts/epic-4-nutrition-tracking.md (rev 1) lines 204-264 -->
 
@@ -50,3 +50,4 @@ Hoàn thiện 3 shared component còn thiếu (sau Story 3.4) theo DEC-09 §10.2
 | Date | Change |
 |------|--------|
 | 2026-05-10 | Story created (`ready-for-dev`) — drafted from epic-4-nutrition-tracking.md §Story 4.1 sau khi Story 4.0 đóng @ a5df46a. |
+| 2026-05-10 | Story complete @ `c2118d9` — 3 components + 27 specs (723/723 PASS). Guards PASS, prod build OK, APK installed emulator-5554. Status `done`. |
