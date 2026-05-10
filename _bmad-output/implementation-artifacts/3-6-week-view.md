@@ -1,6 +1,6 @@
 # Story 3.6: F-03 Week View — toggle from Day View + 7-row layout + copy previous week
 
-Status: ready-for-review
+Status: done
 
 <!-- Source: _bmad-output/planning-artifacts/epic-3-calendar.md (rev 1) lines 374-421 -->
 
