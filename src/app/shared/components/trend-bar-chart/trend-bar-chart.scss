@@ -1,0 +1,53 @@
+.trend-bar-chart {
+  display: block;
+  width: 100%;
+
+  &__bar {
+    transition:
+      height 400ms ease-out,
+      y 400ms ease-out;
+
+    &--low {
+      fill: var(--ion-color-danger);
+    }
+
+    &--medium {
+      fill: var(--ion-color-warning);
+    }
+
+    &--good {
+      fill: var(--ion-color-success);
+    }
+
+    &--high {
+      fill: var(--ion-color-danger);
+    }
+
+    &--compare {
+      fill: var(--ion-color-medium);
+      opacity: 0.5;
+    }
+  }
+
+  &__target-line {
+    stroke: var(--ion-color-medium);
+    stroke-width: 1; /* allow-hardcode: dashed guide line standard 1px */
+    stroke-dasharray: 4 4; /* allow-hardcode: SVG dash spec literal */
+    fill: none;
+  }
+
+  &__axis {
+    position: relative;
+    width: 100%;
+    margin-top: var(--spacing-xs);
+  }
+
+  &__axis-label {
+    position: absolute;
+    transform: translateX(-50%);
+    font-family: var(--ion-font-family);
+    font-size: var(--font-size-xs);
+    color: var(--ion-color-medium);
+    white-space: nowrap;
+  }
+}

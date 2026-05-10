@@ -1,6 +1,6 @@
 # Story 4.1: Shared components — MacroRow + RecipeChangedBanner + TrendBarChart
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Source: _bmad-output/planning-artifacts/epic-4-nutrition-tracking.md (rev 1) lines 204-264 -->
 

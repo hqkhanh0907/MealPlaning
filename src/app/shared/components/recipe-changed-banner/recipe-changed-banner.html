@@ -1,0 +1,16 @@
+<div class="recipe-changed-banner" role="alert" [attr.aria-label]="ariaLabel()">
+  <span class="recipe-changed-banner__icon" aria-hidden="true">⚠️</span>
+  <div class="recipe-changed-banner__body">
+    <p class="recipe-changed-banner__headline">
+      Công thức đã thay đổi:
+      <strong class="recipe-changed-banner__snapshot">{{ snapshotCalories() }} calo</strong>
+      ·
+      <em class="recipe-changed-banner__current">hiện tại {{ currentCalories() }} calo</em>
+    </p>
+    <p class="recipe-changed-banner__delta">
+      Chênh lệch: {{ deltaSign() }}{{ absDelta() }} calo ({{ deltaSign()
+      }}{{ absDiffPct().toFixed(1) }}%)
+    </p>
+    <a class="recipe-changed-banner__faq" href="#" (click)="onFaqClick($event)">ℹ️ Tại sao?</a>
+  </div>
+</div>

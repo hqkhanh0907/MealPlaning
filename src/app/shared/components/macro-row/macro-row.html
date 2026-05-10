@@ -1,0 +1,33 @@
+<div class="macro-row" [class]="'macro-row--' + mode()">
+  @for (m of macros(); track m.key) {
+    <div
+      class="macro-row__item"
+      [class.macro-row__item--highlighted]="isHighlighted(m)"
+      [attr.aria-label]="ariaLabel(m)"
+      role="group"
+    >
+      @if (mode() === 'compact') {
+        <app-calorie-ring
+          [value]="m.data.value"
+          [target]="m.data.target"
+          [size]="32"
+          [strokeWidth]="6"
+          [showCenterLabel]="false"
+          [variant]="m.key === 'fiber' ? 'calories' : m.key"
+        />
+        <div class="macro-row__meta">
+          <span class="macro-row__label">{{ m.label }}</span>
+          <span class="macro-row__values">{{ m.data.value }}/{{ m.data.target }}</span>
+        </div>
+      } @else {
+        <div class="macro-row__row-head">
+          <span class="macro-row__label">{{ m.label }}</span>
+          <span class="macro-row__values">{{ m.data.value }}/{{ m.data.target }}</span>
+        </div>
+        <div class="macro-row__bar" [class]="'macro-row__bar--' + band(m)">
+          <div class="macro-row__bar-fill" [style.width.%]="visualPct(m.data)"></div>
+        </div>
+      }
+    </div>
+  }
+</div>

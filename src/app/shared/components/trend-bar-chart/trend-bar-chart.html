@@ -1,0 +1,56 @@
+<svg
+  class="trend-bar-chart"
+  [attr.viewBox]="viewBox()"
+  [style.height.px]="height()"
+  preserveAspectRatio="none"
+  role="img"
+  [attr.aria-label]="ariaLabel()"
+>
+  <!-- Compare-with overlay (renders first, behind main bars) -->
+  @for (b of compareBars(); track b.index) {
+    @if (b.value > 0) {
+      <rect
+        class="trend-bar-chart__bar trend-bar-chart__bar--compare"
+        [attr.x]="b.x"
+        [attr.y]="height() - b.visualHeight"
+        [attr.width]="b.width"
+        [attr.height]="b.visualHeight"
+      />
+    }
+  }
+
+  <!-- Target line (dashed) -->
+  @if (targetY() !== null) {
+    <line
+      class="trend-bar-chart__target-line"
+      x1="0"
+      [attr.x2]="viewBoxWidth"
+      [attr.y1]="targetY()"
+      [attr.y2]="targetY()"
+    />
+  }
+
+  <!-- Main bars -->
+  @for (b of mainBars(); track b.index) {
+    <rect
+      class="trend-bar-chart__bar"
+      [class]="'trend-bar-chart__bar--' + b.band"
+      [attr.x]="b.x"
+      [attr.y]="height() - b.visualHeight"
+      [attr.width]="b.width"
+      [attr.height]="b.visualHeight"
+    />
+  }
+</svg>
+
+<!-- X-axis labels (HTML, kept outside SVG so font-size token applies cleanly) -->
+<div class="trend-bar-chart__axis" [style.height.px]="20">
+  @for (b of mainBars(); track b.index) {
+    <span
+      class="trend-bar-chart__axis-label"
+      [style.left.%]="((b.x + b.width / 2) / viewBoxWidth) * 100"
+    >
+      {{ b.value > 0 ? b.axisLabel : '─' }}
+    </span>
+  }
+</div>
