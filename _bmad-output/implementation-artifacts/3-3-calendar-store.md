@@ -1,6 +1,6 @@
 # Story 3.3: CalendarStore — signals + invalidation bus + cross-store wiring
 
-Status: ready-for-review
+Status: done
 
 <!-- Source: _bmad-output/planning-artifacts/epic-3-calendar.md (rev 1, 2026-05-10) -->
 
@@ -85,3 +85,16 @@ so that **Calendar pages render purely from signals; mutations route through sto
 |------|--------|
 | 2026-05-10 | Story created (`ready-for-dev`). |
 | 2026-05-10 | Dev complete: DishStore.dishChanged + 3 bumps; CalendarStore (5 signals + 7 mutations + cross-store wiring); 489/489 tests pass; 5/5 guards; APK BUILD SUCCESSFUL. Status → `ready-for-review`. |
+| 2026-05-10 | Code-review: 3-layer (Blind/Edge/Auditor). 0 PATCH, 3 DEFER (today-snapshot, invalid-iso fallback), 3 DISMISS (DST/perf/monotonic). All 8 ACs covered. Status → `done`. |
+
+## Review Findings
+
+| ID | Layer | Severity | Finding | Decision |
+|----|-------|----------|---------|----------|
+| B1 | Blind | LOW | `today` captured at constructor → window doesn't slide past midnight | DEFER (Dev Notes: test determinism) |
+| B2 | Blind | LOW | Initial `currentDate` frozen at constructor | DEFER (UI re-instantiates per route) |
+| B3 | Blind | LOW | `clampDate` silently fallbacks to today for invalid ISO | DEFER (callers validate upstream) |
+| E1 | Edge | LOW | `weekDays` allocates 7 Date objects per recompute | DISMISS (trivial cost) |
+| E2 | Edge | INFO | DST spring-forward edge in `weekStart` | DISMISS (Asia/HCM no DST) |
+| E3 | Edge | LOW | Cross-wiring `if (tick > 0)` skips literal 0 bumps | DISMISS (signal monotonic) |
+| A1-A8 | Auditor | OK | All 8 ACs implemented + spec-covered | PASS |

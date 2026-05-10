@@ -1,5 +1,5 @@
 # generated: 2026-05-07
-# last_updated: 2026-05-10 (rev 9 — Story 3.3 ready-for-review)
+# last_updated: 2026-05-10 (rev 10 — Story 3.3 done after code-review)
 # project: HealthMate AI (MealPlaning)
 # project_key: NOKEY
 # tracking_system: file-system
@@ -70,6 +70,9 @@ story_location: _bmad-output/implementation-artifacts
 #   Mon-Sun, invalidationTick) + 7 mutations (tx-first signal-last R-A3) +
 #   cross-store wiring via effect. 16 new CalendarStore specs + 3 DishStore
 #   bus specs. 489/489 pass. 5/5 guards. APK BUILD SUCCESSFUL.
+# Rev 10 (2026-05-10): Story 3.3 done after code-review.
+#   3-layer review: 0 PATCH, 3 DEFER (today-snapshot, invalid-iso fallback),
+#   3 DISMISS (DST/perf/monotonic). All 8 ACs covered. No regressions.
 
 development_status:
   # Phase 2 — DONE
@@ -90,7 +93,7 @@ development_status:
   epic-3: in-progress
   3-1-schema-spec-coverage-hybrid-check-truth-table: done
   3-2-repos-day-plan-planned-dish: done
-  3-3-calendar-store: ready-for-review
+  3-3-calendar-store: done
   epic-3-retrospective: optional
   epic-4: backlog
   epic-4-retrospective: optional
