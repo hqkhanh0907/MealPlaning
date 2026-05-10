@@ -1,0 +1,35 @@
+.calorie-ring {
+  display: inline-block;
+
+  &__track {
+    stroke: var(--ion-color-step-150);
+  }
+
+  &__fill {
+    transition: stroke-dashoffset 600ms ease-out;
+    stroke-linecap: round;
+  }
+
+  &__label {
+    font-family: var(--ion-font-family);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    fill: var(--ion-text-color);
+  }
+
+  &--low &__fill {
+    stroke: var(--ion-color-danger);
+  }
+
+  &--medium &__fill {
+    stroke: var(--ion-color-warning);
+  }
+
+  &--good &__fill {
+    stroke: var(--ion-color-success);
+  }
+
+  &--high &__fill {
+    stroke: var(--ion-color-danger);
+  }
+}

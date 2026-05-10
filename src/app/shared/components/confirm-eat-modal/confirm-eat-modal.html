@@ -1,0 +1,21 @@
+@if (isOpen()) {
+  <div class="dialog-backdrop" role="presentation">
+    <section
+      class="dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="confirm-eat-title"
+      aria-describedby="confirm-eat-body"
+    >
+      <h2 id="confirm-eat-title" class="dialog-title">{{ title() }}</h2>
+      <p id="confirm-eat-body" class="dialog-message">{{ body() }}</p>
+      @if (hybridMicrocopy(); as micro) {
+        <p class="dialog-microcopy">{{ micro }}</p>
+      }
+      <div class="dialog-actions">
+        <button type="button" class="dialog-btn-cancel" (click)="emit(false)">Hủy</button>
+        <button type="button" class="dialog-btn-primary" (click)="emit(true)">Xác nhận</button>
+      </div>
+    </section>
+  </div>
+}

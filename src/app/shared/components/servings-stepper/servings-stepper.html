@@ -1,0 +1,43 @@
+<div class="servings-stepper" [class.servings-stepper--disabled]="disabled()">
+  <button
+    type="button"
+    class="servings-stepper__btn"
+    aria-label="Giảm khẩu phần"
+    [disabled]="!canDecrement()"
+    (pointerdown)="startHold('dec')"
+    (pointerup)="cancelHold()"
+    (pointerleave)="cancelHold()"
+    (pointercancel)="cancelHold()"
+  >
+    −
+  </button>
+
+  <div class="input-wrapper servings-stepper__input-wrap">
+    <label class="input-label" for="servings-input">Khẩu phần</label>
+    <input
+      id="servings-input"
+      class="input-native"
+      type="number"
+      inputmode="decimal"
+      [attr.min]="min()"
+      [attr.max]="max()"
+      [attr.step]="step()"
+      [value]="value()"
+      [disabled]="disabled()"
+      (blur)="onDirectInput($any($event.target).value)"
+    />
+  </div>
+
+  <button
+    type="button"
+    class="servings-stepper__btn"
+    aria-label="Tăng khẩu phần"
+    [disabled]="!canIncrement()"
+    (pointerdown)="startHold('inc')"
+    (pointerup)="cancelHold()"
+    (pointerleave)="cancelHold()"
+    (pointercancel)="cancelHold()"
+  >
+    +
+  </button>
+</div>

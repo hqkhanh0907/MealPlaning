@@ -1,6 +1,6 @@
 # Story 3.4: Shared primitives — CalorieRing + ServingsStepper + StatusPill + ConfirmEatModal + band-color util
 
-Status: ready-for-dev
+Status: ready-for-review
 
 <!-- Source: _bmad-output/planning-artifacts/epic-3-calendar.md (rev 1, 2026-05-10) lines 265-316 -->
 
@@ -30,13 +30,13 @@ so that **F-03 pages (Story 3.5/3.6/3.7) and Epic 4 surfaces consume the same vi
 
 ## Tasks
 
-- [ ] **T1**: `band-color.ts` util + spec.
-- [ ] **T2**: `CalorieRing` 3-file component + spec.
-- [ ] **T3**: `ServingsStepper` 3-file component + spec.
-- [ ] **T4**: `StatusPill` 3-file component + spec.
-- [ ] **T5**: `ConfirmEatModal` 3-file component + spec.
-- [ ] **T6**: `ng test` ≥510 pass; `check:guards` 9/9 PASS; build; APK.
-- [ ] **T7**: Sprint status rev bump + commit.
+- [x] **T1**: `band-color.ts` util + spec (15 specs PASS).
+- [x] **T2**: `CalorieRing` 3-file component + spec (16 specs PASS).
+- [x] **T3**: `ServingsStepper` 3-file component + spec (15 specs PASS).
+- [x] **T4**: `StatusPill` 3-file component + spec (9 specs PASS).
+- [x] **T5**: `ConfirmEatModal` 3-file component + spec (11 specs PASS).
+- [x] **T6**: `ng test` 558/558 PASS; `check:guards` 9/9 PASS; web build PASS; APK debug BUILD SUCCESSFUL.
+- [x] **T7**: Sprint status rev bump + commit.
 
 ## Dev Notes
 
@@ -60,3 +60,4 @@ so that **F-03 pages (Story 3.5/3.6/3.7) and Epic 4 surfaces consume the same vi
 | Date | Change |
 |------|--------|
 | 2026-05-10 | Story created (`ready-for-dev`). |
+| 2026-05-10 | Dev complete: 5 artifacts (`band-color` util + `CalorieRing` + `ServingsStepper` + `StatusPill` + `ConfirmEatModal`); 66 new specs added (558/558 total PASS); `check:guards` 9/9 PASS; web build + APK debug BUILD SUCCESSFUL. Status → `ready-for-review`. |

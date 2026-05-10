@@ -1,0 +1,24 @@
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--ion-text-color);
+
+  &__icon {
+    font-size: var(--font-size-base);
+    line-height: 1;
+  }
+
+  &--planned {
+    background-color: var(--sage-50);
+    opacity: 0.6;
+  }
+
+  &--logged {
+    background-color: var(--sage-200);
+  }
+}
