@@ -1,1 +1,26 @@
-// Styles for calendar page (stub — Phase 3)
+.calendar-swipe-area {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-bottom: var(--spacing-xxl);
+  touch-action: pan-y;
+}
+
+.calendar-loading {
+  margin: var(--spacing-xl) 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-body);
+  text-align: center;
+}
+
+.calendar-ai-cta {
+  margin: var(--spacing-md);
+  min-height: 44px;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  background: var(--ion-color-secondary);
+  color: var(--ion-color-secondary-contrast);
+  font-size: var(--font-size-body);
+  font-weight: 500;
+  border: none;
+}

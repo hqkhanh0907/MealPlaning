@@ -1,0 +1,55 @@
+.empty-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xl) var(--spacing-md);
+  text-align: center;
+
+  &__icon {
+    font-size: 56px; // allow-hardcode: oversized empty-state illustration glyph (one-off)
+    line-height: 1;
+  }
+
+  &__title {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-title);
+    font-weight: 500;
+  }
+
+  &__subtitle {
+    margin: 0 0 var(--spacing-md);
+    color: var(--text-tertiary);
+    font-size: var(--font-size-body);
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    width: 100%;
+    max-width: 280px;
+  }
+
+  &__btn {
+    min-height: 44px;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    background: var(--ion-color-step-100);
+    color: var(--ion-text-color);
+    font-size: var(--font-size-body);
+    font-weight: 500;
+    border: none;
+
+    &--primary {
+      background: var(--ion-color-secondary);
+      color: var(--ion-color-secondary-contrast);
+    }
+
+    &--ghost {
+      background: transparent;
+      color: var(--text-tertiary);
+    }
+  }
+}

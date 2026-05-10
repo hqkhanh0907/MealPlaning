@@ -1,0 +1,101 @@
+.meal-slot {
+  margin: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  &__emoji {
+    font-size: var(--font-size-xl);
+  }
+
+  &__label {
+    margin: 0;
+    flex: 1;
+    color: var(--text-primary);
+    font-size: var(--font-size-body);
+    font-weight: 500;
+  }
+
+  &__total {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-sm);
+  }
+
+  &__add {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-pill);
+    background: var(--ion-color-secondary);
+    color: var(--ion-color-secondary-contrast);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    border: none;
+  }
+
+  &__empty {
+    margin: var(--spacing-sm) 0 0;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-sm);
+    font-style: italic;
+  }
+
+  &__list {
+    list-style: none;
+    margin: var(--spacing-sm) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) 0;
+
+    &--planned {
+      opacity: 0.6;
+      border-bottom: 1px dashed rgba(95, 101, 117, 0.24);
+    }
+  }
+
+  &__name {
+    flex: 1;
+    color: var(--text-primary);
+    font-size: var(--font-size-body);
+  }
+
+  &__cal {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+
+    &--placeholder {
+      letter-spacing: 0.1em;
+      color: var(--text-tertiary);
+    }
+  }
+
+  &__action {
+    min-height: 32px;
+    padding: 4px 12px;
+    border-radius: var(--radius-md);
+    background: var(--ion-color-secondary);
+    color: var(--ion-color-secondary-contrast);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    border: none;
+
+    &--logged {
+      background: var(--ion-color-step-100);
+      color: var(--text-secondary);
+    }
+  }
+}

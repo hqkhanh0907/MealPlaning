@@ -1,0 +1,14 @@
+.day-summary-card {
+  margin: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
+
+  &__placeholder {
+    margin: 0;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-sm);
+    text-align: center;
+  }
+}

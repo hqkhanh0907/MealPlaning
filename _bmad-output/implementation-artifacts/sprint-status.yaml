@@ -1,5 +1,5 @@
 # generated: 2026-05-07
-# last_updated: 2026-05-10 (rev 13 — Story 3.5 ready-for-dev)
+# last_updated: 2026-05-10 (rev 14 — Story 3.5 ready-for-review)
 # project: HealthMate AI (MealPlaning)
 # project_key: NOKEY
 # tracking_system: file-system
@@ -95,7 +95,7 @@ development_status:
   3-2-repos-day-plan-planned-dish: done
   3-3-calendar-store: done
   3-4-shared-primitives: done
-  3-5-day-view: ready-for-dev
+  3-5-day-view: ready-for-review
   epic-3-retrospective: optional
   epic-4: backlog
   epic-4-retrospective: optional

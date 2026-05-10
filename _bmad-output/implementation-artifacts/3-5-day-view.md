@@ -1,6 +1,6 @@
 # Story 3.5: F-03 Day View — meal slot list + per-dish actions + DaySummaryCard placeholder
 
-Status: ready-for-dev
+Status: ready-for-review
 
 <!-- Source: _bmad-output/planning-artifacts/epic-3-calendar.md (rev 1) lines 319-370 -->
 
@@ -39,13 +39,13 @@ so that **quản lý kế hoạch ăn uống + log thực tế hàng ngày**.
 
 ## Tasks
 
-- [ ] **T1**: `relative-date-label.ts` util + spec.
-- [ ] **T2**: `DaySummaryCard` 3-file stub + spec.
-- [ ] **T3**: `EmptyDayState` 3-file + spec.
-- [ ] **T4**: `MealSlotCard` 3-file + spec.
-- [ ] **T5**: `calendar.page` rewrite (signal-driven, CalendarStore inject, ConfirmEatModal wiring, swipe gesture, AI toast) + spec.
-- [ ] **T6**: `ng test` PASS; `check:guards` 9/9 PASS; build; APK.
-- [ ] **T7**: Sprint status rev bump + commit dev.
+- [x] **T1**: `relative-date-label.ts` util + spec (9 specs PASS).
+- [x] **T2**: `DaySummaryCard` 3-file stub + spec (4 specs PASS).
+- [x] **T3**: `EmptyDayState` 3-file + spec (5 specs PASS).
+- [x] **T4**: `MealSlotCard` 3-file + spec (14 specs PASS).
+- [x] **T5**: `calendar.page` rewrite (signal-driven, CalendarStore inject, ConfirmEatModal wiring, Ionic gesture swipe, AI/Week/Date toast).
+- [x] **T6**: `ng test` 590/590 PASS; `check:guards` 9/9 PASS; web build PASS; APK debug BUILD SUCCESSFUL.
+- [x] **T7**: Sprint status rev bump + commit dev.
 
 ## Dev Notes
 
@@ -71,3 +71,4 @@ so that **quản lý kế hoạch ăn uống + log thực tế hàng ngày**.
 | Date | Change |
 |------|--------|
 | 2026-05-10 | Story created (`ready-for-dev`). |
+| 2026-05-10 | Dev complete: 4 components/util implemented; 32 new specs added (590/590 total PASS, was 558 → +32); `check:guards` 9/9 PASS; web build + APK debug BUILD SUCCESSFUL. Status → `ready-for-review`. |

@@ -1,14 +1,56 @@
-<ion-header>
+<ion-header [translucent]="true">
   <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="onDateChipTap()" aria-label="Chọn ngày">
+        {{ headerLabel() }} ▼
+      </ion-button>
+    </ion-buttons>
     <ion-title>Lịch ăn</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="openSettings()">
-        <ion-icon slot="icon-only" name="settings-outline" />
+      <ion-button (click)="onWeekToggle()" aria-label="Chuyển sang Tuần">
+        <ion-icon slot="icon-only" name="calendar-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="openSettings()" aria-label="Cài đặt">
+        <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
-<ion-content class="ion-padding">
-  <h2>Lịch ăn</h2>
-  <p>Calendar — Coming soon</p>
+
+<ion-content [fullscreen]="true">
+  <div #swipeArea class="calendar-swipe-area">
+    <app-day-summary-card [date]="store.currentDate()" />
+
+    @if (store.dayPlan() === null) {
+      <p class="calendar-loading">Đang tải kế hoạch ngày…</p>
+    } @else if (isEmpty()) {
+      <app-empty-day-state
+        (planClicked)="onPlanFromEmpty()"
+        (copyDeferred)="onCopyFromYesterdayDeferred()"
+        (aiDeferred)="onAiFromEmpty()"
+      />
+    } @else {
+      @for (slot of slotsInOrder(); track slot.id) {
+        <app-meal-slot-card
+          [slot]="slot"
+          [mealType]="slot.meal_type"
+          (markEaten)="onMarkEaten($event)"
+          (unmarkEaten)="onUnmarkEaten($event)"
+          (openLog)="onMealAddTap($event)"
+        />
+      }
+    }
+
+    <button type="button" class="calendar-ai-cta" (click)="onAiCta()">
+      🤖 AI chọn món hôm nay
+    </button>
+  </div>
 </ion-content>
+
+<app-confirm-eat-modal
+  [isOpen]="confirmModalOpen()"
+  [mode]="confirmMode()"
+  [dishName]="confirmDishName()"
+  (confirm)="onConfirm()"
+  (cancel)="onCancel()"
+/>

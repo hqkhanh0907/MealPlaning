@@ -1,0 +1,203 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import type {
+  MealSlotWithDishes,
+  MealType,
+  PlannedDishWithEffective,
+} from '../../../../core/models/meal-plan.types';
+import { MealSlotCard } from './meal-slot-card';
+
+function makeDish(overrides: Partial<PlannedDishWithEffective> = {}): PlannedDishWithEffective {
+  return {
+    id: 'pd-1',
+    meal_slot_id: 'slot-1',
+    dish_id: 'dish-1',
+    servings: 1,
+    sort_order: 0,
+    is_completed: 0,
+    completed_at: null,
+    calories: null,
+    protein: null,
+    carbs: null,
+    fat: null,
+    created_at: '2026-05-10T08:00:00Z',
+    dish_name: 'Phở bò',
+    effective_calories: 450,
+    effective_protein: 30,
+    effective_carbs: 50,
+    effective_fat: 12,
+    ...overrides,
+  };
+}
+
+function makeSlot(dishes: PlannedDishWithEffective[]): MealSlotWithDishes {
+  return {
+    id: 'slot-1',
+    day_plan_id: 'dp-1',
+    meal_type: 'breakfast',
+    position: 0,
+    created_at: '2026-05-10T07:00:00Z',
+    planned_dishes: dishes,
+  };
+}
+
+describe('MealSlotCard', () => {
+  let fixture: ComponentFixture<MealSlotCard>;
+  let component: MealSlotCard;
+
+  function setInputs(slot: MealSlotWithDishes, mealType: MealType): void {
+    fixture.componentRef.setInput('slot', slot);
+    fixture.componentRef.setInput('mealType', mealType);
+    fixture.detectChanges();
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [MealSlotCard] });
+    fixture = TestBed.createComponent(MealSlotCard);
+    component = fixture.componentInstance;
+  });
+
+  describe('Vietnamese labels', () => {
+    it('breakfast → 🍳 Bữa sáng', () => {
+      setInputs(makeSlot([]), 'breakfast');
+      expect(component.emoji()).toBe('🍳');
+      expect(component.label()).toBe('Bữa sáng');
+    });
+
+    it('lunch → 🍱 Bữa trưa', () => {
+      setInputs(makeSlot([]), 'lunch');
+      expect(component.emoji()).toBe('🍱');
+      expect(component.label()).toBe('Bữa trưa');
+    });
+
+    it('dinner → 🍲 Bữa chiều', () => {
+      setInputs(makeSlot([]), 'dinner');
+      expect(component.emoji()).toBe('🍲');
+      expect(component.label()).toBe('Bữa chiều');
+    });
+
+    it('snack → 🍪 Bữa phụ', () => {
+      setInputs(makeSlot([]), 'snack');
+      expect(component.emoji()).toBe('🍪');
+      expect(component.label()).toBe('Bữa phụ');
+    });
+  });
+
+  describe('totalLoggedCalories (only counts is_completed=1)', () => {
+    it('returns 0 when no dishes are completed', () => {
+      setInputs(
+        makeSlot([makeDish({ is_completed: 0 }), makeDish({ id: 'pd-2', is_completed: 0 })]),
+        'breakfast',
+      );
+      expect(component.totalLoggedCalories()).toBe(0);
+    });
+
+    it('sums effective_calories of logged dishes only', () => {
+      setInputs(
+        makeSlot([
+          makeDish({
+            id: 'pd-1',
+            is_completed: 1,
+            completed_at: '2026-05-10T08:00:00Z',
+            effective_calories: 450,
+          }),
+          makeDish({ id: 'pd-2', is_completed: 0, effective_calories: 300 }),
+          makeDish({
+            id: 'pd-3',
+            is_completed: 1,
+            completed_at: '2026-05-10T08:30:00Z',
+            effective_calories: 200,
+          }),
+        ]),
+        'breakfast',
+      );
+      expect(component.totalLoggedCalories()).toBe(650);
+    });
+  });
+
+  describe('outputs', () => {
+    it('emits openLog with mealType on tap [+]', () => {
+      setInputs(makeSlot([]), 'lunch');
+      const spy = jasmine.createSpy('openLog');
+      component.openLog.subscribe(spy);
+      component.onAddTap();
+      expect(spy).toHaveBeenCalledWith('lunch');
+    });
+
+    it('emits markEaten with id when planned dish action tapped', () => {
+      setInputs(makeSlot([makeDish({ id: 'pd-99', is_completed: 0 })]), 'dinner');
+      const spy = jasmine.createSpy('markEaten');
+      component.markEaten.subscribe(spy);
+      component.onActionTap('pd-99', 0);
+      expect(spy).toHaveBeenCalledWith('pd-99');
+    });
+
+    it('emits unmarkEaten with id when logged dish action tapped', () => {
+      setInputs(
+        makeSlot([
+          makeDish({ id: 'pd-77', is_completed: 1, completed_at: '2026-05-10T08:00:00Z' }),
+        ]),
+        'dinner',
+      );
+      const spy = jasmine.createSpy('unmarkEaten');
+      component.unmarkEaten.subscribe(spy);
+      component.onActionTap('pd-77', 1);
+      expect(spy).toHaveBeenCalledWith('pd-77');
+    });
+
+    it('does NOT emit markEaten when action is for logged dish', () => {
+      setInputs(makeSlot([]), 'breakfast');
+      const spy = jasmine.createSpy('markEaten');
+      component.markEaten.subscribe(spy);
+      component.onActionTap('pd-x', 1);
+      expect(spy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('rendered DOM', () => {
+    it('renders empty hint when no dishes', () => {
+      setInputs(makeSlot([]), 'breakfast');
+      const empty = (fixture.nativeElement as HTMLElement).querySelector('.meal-slot__empty');
+      expect(empty?.textContent).toContain('Chưa có món');
+    });
+
+    it('renders calo placeholder ░░░ for planned rows', () => {
+      setInputs(makeSlot([makeDish({ is_completed: 0 })]), 'breakfast');
+      const placeholder = (fixture.nativeElement as HTMLElement).querySelector(
+        '.meal-slot__cal--placeholder',
+      );
+      expect(placeholder?.textContent).toBe('░░░');
+    });
+
+    it('renders status-pill + numeric calo for logged rows', () => {
+      setInputs(
+        makeSlot([
+          makeDish({
+            is_completed: 1,
+            completed_at: '2026-05-10T08:00:00Z',
+            effective_calories: 450,
+          }),
+        ]),
+        'breakfast',
+      );
+      const pill = (fixture.nativeElement as HTMLElement).querySelector('app-status-pill');
+      const cal = (fixture.nativeElement as HTMLElement).querySelector(
+        '.meal-slot__cal:not(.meal-slot__cal--placeholder)',
+      );
+      expect(pill).toBeTruthy();
+      expect(cal?.textContent).toContain('450');
+    });
+
+    it('action button label switches with completion state', () => {
+      setInputs(makeSlot([makeDish({ is_completed: 0 })]), 'breakfast');
+      let btn = (fixture.nativeElement as HTMLElement).querySelector('.meal-slot__action');
+      expect(btn?.textContent?.trim()).toBe('Đã ăn');
+
+      setInputs(
+        makeSlot([makeDish({ is_completed: 1, completed_at: '2026-05-10T08:00:00Z' })]),
+        'breakfast',
+      );
+      btn = (fixture.nativeElement as HTMLElement).querySelector('.meal-slot__action');
+      expect(btn?.textContent?.trim()).toBe('Bỏ đánh dấu');
+    });
+  });
+});

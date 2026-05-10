@@ -1,0 +1,23 @@
+<section class="empty-day" role="region" aria-label="Ngày trống — gợi ý lên kế hoạch">
+  <div class="empty-day__icon" aria-hidden="true">📋</div>
+  <h2 class="empty-day__title">Ngày này chưa có món nào</h2>
+  <p class="empty-day__subtitle">Bắt đầu lên kế hoạch hoặc sao chép từ hôm qua.</p>
+
+  <div class="empty-day__actions">
+    <button
+      type="button"
+      class="empty-day__btn empty-day__btn--primary"
+      (click)="planClicked.emit()"
+    >
+      Lên kế hoạch
+    </button>
+
+    <button type="button" class="empty-day__btn" (click)="copyDeferred.emit()">
+      📋 Sao chép từ hôm qua
+    </button>
+
+    <button type="button" class="empty-day__btn empty-day__btn--ghost" (click)="aiDeferred.emit()">
+      🤖 AI gợi ý (Phase 5)
+    </button>
+  </div>
+</section>
