@@ -32,6 +32,7 @@ import {
   type ConfirmEatMode,
 } from '../../shared/components/confirm-eat-modal/confirm-eat-modal';
 import { DaySummaryCard } from './components/day-summary-card/day-summary-card';
+import { DayRow } from './components/day-row/day-row';
 import { EmptyDayState } from './components/empty-day-state/empty-day-state';
 import { MealSlotCard } from './components/meal-slot-card/meal-slot-card';
 
@@ -77,6 +78,7 @@ function shiftIsoDate(iso: string, deltaDays: number): string {
     IonButton,
     IonIcon,
     ConfirmEatModal,
+    DayRow,
     DaySummaryCard,
     EmptyDayState,
     MealSlotCard,
@@ -149,7 +151,23 @@ export default class CalendarPage implements AfterViewInit {
   }
 
   onWeekToggle(): void {
-    void this.showToast('Week View sẽ ra mắt ở Story 3.6');
+    this.store.setView(this.store.currentView() === 'day' ? 'week' : 'day');
+  }
+
+  onWeekDayTap(date: string): void {
+    this.store.setDate(date);
+    this.store.setView('day');
+  }
+
+  async onCopyPreviousWeek(): Promise<void> {
+    const result = await this.store.copyPreviousWeek();
+    if (result.copiedCount === 0) {
+      void this.showToast('Tuần trước không có món để sao chép');
+    } else {
+      void this.showToast(
+        `Đã sao chép ${result.copiedCount} món từ tuần trước (${result.daysAffected} ngày)`,
+      );
+    }
   }
 
   onAiCta(): void {

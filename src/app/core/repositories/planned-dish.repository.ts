@@ -243,4 +243,123 @@ export class PlannedDishRepository {
       [limit],
     );
   }
+
+  /**
+   * Copy planned + logged dishes from previous week into current week
+   * (Story 3.6 / F-03 §3.4). Per-day, per-meal-type semantics:
+   *   - DELETE planned_dish in target slot WHERE is_completed=0 (clear plans)
+   *   - INSERT a fresh planned (is_completed=0) row for every prev-week dish
+   *     (regardless of source state — re-planning ≠ re-logging).
+   * Returns counts so UI can toast "Đã sao chép {n} món từ tuần trước".
+   *
+   * `currentWeekStart` and `prevWeekStart` are ISO yyyy-mm-dd of the Monday
+   * of each week (caller computes via CalendarStore.weekDays).
+   */
+  async copyPreviousWeek(
+    currentWeekStart: string,
+    prevWeekStart: string,
+  ): Promise<{ copiedCount: number; daysAffected: number }> {
+    const prevDays = enumerate7Days(prevWeekStart);
+    const currentDays = enumerate7Days(currentWeekStart);
+
+    let copiedCount = 0;
+    const affectedDates = new Set<string>();
+
+    await this.db.withTransaction(async () => {
+      for (let i = 0; i < 7; i += 1) {
+        const prevDate = prevDays[i];
+        const targetDate = currentDays[i];
+
+        const prevDayPlan = await this.db.getOne<{ id: string }>(
+          'SELECT id FROM day_plan WHERE date = ?',
+          [prevDate],
+        );
+        if (!prevDayPlan) continue;
+
+        const prevSlots = await this.db.query<{ id: string; meal_type: MealType }>(
+          'SELECT id, meal_type FROM meal_slot WHERE day_plan_id = ?',
+          [prevDayPlan.id],
+        );
+        if (prevSlots.length === 0) continue;
+
+        const prevSlotIds = prevSlots.map((s) => s.id);
+        const placeholders = prevSlotIds.map(() => '?').join(', ');
+        const prevDishes = await this.db.query<{
+          meal_slot_id: string;
+          dish_id: string;
+          servings: number;
+        }>(
+          `SELECT meal_slot_id, dish_id, servings
+           FROM planned_dish
+           WHERE meal_slot_id IN (${placeholders})
+           ORDER BY sort_order ASC, created_at ASC`,
+          [...prevSlotIds],
+        );
+        if (prevDishes.length === 0) continue;
+
+        const targetDayPlan = await this.dayPlanRepository.getOrCreateForDate(targetDate);
+        const targetSlotRows = await this.db.query<{ id: string; meal_type: MealType }>(
+          'SELECT id, meal_type FROM meal_slot WHERE day_plan_id = ?',
+          [targetDayPlan.id],
+        );
+        const targetSlotIdByMealType = new Map<MealType, string>(
+          targetSlotRows.map((s) => [s.meal_type, s.id]),
+        );
+
+        // Clear planned (is_completed=0) rows in every target slot — keep logged.
+        const targetSlotIds = targetSlotRows.map((s) => s.id);
+        if (targetSlotIds.length > 0) {
+          const targetPlaceholders = targetSlotIds.map(() => '?').join(', ');
+          await this.db.execute(
+            `DELETE FROM planned_dish
+             WHERE is_completed = 0
+               AND meal_slot_id IN (${targetPlaceholders})`,
+            [...targetSlotIds],
+          );
+        }
+
+        // Map prev_slot_id → meal_type to know where to insert in target.
+        const prevSlotMealType = new Map<string, MealType>(
+          prevSlots.map((s) => [s.id, s.meal_type]),
+        );
+
+        // Group by meal_type to assign sort_order from 0 in each target slot.
+        const sortByTargetSlot = new Map<string, number>();
+        for (const d of prevDishes) {
+          const mealType = prevSlotMealType.get(d.meal_slot_id);
+          if (!mealType) continue;
+          const targetSlotId = targetSlotIdByMealType.get(mealType);
+          if (!targetSlotId) continue;
+          const sortOrder = sortByTargetSlot.get(targetSlotId) ?? 0;
+          sortByTargetSlot.set(targetSlotId, sortOrder + 1);
+
+          await this.db.execute(
+            `INSERT INTO planned_dish
+               (id, meal_slot_id, dish_id, servings, sort_order,
+                is_completed, completed_at, calories, protein, carbs, fat)
+             VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL)`,
+            [uuidv4(), targetSlotId, d.dish_id, d.servings, sortOrder],
+          );
+          copiedCount += 1;
+          affectedDates.add(targetDate);
+        }
+      }
+    });
+
+    return { copiedCount, daysAffected: affectedDates.size };
+  }
+}
+
+function enumerate7Days(weekStart: string): string[] {
+  const [y, m, d] = weekStart.split('-').map((p) => Number.parseInt(p, 10));
+  const out: string[] = [];
+  for (let i = 0; i < 7; i += 1) {
+    const dt = new Date(y, m - 1, d);
+    dt.setDate(dt.getDate() + i);
+    const yy = dt.getFullYear();
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    const dd = String(dt.getDate()).padStart(2, '0');
+    out.push(`${yy}-${mm}-${dd}`);
+  }
+  return out;
 }

@@ -70,3 +70,28 @@ export interface MealSlotWithDishes extends MealSlot {
 export interface DayPlanWithSlots extends DayPlan {
   meal_slots: MealSlotWithDishes[];
 }
+
+/**
+ * Week-view UI shape (Story 3.6) — derived per-day from `DayPlanWithSlots`.
+ * Lives here so repository/store/component agree on a single contract.
+ */
+export interface WeekDayTotal {
+  date: string; // ISO yyyy-mm-dd
+  label: string; // "T2", "T3", … "CN"
+  dotCount: number; // total planned dishes (logged + planned)
+  loggedCal: number; // sum effective_calories where is_completed=1
+  plannedCal: number; // sum effective_calories where is_completed=0
+  targetCal: number; // copy of day_plan.target_calories (or default if no plan)
+  isToday: boolean;
+  isPast: boolean;
+  hasPlan: boolean; // ≥1 dish (planned or logged) exists for this day
+}
+
+export type WeekDayStatus =
+  | 'no-plan'
+  | 'future-planned'
+  | 'today-recording'
+  | 'past-on-target' // 80–110%
+  | 'past-under' // 50–79%
+  | 'past-over' // 110–150%
+  | 'past-extreme'; // <50% or >150%

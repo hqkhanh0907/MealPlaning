@@ -409,4 +409,249 @@ describe('PlannedDishRepository', () => {
       expect(after - before).toBeGreaterThanOrEqual(6);
     });
   });
+
+  describe('copyPreviousWeek', () => {
+    /**
+     * Mocks the SQL routing for copyPreviousWeek by inspecting the SQL string.
+     * Returns a configurable per-day fixture keyed by ISO date.
+     */
+    function setupWeekCopyMocks(opts: {
+      prevDayPlans: Record<
+        string,
+        {
+          id: string;
+          slots: { id: string; meal_type: string }[];
+          dishes: { meal_slot_id: string; dish_id: string; servings: number }[];
+        } | null
+      >;
+      targetDayPlans: Record<string, { id: string; slots: { id: string; meal_type: string }[] }>;
+    }): void {
+      // getOrCreateForDate spies — return a deterministic dayPlan per date.
+      dayPlanRepo.getOrCreateForDate.and.callFake(async (date: string) => {
+        const target = opts.targetDayPlans[date];
+        if (!target) throw new Error(`no target fixture for ${date}`);
+        return {
+          id: target.id,
+          date,
+          target_calories: 2000,
+          target_protein: 100,
+          created_at: '2026-05-04T00:00:00Z',
+          updated_at: null,
+        };
+      });
+
+      // db.getOne — only called for "SELECT id FROM day_plan WHERE date = ?"
+      // (prev-week probe). Other getOne paths in this method are absent.
+      db.getOne.and.callFake(async <T>(_sql: string, params?: unknown[]) => {
+        const date = params?.[0] as string;
+        const prev = opts.prevDayPlans[date];
+        if (prev === undefined) return null as T | null;
+        if (prev === null) return null as T | null;
+        return { id: prev.id } as T;
+      });
+
+      // db.query — route by SQL prefix and dayPlanId param.
+      db.query.and.callFake(async <T>(sql: string, params?: unknown[]) => {
+        if (sql.startsWith('SELECT id, meal_type FROM meal_slot WHERE day_plan_id')) {
+          const dayPlanId = params?.[0] as string;
+          // Search prev fixtures first.
+          for (const v of Object.values(opts.prevDayPlans)) {
+            if (v && v.id === dayPlanId) return v.slots as T[];
+          }
+          for (const v of Object.values(opts.targetDayPlans)) {
+            if (v.id === dayPlanId) return v.slots as T[];
+          }
+          return [] as T[];
+        }
+        if (sql.startsWith('SELECT meal_slot_id, dish_id, servings')) {
+          // Match on slot ids — find the prev fixture whose slots intersect params.
+          for (const v of Object.values(opts.prevDayPlans)) {
+            if (!v) continue;
+            const slotIdSet = new Set(v.slots.map((s) => s.id));
+            const want = (params ?? []).filter((p) => slotIdSet.has(p as string));
+            if (want.length > 0) {
+              return v.dishes.filter((d) => slotIdSet.has(d.meal_slot_id)) as T[];
+            }
+          }
+          return [] as T[];
+        }
+        return [] as T[];
+      });
+    }
+
+    it('returns 0/0 when previous week is fully empty', async () => {
+      setupWeekCopyMocks({
+        prevDayPlans: {
+          '2026-04-27': null,
+          '2026-04-28': null,
+          '2026-04-29': null,
+          '2026-04-30': null,
+          '2026-05-01': null,
+          '2026-05-02': null,
+          '2026-05-03': null,
+        },
+        targetDayPlans: {},
+      });
+      const result = await repo.copyPreviousWeek('2026-05-04', '2026-04-27');
+      expect(result).toEqual({ copiedCount: 0, daysAffected: 0 });
+      expect(dayPlanRepo.getOrCreateForDate).not.toHaveBeenCalled();
+    });
+
+    it('copies a 1-dish day from prev week into target week with same meal_type', async () => {
+      setupWeekCopyMocks({
+        prevDayPlans: {
+          '2026-04-27': {
+            id: 'dp-prev-mon',
+            slots: [
+              { id: 'pslot-bf', meal_type: 'breakfast' },
+              { id: 'pslot-l', meal_type: 'lunch' },
+              { id: 'pslot-d', meal_type: 'dinner' },
+              { id: 'pslot-s', meal_type: 'snack' },
+            ],
+            dishes: [{ meal_slot_id: 'pslot-bf', dish_id: 'dish-x', servings: 1.5 }],
+          },
+          '2026-04-28': null,
+          '2026-04-29': null,
+          '2026-04-30': null,
+          '2026-05-01': null,
+          '2026-05-02': null,
+          '2026-05-03': null,
+        },
+        targetDayPlans: {
+          '2026-05-04': {
+            id: 'dp-cur-mon',
+            slots: [
+              { id: 'tslot-bf', meal_type: 'breakfast' },
+              { id: 'tslot-l', meal_type: 'lunch' },
+              { id: 'tslot-d', meal_type: 'dinner' },
+              { id: 'tslot-s', meal_type: 'snack' },
+            ],
+          },
+        },
+      });
+
+      const result = await repo.copyPreviousWeek('2026-05-04', '2026-04-27');
+      expect(result).toEqual({ copiedCount: 1, daysAffected: 1 });
+      expect(dayPlanRepo.getOrCreateForDate).toHaveBeenCalledWith('2026-05-04');
+
+      // INSERT was issued into tslot-bf with dish-x + servings 1.5.
+      const insertCall = db.execute.calls
+        .allArgs()
+        .find(
+          (args) =>
+            String(args[0]).startsWith('INSERT INTO planned_dish') &&
+            (args[1] as unknown[])[1] === 'tslot-bf',
+        );
+      expect(insertCall).toBeDefined();
+      expect((insertCall![1] as unknown[])[2]).toBe('dish-x');
+      expect((insertCall![1] as unknown[])[3]).toBe(1.5);
+    });
+
+    it('clears existing planned (is_completed=0) rows in target slots before insert', async () => {
+      setupWeekCopyMocks({
+        prevDayPlans: {
+          '2026-04-27': {
+            id: 'dp-prev-mon',
+            slots: [{ id: 'pslot-bf', meal_type: 'breakfast' }],
+            dishes: [{ meal_slot_id: 'pslot-bf', dish_id: 'dish-x', servings: 1 }],
+          },
+          '2026-04-28': null,
+          '2026-04-29': null,
+          '2026-04-30': null,
+          '2026-05-01': null,
+          '2026-05-02': null,
+          '2026-05-03': null,
+        },
+        targetDayPlans: {
+          '2026-05-04': {
+            id: 'dp-cur-mon',
+            slots: [
+              { id: 'tslot-bf', meal_type: 'breakfast' },
+              { id: 'tslot-l', meal_type: 'lunch' },
+            ],
+          },
+        },
+      });
+
+      await repo.copyPreviousWeek('2026-05-04', '2026-04-27');
+
+      const deleteCall = db.execute.calls
+        .allArgs()
+        .find(
+          (args) =>
+            String(args[0]).startsWith('DELETE FROM planned_dish') &&
+            String(args[0]).includes('is_completed = 0'),
+        );
+      expect(deleteCall).toBeDefined();
+      // params include both target slot ids (clear-all-slots semantic)
+      expect(deleteCall![1] as unknown[]).toEqual(['tslot-bf', 'tslot-l']);
+    });
+
+    it('runs all work inside a single withTransaction call', async () => {
+      setupWeekCopyMocks({
+        prevDayPlans: {
+          '2026-04-27': null,
+          '2026-04-28': null,
+          '2026-04-29': null,
+          '2026-04-30': null,
+          '2026-05-01': null,
+          '2026-05-02': null,
+          '2026-05-03': null,
+        },
+        targetDayPlans: {},
+      });
+      const before = db.withTransaction.calls.count();
+      await repo.copyPreviousWeek('2026-05-04', '2026-04-27');
+      expect(db.withTransaction.calls.count() - before).toBe(1);
+    });
+
+    it('inserts re-numbered sort_order starting at 0 per target slot', async () => {
+      setupWeekCopyMocks({
+        prevDayPlans: {
+          '2026-04-27': {
+            id: 'dp-prev-mon',
+            slots: [
+              { id: 'pslot-bf', meal_type: 'breakfast' },
+              { id: 'pslot-l', meal_type: 'lunch' },
+            ],
+            dishes: [
+              { meal_slot_id: 'pslot-bf', dish_id: 'dish-a', servings: 1 },
+              { meal_slot_id: 'pslot-bf', dish_id: 'dish-b', servings: 2 },
+              { meal_slot_id: 'pslot-l', dish_id: 'dish-c', servings: 1 },
+            ],
+          },
+          '2026-04-28': null,
+          '2026-04-29': null,
+          '2026-04-30': null,
+          '2026-05-01': null,
+          '2026-05-02': null,
+          '2026-05-03': null,
+        },
+        targetDayPlans: {
+          '2026-05-04': {
+            id: 'dp-cur-mon',
+            slots: [
+              { id: 'tslot-bf', meal_type: 'breakfast' },
+              { id: 'tslot-l', meal_type: 'lunch' },
+            ],
+          },
+        },
+      });
+
+      const result = await repo.copyPreviousWeek('2026-05-04', '2026-04-27');
+      expect(result).toEqual({ copiedCount: 3, daysAffected: 1 });
+
+      const inserts = db.execute.calls
+        .allArgs()
+        .filter((args) => String(args[0]).startsWith('INSERT INTO planned_dish'));
+      const bfInserts = inserts.filter((a) => (a[1] as unknown[])[1] === 'tslot-bf');
+      const lInserts = inserts.filter((a) => (a[1] as unknown[])[1] === 'tslot-l');
+      expect(bfInserts.length).toBe(2);
+      expect(lInserts.length).toBe(1);
+      // sort_order: 0,1 in tslot-bf
+      expect(bfInserts.map((a) => (a[1] as unknown[])[4]).sort()).toEqual([0, 1]);
+      // sort_order: 0 in tslot-l
+      expect(lInserts.map((a) => (a[1] as unknown[])[4])).toEqual([0]);
+    });
+  });
 });

@@ -1,0 +1,23 @@
+<button
+  type="button"
+  class="day-row"
+  [class.day-row--today]="day().isToday"
+  [class.day-row--past]="day().isPast"
+  [class]="'day-row--' + status()"
+  (click)="onTap()"
+  [attr.aria-label]="day().label + ' ' + day().date"
+>
+  <span class="day-row__label">{{ day().label }}</span>
+  <span class="day-row__status" aria-hidden="true">{{ statusEmoji() }}</span>
+  <span class="day-row__cal">
+    <span class="day-row__cal-num">{{ displayCal() | number: '1.0-0' }}</span>
+    <span class="day-row__cal-cap">/ {{ capCal() }}</span>
+  </span>
+  @if (hasDots()) {
+    <span class="day-row__dots" aria-hidden="true">
+      @for (_ of dots(); track $index) {
+        <span class="day-row__dot"></span>
+      }
+    </span>
+  }
+</button>
