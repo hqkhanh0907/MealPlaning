@@ -84,6 +84,7 @@ development_status:
   epic-3: in-progress
   3-1-schema-spec-coverage-hybrid-check-truth-table: done
   3-2-repos-day-plan-planned-dish: done
+  3-3-calendar-store: ready-for-dev
   epic-3-retrospective: optional
   epic-4: backlog
   epic-4-retrospective: optional
