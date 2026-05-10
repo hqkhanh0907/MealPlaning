@@ -1,6 +1,6 @@
 # Story 3.2: Repository layer — DayPlanRepository + PlannedDishRepository
 
-Status: ready-for-review
+Status: done
 
 <!-- Source: _bmad-output/planning-artifacts/epic-3-calendar.md (rev 1, 2026-05-10) -->
 
@@ -179,3 +179,15 @@ src/app/core/
 |------------|---------------------------------------------------|
 | 2026-05-10 | Story created (`ready-for-dev`).                  |
 | 2026-05-10 | Dev complete (`ready-for-review`). 472/472 tests pass (446+26). 5/5 guards. Build + APK pass. |
+| 2026-05-10 | Code-review pass (`done`). 6 findings triaged: 1 PATCH (A1 — DB CHECK rejection coverage for AC-4), 3 DEFER (B1 race, E1 N+1, E3 idempotency), 2 DISMISS (B2 perf, E2 schema-owned). 473/473 tests pass. |
+
+## Review Findings
+
+| ID | Layer | Severity | Action | Note |
+|----|-------|----------|--------|------|
+| B1 | Blind | LOW | DEFER | day_plan.date UNIQUE race-condition not exercised — sql.js single-thread, store layer Story 3.3 will throttle. |
+| B2 | Blind | INFO | DISMISS | post-insert getOne preserves DB clock authority over local clock. |
+| E1 | Edge  | MEDIUM | DEFER | findByDateRange N+1 (1 + 2N queries). Acceptable for Week View's 7 rows; precedent in dish.repository. Optimize in Story 3.6 if profiling shows budget breach. |
+| E2 | Edge  | LOW | DISMISS | servings range owned by schema CHECK (Story 3.1 coverage). |
+| E3 | Edge  | LOW | DEFER | re-snapshot on already-completed row guarded by Story 3.5 UI. |
+| A1 | Acceptance | LOW | **PATCH** | Added 1 spec covering DB CHECK rejection path (mock UPDATE throw) — tightens AC-4 coverage. |

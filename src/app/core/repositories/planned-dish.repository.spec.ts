@@ -163,6 +163,27 @@ describe('PlannedDishRepository', () => {
         .filter(([sql]) => (sql as string).includes('UPDATE planned_dish'));
       expect(updateCalls).toHaveSize(0);
     });
+
+    it('propagates DB CHECK rejection when snapshot has NULL nutrition (AC-4)', async () => {
+      // Scenario: dish_with_totals row exists but a column is NULL (e.g. an
+      // ingredient with NULL macro). Snapshot multiplies through to NULL,
+      // schema v2 CHECK then rejects the UPDATE — repo must let that bubble.
+      const corruptTotals = { ...totalsRow, total_protein: null as unknown as number };
+      db.getOne.and.callFake(async (sql: string) => {
+        if (sql.includes('FROM planned_dish')) return planned as never;
+        if (sql.includes('FROM dish_with_totals')) return corruptTotals as never;
+        return null;
+      });
+      db.execute.and.callFake(async (sql: string) => {
+        if (sql.includes('UPDATE planned_dish')) {
+          throw new Error('CHECK constraint failed: planned_dish_hybrid_check');
+        }
+      });
+
+      await expectAsync(repo.markCompleted('pd-1')).toBeRejectedWithError(
+        /CHECK constraint failed/i,
+      );
+    });
   });
 
   describe('unmarkCompleted', () => {

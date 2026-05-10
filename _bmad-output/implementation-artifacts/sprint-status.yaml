@@ -1,5 +1,5 @@
 # generated: 2026-05-07
-# last_updated: 2026-05-10 (rev 7 — Story 3.2 ready-for-dev)
+# last_updated: 2026-05-10 (rev 8 — Story 3.2 done after code-review)
 # project: HealthMate AI (MealPlaning)
 # project_key: NOKEY
 # tracking_system: file-system
@@ -60,6 +60,10 @@ story_location: _bmad-output/implementation-artifacts
 # Rev 7 (2026-05-10): Story 3.2 (Calendar repos) drafted ready-for-dev.
 #   DayPlanRepository (3 method) + PlannedDishRepository (8 method) + meal-plan.types.ts.
 #   Target ≥24 new specs. Schema v2 contract enforced via repo layer.
+# Rev 8 (2026-05-10): Story 3.2 done after code-review.
+#   Dev: 26 new specs (8 day-plan + 18 planned-dish). +1 from code-review (A1).
+#   Findings: 1 PATCH (DB CHECK rejection AC-4), 3 DEFER (race/N+1/idempotency),
+#   2 DISMISS (perf/schema-owned). 473/473 pass. 5/5 guards. APK BUILD SUCCESSFUL.
 
 development_status:
   # Phase 2 — DONE
@@ -79,7 +83,7 @@ development_status:
   # Source-of-truth tạm thời cho story breakdown: epic-3-calendar.md + epic-4-nutrition-tracking.md.
   epic-3: in-progress
   3-1-schema-spec-coverage-hybrid-check-truth-table: done
-  3-2-repos-day-plan-planned-dish: ready-for-review
+  3-2-repos-day-plan-planned-dish: done
   epic-3-retrospective: optional
   epic-4: backlog
   epic-4-retrospective: optional
