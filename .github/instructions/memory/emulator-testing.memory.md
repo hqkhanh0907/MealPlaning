@@ -1178,3 +1178,10 @@ Luôn kiểm tra schema bằng `SELECT sql FROM sqlite_master WHERE name = 'tabl
 - ✅ Scope with component selector: `app-onboarding .goal-item ion-radio::part(container) { display: none; }`
 - ✅ Use `[class.selected]="signal() === 'value'"` on `ion-item` + CSS `.selected { --background: var(--primary-50); }` for highlight-only selection
 - 💡 `ion-radio` still handles keyboard a11y + `aria-checked` even with hidden indicator
+
+## Native startup smoke — separate app bugs from emulator/package-reset noise
+
+- ❌ Vấn đề: `adb install -r` + `pm clear` + immediate launch can report 14-18s cold start and screenshots may show splash/blank while Android/WebView/Play services are still processing package/data reset.
+- ✅ Giải pháp đúng: run two probes — (1) fresh-reset install for worst-case evidence, (2) `am force-stop` then `am start -W` without `pm clear` for app-owned warm/cold startup. Capture logcat timestamps around `Loading app`, `SplashScreen.hide`, `SELECT * FROM user_profile`, and `Displayed`.
+- 💡 Root cause: package replace/data clear can dominate emulator timing; app-owned regressions show up after WebView starts, e.g. duplicate fresh migrations or seed loader blocking `APP_INITIALIZER`.
+- ✅ Fix pattern: fresh empty DB should apply canonical schema once and set `PRAGMA user_version = SCHEMA_VERSION`; seed loading must be delayed/fire-and-forget so first route render is not blocked.
