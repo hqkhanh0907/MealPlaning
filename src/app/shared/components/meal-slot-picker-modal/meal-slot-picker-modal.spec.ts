@@ -56,7 +56,7 @@ describe('MealSlotPickerModal', () => {
     let count = 0;
     component.dismissed.subscribe(() => count++);
     (fixture.nativeElement.querySelector('.msp-cancel') as HTMLButtonElement).click();
-    (fixture.nativeElement.querySelector('.msp-backdrop') as HTMLElement).click();
+    (fixture.nativeElement.querySelector('.msp-backdrop__dismiss') as HTMLButtonElement).click();
     expect(count).toBe(2);
   });
 

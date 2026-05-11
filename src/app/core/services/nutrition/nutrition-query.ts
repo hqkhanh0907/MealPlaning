@@ -15,6 +15,7 @@ export interface NutritionTotals {
   protein: number;
   carbs: number;
   fat: number;
+  fiber: number;
 }
 
 /** One row of `weekTotals` — Mon..Sun, logged-only. */
@@ -33,6 +34,7 @@ const ZERO_TOTALS: NutritionTotals = Object.freeze({
   protein: 0,
   carbs: 0,
   fat: 0,
+  fiber: 0,
 });
 
 const METRIC_TO_COLUMN: Readonly<Record<KeyMetric, 'calories' | 'protein' | 'carbs' | 'fat'>> = {
@@ -64,6 +66,7 @@ export class NutritionQuery {
       protein: number | null;
       carbs: number | null;
       fat: number | null;
+      fiber: number | null;
     }>(
       `SELECT
          COALESCE(SUM(CASE WHEN pd.is_completed = 1
@@ -75,9 +78,12 @@ export class NutritionQuery {
          COALESCE(SUM(CASE WHEN pd.is_completed = 1
                            THEN pd.carbs
                            ELSE dwt.total_carbs    * pd.servings END), 0) AS carbs,
-         COALESCE(SUM(CASE WHEN pd.is_completed = 1
-                           THEN pd.fat
-                           ELSE dwt.total_fat      * pd.servings END), 0) AS fat
+          COALESCE(SUM(CASE WHEN pd.is_completed = 1
+                            THEN pd.fat
+                            ELSE dwt.total_fat      * pd.servings END), 0) AS fat,
+          COALESCE(SUM(CASE WHEN pd.is_completed = 1
+                            THEN pd.fiber
+                            ELSE dwt.total_fiber    * pd.servings END), 0) AS fiber
        FROM day_plan dp
        INNER JOIN meal_slot ms       ON ms.day_plan_id = dp.id
        INNER JOIN planned_dish pd    ON pd.meal_slot_id = ms.id
@@ -91,6 +97,7 @@ export class NutritionQuery {
       protein: row.protein ?? 0,
       carbs: row.carbs ?? 0,
       fat: row.fat ?? 0,
+      fiber: row.fiber ?? 0,
     };
   }
 
@@ -107,6 +114,17 @@ export class NutritionQuery {
     const dates = enumerate7Days(weekStart);
     if (dates.length === 0) return [];
 
+    return this.loggedTotalsForDates(dates);
+  }
+
+  /**
+   * Logged-only totals for caller-provided dates, preserving the input order and
+   * zero-filling dates without a day_plan/logged row. Used by Dashboard streaks
+   * so planned-but-uneaten meals never inflate history metrics.
+   */
+  async loggedTotalsForDates(dates: readonly string[]): Promise<DayTotals[]> {
+    if (dates.length === 0) return [];
+
     const placeholders = dates.map(() => '?').join(', ');
     const rows = await this.db.query<{
       date: string;
@@ -114,20 +132,23 @@ export class NutritionQuery {
       protein: number | null;
       carbs: number | null;
       fat: number | null;
+      fiber: number | null;
     }>(
       `SELECT
          dp.date AS date,
          COALESCE(SUM(pd.calories), 0) AS calories,
          COALESCE(SUM(pd.protein),  0) AS protein,
-         COALESCE(SUM(pd.carbs),    0) AS carbs,
-         COALESCE(SUM(pd.fat),      0) AS fat
+          COALESCE(SUM(pd.carbs),    0) AS carbs,
+          COALESCE(SUM(pd.fat),      0) AS fat,
+          COALESCE(SUM(pd.fiber),    0) AS fiber
        FROM day_plan dp
-       LEFT JOIN meal_slot ms    ON ms.day_plan_id = dp.id
-       LEFT JOIN planned_dish pd ON pd.meal_slot_id = ms.id
-                                 AND pd.is_completed = 1
+        LEFT JOIN meal_slot ms    ON ms.day_plan_id = dp.id
+        LEFT JOIN planned_dish pd ON pd.meal_slot_id = ms.id
+                                  AND pd.is_completed = 1
+                                  AND pd.completed_at IS NOT NULL
        WHERE dp.date IN (${placeholders})
        GROUP BY dp.date`,
-      dates,
+      [...dates],
     );
 
     const byDate = new Map(rows.map((r) => [r.date, r]));
@@ -139,6 +160,7 @@ export class NutritionQuery {
         protein: r?.protein ?? 0,
         carbs: r?.carbs ?? 0,
         fat: r?.fat ?? 0,
+        fiber: r?.fiber ?? 0,
       };
     });
   }

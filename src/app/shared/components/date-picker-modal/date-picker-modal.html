@@ -1,12 +1,12 @@
 @if (isOpen()) {
-  <div class="dp-backdrop" role="presentation" (click)="cancel()">
-    <section
-      class="dp-dialog"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="dp-title"
-      (click)="$event.stopPropagation()"
-    >
+  <div class="dp-backdrop" tabindex="-1" (keydown.escape)="cancel()">
+    <button
+      type="button"
+      class="dp-backdrop__dismiss"
+      aria-label="Đóng bộ chọn ngày"
+      (click)="cancel()"
+    ></button>
+    <dialog class="dp-dialog" open aria-modal="true" aria-labelledby="dp-title">
       <header class="dp-header">
         <h2 id="dp-title" class="dp-title">Chọn ngày</h2>
         <button type="button" class="dp-today" (click)="jumpToday()">Hôm nay</button>
@@ -17,12 +17,13 @@
         [min]="minIso()"
         [max]="maxIso()"
         [value]="selection()"
+        [firstDayOfWeek]="firstDayOfWeek"
         (ionChange)="onIonChange($event)"
       ></ion-datetime>
       <footer class="dp-actions">
         <button type="button" class="dp-btn-cancel" (click)="cancel()">Huỷ</button>
         <button type="button" class="dp-btn-primary" (click)="confirm()">Chọn</button>
       </footer>
-    </section>
+    </dialog>
   </div>
 }

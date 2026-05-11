@@ -12,6 +12,7 @@ interface DishWithTotalsRow {
   total_protein: number;
   total_carbs: number;
   total_fat: number;
+  total_fiber: number;
 }
 
 interface MealSlotIdRow {
@@ -22,6 +23,12 @@ interface MaxSortRow {
   max_sort: number | null;
 }
 
+export interface DateMealPlanItem {
+  readonly mealType: MealType;
+  readonly dishId: string;
+  readonly servings: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PlannedDishRepository {
   private readonly db = inject(Database);
@@ -29,7 +36,7 @@ export class PlannedDishRepository {
 
   /**
    * Insert a planned (not-yet-completed) dish at the end of the slot.
-   * ALWAYS `is_completed=0`, 4 nutrition cols + completed_at NULL — Hybrid
+   * ALWAYS `is_completed=0`, nutrition snapshot cols + completed_at NULL — Hybrid
    * policy demands snapshot only happens via `markCompleted` so the snapshot
    * code-path is the single owner of the truth (Disaster D).
    */
@@ -44,8 +51,8 @@ export class PlannedDishRepository {
       await this.db.execute(
         `INSERT INTO planned_dish
            (id, meal_slot_id, dish_id, servings, sort_order,
-            is_completed, completed_at, calories, protein, carbs, fat)
-         VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL)`,
+             is_completed, completed_at, calories, protein, carbs, fat, fiber)
+         VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL, NULL)`,
         [id, slotId, dishId, servings, sortOrder],
       );
     });
@@ -74,7 +81,7 @@ export class PlannedDishRepository {
         throw new Error(`planned_dish '${plannedDishId}' not found`);
       }
       const totals = await this.db.getOne<DishWithTotalsRow>(
-        'SELECT id, name, total_calories, total_protein, total_carbs, total_fat FROM dish_with_totals WHERE id = ?',
+        'SELECT id, name, total_calories, total_protein, total_carbs, total_fat, total_fiber FROM dish_with_totals WHERE id = ?',
         [planned.dish_id],
       );
       if (!totals) {
@@ -84,16 +91,18 @@ export class PlannedDishRepository {
       const protein = totals.total_protein * planned.servings;
       const carbs = totals.total_carbs * planned.servings;
       const fat = totals.total_fat * planned.servings;
+      const fiber = totals.total_fiber * planned.servings;
       await this.db.execute(
         `UPDATE planned_dish
            SET is_completed = 1,
                completed_at = datetime('now'),
-               calories     = ?,
-               protein      = ?,
-               carbs        = ?,
-               fat          = ?
-         WHERE id = ?`,
-        [calories, protein, carbs, fat, plannedDishId],
+                calories     = ?,
+                protein      = ?,
+                carbs        = ?,
+                fat          = ?,
+                fiber        = ?
+          WHERE id = ?`,
+        [calories, protein, carbs, fat, fiber, plannedDishId],
       );
     });
   }
@@ -109,10 +118,11 @@ export class PlannedDishRepository {
            SET is_completed = 0,
                completed_at = NULL,
                calories     = NULL,
-               protein      = NULL,
-               carbs        = NULL,
-               fat          = NULL
-         WHERE id = ?`,
+                protein      = NULL,
+                carbs        = NULL,
+                fat          = NULL,
+                fiber        = NULL
+          WHERE id = ?`,
         [plannedDishId],
       );
     });
@@ -143,7 +153,7 @@ export class PlannedDishRepository {
       }
 
       const totals = await this.db.getOne<DishWithTotalsRow>(
-        'SELECT id, name, total_calories, total_protein, total_carbs, total_fat FROM dish_with_totals WHERE id = ?',
+        'SELECT id, name, total_calories, total_protein, total_carbs, total_fat, total_fiber FROM dish_with_totals WHERE id = ?',
         [planned.dish_id],
       );
       if (!totals) {
@@ -152,21 +162,73 @@ export class PlannedDishRepository {
       await this.db.execute(
         `UPDATE planned_dish
            SET servings = ?,
-               calories = ?,
-               protein  = ?,
-               carbs    = ?,
-               fat      = ?
-         WHERE id = ?`,
+                calories = ?,
+                protein  = ?,
+                carbs    = ?,
+                fat      = ?,
+                fiber    = ?
+          WHERE id = ?`,
         [
           newServings,
           totals.total_calories * newServings,
           totals.total_protein * newServings,
           totals.total_carbs * newServings,
           totals.total_fat * newServings,
+          totals.total_fiber * newServings,
           plannedDishId,
         ],
       );
     });
+  }
+
+  /**
+   * Convenience API for UI/AI callers: creates the day_plan/meal_slot precondition
+   * and appends a fresh planned row to the requested meal.
+   */
+  async addToDateMealType(
+    date: string,
+    mealType: MealType,
+    dishId: string,
+    servings: number,
+  ): Promise<PlannedDish> {
+    const targetSlot = await this.getSlotForDateMealType(date, mealType);
+    return this.addToSlot(targetSlot.id, dishId, servings);
+  }
+
+  /**
+   * Replace only not-yet-completed dishes for a date. Logged rows are preserved
+   * as immutable history; AI/week-copy plans should never erase food already
+   * marked as eaten.
+   */
+  async replaceDatePlan(date: string, items: readonly DateMealPlanItem[]): Promise<number> {
+    if (items.length === 0) {
+      return 0;
+    }
+
+    let inserted = 0;
+    await this.db.withTransaction(async () => {
+      const targetDayPlan = await this.dayPlanRepository.getOrCreateForDate(date);
+      const targetSlotRows = await this.db.query<{ id: string; meal_type: MealType }>(
+        'SELECT id, meal_type FROM meal_slot WHERE day_plan_id = ?',
+        [targetDayPlan.id],
+      );
+      const targetSlotIdByMealType = new Map<MealType, string>(
+        targetSlotRows.map((slot) => [slot.meal_type, slot.id]),
+      );
+
+      await this.clearTargetPlannedRows(targetSlotRows.map((slot) => slot.id));
+
+      for (const item of items) {
+        const slotId = targetSlotIdByMealType.get(item.mealType);
+        if (!slotId) {
+          throw new Error(`meal_slot for date '${date}' / meal_type '${item.mealType}' missing`);
+        }
+        await this.addToSlot(slotId, item.dishId, item.servings);
+        inserted += 1;
+      }
+    });
+
+    return inserted;
   }
 
   /**
@@ -211,16 +273,7 @@ export class PlannedDishRepository {
     if (!source) {
       throw new Error(`planned_dish '${plannedDishId}' not found`);
     }
-    const targetDayPlan = await this.dayPlanRepository.getOrCreateForDate(targetDate);
-    const targetSlot = await this.db.getOne<MealSlotIdRow>(
-      'SELECT id FROM meal_slot WHERE day_plan_id = ? AND meal_type = ?',
-      [targetDayPlan.id, targetMealType],
-    );
-    if (!targetSlot) {
-      throw new Error(
-        `meal_slot for day_plan '${targetDayPlan.id}' / meal_type '${targetMealType}' missing`,
-      );
-    }
+    const targetSlot = await this.getSlotForDateMealType(targetDate, targetMealType);
     return this.addToSlot(targetSlot.id, source.dish_id, source.servings);
   }
 
@@ -267,86 +320,151 @@ export class PlannedDishRepository {
 
     await this.db.withTransaction(async () => {
       for (let i = 0; i < 7; i += 1) {
-        const prevDate = prevDays[i];
-        const targetDate = currentDays[i];
-
-        const prevDayPlan = await this.db.getOne<{ id: string }>(
-          'SELECT id FROM day_plan WHERE date = ?',
-          [prevDate],
-        );
-        if (!prevDayPlan) continue;
-
-        const prevSlots = await this.db.query<{ id: string; meal_type: MealType }>(
-          'SELECT id, meal_type FROM meal_slot WHERE day_plan_id = ?',
-          [prevDayPlan.id],
-        );
-        if (prevSlots.length === 0) continue;
-
-        const prevSlotIds = prevSlots.map((s) => s.id);
-        const placeholders = prevSlotIds.map(() => '?').join(', ');
-        const prevDishes = await this.db.query<{
-          meal_slot_id: string;
-          dish_id: string;
-          servings: number;
-        }>(
-          `SELECT meal_slot_id, dish_id, servings
-           FROM planned_dish
-           WHERE meal_slot_id IN (${placeholders})
-           ORDER BY sort_order ASC, created_at ASC`,
-          [...prevSlotIds],
-        );
-        if (prevDishes.length === 0) continue;
-
-        const targetDayPlan = await this.dayPlanRepository.getOrCreateForDate(targetDate);
-        const targetSlotRows = await this.db.query<{ id: string; meal_type: MealType }>(
-          'SELECT id, meal_type FROM meal_slot WHERE day_plan_id = ?',
-          [targetDayPlan.id],
-        );
-        const targetSlotIdByMealType = new Map<MealType, string>(
-          targetSlotRows.map((s) => [s.meal_type, s.id]),
-        );
-
-        // Clear planned (is_completed=0) rows in every target slot — keep logged.
-        const targetSlotIds = targetSlotRows.map((s) => s.id);
-        if (targetSlotIds.length > 0) {
-          const targetPlaceholders = targetSlotIds.map(() => '?').join(', ');
-          await this.db.execute(
-            `DELETE FROM planned_dish
-             WHERE is_completed = 0
-               AND meal_slot_id IN (${targetPlaceholders})`,
-            [...targetSlotIds],
-          );
-        }
-
-        // Map prev_slot_id → meal_type to know where to insert in target.
-        const prevSlotMealType = new Map<string, MealType>(
-          prevSlots.map((s) => [s.id, s.meal_type]),
-        );
-
-        // Group by meal_type to assign sort_order from 0 in each target slot.
-        const sortByTargetSlot = new Map<string, number>();
-        for (const d of prevDishes) {
-          const mealType = prevSlotMealType.get(d.meal_slot_id);
-          if (!mealType) continue;
-          const targetSlotId = targetSlotIdByMealType.get(mealType);
-          if (!targetSlotId) continue;
-          const sortOrder = sortByTargetSlot.get(targetSlotId) ?? 0;
-          sortByTargetSlot.set(targetSlotId, sortOrder + 1);
-
-          await this.db.execute(
-            `INSERT INTO planned_dish
-               (id, meal_slot_id, dish_id, servings, sort_order,
-                is_completed, completed_at, calories, protein, carbs, fat)
-             VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL)`,
-            [uuidv4(), targetSlotId, d.dish_id, d.servings, sortOrder],
-          );
-          copiedCount += 1;
-          affectedDates.add(targetDate);
+        const count = await this.copyPreviousWeekDay(prevDays[i], currentDays[i]);
+        if (count > 0) {
+          copiedCount += count;
+          affectedDates.add(currentDays[i]);
         }
       }
     });
 
     return { copiedCount, daysAffected: affectedDates.size };
+  }
+
+  private async copyPreviousWeekDay(prevDate: string, targetDate: string): Promise<number> {
+    const prevDayPlan = await this.db.getOne<{ id: string }>(
+      'SELECT id FROM day_plan WHERE date = ?',
+      [prevDate],
+    );
+    if (!prevDayPlan) {
+      return 0;
+    }
+
+    const prevSlots = await this.db.query<{ id: string; meal_type: MealType }>(
+      'SELECT id, meal_type FROM meal_slot WHERE day_plan_id = ?',
+      [prevDayPlan.id],
+    );
+    if (prevSlots.length === 0) {
+      return 0;
+    }
+
+    const prevDishes = await this.listSlotDishes(prevSlots.map((s) => s.id));
+    if (prevDishes.length === 0) {
+      return 0;
+    }
+
+    const targetDayPlan = await this.dayPlanRepository.getOrCreateForDate(targetDate);
+    const targetSlotRows = await this.db.query<{ id: string; meal_type: MealType }>(
+      'SELECT id, meal_type FROM meal_slot WHERE day_plan_id = ?',
+      [targetDayPlan.id],
+    );
+    await this.clearTargetPlannedRows(targetSlotRows.map((s) => s.id));
+
+    const prevSlotMealType = new Map<string, MealType>(prevSlots.map((s) => [s.id, s.meal_type]));
+    const targetSlotIdByMealType = new Map<MealType, string>(
+      targetSlotRows.map((s) => [s.meal_type, s.id]),
+    );
+    return this.insertCopiedDishes(prevDishes, prevSlotMealType, targetSlotIdByMealType);
+  }
+
+  private async listSlotDishes(slotIds: readonly string[]): Promise<
+    {
+      meal_slot_id: string;
+      dish_id: string;
+      servings: number;
+    }[]
+  > {
+    const placeholders = slotIds.map(() => '?').join(', ');
+    return this.db.query(
+      `SELECT meal_slot_id, dish_id, servings
+       FROM planned_dish
+       WHERE meal_slot_id IN (${placeholders})
+       ORDER BY sort_order ASC, created_at ASC`,
+      [...slotIds],
+    );
+  }
+
+  private async clearTargetPlannedRows(targetSlotIds: readonly string[]): Promise<void> {
+    if (targetSlotIds.length === 0) {
+      return;
+    }
+
+    const targetPlaceholders = targetSlotIds.map(() => '?').join(', ');
+    await this.db.execute(
+      `DELETE FROM planned_dish
+       WHERE is_completed = 0
+         AND meal_slot_id IN (${targetPlaceholders})`,
+      [...targetSlotIds],
+    );
+  }
+
+  private async insertCopiedDishes(
+    prevDishes: readonly {
+      meal_slot_id: string;
+      dish_id: string;
+      servings: number;
+    }[],
+    prevSlotMealType: ReadonlyMap<string, MealType>,
+    targetSlotIdByMealType: ReadonlyMap<MealType, string>,
+  ): Promise<number> {
+    let copiedCount = 0;
+    const sortByTargetSlot = new Map<string, number>();
+
+    for (const d of prevDishes) {
+      const targetSlotId = this.resolveTargetSlotId(
+        d.meal_slot_id,
+        prevSlotMealType,
+        targetSlotIdByMealType,
+      );
+      if (!targetSlotId) {
+        continue;
+      }
+
+      const sortOrder = sortByTargetSlot.get(targetSlotId) ?? 0;
+      sortByTargetSlot.set(targetSlotId, sortOrder + 1);
+      await this.insertCopiedDish(targetSlotId, d.dish_id, d.servings, sortOrder);
+      copiedCount += 1;
+    }
+
+    return copiedCount;
+  }
+
+  private resolveTargetSlotId(
+    previousSlotId: string,
+    prevSlotMealType: ReadonlyMap<string, MealType>,
+    targetSlotIdByMealType: ReadonlyMap<MealType, string>,
+  ): string | null {
+    const mealType = prevSlotMealType.get(previousSlotId);
+    return mealType ? (targetSlotIdByMealType.get(mealType) ?? null) : null;
+  }
+
+  private async insertCopiedDish(
+    targetSlotId: string,
+    dishId: string,
+    servings: number,
+    sortOrder: number,
+  ): Promise<void> {
+    await this.db.execute(
+      `INSERT INTO planned_dish
+          (id, meal_slot_id, dish_id, servings, sort_order,
+           is_completed, completed_at, calories, protein, carbs, fat, fiber)
+       VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL, NULL)`,
+      [uuidv4(), targetSlotId, dishId, servings, sortOrder],
+    );
+  }
+
+  private async getSlotForDateMealType(date: string, mealType: MealType): Promise<MealSlotIdRow> {
+    const targetDayPlan = await this.dayPlanRepository.getOrCreateForDate(date);
+    const targetSlot = await this.db.getOne<MealSlotIdRow>(
+      'SELECT id FROM meal_slot WHERE day_plan_id = ? AND meal_type = ?',
+      [targetDayPlan.id, mealType],
+    );
+    if (!targetSlot) {
+      throw new Error(
+        `meal_slot for day_plan '${targetDayPlan.id}' / meal_type '${mealType}' missing`,
+      );
+    }
+    return targetSlot;
   }
 }
 

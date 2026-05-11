@@ -43,12 +43,19 @@ describe('weekDayStatus', () => {
         ),
       ).toBe('past-on-target');
     });
-    it('110% boundary → on-target (rule says ≥110 = over, so 109 = on-target)', () => {
+    it('109% → on-target', () => {
       expect(
         weekDayStatus(
           makeWeekDay({ hasPlan: true, isPast: true, loggedCal: 2180, targetCal: 2000 }),
         ),
       ).toBe('past-on-target');
+    });
+    it('110% boundary → slight-over warning', () => {
+      expect(
+        weekDayStatus(
+          makeWeekDay({ hasPlan: true, isPast: true, loggedCal: 2200, targetCal: 2000 }),
+        ),
+      ).toBe('past-over');
     });
     it('111% → over', () => {
       expect(
@@ -56,6 +63,20 @@ describe('weekDayStatus', () => {
           makeWeekDay({ hasPlan: true, isPast: true, loggedCal: 2220, targetCal: 2000 }),
         ),
       ).toBe('past-over');
+    });
+    it('120% boundary → over', () => {
+      expect(
+        weekDayStatus(
+          makeWeekDay({ hasPlan: true, isPast: true, loggedCal: 2400, targetCal: 2000 }),
+        ),
+      ).toBe('past-over');
+    });
+    it('121% → extreme (over target)', () => {
+      expect(
+        weekDayStatus(
+          makeWeekDay({ hasPlan: true, isPast: true, loggedCal: 2420, targetCal: 2000 }),
+        ),
+      ).toBe('past-extreme');
     });
     it('60% → under', () => {
       expect(

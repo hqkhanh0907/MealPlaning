@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
 import { DishRepository } from '../../../core/repositories/dish.repository';
@@ -99,6 +99,54 @@ describe('IngredientEditPage (gram-only)', () => {
       await component.onSave();
       expect(ingredientStore.add).not.toHaveBeenCalled();
     });
+
+    it('scrolls the category trigger when category is invalid', fakeAsync(() => {
+      const accessor = component as unknown as FormSignalAccessor;
+      const target = {
+        scrollIntoView: jasmine.createSpy('scrollIntoView'),
+      } as unknown as HTMLElement;
+      spyOn(document, 'querySelector').and.returnValue(target);
+      accessor.formSignal.set({
+        name: 'Trứng gà',
+        category: '',
+        calories: 155,
+        protein: 13,
+        carbs: 1,
+        fat: 11,
+        fiber: 0,
+      });
+
+      void component.onSave();
+      tick();
+
+      expect(document.querySelector).toHaveBeenCalledWith('.picker-trigger--floating');
+      expect(target.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
+      expect(ingredientStore.add).not.toHaveBeenCalled();
+    }));
+
+    it('scrolls the first number input when calories are invalid', fakeAsync(() => {
+      const accessor = component as unknown as FormSignalAccessor;
+      const target = {
+        scrollIntoView: jasmine.createSpy('scrollIntoView'),
+      } as unknown as HTMLElement;
+      spyOn(document, 'querySelector').and.returnValue(target);
+      accessor.formSignal.set({
+        name: 'Trứng gà',
+        category: 'Trứng & Sữa',
+        calories: -1,
+        protein: 13,
+        carbs: 1,
+        fat: 11,
+        fiber: 0,
+      });
+
+      void component.onSave();
+      tick();
+
+      expect(document.querySelector).toHaveBeenCalledWith('input[type="number"]');
+      expect(target.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
+      expect(ingredientStore.add).not.toHaveBeenCalled();
+    }));
   });
 
   describe('edit mode', () => {

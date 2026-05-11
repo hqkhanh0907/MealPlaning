@@ -1,3 +1,60 @@
-<section class="day-summary-card" [attr.data-date]="date()" aria-label="Tổng quan dinh dưỡng">
-  <p class="day-summary-card__placeholder">Tổng quan dinh dưỡng — sẽ có ở Epic 4</p>
+<section
+  class="day-summary-card"
+  [attr.data-date]="date()"
+  aria-label="Tổng quan dinh dưỡng"
+  [attr.aria-busy]="loading()"
+>
+  <header class="day-summary-card__header">
+    <div>
+      <p class="day-summary-card__eyebrow">Ngày {{ date() }}</p>
+      <h2 class="day-summary-card__title">Tổng quan dinh dưỡng</h2>
+    </div>
+    @if (loading()) {
+      <span class="day-summary-card__sync">Đang cập nhật…</span>
+    }
+  </header>
+
+  <div class="day-summary-card__hero" [attr.aria-label]="ariaSummary()">
+    <app-calorie-ring
+      [value]="calories().value"
+      [target]="calories().target"
+      [size]="64"
+      [strokeWidth]="8"
+      variant="calories"
+    />
+    <div class="day-summary-card__metric">
+      <span class="day-summary-card__metric-label">{{ primaryLabel() }} trọng tâm</span>
+      <strong class="day-summary-card__metric-value">
+        {{ primaryValue() }} / {{ primaryTarget() }} {{ primaryUnit() }}
+      </strong>
+      <span class="day-summary-card__metric-note">{{ primaryPct() }}% mục tiêu</span>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    class="day-summary-card__detail-toggle"
+    [attr.aria-expanded]="expanded()"
+    aria-controls="day-summary-detail"
+    (click)="toggleDetails()"
+  >
+    {{ expanded() ? 'Ẩn chi tiết macro' : 'Xem chi tiết macro' }}
+  </button>
+
+  @if (expanded()) {
+    <div id="day-summary-detail" class="day-summary-card__details">
+      <app-macro-row
+        mode="expanded"
+        [protein]="protein()"
+        [carbs]="carbs()"
+        [fat]="fat()"
+        [fiber]="fiber()"
+        [highlightedMetric]="primaryMetric()"
+      />
+      <p class="day-summary-card__fiber-note">
+        Fiber dùng mục tiêu tham chiếu 25g/ngày; dữ liệu đã ăn trước bản v3 hiển thị 0g nếu chưa
+        từng được snapshot.
+      </p>
+    </div>
+  }
 </section>

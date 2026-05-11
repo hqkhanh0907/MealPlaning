@@ -20,10 +20,14 @@ const ZERO_TOTALS: NutritionTotals = Object.freeze({
   protein: 0,
   carbs: 0,
   fat: 0,
+  fiber: 0,
 });
 
+export const DEFAULT_FIBER_TARGET_GRAMS = 25;
+
 const TREND_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const trendKey = (start: string, end: string, metric: KeyMetric) => `${start}_${end}_${metric}`;
+const trendKey = (start: string, end: string, metric: KeyMetric): string =>
+  `${start}_${end}_${metric}`;
 
 interface TrendCacheEntry {
   expiresAt: number;
@@ -57,12 +61,15 @@ export class NutritionStore {
   // ─── derived ──────────────────────────────────────────────────────────
   readonly targets = computed<NutritionTotals>(() => {
     const profile = this.profileStore.profile();
-    if (!profile) return { ...ZERO_TOTALS };
+    if (!profile) {
+      return { ...ZERO_TOTALS, fiber: DEFAULT_FIBER_TARGET_GRAMS };
+    }
     return {
       calories: profile.target_calories ?? 0,
       protein: profile.target_protein ?? 0,
       carbs: profile.target_carbs ?? 0,
       fat: profile.target_fat ?? 0,
+      fiber: DEFAULT_FIBER_TARGET_GRAMS,
     };
   });
 
@@ -78,7 +85,7 @@ export class NutritionStore {
   readonly keyMetric = computed<KeyMetric>(() => pickKeyMetric(this.profileStore.profile())[0]);
 
   // ─── trend cache (in-memory) ─────────────────────────────────────────
-  private trendCache = new Map<string, TrendCacheEntry>();
+  private readonly trendCache = new Map<string, TrendCacheEntry>();
   /** Tick value the cache is keyed against — when it changes, cache resets. */
   private cacheTick = 0;
 

@@ -62,7 +62,7 @@ describe('NutritionQuery (aggregate service)', () => {
    */
   async function seedDish(
     name: string,
-    macros: { calories: number; protein: number; carbs: number; fat: number },
+    macros: { calories: number; protein: number; carbs: number; fat: number; fiber?: number },
   ): Promise<string> {
     const dishId = crypto.randomUUID();
     const ingId = crypto.randomUUID();
@@ -73,8 +73,17 @@ describe('NutritionQuery (aggregate service)', () => {
       'custom',
     ]);
     await db.execute(
-      `INSERT INTO ingredient (id, name, category, calories, protein, carbs, fat) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [ingId, name + '-ing', 'Khác', macros.calories, macros.protein, macros.carbs, macros.fat],
+      `INSERT INTO ingredient (id, name, category, calories, protein, carbs, fat, fiber) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        ingId,
+        name + '-ing',
+        'Khác',
+        macros.calories,
+        macros.protein,
+        macros.carbs,
+        macros.fat,
+        macros.fiber ?? 0,
+      ],
     );
     await db.execute(
       `INSERT INTO dish_ingredient (id, dish_id, ingredient_id, gram_weight) VALUES (?, ?, ?, ?)`,
@@ -93,6 +102,7 @@ describe('NutritionQuery (aggregate service)', () => {
       protein?: number | null;
       carbs?: number | null;
       fat?: number | null;
+      fiber?: number | null;
       completed_at?: string | null;
     } = {},
   ): Promise<string> {
@@ -104,14 +114,15 @@ describe('NutritionQuery (aggregate service)', () => {
       protein: null as number | null,
       carbs: null as number | null,
       fat: null as number | null,
+      fiber: null as number | null,
       completed_at: null as string | null,
       ...overrides,
     };
     await db.execute(
       `INSERT INTO planned_dish
-         (id, meal_slot_id, dish_id, servings, is_completed,
-          calories, protein, carbs, fat, completed_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          (id, meal_slot_id, dish_id, servings, is_completed,
+           calories, protein, carbs, fat, fiber, completed_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         slotId,
@@ -122,6 +133,7 @@ describe('NutritionQuery (aggregate service)', () => {
         row.protein,
         row.carbs,
         row.fat,
+        row.fiber,
         row.completed_at,
       ],
     );
@@ -138,6 +150,7 @@ describe('NutritionQuery (aggregate service)', () => {
         protein: 20,
         carbs: 40,
         fat: 5,
+        fiber: 8,
       });
 
       // 1 planned (is_completed=0) → 300 cal × 2 servings = 600
@@ -149,6 +162,7 @@ describe('NutritionQuery (aggregate service)', () => {
         protein: 35,
         carbs: 50,
         fat: 12,
+        fiber: 6,
         completed_at: '2026-05-10T12:00:00',
       });
 
@@ -157,11 +171,12 @@ describe('NutritionQuery (aggregate service)', () => {
       expect(totals.protein).toBe(40 + 35);
       expect(totals.carbs).toBe(80 + 50);
       expect(totals.fat).toBe(10 + 12);
+      expect(totals.fiber).toBe(16 + 6);
     });
 
     it('returns all zeros for a date with no day_plan', async () => {
       const totals = await svc.dailyTotals('2099-01-01');
-      expect(totals).toEqual({ calories: 0, protein: 0, carbs: 0, fat: 0 });
+      expect(totals).toEqual({ calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
     });
   });
 
@@ -178,6 +193,7 @@ describe('NutritionQuery (aggregate service)', () => {
         protein: 30,
         carbs: 60,
         fat: 12,
+        fiber: 10,
       });
       // logged on Mon
       await insertPlannedDish(day1.slots['lunch'], dish, {
@@ -186,6 +202,7 @@ describe('NutritionQuery (aggregate service)', () => {
         protein: 30,
         carbs: 60,
         fat: 12,
+        fiber: 10,
         completed_at: '2026-05-04T12:00:00',
       });
       // PLANNED (NOT logged) on Mon — must be excluded
@@ -197,6 +214,7 @@ describe('NutritionQuery (aggregate service)', () => {
         protein: 10,
         carbs: 25,
         fat: 4,
+        fiber: 5,
         completed_at: '2026-05-06T08:00:00',
       });
 
@@ -217,12 +235,50 @@ describe('NutritionQuery (aggregate service)', () => {
       expect(week[1].calories).toBe(0);
       // Wed = 200
       expect(week[2].calories).toBe(200);
+      expect(week[0].fiber).toBe(10);
+      expect(week[2].fiber).toBe(5);
     });
 
     it('returns 7 zero rows for an empty week', async () => {
       const week = await svc.weekTotals('2030-01-06');
       expect(week.length).toBe(7);
-      expect(week.every((d) => d.calories === 0 && d.protein === 0)).toBeTrue();
+      expect(week.every((d) => d.calories === 0 && d.protein === 0 && d.fiber === 0)).toBeTrue();
+    });
+  });
+
+  // ─── loggedTotalsForDates ──────────────────────────────────────────────
+
+  describe('loggedTotalsForDates', () => {
+    it('returns caller-ordered logged-only totals and excludes planned rows', async () => {
+      const day1 = await seedDay('2026-05-08');
+      const day2 = await seedDay('2026-05-09');
+      const dish = await seedDish('Cơm gà', {
+        calories: 520,
+        protein: 38,
+        carbs: 55,
+        fat: 16,
+        fiber: 7,
+      });
+
+      await insertPlannedDish(day1.slots['lunch'], dish, {
+        is_completed: 1,
+        calories: 520,
+        protein: 38,
+        carbs: 55,
+        fat: 16,
+        fiber: 7,
+        completed_at: '2026-05-08T12:00:00',
+      });
+      await insertPlannedDish(day2.slots['dinner'], dish, {
+        is_completed: 0,
+        servings: 1,
+      });
+
+      const totals = await svc.loggedTotalsForDates(['2026-05-09', '2026-05-08', '2026-05-07']);
+
+      expect(totals.map((d) => d.date)).toEqual(['2026-05-09', '2026-05-08', '2026-05-07']);
+      expect(totals.map((d) => d.calories)).toEqual([0, 520, 0]);
+      expect(totals[1].fiber).toBe(7);
     });
   });
 
@@ -237,6 +293,7 @@ describe('NutritionQuery (aggregate service)', () => {
         protein: 35,
         carbs: 70,
         fat: 18,
+        fiber: 9,
       });
       await insertPlannedDish(day1.slots['lunch'], dish, {
         is_completed: 1,
@@ -244,6 +301,7 @@ describe('NutritionQuery (aggregate service)', () => {
         protein: 35,
         carbs: 70,
         fat: 18,
+        fiber: 9,
         completed_at: '2026-05-04T12:30:00',
       });
       await insertPlannedDish(day2.slots['dinner'], dish, {
@@ -252,6 +310,7 @@ describe('NutritionQuery (aggregate service)', () => {
         protein: 40,
         carbs: 90,
         fat: 22,
+        fiber: 11,
         completed_at: '2026-05-05T19:00:00',
       });
 
@@ -272,6 +331,7 @@ describe('NutritionQuery (aggregate service)', () => {
         protein: 50,
         carbs: 5,
         fat: 18,
+        fiber: 3,
       });
       await insertPlannedDish(day1.slots['lunch'], dish, {
         is_completed: 1,
@@ -279,6 +339,7 @@ describe('NutritionQuery (aggregate service)', () => {
         protein: 50,
         carbs: 5,
         fat: 18,
+        fiber: 3,
         completed_at: '2026-05-04T12:00:00',
       });
       const cal = await svc.trend('2026-05-04', '2026-05-04', 'calories');

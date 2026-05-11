@@ -21,7 +21,7 @@
           Món: <strong>{{ r.dishName }}</strong>
         </p>
 
-        <div class="dasf-summary" role="status">
+        <output class="dasf-summary">
           <span class="dasf-chip dasf-chip--existing">{{ counts().existing }} đã có</span>
           <span class="dasf-chip dasf-chip--new">{{ counts().created }} mới</span>
           @if (counts().needsConfirm > 0) {
@@ -29,7 +29,7 @@
               {{ counts().needsConfirm }} cần xác nhận
             </span>
           }
-        </div>
+        </output>
 
         <ul class="dasf-list">
           @for (item of rows(); track item.index) {

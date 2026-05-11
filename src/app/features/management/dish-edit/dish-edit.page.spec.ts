@@ -117,6 +117,20 @@ describe('DishEditPage (gram-only)', () => {
     expect(component.recentIngredientOptions.length).toBe(0);
   });
 
+  it('reads native input event values defensively', () => {
+    const readInputValue = (
+      component as unknown as {
+        readInputValue: (event: Event) => string;
+      }
+    ).readInputValue.bind(component);
+    const input = document.createElement('input');
+    input.value = 'Phở bò';
+
+    expect(readInputValue(new Event('change'))).toBe('');
+    expect(readInputValue(new Event('input'))).toBe('');
+    expect(readInputValue({ target: input } as unknown as Event)).toBe('Phở bò');
+  });
+
   it('rejects submit when items list is empty', async () => {
     const access = component as unknown as {
       formSignal: {

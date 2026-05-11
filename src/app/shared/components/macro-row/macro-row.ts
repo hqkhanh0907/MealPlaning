@@ -11,14 +11,14 @@ export interface MacroValue {
 
 interface MacroDescriptor {
   key: 'protein' | 'carbs' | 'fat' | 'fiber';
-  label: string; // VI label
+  label: string;
   data: MacroValue;
 }
 
-const LABEL_VI: Record<MacroDescriptor['key'], string> = {
-  protein: 'Đạm',
-  carbs: 'Tinh bột',
-  fat: 'Chất béo',
+const LABELS: Record<MacroDescriptor['key'], string> = {
+  protein: 'Protein',
+  carbs: 'Carbs',
+  fat: 'Fat',
   fiber: 'Fiber',
 };
 
@@ -41,13 +41,13 @@ export class MacroRow {
   /** Order Protein → Carbs → Fat fixed (Sally O-F04-3 / F-04 §3.2). Fiber appended only when provided. */
   readonly macros = computed<MacroDescriptor[]>(() => {
     const list: MacroDescriptor[] = [
-      { key: 'protein', label: LABEL_VI.protein, data: this.protein() },
-      { key: 'carbs', label: LABEL_VI.carbs, data: this.carbs() },
-      { key: 'fat', label: LABEL_VI.fat, data: this.fat() },
+      { key: 'protein', label: LABELS.protein, data: this.protein() },
+      { key: 'carbs', label: LABELS.carbs, data: this.carbs() },
+      { key: 'fat', label: LABELS.fat, data: this.fat() },
     ];
     const f = this.fiber();
     if (f !== null) {
-      list.push({ key: 'fiber', label: LABEL_VI.fiber, data: f });
+      list.push({ key: 'fiber', label: LABELS.fiber, data: f });
     }
     return list;
   });

@@ -44,7 +44,7 @@ export class BottomSheetPicker {
   @Input() value: string | null = null;
   @Input() searchable = false;
 
-  private _options = signal<PickerOption[]>([]);
+  private readonly _options = signal<PickerOption[]>([]);
   @Input({ required: true }) set options(list: PickerOption[]) {
     this._options.set(list ?? []);
   }
@@ -54,7 +54,7 @@ export class BottomSheetPicker {
    * Per design-system §8l: max 5 items, hidden when empty. Caller is responsible
    * for limiting + ordering. Hidden automatically when search query is non-empty.
    */
-  private _recentOptions = signal<PickerOption[]>([]);
+  private readonly _recentOptions = signal<PickerOption[]>([]);
   @Input() set recentOptions(list: PickerOption[] | null | undefined) {
     this._recentOptions.set(list ?? []);
   }

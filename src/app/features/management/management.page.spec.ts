@@ -113,7 +113,9 @@ describe('ManagementPage', () => {
 
   it('shows source labels using Vietnamese display names', () => {
     expect(component.ingredientSourceLabel('db')).toBe('Có sẵn');
+    expect(component.ingredientSourceLabel('ai')).toBe('AI');
     expect(component.ingredientSourceLabel('manual')).toBe('Tự tạo');
+    expect(component.dishSourceLabel('ai')).toBe('AI');
     expect(component.dishSourceLabel('custom')).toBe('Tự tạo');
   });
 

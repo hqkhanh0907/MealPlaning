@@ -10,6 +10,7 @@ import {
   Component,
   ElementRef,
   ViewChild,
+  afterNextRender,
   computed,
   inject,
   signal,
@@ -102,9 +103,9 @@ const emptyForm = (): DishEditFormValue => ({
   ],
 })
 export default class DishEditPage implements HasUnsavedChanges {
-  @ViewChild('ingredientPicker') private ingredientPicker?: BottomSheetPicker;
-  @ViewChild('mealTagPicker') private mealTagPicker?: BottomSheetPicker;
-  @ViewChild('nameInput') private nameInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('ingredientPicker') private readonly ingredientPicker?: BottomSheetPicker;
+  @ViewChild('mealTagPicker') private readonly mealTagPicker?: BottomSheetPicker;
+  @ViewChild('nameInput') private readonly nameInput?: ElementRef<HTMLInputElement>;
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -247,7 +248,9 @@ export default class DishEditPage implements HasUnsavedChanges {
 
   constructor() {
     addIcons({ chevronDownOutline, closeOutline, sparklesOutline });
-    void this.bootstrap();
+    afterNextRender(() => {
+      void this.bootstrap();
+    });
   }
 
   private async bootstrap(): Promise<void> {
@@ -697,13 +700,7 @@ export default class DishEditPage implements HasUnsavedChanges {
 
   private focusFirstInvalidField(): void {
     const f = this.dishForm;
-    const firstErrorSelector = f.name().errors().length
-      ? 'input'
-      : f.servings().errors().length
-        ? 'input[type="number"]'
-        : f.items().errors().length
-          ? '.ingredient-empty'
-          : null;
+    const firstErrorSelector = this.firstDishErrorSelector();
 
     setTimeout(() => {
       if (f.name().errors().length) {
@@ -719,5 +716,16 @@ export default class DishEditPage implements HasUnsavedChanges {
   private readInputValue(event: Event): string {
     const target = event.target;
     return target instanceof HTMLInputElement ? target.value : '';
+  }
+
+  private firstDishErrorSelector(): string | null {
+    const f = this.dishForm;
+    if (f.name().errors().length) {
+      return 'input';
+    }
+    if (f.servings().errors().length) {
+      return 'input[type="number"]';
+    }
+    return f.items().errors().length ? '.ingredient-empty' : null;
   }
 }

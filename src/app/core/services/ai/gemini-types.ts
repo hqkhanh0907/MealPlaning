@@ -53,6 +53,13 @@ export interface GeminiOptions<T> {
   readonly timeoutMs?: number;
   /** Override default model from `environment.geminiModel`. */
   readonly model?: string;
+  /** Optional inline images for Gemini Vision calls. Data must be base64 without data URL prefix. */
+  readonly imageParts?: readonly GeminiInlineImagePart[];
+}
+
+export interface GeminiInlineImagePart {
+  readonly mimeType: 'image/jpeg' | 'image/png' | 'image/webp';
+  readonly data: string;
 }
 
 /**

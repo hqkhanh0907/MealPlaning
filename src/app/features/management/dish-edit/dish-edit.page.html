@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/management" />
+      <ion-back-button defaultHref="/tabs/management" text="" aria-label="Quay lại" />
     </ion-buttons>
     <ion-title>{{ isEdit() ? 'Sửa món' : 'Thêm món' }}</ion-title>
   </ion-toolbar>
@@ -63,7 +63,6 @@
           <div
             class="nutrition-hero__ring"
             [style.--ring-percent]="caloriePercent()"
-            role="img"
             [attr.aria-label]="
               'Calo: ' +
               formatNumber(previewTotals().calories) +
@@ -121,32 +120,32 @@
         ></div>
       </div>
 
-      <div class="nutrition-hero__pills" role="list">
-        <div class="nutrition-hero__pill nutrition-hero__pill--protein" role="listitem">
+      <ul class="nutrition-hero__pills">
+        <li class="nutrition-hero__pill nutrition-hero__pill--protein">
           <span class="nutrition-hero__pill-dot" aria-hidden="true"></span>
           <span class="nutrition-hero__pill-text"
             >Protein {{ formatNumber(previewTotals().protein) }}g</span
           >
-        </div>
-        <div class="nutrition-hero__pill nutrition-hero__pill--carbs" role="listitem">
+        </li>
+        <li class="nutrition-hero__pill nutrition-hero__pill--carbs">
           <span class="nutrition-hero__pill-dot" aria-hidden="true"></span>
           <span class="nutrition-hero__pill-text"
             >Carbs {{ formatNumber(previewTotals().carbs) }}g</span
           >
-        </div>
-        <div class="nutrition-hero__pill nutrition-hero__pill--fat" role="listitem">
+        </li>
+        <li class="nutrition-hero__pill nutrition-hero__pill--fat">
           <span class="nutrition-hero__pill-dot" aria-hidden="true"></span>
           <span class="nutrition-hero__pill-text"
             >Fat {{ formatNumber(previewTotals().fat) }}g</span
           >
-        </div>
-        <div class="nutrition-hero__pill nutrition-hero__pill--fiber" role="listitem">
+        </li>
+        <li class="nutrition-hero__pill nutrition-hero__pill--fiber">
           <span class="nutrition-hero__pill-dot" aria-hidden="true"></span>
           <span class="nutrition-hero__pill-text"
             >Fiber {{ formatNumber(previewTotals().fiber) }}g</span
           >
-        </div>
-      </div>
+        </li>
+      </ul>
     </section>
 
     <app-form-field label="Mô tả" inputId="dish-field-description">

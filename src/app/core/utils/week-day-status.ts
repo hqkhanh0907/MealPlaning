@@ -13,7 +13,7 @@ export function weekDayStatus(d: WeekDayTotal): WeekDayStatus {
 
   if (d.targetCal <= 0) return 'past-extreme';
   const pct = Math.round((d.loggedCal / d.targetCal) * 100);
-  if (pct < 50 || pct > 150) return 'past-extreme';
+  if (pct < 50 || pct > 120) return 'past-extreme';
   if (pct >= 110) return 'past-over';
   if (pct >= 80) return 'past-on-target';
   return 'past-under';

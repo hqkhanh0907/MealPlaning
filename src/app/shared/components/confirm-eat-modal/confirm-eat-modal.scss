@@ -4,14 +4,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-md);
+  padding: var(--space-md);
   background: var(--scrim-strong);
   z-index: var(--z-dialog);
 }
 
 .dialog {
   width: min(100%, 320px);
-  padding: var(--spacing-lg);
+  padding: var(--space-lg);
   border-radius: var(--radius-lg);
   background: var(--bg-elevated);
   box-shadow: var(--shadow-xl);
@@ -19,7 +19,7 @@
 }
 
 .dialog-title {
-  margin: 0 0 var(--spacing-xs);
+  margin: 0 0 var(--space-xs);
   color: var(--text-primary);
   font-size: var(--font-size-title);
   font-weight: 500;
@@ -34,9 +34,9 @@
 }
 
 .dialog-microcopy {
-  margin: var(--spacing-sm) 0 0;
+  margin: var(--space-sm) 0 0;
   color: var(--text-tertiary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-body-sm);
   line-height: 1.5;
   opacity: 0.85;
 }
@@ -44,8 +44,8 @@
 .dialog-actions {
   display: flex;
   justify-content: space-between;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-md);
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
 }
 
 .dialog-btn-cancel,

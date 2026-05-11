@@ -17,6 +17,7 @@ describe('DishesUsingSheet', () => {
       servings: 2,
       image_url: null,
       meal_tag: null,
+      is_favorite: 0,
       created_at: '2026-04-26T00:00:00Z',
       updated_at: null,
       total_calories: 650,

@@ -36,11 +36,11 @@
 export function normalize(s: string): string {
   return s
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/đ/gi, 'd')
+    .replaceAll(/[\u0300-\u036f]/g, '')
+    .replaceAll(/đ/gi, 'd')
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, ' ');
+    .replaceAll(/\s+/g, ' ');
 }
 
 /**
@@ -69,7 +69,7 @@ const MAX_THRESHOLD = 2;
  * Performance: < 100µs per call for short strings (typical ingredient name).
  */
 export function levenshtein(a: string, b: string, threshold: number = MAX_THRESHOLD): number {
-  const t = threshold < 0 ? 0 : threshold;
+  const t = Math.max(threshold, 0);
   const sentinel = t + 1;
 
   if (a === b) return 0;
@@ -80,8 +80,9 @@ export function levenshtein(a: string, b: string, threshold: number = MAX_THRESH
   // Length difference alone exceeds threshold → early-exit.
   if (Math.abs(m - n) > t) return sentinel;
 
-  if (m === 0) return n > t ? sentinel : n;
-  if (n === 0) return m > t ? sentinel : m;
+  if (m === 0 || n === 0) {
+    return emptyDistance(m, n, t, sentinel);
+  }
 
   // Defensive: if either string is unexpectedly long, still bound memory.
   if (m > 255 || n > 255) {
@@ -96,21 +97,7 @@ export function levenshtein(a: string, b: string, threshold: number = MAX_THRESH
   for (let j = 0; j <= n; j++) prev[j] = j;
 
   for (let i = 1; i <= m; i++) {
-    curr[0] = i;
-    let rowMin = curr[0];
-    const aChar = a.charCodeAt(i - 1);
-
-    for (let j = 1; j <= n; j++) {
-      const cost = aChar === b.charCodeAt(j - 1) ? 0 : 1;
-      const del = prev[j] + 1;
-      const ins = curr[j - 1] + 1;
-      const sub = prev[j - 1] + cost;
-      let v = del < ins ? del : ins;
-      if (sub < v) v = sub;
-      curr[j] = v;
-      if (v < rowMin) rowMin = v;
-    }
-
+    const rowMin = fillLevenshteinRow(a, b, i, prev, curr);
     // Early-exit: if every cell of this row > threshold, the final answer
     // can only grow → return sentinel.
     if (rowMin > t) return sentinel;
@@ -123,6 +110,32 @@ export function levenshtein(a: string, b: string, threshold: number = MAX_THRESH
 
   const dist = prev[n];
   return dist > t ? sentinel : dist;
+}
+
+function emptyDistance(m: number, n: number, threshold: number, sentinel: number): number {
+  const distance = Math.max(m, n);
+  return distance > threshold ? sentinel : distance;
+}
+
+function fillLevenshteinRow(
+  a: string,
+  b: string,
+  rowIndex: number,
+  prev: Uint8Array,
+  curr: Uint8Array,
+): number {
+  curr[0] = rowIndex;
+  let rowMin = curr[0];
+  const aChar = a.codePointAt(rowIndex - 1);
+
+  for (let j = 1; j <= b.length; j++) {
+    const cost = aChar === b.codePointAt(j - 1) ? 0 : 1;
+    const v = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
+    curr[j] = v;
+    rowMin = Math.min(rowMin, v);
+  }
+
+  return rowMin;
 }
 
 /** Read-only candidate shape consumed by `findFuzzyMatches`. */

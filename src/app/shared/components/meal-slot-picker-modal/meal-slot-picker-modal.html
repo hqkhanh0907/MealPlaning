@@ -1,12 +1,12 @@
 @if (isOpen()) {
-  <div class="msp-backdrop" role="presentation" (click)="dismiss()">
-    <section
-      class="msp-sheet"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="msp-title"
-      (click)="$event.stopPropagation()"
-    >
+  <div class="msp-backdrop" tabindex="-1" (keydown.escape)="dismiss()">
+    <button
+      type="button"
+      class="msp-backdrop__dismiss"
+      aria-label="Đóng chọn bữa"
+      (click)="dismiss()"
+    ></button>
+    <dialog class="msp-sheet" open aria-modal="true" aria-labelledby="msp-title">
       <h2 id="msp-title" class="msp-title">{{ title() }}</h2>
       <div class="msp-grid">
         @for (choice of choices; track choice.type) {
@@ -23,6 +23,6 @@
         }
       </div>
       <button type="button" class="msp-cancel" (click)="dismiss()">Huỷ</button>
-    </section>
+    </dialog>
   </div>
 }

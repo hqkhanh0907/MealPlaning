@@ -94,7 +94,7 @@ describe('buildInitialSchemaMigration', () => {
       );
     };
 
-    it('declares 4 nutrition snapshot columns as nullable', () => {
+    it('declares nutrition snapshot columns as nullable', () => {
       const stmt = findPlannedDishDdl();
       expect(stmt).toBeDefined();
       // None of the snapshot columns should be NOT NULL.
@@ -102,6 +102,7 @@ describe('buildInitialSchemaMigration', () => {
       expect(stmt).toContain('protein           REAL,');
       expect(stmt).toContain('carbs             REAL,');
       expect(stmt).toContain('fat               REAL,');
+      expect(stmt).toContain('fiber             REAL,');
       expect(stmt).not.toMatch(/calories\s+REAL\s+NOT\s+NULL/);
     });
 
@@ -110,14 +111,15 @@ describe('buildInitialSchemaMigration', () => {
       expect(stmt).toContain('CHECK (servings BETWEEN 0.1 AND 20)');
     });
 
-    it('enforces bidirectional Hybrid CHECK (RT-01..02 + SNAP-01..05)', () => {
+    it('enforces bidirectional Hybrid CHECK while allowing unknown legacy fiber', () => {
       const stmt = findPlannedDishDdl();
       expect(stmt).toBeDefined();
       // is_completed=0 branch — all snapshot columns must be NULL
       expect(stmt).toMatch(
-        /is_completed = 0[\s\S]*?calories IS NULL[\s\S]*?protein IS NULL[\s\S]*?carbs IS NULL[\s\S]*?fat IS NULL[\s\S]*?completed_at IS NULL/,
+        /is_completed = 0[\s\S]*?calories IS NULL[\s\S]*?protein IS NULL[\s\S]*?carbs IS NULL[\s\S]*?fat IS NULL[\s\S]*?fiber IS NULL[\s\S]*?completed_at IS NULL/,
       );
-      // is_completed=1 branch — all snapshot columns must be NOT NULL
+      // is_completed=1 branch — pre-fiber legacy rows may have unknown fiber,
+      // but the original snapshot macros and completed_at are still required.
       expect(stmt).toMatch(
         /is_completed = 1[\s\S]*?calories IS NOT NULL[\s\S]*?protein IS NOT NULL[\s\S]*?carbs IS NOT NULL[\s\S]*?fat IS NOT NULL[\s\S]*?completed_at IS NOT NULL/,
       );
@@ -199,6 +201,7 @@ interface PlannedDishRow {
   protein: number | null;
   carbs: number | null;
   fat: number | null;
+  fiber: number | null;
   completed_at: string | null;
 }
 
@@ -239,14 +242,15 @@ async function insertPlannedDish(
     protein: null,
     carbs: null,
     fat: null,
+    fiber: null,
     completed_at: null,
     ...overrides,
   };
   await db.execute(
     `INSERT INTO planned_dish
        (id, meal_slot_id, dish_id, servings, is_completed,
-        calories, protein, carbs, fat, completed_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         calories, protein, carbs, fat, fiber, completed_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       id,
       slotId,
@@ -257,6 +261,7 @@ async function insertPlannedDish(
       row.protein,
       row.carbs,
       row.fat,
+      row.fiber,
       row.completed_at,
     ],
   );
@@ -279,7 +284,7 @@ describe('Hybrid CHECK truth-table — runtime (Story 3.1)', () => {
     teardownTestDatabase();
   });
 
-  it('Case 1 — is_completed=0 + 4 nutrition cols NULL + completed_at NULL → resolves', async () => {
+  it('Case 1 — is_completed=0 + nutrition snapshot cols NULL + completed_at NULL → resolves', async () => {
     const id = await insertPlannedDish(db, slotId, dishId, { is_completed: 0 });
     const rows = await db.query<{ id: string }>('SELECT id FROM planned_dish WHERE id = ?', [id]);
     expect(rows.length).toBe(1);
@@ -294,13 +299,28 @@ describe('Hybrid CHECK truth-table — runtime (Story 3.1)', () => {
     expect(count[0].count).toBe(0);
   });
 
-  it('Case 3 — is_completed=1 + 4 nutrition non-NULL + completed_at non-NULL → resolves', async () => {
+  it('Case 3 — is_completed=1 + nutrition snapshot non-NULL + completed_at non-NULL → resolves', async () => {
     const id = await insertPlannedDish(db, slotId, dishId, {
       is_completed: 1,
       calories: 500,
       protein: 30,
       carbs: 40,
       fat: 10,
+      fiber: 7,
+      completed_at: '2026-05-10 12:00:00',
+    });
+    const rows = await db.query<{ id: string }>('SELECT id FROM planned_dish WHERE id = ?', [id]);
+    expect(rows.length).toBe(1);
+  });
+
+  it('Case 3b — is_completed=1 + legacy fiber NULL + completed_at non-NULL → resolves', async () => {
+    const id = await insertPlannedDish(db, slotId, dishId, {
+      is_completed: 1,
+      calories: 500,
+      protein: 30,
+      carbs: 40,
+      fat: 10,
+      fiber: null,
       completed_at: '2026-05-10 12:00:00',
     });
     const rows = await db.query<{ id: string }>('SELECT id FROM planned_dish WHERE id = ?', [id]);
@@ -315,6 +335,7 @@ describe('Hybrid CHECK truth-table — runtime (Story 3.1)', () => {
         protein: null,
         carbs: 40,
         fat: 10,
+        fiber: 7,
         completed_at: '2026-05-10 12:00:00',
       }),
     ).toBeRejectedWithError(/check.*constraint.*failed/i);
@@ -388,6 +409,7 @@ describe('partial index hit — EXPLAIN QUERY PLAN (Story 3.1)', () => {
       protein: 35,
       carbs: 60,
       fat: 12,
+      fiber: 8,
       completed_at: '2026-05-10 13:00:00',
     });
   });

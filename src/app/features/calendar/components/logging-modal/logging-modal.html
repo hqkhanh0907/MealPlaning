@@ -1,0 +1,136 @@
+<ion-modal
+  [isOpen]="isOpen()"
+  [breakpoints]="[0, 1]"
+  [initialBreakpoint]="1"
+  [handle]="true"
+  [handleBehavior]="'cycle'"
+  (didDismiss)="onDismiss()"
+>
+  <ng-template>
+    <ion-header class="logging-modal__header">
+      <ion-toolbar>
+        <div class="logging-modal__title-row">
+          <div>
+            <p class="logging-modal__eyebrow">Thêm vào {{ mealLabel() }}</p>
+            <h2 class="logging-modal__title">Chọn món đã chuẩn bị</h2>
+          </div>
+          <button
+            type="button"
+            class="logging-modal__close"
+            aria-label="Đóng chọn món"
+            (click)="onDismiss()"
+          >
+            <ion-icon name="close-outline" aria-hidden="true" />
+          </button>
+        </div>
+
+        <app-search-toolbar
+          [query]="query()"
+          placeholder="Tìm món ăn"
+          ariaLabel="Tìm món ăn để thêm vào lịch"
+          (queryChange)="onQueryChange($event)"
+        />
+
+        <div class="logging-modal__servings" aria-label="Chọn khẩu phần">
+          <span class="logging-modal__servings-label">Khẩu phần</span>
+          <div class="logging-modal__stepper">
+            <button type="button" aria-label="Giảm khẩu phần" (click)="decreaseServings()">
+              −
+            </button>
+            <output>{{ servings() }}</output>
+            <button type="button" aria-label="Tăng khẩu phần" (click)="increaseServings()">
+              +
+            </button>
+          </div>
+        </div>
+
+        <div class="logging-modal__tabs" role="tablist" aria-label="Bộ lọc món ăn">
+          @for (tab of tabs; track tab.value) {
+            <button
+              type="button"
+              role="tab"
+              [class.logging-modal__tab--active]="activeTab() === tab.value"
+              [attr.aria-selected]="activeTab() === tab.value"
+              (click)="setTab(tab.value)"
+            >
+              {{ tab.label }}
+            </button>
+          }
+        </div>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="logging-modal__content">
+      <section class="logging-modal__ai" aria-labelledby="logging-ai-title">
+        <div class="logging-modal__ai-header">
+          <div>
+            <h3 id="logging-ai-title">Gợi ý AI theo bữa</h3>
+            <p>AI chỉ chọn từ thư viện món hiện có, không tự tạo món ngoài dữ liệu của bạn.</p>
+          </div>
+          <button
+            type="button"
+            class="logging-modal__ai-button"
+            [disabled]="aiLoading() || !!aiDisabledReason()"
+            [attr.aria-label]="aiDisabledReason() || 'Tạo gợi ý món bằng AI'"
+            (click)="requestAiSuggestions()"
+          >
+            {{ aiLoading() ? 'Đang gợi ý…' : 'Gợi ý' }}
+          </button>
+        </div>
+
+        @if (aiDisabledReason()) {
+          <p class="logging-modal__ai-state">{{ aiDisabledReason() }}</p>
+        } @else if (aiSuggestions().length > 0) {
+          <div class="logging-modal__ai-list">
+            @for (suggestion of aiSuggestions(); track suggestion.dishId) {
+              <button
+                type="button"
+                class="logging-modal__ai-card"
+                [attr.aria-label]="'Thêm món AI gợi ý ' + suggestion.dishName"
+                (click)="selectAiSuggestion(suggestion)"
+              >
+                <span>
+                  <strong>{{ suggestion.dishName }}</strong>
+                  <small>{{ suggestion.reason }}</small>
+                </span>
+                <span>{{ suggestion.servings }} khẩu phần</span>
+              </button>
+            }
+          </div>
+        }
+      </section>
+
+      @if (loading()) {
+        <p class="logging-modal__loading">Đang tải thư viện món…</p>
+      } @else if (visibleDishes().length === 0) {
+        <div class="logging-modal__empty">
+          <p>{{ emptyMessage() }}</p>
+          @if (activeTab() === 'all' || query().trim()) {
+            <button type="button" class="logging-modal__create" (click)="requestCreateDish()">
+              Tạo món mới
+            </button>
+          }
+        </div>
+      } @else {
+        <ul class="logging-modal__list">
+          @for (dish of visibleDishes(); track dish.id) {
+            <li>
+              <button
+                type="button"
+                class="logging-modal__dish"
+                [attr.aria-label]="'Thêm ' + dish.name + ' vào ' + mealLabel()"
+                (click)="selectDish(dish)"
+              >
+                <span class="logging-modal__dish-main">
+                  <span class="logging-modal__dish-name">{{ dish.name }}</span>
+                  <span class="logging-modal__dish-meta">{{ describeDish(dish) }}</span>
+                </span>
+                <span class="logging-modal__dish-action">Thêm</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

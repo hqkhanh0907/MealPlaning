@@ -2,7 +2,7 @@
   <header class="meal-slot__header">
     <span class="meal-slot__emoji" aria-hidden="true">{{ emoji() }}</span>
     <h3 class="meal-slot__label">{{ label() }}</h3>
-    <span class="meal-slot__total">{{ totalLoggedCalories() }} cal</span>
+    <span class="meal-slot__total">{{ totalCalories() }} kcal</span>
     <button
       type="button"
       class="meal-slot__add"
@@ -30,9 +30,11 @@
           <span class="meal-slot__name">{{ dish.dish_name }}</span>
           @if (dish.is_completed === 1) {
             <app-status-pill status="logged" [completedAt]="dish.completed_at" />
-            <span class="meal-slot__cal">{{ dish.effective_calories }} cal</span>
+            <span class="meal-slot__cal">{{ roundKcal(dish.effective_calories) }} kcal</span>
           } @else {
-            <span class="meal-slot__cal meal-slot__cal--placeholder">░░░</span>
+            <span class="meal-slot__cal"
+              >{{ roundKcal(dish.effective_calories) }} kcal dự kiến</span
+            >
           }
           <button
             type="button"

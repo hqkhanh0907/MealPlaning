@@ -81,29 +81,15 @@ Lý do chọn binary thay vì threshold:
 - Tooling (Prettier, IDE syntax highlight cho HTML/SCSS, hot reload) hoạt động tối ưu khi template/style nằm file riêng.
 - Diff PR sạch hơn — không còn diff hỗn hợp HTML+TS+CSS trong cùng 1 file.
 
-#### Trạng thái hiện tại (snapshot 2026-04-28) — TẤT CẢ 17/17 component vi phạm PC-1
+#### Trạng thái hiện tại (rev 2026-05) — PC-1 đang PASS
 
-| Component | Lines `.ts` | `.html`? | `.scss`? | Status |
-|-----------|------:|----------|----------|--------|
-| `features/management/management.page.ts` | 1163 | ❌ | ❌ | **Phải tách** |
-| `features/onboarding/onboarding.page.ts` | 869 | ❌ | ❌ | **Phải tách** |
-| `shared/components/ingredient-edit-modal/ingredient-edit-modal.component.ts` | 749 | ❌ | ❌ | **Phải tách** |
-| `shared/components/dish-edit-modal/dish-edit-modal.component.ts` | 652 | ❌ | ❌ | **Phải tách** |
-| `shared/components/bottom-sheet-picker/bottom-sheet-picker.component.ts` | 153 | ❌ | ✅ | **Phải tách `.html`** |
-| `shared/components/confirm-dialog/confirm-dialog.component.ts` | 129 | ❌ | ❌ | **Phải tách** |
-| `shared/components/search-toolbar/search-toolbar.component.ts` | 121 | ❌ | ❌ | **Phải tách** |
-| `shared/forms/form-field/form-field.component.ts` | 103 | ❌ | ❌ | **Phải tách** |
-| `shared/components/empty-state/empty-state.component.ts` | 96 | ❌ | ❌ | **Phải tách** |
-| `shared/components/segmented-control/segmented-control.component.ts` | 51 | ❌ | ❌ | **Phải tách** |
-| `tabs/tabs.page.ts` | 49 | ❌ | ❌ | **Phải tách** |
-| `shared/components/nutrition-badge/nutrition-badge.component.ts` | 47 | ❌ | ❌ | **Phải tách** |
-| `features/calendar/calendar.page.ts` | 45 | ❌ | ❌ | **Phải tách** |
-| `features/dashboard/dashboard.page.ts` | 45 | ❌ | ❌ | **Phải tách** |
-| `features/fitness/fitness.page.ts` | 45 | ❌ | ❌ | **Phải tách** |
-| `features/settings/settings.page.ts` | 29 | ❌ | ❌ | **Phải tách** |
-| `app.component.ts` | 20 | ❌ | ❌ | **Phải tách** |
+Toàn bộ component trong `src/app/` hiện dùng `templateUrl` + `styleUrl` external.
+Rule này được enforce bằng `scripts/check-pc1-external-templates.mjs`, chạy trong
+`npm run check:guards` và `npm run build`.
 
-**Tổng nợ:** 17 file `.html` + 16 file `.scss` cần tạo.
+Snapshot 2026-04-28 từng ghi nhận 17/17 component vi phạm PC-1; debt đó đã được
+xử lý trong Phase B/C refactor. Không tái tạo bảng nợ cũ trong docs hiện hành để
+tránh agent/dev refactor ngược.
 
 #### PC-2 — Pattern naming khi tách
 
@@ -130,29 +116,10 @@ shared/components/<name>/
 - Sprint Phase 1 ưu tiên tốc độ + ít file → inline gọn cho component nhỏ.
 - Đây là quyết định **tactical**, đã hết hạn dùng. PC-1 hiện hành thay thế hoàn toàn.
 
-#### Action — refactor toàn bộ 17 component
+#### Guard — bắt buộc giữ xanh
 
-Refactor task riêng (không nằm trong scope doc update). Thứ tự đề xuất theo độ rủi ro tăng dần (làm thấp rủi ro trước để build muscle memory):
-
-**Wave 1 — component nhỏ, ít coupling (sanity check):**
-1. `app.component.ts` (20)
-2. `tabs.page.ts` (49)
-3. `nutrition-badge.component.ts` (47)
-4. `segmented-control.component.ts` (51)
-5. `calendar/dashboard/fitness/settings.page.ts` (45-29 dòng, 4 router shell)
-6. `empty-state.component.ts` (96)
-
-**Wave 2 — component trung bình:**
-7. `form-field.component.ts` (103)
-8. `search-toolbar.component.ts` (121)
-9. `confirm-dialog.component.ts` (129)
-10. `bottom-sheet-picker.component.ts` (153) — đã có `.scss`, chỉ cần tách `.html`
-
-**Wave 3 — component lớn (test kỹ từng cái, commit riêng):**
-11. `dish-edit-modal` (652)
-12. `ingredient-edit-modal` (749)
-13. `onboarding.page` (869)
-14. `management.page` (1163)
+Chạy `npm run check:pc1` hoặc full `npm run check:guards` trước khi merge. Nếu
+guard fail, sửa component vi phạm thay vì thêm exception.
 
 ### 2.3 Folder layout chuẩn
 

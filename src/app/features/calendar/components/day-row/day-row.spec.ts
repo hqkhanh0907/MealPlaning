@@ -61,8 +61,8 @@ describe('DayRow', () => {
     expect(fixture.nativeElement.querySelector('.day-row--today')).toBeTruthy();
   });
 
-  it('applies status modifier (past-over) when logged ≥110% target', () => {
-    setDay(makeDay({ isPast: true, loggedCal: 2700, targetCal: 2000, hasPlan: true, dotCount: 5 }));
+  it('applies status modifier (past-over) when logged is 111–120% target', () => {
+    setDay(makeDay({ isPast: true, loggedCal: 2250, targetCal: 2000, hasPlan: true, dotCount: 5 }));
     expect(fixture.nativeElement.querySelector('.day-row--past-over')).toBeTruthy();
   });
 });

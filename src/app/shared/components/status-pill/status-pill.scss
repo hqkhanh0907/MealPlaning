@@ -1,24 +1,24 @@
 .status-pill {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-pill);
-  font-size: var(--font-size-sm);
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-body-sm);
   font-weight: 500;
   color: var(--ion-text-color);
 
   &__icon {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-body);
     line-height: 1;
   }
 
   &--planned {
-    background-color: var(--sage-50);
+    background-color: var(--primary-50);
     opacity: 0.6;
   }
 
   &--logged {
-    background-color: var(--sage-200);
+    background-color: var(--primary-200);
   }
 }

@@ -46,6 +46,7 @@ export interface PlannedDish {
   protein: number | null;
   carbs: number | null;
   fat: number | null;
+  fiber: number | null;
   created_at: string;
 }
 
@@ -61,6 +62,7 @@ export interface PlannedDishWithEffective extends PlannedDish {
   effective_protein: number;
   effective_carbs: number;
   effective_fat: number;
+  effective_fiber: number;
 }
 
 export interface MealSlotWithDishes extends MealSlot {
@@ -106,5 +108,5 @@ export type WeekDayStatus =
   | 'today-recording'
   | 'past-on-target' // 80–110%
   | 'past-under' // 50–79%
-  | 'past-over' // 110–150%
-  | 'past-extreme'; // <50% or >150%
+  | 'past-over' // 111–120%
+  | 'past-extreme'; // <50% or >120%

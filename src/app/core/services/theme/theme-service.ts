@@ -16,6 +16,6 @@ export class Theme {
    * argument. Kept only to preserve call sites.
    */
   apply(_mode: ThemeMode = 'light'): void {
-    document.documentElement.removeAttribute('data-theme');
+    delete document.documentElement.dataset['theme'];
   }
 }

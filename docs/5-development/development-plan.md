@@ -190,7 +190,7 @@ AI features split 2 phases:
 - ✅ Story 2.5 Release prep + Phase 2 polish (commit `9ccca1b`) — section caption tier, sticky LƯU brand-color, spacing rhythm tokens, adaptive icon verified, version sync guard, signing config + signed APK pipeline (`scripts/release/build-signed-apk.sh`), version policy doc
 - ✅ Story 2.6 Remove dark mode + collapse migrations (commits `c49f4b5` + `fcc7dd4`) — pre-release schema reset (6 migrations → 1 canonical v1, gram-only, theme CHECK 'light'); legacy sql.js migrator deleted; SCSS `_dark-mode.scss` + 12 `@include dark-root` blocks + 9 `@use dark-mode` imports + 2 `prefers-color-scheme` blocks stripped; Settings "Giao diện" radio group removed; `Theme` service kept as deprecated no-op shim; v0.2.1 (versionCode 3); 418/418 tests + 6/6 guards + emulator force-night-mode QA verified light-only.
 
-**Deliverable:** Full Settings F-13 closed; NotificationService API ready cho Phase 3; release pipeline (signing config + version sync guard) live; signed APK procedure documented in `release-signing.md` + `release-versioning.md`. Phase 2 exit version: `0.2.0` (versionCode `2`).
+**Deliverable:** Full Settings F-13 closed; NotificationService API ready cho Phase 3; release pipeline (signing config + version sync guard) live; signed APK procedure documented in `release-signing.md` + `release-versioning.md`. Phase 2 exit version: `0.2.0` (versionCode `2`); current patch line tracked in `release-versioning.md` is `0.2.2` (versionCode `4`).
 
 ---
 

@@ -3,6 +3,15 @@ import type { PluginListenerHandle } from '@capacitor/core';
 
 import { NETWORK_PLUGIN, NetworkStore, type NetworkPluginLike } from './network.store';
 
+describe('NETWORK_PLUGIN', () => {
+  it('wraps the Capacitor proxy without exposing Angular destroy hooks', () => {
+    TestBed.configureTestingModule({});
+    const plugin = TestBed.inject(NETWORK_PLUGIN);
+
+    expect('ngOnDestroy' in plugin).toBeFalse();
+  });
+});
+
 describe('NetworkStore', () => {
   let store: NetworkStore;
   let getStatusSpy: jasmine.Spy;
@@ -67,8 +76,13 @@ describe('NetworkStore', () => {
   });
 
   it('falls back to online=true when getStatus throws (web env)', async () => {
+    const warnSpy = spyOn(console, 'warn');
     getStatusSpy.and.rejectWith(new Error('not available'));
     await store.start();
     expect(store.online()).toBe(true);
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[NetworkStore] start failed, defaulting online:',
+      jasmine.any(Error),
+    );
   });
 });

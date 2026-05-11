@@ -46,6 +46,14 @@ describe('DatePickerModal', () => {
     expect(component.selection()).toBe(inRange);
   });
 
+  it('forces Vietnamese locale for the Ionic date grid', () => {
+    expect(component.locale).toBe('vi-VN');
+  });
+
+  it('uses Monday as the first day of week for Vietnamese planning flows', () => {
+    expect(component.firstDayOfWeek).toBe(1);
+  });
+
   it('jumpToday() resets selection to today (AC-1 Today shortcut)', () => {
     fixture.componentRef.setInput('initialDate', isoLocal(new Date(Date.now() + 30 * DAY_MS)));
     fixture.componentRef.setInput('isOpen', true);

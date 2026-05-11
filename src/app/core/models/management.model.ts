@@ -37,6 +37,7 @@ export interface DishModel {
   servings: number;
   image_url: string | null;
   meal_tag: MealTag | null;
+  is_favorite: 0 | 1;
   created_at: string;
   updated_at: string | null;
 }

@@ -3,12 +3,64 @@ import { v4 as uuidv4 } from 'uuid';
 import { Database } from '../services/database/database';
 import { UserProfile } from '../models/user-profile.model';
 
+type UserProfileUpdateColumn = Exclude<keyof UserProfile, 'id' | 'created_at' | 'updated_at'>;
+
+export interface WeightLogEntry {
+  id: string;
+  weight_kg: number;
+  date: string;
+  notes: string | null;
+  created_at: string;
+}
+
+const USER_PROFILE_UPDATE_COLUMNS = new Set<string>([
+  'height_cm',
+  'weight_kg',
+  'age',
+  'gender',
+  'goal',
+  'fitness_level',
+  'activity_factor',
+  'bmr',
+  'tdee',
+  'target_calories',
+  'target_protein',
+  'target_carbs',
+  'target_fat',
+  'theme',
+  'notif_morning',
+  'notif_lunch',
+  'notif_evening',
+  'notif_weekly',
+  'onboarding_completed',
+]);
+
 @Injectable({ providedIn: 'root' })
 export class UserProfileRepository {
   private readonly db = inject(Database);
 
   async getProfile(): Promise<UserProfile | null> {
     return this.db.getOne<UserProfile>('SELECT * FROM user_profile LIMIT 1');
+  }
+
+  async getLatestWeightLog(): Promise<WeightLogEntry | null> {
+    return this.db.getOne<WeightLogEntry>(
+      `SELECT id, weight_kg, date, notes, created_at
+         FROM weight_log
+        ORDER BY date DESC
+        LIMIT 1`,
+    );
+  }
+
+  async getPreviousWeightLog(beforeDate: string): Promise<WeightLogEntry | null> {
+    return this.db.getOne<WeightLogEntry>(
+      `SELECT id, weight_kg, date, notes, created_at
+         FROM weight_log
+        WHERE date < ?
+        ORDER BY date DESC
+        LIMIT 1`,
+      [beforeDate],
+    );
   }
 
   /**
@@ -64,7 +116,16 @@ export class UserProfileRepository {
   }
 
   async update(data: Partial<UserProfile>): Promise<void> {
-    const fields = Object.entries(data).filter(([key]) => key !== 'id' && key !== 'created_at');
+    const fields: [UserProfileUpdateColumn, unknown][] = [];
+    for (const [key, value] of Object.entries(data)) {
+      if (value === undefined) {
+        continue;
+      }
+      if (!USER_PROFILE_UPDATE_COLUMNS.has(key)) {
+        throw new Error(`UserProfileRepository: update field '${key}' is not allowed.`);
+      }
+      fields.push([key as UserProfileUpdateColumn, value]);
+    }
     if (fields.length === 0) return;
 
     const setClauses = fields.map(([key]) => `${key} = ?`).join(', ');

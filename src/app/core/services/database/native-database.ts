@@ -30,7 +30,7 @@ type SqlParam = Primitive | Uint8Array;
 
 @Injectable()
 export class NativeDatabase extends Database {
-  private sqlite = new SQLiteConnection(CapacitorSQLite);
+  private readonly sqlite = new SQLiteConnection(CapacitorSQLite);
   private db: SQLiteDBConnection | null = null;
   private initPromise: Promise<void> | null = null;
   private transactionDepth = 0;
@@ -61,8 +61,14 @@ export class NativeDatabase extends Database {
         console.warn('[NativeDatabaseService] WAL not enabled:', err);
       }
 
-      await this.resetLegacyManagementSchemaIfNeeded();
-      await this.applySchema();
+      const currentVersion = await this.readUserVersion();
+      if (currentVersion === 0 && (await this.isDatabaseEmpty())) {
+        await this.applySchema();
+        await this.setUserVersion(SCHEMA_VERSION);
+        return;
+      }
+
+      await this.resetLegacyManagementSchemaIfNeeded(currentVersion);
       await new MigrationRunner(this, MIGRATION_REGISTRY).run();
     } catch (err) {
       this.initPromise = null;
@@ -73,6 +79,24 @@ export class NativeDatabase extends Database {
     }
   }
 
+  private async readUserVersion(): Promise<number> {
+    const [{ user_version = 0 } = { user_version: 0 }] = await this.query<{ user_version: number }>(
+      'PRAGMA user_version;',
+    );
+    return user_version;
+  }
+
+  private async isDatabaseEmpty(): Promise<boolean> {
+    const [{ count = 0 } = { count: 0 }] = await this.query<{ count: number }>(
+      `SELECT COUNT(*) AS count
+       FROM sqlite_master
+       WHERE type IN ('table', 'view', 'index', 'trigger')
+         AND name NOT LIKE 'sqlite_%'
+         AND name != 'android_metadata'`,
+    );
+    return count === 0;
+  }
+
   private async applySchema(): Promise<void> {
     const statements = SCHEMA_DDL.map((ddl) => ({ statement: ddl, values: [] as SqlParam[] }));
     const res = await this.db!.executeSet(statements);
@@ -81,8 +105,12 @@ export class NativeDatabase extends Database {
     }
   }
 
-  private async resetLegacyManagementSchemaIfNeeded(): Promise<void> {
-    const snapshot = await this.readManagementSchemaSnapshot();
+  private async setUserVersion(version: number): Promise<void> {
+    await this.db!.execute(`PRAGMA user_version = ${version};`, false);
+  }
+
+  private async resetLegacyManagementSchemaIfNeeded(currentVersion: number): Promise<void> {
+    const snapshot = await this.readManagementSchemaSnapshot(currentVersion);
     if (!shouldResetLegacyManagementSchema(snapshot)) {
       return;
     }
@@ -94,13 +122,11 @@ export class NativeDatabase extends Database {
     await this.db!.execute('DROP TABLE IF EXISTS ingredient;', false);
   }
 
-  private async readManagementSchemaSnapshot(): Promise<ManagementSchemaSnapshot> {
-    const [{ user_version = 0 } = { user_version: 0 }] = await this.query<{ user_version: number }>(
-      'PRAGMA user_version;',
-    );
-
+  private async readManagementSchemaSnapshot(
+    userVersion: number,
+  ): Promise<ManagementSchemaSnapshot> {
     return {
-      userVersion: user_version,
+      userVersion,
       ingredientColumns: await this.readTableColumns('ingredient'),
       dishColumns: await this.readTableColumns('dish'),
       dishIngredientColumns: await this.readTableColumns('dish_ingredient'),

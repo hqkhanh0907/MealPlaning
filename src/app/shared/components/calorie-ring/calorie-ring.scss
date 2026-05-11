@@ -2,7 +2,7 @@
   display: inline-block;
 
   &__track {
-    stroke: var(--ion-color-step-150);
+    stroke: var(--bg-muted);
   }
 
   &__fill {
@@ -12,7 +12,7 @@
 
   &__label {
     font-family: var(--ion-font-family);
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-body);
     font-weight: 600;
     fill: var(--ion-text-color);
   }

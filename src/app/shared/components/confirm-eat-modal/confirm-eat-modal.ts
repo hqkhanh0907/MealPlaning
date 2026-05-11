@@ -35,11 +35,11 @@ export class ConfirmEatModal {
       : null,
   );
 
-  emit(decision: boolean): void {
-    if (decision) {
-      this.confirmed.emit();
-    } else {
-      this.cancelled.emit();
-    }
+  confirm(): void {
+    this.confirmed.emit();
+  }
+
+  cancel(): void {
+    this.cancelled.emit();
   }
 }

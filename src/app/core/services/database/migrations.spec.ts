@@ -1,4 +1,5 @@
 import {
+  buildFiberSnapshotSchemaMigration,
   buildHybridPolicySchemaMigration,
   buildInitialSchemaMigration,
   SCHEMA_VERSION,
@@ -6,19 +7,22 @@ import {
 import { MIGRATION_REGISTRY } from './migrations';
 
 describe('MIGRATION_REGISTRY', () => {
-  it('exposes v1 + v2 migrations matching SCHEMA_VERSION', () => {
-    expect(SCHEMA_VERSION).toBe(2);
-    expect(MIGRATION_REGISTRY.length).toBe(2);
+  it('exposes v1 + v2 + v3 migrations matching SCHEMA_VERSION', () => {
+    expect(SCHEMA_VERSION).toBe(3);
+    expect(MIGRATION_REGISTRY.length).toBe(3);
     expect(MIGRATION_REGISTRY[0].version).toBe(1);
     expect(MIGRATION_REGISTRY[1].version).toBe(2);
-    expect(MIGRATION_REGISTRY[1].version).toBe(SCHEMA_VERSION);
+    expect(MIGRATION_REGISTRY[2].version).toBe(3);
+    expect(MIGRATION_REGISTRY[2].version).toBe(SCHEMA_VERSION);
   });
 
-  it('uses the canonical builders (immutable v1, hybrid-policy v2)', () => {
+  it('uses the canonical builders (v1, hybrid-policy v2, fiber snapshot v3)', () => {
     const v1 = buildInitialSchemaMigration();
     const v2 = buildHybridPolicySchemaMigration();
+    const v3 = buildFiberSnapshotSchemaMigration();
     expect(MIGRATION_REGISTRY[0].statements).toEqual(v1.statements);
     expect(MIGRATION_REGISTRY[1].statements).toEqual(v2.statements);
+    expect(MIGRATION_REGISTRY[2].statements).toEqual(v3.statements);
   });
 
   it('keeps migrations sorted by ascending version', () => {
@@ -72,5 +76,26 @@ describe('buildHybridPolicySchemaMigration (D8 DEC-11)', () => {
     expect(joined).toContain('idx_planned_dish_completed');
     expect(joined).toContain('idx_planned_dish_completed_at');
     expect(joined).toContain('idx_meal_slot_day_plan');
+  });
+});
+
+describe('buildFiberSnapshotSchemaMigration', () => {
+  it('declares version 3', () => {
+    expect(buildFiberSnapshotSchemaMigration().version).toBe(3);
+  });
+
+  it('recreates planned_dish with nullable legacy fiber in the Hybrid CHECK', () => {
+    const joined = buildFiberSnapshotSchemaMigration().statements.join('\n');
+    expect(joined).toContain('fiber             REAL');
+    expect(joined).toMatch(/is_completed = 0[\s\S]*?fiber IS NULL[\s\S]*?completed_at IS NULL/);
+    expect(joined).toMatch(
+      /is_completed = 1[\s\S]*?calories IS NOT NULL[\s\S]*?protein IS NOT NULL[\s\S]*?carbs IS NOT NULL[\s\S]*?fat IS NOT NULL[\s\S]*?completed_at IS NOT NULL/,
+    );
+  });
+
+  it('preserves historical logged fiber as unknown instead of synthesizing mutable recipe totals', () => {
+    const joined = buildFiberSnapshotSchemaMigration().statements.join('\n');
+    expect(joined).toContain('NULL AS fiber');
+    expect(joined).not.toContain('total_fiber');
   });
 });

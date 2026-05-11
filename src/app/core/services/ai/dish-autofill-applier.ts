@@ -17,6 +17,7 @@ import type {
   DishAutofillFuzzyConfirmRow,
   DishAutofillNewRow,
   DishAutofillResult,
+  DishAutofillRow,
 } from './nutrition-ai';
 
 /**
@@ -60,43 +61,71 @@ export class DishAutofillApplier {
     // không được tạo 2 ingredient. Key = normalized name (re-check qua DB
     // findByExactName để bắt cả case ingredient vừa tạo trong vòng lặp này).
     for (let i = 0; i < result.rows.length; i++) {
-      const row = result.rows[i];
-
-      if (row.kind === 'existing') {
-        dishIngredients.push(
-          this.toLink((row as DishAutofillExistingRow).matchedIngredientId, row.gramWeight, i),
-        );
-        continue;
+      const link = await this.applyRow(result.rows[i], i, options);
+      dishIngredients.push(link.dishIngredient);
+      if (link.createdIngredientId) {
+        createdIngredientIds.push(link.createdIngredientId);
       }
-
-      if (row.kind === 'fuzzyConfirm') {
-        const decision = options.fuzzyDecisions.get(i);
-        if (!decision) {
-          throw new Error(
-            `[DishAutofillApplier] Missing fuzzyDecision for row ${i} ` +
-              `('${(row as DishAutofillFuzzyConfirmRow).name}').`,
-          );
-        }
-        if (decision === 'accept-suggestion') {
-          dishIngredients.push(
-            this.toLink((row as DishAutofillFuzzyConfirmRow).suggestedMatchId, row.gramWeight, i),
-          );
-        } else {
-          const id = await this.findOrCreate((row as DishAutofillFuzzyConfirmRow).pendingNew);
-          if (id.created) createdIngredientIds.push(id.ingredientId);
-          dishIngredients.push(this.toLink(id.ingredientId, row.gramWeight, i));
-        }
-        continue;
-      }
-
-      // kind === 'new'
-      const newRow = row as DishAutofillNewRow;
-      const id = await this.findOrCreate(newRow);
-      if (id.created) createdIngredientIds.push(id.ingredientId);
-      dishIngredients.push(this.toLink(id.ingredientId, newRow.gramWeight, i));
     }
 
     return { dishIngredients, createdIngredientIds };
+  }
+
+  private async applyRow(
+    row: DishAutofillRow,
+    index: number,
+    options: ApplyAutofillOptions,
+  ): Promise<{ dishIngredient: CreateDishIngredientInput; createdIngredientId: string | null }> {
+    if (row.kind === 'existing') {
+      return this.linkExisting(row, index);
+    }
+
+    if (row.kind === 'fuzzyConfirm') {
+      return this.linkFuzzy(row, index, options);
+    }
+
+    return this.linkNew(row, index);
+  }
+
+  private linkExisting(
+    row: DishAutofillExistingRow,
+    index: number,
+  ): { dishIngredient: CreateDishIngredientInput; createdIngredientId: null } {
+    return {
+      dishIngredient: this.toLink(row.matchedIngredientId, row.gramWeight, index),
+      createdIngredientId: null,
+    };
+  }
+
+  private async linkFuzzy(
+    row: DishAutofillFuzzyConfirmRow,
+    index: number,
+    options: ApplyAutofillOptions,
+  ): Promise<{ dishIngredient: CreateDishIngredientInput; createdIngredientId: string | null }> {
+    const decision = options.fuzzyDecisions.get(index);
+    if (!decision) {
+      throw new Error(
+        `[DishAutofillApplier] Missing fuzzyDecision for row ${index} ('${row.name}').`,
+      );
+    }
+    if (decision === 'accept-suggestion') {
+      return {
+        dishIngredient: this.toLink(row.suggestedMatchId, row.gramWeight, index),
+        createdIngredientId: null,
+      };
+    }
+    return this.linkNew(row.pendingNew, index);
+  }
+
+  private async linkNew(
+    row: Omit<DishAutofillNewRow, 'kind'>,
+    index: number,
+  ): Promise<{ dishIngredient: CreateDishIngredientInput; createdIngredientId: string | null }> {
+    const id = await this.findOrCreate(row);
+    return {
+      dishIngredient: this.toLink(id.ingredientId, row.gramWeight, index),
+      createdIngredientId: id.created ? id.ingredientId : null,
+    };
   }
 
   private toLink(

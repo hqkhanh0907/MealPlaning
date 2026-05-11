@@ -1,9 +1,9 @@
 import { APP_INITIALIZER, ApplicationInitStatus } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, flushMicrotasks, TestBed, tick } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { ProfileStore } from '../../stores/profile.store';
 import { SeedLoader } from '../seed/seed-loader';
-import { provideDatabaseService } from './database.provider';
+import { provideDatabaseService, SEED_STARTUP_DELAY_MS } from './database.provider';
 import { Database } from './database';
 
 describe('provideDatabaseService startup orchestration', () => {
@@ -58,19 +58,68 @@ describe('provideDatabaseService startup orchestration', () => {
     expect(initializers.length).toBe(1);
   });
 
-  it('initializes database before loading profile during app init', async () => {
+  it('initializes database and profile before starting delayed seed load', fakeAsync(() => {
     const { calls, initStatus } = configure();
-    await initStatus.donePromise;
-    expect(calls).toEqual(['db.initialize', 'seed.run', 'profile.loadProfile']);
-  });
+    let initialized = false;
+    initStatus.donePromise.then(() => {
+      initialized = true;
+    });
 
-  it('continues startup even if seed loader throws', async () => {
+    flushMicrotasks();
+    expect(initialized).toBeTrue();
+    expect(calls).toEqual(['db.initialize', 'profile.loadProfile']);
+
+    tick(SEED_STARTUP_DELAY_MS);
+    flushMicrotasks();
+    expect(calls).toEqual(['db.initialize', 'profile.loadProfile', 'seed.run']);
+  }));
+
+  it('does not wait for seed loader during app init', fakeAsync(() => {
+    let resolveSeed!: (value: { ingredients: number; dishes: number }) => void;
+    const { calls, seedLoader, initStatus } = configure();
+    seedLoader.run.and.callFake(
+      () =>
+        new Promise<{ ingredients: number; dishes: number }>((resolve) => {
+          calls.push('seed.run');
+          resolveSeed = resolve;
+        }),
+    );
+
+    let initialized = false;
+    initStatus.donePromise.then(() => {
+      initialized = true;
+    });
+    flushMicrotasks();
+    expect(initialized).toBeTrue();
+    expect(calls).toEqual(['db.initialize', 'profile.loadProfile']);
+
+    tick(SEED_STARTUP_DELAY_MS);
+    expect(calls).toEqual(['db.initialize', 'profile.loadProfile', 'seed.run']);
+    resolveSeed({ ingredients: 0, dishes: 0 });
+    flushMicrotasks();
+  }));
+
+  it('continues startup even if seed loader throws', fakeAsync(() => {
+    const warnSpy = spyOn(console, 'warn');
     const { calls, seedLoader, initStatus } = configure();
     seedLoader.run.and.callFake(async () => {
       calls.push('seed.run');
       throw new Error('boom');
     });
-    await initStatus.donePromise;
-    expect(calls).toEqual(['db.initialize', 'seed.run', 'profile.loadProfile']);
-  });
+    let initialized = false;
+    initStatus.donePromise.then(() => {
+      initialized = true;
+    });
+    flushMicrotasks();
+    expect(initialized).toBeTrue();
+    expect(calls).toEqual(['db.initialize', 'profile.loadProfile']);
+
+    tick(SEED_STARTUP_DELAY_MS);
+    flushMicrotasks();
+    expect(calls).toEqual(['db.initialize', 'profile.loadProfile', 'seed.run']);
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[DatabaseProvider] seed load failed:',
+      jasmine.any(Error),
+    );
+  }));
 });

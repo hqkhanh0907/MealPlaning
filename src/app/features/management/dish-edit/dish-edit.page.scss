@@ -230,7 +230,7 @@
   width: 100%;
   display: flex;
   height: 10px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-full);
   overflow: hidden;
   background: var(--bg-muted);
   gap: 2px;
@@ -254,6 +254,9 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .nutrition-hero__pill {

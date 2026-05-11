@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   ViewChild,
+  afterNextRender,
   computed,
   inject,
   signal,
@@ -85,8 +86,8 @@ const emptyForm = (): IngredientEditFormValue => ({
   ],
 })
 export default class IngredientEditPage implements HasUnsavedChanges {
-  @ViewChild('categoryPicker') private categoryPicker?: BottomSheetPicker;
-  @ViewChild('nameInput') private nameInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('categoryPicker') private readonly categoryPicker?: BottomSheetPicker;
+  @ViewChild('nameInput') private readonly nameInput?: ElementRef<HTMLInputElement>;
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -134,7 +135,9 @@ export default class IngredientEditPage implements HasUnsavedChanges {
 
   constructor() {
     addIcons({ chevronDownOutline, sparklesOutline });
-    void this.bootstrap();
+    afterNextRender(() => {
+      void this.bootstrap();
+    });
   }
 
   private async bootstrap(): Promise<void> {
@@ -335,11 +338,12 @@ export default class IngredientEditPage implements HasUnsavedChanges {
         this.nameInput?.nativeElement.focus();
         return;
       }
-      const sel = f.category().errors().length
-        ? '.picker-trigger--floating'
-        : f.calories().errors().length
-          ? 'input[type="number"]'
-          : null;
+      let sel: string | null = null;
+      if (f.category().errors().length) {
+        sel = '.picker-trigger--floating';
+      } else if (f.calories().errors().length) {
+        sel = 'input[type="number"]';
+      }
       const target = sel ? (document.querySelector(sel) as HTMLElement | null) : null;
       target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });

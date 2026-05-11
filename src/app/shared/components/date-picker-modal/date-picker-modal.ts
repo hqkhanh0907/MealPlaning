@@ -3,12 +3,10 @@ import {
   Component,
   computed,
   effect,
-  inject,
   input,
   output,
   signal,
 } from '@angular/core';
-import { LOCALE_ID } from '@angular/core';
 import { IonDatetime } from '@ionic/angular/standalone';
 
 const CLAMP_DAYS = 365;
@@ -39,7 +37,8 @@ function clampToBounds(iso: string, minIso: string, maxIso: string): string {
   styleUrl: './date-picker-modal.scss',
 })
 export class DatePickerModal {
-  readonly locale = inject(LOCALE_ID, { optional: true }) ?? 'vi-VN';
+  readonly locale = 'vi-VN';
+  readonly firstDayOfWeek = 1;
 
   readonly isOpen = input<boolean>(false);
   readonly initialDate = input<string>(todayIso());

@@ -33,7 +33,10 @@ export interface NetworkPluginLike {
 
 export const NETWORK_PLUGIN = new InjectionToken<NetworkPluginLike>('NETWORK_PLUGIN', {
   providedIn: 'root',
-  factory: () => Network as unknown as NetworkPluginLike,
+  factory: () => ({
+    getStatus: () => Network.getStatus(),
+    addListener: (event, cb) => Network.addListener(event, cb),
+  }),
 });
 
 @Injectable({ providedIn: 'root' })

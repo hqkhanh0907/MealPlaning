@@ -78,10 +78,10 @@ describe('MacroRow', () => {
     expect(component.band(macros[1])).toBe('low');
   });
 
-  it('aria-label uses Vietnamese label and rounded percentage', () => {
+  it('aria-label uses canonical macro label and rounded percentage', () => {
     fixture.detectChanges();
     const protein = component.macros()[0];
-    expect(component.ariaLabel(protein)).toBe('Đạm 30 trên 100, 30 phần trăm');
+    expect(component.ariaLabel(protein)).toBe('Protein 30 trên 100, 30 phần trăm');
   });
 
   it('highlight border applied to correct DOM node', () => {

@@ -75,15 +75,14 @@ export class GeminiClient {
       throw err;
     }
 
-    let lastError: GeminiError | undefined;
-    let lastResponseText: string | undefined;
-    let lastTokens: number | undefined;
-
     for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+      let responseText: string | undefined;
+      let responseTokens: number | undefined;
+
       try {
         const { text, tokens } = await this.callOnce(prompt, options, model, timeoutMs);
-        lastResponseText = text;
-        lastTokens = tokens;
+        responseText = text;
+        responseTokens = tokens;
 
         // Parse + validate (any failure here is also retry candidate for parse).
         const parsed = this.parseAndValidate(text, options.schema);
@@ -92,25 +91,25 @@ export class GeminiClient {
         await this.logSuccess(options.feature, prompt, text, model, tokens);
         return parsed;
       } catch (err) {
-        lastError = err instanceof GeminiError ? err : new GeminiError('network', String(err), err);
+        const geminiError =
+          err instanceof GeminiError ? err : new GeminiError('network', String(err), err);
 
-        if (!RETRYABLE.has(lastError.kind) || attempt === MAX_RETRY_ATTEMPTS - 1) {
-          break;
+        if (!RETRYABLE.has(geminiError.kind) || attempt === MAX_RETRY_ATTEMPTS - 1) {
+          await this.logAttempt(
+            options.feature,
+            prompt,
+            geminiError,
+            model,
+            responseText,
+            responseTokens,
+          );
+          throw geminiError;
         }
         await sleep(RETRY_DELAYS_MS[attempt]);
       }
     }
 
-    // All attempts failed — log + throw last error.
-    await this.logAttempt(
-      options.feature,
-      prompt,
-      lastError ?? new GeminiError('network', 'unknown'),
-      model,
-      lastResponseText,
-      lastTokens,
-    );
-    throw lastError ?? new GeminiError('network', 'unknown');
+    throw new GeminiError('network', 'Retry loop exhausted unexpectedly');
   }
 
   /**
@@ -124,8 +123,13 @@ export class GeminiClient {
   ): Promise<{ text: string; tokens: number | undefined }> {
     const url = `${API_BASE}/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(this.apiKey)}`;
 
+    const parts: unknown[] = [{ text: prompt }];
+    for (const image of options.imageParts ?? []) {
+      parts.push({ inlineData: { mimeType: image.mimeType, data: image.data } });
+    }
+
     const body: Record<string, unknown> = {
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      contents: [{ role: 'user', parts }],
       generationConfig: {
         temperature: options.temperature ?? DEFAULT_TEMPERATURE,
         maxOutputTokens: options.maxOutputTokens ?? DEFAULT_MAX_TOKENS,

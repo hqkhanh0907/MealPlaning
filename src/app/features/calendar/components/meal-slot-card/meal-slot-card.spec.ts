@@ -19,12 +19,14 @@ function makeDish(overrides: Partial<PlannedDishWithEffective> = {}): PlannedDis
     protein: null,
     carbs: null,
     fat: null,
+    fiber: null,
     created_at: '2026-05-10T08:00:00Z',
     dish_name: 'Phở bò',
     effective_calories: 450,
     effective_protein: 30,
     effective_carbs: 50,
     effective_fat: 12,
+    effective_fiber: 5,
     ...overrides,
   };
 }
@@ -82,16 +84,16 @@ describe('MealSlotCard', () => {
     });
   });
 
-  describe('totalLoggedCalories (only counts is_completed=1)', () => {
-    it('returns 0 when no dishes are completed', () => {
+  describe('totalCalories', () => {
+    it('sums planned effective calories for planning visibility', () => {
       setInputs(
         makeSlot([makeDish({ is_completed: 0 }), makeDish({ id: 'pd-2', is_completed: 0 })]),
         'breakfast',
       );
-      expect(component.totalLoggedCalories()).toBe(0);
+      expect(component.totalCalories()).toBe(900);
     });
 
-    it('sums effective_calories of logged dishes only', () => {
+    it('sums effective_calories of planned and logged dishes', () => {
       setInputs(
         makeSlot([
           makeDish({
@@ -110,7 +112,7 @@ describe('MealSlotCard', () => {
         ]),
         'breakfast',
       );
-      expect(component.totalLoggedCalories()).toBe(650);
+      expect(component.totalCalories()).toBe(950);
     });
   });
 
@@ -204,12 +206,10 @@ describe('MealSlotCard', () => {
       expect(empty?.textContent).toContain('Chưa có món');
     });
 
-    it('renders calo placeholder ░░░ for planned rows', () => {
+    it('renders expected kcal for planned rows', () => {
       setInputs(makeSlot([makeDish({ is_completed: 0 })]), 'breakfast');
-      const placeholder = (fixture.nativeElement as HTMLElement).querySelector(
-        '.meal-slot__cal--placeholder',
-      );
-      expect(placeholder?.textContent).toBe('░░░');
+      const cal = (fixture.nativeElement as HTMLElement).querySelector('.meal-slot__cal');
+      expect(cal?.textContent).toContain('450 kcal dự kiến');
     });
 
     it('renders status-pill + numeric calo for logged rows', () => {
@@ -224,11 +224,9 @@ describe('MealSlotCard', () => {
         'breakfast',
       );
       const pill = (fixture.nativeElement as HTMLElement).querySelector('app-status-pill');
-      const cal = (fixture.nativeElement as HTMLElement).querySelector(
-        '.meal-slot__cal:not(.meal-slot__cal--placeholder)',
-      );
+      const cal = (fixture.nativeElement as HTMLElement).querySelector('.meal-slot__cal');
       expect(pill).toBeTruthy();
-      expect(cal?.textContent).toContain('450');
+      expect(cal?.textContent).toContain('450 kcal');
     });
 
     it('action button label switches with completion state', () => {

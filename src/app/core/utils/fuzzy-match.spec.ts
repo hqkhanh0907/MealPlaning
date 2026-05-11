@@ -82,6 +82,15 @@ describe('fuzzy-match — levenshtein (early-exit, default threshold 2)', () => 
     expect(levenshtein('hanh la', 'abcxyz')).toBe(3);
   });
 
+  it('returns concrete empty-string distance when within threshold', () => {
+    expect(levenshtein('', 'ab', 2)).toBe(2);
+    expect(levenshtein('ab', '', 2)).toBe(2);
+  });
+
+  it('bounds memory for unexpectedly long same-length inputs', () => {
+    expect(levenshtein('a'.repeat(256), 'b'.repeat(256))).toBe(3);
+  });
+
   it('respects custom threshold parameter', () => {
     // threshold=0 → exact match only, sentinel=1
     expect(levenshtein('bun', 'bo', 0)).toBe(1);

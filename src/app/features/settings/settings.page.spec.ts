@@ -148,4 +148,30 @@ describe('SettingsPage', () => {
     expect(profileStore.updateProfile).toHaveBeenCalledWith({ notif_evening: 0 });
     expect(notifications.sync).toHaveBeenCalled();
   });
+
+  it('onToggleChange ignores unchanged notification state', async () => {
+    profileSignal.set(makeProfile({ notif_morning: 1 }));
+    const event = new CustomEvent<{ checked: boolean }>('ionChange', {
+      detail: { checked: true },
+    });
+
+    await component.onToggleChange('morning', event);
+
+    expect(notifications.requestPermission).not.toHaveBeenCalled();
+    expect(profileStore.updateProfile).not.toHaveBeenCalled();
+  });
+
+  it('onToggleChange reverts target checked value when permission is denied', async () => {
+    notifications.requestPermission.and.resolveTo(false);
+    const target = { checked: true } as HTMLIonToggleElement;
+    const event = new CustomEvent<{ checked: boolean }>('ionChange', {
+      detail: { checked: true },
+    });
+    Object.defineProperty(event, 'target', { value: target });
+
+    await component.onToggleChange('morning', event);
+
+    expect(target.checked).toBeFalse();
+    expect(profileStore.updateProfile).not.toHaveBeenCalled();
+  });
 });

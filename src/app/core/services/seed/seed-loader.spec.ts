@@ -129,11 +129,17 @@ describe('SeedLoaderService', () => {
     flushSeeds([ing1], [], [dish1]);
     await p1;
 
+    const querySpy = spyOn(db, 'query').and.callThrough();
     const p2 = loader.run();
     flushSeeds([ing1], [], [dish1]);
     const result = await p2;
+    const artifactLookupCalls = querySpy.calls
+      .allArgs()
+      .filter(([sql]) => String(sql).startsWith('SELECT artifact_id FROM seed_artifact'));
 
     expect(result).toEqual({ ingredients: 0, dishes: 0 });
+    expect(artifactLookupCalls.length).toBe(1);
+    expect(String(artifactLookupCalls[0]?.[0])).toContain('WHERE artifact_id IN (?, ?)');
     expect(await count('ingredient')).toBe(1);
     expect(await count('dish')).toBe(1);
     expect(await count('seed_artifact')).toBe(2);

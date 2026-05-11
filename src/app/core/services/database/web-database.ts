@@ -46,7 +46,9 @@ export class WebDatabase extends Database {
   override async execute(sql: string, params?: unknown[]): Promise<void> {
     this.ensureDb();
     this.db!.run(sql, params as (string | number | null | Uint8Array)[]);
-    this.persist();
+    if (this.transactionDepth === 0) {
+      this.persist();
+    }
   }
 
   override async withTransaction<T>(callback: () => Promise<T>): Promise<T> {

@@ -86,7 +86,7 @@
 
 .dasf-row {
   background: var(--bg-card);
-  border: 1px solid var(--divider);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md, 12px);
   padding: 12px 14px;
 
@@ -162,7 +162,7 @@
 .dasf-pill {
   background: var(--bg-muted);
   color: var(--text-primary);
-  border: 1px solid var(--divider);
+  border: 1px solid var(--border-color);
   border-radius: 999px;
   padding: 6px 12px;
   font-size: var(--font-size-body-sm);
@@ -181,7 +181,7 @@
   position: sticky;
   bottom: 0;
   background: var(--bg-card);
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--border-color);
   padding: 10px 20px 16px;
 }
 

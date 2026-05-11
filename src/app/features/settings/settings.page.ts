@@ -41,6 +41,19 @@ function activityLabel(factor: number): string {
   return activityLabelShort(level);
 }
 
+function notificationPatch(key: SlotKey, value: 0 | 1): Partial<UserProfile> {
+  switch (key) {
+    case 'morning':
+      return { notif_morning: value };
+    case 'lunch':
+      return { notif_lunch: value };
+    case 'evening':
+      return { notif_evening: value };
+    case 'weekly':
+      return { notif_weekly: value };
+  }
+}
+
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.page.html',
@@ -63,9 +76,9 @@ function activityLabel(factor: number): string {
   ],
 })
 export default class SettingsPage {
-  private profileStore = inject(ProfileStore);
-  private notifications = inject(LocalNotifications);
-  private toastCtrl = inject(ToastController);
+  private readonly profileStore = inject(ProfileStore);
+  private readonly notifications = inject(LocalNotifications);
+  private readonly toastCtrl = inject(ToastController);
 
   readonly profile = this.profileStore.profile;
 
@@ -123,16 +136,7 @@ export default class SettingsPage {
         return false;
       }
     }
-    const v = enabled ? 1 : 0;
-    const patch: Partial<UserProfile> =
-      key === 'morning'
-        ? { notif_morning: v }
-        : key === 'lunch'
-          ? { notif_lunch: v }
-          : key === 'evening'
-            ? { notif_evening: v }
-            : { notif_weekly: v };
-    await this.profileStore.updateProfile(patch);
+    await this.profileStore.updateProfile(notificationPatch(key, enabled ? 1 : 0));
     const p = this.profile();
     if (p) {
       await this.notifications.sync({

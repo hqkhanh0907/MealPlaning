@@ -6,13 +6,13 @@
 }
 
 .dus-header {
-  --background: var(--surface);
+  --background: var(--bg-card);
 }
 
 .dus-toolbar {
-  --background: var(--surface);
+  --background: var(--bg-card);
   --color: var(--text-primary);
-  --border-color: var(--border);
+  --border-color: var(--border-color);
   --min-height: 56px;
 }
 
@@ -46,7 +46,7 @@
 }
 
 .dus-content {
-  --background: var(--surface);
+  --background: var(--bg-card);
   --padding-bottom: var(--ion-safe-area-bottom, 0);
 }
 
@@ -92,7 +92,7 @@
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-color);
   cursor: pointer;
   outline: none;
 

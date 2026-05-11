@@ -21,6 +21,7 @@ describe('PlannedDishRepository', () => {
     protein: null,
     carbs: null,
     fat: null,
+    fiber: null,
     created_at: '2026-05-10T00:00:00Z',
   };
 
@@ -33,6 +34,7 @@ describe('PlannedDishRepository', () => {
     protein: 40,
     carbs: 100,
     fat: 20,
+    fiber: 8,
   };
 
   const totalsRow = {
@@ -42,6 +44,7 @@ describe('PlannedDishRepository', () => {
     total_protein: 20,
     total_carbs: 50,
     total_fat: 10,
+    total_fiber: 4,
   };
 
   beforeEach(() => {
@@ -73,7 +76,7 @@ describe('PlannedDishRepository', () => {
   });
 
   describe('addToSlot', () => {
-    it('inserts with is_completed=0 and 4 nutrition cols NULL', async () => {
+    it('inserts with is_completed=0 and nutrition snapshot cols NULL', async () => {
       let calls = 0;
       db.getOne.and.callFake(async () => {
         calls += 1;
@@ -89,8 +92,8 @@ describe('PlannedDishRepository', () => {
         .allArgs()
         .find(([sql]) => (sql as string).includes('INSERT INTO planned_dish'))!;
       const sql = insertCall[0] as string;
-      expect(sql).toContain('is_completed, completed_at, calories, protein, carbs, fat');
-      expect(sql).toContain('VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL)');
+      expect(sql).toContain('is_completed, completed_at, calories, protein, carbs, fat, fiber');
+      expect(sql).toContain('VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL, NULL)');
       const params = insertCall[1] as unknown[];
       expect(params[4]).toBe(3); // sort_order = max_sort + 1
     });
@@ -109,6 +112,75 @@ describe('PlannedDishRepository', () => {
         .allArgs()
         .find(([sql]) => (sql as string).includes('INSERT INTO planned_dish'))!;
       expect((insertCall[1] as unknown[])[4]).toBe(0);
+    });
+  });
+
+  describe('replaceDatePlan', () => {
+    beforeEach(() => {
+      dayPlanRepo.getOrCreateForDate.and.returnValue(
+        Promise.resolve({
+          id: 'dp-target',
+          date: '2026-05-10',
+          target_calories: 2000,
+          target_protein: 100,
+          created_at: 'x',
+          updated_at: null,
+        }),
+      );
+      db.query.and.callFake(async <T>(sql: string) => {
+        if (sql.includes('SELECT id, meal_type FROM meal_slot')) {
+          return [
+            { id: 'slot-breakfast', meal_type: 'breakfast' },
+            { id: 'slot-lunch', meal_type: 'lunch' },
+            { id: 'slot-dinner', meal_type: 'dinner' },
+            { id: 'slot-snack', meal_type: 'snack' },
+          ] as T[];
+        }
+        return [] as T[];
+      });
+      db.getOne.and.callFake(async <T>(sql: string) => {
+        if (sql.includes('COALESCE(MAX(sort_order)')) return { max_sort: null } as T;
+        if (sql.includes('SELECT * FROM planned_dish')) return planned as T;
+        return null;
+      });
+    });
+
+    it('clears only planned rows and inserts AI/day-plan items into matching slots', async () => {
+      const result = await repo.replaceDatePlan('2026-05-10', [
+        { mealType: 'breakfast', dishId: 'dish-a', servings: 1 },
+        { mealType: 'lunch', dishId: 'dish-b', servings: 1.5 },
+      ]);
+
+      expect(result).toBe(2);
+      expect(dayPlanRepo.getOrCreateForDate).toHaveBeenCalledWith('2026-05-10');
+      const deleteCall = db.execute.calls
+        .allArgs()
+        .find(
+          ([sql]) =>
+            (sql as string).includes('DELETE FROM planned_dish') &&
+            (sql as string).includes('is_completed = 0'),
+        );
+      expect(deleteCall).toBeDefined();
+      expect(deleteCall![1]).toEqual(['slot-breakfast', 'slot-lunch', 'slot-dinner', 'slot-snack']);
+
+      const insertCalls = db.execute.calls
+        .allArgs()
+        .filter(([sql]) => (sql as string).includes('INSERT INTO planned_dish'));
+      expect(insertCalls).toHaveSize(2);
+      expect((insertCalls[0][1] as unknown[])[1]).toBe('slot-breakfast');
+      expect((insertCalls[0][1] as unknown[])[2]).toBe('dish-a');
+      expect((insertCalls[0][1] as unknown[])[3]).toBe(1);
+      expect((insertCalls[1][1] as unknown[])[1]).toBe('slot-lunch');
+      expect((insertCalls[1][1] as unknown[])[2]).toBe('dish-b');
+      expect((insertCalls[1][1] as unknown[])[3]).toBe(1.5);
+    });
+
+    it('does nothing for an empty item list', async () => {
+      const result = await repo.replaceDatePlan('2026-05-10', []);
+
+      expect(result).toBe(0);
+      expect(db.withTransaction).not.toHaveBeenCalled();
+      expect(db.execute).not.toHaveBeenCalled();
     });
   });
 
@@ -132,12 +204,13 @@ describe('PlannedDishRepository', () => {
       expect(sql).toContain("completed_at = datetime('now')");
       expect(sql).not.toContain('Date.now');
       const params = updateCall[1] as unknown[];
-      // calories/protein/carbs/fat = totals × servings(2)
+      // calories/protein/carbs/fat/fiber = totals × servings(2)
       expect(params[0]).toBe(800);
       expect(params[1]).toBe(40);
       expect(params[2]).toBe(100);
       expect(params[3]).toBe(20);
-      expect(params[4]).toBe('pd-1');
+      expect(params[4]).toBe(8);
+      expect(params[5]).toBe('pd-1');
       expect(calls).toBeGreaterThanOrEqual(2);
     });
 
@@ -187,7 +260,7 @@ describe('PlannedDishRepository', () => {
   });
 
   describe('unmarkCompleted', () => {
-    it('resets is_completed, completed_at, and 4 nutrition cols to NULL (SNAP-05)', async () => {
+    it('resets is_completed, completed_at, and nutrition snapshot cols to NULL (SNAP-05)', async () => {
       await repo.unmarkCompleted('pd-2');
 
       expect(db.withTransaction).toHaveBeenCalledTimes(1);
@@ -198,6 +271,7 @@ describe('PlannedDishRepository', () => {
       expect(sql).toContain('protein      = NULL');
       expect(sql).toContain('carbs        = NULL');
       expect(sql).toContain('fat          = NULL');
+      expect(sql).toContain('fiber        = NULL');
     });
   });
 
@@ -238,6 +312,7 @@ describe('PlannedDishRepository', () => {
       expect(params[2]).toBe(75); // 25 × 3
       expect(params[3]).toBe(150); // carbs 50 × 3
       expect(params[4]).toBe(30); // fat 10 × 3
+      expect(params[5]).toBe(12); // fiber 4 × 3
     });
 
     it('throws when planned_dish missing', async () => {
@@ -309,7 +384,9 @@ describe('PlannedDishRepository', () => {
       const insertCall = db.execute.calls
         .allArgs()
         .find(([sql]) => (sql as string).includes('INSERT INTO planned_dish'))!;
-      expect(insertCall[0]).toContain('VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL)');
+      expect(insertCall[0]).toContain(
+        'VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL, NULL)',
+      );
     });
 
     it('throws when source planned_dish is missing', async () => {
@@ -493,6 +570,50 @@ describe('PlannedDishRepository', () => {
         targetDayPlans: {},
       });
       const result = await repo.copyPreviousWeek('2026-05-04', '2026-04-27');
+      expect(result).toEqual({ copiedCount: 0, daysAffected: 0 });
+      expect(dayPlanRepo.getOrCreateForDate).not.toHaveBeenCalled();
+    });
+
+    it('skips a previous day plan that has no meal slots', async () => {
+      setupWeekCopyMocks({
+        prevDayPlans: {
+          '2026-04-27': { id: 'dp-prev-mon', slots: [], dishes: [] },
+          '2026-04-28': null,
+          '2026-04-29': null,
+          '2026-04-30': null,
+          '2026-05-01': null,
+          '2026-05-02': null,
+          '2026-05-03': null,
+        },
+        targetDayPlans: {},
+      });
+
+      const result = await repo.copyPreviousWeek('2026-05-04', '2026-04-27');
+
+      expect(result).toEqual({ copiedCount: 0, daysAffected: 0 });
+      expect(dayPlanRepo.getOrCreateForDate).not.toHaveBeenCalled();
+    });
+
+    it('skips a previous day plan that has slots but no dishes', async () => {
+      setupWeekCopyMocks({
+        prevDayPlans: {
+          '2026-04-27': {
+            id: 'dp-prev-mon',
+            slots: [{ id: 'pslot-bf', meal_type: 'breakfast' }],
+            dishes: [],
+          },
+          '2026-04-28': null,
+          '2026-04-29': null,
+          '2026-04-30': null,
+          '2026-05-01': null,
+          '2026-05-02': null,
+          '2026-05-03': null,
+        },
+        targetDayPlans: {},
+      });
+
+      const result = await repo.copyPreviousWeek('2026-05-04', '2026-04-27');
+
       expect(result).toEqual({ copiedCount: 0, daysAffected: 0 });
       expect(dayPlanRepo.getOrCreateForDate).not.toHaveBeenCalled();
     });

@@ -1,0 +1,23 @@
+<section class="rest-timer" aria-label="Rest timer">
+  <div class="rest-timer__status">
+    <ion-icon name="timer-outline" aria-hidden="true" />
+    <div>
+      <span>Rest timer</span>
+      <strong>{{ label() }}</strong>
+    </div>
+  </div>
+
+  <div class="rest-timer__actions">
+    <ion-button
+      fill="clear"
+      size="small"
+      (click)="start()"
+      [disabled]="remaining() <= 0 || isRunning()"
+    >
+      Bắt đầu
+    </ion-button>
+    <ion-button fill="clear" size="small" (click)="reset()" aria-label="Reset rest timer">
+      <ion-icon slot="icon-only" name="refresh-outline" />
+    </ion-button>
+  </div>
+</section>

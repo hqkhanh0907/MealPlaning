@@ -30,6 +30,17 @@ export interface CreateIngredientInput {
 export type UpdateIngredientInput = Partial<CreateIngredientInput>;
 
 type IngredientRow = IngredientModel;
+type IngredientUpdateColumn = Exclude<keyof CreateIngredientInput, 'source'>;
+
+const INGREDIENT_UPDATE_COLUMNS = new Set<string>([
+  'name',
+  'category',
+  'calories',
+  'protein',
+  'carbs',
+  'fat',
+  'fiber',
+]);
 
 @Injectable({ providedIn: 'root' })
 export class IngredientRepository {
@@ -150,12 +161,18 @@ export class IngredientRepository {
       throw new Error(`Ingredient '${id}' not found.`);
     }
 
-    const fields: [string, unknown][] = [];
+    const fields: [IngredientUpdateColumn | 'source', unknown][] = [];
     for (const [key, value] of Object.entries(data)) {
       if (value === undefined) {
         continue;
       }
-      fields.push([key, value]);
+      if (key === 'source') {
+        continue;
+      }
+      if (!INGREDIENT_UPDATE_COLUMNS.has(key)) {
+        throw new Error(`IngredientRepository: update field '${key}' is not allowed.`);
+      }
+      fields.push([key as IngredientUpdateColumn, value]);
     }
     fields.push(['source', 'manual']);
 

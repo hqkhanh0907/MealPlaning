@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Database } from '../services/database/database';
-import { UserProfileRepository } from './user-profile.repository';
+import { UserProfileRepository, type WeightLogEntry } from './user-profile.repository';
 import { UserProfile } from '../models/user-profile.model';
 
 /**
@@ -67,11 +67,72 @@ describe('UserProfileRepository (singleton semantics)', () => {
   });
 
   it('second insert() is a no-op and returns the existing row', async () => {
+    const warnSpy = spyOn(console, 'warn');
     const first = await repo.insert(sampleData);
     const second = await repo.insert(sampleData);
 
     expect(rows.length).toBe(1);
     expect(second.id).toBe(first.id);
     expect(fakeDb.execute).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[UserProfileRepository] insert() called but profile already exists; returning existing row',
+    );
+  });
+
+  it('updates only whitelisted profile fields', async () => {
+    await repo.update({ target_calories: 2100, notif_lunch: 0 });
+
+    const [sql, params] = fakeDb.execute.calls.mostRecent().args;
+    expect(sql).toContain('target_calories = ?');
+    expect(sql).toContain('notif_lunch = ?');
+    expect(sql).toContain('updated_at = datetime');
+    expect(params).toEqual([2100, 0]);
+  });
+
+  it('rejects unknown update fields before building SQL', async () => {
+    const unsafe = { 'target_calories = 1 WHERE 1=1 --': 1 } as unknown as Partial<UserProfile>;
+
+    await expectAsync(repo.update(unsafe)).toBeRejectedWithError(
+      "UserProfileRepository: update field 'target_calories = 1 WHERE 1=1 --' is not allowed.",
+    );
+    expect(fakeDb.execute).not.toHaveBeenCalled();
+  });
+
+  it('reads the latest weight_log by date', async () => {
+    const latest: WeightLogEntry = {
+      id: 'w2',
+      weight_kg: 64.5,
+      date: '2026-05-10',
+      notes: null,
+      created_at: '2026-05-10T06:00:00',
+    };
+    fakeDb.getOne.and.resolveTo(latest);
+
+    const result = await repo.getLatestWeightLog();
+
+    expect(result).toEqual(latest);
+    const [sql, params] = fakeDb.getOne.calls.mostRecent().args;
+    expect(sql).toContain('FROM weight_log');
+    expect(sql).toContain('ORDER BY date DESC');
+    expect(params).toBeUndefined();
+  });
+
+  it('reads the previous weight_log before a given date', async () => {
+    const previous: WeightLogEntry = {
+      id: 'w1',
+      weight_kg: 65.2,
+      date: '2026-05-03',
+      notes: 'weekly check-in',
+      created_at: '2026-05-03T06:00:00',
+    };
+    fakeDb.getOne.and.resolveTo(previous);
+
+    const result = await repo.getPreviousWeightLog('2026-05-10');
+
+    expect(result).toEqual(previous);
+    const [sql, params] = fakeDb.getOne.calls.mostRecent().args;
+    expect(sql).toContain('WHERE date < ?');
+    expect(sql).toContain('ORDER BY date DESC');
+    expect(params).toEqual(['2026-05-10']);
   });
 });

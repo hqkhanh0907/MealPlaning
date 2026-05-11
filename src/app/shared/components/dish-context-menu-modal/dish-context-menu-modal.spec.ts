@@ -52,7 +52,9 @@ describe('DishContextMenuModal', () => {
 
     const cancel = fixture.nativeElement.querySelector('.sheet-cancel') as HTMLButtonElement;
     cancel.click();
-    const backdrop = fixture.nativeElement.querySelector('.sheet-backdrop') as HTMLElement;
+    const backdrop = fixture.nativeElement.querySelector(
+      '.sheet-backdrop__dismiss',
+    ) as HTMLButtonElement;
     backdrop.click();
     expect(dismissCount).toBe(2);
   });

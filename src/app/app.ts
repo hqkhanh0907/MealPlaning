@@ -31,18 +31,9 @@ export class App {
     // Light-only since Story 2.6 (2026-05-08). Theme service is a no-op shim.
     this.themeService.apply('light');
 
-    const p = this.profileStore.profile();
-    if (p) {
-      void this.notifications.sync({
-        morning: !!p.notif_morning,
-        lunch: !!p.notif_lunch,
-        evening: !!p.notif_evening,
-        weekly: !!p.notif_weekly,
-      });
-    }
-
     afterNextRender(() => {
       SplashScreen.hide();
+      this.syncNotificationsFromProfile();
 
       // Sage wellness status bar (Android native only — sage tinted, light icons).
       // No-op on web platform; safe to call without try/catch (Capacitor returns Promise.reject silently).
@@ -57,6 +48,20 @@ export class App {
       void cleanupOldAiLogs(this.db, 30).catch((err) =>
         console.warn('[App] cleanupOldAiLogs failed:', err),
       );
+    });
+  }
+
+  private syncNotificationsFromProfile(): void {
+    const p = this.profileStore.profile();
+    if (!p) {
+      return;
+    }
+
+    void this.notifications.sync({
+      morning: !!p.notif_morning,
+      lunch: !!p.notif_lunch,
+      evening: !!p.notif_evening,
+      weekly: !!p.notif_weekly,
     });
   }
 }

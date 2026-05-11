@@ -32,7 +32,7 @@ CI guard `scripts/check-version-sync.mjs` (wired into `npm run check:guards`) fa
 
 ## Current
 
-- `0.2.0` — Phase 2 exit (Settings polish + release prep). versionCode `2`.
+- `0.2.2` — patch line after Phase 2 exit. Current Android `versionCode` is `4`.
 
 ## History
 
@@ -40,3 +40,5 @@ CI guard `scripts/check-version-sync.mjs` (wired into `npm run check:guards`) fa
 |---|---|---|---|---|
 | 0.1.0 | 1 | Phase 1 | 2026-04 | Initial onboarding + dashboard |
 | 0.2.0 | 2 | Phase 2 | 2026-05 | Settings polish, notifications, release prep |
+| 0.2.1 | 3 | Phase 2 patch | 2026-05 | Light-only cleanup and schema reset patch |
+| 0.2.2 | 4 | Phase 2 patch | 2026-05 | Post-release polish and Story 4 foundation work |

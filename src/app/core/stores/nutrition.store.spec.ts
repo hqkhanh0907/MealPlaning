@@ -52,6 +52,7 @@ describe('NutritionStore', () => {
         protein: 60,
         carbs: 100,
         fat: 30,
+        fiber: 12,
       }),
     );
     trendSpy = jasmine.createSpy('trend').and.callFake((s: string, e: string, _m: string) =>
@@ -129,12 +130,13 @@ describe('NutritionStore', () => {
       protein: 180,
       carbs: 250,
       fat: 70,
+      fiber: 25,
     });
   });
 
   it('targets default to zeros when profile is null', () => {
     const store = TestBed.inject(NutritionStore);
-    expect(store.targets()).toEqual({ calories: 0, protein: 0, carbs: 0, fat: 0 });
+    expect(store.targets()).toEqual({ calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 25 });
   });
 
   it('keyMetric reflects router output (gain_muscle → protein)', () => {

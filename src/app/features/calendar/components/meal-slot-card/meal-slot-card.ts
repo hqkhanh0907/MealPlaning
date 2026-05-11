@@ -33,13 +33,13 @@ export class MealSlotCard {
   readonly label = computed<string>(() => MEAL_LABEL_VI[this.mealType()].label);
 
   /**
-   * Sum tổng calo per slot — chỉ tính `is_completed=1` để khớp Hybrid display semantic
-   * (planned dish chưa "tiêu thụ" nên không cộng vào "đã ăn"). F-03 §2.3.
+   * Planning view must show expected kcal for planned rows and immutable
+   * snapshot kcal for logged rows. Both are exposed as `effective_calories`.
    */
-  readonly totalLoggedCalories = computed<number>(() =>
-    this.slot()
-      .planned_dishes.filter((d) => d.is_completed === 1)
-      .reduce((acc, d) => acc + d.effective_calories, 0),
+  readonly totalCalories = computed<number>(() =>
+    this.roundKcal(
+      this.slot().planned_dishes.reduce((acc, dish) => acc + dish.effective_calories, 0),
+    ),
   );
 
   /** Long-press timer state per row; cleared on pointer-up/leave/move. */
@@ -61,6 +61,10 @@ export class MealSlotCard {
     } else {
       this.markEaten.emit(plannedDishId);
     }
+  }
+
+  roundKcal(value: number): number {
+    return Math.round(Number.isFinite(value) ? value : 0);
   }
 
   onPressStart(plannedDishId: string): void {

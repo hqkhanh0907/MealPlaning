@@ -6,8 +6,12 @@ import type {
   PlannedDish,
   WeekDayTotal,
 } from '../models/meal-plan.types';
+import type { DishListItem } from '../repositories/dish.repository';
 import { DayPlanRepository } from '../repositories/day-plan.repository';
-import { PlannedDishRepository } from '../repositories/planned-dish.repository';
+import {
+  PlannedDishRepository,
+  type DateMealPlanItem,
+} from '../repositories/planned-dish.repository';
 import { DishStore } from './dish.store';
 
 const DAY_MS = 86_400_000;
@@ -117,6 +121,27 @@ export class CalendarStore {
     const created = await this.plannedDishRepo.addToSlot(slotId, dishId, servings);
     this.invalidationTick.update((n) => n + 1);
     return created;
+  }
+
+  async addDishToMeal(mealType: MealType, dishId: string, servings: number): Promise<PlannedDish> {
+    const created = await this.plannedDishRepo.addToDateMealType(
+      this.currentDate(),
+      mealType,
+      dishId,
+      servings,
+    );
+    this.invalidationTick.update((n) => n + 1);
+    return created;
+  }
+
+  async replaceCurrentDatePlan(items: readonly DateMealPlanItem[]): Promise<number> {
+    const inserted = await this.plannedDishRepo.replaceDatePlan(this.currentDate(), items);
+    this.invalidationTick.update((n) => n + 1);
+    return inserted;
+  }
+
+  async listRecentLoggedDishes(limit = 20): Promise<DishListItem[]> {
+    return this.plannedDishRepo.listRecentLogged(limit);
   }
 
   async markEaten(plannedDishId: string): Promise<void> {
@@ -254,9 +279,19 @@ export class CalendarStore {
   // -- internal ---------------------------------------------------------------
 
   private async hydrateDayPlan(date: string): Promise<void> {
-    const result = await this.dayPlanRepo.findByDate(date);
+    let result = await this.dayPlanRepo.findByDate(date);
     // Stale-result guard: if currentDate changed mid-fetch, drop this update.
     if (this.currentDate() !== date) return;
+
+    if (!result) {
+      await this.dayPlanRepo.getOrCreateForDate(date);
+      if (this.currentDate() !== date) return;
+      result = await this.dayPlanRepo.findByDate(date);
+      if (!result) {
+        throw new Error(`CalendarStore: failed to hydrate day plan for '${date}'`);
+      }
+    }
+
     this.dayPlan.set(result);
   }
 

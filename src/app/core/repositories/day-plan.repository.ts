@@ -37,12 +37,14 @@ const PLANNED_DISH_SELECT_FRAGMENT = `
   pd.protein         AS protein,
   pd.carbs           AS carbs,
   pd.fat             AS fat,
+  pd.fiber           AS fiber,
   pd.created_at      AS created_at,
   dwt.name           AS dish_name,
   CASE WHEN pd.is_completed = 1 THEN pd.calories ELSE dwt.total_calories * pd.servings END AS effective_calories,
   CASE WHEN pd.is_completed = 1 THEN pd.protein  ELSE dwt.total_protein  * pd.servings END AS effective_protein,
   CASE WHEN pd.is_completed = 1 THEN pd.carbs    ELSE dwt.total_carbs    * pd.servings END AS effective_carbs,
-  CASE WHEN pd.is_completed = 1 THEN pd.fat      ELSE dwt.total_fat      * pd.servings END AS effective_fat
+  CASE WHEN pd.is_completed = 1 THEN pd.fat      ELSE dwt.total_fat      * pd.servings END AS effective_fat,
+  CASE WHEN pd.is_completed = 1 THEN COALESCE(pd.fiber, 0) ELSE dwt.total_fiber * pd.servings END AS effective_fiber
 `.trim();
 
 interface PlannedDishWithEffectiveAndSlot extends PlannedDishWithEffective {

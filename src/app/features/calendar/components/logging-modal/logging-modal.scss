@@ -1,0 +1,292 @@
+.logging-modal__header {
+  ion-toolbar {
+    --padding-start: var(--space-md);
+    --padding-end: var(--space-md);
+    --padding-top: var(--space-md);
+    --padding-bottom: var(--space-sm);
+  }
+}
+
+.logging-modal__title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.logging-modal__eyebrow,
+.logging-modal__title {
+  margin: 0;
+}
+
+.logging-modal__eyebrow {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-caption);
+  font-weight: 500;
+}
+
+.logging-modal__title {
+  margin-top: var(--space-xs);
+  color: var(--text-primary);
+  font-size: var(--font-size-title);
+  font-weight: 700;
+}
+
+.logging-modal__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--bg-muted);
+  color: var(--text-primary);
+}
+
+.logging-modal__servings {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin: var(--space-md) 0;
+}
+
+.logging-modal__servings-label {
+  color: var(--text-primary);
+  font-size: var(--font-size-body-sm);
+  font-weight: 600;
+}
+
+.logging-modal__stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+
+  button {
+    min-width: 44px;
+    min-height: 44px;
+    border: 0;
+    background: transparent;
+    color: var(--ion-color-primary-shade);
+    font-size: var(--font-size-title);
+    font-weight: 700;
+  }
+
+  output {
+    min-width: 40px;
+    color: var(--text-primary);
+    font-size: var(--font-size-body);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+}
+
+.logging-modal__tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xs);
+  padding: var(--space-xs);
+  border-radius: var(--radius-sm);
+  background: var(--bg-muted);
+
+  button {
+    min-height: 44px;
+    border: 0;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-body-sm);
+    font-weight: 600;
+  }
+}
+
+.logging-modal__tabs .logging-modal__tab--active {
+  background: var(--bg-card);
+  color: var(--ion-color-primary-shade);
+  box-shadow: var(--shadow-sm);
+}
+
+.logging-modal__content {
+  --padding-start: var(--space-md);
+  --padding-end: var(--space-md);
+  --padding-top: var(--space-md);
+  --padding-bottom: var(--space-2xl);
+}
+
+.logging-modal__loading,
+.logging-modal__empty {
+  margin: var(--space-xl) 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-body);
+  line-height: 1.5;
+  text-align: center;
+}
+
+.logging-modal__ai {
+  display: grid;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+}
+
+.logging-modal__ai-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  h3 {
+    color: var(--text-primary);
+    font-size: var(--font-size-body);
+    font-weight: 700;
+  }
+
+  p {
+    margin-top: var(--space-xs);
+    color: var(--text-tertiary);
+    font-size: var(--font-size-caption);
+    line-height: 1.5;
+  }
+}
+
+.logging-modal__ai-button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+  font-size: var(--font-size-body-sm);
+  font-weight: 700;
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.logging-modal__ai-state {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-caption);
+  line-height: 1.5;
+}
+
+.logging-modal__ai-list {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.logging-modal__ai-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  min-height: 56px;
+  padding: var(--space-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-muted);
+  color: var(--text-primary);
+  text-align: left;
+
+  span {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  strong {
+    color: var(--text-primary);
+    font-size: var(--font-size-body-sm);
+  }
+
+  small,
+  > span:last-child {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-caption);
+    line-height: 1.5;
+  }
+
+  > span:last-child {
+    flex: 0 0 auto;
+    font-weight: 600;
+  }
+}
+
+.logging-modal__create {
+  min-height: 44px;
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-lg);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--ion-color-secondary);
+  color: var(--ion-color-secondary-contrast);
+  font-size: var(--font-size-body-sm);
+  font-weight: 700;
+}
+
+.logging-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.logging-modal__dish {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  width: 100%;
+  min-height: 64px;
+  padding: var(--space-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.logging-modal__dish-main {
+  display: grid;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.logging-modal__dish-name {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: var(--font-size-body);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logging-modal__dish-meta {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-caption);
+  line-height: 1.5;
+}
+
+.logging-modal__dish-action {
+  flex: 0 0 auto;
+  color: var(--ion-color-primary-shade);
+  font-size: var(--font-size-body-sm);
+  font-weight: 700;
+}

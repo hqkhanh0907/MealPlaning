@@ -60,6 +60,12 @@ export interface SeedDishRecord {
   ingredients: SeedDishIngredient[];
 }
 
+interface SeedArtifactRow {
+  artifact_id: string;
+}
+
+const SEED_ARTIFACT_LOOKUP_CHUNK_SIZE = 400;
+
 @Injectable({ providedIn: 'root' })
 export class SeedLoader {
   private readonly db = inject(Database);
@@ -72,28 +78,38 @@ export class SeedLoader {
       firstValueFrom(this.http.get<SeedDishRecord[]>(DISHES_URL)),
     ]);
 
-    let ingredientCount = 0;
-    for (const rec of [...ingredients, ...composites]) {
-      if (await this.processIngredient(rec)) {
-        ingredientCount += 1;
-      }
-    }
+    const seedIngredients = [...ingredients, ...composites];
+    const seededArtifactIds = await this.loadSeededArtifactIds([
+      ...seedIngredients.map((rec) => rec.id),
+      ...dishes.map((rec) => rec.id),
+    ]);
 
+    let ingredientCount = 0;
     let dishCount = 0;
-    for (const rec of dishes) {
-      if (await this.processDish(rec)) {
-        dishCount += 1;
+    await this.db.withTransaction(async () => {
+      for (const rec of seedIngredients) {
+        if (seededArtifactIds.has(rec.id)) {
+          continue;
+        }
+        if (await this.processIngredient(rec)) {
+          ingredientCount += 1;
+        }
       }
-    }
+
+      for (const rec of dishes) {
+        if (seededArtifactIds.has(rec.id)) {
+          continue;
+        }
+        if (await this.processDish(rec)) {
+          dishCount += 1;
+        }
+      }
+    });
 
     return { ingredients: ingredientCount, dishes: dishCount };
   }
 
   private async processIngredient(rec: SeedIngredientRecord): Promise<boolean> {
-    if (await this.alreadySeeded(rec.id)) {
-      return false;
-    }
-
     const fingerprint = await fingerprintRecord(rec);
     const category = CATEGORY_MAP[rec.category] ?? 'Khác';
 
@@ -125,10 +141,6 @@ export class SeedLoader {
   }
 
   private async processDish(rec: SeedDishRecord): Promise<boolean> {
-    if (await this.alreadySeeded(rec.id)) {
-      return false;
-    }
-
     const fingerprint = await fingerprintRecord(rec);
 
     await this.db.execute(
@@ -159,17 +171,33 @@ export class SeedLoader {
     return true;
   }
 
-  private async alreadySeeded(artifactId: string): Promise<boolean> {
-    const rows = await this.db.query<{ one: number }>(
-      'SELECT 1 AS one FROM seed_artifact WHERE artifact_id = ?',
-      [artifactId],
-    );
-    return rows.length > 0;
+  private async loadSeededArtifactIds(artifactIds: readonly string[]): Promise<Set<string>> {
+    if (artifactIds.length === 0) {
+      return new Set();
+    }
+
+    const seededArtifactIds = new Set<string>();
+    for (let i = 0; i < artifactIds.length; i += SEED_ARTIFACT_LOOKUP_CHUNK_SIZE) {
+      const chunk = artifactIds.slice(i, i + SEED_ARTIFACT_LOOKUP_CHUNK_SIZE);
+      const placeholders = chunk.map(() => '?').join(', ');
+      const rows = await this.db.query<SeedArtifactRow>(
+        `SELECT artifact_id FROM seed_artifact WHERE artifact_id IN (${placeholders})`,
+        chunk,
+      );
+      for (const row of rows) {
+        seededArtifactIds.add(row.artifact_id);
+      }
+    }
+
+    return seededArtifactIds;
   }
 }
 
 async function fingerprintRecord(record: object): Promise<string> {
-  const json = JSON.stringify(record, Object.keys(record).sort());
+  const json = JSON.stringify(
+    record,
+    Object.keys(record).sort((a, b) => a.localeCompare(b)),
+  );
   const bytes = new TextEncoder().encode(json);
   const digest = await crypto.subtle.digest('SHA-256', bytes);
   return bytesToHex(new Uint8Array(digest));

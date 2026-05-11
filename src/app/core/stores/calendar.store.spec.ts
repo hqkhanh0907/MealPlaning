@@ -24,6 +24,7 @@ describe('CalendarStore', () => {
     protein: null,
     carbs: null,
     fat: null,
+    fiber: null,
     created_at: '2026-05-10T00:00:00Z',
   };
 
@@ -53,6 +54,8 @@ describe('CalendarStore', () => {
     ]);
     plannedDishRepo = jasmine.createSpyObj<PlannedDishRepository>('PlannedDishRepository', [
       'addToSlot',
+      'addToDateMealType',
+      'replaceDatePlan',
       'markCompleted',
       'unmarkCompleted',
       'editServings',
@@ -65,11 +68,14 @@ describe('CalendarStore', () => {
 
     dayPlanRepo.findByDate.and.returnValue(Promise.resolve(sampleDayPlan));
     plannedDishRepo.addToSlot.and.returnValue(Promise.resolve(samplePlanned));
+    plannedDishRepo.addToDateMealType.and.returnValue(Promise.resolve(samplePlanned));
+    plannedDishRepo.replaceDatePlan.and.returnValue(Promise.resolve(2));
     plannedDishRepo.markCompleted.and.returnValue(Promise.resolve());
     plannedDishRepo.unmarkCompleted.and.returnValue(Promise.resolve());
     plannedDishRepo.editServings.and.returnValue(Promise.resolve());
     plannedDishRepo.delete.and.returnValue(Promise.resolve());
     plannedDishRepo.copyToDate.and.returnValue(Promise.resolve(samplePlanned));
+    plannedDishRepo.listRecentLogged.and.returnValue(Promise.resolve([]));
 
     TestBed.configureTestingModule({
       providers: [
@@ -158,11 +164,48 @@ describe('CalendarStore', () => {
       expect(store.invalidationTick()).toBe(before + 1);
     });
 
+    it('addDishToMeal creates date/meal precondition through repository', async () => {
+      store.setDate('2026-05-10');
+      const before = store.invalidationTick();
+      await store.addDishToMeal('lunch', 'd-1', 1.5);
+      expect(plannedDishRepo.addToDateMealType).toHaveBeenCalledWith(
+        '2026-05-10',
+        'lunch',
+        'd-1',
+        1.5,
+      );
+      expect(store.invalidationTick()).toBe(before + 1);
+    });
+
     it('markEaten bumps tick', async () => {
       const before = store.invalidationTick();
       await store.markEaten('pd-1');
       expect(plannedDishRepo.markCompleted).toHaveBeenCalledWith('pd-1');
       expect(store.invalidationTick()).toBe(before + 1);
+    });
+
+    it('replaceCurrentDatePlan replaces planned rows through repository and bumps tick', async () => {
+      store.setDate('2026-05-10');
+      const before = store.invalidationTick();
+      const items = [
+        { mealType: 'breakfast' as const, dishId: 'd-1', servings: 1 },
+        { mealType: 'lunch' as const, dishId: 'd-2', servings: 1.5 },
+      ];
+
+      const result = await store.replaceCurrentDatePlan(items);
+
+      expect(result).toBe(2);
+      expect(plannedDishRepo.replaceDatePlan).toHaveBeenCalledWith('2026-05-10', items);
+      expect(store.invalidationTick()).toBe(before + 1);
+    });
+
+    it('listRecentLoggedDishes reads through repository without mutating calendar state', async () => {
+      const before = store.invalidationTick();
+      const result = await store.listRecentLoggedDishes(12);
+
+      expect(result).toEqual([]);
+      expect(plannedDishRepo.listRecentLogged).toHaveBeenCalledWith(12);
+      expect(store.invalidationTick()).toBe(before);
     });
 
     it('unmarkEaten bumps tick', async () => {
@@ -222,6 +265,23 @@ describe('CalendarStore', () => {
       expect(dayPlanRepo.findByDate).toHaveBeenCalledWith('2026-05-12');
       expect(store.dayPlan()).toEqual(sampleDayPlan);
     });
+
+    it('creates a missing day plan before rendering the day view', async () => {
+      dayPlanRepo.findByDate.calls.reset();
+      dayPlanRepo.findByDate.and.returnValues(
+        Promise.resolve(null),
+        Promise.resolve(sampleDayPlan),
+      );
+      dayPlanRepo.getOrCreateForDate.and.returnValue(Promise.resolve(sampleDayPlan));
+
+      store.setDate('2026-05-13');
+      await flush();
+      await flush();
+
+      expect(dayPlanRepo.findByDate).toHaveBeenCalledWith('2026-05-13');
+      expect(dayPlanRepo.getOrCreateForDate).toHaveBeenCalledWith('2026-05-13');
+      expect(store.dayPlan()).toEqual(sampleDayPlan);
+    });
   });
 
   describe('Story 3.7 — context menu mutations', () => {
@@ -264,6 +324,7 @@ describe('CalendarStore', () => {
                 effective_protein: 20,
                 effective_carbs: 30,
                 effective_fat: 10,
+                effective_fiber: 4,
               },
             ],
           },
@@ -375,6 +436,7 @@ describe('CalendarStore', () => {
                 effective_protein: 5,
                 effective_carbs: 10,
                 effective_fat: 2,
+                effective_fiber: 3,
               },
               {
                 ...samplePlanned,
@@ -385,6 +447,7 @@ describe('CalendarStore', () => {
                 effective_protein: 5,
                 effective_carbs: 10,
                 effective_fat: 2,
+                effective_fiber: 3,
               },
             ],
           },

@@ -39,14 +39,14 @@
   &__axis {
     position: relative;
     width: 100%;
-    margin-top: var(--spacing-xs);
+    margin-top: var(--space-xs);
   }
 
   &__axis-label {
     position: absolute;
     transform: translateX(-50%);
     font-family: var(--ion-font-family);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-overline);
     color: var(--ion-color-medium);
     white-space: nowrap;
   }

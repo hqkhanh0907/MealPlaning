@@ -1,32 +1,31 @@
 @if (isOpen()) {
-  <div class="sheet-backdrop" role="presentation" (click)="dismiss()">
-    <section
-      class="sheet"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="dish-ctx-title"
-      (click)="$event.stopPropagation()"
-    >
+  <div class="sheet-backdrop" tabindex="-1" (keydown.escape)="dismiss()">
+    <button
+      type="button"
+      class="sheet-backdrop__dismiss"
+      aria-label="Đóng menu món ăn"
+      (click)="dismiss()"
+    ></button>
+    <dialog class="sheet" open aria-modal="true" aria-labelledby="dish-ctx-title">
       <header class="sheet-header">
         <h2 id="dish-ctx-title" class="sheet-title">{{ dishName() }}</h2>
       </header>
-      <ul class="sheet-actions" role="menu">
-        <li role="none">
-          <button type="button" role="menuitem" class="sheet-action" (click)="select('copy')">
+      <ul class="sheet-actions">
+        <li>
+          <button type="button" class="sheet-action" (click)="select('copy')">
             <span class="sheet-action-icon" aria-hidden="true">📋</span>
             <span class="sheet-action-label">Sao chép sang ngày khác</span>
           </button>
         </li>
-        <li role="none">
-          <button type="button" role="menuitem" class="sheet-action" (click)="select('move')">
+        <li>
+          <button type="button" class="sheet-action" (click)="select('move')">
             <span class="sheet-action-icon" aria-hidden="true">↔️</span>
             <span class="sheet-action-label">Di chuyển sang bữa khác</span>
           </button>
         </li>
-        <li role="none">
+        <li>
           <button
             type="button"
-            role="menuitem"
             class="sheet-action sheet-action--danger"
             (click)="select('delete')"
           >
@@ -36,6 +35,6 @@
         </li>
       </ul>
       <button type="button" class="sheet-cancel" (click)="dismiss()">Huỷ</button>
-    </section>
+    </dialog>
   </div>
 }

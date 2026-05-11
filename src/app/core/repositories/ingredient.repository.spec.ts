@@ -1,6 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { Database } from '../services/database/database';
-import { IngredientRepository, type CreateIngredientInput } from './ingredient.repository';
+import {
+  IngredientRepository,
+  type CreateIngredientInput,
+  type UpdateIngredientInput,
+} from './ingredient.repository';
 
 describe('IngredientRepository (gram-only v6)', () => {
   let repo: IngredientRepository;
@@ -105,6 +109,16 @@ describe('IngredientRepository (gram-only v6)', () => {
     const updateArgs = db.execute.calls.argsFor(0);
     expect(updateArgs[0]).toContain('source = ?');
     expect(updateArgs[1]).toContain('manual');
+  });
+
+  it('rejects unknown update fields before building SQL', async () => {
+    db.getOne.and.callFake(async () => ingredientRow as never);
+    const unsafe = { 'name = ? WHERE 1=1 --': 'bad' } as unknown as UpdateIngredientInput;
+
+    await expectAsync(repo.update('ingredient-1', unsafe)).toBeRejectedWithError(
+      "IngredientRepository: update field 'name = ? WHERE 1=1 --' is not allowed.",
+    );
+    expect(db.execute).not.toHaveBeenCalled();
   });
 
   it('deletes ingredient by id', async () => {

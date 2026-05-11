@@ -134,6 +134,26 @@ describe('GeminiClient', () => {
     expect(gen['responseMimeType']).toBe('application/json');
   });
 
+  it('keeps text prompt and attaches inline images when provided', async () => {
+    let capturedBody: Record<string, unknown> | undefined;
+    globalThis.fetch = (async (_url: string, init: RequestInit) => {
+      capturedBody = JSON.parse(init.body as string) as Record<string, unknown>;
+      return makeJsonResponse(makeGeminiCandidate({ value: 'vision' }));
+    }) as typeof fetch;
+
+    await client.generateContent<SimpleResult>('analyse this meal', {
+      feature: 'image_analysis',
+      schema: SimpleSchema,
+      imageParts: [{ mimeType: 'image/jpeg', data: 'BASE64_DATA' }],
+    });
+
+    const contents = capturedBody!['contents'] as { parts: unknown[] }[];
+    expect(contents[0].parts).toEqual([
+      { text: 'analyse this meal' },
+      { inlineData: { mimeType: 'image/jpeg', data: 'BASE64_DATA' } },
+    ]);
+  });
+
   // -----------------------------------------------------------------------
   // HTTP error mapping
   // -----------------------------------------------------------------------
@@ -227,6 +247,7 @@ describe('GeminiClient', () => {
   });
 
   it('does not crash when ai_chat_log INSERT fails', async () => {
+    const warnSpy = spyOn(console, 'warn');
     fakeDb.execute.and.rejectWith(new Error('db locked'));
     fetchQueue.push(() => makeJsonResponse(makeGeminiCandidate({ value: 'ok' })));
 
@@ -235,6 +256,10 @@ describe('GeminiClient', () => {
       schema: SimpleSchema,
     });
     expect(result).toEqual({ value: 'ok' });
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[GeminiClient] ai_chat_log write failed:',
+      jasmine.any(Error),
+    );
   });
 
   // -----------------------------------------------------------------------

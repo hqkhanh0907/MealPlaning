@@ -31,8 +31,15 @@ import type {
   MealType,
   PlannedDishWithEffective,
 } from '../../core/models/meal-plan.types';
+import type { DishListItem } from '../../core/repositories/dish.repository';
 import { CalendarStore } from '../../core/stores/calendar.store';
 import { DayPlanRepository } from '../../core/repositories/day-plan.repository';
+import { DishStore } from '../../core/stores/dish.store';
+import { NetworkStore } from '../../core/stores/network.store';
+import { NutritionStore } from '../../core/stores/nutrition.store';
+import { MealPlanAi } from '../../core/services/ai/meal-plan-ai';
+import { MenuSuggestionAi, type MenuSuggestion } from '../../core/services/ai/menu-suggestion-ai';
+import { GEMINI_ERROR_TOAST, GeminiError } from '../../core/services/ai/gemini-types';
 import { UndoToastQueue } from '../../core/services/undo-toast-queue';
 import { relativeDateLabel } from '../../core/utils/relative-date-label';
 import {
@@ -48,6 +55,7 @@ import { MealSlotPickerModal } from '../../shared/components/meal-slot-picker-mo
 import { DaySummaryCard } from './components/day-summary-card/day-summary-card';
 import { DayRow } from './components/day-row/day-row';
 import { EmptyDayState } from './components/empty-day-state/empty-day-state';
+import { LoggingModal, type LoggingDishSelection } from './components/logging-modal/logging-modal';
 import { MealSlotCard } from './components/meal-slot-card/meal-slot-card';
 
 const MEAL_ORDER: readonly MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
@@ -107,6 +115,7 @@ function shiftIsoDate(iso: string, deltaDays: number): string {
     DayRow,
     DaySummaryCard,
     EmptyDayState,
+    LoggingModal,
     MealSlotCard,
   ],
 })
@@ -116,7 +125,12 @@ export default class CalendarPage implements AfterViewInit {
   private readonly gestureCtrl = inject(GestureController);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dayPlanRepo = inject(DayPlanRepository);
+  private readonly mealPlanAi = inject(MealPlanAi);
+  private readonly menuSuggestionAi = inject(MenuSuggestionAi);
+  private readonly nutritionStore = inject(NutritionStore);
   private readonly undoQueue = inject(UndoToastQueue);
+  protected readonly dishStore = inject(DishStore);
+  protected readonly network = inject(NetworkStore);
   protected readonly store = inject(CalendarStore);
 
   private readonly today = todayIso();
@@ -167,6 +181,18 @@ export default class CalendarPage implements AfterViewInit {
 
   /** Date picker for "copy to date" flow. */
   readonly copyToDatePickerOpen = signal(false);
+
+  readonly loggingModalOpen = signal(false);
+  readonly loggingMealType = signal<MealType>('breakfast');
+  readonly loggingLoading = signal(false);
+  readonly recentLoggedDishes = signal<readonly DishListItem[]>([]);
+  readonly loggingAiSuggestions = signal<readonly MenuSuggestion[]>([]);
+  readonly loggingAiLoading = signal(false);
+  readonly loggingAiDisabledReason = computed<string | null>(() =>
+    this.network.online() ? null : 'Cần kết nối mạng để AI gợi ý món.',
+  );
+  readonly loggingMealLabel = computed<string>(() => this.mealLabel(this.loggingMealType()));
+  readonly aiPlanning = signal(false);
 
   /** Active undo toast (head of FIFO queue) — drives the bottom toast UI. */
   readonly activeUndo = this.undoQueue.activeToast;
@@ -245,12 +271,116 @@ export default class CalendarPage implements AfterViewInit {
     }
   }
 
-  onAiCta(): void {
-    void this.showToast('Tính năng AI sẽ ra mắt Phase 5');
+  async onAiCta(): Promise<void> {
+    if (this.aiPlanning()) {
+      return;
+    }
+    if (!this.network.online()) {
+      void this.showToast('Cần kết nối mạng để AI chọn món');
+      return;
+    }
+
+    this.aiPlanning.set(true);
+    try {
+      await this.dishStore.load();
+      const dishes = this.dishStore.dishes();
+      if (dishes.length === 0) {
+        void this.showToast('Chưa có món trong thư viện. Hãy tạo món trước khi dùng AI');
+        return;
+      }
+
+      const suggestions = await this.mealPlanAi.planDay({
+        date: this.store.currentDate(),
+        targets: this.nutritionStore.targets(),
+        dishes,
+      });
+      const inserted = await this.store.replaceCurrentDatePlan(
+        suggestions.map((item) => ({
+          mealType: item.mealType,
+          dishId: item.dishId,
+          servings: item.servings,
+        })),
+      );
+      void this.showToast(`AI đã chọn ${inserted} món cho ngày này`);
+    } catch (err) {
+      console.warn('[CalendarPage] AI meal plan failed:', err);
+      void this.showToast(
+        err instanceof GeminiError
+          ? GEMINI_ERROR_TOAST[err.kind]
+          : 'AI chưa tạo được kế hoạch, vui lòng thử lại',
+      );
+    } finally {
+      this.aiPlanning.set(false);
+    }
   }
 
-  onMealAddTap(_mealType: MealType): void {
-    void this.showToast('Modal thêm món sẽ ra mắt ở Epic 4');
+  async onMealAddTap(mealType: MealType): Promise<void> {
+    this.loggingMealType.set(mealType);
+    this.loggingAiSuggestions.set([]);
+    this.loggingModalOpen.set(true);
+    this.loggingLoading.set(true);
+    try {
+      await this.dishStore.load();
+      this.recentLoggedDishes.set(await this.store.listRecentLoggedDishes(20));
+    } finally {
+      this.loggingLoading.set(false);
+    }
+  }
+
+  async onLoggingDishSelected(selection: LoggingDishSelection): Promise<void> {
+    const mealType = this.loggingMealType();
+    await this.store.addDishToMeal(mealType, selection.dishId, selection.servings);
+    this.loggingModalOpen.set(false);
+    void this.showToast(
+      `Đã thêm "${selection.dishName}" vào ${this.mealLabel(mealType)} (${selection.servings} khẩu phần)`,
+    );
+  }
+
+  async onLoggingAiSuggestionsRequested(): Promise<void> {
+    if (this.loggingAiLoading()) {
+      return;
+    }
+    if (!this.network.online()) {
+      void this.showToast('Cần kết nối mạng để AI gợi ý món');
+      return;
+    }
+    this.loggingAiLoading.set(true);
+    try {
+      await this.dishStore.load();
+      const dishes = this.dishStore.dishes();
+      if (dishes.length === 0) {
+        void this.showToast('Chưa có món trong thư viện. Hãy tạo món trước khi dùng AI');
+        return;
+      }
+      const suggestions = await this.menuSuggestionAi.suggest({
+        date: this.store.currentDate(),
+        mealType: this.loggingMealType(),
+        targets: this.nutritionStore.targets(),
+        currentTotals: this.nutritionStore.today(),
+        dishes,
+      });
+      this.loggingAiSuggestions.set(suggestions);
+      void this.showToast(`AI đã gợi ý ${suggestions.length} món cho ${this.loggingMealLabel()}`);
+    } catch (err) {
+      console.warn('[CalendarPage] AI menu suggestion failed:', err);
+      void this.showToast(
+        err instanceof GeminiError
+          ? GEMINI_ERROR_TOAST[err.kind]
+          : 'AI chưa gợi ý được món, vui lòng thử lại',
+      );
+    } finally {
+      this.loggingAiLoading.set(false);
+    }
+  }
+
+  onLoggingDismiss(): void {
+    this.loggingModalOpen.set(false);
+    this.loggingAiSuggestions.set([]);
+  }
+
+  onCreateDishRequested(): void {
+    this.loggingModalOpen.set(false);
+    void this.router.navigate(['/tabs/management/dish/new']);
   }
 
   onMarkEaten(plannedDishId: string): void {

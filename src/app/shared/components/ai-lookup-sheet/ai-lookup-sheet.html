@@ -19,9 +19,9 @@
       @if (resultView(); as r) {
         <div class="als-form">
           @if (mode === 'update') {
-            <div class="als-update-banner" role="status">
+            <output class="als-update-banner">
               Đang cập nhật <strong>"{{ r.name }}"</strong> đã có trong DB
-            </div>
+            </output>
           }
 
           <div class="als-confidence" [class]="confidenceClass()">

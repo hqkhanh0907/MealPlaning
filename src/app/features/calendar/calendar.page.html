@@ -22,12 +22,7 @@
     <section class="week-view" aria-label="Tuần hiện tại">
       <header class="week-view__header">
         <h2 class="week-view__title">Tuần này</h2>
-        <button
-          type="button"
-          class="week-view__copy-btn"
-          (click)="onCopyPreviousWeek()"
-          aria-label="Sao chép từ tuần trước"
-        >
+        <button type="button" class="week-view__copy-btn" (click)="onCopyPreviousWeek()">
           📋 Sao chép tuần trước
         </button>
       </header>
@@ -68,8 +63,20 @@
         }
       }
 
-      <button type="button" class="calendar-ai-cta" (click)="onAiCta()">
-        🤖 AI chọn món hôm nay
+      <button
+        type="button"
+        class="calendar-ai-cta"
+        [disabled]="aiPlanning() || !network.online()"
+        [attr.aria-label]="
+          !network.online()
+            ? 'Cần kết nối mạng để AI chọn món'
+            : aiPlanning()
+              ? 'AI đang chọn món'
+              : 'AI chọn món hôm nay'
+        "
+        (click)="onAiCta()"
+      >
+        {{ aiPlanning() ? '🤖 AI đang chọn món…' : '🤖 AI chọn món hôm nay' }}
       </button>
     </div>
   }
@@ -112,12 +119,27 @@
   (dismissed)="onCopyDatePickerDismiss()"
 />
 
+<app-logging-modal
+  [isOpen]="loggingModalOpen()"
+  [mealLabel]="loggingMealLabel()"
+  [allDishes]="dishStore.dishes()"
+  [recentDishes]="recentLoggedDishes()"
+  [loading]="loggingLoading() || dishStore.loading()"
+  [aiSuggestions]="loggingAiSuggestions()"
+  [aiLoading]="loggingAiLoading()"
+  [aiDisabledReason]="loggingAiDisabledReason()"
+  (dishSelected)="onLoggingDishSelected($event)"
+  (aiSuggestionsRequested)="onLoggingAiSuggestionsRequested()"
+  (createDishRequested)="onCreateDishRequested()"
+  (dismissed)="onLoggingDismiss()"
+/>
+
 @if (activeUndo(); as toast) {
-  <div class="undo-toast" role="status" aria-live="polite">
+  <output class="undo-toast" aria-live="polite">
     <span class="undo-toast__msg">{{ toast.message }}</span>
     <button type="button" class="undo-toast__btn" (click)="onUndoTap()">Hoàn tác</button>
     <button type="button" class="undo-toast__close" aria-label="Đóng" (click)="onUndoDismiss()">
       ✕
     </button>
-  </div>
+  </output>
 }

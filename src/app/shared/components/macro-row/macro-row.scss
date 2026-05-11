@@ -4,21 +4,21 @@
 
   &--compact {
     flex-direction: row;
-    gap: var(--spacing-md);
+    gap: var(--space-md);
     justify-content: space-between;
   }
 
   &--expanded {
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: var(--space-sm);
   }
 
   &__item {
     display: flex;
     flex: 1 1 0;
     border: 1px solid transparent;
-    border-radius: var(--border-radius-sm);
-    padding: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs);
     transition: border-color 200ms ease-out;
 
     &--highlighted {
@@ -29,12 +29,12 @@
   &--compact &__item {
     flex-direction: column;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: var(--space-xs);
   }
 
   &--expanded &__item {
     flex-direction: column;
-    gap: var(--spacing-xs);
+    gap: var(--space-xs);
   }
 
   &__meta {
@@ -52,28 +52,28 @@
 
   &__label {
     font-family: var(--ion-font-family);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-body-sm);
     color: var(--ion-color-medium);
   }
 
   &__values {
     font-family: var(--ion-font-family);
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-body);
     font-weight: 600;
     color: var(--ion-text-color);
   }
 
   &__bar {
     height: 8px; /* allow-hardcode: bar thickness fixed by design spec */
-    background: var(--ion-color-step-150);
-    border-radius: var(--border-radius-sm);
+    background: var(--bg-muted);
+    border-radius: var(--radius-sm);
     overflow: hidden;
   }
 
   &__bar-fill {
     height: 100%;
     transition: width 600ms ease-out;
-    border-radius: var(--border-radius-sm);
+    border-radius: var(--radius-sm);
   }
 
   &__bar--low &__bar-fill {

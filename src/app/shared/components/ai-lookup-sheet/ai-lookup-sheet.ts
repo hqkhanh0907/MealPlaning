@@ -70,6 +70,14 @@ export interface AiLookupSavePayload {
   fiber: number;
 }
 
+type Confidence = IngredientLookupResult['confidence'];
+
+const CONFIDENCE_LABELS: Record<Confidence, string> = {
+  high: 'Độ tin cậy cao',
+  medium: 'Trung bình',
+  low: 'Thấp',
+};
+
 @Component({
   selector: 'app-ai-lookup-sheet',
   standalone: true,
@@ -157,7 +165,7 @@ export class AiLookupSheet {
     label: c,
   }));
 
-  @ViewChild('categoryPicker') private categoryPicker?: BottomSheetPicker;
+  @ViewChild('categoryPicker') private readonly categoryPicker?: BottomSheetPicker;
 
   protected readonly resultView = this._result.asReadonly();
 
@@ -166,12 +174,7 @@ export class AiLookupSheet {
 
   protected readonly confidenceLabel = computed(() => {
     const r = this._result();
-    if (!r) return '';
-    return r.confidence === 'high'
-      ? 'Độ tin cậy cao'
-      : r.confidence === 'medium'
-        ? 'Trung bình'
-        : 'Thấp';
+    return r ? CONFIDENCE_LABELS[r.confidence] : '';
   });
 
   /** CSS modifier class for confidence badge — Decision #11. */

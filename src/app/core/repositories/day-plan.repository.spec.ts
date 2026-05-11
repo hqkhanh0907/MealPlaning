@@ -136,12 +136,14 @@ describe('DayPlanRepository', () => {
               protein: null,
               carbs: null,
               fat: null,
+              fiber: null,
               created_at: '2026-05-10T00:00:00Z',
               dish_name: 'Cơm trứng',
               effective_calories: 600,
               effective_protein: 30,
               effective_carbs: 80,
               effective_fat: 15,
+              effective_fiber: 6,
             },
           ] as never;
         }
@@ -165,6 +167,7 @@ describe('DayPlanRepository', () => {
       expect(dishQuerySql).toContain('effective_protein');
       expect(dishQuerySql).toContain('effective_carbs');
       expect(dishQuerySql).toContain('effective_fat');
+      expect(dishQuerySql).toContain('effective_fiber');
       expect(dishQuerySql).toContain('CASE WHEN pd.is_completed = 1 THEN pd.calories');
     });
 

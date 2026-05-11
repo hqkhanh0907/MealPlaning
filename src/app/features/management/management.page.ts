@@ -428,7 +428,7 @@ export default class ManagementPage {
   }
 
   ingredientSourceLabel(source: string): string {
-    return source === 'db' ? 'Có sẵn' : source === 'ai' ? 'AI' : 'Tự tạo';
+    return this.sourceLabel(source);
   }
 
   ingredientCategoryClass(category: string): string {
@@ -450,7 +450,7 @@ export default class ManagementPage {
   }
 
   dishSourceLabel(source: string): string {
-    return source === 'db' ? 'Có sẵn' : source === 'ai' ? 'AI' : 'Tự tạo';
+    return this.sourceLabel(source);
   }
 
   dishTypeClass(type: string): string {
@@ -481,5 +481,12 @@ export default class ManagementPage {
 
   formatNumber(value: number): string {
     return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, '');
+  }
+
+  private sourceLabel(source: string): string {
+    if (source === 'db') {
+      return 'Có sẵn';
+    }
+    return source === 'ai' ? 'AI' : 'Tự tạo';
   }
 }

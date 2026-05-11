@@ -1,5 +1,5 @@
 @if (isOpen()) {
-  <div class="dialog-backdrop" role="presentation">
+  <div class="dialog-backdrop">
     <section
       class="dialog"
       role="alertdialog"
@@ -13,8 +13,8 @@
         <p class="dialog-microcopy">{{ micro }}</p>
       }
       <div class="dialog-actions">
-        <button type="button" class="dialog-btn-cancel" (click)="emit(false)">Hủy</button>
-        <button type="button" class="dialog-btn-primary" (click)="emit(true)">Xác nhận</button>
+        <button type="button" class="dialog-btn-cancel" (click)="cancel()">Hủy</button>
+        <button type="button" class="dialog-btn-primary" (click)="confirm()">Xác nhận</button>
       </div>
     </section>
   </div>

@@ -50,11 +50,3 @@
   font-size: var(--font-size-body);
   font-weight: 500;
 }
-
-:host-context(body.dark),
-:host-context(.dark) {
-  .empty-icon-shell {
-    background: var(--quick-action-bg);
-    color: var(--quick-action-text);
-  }
-}

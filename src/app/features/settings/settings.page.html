@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/" />
+      <ion-back-button defaultHref="/" text="" aria-label="Quay lại" />
     </ion-buttons>
     <ion-title>Cài đặt</ion-title>
   </ion-toolbar>
@@ -56,14 +56,14 @@
     <ion-item>
       <ion-label>Carbs</ion-label>
       <ion-note slot="end">{{
-        profile()?.target_carbs != null ? profile()!.target_carbs + ' g' : '—'
+        (profile()?.target_carbs ?? null) !== null ? profile()!.target_carbs + ' g' : '—'
       }}</ion-note>
     </ion-item>
 
     <ion-item>
       <ion-label>Fat</ion-label>
       <ion-note slot="end">{{
-        profile()?.target_fat != null ? profile()!.target_fat + ' g' : '—'
+        (profile()?.target_fat ?? null) !== null ? profile()!.target_fat + ' g' : '—'
       }}</ion-note>
     </ion-item>
 

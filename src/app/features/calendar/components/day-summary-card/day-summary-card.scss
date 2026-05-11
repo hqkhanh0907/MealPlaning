@@ -1,14 +1,84 @@
 .day-summary-card {
-  margin: var(--spacing-md);
-  padding: var(--spacing-md);
+  margin: var(--space-md);
+  padding: var(--space-md);
   border-radius: var(--radius-lg);
   background: var(--bg-elevated);
   box-shadow: var(--shadow-sm);
 
-  &__placeholder {
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+  }
+
+  &__eyebrow {
     margin: 0;
     color: var(--text-tertiary);
-    font-size: var(--font-size-sm);
-    text-align: center;
+    font-size: var(--font-size-caption);
+    font-weight: 500;
+  }
+
+  &__title {
+    margin: var(--space-xs) 0 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-title);
+    font-weight: 700;
+  }
+
+  &__sync {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-caption);
+    white-space: nowrap;
+  }
+
+  &__hero {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  &__metric {
+    min-width: 0;
+  }
+
+  &__metric-label,
+  &__metric-note {
+    display: block;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-body-sm);
+  }
+
+  &__metric-value {
+    display: block;
+    margin: var(--space-xs) 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-headline);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__detail-toggle {
+    width: 100%;
+    min-height: 44px;
+    margin-top: var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--ion-color-primary-shade);
+    font-size: var(--font-size-body-sm);
+    font-weight: 600;
+  }
+
+  &__details {
+    margin-top: var(--space-md);
+  }
+
+  &__fiber-note {
+    margin: var(--space-sm) 0 0;
+    color: var(--text-tertiary);
+    font-size: var(--font-size-caption);
+    line-height: 1.5;
   }
 }

@@ -189,7 +189,7 @@
     110,
     0.12
   ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-  color: #4f6a4f; // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
+  color: var(--text-primary);
 }
 
 // Category & Type badges (DS §2.7 Data-viz palette — Sage Wellness)
@@ -203,7 +203,7 @@
     68,
     0.1
   ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-  color: #a85544; // terracotta // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
+  color: var(--text-primary);
 }
 
 .badge--category-cat-ca {
@@ -213,7 +213,7 @@
     138,
     0.1
   ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-  color: #4a7a8a; // slate blue // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
+  color: var(--text-primary);
 }
 
 .badge--category-cat-trung {
@@ -223,7 +223,7 @@
     62,
     0.1
   ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-  color: #b07a3e; // warm amber // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
+  color: var(--text-primary);
 }
 
 .badge--category-cat-rau {
@@ -233,7 +233,7 @@
     110,
     0.1
   ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-  color: #6f8b6e; // sage (= primary) // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
+  color: var(--text-primary);
 }
 
 .badge--category-cat-ngu-coc {
@@ -243,7 +243,7 @@
     56,
     0.1
   ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-  color: #a66638; // burnt sienna // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
+  color: var(--text-primary);
 }
 
 .badge--category-cat-dau-hat {
@@ -253,7 +253,7 @@
     140,
     0.1
   ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-  color: #8a6a8c; // muted plum // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
+  color: var(--text-primary);
 }
 
 .badge--category-cat-dau-mo {
@@ -263,7 +263,7 @@
     71,
     0.1
   ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-  color: #c9a847; // golden // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
+  color: var(--text-primary);
 }
 
 .badge--category-cat-gia-vi {
@@ -273,7 +273,7 @@
     106,
     0.1
   ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-  color: #b04a6a; // muted rose // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
+  color: var(--text-primary);
 }
 
 .badge--category-cat-nuoc-dung {
@@ -283,7 +283,7 @@
     122,
     0.1
   ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-  color: #5a8a7a; // teal-sage // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
+  color: var(--text-primary);
 }
 
 .badge--category-cat-trai-cay {
@@ -293,7 +293,7 @@
     62,
     0.1
   ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-  color: #c2493e; // cherry (= danger) // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
+  color: var(--text-primary);
 }
 
 .badge--category-cat-khac {
@@ -303,7 +303,7 @@
     106,
     0.1
   ); // allow-hardcode: DS §2.7 data-viz category palette — intentional 10/18% tint, no semantic token
-  color: #80776a; // warm medium // allow-hardcode: DS §2.7 data-viz category palette — intentional brand hue, no semantic token
+  color: var(--text-primary);
 }
 
 .badge--type-ingredient {

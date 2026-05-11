@@ -2,13 +2,469 @@
   <ion-toolbar>
     <ion-title>Tập luyện</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="openSettings()">
+      <ion-button (click)="openSettings()" aria-label="Cài đặt">
         <ion-icon slot="icon-only" name="settings-outline" />
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
-<ion-content class="ion-padding">
-  <h2>Tập luyện</h2>
-  <p>Fitness — Coming soon</p>
+
+<ion-content class="fitness-page">
+  @if (fitness.loading()) {
+    <p class="status-banner" role="status">Đang chuẩn bị dữ liệu bài tập...</p>
+  }
+
+  @if (fitness.errorMessage(); as error) {
+    <p class="status-banner status-banner--error" role="alert">{{ error }}</p>
+  }
+
+  @if (fitness.successMessage(); as success) {
+    <p class="status-banner status-banner--success" role="status">{{ success }}</p>
+  }
+
+  <section class="fitness-hero" aria-labelledby="fitness-title">
+    <div class="fitness-hero__icon" aria-hidden="true">
+      <ion-icon name="barbell-outline" />
+    </div>
+    <div>
+      <p class="eyebrow">Tập luyện offline + AI</p>
+      <h1 id="fitness-title">Theo giáo án, log set, xem tiến trình</h1>
+      <p>
+        Dữ liệu bài tập chạy offline với {{ fitness.exercises().length }} bài phổ biến, 3 preset
+        evidence-based và workout logger theo set.
+      </p>
+    </div>
+  </section>
+
+  <section class="fitness-card" aria-labelledby="plan-title">
+    <header class="section-header">
+      <div>
+        <p class="eyebrow">F-08 Training plan</p>
+        <h2 id="plan-title">Chọn giáo án</h2>
+      </div>
+      @if (fitness.activePlan(); as activePlan) {
+        <span class="active-pill">{{ activePlan.name }}</span>
+      }
+    </header>
+
+    <div class="ai-plan-callout">
+      <div>
+        <strong>AI Custom plan</strong>
+        <span>
+          Tạo giáo án dựa trên level, mục tiêu, bài tập hiện có và volume gần đây. App chỉ gọi AI
+          khi bạn bấm nút này.
+        </span>
+        @if (fitness.aiPlanRationale(); as rationale) {
+          <small>{{ rationale }}</small>
+        }
+      </div>
+      <ion-button
+        fill="outline"
+        (click)="fitness.generateAiCustomPlan()"
+        [disabled]="fitness.aiPlanLoading() || fitness.activeSession() !== null"
+        [attr.aria-label]="
+          fitness.activeSession() !== null
+            ? 'Đang có buổi tập, hoàn thành trước khi tạo giáo án AI'
+            : 'Tạo giáo án AI custom'
+        "
+      >
+        <ion-icon slot="start" name="sparkles-outline" />
+        {{ fitness.aiPlanLoading() ? 'Đang tạo...' : 'Tạo AI plan' }}
+      </ion-button>
+    </div>
+
+    <div class="plan-grid">
+      @for (plan of fitness.plans(); track plan.id) {
+        <article class="plan-card" [class.plan-card--active]="plan.is_active === 1">
+          <div>
+            <strong>{{ plan.name }}</strong>
+            <span>{{ plan.frequency }} buổi/tuần · {{ plan.planned_exercises }} bài</span>
+          </div>
+          <p>{{ plan.description }}</p>
+          <ion-button
+            fill="clear"
+            size="small"
+            (click)="fitness.activatePlan(plan.type)"
+            [disabled]="
+              fitness.activeSession() !== null || plan.type === 'ai_custom' || plan.is_active === 1
+            "
+            [attr.aria-label]="
+              fitness.activeSession() !== null
+                ? 'Đang có buổi tập, hoàn thành trước khi đổi giáo án'
+                : plan.is_active === 1
+                  ? plan.name + ' đang được chọn'
+                  : 'Chọn ' + plan.name
+            "
+          >
+            {{
+              fitness.activeSession() !== null && plan.is_active !== 1
+                ? 'Hoàn thành buổi hiện tại'
+                : plan.is_active === 1
+                  ? 'Đang dùng'
+                  : 'Chọn'
+            }}
+          </ion-button>
+        </article>
+      }
+    </div>
+
+    @if (fitness.activePlan(); as activePlan) {
+      <div class="week-strip" aria-label="Lịch tập trong tuần">
+        @for (day of activePlan.days; track day.id) {
+          <article class="week-day" [class.week-day--rest]="day.is_rest_day === 1">
+            <span>{{ day.day_of_week === 0 ? 'CN' : 'T' + (day.day_of_week + 1) }}</span>
+            <strong>{{ day.name }}</strong>
+            <small>
+              @if (day.is_rest_day === 1) {
+                Nghỉ
+              } @else {
+                {{ day.exercises.length }} bài
+              }
+            </small>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="fitness-card" aria-labelledby="today-workout-title">
+    <header class="section-header">
+      <div>
+        <p class="eyebrow">F-09 Workout logger</p>
+        <h2 id="today-workout-title">Buổi tập hôm nay</h2>
+      </div>
+      @if (fitness.activeSession(); as session) {
+        <span class="active-pill active-pill--accent">{{
+          session.mode === 'guided' ? 'Guided' : 'Free'
+        }}</span>
+      }
+    </header>
+
+    @if (fitness.todayDay(); as day) {
+      @if (day.is_rest_day === 1) {
+        <div class="empty-workout">
+          <ion-icon name="calendar-outline" aria-hidden="true" />
+          <strong>{{ day.name }}</strong>
+          <p>Hôm nay là ngày nghỉ theo giáo án. Nếu vẫn muốn tập, dùng Free mode.</p>
+          <ion-button
+            (click)="fitness.startFree()"
+            fill="solid"
+            [disabled]="fitness.activeSession() !== null"
+            [attr.aria-label]="
+              fitness.activeSession() !== null
+                ? 'Đang có buổi tập, hoàn thành trước khi bắt đầu Free workout'
+                : 'Bắt đầu Free workout'
+            "
+          >
+            {{ fitness.activeSession() ? 'Đang tập' : 'Bắt đầu Free workout' }}
+          </ion-button>
+        </div>
+      } @else {
+        <div class="today-plan">
+          <div>
+            <strong>{{ day.name }}</strong>
+            <span>{{ day.exercises.length }} bài · guided mode</span>
+          </div>
+          <ion-button
+            (click)="fitness.startTodayGuided()"
+            fill="solid"
+            [disabled]="fitness.activeSession() !== null"
+            [attr.aria-label]="
+              fitness.activeSession() !== null
+                ? 'Đang có buổi tập, hoàn thành trước khi bắt đầu buổi mới'
+                : 'Bắt đầu buổi tập theo giáo án'
+            "
+          >
+            <ion-icon slot="start" name="flash-outline" />
+            {{ fitness.activeSession() ? 'Đang tập' : 'Bắt đầu' }}
+          </ion-button>
+        </div>
+
+        <div class="planned-exercise-list">
+          @for (exercise of day.exercises; track exercise.id) {
+            <article class="planned-exercise">
+              <strong>{{ exercise.exercise_name_vi || exercise.exercise_name }}</strong>
+              <span
+                >{{ exercise.sets }}×{{ exercise.reps_min }}-{{ exercise.reps_max }} · nghỉ
+                {{ exercise.rest_seconds }}s</span
+              >
+              @if (exercise.notes) {
+                <small>{{ exercise.notes }}</small>
+              }
+            </article>
+          }
+        </div>
+      }
+    } @else {
+      <div class="empty-workout">
+        <ion-icon name="calendar-outline" aria-hidden="true" />
+        <strong>Chưa có giáo án hoạt động</strong>
+        <p>Chọn một preset ở trên để app hiển thị buổi tập hôm nay.</p>
+      </div>
+    }
+
+    <div class="free-mode">
+      <div class="input-wrapper">
+        <label class="input-label" for="exercise-search">Tìm bài tập free mode</label>
+        <input
+          id="exercise-search"
+          class="input-native"
+          type="search"
+          [value]="fitness.exerciseSearch()"
+          (input)="onSearchInput($event)"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="exercise-picker" aria-label="Danh sách bài tập">
+        @for (exercise of fitness.filteredExercises(); track exercise.id) {
+          <button
+            type="button"
+            class="exercise-chip"
+            (click)="fitness.addExerciseToActive(exercise.id)"
+          >
+            <ion-icon name="add-outline" aria-hidden="true" />
+            {{ exercise.name_vi || exercise.name }}
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+
+  @if (fitness.activeSession(); as session) {
+    <section class="fitness-card active-workout" aria-labelledby="active-workout-title">
+      <header class="section-header">
+        <div>
+          <p class="eyebrow">Đang tập</p>
+          <h2 id="active-workout-title">{{ session.training_day_name }}</h2>
+        </div>
+        <ion-button
+          fill="clear"
+          size="small"
+          (click)="fitness.completeWorkout()"
+          [disabled]="!fitness.canCompleteWorkout()"
+          [attr.aria-label]="
+            fitness.canCompleteWorkout()
+              ? 'Hoàn thành buổi tập'
+              : 'Cần log ít nhất 1 set trước khi hoàn thành buổi tập'
+          "
+        >
+          <ion-icon slot="start" name="checkmark-circle-outline" />
+          Hoàn thành
+        </ion-button>
+      </header>
+
+      <div class="workout-exercise-tabs" aria-label="Bài trong buổi tập">
+        @for (exercise of session.exercises; track exercise.id) {
+          <button
+            type="button"
+            class="workout-tab"
+            [class.workout-tab--active]="fitness.selectedWorkoutExercise()?.id === exercise.id"
+            (click)="fitness.selectWorkoutExercise(exercise.id)"
+          >
+            {{ exercise.exercise_name_vi || exercise.exercise_name }}
+            <small>{{ exercise.sets.length }} set</small>
+          </button>
+        }
+      </div>
+
+      @if (fitness.selectedWorkoutExercise(); as selected) {
+        <article class="set-logger">
+          <header>
+            <strong>{{ selected.exercise_name_vi || selected.exercise_name }}</strong>
+            <span>{{ selected.total_volume }} kg volume</span>
+          </header>
+
+          <div class="set-grid">
+            <div class="input-wrapper">
+              <label class="input-label" for="weight-kg">Weight (kg)</label>
+              <input
+                id="weight-kg"
+                class="input-native"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                max="500"
+                step="0.5"
+                [value]="fitness.setDraft().weightKg"
+                (input)="onWeightInput($event)"
+              />
+            </div>
+
+            <div class="input-wrapper">
+              <label class="input-label" for="reps">Reps</label>
+              <input
+                id="reps"
+                class="input-native"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                max="100"
+                step="1"
+                [value]="fitness.setDraft().reps"
+                (input)="onRepsInput($event)"
+              />
+            </div>
+
+            <div class="input-wrapper">
+              <label class="input-label" for="rest-seconds">Rest (giây)</label>
+              <input
+                id="rest-seconds"
+                class="input-native"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                max="600"
+                step="15"
+                [value]="fitness.setDraft().restSeconds"
+                (input)="onRestInput($event)"
+              />
+            </div>
+          </div>
+
+          <div class="effort-row" aria-label="Effort optional">
+            <button
+              type="button"
+              [class.effort-chip--active]="fitness.setDraft().effort === 'easy'"
+              class="effort-chip"
+              (click)="setEffort('easy')"
+            >
+              😊 Easy
+            </button>
+            <button
+              type="button"
+              [class.effort-chip--active]="fitness.setDraft().effort === 'just_right'"
+              class="effort-chip"
+              (click)="setEffort('just_right')"
+            >
+              💪 Vừa
+            </button>
+            <button
+              type="button"
+              [class.effort-chip--active]="fitness.setDraft().effort === 'hard'"
+              class="effort-chip"
+              (click)="setEffort('hard')"
+            >
+              😤 Nặng
+            </button>
+            <button
+              type="button"
+              [class.effort-chip--active]="fitness.setDraft().effort === 'maxed'"
+              class="effort-chip"
+              (click)="setEffort('maxed')"
+            >
+              🔥 Max
+            </button>
+          </div>
+
+          <div class="input-wrapper">
+            <label class="input-label" for="set-notes">Ghi chú set</label>
+            <input
+              id="set-notes"
+              class="input-native"
+              type="text"
+              [value]="fitness.setDraft().notes"
+              (input)="onNotesInput($event)"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="logger-actions">
+            <ion-button (click)="fitness.logSet()" fill="solid">Log set</ion-button>
+            <app-rest-timer [seconds]="fitness.restSeconds()" />
+          </div>
+
+          @if (selected.sets.length > 0) {
+            <div class="set-history" aria-label="Set đã log">
+              @for (set of selected.sets; track set.id) {
+                <article>
+                  <strong>Set {{ set.set_number }}</strong>
+                  <span>{{ set.weight_kg }} kg × {{ set.reps }}</span>
+                  @if (set.effort) {
+                    <small>{{ set.effort }}</small>
+                  }
+                </article>
+              }
+            </div>
+          }
+        </article>
+      }
+    </section>
+  }
+
+  <section class="fitness-card" aria-labelledby="progress-title">
+    <header class="section-header">
+      <div>
+        <p class="eyebrow">F-10 Progress</p>
+        <h2 id="progress-title">Tiến trình tập luyện</h2>
+      </div>
+    </header>
+
+    @if (fitness.progress(); as progress) {
+      <div class="progress-summary">
+        <article>
+          <ion-icon name="stats-chart-outline" aria-hidden="true" />
+          <strong>{{ fitness.currentWeekVolumeLabel() }}</strong>
+          <span>Volume tuần này</span>
+          <small>{{ fitness.volumeChangeLabel() }}</small>
+        </article>
+        <article>
+          <ion-icon name="flame-outline" aria-hidden="true" />
+          <strong>{{ progress.workoutStreakWeeks }} tuần</strong>
+          <span>Workout streak</span>
+          <small>Streak theo tuần, không phạt ngày nghỉ.</small>
+        </article>
+        <article>
+          <ion-icon name="body-outline" aria-hidden="true" />
+          <strong>
+            @if (progress.weeklyAvgWeightKg === null) {
+              —
+            } @else {
+              {{ progress.weeklyAvgWeightKg }} kg
+            }
+          </strong>
+          <span>TB cân nặng 7 ngày</span>
+          <small>{{
+            progress.weightSource === 'profile' ? 'Ước tính từ hồ sơ' : 'Từ weight log'
+          }}</small>
+        </article>
+      </div>
+
+      <div class="chart-block">
+        <h3>Volume theo nhóm cơ</h3>
+        @if (progress.volumeByMuscle.length === 0) {
+          <p class="empty-copy">Chưa có workout hoàn thành trong tuần này.</p>
+        } @else {
+          @for (point of progress.volumeByMuscle; track point.muscle_group) {
+            <div class="chart-row">
+              <span>{{ point.label }}</span>
+              <div class="chart-track" aria-hidden="true">
+                <i [style.--progress]="barWidth(point.volume, fitness.maxMuscleVolume())"></i>
+              </div>
+              <strong>{{ point.volume }} kg</strong>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="chart-block">
+        <h3>Est. 1RM compound lifts</h3>
+        @if (progress.strength.length === 0) {
+          <p class="empty-copy">Log set compound ≤10 reps để xem 1RM ước tính theo Epley.</p>
+        } @else {
+          @for (point of progress.strength; track point.exercise_id) {
+            <div class="chart-row">
+              <span>{{ point.exercise_name_vi || point.exercise_name }}</span>
+              <div class="chart-track" aria-hidden="true">
+                <i
+                  [style.--progress]="barWidth(point.estimated_1rm, fitness.maxEstimatedOneRm())"
+                ></i>
+              </div>
+              <strong>{{ point.estimated_1rm }} kg</strong>
+            </div>
+          }
+        }
+      </div>
+    }
+  </section>
 </ion-content>
