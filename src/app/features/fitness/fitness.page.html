@@ -35,7 +35,7 @@
 
     <div class="ai-plan-callout">
       <div class="ai-plan-callout__text">
-        <strong>AI Custom plan</strong>
+        <strong>Giáo án AI tùy chỉnh</strong>
         <span> Tạo giáo án dựa trên level, mục tiêu, bài tập hiện có và volume gần đây. </span>
         @if (fitness.aiPlanRationale(); as rationale) {
           <small>{{ rationale }}</small>
@@ -394,7 +394,7 @@
         <article>
           <ion-icon name="flame-outline" aria-hidden="true" />
           <strong>{{ progress.workoutStreakWeeks }} tuần</strong>
-          <span>Workout streak</span>
+          <span>Streak tập luyện</span>
           <small>Streak theo tuần, không phạt ngày nghỉ.</small>
         </article>
         <article>
@@ -416,7 +416,7 @@
       <div class="chart-block">
         <h3>Volume theo nhóm cơ</h3>
         @if (progress.volumeByMuscle.length === 0) {
-          <p class="empty-copy">Chưa có workout hoàn thành trong tuần này.</p>
+          <p class="empty-copy">Chưa có buổi tập hoàn thành trong tuần này.</p>
         } @else {
           @for (point of progress.volumeByMuscle; track point.muscle_group) {
             <div class="chart-row">
