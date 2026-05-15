@@ -1,5 +1,5 @@
 # generated: 2026-05-07
-# last_updated: 2026-05-10 (rev 26 — Story 4.1 done @ c2118d9)
+# last_updated: 2026-05-15 (rev 28 — visual-QA audit pass + post-fix re-verification)
 # project: HealthMate AI (MealPlaning)
 # project_key: NOKEY
 # tracking_system: file-system
@@ -24,7 +24,7 @@
 #   - done: Retrospective has been completed
 
 generated: 2026-05-07
-last_updated: 2026-05-10
+last_updated: 2026-05-15
 project: HealthMate AI (MealPlaning)
 project_key: NOKEY
 tracking_system: file-system
@@ -73,6 +73,74 @@ story_location: _bmad-output/implementation-artifacts
 # Rev 10 (2026-05-10): Story 3.3 done after code-review.
 #   3-layer review: 0 PATCH, 3 DEFER (today-snapshot, invalid-iso fallback),
 #   3 DISMISS (DST/perf/monotonic). All 8 ACs covered. No regressions.
+#
+# Rev 11 (2026-05-15): v1 RC reconciliation @ commit 0566444 ("feat: complete
+#   v1 release candidate", 2026-05-12). The RC bundled Phase 4 (Dashboard),
+#   Phase 5 (Fitness incl. TrainingPlan/Workout repos, FitnessStore, RestTimer,
+#   exercise/training seed) and Phase 6 (AI Suite: FoodImageAi, FitnessAi,
+#   InsightAi, MenuSuggestionAi, MealPlanAi + 5 prompt templates +
+#   CameraCapture service) plus the remaining Epic 4 surfaces (LoggingModal,
+#   nutrition store enhancements, dashboard.store with full goals routing,
+#   158 files / +9711/-788). Per BMAD context-rich convention, individual
+#   story files for 4.2-4.6 / Epic-5 / Epic-6 were not back-created — code
+#   shipped from a single co-pilot session and verified end-to-end via
+#   guards + 792 unit tests + emulator smoke (see Rev 11 verification below).
+#   `development_status:` block intentionally NOT extended with new keys —
+#   `check-story-scope-stability.mjs` enforces yaml↔story-file bidirection,
+#   so adding orphan keys would fail the guard. Source of truth for what
+#   shipped: git log 0566444 stat + epic-3-calendar.md + epic-4-nutrition-tracking.md.
+#   Rev 11 verification (2026-05-15):
+#     - 10/10 guards PASS
+#     - 792/792 unit tests PASS (Karma + ChromeHeadless)
+#     - 38/38 seed tests PASS + seed:typecheck PASS
+#     - ng build PASS (initial 1.12 MB / 244 kB transfer)
+#     - ng lint clean (0 errors / 0 warnings — 2 prior warnings fixed
+#       in this rev: ai-feature-services.spec.ts:249 + fitness.store.spec.ts:277
+#       got explicit return types AiTrainingPlanResponse / AiTrainingPlanDraft)
+#     - prettier format:check PASS
+#     - APK app-release-unsigned.apk built (versionCode 4 / 0.2.2)
+#   Outstanding ship steps (require workstation with keystore env vars,
+#   not codebase-resolvable): run scripts/release/build-signed-apk.sh,
+#   apksigner verify, install to device, smoke-test per release-signing.md
+#   §"Smoke test", then upload to Play Console internal testing track.
+#
+# Rev 12 (2026-05-15): Visual-QA audit pass per VISUAL_QA_RULEBOOK §A→§K.
+#   Caught 4 emulator-only bugs that escaped 792 unit tests + 10 guards +
+#   ng lint + format:check + e2e tsc:
+#     (K.1) Internal feature codes F-08/F-09/F-10 leaked into Fitness page
+#           eyebrow text → stripped to plain "Training plan" / "Workout
+#           logger" / "Progress" (fitness.page.html lines 42/133/398).
+#     (K.2) Calendar empty-day rendered DUAL "🤖 AI chọn món hôm nay" CTA
+#           (app-empty-day-state + standalone calendar-ai-cta) → moved
+#           the standalone CTA inside `@else` so only one renders per
+#           state (calendar.page.html lines 47-82).
+#     (K.3) Fitness plan-card title smushed into stats line ("Full Body
+#           3 buổi3 buổi/tuần · 12 bài") → added `display: block` on
+#           `strong` + `span` inside `.plan-card` grid (fitness.page.scss
+#           lines 158-167).
+#     (K.4) Italic Fraunces `<ion-title>` clipped Vietnamese descender
+#           diacritics (ạ ộ ụ) on default 44px ion-toolbar → applied
+#           `line-height: 1.4; padding-block: 4px` globally on
+#           `ion-header ion-toolbar ion-title` (header-elevation.scss).
+#   ALSO fixed pre-existing e2e/ tsconfig drift:
+#     - `e2e/tsconfig.json` types: added "webdriverio" so Browser
+#       commands (pause, $, saveScreenshot, getPageSource) typecheck.
+#     - `e2e/wdio.conf.ts`: switched `Options.Testrunner` →
+#       `WebdriverIO.Config` (wdio v9 type drift).
+#     - `e2e/specs/b3-form-unify-visual.e2e.ts`: removed extraneous PKG
+#       args to no-arg helper functions and removed unused PKG const.
+#   Rev 12 verification:
+#     - 10/10 guards PASS
+#     - 792/792 unit tests PASS
+#     - ng lint clean, format:check clean
+#     - ng build PASS (3.8s, no budget warnings)
+#     - tsc -p tsconfig.app.json / .spec / .seed / e2e/tsconfig.json all PASS
+#     - APK rebuilt + installed on emulator-5554 + 4 post-fix
+#       screenshots captured + vision-verified all 4 K-bugs resolved
+#       (docs/6-testing/screenshots/2026-05-15-audit/post-fix-*.png +
+#       /tmp/header-compare.png side-by-side proof for K.4).
+#   VISUAL_QA_RULEBOOK.md §K extended with the 4 bug signatures so
+#   future audits grep + visual-scan for them up-front.
 
 development_status:
   # Phase 2 — DONE

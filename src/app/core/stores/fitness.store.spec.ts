@@ -14,6 +14,7 @@ import type { UserProfile } from '../models/user-profile.model';
 import { ExerciseRepository } from '../repositories/exercise.repository';
 import { TrainingPlanRepository } from '../repositories/training-plan.repository';
 import { WorkoutRepository } from '../repositories/workout.repository';
+import type { AiTrainingPlanDraft } from '../models/fitness.types';
 import { FitnessAi } from '../services/ai/fitness-ai';
 import { NetworkStore } from './network.store';
 import { ProfileStore } from './profile.store';
@@ -274,7 +275,7 @@ function progressSummary(overrides: Partial<FitnessProgressSummary> = {}): Fitne
   };
 }
 
-function aiPlanDraft() {
+function aiPlanDraft(): AiTrainingPlanDraft {
   return {
     name: 'AI Full Body',
     description: 'AI tạo giáo án 3 buổi.',

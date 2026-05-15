@@ -69,6 +69,12 @@ ion-header ion-toolbar ion-title {
   padding-inline: 56px;
   pointer-events: none;
   text-align: center;
+  // Vietnamese diacritics (ạ ộ ụ ặ) clipped at the bottom edge when the
+  // global italic Fraunces title set on per-page ion-title rules met the
+  // default 44px ion-toolbar min-height. line-height ≥ 1.4 + small vertical
+  // padding restores breathing room without changing the visual font-size.
+  line-height: 1.4;
+  padding-block: 4px;
 }
 
 ion-header {

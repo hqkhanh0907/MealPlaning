@@ -155,11 +155,13 @@
   }
 
   strong {
+    display: block;
     color: var(--text-primary);
   }
 
   span,
   p {
+    display: block;
     color: var(--text-tertiary);
     line-height: 1.5;
   }

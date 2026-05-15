@@ -61,23 +61,23 @@
             (dishLongPress)="onDishLongPress($event, slot.meal_type)"
           />
         }
-      }
 
-      <button
-        type="button"
-        class="calendar-ai-cta"
-        [disabled]="aiPlanning() || !network.online()"
-        [attr.aria-label]="
-          !network.online()
-            ? 'Cần kết nối mạng để AI chọn món'
-            : aiPlanning()
-              ? 'AI đang chọn món'
-              : 'AI chọn món hôm nay'
-        "
-        (click)="onAiCta()"
-      >
-        {{ aiPlanning() ? '🤖 AI đang chọn món…' : '🤖 AI chọn món hôm nay' }}
-      </button>
+        <button
+          type="button"
+          class="calendar-ai-cta"
+          [disabled]="aiPlanning() || !network.online()"
+          [attr.aria-label]="
+            !network.online()
+              ? 'Cần kết nối mạng để AI chọn món'
+              : aiPlanning()
+                ? 'AI đang chọn món'
+                : 'AI chọn món hôm nay'
+          "
+          (click)="onAiCta()"
+        >
+          {{ aiPlanning() ? '🤖 AI đang chọn món…' : '🤖 AI chọn món hôm nay' }}
+        </button>
+      }
     </div>
   }
 </ion-content>
