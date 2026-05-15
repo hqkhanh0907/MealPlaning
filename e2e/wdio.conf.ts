@@ -10,9 +10,7 @@
  *   - APK installed: see `references/apk-delivery-and-scss-budget.md`
  *   - Appium server running: `npm run e2e:appium` in another shell
  */
-import type { Options } from '@wdio/types';
-
-export const config: Options.Testrunner = {
+export const config: WebdriverIO.Config = {
   runner: 'local',
   tsConfigPath: './e2e/tsconfig.json',
 

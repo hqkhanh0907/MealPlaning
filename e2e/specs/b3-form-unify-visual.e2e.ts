@@ -20,13 +20,11 @@ import {
   waitForText,
 } from '../helpers/app-driver';
 
-const PKG = 'com.healthmate.ai';
-
 describe('B3 — Settings forms render after floating-label normalize', () => {
   before(async () => {
-    await forceStop(PKG);
-    await clearAppData(PKG);
-    await launchApp(PKG);
+    await forceStop();
+    await clearAppData();
+    await launchApp();
   });
 
   it('reaches body-edit and goals-edit', async () => {

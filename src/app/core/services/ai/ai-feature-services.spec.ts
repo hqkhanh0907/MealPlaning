@@ -9,6 +9,7 @@ import { FoodImageAi } from './food-image-ai';
 import { GeminiClient } from './gemini-client';
 import { InsightAi } from './insight-ai';
 import { MenuSuggestionAi } from './menu-suggestion-ai';
+import type { AiTrainingPlanResponse } from './prompts/training-plan.prompt';
 
 describe('AI feature services', () => {
   let gemini: jasmine.SpyObj<GeminiClient>;
@@ -246,7 +247,7 @@ function progressSummary(): FitnessProgressSummary {
   };
 }
 
-function trainingPlanResponse() {
+function trainingPlanResponse(): AiTrainingPlanResponse {
   return {
     name: 'AI Full Body',
     description: 'AI tạo giáo án 3 buổi.',
