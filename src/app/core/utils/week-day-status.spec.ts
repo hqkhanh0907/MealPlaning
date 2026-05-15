@@ -1,5 +1,5 @@
 import type { WeekDayTotal } from '../models/meal-plan.types';
-import { weekDayStatus, weekDayStatusEmoji } from './week-day-status';
+import { weekDayStatus, weekDayStatusIcon } from './week-day-status';
 
 function makeWeekDay(overrides: Partial<WeekDayTotal> = {}): WeekDayTotal {
   return {
@@ -107,14 +107,14 @@ describe('weekDayStatus', () => {
   });
 });
 
-describe('weekDayStatusEmoji', () => {
-  it('maps each status to its glyph', () => {
-    expect(weekDayStatusEmoji('no-plan')).toBe('⚪');
-    expect(weekDayStatusEmoji('future-planned')).toBe('⚪');
-    expect(weekDayStatusEmoji('today-recording')).toBe('🟠');
-    expect(weekDayStatusEmoji('past-on-target')).toBe('✅');
-    expect(weekDayStatusEmoji('past-under')).toBe('🟡');
-    expect(weekDayStatusEmoji('past-over')).toBe('⚠️');
-    expect(weekDayStatusEmoji('past-extreme')).toBe('⛔');
+describe('weekDayStatusIcon', () => {
+  it('maps each status to its ionicon name', () => {
+    expect(weekDayStatusIcon('no-plan')).toBe('ellipse-outline');
+    expect(weekDayStatusIcon('future-planned')).toBe('ellipse-outline');
+    expect(weekDayStatusIcon('today-recording')).toBe('radio-button-on-outline');
+    expect(weekDayStatusIcon('past-on-target')).toBe('checkmark-circle-outline');
+    expect(weekDayStatusIcon('past-under')).toBe('remove-circle-outline');
+    expect(weekDayStatusIcon('past-over')).toBe('alert-circle-outline');
+    expect(weekDayStatusIcon('past-extreme')).toBe('close-circle-outline');
   });
 });

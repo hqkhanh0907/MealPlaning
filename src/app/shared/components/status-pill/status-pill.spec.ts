@@ -18,9 +18,9 @@ describe('StatusPill', () => {
   });
 
   describe('planned variant', () => {
-    it('uses 📌 icon', () => {
+    it('uses bookmark-outline icon', () => {
       setInputs('planned');
-      expect(component.icon()).toBe('📌');
+      expect(component.icon()).toBe('bookmark-outline');
     });
 
     it('label is "Kế hoạch"', () => {
@@ -35,9 +35,9 @@ describe('StatusPill', () => {
   });
 
   describe('logged variant', () => {
-    it('uses 🔒 icon', () => {
+    it('uses lock-closed-outline icon', () => {
       setInputs('logged', '2026-05-10T08:30:00Z');
-      expect(component.icon()).toBe('🔒');
+      expect(component.icon()).toBe('lock-closed-outline');
     });
 
     it('formats completedAt as "Đã ăn lúc HH:mm" in vi-VN locale', () => {

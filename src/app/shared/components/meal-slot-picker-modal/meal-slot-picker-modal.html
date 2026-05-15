@@ -17,7 +17,6 @@
             (click)="pick(choice.type)"
             [attr.aria-pressed]="current() === choice.type"
           >
-            <span class="msp-chip-emoji" aria-hidden="true">{{ choice.emoji }}</span>
             <span class="msp-chip-label">{{ choice.label }}</span>
           </button>
         }

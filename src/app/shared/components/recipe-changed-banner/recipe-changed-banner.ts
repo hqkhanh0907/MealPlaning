@@ -1,13 +1,21 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { informationCircleOutline, warningOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-recipe-changed-banner',
   standalone: true,
+  imports: [IonIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './recipe-changed-banner.html',
   styleUrl: './recipe-changed-banner.scss',
 })
 export class RecipeChangedBanner {
+  constructor() {
+    addIcons({ warningOutline, informationCircleOutline });
+  }
+
   readonly snapshotCalories = input.required<number>();
   readonly currentCalories = input.required<number>();
   /** Pre-computed by caller; banner trusts the input and does not re-compute. */

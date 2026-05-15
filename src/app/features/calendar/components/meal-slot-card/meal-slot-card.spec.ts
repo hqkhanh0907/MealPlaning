@@ -59,27 +59,23 @@ describe('MealSlotCard', () => {
   });
 
   describe('Vietnamese labels', () => {
-    it('breakfast → 🍳 Bữa sáng', () => {
+    it('breakfast → Bữa sáng', () => {
       setInputs(makeSlot([]), 'breakfast');
-      expect(component.emoji()).toBe('🍳');
       expect(component.label()).toBe('Bữa sáng');
     });
 
-    it('lunch → 🍱 Bữa trưa', () => {
+    it('lunch → Bữa trưa', () => {
       setInputs(makeSlot([]), 'lunch');
-      expect(component.emoji()).toBe('🍱');
       expect(component.label()).toBe('Bữa trưa');
     });
 
-    it('dinner → 🍲 Bữa chiều', () => {
+    it('dinner → Bữa chiều', () => {
       setInputs(makeSlot([]), 'dinner');
-      expect(component.emoji()).toBe('🍲');
       expect(component.label()).toBe('Bữa chiều');
     });
 
-    it('snack → 🍪 Bữa phụ', () => {
+    it('snack → Bữa phụ', () => {
       setInputs(makeSlot([]), 'snack');
-      expect(component.emoji()).toBe('🍪');
       expect(component.label()).toBe('Bữa phụ');
     });
   });

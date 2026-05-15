@@ -19,16 +19,16 @@ export function weekDayStatus(d: WeekDayTotal): WeekDayStatus {
   return 'past-under';
 }
 
-const STATUS_EMOJI: Record<WeekDayStatus, string> = {
-  'no-plan': '⚪',
-  'future-planned': '⚪',
-  'today-recording': '🟠',
-  'past-on-target': '✅',
-  'past-under': '🟡',
-  'past-over': '⚠️',
-  'past-extreme': '⛔',
+const STATUS_ICON: Record<WeekDayStatus, string> = {
+  'no-plan': 'ellipse-outline',
+  'future-planned': 'ellipse-outline',
+  'today-recording': 'radio-button-on-outline',
+  'past-on-target': 'checkmark-circle-outline',
+  'past-under': 'remove-circle-outline',
+  'past-over': 'alert-circle-outline',
+  'past-extreme': 'close-circle-outline',
 };
 
-export function weekDayStatusEmoji(s: WeekDayStatus): string {
-  return STATUS_EMOJI[s];
+export function weekDayStatusIcon(s: WeekDayStatus): string {
+  return STATUS_ICON[s];
 }

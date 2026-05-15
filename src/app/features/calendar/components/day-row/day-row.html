@@ -7,8 +7,14 @@
   (click)="onTap()"
   [attr.aria-label]="day().label + ' ' + day().date"
 >
-  <span class="day-row__label">{{ day().label }}</span>
-  <span class="day-row__status" aria-hidden="true">{{ statusEmoji() }}</span>
+  <span class="day-row__label">
+    <span class="day-row__label-name">{{ day().label }}</span>
+    <span class="day-row__label-date">{{ dayOfMonth() }}</span>
+    @if (day().isToday) {
+      <span class="day-row__today-pill">Hôm nay</span>
+    }
+  </span>
+  <ion-icon class="day-row__status" [name]="statusIcon()" aria-hidden="true" />
   <span class="day-row__cal">
     <span class="day-row__cal-num">{{ displayCal() | number: '1.0-0' }}</span>
     <span class="day-row__cal-cap">/ {{ capCal() }}</span>

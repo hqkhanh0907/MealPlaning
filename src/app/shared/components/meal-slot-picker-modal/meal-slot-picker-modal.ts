@@ -4,14 +4,13 @@ import type { MealType } from '../../../core/models/meal-plan.types';
 interface SlotChoice {
   type: MealType;
   label: string;
-  emoji: string;
 }
 
 const CHOICES: readonly SlotChoice[] = [
-  { type: 'breakfast', label: 'Sáng', emoji: '🌅' },
-  { type: 'lunch', label: 'Trưa', emoji: '🍱' },
-  { type: 'dinner', label: 'Tối', emoji: '🍽️' },
-  { type: 'snack', label: 'Phụ', emoji: '🍪' },
+  { type: 'breakfast', label: 'Sáng' },
+  { type: 'lunch', label: 'Trưa' },
+  { type: 'dinner', label: 'Tối' },
+  { type: 'snack', label: 'Phụ' },
 ];
 
 @Component({

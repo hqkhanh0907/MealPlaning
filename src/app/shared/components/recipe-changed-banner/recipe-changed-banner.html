@@ -1,5 +1,5 @@
 <div class="recipe-changed-banner" role="alert" [attr.aria-label]="ariaLabel()">
-  <span class="recipe-changed-banner__icon" aria-hidden="true">⚠️</span>
+  <ion-icon class="recipe-changed-banner__icon" name="warning-outline" aria-hidden="true" />
   <div class="recipe-changed-banner__body">
     <p class="recipe-changed-banner__headline">
       Công thức đã thay đổi:
@@ -11,6 +11,9 @@
       Chênh lệch: {{ deltaSign() }}{{ absDelta() }} calo ({{ deltaSign()
       }}{{ absDiffPct().toFixed(1) }}%)
     </p>
-    <a class="recipe-changed-banner__faq" href="#" (click)="onFaqClick($event)">ℹ️ Tại sao?</a>
+    <a class="recipe-changed-banner__faq" href="#" (click)="onFaqClick($event)">
+      <ion-icon name="information-circle-outline" aria-hidden="true" />
+      <span>Tại sao?</span>
+    </a>
   </div>
 </div>

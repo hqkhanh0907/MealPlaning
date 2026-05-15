@@ -50,8 +50,9 @@ ion-radio::part(mark) {
 
 app-management .fab {
   position: fixed;
-  right: 16px;
-  bottom: 72px;
+  right: 20px;
+  /* tab bar height ~56px + safe-area inset ~24px (gesture bar) + 16px gap = 96px */
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   z-index: var(--z-fab);
   width: 56px;
   height: 56px;

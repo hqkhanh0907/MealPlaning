@@ -13,13 +13,13 @@
       <ul class="sheet-actions">
         <li>
           <button type="button" class="sheet-action" (click)="select('copy')">
-            <span class="sheet-action-icon" aria-hidden="true">📋</span>
+            <ion-icon class="sheet-action-icon" name="copy-outline" aria-hidden="true" />
             <span class="sheet-action-label">Sao chép sang ngày khác</span>
           </button>
         </li>
         <li>
           <button type="button" class="sheet-action" (click)="select('move')">
-            <span class="sheet-action-icon" aria-hidden="true">↔️</span>
+            <ion-icon class="sheet-action-icon" name="swap-horizontal-outline" aria-hidden="true" />
             <span class="sheet-action-label">Di chuyển sang bữa khác</span>
           </button>
         </li>
@@ -29,7 +29,7 @@
             class="sheet-action sheet-action--danger"
             (click)="select('delete')"
           >
-            <span class="sheet-action-icon" aria-hidden="true">🗑️</span>
+            <ion-icon class="sheet-action-icon" name="trash-outline" aria-hidden="true" />
             <span class="sheet-action-label">Xoá khỏi bữa</span>
           </button>
         </li>

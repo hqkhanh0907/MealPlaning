@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prompt Master"
+  short_description: "Nang cap prompt len chuan chuyen gia"
+  default_prompt: "Use $prompt-master to upgrade this rough prompt into a world-class Vietnamese prompt."

@@ -4,11 +4,11 @@ import { StatusPill } from '../../../../shared/components/status-pill/status-pil
 
 const LONG_PRESS_MS = 500;
 
-const MEAL_LABEL_VI: Record<MealType, { emoji: string; label: string }> = {
-  breakfast: { emoji: '🍳', label: 'Bữa sáng' },
-  lunch: { emoji: '🍱', label: 'Bữa trưa' },
-  dinner: { emoji: '🍲', label: 'Bữa chiều' },
-  snack: { emoji: '🍪', label: 'Bữa phụ' },
+const MEAL_LABEL_VI: Record<MealType, string> = {
+  breakfast: 'Bữa sáng',
+  lunch: 'Bữa trưa',
+  dinner: 'Bữa chiều',
+  snack: 'Bữa phụ',
 };
 
 @Component({
@@ -29,8 +29,7 @@ export class MealSlotCard {
   /** Emits planned_dish.id when user long-presses a row (Story 3.7 AC-3). */
   readonly dishLongPress = output<string>();
 
-  readonly emoji = computed<string>(() => MEAL_LABEL_VI[this.mealType()].emoji);
-  readonly label = computed<string>(() => MEAL_LABEL_VI[this.mealType()].label);
+  readonly label = computed<string>(() => MEAL_LABEL_VI[this.mealType()]);
 
   /**
    * Planning view must show expected kcal for planned rows and immutable

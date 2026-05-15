@@ -1,5 +1,5 @@
 <section class="empty-day" aria-label="Ngày trống — gợi ý lên kế hoạch">
-  <div class="empty-day__icon" aria-hidden="true">📋</div>
+  <ion-icon class="empty-day__icon" name="calendar-clear-outline" aria-hidden="true" />
   <h2 class="empty-day__title">Ngày này chưa có món nào</h2>
   <p class="empty-day__subtitle">Bắt đầu lên kế hoạch hoặc sao chép từ hôm qua.</p>
 
@@ -9,15 +9,18 @@
       class="empty-day__btn empty-day__btn--primary"
       (click)="planClicked.emit()"
     >
-      Lên kế hoạch
+      <ion-icon name="add-circle-outline" aria-hidden="true" />
+      <span>Lên kế hoạch</span>
     </button>
 
     <button type="button" class="empty-day__btn" (click)="copyDeferred.emit()">
-      📋 Sao chép từ hôm qua
+      <ion-icon name="copy-outline" aria-hidden="true" />
+      <span>Sao chép từ hôm qua</span>
     </button>
 
     <button type="button" class="empty-day__btn empty-day__btn--ghost" (click)="aiDeferred.emit()">
-      🤖 AI chọn món hôm nay
+      <ion-icon name="sparkles-outline" aria-hidden="true" />
+      <span>AI chọn món hôm nay</span>
     </button>
   </div>
 </section>

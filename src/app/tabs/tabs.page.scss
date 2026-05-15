@@ -4,6 +4,45 @@ ion-tab-bar {
   --color-selected: var(--ion-tab-bar-color-selected);
 }
 
+/* Apple-HIG-style selected emphasis: tab-button[aria-selected="true"] gets
+ * (1) filled icon swap via ion-icon double-render (we keep outline at rest,
+ *      bump weight + a top accent bar instead because Ionicons set is mixed),
+ * (2) bolder label, and (3) a small accent rail. */
+ion-tab-button {
+  position: relative;
+  transition:
+    color 120ms ease,
+    transform 120ms ease;
+
+  ion-label {
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+}
+
+ion-tab-button.tab-selected,
+ion-tab-button[aria-selected='true'] {
+  ion-label {
+    font-weight: 700;
+  }
+
+  ion-icon {
+    transform: scale(1.06);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 3px;
+    border-radius: 0 0 var(--radius-full) var(--radius-full);
+    background: var(--ion-tab-bar-color-selected);
+  }
+}
+
 :host-context(body.edit-overlay-open) ion-tab-bar {
   display: none;
 }

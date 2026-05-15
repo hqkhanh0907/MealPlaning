@@ -103,7 +103,8 @@
           "
           (click)="onAiCta()"
         >
-          {{ aiPlanning() ? '🤖 AI đang chọn món…' : '🤖 AI chọn món hôm nay' }}
+          <ion-icon name="sparkles-outline" aria-hidden="true" />
+          <span>{{ aiPlanning() ? 'AI đang chọn món…' : 'AI chọn món hôm nay' }}</span>
         </button>
       }
     </div>
@@ -167,7 +168,7 @@
     <span class="undo-toast__msg">{{ toast.message }}</span>
     <button type="button" class="undo-toast__btn" (click)="onUndoTap()">Hoàn tác</button>
     <button type="button" class="undo-toast__close" aria-label="Đóng" (click)="onUndoDismiss()">
-      ✕
+      <ion-icon name="close" aria-hidden="true" />
     </button>
   </output>
 }

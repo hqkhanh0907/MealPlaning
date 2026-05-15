@@ -1,6 +1,6 @@
 .day-row {
   display: grid;
-  grid-template-columns: 40px 32px 1fr auto;
+  grid-template-columns: minmax(96px, auto) 32px 1fr auto;
   align-items: center;
   gap: var(--space-sm);
   width: 100%;
@@ -35,12 +35,49 @@
   }
 
   &__label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-xs);
     font-weight: 600;
     font-size: var(--font-size-body-sm);
   }
 
+  &__label-name {
+    color: var(--text-primary);
+  }
+
+  &__label-date {
+    color: var(--text-tertiary);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__today-pill {
+    margin-inline-start: var(--space-xs);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+    font-size: var(--font-size-overline);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
   &__status {
     font-size: var(--font-size-subtitle);
+    color: var(--text-secondary);
+  }
+
+  &--past-on-target &__status {
+    color: var(--ion-color-success, var(--ion-color-primary));
+  }
+  &--past-over &__status,
+  &--today-recording &__status {
+    color: var(--ion-color-warning, var(--ion-color-tertiary));
+  }
+  &--past-extreme &__status {
+    color: var(--ion-color-danger, var(--ion-color-tertiary));
   }
 
   &__cal {

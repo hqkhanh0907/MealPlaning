@@ -11,8 +11,24 @@
     gap: var(--space-sm);
   }
 
-  &__emoji {
-    font-size: var(--font-size-icon-xl);
+  &__accent {
+    width: 4px;
+    height: 22px;
+    border-radius: var(--radius-full);
+    background: var(--ion-color-primary);
+  }
+
+  [data-meal='breakfast'] &__accent {
+    background: var(--accent-300, var(--ion-color-primary));
+  }
+  [data-meal='lunch'] &__accent {
+    background: var(--ion-color-primary);
+  }
+  [data-meal='dinner'] &__accent {
+    background: var(--ion-color-secondary);
+  }
+  [data-meal='snack'] &__accent {
+    background: var(--ion-color-tertiary, var(--ion-color-primary));
   }
 
   &__label {

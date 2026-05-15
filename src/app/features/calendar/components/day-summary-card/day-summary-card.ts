@@ -42,6 +42,22 @@ export class DaySummaryCard {
   readonly targets = this.nutrition.targets;
   readonly primaryMetric = this.nutrition.keyMetric;
 
+  /** Vietnamese long date, e.g. "Thứ Sáu, 15/05/2026". Falls back to raw ISO if invalid. */
+  readonly displayDate = computed<string>(() => {
+    const iso = this.date();
+    const parts = iso.split('-');
+    if (parts.length !== 3) return iso;
+    const [y, m, d] = parts.map((p) => parseInt(p, 10));
+    if (!y || !m || !d) return iso;
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    if (Number.isNaN(dt.getTime())) return iso;
+    const weekdayVi = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    const w = weekdayVi[dt.getUTCDay()];
+    const dd = String(d).padStart(2, '0');
+    const mm = String(m).padStart(2, '0');
+    return `${w}, ${dd}/${mm}/${y}`;
+  });
+
   readonly calories = computed<MacroValue>(() => this.macroValue('calories'));
   readonly protein = computed<MacroValue>(() => this.macroValue('protein'));
   readonly carbs = computed<MacroValue>(() => this.macroValue('carbs'));

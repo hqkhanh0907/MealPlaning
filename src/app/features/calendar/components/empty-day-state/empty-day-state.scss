@@ -9,6 +9,7 @@
   &__icon {
     font-size: 56px; // allow-hardcode: oversized empty-state illustration glyph (one-off)
     line-height: 1;
+    color: var(--text-tertiary);
   }
 
   &__title {
@@ -41,6 +42,14 @@
     font-size: var(--font-size-body);
     font-weight: 500;
     border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+
+    ion-icon {
+      font-size: var(--font-size-subtitle);
+    }
 
     &--primary {
       background: var(--ion-color-secondary);

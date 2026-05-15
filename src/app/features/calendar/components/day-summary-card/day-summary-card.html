@@ -6,7 +6,7 @@
 >
   <header class="day-summary-card__header">
     <div>
-      <p class="day-summary-card__eyebrow">Ngày {{ date() }}</p>
+      <p class="day-summary-card__eyebrow">{{ displayDate() }}</p>
       <h2 class="day-summary-card__title">Tổng quan dinh dưỡng</h2>
     </div>
     @if (loading()) {
