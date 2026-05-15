@@ -197,10 +197,11 @@
   </section>
 
   <section class="quick-actions" aria-label="Hành động nhanh">
+    <app-ai-offline-banner />
     <button
       type="button"
       class="quick-action quick-action--primary quick-action--button"
-      [disabled]="dashboard.dailyAiLoading()"
+      [disabled]="dashboard.dailyAiLoading() || !network.online()"
       [attr.aria-label]="
         dashboard.dailyAiLoading() ? 'AI đang tạo insight hôm nay' : 'Tạo AI insight hôm nay'
       "
@@ -218,7 +219,7 @@
     <button
       type="button"
       class="quick-action quick-action--button"
-      [disabled]="dashboard.foodImageLoading()"
+      [disabled]="dashboard.foodImageLoading() || !network.online()"
       [attr.aria-label]="
         dashboard.foodImageLoading()
           ? 'AI đang phân tích ảnh món ăn'

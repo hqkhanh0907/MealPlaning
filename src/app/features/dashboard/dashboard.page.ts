@@ -26,7 +26,9 @@ import {
   sparklesOutline,
 } from 'ionicons/icons';
 import { DashboardStore } from '../../core/stores/dashboard.store';
+import { NetworkStore } from '../../core/stores/network.store';
 import { GEMINI_ERROR_TOAST, GeminiError } from '../../core/services/ai/gemini-types';
+import { AiOfflineBanner } from '../../shared/components/ai-offline-banner/ai-offline-banner';
 import { CalorieRing } from '../../shared/components/calorie-ring/calorie-ring';
 
 @Component({
@@ -36,6 +38,7 @@ import { CalorieRing } from '../../shared/components/calorie-ring/calorie-ring';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink,
+    AiOfflineBanner,
     CalorieRing,
     IonHeader,
     IonToolbar,
@@ -50,6 +53,7 @@ export default class DashboardPage {
   private readonly router = inject(Router);
   private readonly toastCtrl = inject(ToastController);
   protected readonly dashboard = inject(DashboardStore);
+  protected readonly network = inject(NetworkStore);
 
   constructor() {
     addIcons({

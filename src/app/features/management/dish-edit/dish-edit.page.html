@@ -10,11 +10,12 @@
 <ion-content>
   <div class="form-content">
     @if (!isEdit()) {
+      <app-ai-offline-banner />
       <button
         type="button"
         class="btn-ai-lookup"
         data-testid="btn-ask-ai"
-        [disabled]="aiAutofillLoading()"
+        [disabled]="aiAutofillLoading() || !network.online()"
         (click)="onAskAi()"
       >
         @if (aiAutofillLoading()) {

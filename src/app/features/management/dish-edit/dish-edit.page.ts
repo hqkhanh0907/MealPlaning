@@ -53,6 +53,8 @@ import {
   type DishAutofillAppliedPayload,
 } from '../../../shared/components/dish-autofill-sheet/dish-autofill-sheet';
 import { AppFormField } from '../../../shared/forms';
+import { AiOfflineBanner } from '../../../shared/components/ai-offline-banner/ai-offline-banner';
+import { NetworkStore } from '../../../core/stores/network.store';
 import { dishFormSchema } from '../../../shared/forms/schemas/dish-form.schema';
 import type { DishEditFormValue, DishIngredientFormItem } from './dish-edit.types';
 
@@ -99,6 +101,7 @@ const emptyForm = (): DishEditFormValue => ({
     BottomSheetPicker,
     ConfirmDialog,
     AppFormField,
+    AiOfflineBanner,
     DishAutofillSheet,
   ],
 })
@@ -112,6 +115,7 @@ export default class DishEditPage implements HasUnsavedChanges {
   private readonly dishStore = inject(DishStore);
   private readonly ingredientStore = inject(IngredientStore);
   private readonly profileStore = inject(ProfileStore);
+  protected readonly network = inject(NetworkStore);
   private readonly ingredientRepo = inject(IngredientRepository);
   private readonly nutritionAi = inject(NutritionAi);
   private readonly autofillApplier = inject(DishAutofillApplier);
