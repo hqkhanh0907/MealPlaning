@@ -141,6 +141,41 @@ story_location: _bmad-output/implementation-artifacts
 #       /tmp/header-compare.png side-by-side proof for K.4).
 #   VISUAL_QA_RULEBOOK.md §K extended with the 4 bug signatures so
 #   future audits grep + visual-scan for them up-front.
+#
+# Rev 13 (2026-05-15): Polish pass 2 — Apple-grade UI/UX refinement.
+#   After rev 12 closed all known blockers, ran a dedicated polish audit
+#   (no blocker criterion — proactively hunt mediocre UI/UX):
+#     - Captured 10 fresh post-fix screenshots across all 4 tabs.
+#     - Vision-audited each screen for hierarchy, spacing, typography,
+#       affordance, color/contrast, empty-state polish.
+#   Caught 2 NEW root-cause bugs that escaped rev 12:
+#     (K.5) Calendar header date pill clipped — `<ion-button>` carrying
+#           text label + inline `▼` glyph inside `<ion-buttons slot="start">`
+#           rendered the chevron dangling outside the toolbar's left edge
+#           on long labels (e.g. weekday-stamped "Thứ 6, 15/05/26"). Root
+#           cause: ion-button isn't built for compound text+glyph chips.
+#           Fix: replaced with a real `<button class="calendar-date-chip">`
+#           pill — inline-flex, contained padding, ion-icon chevron-down,
+#           glass-tint background. See calendar.page.html lines 1-22 +
+#           calendar.page.scss `.calendar-date-chip` block.
+#     (K.6) Calendar week-view T6 row showed dead "0 / 0" goal — `day_plan.
+#           target_calories` is seeded 0 (not NULL) in DB, so `?? 2000`
+#           never fired. UI displayed zero target as if user had no goal.
+#           Fix: in `calendar.store.ts` weekData, treat `(raw ?? 0) > 0`
+#           as "set", otherwise fall back to `ProfileStore.profile()?.
+#           target_calories` (user's real goal — 1382 kcal in this case),
+#           and finally to 2000. Also wired ProfileStore into CalendarStore
+#           via constructor injection (no circular dep — Profile is leaf).
+#   Rev 13 verification:
+#     - 10/10 guards PASS (incl. design-tokens + css-vars)
+#     - 792/792 unit tests PASS
+#     - ng build PASS (3.4s, no warnings)
+#     - APK rebuilt + reinstalled + side-by-side comparison screenshots:
+#       docs/6-testing/screenshots/2026-05-15-polish/COMPARE-date-pill.png
+#       docs/6-testing/screenshots/2026-05-15-polish/COMPARE-week-target.png
+#     - Vision verified: pill now reads "Hôm nay ⌄" contained in a rounded
+#       chip with glass tint; all 7 week rows now read "0 / 1382".
+#   VISUAL_QA_RULEBOOK.md §K extended with K.5 + K.6.
 
 development_status:
   # Phase 2 — DONE

@@ -1,9 +1,15 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="onDateChipTap()" aria-label="Chọn ngày">
-        {{ headerLabel() }} ▼
-      </ion-button>
+      <button
+        type="button"
+        class="calendar-date-chip"
+        (click)="onDateChipTap()"
+        aria-label="Chọn ngày"
+      >
+        <span class="calendar-date-chip__label">{{ headerLabel() }}</span>
+        <ion-icon class="calendar-date-chip__chevron" name="chevron-down" aria-hidden="true" />
+      </button>
     </ion-buttons>
     <ion-title>Lịch ăn</ion-title>
     <ion-buttons slot="end">

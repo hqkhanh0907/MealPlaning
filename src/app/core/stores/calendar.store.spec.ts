@@ -5,6 +5,7 @@ import { DayPlanRepository } from '../repositories/day-plan.repository';
 import { PlannedDishRepository } from '../repositories/planned-dish.repository';
 import { CalendarStore } from './calendar.store';
 import { DishStore } from './dish.store';
+import { ProfileStore } from './profile.store';
 
 describe('CalendarStore', () => {
   let store: CalendarStore;
@@ -83,6 +84,7 @@ describe('CalendarStore', () => {
         { provide: DayPlanRepository, useValue: dayPlanRepo },
         { provide: PlannedDishRepository, useValue: plannedDishRepo },
         { provide: DishStore, useValue: { dishChanged: dishChangedSignal } },
+        { provide: ProfileStore, useValue: { profile: signal(null) } },
       ],
     });
     store = TestBed.inject(CalendarStore);

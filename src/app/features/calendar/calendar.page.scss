@@ -112,3 +112,40 @@
   min-height: 44px;
   cursor: pointer;
 }
+
+/* Calendar header date chip — contained pill (replaces ion-button + "▼" hack
+   that clipped at the toolbar's left edge when label was long like
+   "Thứ 6, 15/05/26"). All-in-one inset, padding, baseline-aligned chevron. */
+.calendar-date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: 8px;
+  padding: 6px 10px 6px 12px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18); // allow-hardcode: header-on-sage glass tint (DS §2.7)
+  color: var(--ion-color-primary-contrast);
+  font-family: var(--ion-font-family);
+  font-weight: 600;
+  font-size: var(--font-size-caption);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease;
+
+  &:active {
+    background: rgba(255, 255, 255, 0.28); // allow-hardcode: pressed state on glass tint (DS §2.7)
+  }
+}
+
+.calendar-date-chip__label {
+  white-space: nowrap;
+}
+
+.calendar-date-chip__chevron {
+  font-size: var(--font-size-caption);
+  opacity: 0.9;
+}

@@ -24,7 +24,7 @@ import {
 } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { calendarOutline, settingsOutline, sparklesOutline } from 'ionicons/icons';
+import { calendarOutline, chevronDown, settingsOutline, sparklesOutline } from 'ionicons/icons';
 import type {
   DeletedDishSnapshot,
   MealSlotWithDishes,
@@ -198,7 +198,7 @@ export default class CalendarPage implements AfterViewInit {
   readonly activeUndo = this.undoQueue.activeToast;
 
   constructor() {
-    addIcons({ calendarOutline, settingsOutline, sparklesOutline });
+    addIcons({ calendarOutline, chevronDown, settingsOutline, sparklesOutline });
     // Probe yesterday whenever current date changes so canCopyYesterday stays accurate.
     effect(() => {
       const today = this.store.currentDate();

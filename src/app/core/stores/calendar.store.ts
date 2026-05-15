@@ -13,6 +13,7 @@ import {
   type DateMealPlanItem,
 } from '../repositories/planned-dish.repository';
 import { DishStore } from './dish.store';
+import { ProfileStore } from './profile.store';
 
 const DAY_MS = 86_400_000;
 const CLAMP_DAYS = 365;
@@ -57,6 +58,7 @@ export class CalendarStore {
   private readonly dayPlanRepo = inject(DayPlanRepository);
   private readonly plannedDishRepo = inject(PlannedDishRepository);
   private readonly dishStore = inject(DishStore);
+  private readonly profileStore = inject(ProfileStore);
 
   /** Captured at construction so clamp behaviour stays test-deterministic. */
   private readonly today = new Date();
@@ -307,6 +309,8 @@ export class CalendarStore {
     for (const dp of dayPlans) byDate.set(dp.date, dp);
 
     const todayIso = this.todayIso;
+    const profileTarget = this.profileStore.profile()?.target_calories ?? 0;
+    const fallbackTarget = profileTarget > 0 ? profileTarget : DEFAULT_TARGET_CAL;
     const totals: WeekDayTotal[] = days.map((date, i) => {
       const dp = byDate.get(date);
       let logged = 0;
@@ -324,13 +328,17 @@ export class CalendarStore {
           }
         }
       }
+      // Treat 0 as "unset" — older day_plan rows seeded target_calories=0
+      // before goals were computed; fall back to user profile, then 2000.
+      const rawTarget = dp?.target_calories ?? 0;
+      const targetCal = rawTarget > 0 ? rawTarget : fallbackTarget;
       return {
         date,
         label: VN_DAY_LABELS[i],
         dotCount,
         loggedCal: logged,
         plannedCal: planned,
-        targetCal: dp?.target_calories ?? DEFAULT_TARGET_CAL,
+        targetCal,
         isToday: date === todayIso,
         isPast: date < todayIso,
         hasPlan: dotCount > 0,
