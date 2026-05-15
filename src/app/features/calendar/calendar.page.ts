@@ -24,7 +24,15 @@ import {
 } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { calendarOutline, chevronDown, settingsOutline, sparklesOutline } from 'ionicons/icons';
+import {
+  calendarOutline,
+  chevronBack,
+  chevronDown,
+  chevronForward,
+  copyOutline,
+  settingsOutline,
+  sparklesOutline,
+} from 'ionicons/icons';
 import type {
   DeletedDishSnapshot,
   MealSlotWithDishes,
@@ -95,6 +103,11 @@ function shiftIsoDate(iso: string, deltaDays: number): string {
   return `${yy}-${mm}-${dd}`;
 }
 
+function parseIsoLocal(iso: string): Date {
+  const [y, m, d] = iso.split('-').map((p) => Number.parseInt(p, 10));
+  return new Date(y, (m ?? 1) - 1, d ?? 1);
+}
+
 @Component({
   selector: 'app-calendar',
   templateUrl: './calendar.page.html',
@@ -140,6 +153,35 @@ export default class CalendarPage implements AfterViewInit {
   readonly headerLabel = computed<string>(() =>
     relativeDateLabel(this.store.currentDate(), this.today),
   );
+
+  /** Inclusive range of the active week (Mon → Sun), e.g. "11 – 17 Thg 5". */
+  readonly weekRangeLabel = computed<string>(() => {
+    const days = this.store.weekDays();
+    if (days.length !== 7) return '';
+    const a = parseIsoLocal(days[0]);
+    const b = parseIsoLocal(days[6]);
+    const monthShort = [
+      'Thg 1',
+      'Thg 2',
+      'Thg 3',
+      'Thg 4',
+      'Thg 5',
+      'Thg 6',
+      'Thg 7',
+      'Thg 8',
+      'Thg 9',
+      'Thg 10',
+      'Thg 11',
+      'Thg 12',
+    ];
+    const sameMonth = a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
+    if (sameMonth) return `${a.getDate()} – ${b.getDate()} ${monthShort[b.getMonth()]}`;
+    return `${a.getDate()} ${monthShort[a.getMonth()]} – ${b.getDate()} ${monthShort[b.getMonth()]}`;
+  });
+
+  onWeekNav(delta: -7 | 7): void {
+    this.store.setDate(shiftIsoDate(this.store.currentDate(), delta));
+  }
 
   readonly slotsInOrder = computed<MealSlotWithDishes[]>(() => {
     const dp = this.store.dayPlan();
@@ -198,7 +240,15 @@ export default class CalendarPage implements AfterViewInit {
   readonly activeUndo = this.undoQueue.activeToast;
 
   constructor() {
-    addIcons({ calendarOutline, chevronDown, settingsOutline, sparklesOutline });
+    addIcons({
+      calendarOutline,
+      chevronBack,
+      chevronDown,
+      chevronForward,
+      copyOutline,
+      settingsOutline,
+      sparklesOutline,
+    });
     // Probe yesterday whenever current date changes so canCopyYesterday stays accurate.
     effect(() => {
       const today = this.store.currentDate();

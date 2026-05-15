@@ -22,24 +22,10 @@
     <p class="status-banner status-banner--success" role="status">{{ success }}</p>
   }
 
-  <section class="fitness-hero" aria-labelledby="fitness-title">
-    <div class="fitness-hero__icon" aria-hidden="true">
-      <ion-icon name="barbell-outline" />
-    </div>
-    <div>
-      <p class="eyebrow">Tập luyện offline + AI</p>
-      <h1 id="fitness-title">Theo giáo án, log set, xem tiến trình</h1>
-      <p>
-        Dữ liệu bài tập chạy offline với {{ fitness.exercises().length }} bài phổ biến, 3 preset
-        evidence-based và workout logger theo set.
-      </p>
-    </div>
-  </section>
-
   <section class="fitness-card" aria-labelledby="plan-title">
     <header class="section-header">
       <div>
-        <p class="eyebrow">Training plan</p>
+        <p class="eyebrow">Giáo án</p>
         <h2 id="plan-title">Chọn giáo án</h2>
       </div>
       @if (fitness.activePlan(); as activePlan) {
@@ -48,12 +34,9 @@
     </header>
 
     <div class="ai-plan-callout">
-      <div>
+      <div class="ai-plan-callout__text">
         <strong>AI Custom plan</strong>
-        <span>
-          Tạo giáo án dựa trên level, mục tiêu, bài tập hiện có và volume gần đây. App chỉ gọi AI
-          khi bạn bấm nút này.
-        </span>
+        <span> Tạo giáo án dựa trên level, mục tiêu, bài tập hiện có và volume gần đây. </span>
         @if (fitness.aiPlanRationale(); as rationale) {
           <small>{{ rationale }}</small>
         }
@@ -130,7 +113,7 @@
   <section class="fitness-card" aria-labelledby="today-workout-title">
     <header class="section-header">
       <div>
-        <p class="eyebrow">Workout logger</p>
+        <p class="eyebrow">Buổi tập</p>
         <h2 id="today-workout-title">Buổi tập hôm nay</h2>
       </div>
       @if (fitness.activeSession(); as session) {
@@ -395,7 +378,7 @@
   <section class="fitness-card" aria-labelledby="progress-title">
     <header class="section-header">
       <div>
-        <p class="eyebrow">Progress</p>
+        <p class="eyebrow">Tiến trình</p>
         <h2 id="progress-title">Tiến trình tập luyện</h2>
       </div>
     </header>

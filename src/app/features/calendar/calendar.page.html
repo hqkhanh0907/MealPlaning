@@ -27,11 +27,33 @@
   @if (store.currentView() === 'week') {
     <section class="week-view" aria-label="Tuần hiện tại">
       <header class="week-view__header">
-        <h2 class="week-view__title">Tuần này</h2>
-        <button type="button" class="week-view__copy-btn" (click)="onCopyPreviousWeek()">
-          📋 Sao chép tuần trước
-        </button>
+        <div class="week-view__title-block">
+          <h2 class="week-view__title">Tuần này</h2>
+          <span class="week-view__range">{{ weekRangeLabel() }}</span>
+        </div>
+        <nav class="week-view__nav" aria-label="Điều hướng tuần">
+          <button
+            type="button"
+            class="week-view__nav-btn"
+            (click)="onWeekNav(-7)"
+            aria-label="Tuần trước"
+          >
+            <ion-icon name="chevron-back" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="week-view__nav-btn"
+            (click)="onWeekNav(7)"
+            aria-label="Tuần sau"
+          >
+            <ion-icon name="chevron-forward" aria-hidden="true" />
+          </button>
+        </nav>
       </header>
+      <button type="button" class="week-view__copy-btn" (click)="onCopyPreviousWeek()">
+        <ion-icon name="copy-outline" aria-hidden="true" />
+        <span>Sao chép tuần trước</span>
+      </button>
       @if (store.weekData() === null) {
         <p class="calendar-loading">Đang tải dữ liệu tuần…</p>
       } @else {

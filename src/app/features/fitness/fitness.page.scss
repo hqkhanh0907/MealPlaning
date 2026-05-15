@@ -23,48 +23,51 @@
   }
 }
 
-.fitness-hero,
 .fitness-card {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-xl);
   background: var(--bg-card);
   box-shadow: var(--shadow-sm);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-md);
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
 }
 
-.fitness-hero {
+.ai-plan-callout {
   display: flex;
   align-items: flex-start;
   gap: var(--space-md);
-  padding: var(--space-xl);
+  margin: 0 calc(-1 * var(--space-sm)) var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-left: 3px solid var(--ion-color-primary);
+  background: transparent;
 
-  &__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 56px;
-    height: 56px;
-    border-radius: var(--radius-full);
-    background: var(--accent-50);
-    color: var(--accent-700);
-    font-size: var(--font-size-icon-xl);
+  &__text {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 2px;
   }
 
-  h1 {
-    margin: 0;
+  strong {
     color: var(--text-primary);
-    font-size: var(--font-size-display);
-    font-weight: 700;
-    line-height: 1.2;
+    font-size: var(--font-size-body);
   }
 
-  p:not(.eyebrow) {
-    margin: var(--space-sm) 0 0;
+  span,
+  small {
+    display: block;
+    color: var(--text-secondary);
+    font-size: var(--font-size-body-sm);
+    line-height: 1.45;
   }
-}
 
-.fitness-card {
-  margin-top: var(--space-lg);
-  padding: var(--space-md);
+  ion-button {
+    flex-shrink: 0;
+  }
 }
 
 .eyebrow {
@@ -115,22 +118,6 @@
 .set-history {
   display: grid;
   gap: var(--space-sm);
-}
-
-.ai-plan-callout {
-  display: grid;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-md);
-  padding: var(--space-md);
-  border: 1px solid var(--primary-200);
-  border-radius: var(--radius-lg);
-  background: var(--primary-50);
-
-  span,
-  small {
-    display: block;
-    margin-top: var(--space-xs);
-  }
 }
 
 .plan-card,
@@ -487,10 +474,18 @@
 }
 
 @media (max-width: 420px) {
-  .fitness-hero,
   .today-plan,
   .section-header {
     flex-direction: column;
+  }
+
+  .ai-plan-callout {
+    flex-direction: column;
+    align-items: stretch;
+
+    ion-button {
+      align-self: flex-end;
+    }
   }
 
   .set-grid,

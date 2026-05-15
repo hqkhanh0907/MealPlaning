@@ -24,8 +24,24 @@
   gap: 8px;
   overflow-x: auto;
   margin: 12px 0 8px;
-  padding-bottom: 2px;
+  padding: 0 16px 2px;
   scrollbar-width: none;
+  /* Soft edge fade — hints at horizontal scroll without a hard cut. Matches
+     Apple's category rails (App Store, Music). */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 16px,
+    #000 calc(100% - 24px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 16px,
+    #000 calc(100% - 24px),
+    transparent 100%
+  );
 }
 
 .filter-strip::-webkit-scrollbar {

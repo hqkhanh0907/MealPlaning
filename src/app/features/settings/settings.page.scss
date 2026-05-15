@@ -1,14 +1,25 @@
 .settings-content {
-  --background: var(--ion-background-color);
+  --background: var(--bg-page);
+  --padding-top: var(--space-md);
+  --padding-bottom: var(--space-2xl);
 }
 
+/* iOS-style inset-grouped list. Each ion-list section becomes a rounded card
+   inset from the screen edges; rows show hairline separators only between
+   items, never as outer borders. */
 .settings-list {
-  margin-bottom: 0;
+  margin: 0 var(--space-md) var(--space-lg);
+  padding: 0;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
-// P1-1 — Section caption tier on hub. Override default ion-list-header h2 so
-// labels read as captions, not page headings — keeps focus on row content.
+// P1-1 — Section caption tier on hub.
 .settings-list ion-list-header {
+  --background: transparent;
+  --color: var(--text-tertiary);
   min-height: auto;
   padding-top: var(--space-sm);
   padding-bottom: var(--space-xs);
@@ -22,7 +33,22 @@
   }
 }
 
+.settings-list ion-item {
+  --background: transparent;
+  --padding-start: var(--space-md);
+  --inner-padding-end: var(--space-md);
+  --border-color: var(--border-color);
+  --min-height: 52px;
+}
+
+.settings-list ion-item:last-of-type {
+  --inner-border-width: 0;
+  --border-width: 0;
+}
+
 .settings-hint {
+  margin: 0 var(--space-md) var(--space-md);
   color: var(--text-tertiary);
+  font-size: var(--font-size-body-sm);
   opacity: 0.95;
 }

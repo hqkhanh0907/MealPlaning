@@ -36,19 +36,72 @@
   &__header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
+    gap: var(--space-md);
     margin-bottom: var(--space-md);
+  }
+
+  &__title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
   }
 
   &__title {
     margin: 0;
     font-size: var(--font-size-title);
     font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  &__range {
+    font-size: var(--font-size-caption);
+    color: var(--text-secondary);
+    letter-spacing: 0.2px;
+  }
+
+  &__nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  &__nav-btn {
+    appearance: none;
+    border: 1px solid var(--border-color);
+    background: var(--bg-elevated);
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      transform 0.1s ease;
+
+    ion-icon {
+      font-size: 18px; // allow-hardcode: 36px nav button glyph between icon-sm 15 and icon-md 20 (DS §6)
+    }
+
+    &:active {
+      background: var(--bg-elevated);
+      transform: scale(0.96);
+    }
   }
 
   &__copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
     border: 0;
-    min-height: 44px;
+    min-height: 40px;
+    margin-bottom: var(--space-md);
     padding: var(--space-sm) var(--space-md);
     border-radius: var(--radius-md);
     background: var(--bg-elevated);
@@ -56,6 +109,11 @@
     font: inherit;
     font-size: var(--font-size-body-sm);
     cursor: pointer;
+
+    ion-icon {
+      font-size: 16px; // allow-hardcode: inline glyph next to body-sm label (DS §6)
+      color: var(--text-secondary);
+    }
   }
 
   &__list {
