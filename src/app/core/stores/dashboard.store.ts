@@ -142,25 +142,30 @@ export class DashboardStore {
 
   readonly heroTitle = computed(() => {
     const pct = this.caloriePercent();
-    if (pct === null) return 'Thiết lập mục tiêu để Dashboard có ý nghĩa hơn';
-    if (this.totals().calories <= 0) return 'Hôm nay chưa có món nào trong lịch ăn';
+    if (pct === null) return 'Thiết lập mục tiêu để bắt đầu';
+    if (this.totals().calories <= 0) return 'Sẵn sàng cho hôm nay';
     if (pct < CALORIE_STREAK_MIN_PCT) {
       const remaining = this.remainingCalories();
       return remaining === null
-        ? 'Hôm nay còn thiếu dữ liệu mục tiêu'
+        ? 'Còn thiếu dữ liệu mục tiêu'
         : `Còn ${formatNumber(remaining)} kcal`;
     }
     if (pct <= 110) return 'Hôm nay đang đúng nhịp';
-    if (pct <= CALORIE_STREAK_MAX_PCT) return 'Kế hoạch hôm nay hơi cao';
-    return 'Kế hoạch hôm nay vượt mục tiêu';
+    if (pct <= CALORIE_STREAK_MAX_PCT) return 'Hơi cao so với mục tiêu';
+    return 'Vượt mục tiêu kcal';
   });
 
   readonly heroBody = computed(() => {
+    const cal = Math.round(this.totals().calories);
+    if (cal <= 0) return 'Bắt đầu ghi bữa đầu tiên để Dashboard sống động hơn.';
     const key = this.keyMetric();
     const label = METRIC_LABELS[key];
     const value = Math.round(this.totals()[key]);
-    return `${label} hiện tại: ${formatNumber(value)}. Dashboard dùng dữ liệu lịch ăn hôm nay, gồm món đã ghi và món còn trong kế hoạch.`;
+    return `${label} hôm nay: ${formatNumber(value)}.`;
   });
+
+  /** True khi user chưa log bữa nào hôm nay → Dashboard hiển thị empty-state gọn. */
+  readonly hasNutritionData = computed(() => this.totals().calories > 0);
 
   readonly macroRows = computed<DashboardMacroRow[]>(() => {
     const totals = this.totals();
@@ -189,15 +194,9 @@ export class DashboardStore {
     const caloriePct = this.caloriePercent();
     const proteinPct = this.proteinPercent();
 
-    if (totals.calories <= 0) {
-      return {
-        tone: 'info',
-        title: 'Chưa có dữ liệu cho hôm nay',
-        body: 'Thêm món vào lịch ăn để Dashboard bắt đầu tính calo, Protein và macro thật.',
-        ctaLabel: 'Mở lịch ăn',
-        ctaRoute: '/tabs/calendar',
-      };
-    }
+    // Empty state đã được Hero card cover (heroTitle + heroBody) — không cần
+    // duplicate AI Insight card cho cùng thông điệp. Hide khi chưa có dữ liệu.
+    if (totals.calories <= 0) return null;
 
     if (caloriePct !== null && caloriePct > CALORIE_STREAK_MAX_PCT) {
       return {

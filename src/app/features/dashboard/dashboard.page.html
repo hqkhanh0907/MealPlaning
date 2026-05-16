@@ -2,13 +2,6 @@
   <ion-toolbar>
     <ion-title>Tổng quan</ion-title>
     <ion-buttons slot="end">
-      <ion-button
-        (click)="refresh()"
-        [disabled]="dashboard.loading()"
-        [attr.aria-label]="dashboard.loading() ? 'Đang cập nhật Dashboard' : 'Cập nhật Dashboard'"
-      >
-        <ion-icon slot="icon-only" name="refresh-outline" />
-      </ion-button>
       <ion-button (click)="openSettings()" aria-label="Cài đặt">
         <ion-icon slot="icon-only" name="settings-outline" />
       </ion-button>
@@ -21,6 +14,7 @@
     <p class="dashboard-loading" role="status">Đang cập nhật số liệu...</p>
   }
 
+  <!-- Hero — compact. 1 chip ngày + 1 dòng heading + 1 dòng body. -->
   <section class="dashboard-hero" aria-labelledby="dashboard-title">
     <div class="dashboard-hero__badge">
       <ion-icon name="calendar-outline" aria-hidden="true" />
@@ -30,6 +24,63 @@
     <p>{{ dashboard.heroBody() }}</p>
   </section>
 
+  <!-- Nutrition — luôn hiển thị, là core metric. -->
+  <section class="dashboard-card nutrition-card" aria-labelledby="nutrition-card-title">
+    <header class="dashboard-card__header">
+      <div>
+        <p class="dashboard-card__eyebrow">Dinh dưỡng hôm nay</p>
+        <h2 id="nutrition-card-title">Calo và macro</h2>
+      </div>
+      <a class="card-link" routerLink="/tabs/calendar">
+        Chi tiết
+        <ion-icon name="chevron-forward-outline" aria-hidden="true" />
+      </a>
+    </header>
+
+    <div class="nutrition-overview">
+      <app-calorie-ring
+        [value]="dashboard.roundedCalories()"
+        [target]="dashboard.targets().calories"
+        [size]="64"
+        [strokeWidth]="8"
+        variant="calories"
+      />
+      <div>
+        <strong>{{ dashboard.roundedCalories() }} kcal</strong>
+        <span>{{ dashboard.calorieTargetLabel() }}</span>
+        <small>{{ dashboard.caloriePercentLabel() }} mục tiêu</small>
+      </div>
+    </div>
+
+    @if (dashboard.hasNutritionData()) {
+      <div class="progress-track" aria-hidden="true">
+        <span
+          class="progress-fill progress-fill--calories"
+          [style.--progress]="dashboard.calorieProgressCss()"
+        ></span>
+      </div>
+
+      <div class="macro-list" aria-label="Macro hôm nay">
+        @for (row of dashboard.macroRows(); track row.metric) {
+          <article [class]="'macro-item macro-item--' + row.metric">
+            <div class="macro-item__header">
+              <span>{{ row.label }}</span>
+              <strong>{{ row.percentLabel }}</strong>
+            </div>
+            <div class="macro-item__meta">
+              <span>{{ row.valueLabel }}</span>
+              <span>{{ row.targetLabel }}</span>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+              <span class="progress-fill" [style.--progress]="row.progressCss"></span>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- AI Insight — CHỈ render khi thực sự có insight (không show "chưa có dữ liệu" rỗng). -->
   @if (dashboard.dailyAiInsight(); as aiInsight) {
     <section
       class="dashboard-card ai-card"
@@ -67,6 +118,7 @@
     </section>
   }
 
+  <!-- Photo analysis — CHỈ render khi có result. -->
   @if (dashboard.foodImageAnalysis(); as analysis) {
     <section class="dashboard-card photo-card" aria-labelledby="photo-analysis-title">
       <div class="dashboard-card__icon dashboard-card__icon--accent" aria-hidden="true">
@@ -95,78 +147,11 @@
     </section>
   }
 
-  <section class="dashboard-card nutrition-card" aria-labelledby="nutrition-card-title">
-    <header class="dashboard-card__header">
-      <div>
-        <p class="dashboard-card__eyebrow">Dinh dưỡng hôm nay</p>
-        <h2 id="nutrition-card-title">Calo và macro</h2>
-      </div>
-      <a class="card-link" routerLink="/tabs/calendar">
-        Chi tiết
-        <ion-icon name="chevron-forward-outline" aria-hidden="true" />
-      </a>
-    </header>
-
-    <div class="nutrition-overview">
-      <app-calorie-ring
-        [value]="dashboard.roundedCalories()"
-        [target]="dashboard.targets().calories"
-        [size]="64"
-        [strokeWidth]="8"
-        variant="calories"
-      />
-      <div>
-        <strong>{{ dashboard.roundedCalories() }} kcal</strong>
-        <span>{{ dashboard.calorieTargetLabel() }}</span>
-        <small>{{ dashboard.caloriePercentLabel() }} mục tiêu</small>
-      </div>
-    </div>
-
-    <div class="progress-track" aria-hidden="true">
-      <span
-        class="progress-fill progress-fill--calories"
-        [style.--progress]="dashboard.calorieProgressCss()"
-      ></span>
-    </div>
-
-    <div class="macro-list" aria-label="Macro hôm nay">
-      @for (row of dashboard.macroRows(); track row.metric) {
-        <article [class]="'macro-item macro-item--' + row.metric">
-          <div class="macro-item__header">
-            <span>{{ row.label }}</span>
-            <strong>{{ row.percentLabel }}</strong>
-          </div>
-          <div class="macro-item__meta">
-            <span>{{ row.valueLabel }}</span>
-            <span>{{ row.targetLabel }}</span>
-          </div>
-          <div class="progress-track" aria-hidden="true">
-            <span class="progress-fill" [style.--progress]="row.progressCss"></span>
-          </div>
-        </article>
-      }
-    </div>
-  </section>
-
-  <section class="dashboard-card workout-card" aria-labelledby="workout-card-title">
-    <div class="dashboard-card__icon dashboard-card__icon--accent" aria-hidden="true">
-      <ion-icon name="barbell-outline" />
-    </div>
-    <div class="dashboard-card__content">
-      <p class="dashboard-card__eyebrow">Tập luyện</p>
-      <h2 id="workout-card-title">{{ dashboard.workoutTitle() }}</h2>
-      <p>{{ dashboard.workoutBody() }}</p>
-      <a class="card-link" routerLink="/tabs/fitness">
-        Mở tab Tập luyện
-        <ion-icon name="chevron-forward-outline" aria-hidden="true" />
-      </a>
-    </div>
-  </section>
-
+  <!-- Tiến độ: streak + weight + workout-row inline. Gọn 1 section. -->
   <section class="stat-section" aria-labelledby="stat-section-title">
     <header class="section-header">
       <p class="dashboard-card__eyebrow">Tiến độ</p>
-      <h2 id="stat-section-title">Chuỗi ngày & cân nặng</h2>
+      <h2 id="stat-section-title">Streak & cân nặng</h2>
     </header>
 
     <div class="stat-grid">
@@ -196,6 +181,7 @@
     </div>
   </section>
 
+  <!-- Quick actions: CHỈ 2 unique AI features. Tab bar đã handle còn lại. -->
   <section class="quick-actions" aria-label="Hành động nhanh">
     <app-ai-offline-banner />
     <button
@@ -212,7 +198,7 @@
       </span>
       <span>
         <strong>{{ dashboard.dailyAiLoading() ? 'AI đang phân tích…' : 'Tạo AI insight' }}</strong>
-        <small>Nhận gợi ý theo dinh dưỡng, cân nặng và tập luyện hôm nay.</small>
+        <small>Gợi ý cá nhân hoá cho hôm nay.</small>
       </span>
     </button>
 
@@ -234,48 +220,8 @@
         <strong>{{
           dashboard.foodImageLoading() ? 'Đang phân tích ảnh…' : 'Phân tích ảnh món ăn'
         }}</strong>
-        <small>Ảnh chỉ gửi khi bạn bấm chụp; app không lưu ảnh vào máy.</small>
+        <small>Ảnh chỉ gửi khi bấm chụp, không lưu vào máy.</small>
       </span>
     </button>
-
-    <a class="quick-action quick-action--primary" routerLink="/tabs/calendar">
-      <span class="quick-action__icon" aria-hidden="true">
-        <ion-icon name="calendar-outline" />
-      </span>
-      <span>
-        <strong>AI chọn món hôm nay</strong>
-        <small>Mở lịch ăn để tạo hoặc chỉnh kế hoạch trong ngày.</small>
-      </span>
-    </a>
-
-    <a class="quick-action" routerLink="/tabs/management">
-      <span class="quick-action__icon" aria-hidden="true">
-        <ion-icon name="restaurant-outline" />
-      </span>
-      <span>
-        <strong>Quản lý món ăn</strong>
-        <small>Cập nhật thư viện món và nguyên liệu.</small>
-      </span>
-    </a>
-
-    <a class="quick-action" routerLink="/settings/body">
-      <span class="quick-action__icon" aria-hidden="true">
-        <ion-icon name="body-outline" />
-      </span>
-      <span>
-        <strong>Cập nhật cơ thể</strong>
-        <small>Điều chỉnh cân nặng, chiều cao và tuổi.</small>
-      </span>
-    </a>
-
-    <a class="quick-action" routerLink="/tabs/fitness">
-      <span class="quick-action__icon" aria-hidden="true">
-        <ion-icon name="fitness-outline" />
-      </span>
-      <span>
-        <strong>Tập luyện</strong>
-        <small>Chọn giáo án, ghi set và xem tiến độ thật.</small>
-      </span>
-    </a>
   </section>
 </ion-content>

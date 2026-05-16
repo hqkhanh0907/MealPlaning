@@ -12,15 +12,11 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
-  barbellOutline,
-  bodyOutline,
   calendarOutline,
   cameraOutline,
   chevronForwardOutline,
   fitnessOutline,
   flameOutline,
-  refreshOutline,
-  restaurantOutline,
   scaleOutline,
   settingsOutline,
   sparklesOutline,
@@ -57,15 +53,11 @@ export default class DashboardPage {
 
   constructor() {
     addIcons({
-      barbellOutline,
-      bodyOutline,
       calendarOutline,
       cameraOutline,
       chevronForwardOutline,
       fitnessOutline,
       flameOutline,
-      refreshOutline,
-      restaurantOutline,
       scaleOutline,
       settingsOutline,
       sparklesOutline,
@@ -78,10 +70,6 @@ export default class DashboardPage {
 
   openSettings(): void {
     void this.router.navigate(['/settings']);
-  }
-
-  refresh(): void {
-    void this.dashboard.refresh();
   }
 
   confidenceLabel(value: 'high' | 'medium' | 'low'): string {
