@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import {
   IonButton,
   IonButtons,
@@ -16,6 +16,7 @@ import {
   bodyOutline,
   calendarOutline,
   checkmarkCircleOutline,
+  chevronUpOutline,
   flashOutline,
   flameOutline,
   pulseOutline,
@@ -46,6 +47,7 @@ export default class FitnessPage {
       bodyOutline,
       calendarOutline,
       checkmarkCircleOutline,
+      chevronUpOutline,
       flashOutline,
       flameOutline,
       pulseOutline,
@@ -54,6 +56,17 @@ export default class FitnessPage {
       statsChartOutline,
       timerOutline,
     });
+  }
+
+  /**
+   * Free-mode picker (search + ~100 exercise chips) is COLLAPSED by default
+   * to keep the Hôm nay card focused on planned-exercise list + Bắt đầu CTA.
+   * User opens it via "Thêm bài tập tự do" toggle below the planned list.
+   */
+  readonly freeModeOpen = signal(false);
+
+  toggleFreeMode(): void {
+    this.freeModeOpen.update((v) => !v);
   }
 
   ionViewWillEnter(): void {
