@@ -4,6 +4,18 @@
       <ion-back-button defaultHref="/tabs/management" text="" aria-label="Quay lại" />
     </ion-buttons>
     <ion-title>{{ isEdit() ? 'Sửa món' : 'Thêm món' }}</ion-title>
+    @if (isEdit()) {
+      <ion-buttons slot="end">
+        <button
+          type="button"
+          class="icon-button icon-button--danger"
+          aria-label="Xóa món ăn"
+          (click)="openDeleteDialog()"
+        >
+          <ion-icon name="trash-outline" aria-hidden="true" />
+        </button>
+      </ion-buttons>
+    }
   </ion-toolbar>
 </ion-header>
 
@@ -254,126 +266,126 @@
         <div id="err-dish-items" class="field-error" role="alert">{{ msg }}</div>
       }
     }
-
-    <button type="button" class="btn-cta" [disabled]="saving()" (click)="onSave()">
-      {{ saving() ? 'Đang lưu...' : isEdit() ? 'Lưu thay đổi' : 'Lưu món ăn' }}
-    </button>
-
-    @if (isEdit()) {
-      <button type="button" class="btn-danger-text" (click)="openDeleteDialog()">Xóa món ăn</button>
-    }
   </div>
-
-  <ion-modal
-    [isOpen]="activeGramRowId() !== null"
-    [breakpoints]="[0, 0.6, 0.85]"
-    [initialBreakpoint]="0.6"
-    [handle]="true"
-    (didDismiss)="closeGramSheet()"
-  >
-    <ng-template>
-      <ion-header class="sheet-header">
-        <ion-toolbar>
-          <div class="sheet-title-row">
-            <h2 class="sheet-title">Nhập trọng lượng (g)</h2>
-            <button class="sheet-close" type="button" (click)="closeGramSheet()" aria-label="Đóng">
-              <ion-icon name="chevron-down-outline" />
-            </button>
-          </div>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="sheet-content amount-sheet">
-        @if (gramDraft(); as draft) {
-          <div class="sheet-card">
-            <div class="amount-sheet__header">
-              <div>
-                <div class="ingredient-item__name">{{ draftIngredientName(draft) }}</div>
-                <div class="ingredient-item__detail">{{ draftCalories(draft) }}</div>
-              </div>
-            </div>
-
-            <app-form-field label="Trọng lượng (g)" inputId="gram-draft-value">
-              <input
-                id="gram-draft-value"
-                class="input-native"
-                type="number"
-                inputmode="decimal"
-                [value]="draft.gram_weight"
-                step="1"
-                min="0"
-                (input)="updateGramDraftValue($event)"
-              />
-            </app-form-field>
-          </div>
-          <div class="sheet-actions">
-            <button type="button" class="btn-outline" (click)="closeGramSheet()">Hủy</button>
-            <button type="button" class="btn-cta" (click)="saveGramDraft()">
-              {{ draft.mode === 'create' ? 'Thêm' : 'Cập nhật' }}
-            </button>
-          </div>
-        }
-      </ion-content>
-    </ng-template>
-  </ion-modal>
-
-  <app-confirm-dialog
-    [isOpen]="pendingDeleteId() !== null"
-    [title]="
-      deleteReferenceLoading()
-        ? 'Đang kiểm tra...'
-        : deleteReferenceCount() > 0
-          ? 'Không thể xóa'
-          : 'Xóa món ăn?'
-    "
-    [message]="
-      deleteReferenceLoading()
-        ? 'Đang kiểm tra kế hoạch ăn đang dùng món này.'
-        : deleteReferenceCount() > 0
-          ? 'Món ăn này đang được dùng trong kế hoạch ăn nên chưa thể xóa.'
-          : 'Bạn có chắc muốn xóa món ăn này? Thao tác này không thể hoàn tác.'
-    "
-    [cancelLabel]="deleteReferenceCount() > 0 ? 'Đóng' : 'Giữ lại'"
-    [confirmLabel]="
-      deleteReferenceLoading() ? 'Đang kiểm tra...' : deleteReferenceCount() > 0 ? 'Đóng' : 'Xóa'
-    "
-    [confirmVariant]="deleteReferenceCount() > 0 || deleteReferenceLoading() ? 'primary' : 'danger'"
-    (cancelled)="closeDeleteDialog()"
-    [confirmDisabled]="deleteReferenceLoading()"
-    (confirmed)="confirmDelete()"
-  />
-
-  <app-confirm-dialog
-    [isOpen]="discardDialogOpen()"
-    title="Bỏ thay đổi?"
-    message="Bạn có thay đổi chưa lưu. Nếu rời khỏi màn hình này, các thay đổi sẽ bị mất."
-    cancelLabel="Ở lại"
-    confirmLabel="Bỏ thay đổi"
-    confirmVariant="danger"
-    (cancelled)="cancelDiscardChanges()"
-    (confirmed)="confirmDiscardChangesDialog()"
-  />
-
-  <app-bottom-sheet-picker
-    #ingredientPicker
-    title="Chọn nguyên liệu"
-    [options]="ingredientOptions"
-    [recentOptions]="recentIngredientOptions"
-    [searchable]="true"
-    (valueChange)="onIngredientSelected($event)"
-  />
-
-  <app-bottom-sheet-picker
-    #mealTagPicker
-    title="Chọn loại bữa"
-    [value]="formSignal().meal_tag"
-    [options]="mealTagOptions"
-    (valueChange)="onMealTagSelected($event)"
-  />
-
-  <app-dish-autofill-sheet
-    [isOpen]="aiAutofillSheetOpen()"
-    [result]="aiAutofillResult()"
-    (applied)="onAutofillApplied($event)"
-    (dismissed)="onAutofillSheetDismissed()"
-  />
 </ion-content>
+
+<ion-footer class="ion-no-border">
+  <div class="sticky-save-bar">
+    <ion-button expand="block" class="save-button" [disabled]="saving()" (click)="onSave()">
+      {{ saving() ? 'Đang lưu...' : isEdit() ? 'Lưu thay đổi' : 'Lưu món ăn' }}
+    </ion-button>
+  </div>
+</ion-footer>
+
+<ion-modal
+  [isOpen]="activeGramRowId() !== null"
+  [breakpoints]="[0, 0.6, 0.85]"
+  [initialBreakpoint]="0.6"
+  [handle]="true"
+  (didDismiss)="closeGramSheet()"
+>
+  <ng-template>
+    <ion-header class="sheet-header">
+      <ion-toolbar>
+        <div class="sheet-title-row">
+          <h2 class="sheet-title">Nhập trọng lượng (g)</h2>
+          <button class="sheet-close" type="button" (click)="closeGramSheet()" aria-label="Đóng">
+            <ion-icon name="chevron-down-outline" />
+          </button>
+        </div>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="sheet-content amount-sheet">
+      @if (gramDraft(); as draft) {
+        <div class="sheet-card">
+          <div class="amount-sheet__header">
+            <div>
+              <div class="ingredient-item__name">{{ draftIngredientName(draft) }}</div>
+              <div class="ingredient-item__detail">{{ draftCalories(draft) }}</div>
+            </div>
+          </div>
+
+          <app-form-field label="Trọng lượng (g)" inputId="gram-draft-value">
+            <input
+              id="gram-draft-value"
+              class="input-native"
+              type="number"
+              inputmode="decimal"
+              [value]="draft.gram_weight"
+              step="1"
+              min="0"
+              (input)="updateGramDraftValue($event)"
+            />
+          </app-form-field>
+        </div>
+        <div class="sheet-actions">
+          <button type="button" class="btn-outline" (click)="closeGramSheet()">Hủy</button>
+          <button type="button" class="btn-cta" (click)="saveGramDraft()">
+            {{ draft.mode === 'create' ? 'Thêm' : 'Cập nhật' }}
+          </button>
+        </div>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<app-confirm-dialog
+  [isOpen]="pendingDeleteId() !== null"
+  [title]="
+    deleteReferenceLoading()
+      ? 'Đang kiểm tra...'
+      : deleteReferenceCount() > 0
+        ? 'Không thể xóa'
+        : 'Xóa món ăn?'
+  "
+  [message]="
+    deleteReferenceLoading()
+      ? 'Đang kiểm tra kế hoạch ăn đang dùng món này.'
+      : deleteReferenceCount() > 0
+        ? 'Món ăn này đang được dùng trong kế hoạch ăn nên chưa thể xóa.'
+        : 'Bạn có chắc muốn xóa món ăn này? Thao tác này không thể hoàn tác.'
+  "
+  [cancelLabel]="deleteReferenceCount() > 0 ? 'Đóng' : 'Giữ lại'"
+  [confirmLabel]="
+    deleteReferenceLoading() ? 'Đang kiểm tra...' : deleteReferenceCount() > 0 ? 'Đóng' : 'Xóa'
+  "
+  [confirmVariant]="deleteReferenceCount() > 0 || deleteReferenceLoading() ? 'primary' : 'danger'"
+  (cancelled)="closeDeleteDialog()"
+  [confirmDisabled]="deleteReferenceLoading()"
+  (confirmed)="confirmDelete()"
+/>
+
+<app-confirm-dialog
+  [isOpen]="discardDialogOpen()"
+  title="Bỏ thay đổi?"
+  message="Bạn có thay đổi chưa lưu. Nếu rời khỏi màn hình này, các thay đổi sẽ bị mất."
+  cancelLabel="Ở lại"
+  confirmLabel="Bỏ thay đổi"
+  confirmVariant="danger"
+  (cancelled)="cancelDiscardChanges()"
+  (confirmed)="confirmDiscardChangesDialog()"
+/>
+
+<app-bottom-sheet-picker
+  #ingredientPicker
+  title="Chọn nguyên liệu"
+  [options]="ingredientOptions"
+  [recentOptions]="recentIngredientOptions"
+  [searchable]="true"
+  (valueChange)="onIngredientSelected($event)"
+/>
+
+<app-bottom-sheet-picker
+  #mealTagPicker
+  title="Chọn loại bữa"
+  [value]="formSignal().meal_tag"
+  [options]="mealTagOptions"
+  (valueChange)="onMealTagSelected($event)"
+/>
+
+<app-dish-autofill-sheet
+  [isOpen]="aiAutofillSheetOpen()"
+  [result]="aiAutofillResult()"
+  (applied)="onAutofillApplied($event)"
+  (dismissed)="onAutofillSheetDismissed()"
+/>

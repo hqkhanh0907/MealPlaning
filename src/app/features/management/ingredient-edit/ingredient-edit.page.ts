@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  type OnDestroy,
+  type OnInit,
   ViewChild,
   afterNextRender,
   computed,
@@ -14,8 +16,10 @@ import { FormField, form } from '@angular/forms/signals';
 import {
   AlertController,
   IonBackButton,
+  IonButton,
   IonButtons,
   IonContent,
+  IonFooter,
   IonHeader,
   IonIcon,
   IonSpinner,
@@ -24,7 +28,7 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { chevronDownOutline, sparklesOutline } from 'ionicons/icons';
+import { chevronDownOutline, sparklesOutline, trashOutline } from 'ionicons/icons';
 import { INGREDIENT_CATEGORIES } from '../../../core/models/management.constants';
 import type { HasUnsavedChanges } from '../../../core/guards/unsaved-changes-guard';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
@@ -73,6 +77,8 @@ const emptyForm = (): IngredientEditFormValue => ({
     IonToolbar,
     IonTitle,
     IonContent,
+    IonFooter,
+    IonButton,
     IonButtons,
     IonBackButton,
     IonIcon,
@@ -86,7 +92,7 @@ const emptyForm = (): IngredientEditFormValue => ({
     AiLookupSheet,
   ],
 })
-export default class IngredientEditPage implements HasUnsavedChanges {
+export default class IngredientEditPage implements HasUnsavedChanges, OnInit, OnDestroy {
   @ViewChild('categoryPicker') private readonly categoryPicker?: BottomSheetPicker;
   @ViewChild('nameInput') private readonly nameInput?: ElementRef<HTMLInputElement>;
 
@@ -136,10 +142,18 @@ export default class IngredientEditPage implements HasUnsavedChanges {
   protected readonly ingredientForm = form(this.formSignal, ingredientFormSchema);
 
   constructor() {
-    addIcons({ chevronDownOutline, sparklesOutline });
+    addIcons({ chevronDownOutline, sparklesOutline, trashOutline });
     afterNextRender(() => {
       void this.bootstrap();
     });
+  }
+
+  ngOnInit(): void {
+    document.body.classList.add('edit-overlay-open');
+  }
+
+  ngOnDestroy(): void {
+    document.body.classList.remove('edit-overlay-open');
   }
 
   private async bootstrap(): Promise<void> {

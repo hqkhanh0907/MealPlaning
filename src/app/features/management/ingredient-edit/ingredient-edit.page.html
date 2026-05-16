@@ -4,6 +4,18 @@
       <ion-back-button defaultHref="/tabs/management" text="" aria-label="Quay lại" />
     </ion-buttons>
     <ion-title>{{ isEdit() ? 'Sửa nguyên liệu' : 'Thêm nguyên liệu' }}</ion-title>
+    @if (isEdit()) {
+      <ion-buttons slot="end">
+        <button
+          type="button"
+          class="icon-button icon-button--danger"
+          aria-label="Xóa nguyên liệu"
+          (click)="openDeleteDialog()"
+        >
+          <ion-icon name="trash-outline" aria-hidden="true" />
+        </button>
+      </ion-buttons>
+    }
   </ion-toolbar>
 </ion-header>
 
@@ -172,78 +184,76 @@
         Xem các món đang dùng nguyên liệu này
       </button>
     }
-
-    <button type="button" class="btn-cta" [disabled]="saving()" (click)="onSave()">
-      {{ saving() ? 'Đang lưu...' : isEdit() ? 'Lưu thay đổi' : 'Lưu nguyên liệu' }}
-    </button>
-
-    @if (isEdit()) {
-      <button type="button" class="btn-danger-text" (click)="openDeleteDialog()">
-        Xóa nguyên liệu
-      </button>
-    }
   </div>
-
-  @if (isEdit() && ingredientId(); as id) {
-    <app-dishes-using-sheet
-      [ingredientId]="id"
-      [isOpen]="isDishesSheetOpen()"
-      (dishSelected)="onDishSelectedFromSheet($event)"
-      (closed)="onDishesSheetClosed()"
-    />
-  }
-
-  <app-confirm-dialog
-    [isOpen]="pendingDeleteId() !== null"
-    [title]="
-      deleteReferenceLoading()
-        ? 'Đang kiểm tra...'
-        : deleteReferenceCount() > 0
-          ? 'Không thể xóa'
-          : 'Xóa nguyên liệu?'
-    "
-    [message]="
-      deleteReferenceLoading()
-        ? 'Đang kiểm tra món ăn đang dùng nguyên liệu này.'
-        : deleteReferenceCount() > 0
-          ? 'Nguyên liệu này đang được dùng trong ' + deleteReferenceCount() + ' món ăn.'
-          : 'Bạn có chắc muốn xóa nguyên liệu này? Thao tác này không thể hoàn tác.'
-    "
-    [cancelLabel]="deleteReferenceCount() > 0 ? 'Đóng' : 'Giữ lại'"
-    [confirmLabel]="
-      deleteReferenceLoading() ? 'Đang kiểm tra...' : deleteReferenceCount() > 0 ? 'Đóng' : 'Xóa'
-    "
-    [confirmVariant]="deleteReferenceCount() > 0 || deleteReferenceLoading() ? 'primary' : 'danger'"
-    (cancelled)="closeDeleteDialog()"
-    [confirmDisabled]="deleteReferenceLoading()"
-    (confirmed)="confirmDelete()"
-  />
-
-  <app-confirm-dialog
-    [isOpen]="discardDialogOpen()"
-    title="Bỏ thay đổi?"
-    message="Bạn có thay đổi chưa lưu. Nếu rời khỏi màn hình này, các thay đổi sẽ bị mất."
-    cancelLabel="Ở lại"
-    confirmLabel="Bỏ thay đổi"
-    confirmVariant="danger"
-    (cancelled)="cancelDiscardChanges()"
-    (confirmed)="confirmDiscardChangesDialog()"
-  />
-
-  <app-ai-lookup-sheet
-    [isOpen]="aiSheetOpen()"
-    [result]="aiResult()"
-    [mode]="aiSheetMode()"
-    [existingIngredientId]="aiExistingId()"
-    (saved)="onAiSheetSaved($event)"
-    (dismissed)="onAiSheetDismissed()"
-  />
-
-  <app-bottom-sheet-picker
-    #categoryPicker
-    title="Chọn nhóm nguyên liệu"
-    [value]="formSignal().category"
-    [options]="categoryOptions"
-    (valueChange)="onCategorySelected($event)"
-  />
 </ion-content>
+
+<ion-footer class="ion-no-border">
+  <div class="sticky-save-bar">
+    <ion-button expand="block" class="save-button" [disabled]="saving()" (click)="onSave()">
+      {{ saving() ? 'Đang lưu...' : isEdit() ? 'Lưu thay đổi' : 'Lưu nguyên liệu' }}
+    </ion-button>
+  </div>
+</ion-footer>
+
+@if (isEdit() && ingredientId(); as id) {
+  <app-dishes-using-sheet
+    [ingredientId]="id"
+    [isOpen]="isDishesSheetOpen()"
+    (dishSelected)="onDishSelectedFromSheet($event)"
+    (closed)="onDishesSheetClosed()"
+  />
+}
+
+<app-confirm-dialog
+  [isOpen]="pendingDeleteId() !== null"
+  [title]="
+    deleteReferenceLoading()
+      ? 'Đang kiểm tra...'
+      : deleteReferenceCount() > 0
+        ? 'Không thể xóa'
+        : 'Xóa nguyên liệu?'
+  "
+  [message]="
+    deleteReferenceLoading()
+      ? 'Đang kiểm tra món ăn đang dùng nguyên liệu này.'
+      : deleteReferenceCount() > 0
+        ? 'Nguyên liệu này đang được dùng trong ' + deleteReferenceCount() + ' món ăn.'
+        : 'Bạn có chắc muốn xóa nguyên liệu này? Thao tác này không thể hoàn tác.'
+  "
+  [cancelLabel]="deleteReferenceCount() > 0 ? 'Đóng' : 'Giữ lại'"
+  [confirmLabel]="
+    deleteReferenceLoading() ? 'Đang kiểm tra...' : deleteReferenceCount() > 0 ? 'Đóng' : 'Xóa'
+  "
+  [confirmVariant]="deleteReferenceCount() > 0 || deleteReferenceLoading() ? 'primary' : 'danger'"
+  (cancelled)="closeDeleteDialog()"
+  [confirmDisabled]="deleteReferenceLoading()"
+  (confirmed)="confirmDelete()"
+/>
+
+<app-confirm-dialog
+  [isOpen]="discardDialogOpen()"
+  title="Bỏ thay đổi?"
+  message="Bạn có thay đổi chưa lưu. Nếu rời khỏi màn hình này, các thay đổi sẽ bị mất."
+  cancelLabel="Ở lại"
+  confirmLabel="Bỏ thay đổi"
+  confirmVariant="danger"
+  (cancelled)="cancelDiscardChanges()"
+  (confirmed)="confirmDiscardChangesDialog()"
+/>
+
+<app-ai-lookup-sheet
+  [isOpen]="aiSheetOpen()"
+  [result]="aiResult()"
+  [mode]="aiSheetMode()"
+  [existingIngredientId]="aiExistingId()"
+  (saved)="onAiSheetSaved($event)"
+  (dismissed)="onAiSheetDismissed()"
+/>
+
+<app-bottom-sheet-picker
+  #categoryPicker
+  title="Chọn nhóm nguyên liệu"
+  [value]="formSignal().category"
+  [options]="categoryOptions"
+  (valueChange)="onCategorySelected($event)"
+/>

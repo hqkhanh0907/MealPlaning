@@ -9,6 +9,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  type OnDestroy,
+  type OnInit,
   ViewChild,
   afterNextRender,
   computed,
@@ -20,8 +22,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormField, form } from '@angular/forms/signals';
 import {
   IonBackButton,
+  IonButton,
   IonButtons,
   IonContent,
+  IonFooter,
   IonHeader,
   IonIcon,
   IonModal,
@@ -31,7 +35,7 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { chevronDownOutline, closeOutline, sparklesOutline } from 'ionicons/icons';
+import { chevronDownOutline, closeOutline, sparklesOutline, trashOutline } from 'ionicons/icons';
 import { v4 as uuidv4 } from 'uuid';
 import type { IngredientListItem } from '../../../core/repositories/ingredient.repository';
 import { IngredientRepository } from '../../../core/repositories/ingredient.repository';
@@ -92,6 +96,8 @@ const emptyForm = (): DishEditFormValue => ({
     IonToolbar,
     IonTitle,
     IonContent,
+    IonFooter,
+    IonButton,
     IonButtons,
     IonBackButton,
     IonIcon,
@@ -105,7 +111,7 @@ const emptyForm = (): DishEditFormValue => ({
     DishAutofillSheet,
   ],
 })
-export default class DishEditPage implements HasUnsavedChanges {
+export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestroy {
   @ViewChild('ingredientPicker') private readonly ingredientPicker?: BottomSheetPicker;
   @ViewChild('mealTagPicker') private readonly mealTagPicker?: BottomSheetPicker;
   @ViewChild('nameInput') private readonly nameInput?: ElementRef<HTMLInputElement>;
@@ -251,10 +257,18 @@ export default class DishEditPage implements HasUnsavedChanges {
   });
 
   constructor() {
-    addIcons({ chevronDownOutline, closeOutline, sparklesOutline });
+    addIcons({ chevronDownOutline, closeOutline, sparklesOutline, trashOutline });
     afterNextRender(() => {
       void this.bootstrap();
     });
+  }
+
+  ngOnInit(): void {
+    document.body.classList.add('edit-overlay-open');
+  }
+
+  ngOnDestroy(): void {
+    document.body.classList.remove('edit-overlay-open');
   }
 
   private async bootstrap(): Promise<void> {
