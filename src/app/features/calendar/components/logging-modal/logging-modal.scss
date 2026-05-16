@@ -21,9 +21,12 @@
 }
 
 .logging-modal__eyebrow {
-  color: var(--text-tertiary);
+  color: var(--ion-color-primary-contrast);
+  opacity: 0.78; // allow-hardcode: contrast tier between full-white title and tertiary
   font-size: var(--font-size-caption);
-  font-weight: 500;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .logging-modal__title {
