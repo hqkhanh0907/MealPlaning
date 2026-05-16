@@ -136,6 +136,107 @@ describe('Fitness repositories', () => {
     ).toBeRejectedWithError('WorkoutRepository: weight must be between 0 and 500kg.');
   });
 
+  it('deleteSet removes a single set, re-numbers remaining sets contiguously, and re-syncs totals', async () => {
+    await planRepo.ensurePresetPlans();
+    const today = await planRepo.getTodayTrainingDay('2026-05-11');
+    const session = await workoutRepo.startGuidedSession(
+      today!.id,
+      new Date('2026-05-11T07:00:00'),
+    );
+    const exerciseId = session.exercises[0].id;
+
+    const s1 = await workoutRepo.addSet(exerciseId, {
+      weightKg: 100,
+      reps: 5,
+      restSeconds: 90,
+      effort: null,
+      notes: null,
+    });
+    const s2 = await workoutRepo.addSet(exerciseId, {
+      weightKg: 100,
+      reps: 5,
+      restSeconds: 90,
+      effort: null,
+      notes: null,
+    });
+    await workoutRepo.addSet(exerciseId, {
+      weightKg: 100,
+      reps: 5,
+      restSeconds: 90,
+      effort: null,
+      notes: null,
+    });
+
+    await workoutRepo.deleteSet(s2.id);
+
+    const refreshed = await workoutRepo.getSession(session.id);
+    const sets = refreshed!.exercises[0].sets;
+    expect(sets.length).toBe(2);
+    expect(sets.map((s) => s.set_number)).toEqual([1, 2]);
+    expect(sets[0].id).toBe(s1.id);
+    expect(refreshed!.total_volume).toBe(1000);
+
+    // Idempotent on missing id.
+    await expectAsync(workoutRepo.deleteSet('does-not-exist')).toBeResolved();
+  });
+
+  it('removeExerciseFromSession cascades sets and updates session totals', async () => {
+    await planRepo.ensurePresetPlans();
+    const today = await planRepo.getTodayTrainingDay('2026-05-11');
+    const session = await workoutRepo.startGuidedSession(
+      today!.id,
+      new Date('2026-05-11T07:00:00'),
+    );
+    const target = session.exercises[0];
+
+    await workoutRepo.addSet(target.id, {
+      weightKg: 50,
+      reps: 10,
+      restSeconds: 60,
+      effort: null,
+      notes: null,
+    });
+
+    await workoutRepo.removeExerciseFromSession(target.id);
+
+    const refreshed = await workoutRepo.getSession(session.id);
+    expect(refreshed!.exercises.find((e) => e.id === target.id)).toBeUndefined();
+    expect(refreshed!.total_volume).toBe(0);
+  });
+
+  it('cancelSession deletes an in-progress session entirely and refuses completed sessions', async () => {
+    await planRepo.ensurePresetPlans();
+    const today = await planRepo.getTodayTrainingDay('2026-05-11');
+    const live = await workoutRepo.startGuidedSession(today!.id, new Date('2026-05-11T07:00:00'));
+    await workoutRepo.addSet(live.exercises[0].id, {
+      weightKg: 80,
+      reps: 5,
+      restSeconds: 90,
+      effort: null,
+      notes: null,
+    });
+
+    await workoutRepo.cancelSession(live.id);
+
+    expect(await workoutRepo.getSession(live.id)).toBeNull();
+    expect(await workoutRepo.getActiveSession()).toBeNull();
+
+    // Completed session is NOT cancellable via this API.
+    const second = await workoutRepo.startGuidedSession(today!.id, new Date('2026-05-11T08:00:00'));
+    await workoutRepo.addSet(second.exercises[0].id, {
+      weightKg: 80,
+      reps: 5,
+      restSeconds: 90,
+      effort: null,
+      notes: null,
+    });
+    await workoutRepo.completeSession(second.id, new Date('2026-05-11T08:30:00'));
+
+    await expectAsync(workoutRepo.cancelSession(second.id)).toBeRejectedWithError(
+      /already completed/,
+    );
+  });
+
   async function seedProfile(): Promise<void> {
     await db.execute(
       `INSERT INTO user_profile (

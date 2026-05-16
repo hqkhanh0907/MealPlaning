@@ -302,6 +302,87 @@ export class FitnessStore {
     }
   }
 
+  /**
+   * Cancel/discard the in-progress session entirely (removes the session row + all logged sets).
+   * Surface this in UI ONLY behind a confirm step — irreversible. No-op if no active session.
+   */
+  async cancelActiveSession(): Promise<void> {
+    const session = this.activeSession();
+    if (!session) return;
+    this.errorMessage.set(null);
+    try {
+      await this.workoutRepo.cancelSession(session.id);
+      this.activeSession.set(null);
+      this.selectedWorkoutExerciseId.set(null);
+      this.setDraft.set({ ...DEFAULT_SET_DRAFT });
+      this.restSeconds.set(0);
+      await this.refresh();
+      this.successMessage.set('Đã hủy buổi tập.');
+    } catch (error) {
+      this.errorMessage.set(toErrorMessage(error));
+    }
+  }
+
+  /**
+   * Delete a single logged set in the currently-selected workout exercise. UI must confirm
+   * (destructive). After delete we re-fetch the session to refresh set_number contiguity + totals.
+   */
+  async deleteSet(setId: string): Promise<void> {
+    const sessionId = this.activeSession()?.id;
+    if (!sessionId) return;
+    this.errorMessage.set(null);
+    try {
+      await this.workoutRepo.deleteSet(setId);
+      this.activeSession.set(await this.workoutRepo.getSession(sessionId));
+      this.successMessage.set('Đã xóa set.');
+    } catch (error) {
+      this.errorMessage.set(toErrorMessage(error));
+    }
+  }
+
+  /**
+   * Remove an exercise (and its sets) from the active session. UI must confirm. After remove we
+   * fall back to the first remaining exercise as the selected tab.
+   */
+  async removeExerciseFromActive(workoutExerciseId: string): Promise<void> {
+    const session = this.activeSession();
+    if (!session) return;
+    this.errorMessage.set(null);
+    try {
+      await this.workoutRepo.removeExerciseFromSession(workoutExerciseId);
+      const refreshed = await this.workoutRepo.getSession(session.id);
+      this.activeSession.set(refreshed);
+      if (this.selectedWorkoutExerciseId() === workoutExerciseId) {
+        this.selectedWorkoutExerciseId.set(refreshed?.exercises[0]?.id ?? null);
+      }
+      this.successMessage.set('Đã xóa bài khỏi buổi tập.');
+    } catch (error) {
+      this.errorMessage.set(toErrorMessage(error));
+    }
+  }
+
+  /**
+   * Repeat the most-recent set in the selected exercise: prefills the draft with last set's
+   * weight/reps/rest/effort then calls logSet(). Apple Fitness-style "+1 same set" shortcut so user
+   * doesn't re-type the same values 4 times per exercise.
+   */
+  async repeatLastSet(): Promise<void> {
+    const selected = this.selectedWorkoutExercise();
+    const lastSet = selected?.sets[selected.sets.length - 1];
+    if (!lastSet) {
+      this.errorMessage.set('Chưa có set nào để lặp lại.');
+      return;
+    }
+    this.setDraft.set({
+      weightKg: String(lastSet.weight_kg),
+      reps: String(lastSet.reps),
+      restSeconds: String(lastSet.rest_seconds ?? 90),
+      effort: lastSet.effort,
+      notes: '',
+    });
+    await this.logSet();
+  }
+
   clearMessages(): void {
     this.errorMessage.set(null);
     this.successMessage.set(null);

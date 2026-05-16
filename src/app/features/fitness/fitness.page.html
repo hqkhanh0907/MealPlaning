@@ -194,8 +194,8 @@
       </div>
     }
 
-    <!-- Free-mode picker: ẨN khi rest-day (đã có CTA "Bắt đầu buổi tự do"), hiển thị toggle khi có planned day hoặc chưa có giáo án. -->
-    @if (!fitness.todayDay()?.is_rest_day) {
+    <!-- Free-mode picker: ẨN khi rest-day và CHƯA có active session (CTA "Bắt đầu buổi tự do" đã đủ). Hiển thị khi active session đang chạy (user cần thêm exercise vào buổi đang tập) hoặc khi có planned day. -->
+    @if (fitness.activeSession() !== null || !fitness.todayDay()?.is_rest_day) {
       <div class="free-mode">
         <button
           type="button"
@@ -247,156 +247,212 @@
           <p class="eyebrow">Đang tập</p>
           <h2 id="active-workout-title">{{ session.training_day_name }}</h2>
         </div>
-        <ion-button
-          fill="clear"
-          size="small"
-          (click)="fitness.completeWorkout()"
-          [disabled]="!fitness.canCompleteWorkout()"
-          [attr.aria-label]="
-            fitness.canCompleteWorkout()
-              ? 'Hoàn thành buổi tập'
-              : 'Cần log ít nhất 1 set trước khi hoàn thành buổi tập'
-          "
-        >
-          <ion-icon slot="start" name="checkmark-circle-outline" />
-          Hoàn thành
-        </ion-button>
+        <div class="active-workout__actions">
+          <ion-button
+            fill="clear"
+            size="small"
+            color="medium"
+            (click)="confirmCancelSession()"
+            aria-label="Hủy buổi tập"
+          >
+            <ion-icon slot="icon-only" name="close-circle-outline" />
+          </ion-button>
+          <ion-button
+            fill="clear"
+            size="small"
+            (click)="fitness.completeWorkout()"
+            [disabled]="!fitness.canCompleteWorkout()"
+            [attr.aria-label]="
+              fitness.canCompleteWorkout()
+                ? 'Hoàn thành buổi tập'
+                : 'Cần log ít nhất 1 set trước khi hoàn thành buổi tập'
+            "
+          >
+            <ion-icon slot="start" name="checkmark-circle-outline" />
+            Hoàn thành
+          </ion-button>
+        </div>
       </header>
 
-      <div class="workout-exercise-tabs" aria-label="Bài trong buổi tập">
-        @for (exercise of session.exercises; track exercise.id) {
-          <button
-            type="button"
-            class="workout-tab"
-            [class.workout-tab--active]="fitness.selectedWorkoutExercise()?.id === exercise.id"
-            (click)="fitness.selectWorkoutExercise(exercise.id)"
-          >
-            {{ exercise.exercise_name_vi || exercise.exercise_name }}
-            <small>{{ exercise.sets.length }} set</small>
-          </button>
-        }
-      </div>
-
-      @if (fitness.selectedWorkoutExercise(); as selected) {
-        <article class="set-logger">
-          <header>
-            <strong>{{ selected.exercise_name_vi || selected.exercise_name }}</strong>
-            <span>{{ selected.total_volume }} kg khối lượng</span>
-          </header>
-
-          <div class="set-grid">
-            <div class="input-wrapper">
-              <label class="input-label" for="weight-kg">Tạ (kg)</label>
-              <input
-                id="weight-kg"
-                class="input-native"
-                type="number"
-                inputmode="decimal"
-                min="0"
-                max="500"
-                step="0.5"
-                [value]="fitness.setDraft().weightKg"
-                (input)="onWeightInput($event)"
-              />
-            </div>
-
-            <div class="input-wrapper">
-              <label class="input-label" for="reps">Số lần</label>
-              <input
-                id="reps"
-                class="input-native"
-                type="number"
-                inputmode="numeric"
-                min="1"
-                max="100"
-                step="1"
-                [value]="fitness.setDraft().reps"
-                (input)="onRepsInput($event)"
-              />
-            </div>
-
-            <div class="input-wrapper">
-              <label class="input-label" for="rest-seconds">Nghỉ (giây)</label>
-              <input
-                id="rest-seconds"
-                class="input-native"
-                type="number"
-                inputmode="numeric"
-                min="0"
-                max="600"
-                step="15"
-                [value]="fitness.setDraft().restSeconds"
-                (input)="onRestInput($event)"
-              />
-            </div>
-          </div>
-
-          <div class="effort-row" aria-label="Effort optional">
+      @if (session.exercises.length === 0) {
+        <div class="empty-workout">
+          <ion-icon name="barbell-outline" aria-hidden="true" />
+          <strong>Buổi tập trống</strong>
+          <p>Thêm bài tập đầu tiên để bắt đầu ghi set.</p>
+          <ion-button fill="solid" (click)="openFreeModeAndScroll()">
+            <ion-icon slot="start" name="add-outline" />
+            Thêm bài tập
+          </ion-button>
+        </div>
+      } @else {
+        <div class="workout-exercise-tabs" aria-label="Bài trong buổi tập">
+          @for (exercise of session.exercises; track exercise.id) {
             <button
               type="button"
-              [class.effort-chip--active]="fitness.setDraft().effort === 'easy'"
-              class="effort-chip"
-              (click)="setEffort('easy')"
+              class="workout-tab"
+              [class.workout-tab--active]="fitness.selectedWorkoutExercise()?.id === exercise.id"
+              (click)="fitness.selectWorkoutExercise(exercise.id)"
             >
-              Dễ
+              {{ exercise.exercise_name_vi || exercise.exercise_name }}
+              <small>{{ exercise.sets.length }} set</small>
             </button>
-            <button
-              type="button"
-              [class.effort-chip--active]="fitness.setDraft().effort === 'just_right'"
-              class="effort-chip"
-              (click)="setEffort('just_right')"
-            >
-              Vừa
-            </button>
-            <button
-              type="button"
-              [class.effort-chip--active]="fitness.setDraft().effort === 'hard'"
-              class="effort-chip"
-              (click)="setEffort('hard')"
-            >
-              Nặng
-            </button>
-            <button
-              type="button"
-              [class.effort-chip--active]="fitness.setDraft().effort === 'maxed'"
-              class="effort-chip"
-              (click)="setEffort('maxed')"
-            >
-              Tối đa
-            </button>
-          </div>
-
-          <div class="input-wrapper">
-            <label class="input-label" for="set-notes">Ghi chú set</label>
-            <input
-              id="set-notes"
-              class="input-native"
-              type="text"
-              [value]="fitness.setDraft().notes"
-              (input)="onNotesInput($event)"
-              autocomplete="off"
-            />
-          </div>
-
-          <div class="logger-actions">
-            <ion-button (click)="fitness.logSet()" fill="solid">Ghi set</ion-button>
-            <app-rest-timer [seconds]="fitness.restSeconds()" />
-          </div>
-
-          @if (selected.sets.length > 0) {
-            <div class="set-history" aria-label="Set đã ghi">
-              @for (set of selected.sets; track set.id) {
-                <article>
-                  <strong>Set {{ set.set_number }}</strong>
-                  <span>{{ set.weight_kg }} kg × {{ set.reps }}</span>
-                  @if (set.effort) {
-                    <small>{{ set.effort }}</small>
-                  }
-                </article>
-              }
-            </div>
           }
-        </article>
+        </div>
+
+        @if (fitness.selectedWorkoutExercise(); as selected) {
+          <article class="set-logger">
+            <header>
+              <div>
+                <strong>{{ selected.exercise_name_vi || selected.exercise_name }}</strong>
+                <span>{{ selected.total_volume }} kg khối lượng</span>
+              </div>
+              <ion-button
+                fill="clear"
+                size="small"
+                color="medium"
+                (click)="confirmRemoveExercise(selected.id)"
+                aria-label="Xóa bài này khỏi buổi tập"
+              >
+                <ion-icon slot="icon-only" name="trash-outline" />
+              </ion-button>
+            </header>
+
+            <div class="set-grid">
+              <div class="input-wrapper">
+                <label class="input-label" for="weight-kg">Tạ (kg)</label>
+                <input
+                  id="weight-kg"
+                  class="input-native"
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  max="500"
+                  step="0.5"
+                  [value]="fitness.setDraft().weightKg"
+                  (input)="onWeightInput($event)"
+                />
+              </div>
+
+              <div class="input-wrapper">
+                <label class="input-label" for="reps">Số lần</label>
+                <input
+                  id="reps"
+                  class="input-native"
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  max="100"
+                  step="1"
+                  [value]="fitness.setDraft().reps"
+                  (input)="onRepsInput($event)"
+                />
+              </div>
+
+              <div class="input-wrapper">
+                <label class="input-label" for="rest-seconds">Nghỉ (giây)</label>
+                <input
+                  id="rest-seconds"
+                  class="input-native"
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  max="600"
+                  step="15"
+                  [value]="fitness.setDraft().restSeconds"
+                  (input)="onRestInput($event)"
+                />
+              </div>
+            </div>
+
+            <div class="effort-row" aria-label="Effort optional">
+              <button
+                type="button"
+                [class.effort-chip--active]="fitness.setDraft().effort === 'easy'"
+                class="effort-chip"
+                (click)="setEffort('easy')"
+              >
+                Dễ
+              </button>
+              <button
+                type="button"
+                [class.effort-chip--active]="fitness.setDraft().effort === 'just_right'"
+                class="effort-chip"
+                (click)="setEffort('just_right')"
+              >
+                Vừa
+              </button>
+              <button
+                type="button"
+                [class.effort-chip--active]="fitness.setDraft().effort === 'hard'"
+                class="effort-chip"
+                (click)="setEffort('hard')"
+              >
+                Nặng
+              </button>
+              <button
+                type="button"
+                [class.effort-chip--active]="fitness.setDraft().effort === 'maxed'"
+                class="effort-chip"
+                (click)="setEffort('maxed')"
+              >
+                Tối đa
+              </button>
+            </div>
+
+            <div class="input-wrapper">
+              <label class="input-label" for="set-notes">Ghi chú set</label>
+              <input
+                id="set-notes"
+                class="input-native"
+                type="text"
+                [value]="fitness.setDraft().notes"
+                (input)="onNotesInput($event)"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="logger-actions">
+              <ion-button (click)="fitness.logSet()" fill="solid" expand="block">
+                <ion-icon slot="start" name="add-outline" />
+                Ghi set
+              </ion-button>
+              @if (selected.sets.length > 0) {
+                <ion-button
+                  (click)="fitness.repeatLastSet()"
+                  fill="outline"
+                  aria-label="Lặp lại set vừa ghi"
+                >
+                  <ion-icon slot="icon-only" name="repeat-outline" />
+                </ion-button>
+              }
+              <app-rest-timer [seconds]="fitness.restSeconds()" />
+            </div>
+
+            @if (selected.sets.length > 0) {
+              <div class="set-history" aria-label="Set đã ghi">
+                @for (set of selected.sets; track set.id) {
+                  <article>
+                    <div class="set-history__main">
+                      <strong>Set {{ set.set_number }}</strong>
+                      <span>{{ set.weight_kg }} kg × {{ set.reps }}</span>
+                      @if (set.effort) {
+                        <small>{{ effortLabel(set.effort) }}</small>
+                      }
+                    </div>
+                    <button
+                      type="button"
+                      class="set-history__delete"
+                      (click)="confirmDeleteSet(set.id, set.set_number)"
+                      [attr.aria-label]="'Xóa set ' + set.set_number"
+                    >
+                      <ion-icon name="trash-outline" aria-hidden="true" />
+                    </button>
+                  </article>
+                }
+              </div>
+            }
+          </article>
+        }
       }
     </section>
   }

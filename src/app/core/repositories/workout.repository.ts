@@ -243,6 +243,92 @@ export class WorkoutRepository {
     });
   }
 
+  /**
+   * Delete a single logged set + re-number remaining sets in that exercise + sync session totals.
+   * No-op if set doesn't exist (idempotent — UI may double-tap).
+   */
+  async deleteSet(setId: string): Promise<void> {
+    const row = await this.db.getOne<{ workout_exercise_id: string; workout_session_id: string }>(
+      `SELECT ws.workout_exercise_id, we.workout_session_id
+         FROM workout_set ws
+         JOIN workout_exercise we ON we.id = ws.workout_exercise_id
+        WHERE ws.id = ?`,
+      [setId],
+    );
+    if (!row) return;
+
+    await this.db.withTransaction(async () => {
+      await this.db.execute(`DELETE FROM workout_set WHERE id = ?`, [setId]);
+      // Re-number remaining sets to keep set_number contiguous (1..N).
+      const remaining = await this.db.query<{ id: string }>(
+        `SELECT id FROM workout_set
+          WHERE workout_exercise_id = ?
+          ORDER BY set_number ASC, created_at ASC`,
+        [row.workout_exercise_id],
+      );
+      for (let i = 0; i < remaining.length; i++) {
+        await this.db.execute(`UPDATE workout_set SET set_number = ? WHERE id = ?`, [
+          i + 1,
+          remaining[i].id,
+        ]);
+      }
+      await this.syncTotals(row.workout_session_id);
+    });
+  }
+
+  /**
+   * Remove an exercise (and all its logged sets, via FK ON DELETE CASCADE) from an active session.
+   * Re-syncs session totals. Idempotent on missing exercise id.
+   */
+  async removeExerciseFromSession(workoutExerciseId: string): Promise<void> {
+    const row = await this.db.getOne<{ workout_session_id: string }>(
+      `SELECT workout_session_id FROM workout_exercise WHERE id = ?`,
+      [workoutExerciseId],
+    );
+    if (!row) return;
+
+    await this.db.withTransaction(async () => {
+      await this.db.execute(`DELETE FROM workout_set WHERE workout_exercise_id = ?`, [
+        workoutExerciseId,
+      ]);
+      await this.db.execute(`DELETE FROM workout_exercise WHERE id = ?`, [workoutExerciseId]);
+      await this.syncTotals(row.workout_session_id);
+    });
+  }
+
+  /**
+   * Hard-cancel an in-progress session: deletes the session row and cascades to exercises + sets.
+   * Use when user wants to abort/discard a workout (e.g. started by mistake). Throws if session is
+   * already completed — that branch must use a separate "delete completed workout" path (not yet
+   * implemented; out of scope for cancel).
+   */
+  async cancelSession(sessionId: string): Promise<void> {
+    const session = await this.db.getOne<{ completed_at: string | null }>(
+      `SELECT completed_at FROM workout_session WHERE id = ?`,
+      [sessionId],
+    );
+    if (!session) return;
+    if (session.completed_at !== null) {
+      throw new Error(
+        'WorkoutRepository: session already completed; cancel is only valid for in-progress sessions.',
+      );
+    }
+
+    await this.db.withTransaction(async () => {
+      await this.db.execute(
+        `DELETE FROM workout_set
+          WHERE workout_exercise_id IN (
+            SELECT id FROM workout_exercise WHERE workout_session_id = ?
+          )`,
+        [sessionId],
+      );
+      await this.db.execute(`DELETE FROM workout_exercise WHERE workout_session_id = ?`, [
+        sessionId,
+      ]);
+      await this.db.execute(`DELETE FROM workout_session WHERE id = ?`, [sessionId]);
+    });
+  }
+
   async getSession(sessionId: string): Promise<WorkoutSessionDetail | null> {
     const row = await this.db.getOne<SessionRow>(
       `SELECT id, date, training_plan_day_id, training_day_name, mode, total_volume,
