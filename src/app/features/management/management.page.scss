@@ -1,7 +1,8 @@
 .management-shell {
-  /* 96px bottom = 56px FAB + 16px FAB margin + 24px breathing room.
-     Earlier 80px clipped the last list card behind the FAB. */
-  padding: 12px 16px 96px;
+  /* FAB sits at bottom: calc(96px + safe-area) and is 56px tall.
+     To keep last card's kebab menu free of FAB occlusion:
+     padding-bottom = FAB bottom (96) + FAB height (56) + gap (16) = 168px. */
+  padding: 12px 16px calc(168px + env(safe-area-inset-bottom, 0px));
   background: var(--bg-page);
   min-height: 100%;
 }
