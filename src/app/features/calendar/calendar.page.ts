@@ -155,29 +155,16 @@ export default class CalendarPage implements AfterViewInit {
     relativeDateLabel(this.store.currentDate(), this.today),
   );
 
-  /** Inclusive range of the active week (Mon → Sun), e.g. "11 – 17 Thg 5". */
+  /** Inclusive range of the active week (Mon → Sun), e.g. "11 – 17 tháng 5". */
   readonly weekRangeLabel = computed<string>(() => {
     const days = this.store.weekDays();
     if (days.length !== 7) return '';
     const a = parseIsoLocal(days[0]);
     const b = parseIsoLocal(days[6]);
-    const monthShort = [
-      'Thg 1',
-      'Thg 2',
-      'Thg 3',
-      'Thg 4',
-      'Thg 5',
-      'Thg 6',
-      'Thg 7',
-      'Thg 8',
-      'Thg 9',
-      'Thg 10',
-      'Thg 11',
-      'Thg 12',
-    ];
+    const monthLabel = (m: number) => `tháng ${m + 1}`;
     const sameMonth = a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
-    if (sameMonth) return `${a.getDate()} – ${b.getDate()} ${monthShort[b.getMonth()]}`;
-    return `${a.getDate()} ${monthShort[a.getMonth()]} – ${b.getDate()} ${monthShort[b.getMonth()]}`;
+    if (sameMonth) return `${a.getDate()} – ${b.getDate()} ${monthLabel(b.getMonth())}`;
+    return `${a.getDate()} ${monthLabel(a.getMonth())} – ${b.getDate()} ${monthLabel(b.getMonth())}`;
   });
 
   onWeekNav(delta: -7 | 7): void {

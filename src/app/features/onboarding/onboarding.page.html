@@ -126,9 +126,6 @@
             inputmode="decimal"
             class="input-native"
             [formField]="step2aForm.heightCm"
-            min="100"
-            max="250"
-            step="0.1"
             [attr.aria-invalid]="step2aFieldError('heightCm') ? 'true' : null"
             [attr.aria-describedby]="step2aFieldError('heightCm') ? 'err-height' : null"
           />
@@ -149,9 +146,6 @@
             inputmode="decimal"
             class="input-native"
             [formField]="step2aForm.weightKg"
-            min="30"
-            max="300"
-            step="0.1"
             [attr.aria-invalid]="step2aFieldError('weightKg') ? 'true' : null"
             [attr.aria-describedby]="step2aFieldError('weightKg') ? 'err-weight' : null"
           />
@@ -172,9 +166,6 @@
             inputmode="numeric"
             class="input-native"
             [formField]="step2aForm.age"
-            min="13"
-            max="100"
-            step="1"
             [attr.aria-invalid]="step2aFieldError('age') ? 'true' : null"
             [attr.aria-describedby]="step2aFieldError('age') ? 'err-age' : null"
           />

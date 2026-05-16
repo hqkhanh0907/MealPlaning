@@ -35,8 +35,10 @@
 
     <div class="ai-plan-callout">
       <div class="ai-plan-callout__text">
-        <strong>Giáo án AI tùy chỉnh</strong>
-        <span> Tạo giáo án dựa trên trình độ, mục tiêu, bài tập hiện có và khối lượng gần đây. </span>
+        <strong>Giáo án AI riêng cho bạn</strong>
+        <span>
+          Tạo giáo án dựa trên trình độ, mục tiêu, bài tập hiện có và khối lượng gần đây.
+        </span>
         @if (fitness.aiPlanRationale(); as rationale) {
           <small>{{ rationale }}</small>
         }
@@ -48,11 +50,11 @@
         [attr.aria-label]="
           fitness.activeSession() !== null
             ? 'Đang có buổi tập, hoàn thành trước khi tạo giáo án AI'
-            : 'Tạo giáo án AI custom'
+            : 'Tạo giáo án AI riêng'
         "
       >
         <ion-icon slot="start" name="sparkles-outline" />
-        {{ fitness.aiPlanLoading() ? 'Đang tạo...' : 'Tạo AI plan' }}
+        {{ fitness.aiPlanLoading() ? 'Đang tạo...' : 'Tạo giáo án AI' }}
       </ion-button>
     </div>
 
@@ -118,7 +120,7 @@
       </div>
       @if (fitness.activeSession(); as session) {
         <span class="active-pill active-pill--accent">{{
-          session.mode === 'guided' ? 'Guided' : 'Free'
+          session.mode === 'guided' ? 'Theo giáo án' : 'Tự do'
         }}</span>
       }
     </header>
@@ -135,18 +137,18 @@
             [disabled]="fitness.activeSession() !== null"
             [attr.aria-label]="
               fitness.activeSession() !== null
-                ? 'Đang có buổi tập, hoàn thành trước khi bắt đầu Free workout'
-                : 'Bắt đầu Free workout'
+                ? 'Đang có buổi tập, hoàn thành trước khi bắt đầu buổi tự do'
+                : 'Bắt đầu buổi tự do'
             "
           >
-            {{ fitness.activeSession() ? 'Đang tập' : 'Bắt đầu Free workout' }}
+            {{ fitness.activeSession() ? 'Đang tập' : 'Bắt đầu buổi tự do' }}
           </ion-button>
         </div>
       } @else {
         <div class="today-plan">
           <div>
             <strong>{{ day.name }}</strong>
-            <span>{{ day.exercises.length }} bài · guided mode</span>
+            <span>{{ day.exercises.length }} bài · theo giáo án</span>
           </div>
           <ion-button
             (click)="fitness.startTodayGuided()"
@@ -260,7 +262,7 @@
 
           <div class="set-grid">
             <div class="input-wrapper">
-              <label class="input-label" for="weight-kg">Weight (kg)</label>
+              <label class="input-label" for="weight-kg">Tạ (kg)</label>
               <input
                 id="weight-kg"
                 class="input-native"
@@ -275,7 +277,7 @@
             </div>
 
             <div class="input-wrapper">
-              <label class="input-label" for="reps">Reps</label>
+              <label class="input-label" for="reps">Số lần</label>
               <input
                 id="reps"
                 class="input-native"
@@ -290,7 +292,7 @@
             </div>
 
             <div class="input-wrapper">
-              <label class="input-label" for="rest-seconds">Rest (giây)</label>
+              <label class="input-label" for="rest-seconds">Nghỉ (giây)</label>
               <input
                 id="rest-seconds"
                 class="input-native"
@@ -353,7 +355,7 @@
           </div>
 
           <div class="logger-actions">
-            <ion-button (click)="fitness.logSet()" fill="solid">Log set</ion-button>
+            <ion-button (click)="fitness.logSet()" fill="solid">Ghi set</ion-button>
             <app-rest-timer [seconds]="fitness.restSeconds()" />
           </div>
 

@@ -32,6 +32,8 @@ const ENV_FILE = resolve(REPO_ROOT, '.env');
 const OUT_FILE = resolve(REPO_ROOT, 'src/environments/environment.prod.ts');
 const MODEL = 'gemini-2.5-flash';
 const DB_NAME = 'healthmate.db';
+const PKG = JSON.parse(readFileSync(resolve(REPO_ROOT, 'package.json'), 'utf8'));
+const APP_VERSION = PKG.version;
 
 function obfuscate(plain) {
   if (!plain) return '';
@@ -84,6 +86,7 @@ function main() {
  */
 export const environment = {
   production: true,
+  appVersion: '${APP_VERSION}',
   geminiApiKeyObf: '${obf}',
   geminiModel: '${MODEL}',
   dbName: '${DB_NAME}',
