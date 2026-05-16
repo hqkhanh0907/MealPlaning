@@ -41,6 +41,9 @@
         class="input-native"
         type="number"
         inputmode="numeric"
+        min="800"
+        max="6000"
+        step="10"
         [attr.aria-invalid]="caloInvalid() ? 'true' : null"
         [attr.aria-describedby]="caloInvalid() ? 'err-goals-calo' : null"
         [ngModel]="calo()"
@@ -60,6 +63,9 @@
         class="input-native"
         type="number"
         inputmode="numeric"
+        min="20"
+        max="400"
+        step="1"
         [attr.aria-invalid]="proteinInvalid() ? 'true' : null"
         [attr.aria-describedby]="proteinInvalid() ? 'err-goals-protein' : null"
         [ngModel]="protein()"
@@ -79,6 +85,9 @@
         class="input-native"
         type="number"
         inputmode="numeric"
+        min="0"
+        max="1000"
+        step="1"
         placeholder="Tự động"
         [attr.aria-invalid]="carbsInvalid() ? 'true' : null"
         [attr.aria-describedby]="carbsInvalid() ? 'err-goals-carbs' : null"
@@ -99,6 +108,9 @@
         class="input-native"
         type="number"
         inputmode="numeric"
+        min="0"
+        max="1000"
+        step="1"
         placeholder="Tự động"
         [attr.aria-invalid]="fatInvalid() ? 'true' : null"
         [attr.aria-describedby]="fatInvalid() ? 'err-goals-fat' : null"
@@ -108,7 +120,7 @@
     </app-form-field>
 
     <ion-button fill="clear" size="small" class="reset-button reset-button--text" (click)="reset()">
-      Reset về đề xuất
+      Đặt lại về đề xuất
     </ion-button>
 
     <p class="form-hint">

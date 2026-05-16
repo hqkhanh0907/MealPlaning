@@ -97,11 +97,19 @@ export default class ActivityEditPage implements OnInit {
   readonly activeLabel = computed(
     () => this.options.find((o) => o.factor === this.factor())?.label ?? '',
   );
+  readonly isDirty = computed(() => {
+    const p = this.profileStore.profile();
+    return !!p && p.activity_factor !== this.factor();
+  });
 
   async save(): Promise<void> {
     const p = this.profileStore.profile();
     const r = this.preview();
     if (!p || !r) return;
+    if (!this.isDirty()) {
+      this.location.back();
+      return;
+    }
     const currentRecalc = recalcTargets({
       height_cm: p.height_cm,
       weight_kg: p.weight_kg,

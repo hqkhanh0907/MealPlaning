@@ -135,4 +135,30 @@ describe('dishFormSchema (gram-only)', () => {
     const f = buildForm(baseValue({ items: [baseItem({ ingredient_id: '   ' })] }));
     expect(allErrorKinds(f)).toContain('ingredientRequired');
   });
+
+  it('flags gram_weight above 5000 as gramTooHigh', () => {
+    const f = buildForm(baseValue({ items: [baseItem({ gram_weight: 5001 })] }));
+    expect(allErrorKinds(f)).toContain('gramTooHigh');
+  });
+
+  it('accepts gram_weight at the 5000 g boundary', () => {
+    const f = buildForm(baseValue({ items: [baseItem({ gram_weight: 5000 })] }));
+    expect(allErrorKinds(f)).not.toContain('gramTooHigh');
+  });
+
+  it('flags more than 30 items as itemsTooMany', () => {
+    const manyItems = Array.from({ length: 31 }, (_, i) =>
+      baseItem({ local_id: `i-${i}`, ingredient_id: `ing-${i}` }),
+    );
+    const f = buildForm(baseValue({ items: manyItems }));
+    expect(allErrorKinds(f)).toContain('itemsTooMany');
+  });
+
+  it('accepts exactly 30 items', () => {
+    const manyItems = Array.from({ length: 30 }, (_, i) =>
+      baseItem({ local_id: `i-${i}`, ingredient_id: `ing-${i}` }),
+    );
+    const f = buildForm(baseValue({ items: manyItems }));
+    expect(allErrorKinds(f)).not.toContain('itemsTooMany');
+  });
 });

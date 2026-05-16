@@ -1,0 +1,57 @@
+[
+  {
+    "step": "00",
+    "pair": "coldstart",
+    "png": "00-coldstart.png",
+    "md5": "45884592a6c14e88b07d4f49ae82770b",
+    "md5_short": "45884592",
+    "route": "",
+    "expected_route": null,
+    "status": "ok"
+  },
+  {
+    "step": "02",
+    "pair": "dashboard",
+    "png": "02-dashboard.png",
+    "md5": null,
+    "route": null,
+    "status": "tap-failed",
+    "stderr": "[qa-tap] error: socket hang up\n"
+  },
+  {
+    "step": "03",
+    "pair": "calendar",
+    "png": "03-calendar.png",
+    "md5": null,
+    "route": null,
+    "status": "tap-failed",
+    "stderr": "[qa-tap] error: socket hang up\n"
+  },
+  {
+    "step": "04",
+    "pair": "management",
+    "png": "04-management.png",
+    "md5": null,
+    "route": null,
+    "status": "tap-failed",
+    "stderr": "[qa-tap] error: socket hang up\n"
+  },
+  {
+    "step": "05",
+    "pair": "fitness",
+    "png": "05-fitness.png",
+    "md5": null,
+    "route": null,
+    "status": "tap-failed",
+    "stderr": "[qa-tap] error: socket hang up\n"
+  },
+  {
+    "step": "06",
+    "pair": "back-dashboard",
+    "png": "06-back-dashboard.png",
+    "md5": null,
+    "route": null,
+    "status": "tap-failed",
+    "stderr": "[qa-tap] error: socket hang up\n"
+  }
+]

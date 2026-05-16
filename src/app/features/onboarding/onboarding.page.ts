@@ -1,5 +1,6 @@
 import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { App as CapacitorApp, type BackButtonListenerEvent } from '@capacitor/app';
 import {
   IonHeader,
   IonToolbar,
@@ -73,6 +74,7 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
 export default class OnboardingPage {
   private readonly router = inject(Router);
   private readonly profileStore = inject(ProfileStore);
+  private backButtonListener?: Promise<{ remove: () => Promise<void> }>;
 
   readonly step1Heading = viewChild<ElementRef>('step1Heading');
   readonly step2aHeading = viewChild<ElementRef>('step2aHeading');
@@ -160,6 +162,18 @@ export default class OnboardingPage {
       trophyOutline,
       checkmark,
     });
+    this.backButtonListener = CapacitorApp.addListener(
+      'backButton',
+      ({ canGoBack }: BackButtonListenerEvent) => {
+        if (this.step() > 1) {
+          this.goBack();
+          return;
+        }
+        if (!canGoBack) {
+          CapacitorApp.exitApp();
+        }
+      },
+    );
     // Live error updates are reactive via FieldTree.errors() — no effect needed.
   }
 
@@ -171,6 +185,12 @@ export default class OnboardingPage {
   /** Set activity level from radio card */
   onActivityChange(value: ActivityLevel): void {
     this.activityLevel.set(value);
+    this.clearStep2bError('activityLevel');
+  }
+
+  onGymExperienceChange(value: GymExperience): void {
+    this.gymExperience.set(value);
+    this.clearStep2bError('gymExperience');
   }
 
   /** Step 1 → Step 2a (CTA disabled prevents calling without goal) */
@@ -199,6 +219,10 @@ export default class OnboardingPage {
       this.step.set(2);
       this.focusHeading('step2aHeading');
     }
+  }
+
+  ionViewWillLeave(): void {
+    void this.backButtonListener?.then((listener) => listener.remove());
   }
 
   async complete(): Promise<void> {
@@ -298,6 +322,19 @@ export default class OnboardingPage {
           .getElementById('err-activity')
           ?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
       );
+      return;
     }
+
+    if (errors.gymExperience) {
+      setTimeout(() =>
+        document
+          .getElementById('err-gym-experience')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' }),
+      );
+    }
+  }
+
+  private clearStep2bError(field: keyof Step2bErrors): void {
+    this.step2bErrors.update((errors) => ({ ...errors, [field]: '' }));
   }
 }

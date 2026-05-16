@@ -126,6 +126,8 @@
             inputmode="decimal"
             class="input-native"
             [formField]="step2aForm.heightCm"
+            min="100"
+            max="250"
             step="0.1"
             [attr.aria-invalid]="step2aFieldError('heightCm') ? 'true' : null"
             [attr.aria-describedby]="step2aFieldError('heightCm') ? 'err-height' : null"
@@ -147,6 +149,8 @@
             inputmode="decimal"
             class="input-native"
             [formField]="step2aForm.weightKg"
+            min="30"
+            max="300"
             step="0.1"
             [attr.aria-invalid]="step2aFieldError('weightKg') ? 'true' : null"
             [attr.aria-describedby]="step2aFieldError('weightKg') ? 'err-weight' : null"
@@ -168,6 +172,9 @@
             inputmode="numeric"
             class="input-native"
             [formField]="step2aForm.age"
+            min="13"
+            max="100"
+            step="1"
             [attr.aria-invalid]="step2aFieldError('age') ? 'true' : null"
             [attr.aria-describedby]="step2aFieldError('age') ? 'err-age' : null"
           />
@@ -239,7 +246,7 @@
         <h1 #step2bHeading class="step-title" tabindex="-1">Mức hoạt động</h1>
         <p class="step-subtitle">Giúp chúng tôi tính nhu cầu calo phù hợp</p>
 
-        <p class="section-label" style="margin-top: 0">Mức vận động</p>
+        <p class="section-label section-label--flush">Mức vận động</p>
         <div
           role="radiogroup"
           aria-label="Mức vận động"
@@ -276,12 +283,12 @@
           <div
             class="radio-item"
             [class.selected]="gymExperience() === 'never'"
-            (click)="gymExperience.set('never')"
+            (click)="onGymExperienceChange('never')"
             role="radio"
             tabindex="0"
             [attr.aria-checked]="gymExperience() === 'never'"
-            (keydown.enter)="gymExperience.set('never')"
-            (keydown.space)="gymExperience.set('never'); $event.preventDefault()"
+            (keydown.enter)="onGymExperienceChange('never')"
+            (keydown.space)="onGymExperienceChange('never'); $event.preventDefault()"
           >
             <span class="radio-circle" aria-hidden="true"></span>
             <span class="radio-label">Chưa bao giờ</span>
@@ -292,12 +299,12 @@
           <div
             class="radio-item"
             [class.selected]="gymExperience() === 'under_6m'"
-            (click)="gymExperience.set('under_6m')"
+            (click)="onGymExperienceChange('under_6m')"
             role="radio"
             tabindex="0"
             [attr.aria-checked]="gymExperience() === 'under_6m'"
-            (keydown.enter)="gymExperience.set('under_6m')"
-            (keydown.space)="gymExperience.set('under_6m'); $event.preventDefault()"
+            (keydown.enter)="onGymExperienceChange('under_6m')"
+            (keydown.space)="onGymExperienceChange('under_6m'); $event.preventDefault()"
           >
             <span class="radio-circle" aria-hidden="true"></span>
             <span class="radio-label">Dưới 6 tháng</span>
@@ -308,12 +315,12 @@
           <div
             class="radio-item"
             [class.selected]="gymExperience() === '6m_2y'"
-            (click)="gymExperience.set('6m_2y')"
+            (click)="onGymExperienceChange('6m_2y')"
             role="radio"
             tabindex="0"
             [attr.aria-checked]="gymExperience() === '6m_2y'"
-            (keydown.enter)="gymExperience.set('6m_2y')"
-            (keydown.space)="gymExperience.set('6m_2y'); $event.preventDefault()"
+            (keydown.enter)="onGymExperienceChange('6m_2y')"
+            (keydown.space)="onGymExperienceChange('6m_2y'); $event.preventDefault()"
           >
             <span class="radio-circle" aria-hidden="true"></span>
             <span class="radio-label">6 tháng — 2 năm</span>
@@ -324,12 +331,12 @@
           <div
             class="radio-item"
             [class.selected]="gymExperience() === 'over_2y'"
-            (click)="gymExperience.set('over_2y')"
+            (click)="onGymExperienceChange('over_2y')"
             role="radio"
             tabindex="0"
             [attr.aria-checked]="gymExperience() === 'over_2y'"
-            (keydown.enter)="gymExperience.set('over_2y')"
-            (keydown.space)="gymExperience.set('over_2y'); $event.preventDefault()"
+            (keydown.enter)="onGymExperienceChange('over_2y')"
+            (keydown.space)="onGymExperienceChange('over_2y'); $event.preventDefault()"
           >
             <span class="radio-circle" aria-hidden="true"></span>
             <span class="radio-label">Trên 2 năm</span>
@@ -339,7 +346,9 @@
           </div>
         </div>
         @if (step2bErrors().gymExperience) {
-          <div class="field-error" role="alert">{{ step2bErrors().gymExperience }}</div>
+          <div id="err-gym-experience" class="field-error" role="alert">
+            {{ step2bErrors().gymExperience }}
+          </div>
         }
 
         @if (saveError()) {

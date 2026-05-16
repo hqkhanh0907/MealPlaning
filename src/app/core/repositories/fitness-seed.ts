@@ -1,6 +1,6 @@
 import type { ExerciseCategory, MuscleGroup, TrainingPlanType } from '../models/fitness.types';
 
-export const FITNESS_SEED_VERSION = '1.0.0';
+export const FITNESS_SEED_VERSION = '1.0.1';
 
 export interface SeedExercise {
   id: string;
@@ -226,7 +226,7 @@ export const SEED_TRAINING_PLANS: readonly SeedTrainingPlan[] = [
     name: 'Full Body 3 buổi',
     type: 'full_body',
     frequency: 3,
-    description: 'Beginner-friendly: tập toàn thân 3 ngày/tuần, ưu tiên kỹ thuật và phục hồi.',
+    description: 'Phù hợp người mới: tập toàn thân 3 ngày/tuần, ưu tiên kỹ thuật và phục hồi.',
     days: [
       day(1, 'Full Body A', [
         pe('ex_back_squat', 3, 8, 10, 120, 'Giữ form ổn định trước khi tăng tạ.'),
@@ -257,11 +257,11 @@ export const SEED_TRAINING_PLANS: readonly SeedTrainingPlan[] = [
     name: 'Upper / Lower 4 buổi',
     type: 'upper_lower',
     frequency: 4,
-    description: 'Intermediate split: tăng volume thân trên/thân dưới, nghỉ giữa các block.',
+    description: 'Trình độ trung cấp: tăng khối lượng thân trên/thân dưới, nghỉ giữa các block.',
     days: [
       day(1, 'Upper A', [
         pe('ex_barbell_bench_press', 4, 6, 8, 150, 'Compound chính.'),
-        pe('ex_barbell_row', 4, 8, 10, 120, 'Kéo cùng volume với đẩy.'),
+        pe('ex_barbell_row', 4, 8, 10, 120, 'Kéo cùng khối lượng với đẩy.'),
         pe('ex_dumbbell_shoulder_press', 3, 8, 10, 90, 'Không khóa khuỷu quá mạnh.'),
         pe('ex_triceps_pushdown', 3, 10, 15, 60, 'Kiểm soát eccentric.'),
         pe('ex_barbell_curl', 3, 10, 12, 60, 'Không đung đưa người.'),
@@ -295,7 +295,7 @@ export const SEED_TRAINING_PLANS: readonly SeedTrainingPlan[] = [
     name: 'PPL 6 buổi',
     type: 'ppl',
     frequency: 6,
-    description: 'Advanced split: Push/Pull/Legs lặp 2 vòng, volume cao và cần phục hồi tốt.',
+    description: 'Trình độ nâng cao: Đẩy/Kéo/Chân lặp 2 vòng, khối lượng cao và cần phục hồi tốt.',
     days: [
       day(1, 'Push A', [
         pe('ex_barbell_bench_press', 4, 6, 8, 150, 'Đẩy ngang nặng.'),
@@ -367,7 +367,7 @@ function day(dayOfWeek: number, name: string, exercises: SeedPlannedExercise[]):
 }
 
 function rest(dayOfWeek: number): SeedTrainingDay {
-  return { dayOfWeek, name: 'Rest Day', isRestDay: true, exercises: [] };
+  return { dayOfWeek, name: 'Ngày nghỉ', isRestDay: true, exercises: [] };
 }
 
 function pe(

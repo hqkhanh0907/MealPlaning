@@ -36,7 +36,7 @@
     <div class="ai-plan-callout">
       <div class="ai-plan-callout__text">
         <strong>Giáo án AI tùy chỉnh</strong>
-        <span> Tạo giáo án dựa trên level, mục tiêu, bài tập hiện có và volume gần đây. </span>
+        <span> Tạo giáo án dựa trên trình độ, mục tiêu, bài tập hiện có và khối lượng gần đây. </span>
         @if (fitness.aiPlanRationale(); as rationale) {
           <small>{{ rationale }}</small>
         }
@@ -128,7 +128,7 @@
         <div class="empty-workout">
           <ion-icon name="calendar-outline" aria-hidden="true" />
           <strong>{{ day.name }}</strong>
-          <p>Hôm nay là ngày nghỉ theo giáo án. Nếu vẫn muốn tập, dùng Free mode.</p>
+          <p>Hôm nay là ngày nghỉ theo giáo án. Nếu vẫn muốn tập, dùng chế độ tự do.</p>
           <ion-button
             (click)="fitness.startFree()"
             fill="solid"
@@ -188,7 +188,7 @@
 
     <div class="free-mode">
       <div class="input-wrapper">
-        <label class="input-label" for="exercise-search">Tìm bài tập free mode</label>
+        <label class="input-label" for="exercise-search">Tìm bài tập tự do</label>
         <input
           id="exercise-search"
           class="input-native"
@@ -255,7 +255,7 @@
         <article class="set-logger">
           <header>
             <strong>{{ selected.exercise_name_vi || selected.exercise_name }}</strong>
-            <span>{{ selected.total_volume }} kg volume</span>
+            <span>{{ selected.total_volume }} kg khối lượng</span>
           </header>
 
           <div class="set-grid">
@@ -358,7 +358,7 @@
           </div>
 
           @if (selected.sets.length > 0) {
-            <div class="set-history" aria-label="Set đã log">
+            <div class="set-history" aria-label="Set đã ghi">
               @for (set of selected.sets; track set.id) {
                 <article>
                   <strong>Set {{ set.set_number }}</strong>
@@ -388,14 +388,14 @@
         <article>
           <ion-icon name="stats-chart-outline" aria-hidden="true" />
           <strong>{{ fitness.currentWeekVolumeLabel() }}</strong>
-          <span>Volume tuần này</span>
+          <span>Khối lượng tuần này</span>
           <small>{{ fitness.volumeChangeLabel() }}</small>
         </article>
         <article>
           <ion-icon name="flame-outline" aria-hidden="true" />
           <strong>{{ progress.workoutStreakWeeks }} tuần</strong>
-          <span>Streak tập luyện</span>
-          <small>Streak theo tuần, không phạt ngày nghỉ.</small>
+          <span>Chuỗi tuần tập</span>
+          <small>Tính theo tuần, không phạt ngày nghỉ.</small>
         </article>
         <article>
           <ion-icon name="body-outline" aria-hidden="true" />
@@ -414,7 +414,7 @@
       </div>
 
       <div class="chart-block">
-        <h3>Volume theo nhóm cơ</h3>
+        <h3>Khối lượng theo nhóm cơ</h3>
         @if (progress.volumeByMuscle.length === 0) {
           <p class="empty-copy">Chưa có buổi tập hoàn thành trong tuần này.</p>
         } @else {
@@ -431,9 +431,9 @@
       </div>
 
       <div class="chart-block">
-        <h3>Est. 1RM compound lifts</h3>
+        <h3>1RM ước tính (Epley)</h3>
         @if (progress.strength.length === 0) {
-          <p class="empty-copy">Log set compound ≤10 reps để xem 1RM ước tính theo Epley.</p>
+          <p class="empty-copy">Ghi set compound ≤10 reps để xem 1RM ước tính theo Epley.</p>
         } @else {
           @for (point of progress.strength; track point.exercise_id) {
             <div class="chart-row">

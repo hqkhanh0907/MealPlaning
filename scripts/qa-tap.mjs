@@ -78,18 +78,27 @@ function ensureForward() {
     process.exit(2);
   }
 
-  adb(["forward", "--remove", `tcp:${PORT}`]);
-  const fwd = adb(["forward", `tcp:${PORT}`, `localabstract:${match[1]}`]);
-  if (fwd.status !== 0) {
-    console.error(`[qa-tap] adb forward failed: ${fwd.stderr}`);
-    process.exit(2);
+  // Only touch the forward if it's missing or pointing at the wrong socket.
+  // Re-removing a valid forward race-clobbers in-flight CDP requests issued by
+  // an outer orchestrator (visual-tour.mjs) — caused "socket hang up" on every
+  // tap when the orchestrator had just set the forward correctly.
+  const fwdList = adb(["forward", "--list"]).stdout || "";
+  const wantLine = `tcp:${PORT} localabstract:${match[1]}`;
+  if (!fwdList.includes(wantLine)) {
+    adb(["forward", "--remove", `tcp:${PORT}`]);
+    const fwd = adb(["forward", `tcp:${PORT}`, `localabstract:${match[1]}`]);
+    if (fwd.status !== 0) {
+      console.error(`[qa-tap] adb forward failed: ${fwd.stderr}`);
+      process.exit(2);
+    }
   }
 }
 
 /** Connect to the first non-devtools page in the WebView. */
 async function connect() {
-  // The Android 16 emulator occasionally SIGTRAPs the app at launch (MTE/scudo).
-  // Retry up to 4 times with progressive backoff.
+  // Retry up to 4 times with progressive backoff. Do NOT force-stop on retry
+  // (the old code did; it killed the very app we were trying to reach when
+  // the CDP HTTP server just needed another moment to come up).
   let lastErr;
   for (let attempt = 0; attempt < 4; attempt++) {
     try {
@@ -105,9 +114,8 @@ async function connect() {
       return client;
     } catch (e) {
       lastErr = e;
-      // Force a relaunch on next attempt.
-      adb(["shell", "am", "force-stop", PKG]);
-      await new Promise((r) => setTimeout(r, 400));
+      // Back off without killing the app.
+      await new Promise((r) => setTimeout(r, 400 + attempt * 400));
     }
   }
   throw lastErr;

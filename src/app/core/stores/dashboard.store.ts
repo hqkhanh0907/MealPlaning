@@ -159,7 +159,7 @@ export class DashboardStore {
     const key = this.keyMetric();
     const label = METRIC_LABELS[key];
     const value = Math.round(this.totals()[key]);
-    return `${label} hiện tại: ${formatNumber(value)}. Dashboard dùng dữ liệu lịch ăn hôm nay, gồm món đã log và món còn trong kế hoạch.`;
+    return `${label} hiện tại: ${formatNumber(value)}. Dashboard dùng dữ liệu lịch ăn hôm nay, gồm món đã ghi và món còn trong kế hoạch.`;
   });
 
   readonly macroRows = computed<DashboardMacroRow[]>(() => {
@@ -244,7 +244,7 @@ export class DashboardStore {
 
   readonly workoutTitle = computed(() => {
     const volume = this.workoutSummary().currentWeekVolume;
-    if (volume > 0) return `Tuần này ${formatNumber(volume)} kg volume`;
+    if (volume > 0) return `Tuần này ${formatNumber(volume)} kg khối lượng`;
     return this.workoutSummary().lastSessionLabel
       ? 'Tuần này chưa có buổi tập'
       : 'Chưa có buổi tập nào';
@@ -256,19 +256,19 @@ export class DashboardStore {
       if (summary.previousWeekVolume > 0) {
         const delta = summary.currentWeekVolume - summary.previousWeekVolume;
         if (delta > 0) {
-          return `Tăng ${formatNumber(delta)} kg volume so với tuần trước. Tiếp tục giữ nhịp và ưu tiên form đúng.`;
+          return `Tăng ${formatNumber(delta)} kg khối lượng so với tuần trước. Tiếp tục giữ nhịp và ưu tiên kỹ thuật đúng.`;
         }
         if (delta < 0) {
-          return `Giảm ${formatNumber(Math.abs(delta))} kg volume so với tuần trước. Kiểm tra lịch tập để không mất nhịp.`;
+          return `Giảm ${formatNumber(Math.abs(delta))} kg khối lượng so với tuần trước. Kiểm tra lịch tập để không mất nhịp.`;
         }
-        return 'Volume đang ngang tuần trước. Nếu cơ thể ổn, tăng nhẹ mức tạ hoặc số set.';
+        return 'Khối lượng đang ngang tuần trước. Nếu cơ thể ổn, tăng nhẹ mức tạ hoặc số set.';
       }
-      return 'Đã ghi nhận volume tập luyện tuần này. Hoàn thành thêm buổi để Dashboard bắt đầu so sánh xu hướng.';
+      return 'Đã ghi nhận khối lượng tập luyện tuần này. Hoàn thành thêm buổi để Dashboard bắt đầu so sánh xu hướng.';
     }
     if (summary.lastSessionLabel) {
       return `Buổi gần nhất: ${summary.lastSessionLabel}. Mở tab Tập luyện để bắt đầu buổi mới.`;
     }
-    return 'Chọn giáo án hoặc bắt đầu Free Workout trong tab Tập luyện để Dashboard hiển thị số liệu thật.';
+    return 'Chọn giáo án hoặc bắt đầu Buổi tự do trong tab Tập luyện để Dashboard hiển thị số liệu thật.';
   });
 
   readonly workoutStreakDisplay = computed(() => {

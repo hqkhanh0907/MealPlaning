@@ -28,6 +28,7 @@ import { chevronDownOutline, sparklesOutline } from 'ionicons/icons';
 import { INGREDIENT_CATEGORIES } from '../../../core/models/management.constants';
 import type { HasUnsavedChanges } from '../../../core/guards/unsaved-changes-guard';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
+import { NetworkStore } from '../../../core/stores/network.store';
 import { GEMINI_ERROR_TOAST, GeminiError } from '../../../core/services/ai/gemini-types';
 import {
   NutritionAi,
@@ -95,6 +96,7 @@ export default class IngredientEditPage implements HasUnsavedChanges {
   private readonly nutritionAi = inject(NutritionAi);
   private readonly toastCtrl = inject(ToastController);
   private readonly alertCtrl = inject(AlertController);
+  protected readonly network = inject(NetworkStore);
 
   readonly categories = INGREDIENT_CATEGORIES;
 

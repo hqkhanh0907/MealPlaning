@@ -15,7 +15,7 @@
         type="button"
         class="btn-ai-lookup"
         data-testid="btn-ask-ai"
-        [disabled]="aiLoading()"
+        [disabled]="aiLoading() || !network.online()"
         (click)="onAskAi()"
       >
         @if (aiLoading()) {

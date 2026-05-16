@@ -25,6 +25,12 @@ const itemSchema = schema<DishIngredientFormItem>((p) => {
         message: 'Trọng lượng (g) phải lớn hơn 0.',
       };
     }
+    if (v > 5000) {
+      return {
+        kind: 'gramTooHigh',
+        message: 'Trọng lượng (g) không được vượt 5000 g.',
+      };
+    }
     return null;
   });
 
@@ -74,6 +80,12 @@ export const dishFormSchema = schema<DishEditFormValue>((p) => {
       errors.push({
         kind: 'itemsRequired',
         message: 'Cần ít nhất 1 nguyên liệu trước khi lưu món ăn.',
+      });
+    }
+    if (items.length > 30) {
+      errors.push({
+        kind: 'itemsTooMany',
+        message: 'Một món ăn tối đa 30 nguyên liệu.',
       });
     }
     return errors;

@@ -23,6 +23,7 @@ import { LocalNotifications, SlotKey } from '../../core/services/notifications/l
 import { UserProfile } from '../../core/models/user-profile.model';
 import { activityLabelShort } from '../../core/services/profile/activity-label';
 import { getActivityLevelFromFactor } from '../onboarding/onboarding-calculation';
+import { environment } from '../../../environments/environment';
 
 const GENDER_LABELS: Record<UserProfile['gender'], string> = {
   male: 'Nam',
@@ -103,7 +104,7 @@ export default class SettingsPage {
   readonly eveningEnabled = computed(() => !!this.profile()?.notif_evening);
   readonly weeklyEnabled = computed(() => !!this.profile()?.notif_weekly);
 
-  readonly appVersion = '0.2.2';
+  readonly appVersion = environment.appVersion;
 
   constructor() {
     addIcons({ chevronForwardOutline });

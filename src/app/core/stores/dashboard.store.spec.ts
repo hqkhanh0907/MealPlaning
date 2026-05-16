@@ -292,8 +292,8 @@ describe('DashboardStore', () => {
     await store.refresh(new Date('2026-05-10T08:00:00'));
 
     expect(workoutRepo.progressSummary).toHaveBeenCalledOnceWith(new Date('2026-05-10T08:00:00'));
-    expect(store.workoutTitle()).toBe('Tuần này 5.200 kg volume');
-    expect(store.workoutBody()).toContain('Tăng 700 kg volume');
+    expect(store.workoutTitle()).toBe('Tuần này 5.200 kg khối lượng');
+    expect(store.workoutBody()).toContain('Tăng 700 kg khối lượng');
     expect(store.workoutStreakDisplay()).toBe('3 tuần');
   });
 

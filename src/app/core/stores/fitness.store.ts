@@ -257,7 +257,7 @@ export class FitnessStore {
   async logSet(): Promise<void> {
     const exercise = this.selectedWorkoutExercise();
     if (!exercise) {
-      this.errorMessage.set('Chọn một bài tập trước khi log set.');
+      this.errorMessage.set('Chọn một bài tập trước khi ghi set.');
       return;
     }
 
@@ -276,7 +276,7 @@ export class FitnessStore {
       }
       this.restSeconds.set(draft.value.restSeconds);
       this.setDraft.update((current) => ({ ...current, notes: '' }));
-      this.successMessage.set('Đã log set tập.');
+      this.successMessage.set('Đã ghi set tập.');
     } catch (error) {
       this.errorMessage.set(toErrorMessage(error));
     }

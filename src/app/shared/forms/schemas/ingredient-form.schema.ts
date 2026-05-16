@@ -16,10 +16,12 @@
 import { schema, validate, type ValidationError } from '@angular/forms/signals';
 import type { IngredientEditFormValue } from '../../../features/management/ingredient-edit/ingredient-edit.types';
 
-const optionalNonNegative = (
+const optionalBoundedNonNegative = (
   v: number | null,
-  kindWhenNeg: string,
+  max: number,
+  kindWhenOut: string,
   msgWhenNeg: string,
+  msgWhenTooHigh: string,
 ): ValidationError | null => {
   if (v === null) {
     return null;
@@ -28,7 +30,10 @@ const optionalNonNegative = (
     return { kind: 'invalid', message: 'Số không hợp lệ' };
   }
   if (v < 0) {
-    return { kind: kindWhenNeg, message: msgWhenNeg };
+    return { kind: kindWhenOut, message: msgWhenNeg };
+  }
+  if (v > max) {
+    return { kind: 'tooHigh', message: msgWhenTooHigh };
   }
   return null;
 };
@@ -53,19 +58,49 @@ export const ingredientFormSchema = schema<IngredientEditFormValue>((p) => {
   });
 
   validate(p.calories, ({ value }) =>
-    optionalNonNegative(value(), 'positive', 'Calories không được nhỏ hơn 0'),
+    optionalBoundedNonNegative(
+      value(),
+      1000,
+      'positive',
+      'Calories không được nhỏ hơn 0',
+      'Calories không được vượt 1000 kcal/100g',
+    ),
   );
   validate(p.protein, ({ value }) =>
-    optionalNonNegative(value(), 'positive', 'Protein không được nhỏ hơn 0'),
+    optionalBoundedNonNegative(
+      value(),
+      100,
+      'positive',
+      'Protein không được nhỏ hơn 0',
+      'Protein không được vượt 100 g/100g',
+    ),
   );
   validate(p.carbs, ({ value }) =>
-    optionalNonNegative(value(), 'positive', 'Carbs không được nhỏ hơn 0'),
+    optionalBoundedNonNegative(
+      value(),
+      100,
+      'positive',
+      'Carbs không được nhỏ hơn 0',
+      'Carbs không được vượt 100 g/100g',
+    ),
   );
   validate(p.fat, ({ value }) =>
-    optionalNonNegative(value(), 'positive', 'Fat không được nhỏ hơn 0'),
+    optionalBoundedNonNegative(
+      value(),
+      100,
+      'positive',
+      'Fat không được nhỏ hơn 0',
+      'Fat không được vượt 100 g/100g',
+    ),
   );
   validate(p.fiber, ({ value }) =>
-    optionalNonNegative(value(), 'positive', 'Fiber không được nhỏ hơn 0'),
+    optionalBoundedNonNegative(
+      value(),
+      100,
+      'positive',
+      'Fiber không được nhỏ hơn 0',
+      'Fiber không được vượt 100 g/100g',
+    ),
   );
 
   // Cross-field sanity check: protein + carbs + fat ≤ 100 g per 100 g.

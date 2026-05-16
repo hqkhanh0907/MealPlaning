@@ -135,4 +135,64 @@ describe('ingredientFormSchema (gram-only)', () => {
     const f = buildForm(baseValue({ protein: 30, carbs: 40, fat: 30 }));
     expect(allErrorKinds(f)).not.toContain('macroOver100');
   });
+
+  it('flags calories over 1000 kcal/100g as tooHigh', () => {
+    const f = buildForm(baseValue({ calories: 1001 }));
+    expect(
+      f
+        .calories()
+        .errors()
+        .some((e) => e.kind === 'tooHigh'),
+    ).toBeTrue();
+  });
+
+  it('allows calories at the 1000 kcal/100g ceiling', () => {
+    const f = buildForm(baseValue({ calories: 1000, protein: 0, carbs: 0, fat: 0 }));
+    expect(
+      f
+        .calories()
+        .errors()
+        .some((e) => e.kind === 'tooHigh'),
+    ).toBeFalse();
+  });
+
+  it('flags protein over 100 g/100g as tooHigh', () => {
+    const f = buildForm(baseValue({ protein: 101, carbs: 0, fat: 0 }));
+    expect(
+      f
+        .protein()
+        .errors()
+        .some((e) => e.kind === 'tooHigh'),
+    ).toBeTrue();
+  });
+
+  it('flags carbs over 100 g/100g as tooHigh', () => {
+    const f = buildForm(baseValue({ protein: 0, carbs: 101, fat: 0 }));
+    expect(
+      f
+        .carbs()
+        .errors()
+        .some((e) => e.kind === 'tooHigh'),
+    ).toBeTrue();
+  });
+
+  it('flags fat over 100 g/100g as tooHigh', () => {
+    const f = buildForm(baseValue({ protein: 0, carbs: 0, fat: 101 }));
+    expect(
+      f
+        .fat()
+        .errors()
+        .some((e) => e.kind === 'tooHigh'),
+    ).toBeTrue();
+  });
+
+  it('flags fiber over 100 g/100g as tooHigh', () => {
+    const f = buildForm(baseValue({ fiber: 101 }));
+    expect(
+      f
+        .fiber()
+        .errors()
+        .some((e) => e.kind === 'tooHigh'),
+    ).toBeTrue();
+  });
 });

@@ -51,7 +51,13 @@
 
 <ion-footer class="ion-no-border">
   <div class="sticky-save-bar">
-    <ion-button expand="block" class="save-button" color="primary" (click)="save()">
+    <ion-button
+      expand="block"
+      class="save-button"
+      [color]="isDirty() ? 'primary' : 'medium'"
+      [disabled]="!isDirty()"
+      (click)="save()"
+    >
       Lưu
     </ion-button>
   </div>

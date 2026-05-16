@@ -135,7 +135,7 @@ describe('FitnessStore', () => {
       notes: null,
     });
     expect(store.restSeconds()).toBe(90);
-    expect(store.successMessage()).toBe('Đã log set tập.');
+    expect(store.successMessage()).toBe('Đã ghi set tập.');
   });
 
   it('rejects invalid set input before touching the repository', async () => {
