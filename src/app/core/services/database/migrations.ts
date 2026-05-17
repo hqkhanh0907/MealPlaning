@@ -2,6 +2,7 @@ import {
   buildFiberSnapshotSchemaMigration,
   buildHybridPolicySchemaMigration,
   buildInitialSchemaMigration,
+  buildWorkoutSessionStatusMigration,
   buildWorkoutSetUpdatedAtMigration,
   SCHEMA_VERSION,
 } from './schema';
@@ -15,12 +16,14 @@ import type { Migration } from './migration-runner';
  * v2 — Hybrid policy enforcement (D8 DEC-11, 2026-05-09).
  * v3 — Fiber snapshot column for logged meal nutrition details.
  * v4 — workout_set.updated_at column (F-012 fix, 2026-05-17).
+ * v5 — workout_session.status + cancelled_at for soft-cancel + undo (p3-1).
  */
 export const MIGRATION_REGISTRY: readonly Migration[] = [
   buildInitialSchemaMigration(),
   buildHybridPolicySchemaMigration(),
   buildFiberSnapshotSchemaMigration(),
   buildWorkoutSetUpdatedAtMigration(),
+  buildWorkoutSessionStatusMigration(),
 ];
 
 if (MIGRATION_REGISTRY[MIGRATION_REGISTRY.length - 1]?.version !== SCHEMA_VERSION) {

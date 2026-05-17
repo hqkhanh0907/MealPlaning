@@ -28,7 +28,7 @@
  *   docs/4-architecture/decisions/calendar-tracking.md (D8 v2)
  */
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 /**
  * Final DDL — gram-only nutrition, light-only theme. Idempotent
@@ -574,5 +574,34 @@ export function buildWorkoutSetUpdatedAtMigration(): {
   return {
     version: 4,
     statements: WORKOUT_SET_UPDATED_AT_DDL,
+  };
+}
+
+const WORKOUT_SESSION_STATUS_DDL = [
+  // p3-1: workout_session.status state machine + cancelled_at for soft delete.
+  //
+  // Pre-v5 cancelSession() hard-deleted the row (and its child sets/exercises),
+  // so undo was impossible. v5 introduces a 3-state status column
+  // (active / completed / cancelled) and a cancelled_at timestamp. cancelSession
+  // now flips status='cancelled' + sets cancelled_at; undoCancel reverts. The
+  // hard purge path is still available for explicit user delete.
+  //
+  // Backfill maps existing rows by completed_at:
+  //   completed_at IS NULL     -> active  (in-progress at the time of upgrade)
+  //   completed_at IS NOT NULL -> completed
+  // No row can be 'cancelled' on upgrade because v4 had no soft-cancel path.
+  `ALTER TABLE workout_session ADD COLUMN status TEXT NOT NULL DEFAULT 'active'`,
+  `ALTER TABLE workout_session ADD COLUMN cancelled_at TEXT`,
+  `UPDATE workout_session SET status = 'completed' WHERE completed_at IS NOT NULL`,
+  `CREATE INDEX IF NOT EXISTS idx_ws_status ON workout_session(status)`,
+] as const;
+
+export function buildWorkoutSessionStatusMigration(): {
+  version: number;
+  statements: readonly string[];
+} {
+  return {
+    version: 5,
+    statements: WORKOUT_SESSION_STATUS_DDL,
   };
 }

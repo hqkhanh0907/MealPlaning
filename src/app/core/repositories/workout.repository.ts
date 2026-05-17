@@ -58,7 +58,7 @@ export class WorkoutRepository {
       `SELECT id, date, training_plan_day_id, training_day_name, mode, total_volume,
               duration_minutes, started_at, completed_at, created_at
          FROM workout_session
-        WHERE completed_at IS NULL
+        WHERE status = 'active'
         ORDER BY started_at DESC
         LIMIT 1`,
     );
@@ -238,7 +238,7 @@ export class WorkoutRepository {
 
   async completeSession(sessionId: string, now: Date = new Date()): Promise<void> {
     const session = await this.db.getOne<{ started_at: string }>(
-      `SELECT started_at FROM workout_session WHERE id = ? AND completed_at IS NULL`,
+      `SELECT started_at FROM workout_session WHERE id = ? AND status = 'active'`,
       [sessionId],
     );
     if (!session) {
@@ -253,7 +253,7 @@ export class WorkoutRepository {
       await this.syncTotals(sessionId);
       await this.db.execute(
         `UPDATE workout_session
-            SET completed_at = ?, duration_minutes = ?
+            SET completed_at = ?, duration_minutes = ?, status = 'completed'
           WHERE id = ?`,
         [now.toISOString(), durationMinutes, sessionId],
       );
@@ -355,31 +355,70 @@ export class WorkoutRepository {
    * already completed — that branch must use a separate "delete completed workout" path (not yet
    * implemented; out of scope for cancel).
    */
-  async cancelSession(sessionId: string): Promise<void> {
-    const session = await this.db.getOne<{ completed_at: string | null }>(
-      `SELECT completed_at FROM workout_session WHERE id = ?`,
+  /**
+   * Soft-cancel a session: flip status to 'cancelled' and record cancelled_at.
+   *
+   * Child rows (workout_exercise, workout_set) are preserved so {@link undoCancel}
+   * can restore the session 1:1. Hard delete is reserved for explicit user
+   * "Xóa buổi tập" actions (not implemented yet).
+   *
+   * Errors out for already-completed sessions — those need a separate
+   * delete-completed-workout path (out of scope for cancel).
+   */
+  async cancelSession(sessionId: string, now: Date = new Date()): Promise<void> {
+    const session = await this.db.getOne<{ status: string }>(
+      `SELECT status FROM workout_session WHERE id = ?`,
       [sessionId],
     );
     if (!session) return;
-    if (session.completed_at !== null) {
+    if (session.status === 'completed') {
       throw new Error(
         'WorkoutRepository: session already completed; cancel is only valid for in-progress sessions.',
       );
     }
+    if (session.status === 'cancelled') return; // idempotent
 
-    await this.db.withTransaction(async () => {
-      await this.db.execute(
-        `DELETE FROM workout_set
-          WHERE workout_exercise_id IN (
-            SELECT id FROM workout_exercise WHERE workout_session_id = ?
-          )`,
-        [sessionId],
+    await this.db.execute(
+      `UPDATE workout_session
+          SET status = 'cancelled', cancelled_at = ?
+        WHERE id = ?`,
+      [now.toISOString(), sessionId],
+    );
+  }
+
+  /**
+   * Undo a soft-cancel within the active session window. Flips status back to
+   * 'active' and clears cancelled_at. No-op if the session is missing or
+   * already in another terminal state.
+   *
+   * Safety: refuses to undo if there is already a different active session
+   * (would violate the single-active-session invariant enforced by
+   * {@link getActiveSession}). Caller must clean that up first.
+   */
+  async undoCancel(sessionId: string): Promise<void> {
+    const session = await this.db.getOne<{ status: string }>(
+      `SELECT status FROM workout_session WHERE id = ?`,
+      [sessionId],
+    );
+    if (!session) return;
+    if (session.status !== 'cancelled') return;
+
+    const existingActive = await this.db.getOne<{ id: string }>(
+      `SELECT id FROM workout_session WHERE status = 'active' AND id <> ? LIMIT 1`,
+      [sessionId],
+    );
+    if (existingActive) {
+      throw new Error(
+        'WorkoutRepository: cannot undo cancel — another active session exists.',
       );
-      await this.db.execute(`DELETE FROM workout_exercise WHERE workout_session_id = ?`, [
-        sessionId,
-      ]);
-      await this.db.execute(`DELETE FROM workout_session WHERE id = ?`, [sessionId]);
-    });
+    }
+
+    await this.db.execute(
+      `UPDATE workout_session
+          SET status = 'active', cancelled_at = NULL
+        WHERE id = ?`,
+      [sessionId],
+    );
   }
 
   async getSession(sessionId: string): Promise<WorkoutSessionDetail | null> {

@@ -22,6 +22,28 @@
     <p class="status-banner status-banner--success" role="status">{{ success }}</p>
   }
 
+  @if (fitness.lastCancelledSessionId(); as cancelledId) {
+    <div class="undo-snackbar" role="status" aria-live="polite">
+      <span class="undo-snackbar__msg">Đã hủy buổi tập.</span>
+      <button
+        type="button"
+        class="undo-snackbar__action"
+        (click)="void fitness.undoCancelWorkout()"
+        aria-label="Hoàn tác hủy buổi tập"
+      >
+        Hoàn tác
+      </button>
+      <button
+        type="button"
+        class="undo-snackbar__dismiss"
+        (click)="fitness.dismissCancelUndo()"
+        aria-label="Đóng"
+      >
+        ✕
+      </button>
+    </div>
+  }
+
   <!-- Giáo án — full picker chỉ render khi CHƯA có activePlan (first-run).
        Khi đã có active: collapse thành compact strip phía dưới (active-plan card). -->
   @if (!fitness.activePlan()) {

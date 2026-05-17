@@ -58,6 +58,7 @@ describe('FitnessStore', () => {
       'deleteSet',
       'updateSet',
       'cancelSession',
+      'undoCancel',
       'removeExerciseFromSession',
     ]);
     workoutRepo.getActiveSession.and.resolveTo(null);
@@ -84,6 +85,7 @@ describe('FitnessStore', () => {
     workoutRepo.deleteSet.and.resolveTo();
     workoutRepo.updateSet.and.resolveTo();
     workoutRepo.cancelSession.and.resolveTo();
+    workoutRepo.undoCancel.and.resolveTo();
     workoutRepo.removeExerciseFromSession.and.resolveTo();
     fitnessAi = jasmine.createSpyObj<FitnessAi>('FitnessAi', ['generateTrainingPlan']);
     fitnessAi.generateTrainingPlan.and.resolveTo(aiPlanDraft());
@@ -237,18 +239,40 @@ describe('FitnessStore', () => {
     expect(store.lastCompletedSession()).toBeNull();
   });
 
-  it('cancelWorkout deletes the session and clears local state', async () => {
-    store.activeSession.set(workoutSession());
+  it('cancelWorkout soft-cancels session, clears local state, records undo handle', async () => {
+    const session = workoutSession();
+    store.activeSession.set(session);
     store.selectedWorkoutExerciseId.set('we-1');
     store.restSeconds.set(60);
 
     await store.cancelWorkout();
 
-    expect(workoutRepo.cancelSession).toHaveBeenCalled();
+    expect(workoutRepo.cancelSession).toHaveBeenCalledWith(session.id);
     expect(store.activeSession()).toBeNull();
     expect(store.selectedWorkoutExerciseId()).toBeNull();
     expect(store.restSeconds()).toBe(0);
     expect(store.successMessage()).toBe('Đã hủy buổi tập.');
+    expect(store.lastCancelledSessionId()).toBe(session.id);
+  });
+
+  it('undoCancelWorkout restores active session and clears undo handle', async () => {
+    const session = workoutSession();
+    store.lastCancelledSessionId.set(session.id);
+    workoutRepo.getActiveSession.and.resolveTo(session);
+
+    await store.undoCancelWorkout();
+
+    expect(workoutRepo.undoCancel).toHaveBeenCalledWith(session.id);
+    expect(store.activeSession()?.id).toBe(session.id);
+    expect(store.lastCancelledSessionId()).toBeNull();
+    expect(store.successMessage()).toBe('Đã khôi phục buổi tập.');
+  });
+
+  it('dismissCancelUndo clears handle without calling repo', () => {
+    store.lastCancelledSessionId.set('abc');
+    store.dismissCancelUndo();
+    expect(store.lastCancelledSessionId()).toBeNull();
+    expect(workoutRepo.undoCancel).not.toHaveBeenCalled();
   });
 
   it('updateSet calls repo with full draft and refreshes session', async () => {

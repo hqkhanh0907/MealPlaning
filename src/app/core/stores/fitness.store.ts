@@ -51,6 +51,13 @@ export class FitnessStore {
    * the modal or starts a new workout.
    */
   readonly lastCompletedSession = signal<WorkoutSessionDetail | null>(null);
+
+  /**
+   * Id of the session most recently soft-cancelled by the user. Hub renders an
+   * undo snackbar while non-null; cleared on undo, on dismiss, or on next
+   * session start.
+   */
+  readonly lastCancelledSessionId = signal<string | null>(null);
   readonly selectedWorkoutExerciseId = signal<string | null>(null);
   readonly setDraft = signal<WorkoutSetDraft>({ ...DEFAULT_SET_DRAFT });
   readonly progress = signal<FitnessProgressSummary | null>(null);
@@ -456,6 +463,8 @@ export class FitnessStore {
     this.errorMessage.set(null);
     try {
       await this.workoutRepo.cancelSession(session.id);
+      // Remember which session was cancelled so the UI can offer undo.
+      this.lastCancelledSessionId.set(session.id);
       this.activeSession.set(null);
       this.selectedWorkoutExerciseId.set(null);
       this.restSeconds.set(0);
@@ -465,6 +474,33 @@ export class FitnessStore {
     } catch (error) {
       this.errorMessage.set(toErrorMessage(error));
     }
+  }
+
+  /**
+   * Restore the most recently soft-cancelled session. Idempotent: clears the
+   * undo handle on success or failure so the snackbar doesn't linger.
+   */
+  async undoCancelWorkout(): Promise<void> {
+    const sessionId = this.lastCancelledSessionId();
+    if (!sessionId) return;
+
+    this.errorMessage.set(null);
+    try {
+      await this.workoutRepo.undoCancel(sessionId);
+      const restored = await this.workoutRepo.getActiveSession();
+      this.activeSession.set(restored);
+      await this.refresh();
+      this.successMessage.set('Đã khôi phục buổi tập.');
+    } catch (error) {
+      this.errorMessage.set(toErrorMessage(error));
+    } finally {
+      this.lastCancelledSessionId.set(null);
+    }
+  }
+
+  /** Dismiss the undo handle without restoring (timeout or user dismiss). */
+  dismissCancelUndo(): void {
+    this.lastCancelledSessionId.set(null);
   }
 
   async deleteSet(setId: string): Promise<void> {

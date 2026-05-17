@@ -258,7 +258,7 @@ describe('Fitness repositories', () => {
     expect(refreshed!.total_volume).toBe(0);
   });
 
-  it('cancelSession deletes an in-progress session entirely and refuses completed sessions', async () => {
+  it('cancelSession soft-cancels in-progress session (preserves row + child sets), refuses completed, supports undo', async () => {
     await planRepo.ensurePresetPlans();
     const today = await planRepo.getTodayTrainingDay('2026-05-11');
     const live = await workoutRepo.startGuidedSession(today!.id, new Date('2026-05-11T07:00:00'));
@@ -270,24 +270,55 @@ describe('Fitness repositories', () => {
       notes: null,
     });
 
-    await workoutRepo.cancelSession(live.id);
+    await workoutRepo.cancelSession(live.id, new Date('2026-05-11T07:15:00Z'));
 
-    expect(await workoutRepo.getSession(live.id)).toBeNull();
+    // Soft delete: row preserved, just status flipped + cancelled_at set.
+    const cancelled = await workoutRepo.getSession(live.id);
+    expect(cancelled).not.toBeNull();
+    expect(cancelled!.exercises[0].sets.length).toBe(1); // child rows preserved
+    const cancelledRow = await db.getOne<{ status: string; cancelled_at: string | null }>(
+      `SELECT status, cancelled_at FROM workout_session WHERE id = ?`,
+      [live.id],
+    );
+    expect(cancelledRow!.status).toBe('cancelled');
+    expect(cancelledRow!.cancelled_at).toBe('2026-05-11T07:15:00.000Z');
+    // Cancelled session is NOT an active session.
     expect(await workoutRepo.getActiveSession()).toBeNull();
 
-    // Completed session is NOT cancellable via this API.
-    const second = await workoutRepo.startGuidedSession(today!.id, new Date('2026-05-11T08:00:00'));
-    await workoutRepo.addSet(second.exercises[0].id, {
-      weightKg: 80,
-      reps: 5,
-      restSeconds: 90,
-      effort: null,
-      notes: null,
-    });
-    await workoutRepo.completeSession(second.id, new Date('2026-05-11T08:30:00'));
+    // Idempotent re-cancel.
+    await workoutRepo.cancelSession(live.id, new Date('2026-05-11T07:20:00Z'));
+    const afterReCancel = await db.getOne<{ cancelled_at: string }>(
+      `SELECT cancelled_at FROM workout_session WHERE id = ?`,
+      [live.id],
+    );
+    expect(afterReCancel!.cancelled_at).toBe('2026-05-11T07:15:00.000Z'); // unchanged
 
-    await expectAsync(workoutRepo.cancelSession(second.id)).toBeRejectedWithError(
+    // Undo restores 'active' status and clears cancelled_at.
+    await workoutRepo.undoCancel(live.id);
+    const restored = await workoutRepo.getActiveSession();
+    expect(restored).not.toBeNull();
+    expect(restored!.id).toBe(live.id);
+    expect(restored!.exercises[0].sets.length).toBe(1); // sets still intact
+
+    // Completed session is NOT cancellable via this API.
+    await workoutRepo.completeSession(live.id, new Date('2026-05-11T08:30:00'));
+    await expectAsync(workoutRepo.cancelSession(live.id)).toBeRejectedWithError(
       /already completed/,
+    );
+  });
+
+  it('undoCancel refuses when another active session exists', async () => {
+    await planRepo.ensurePresetPlans();
+    const today = await planRepo.getTodayTrainingDay('2026-05-11');
+    const first = await workoutRepo.startGuidedSession(today!.id, new Date('2026-05-11T07:00:00'));
+    await workoutRepo.cancelSession(first.id);
+
+    // Spawn another active session — first session can no longer be undone.
+    const second = await workoutRepo.startGuidedSession(today!.id, new Date('2026-05-11T08:00:00'));
+    expect(second.id).not.toBe(first.id);
+
+    await expectAsync(workoutRepo.undoCancel(first.id)).toBeRejectedWithError(
+      /another active session/,
     );
   });
 
