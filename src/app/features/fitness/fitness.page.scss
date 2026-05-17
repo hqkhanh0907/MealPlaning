@@ -592,3 +592,46 @@
     font-weight: 600;
   }
 }
+
+/* Active plan card — compact strip when a plan is active.
+   Replaces the full "Chọn giáo án" picker until the user taps "Đổi". */
+.active-plan-card {
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+  }
+
+  &__meta {
+    display: grid;
+    gap: 2px;
+
+    h2 {
+      margin: 0;
+    }
+  }
+
+  &__sub {
+    color: var(--text-secondary);
+    font-size: var(--font-size-body-sm);
+  }
+
+  &__switch {
+    flex-shrink: 0;
+    min-height: 36px;
+    padding: 0 var(--space-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: var(--font-size-body-sm);
+    font-weight: 500;
+    cursor: pointer;
+
+    &:active {
+      background: var(--bg-muted);
+    }
+  }
+}

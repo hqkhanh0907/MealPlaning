@@ -22,83 +22,100 @@
     <p class="status-banner status-banner--success" role="status">{{ success }}</p>
   }
 
-  <!-- Giáo án -->
-  <section class="fitness-card" aria-labelledby="plan-title">
-    <header class="section-header">
-      <div>
-        <p class="eyebrow">Giáo án</p>
-        <h2 id="plan-title">Chọn giáo án</h2>
-      </div>
-    </header>
-
-    <div class="ai-plan-callout ai-plan-callout--compact">
-      <div class="ai-plan-callout__text">
-        <strong>Giáo án AI riêng cho bạn</strong>
-        @if (fitness.aiPlanRationale(); as rationale) {
-          <small>{{ rationale }}</small>
-        }
-      </div>
-      <ion-button
-        fill="outline"
-        size="small"
-        (click)="fitness.generateAiCustomPlan()"
-        [disabled]="fitness.aiPlanLoading() || fitness.activeSession() !== null"
-        [attr.aria-label]="
-          fitness.activeSession() !== null
-            ? 'Đang có buổi tập, hoàn thành trước khi tạo giáo án AI'
-            : 'Tạo giáo án AI riêng'
-        "
-      >
-        <ion-icon slot="start" name="sparkles-outline" />
-        {{ fitness.aiPlanLoading() ? 'Đang tạo...' : 'Tạo' }}
-      </ion-button>
-    </div>
-
-    <div class="plan-grid">
-      @for (plan of fitness.plans(); track plan.id) {
-        <article class="plan-card" [class.plan-card--active]="plan.is_active === 1">
-          <div>
-            <strong>{{ plan.name }}</strong>
-            <span>{{ plan.frequency }} buổi/tuần · {{ plan.planned_exercises }} bài</span>
-          </div>
-          <p>{{ plan.description }}</p>
-          <ion-button
-            fill="clear"
-            size="small"
-            (click)="fitness.activatePlan(plan.type)"
-            [disabled]="
-              fitness.activeSession() !== null || plan.type === 'ai_custom' || plan.is_active === 1
-            "
-            [attr.aria-label]="
-              fitness.activeSession() !== null
-                ? 'Đang có buổi tập, hoàn thành trước khi đổi giáo án'
-                : plan.is_active === 1
-                  ? plan.name + ' đang được chọn'
-                  : 'Chọn ' + plan.name
-            "
-          >
-            {{
-              fitness.activeSession() !== null && plan.is_active !== 1
-                ? 'Hoàn thành buổi hiện tại'
-                : plan.is_active === 1
-                  ? 'Đang dùng'
-                  : 'Chọn'
-            }}
-          </ion-button>
-        </article>
-      }
-    </div>
-  </section>
-
-  <!-- Lịch tuần: chỉ render khi có activePlan -->
-  @if (fitness.activePlan(); as activePlan) {
-    <section class="fitness-card" aria-labelledby="week-title">
+  <!-- Giáo án — full picker chỉ render khi CHƯA có activePlan (first-run).
+       Khi đã có active: collapse thành compact strip phía dưới (active-plan card). -->
+  @if (!fitness.activePlan()) {
+    <section class="fitness-card" aria-labelledby="plan-title">
       <header class="section-header">
         <div>
-          <p class="eyebrow">Lịch tuần</p>
-          <h2 id="week-title">{{ activePlan.name }}</h2>
+          <p class="eyebrow">Giáo án</p>
+          <h2 id="plan-title">Chọn giáo án</h2>
         </div>
       </header>
+
+      <div class="ai-plan-callout ai-plan-callout--compact">
+        <div class="ai-plan-callout__text">
+          <strong>Giáo án AI riêng cho bạn</strong>
+          @if (fitness.aiPlanRationale(); as rationale) {
+            <small>{{ rationale }}</small>
+          }
+        </div>
+        <ion-button
+          fill="outline"
+          size="small"
+          (click)="fitness.generateAiCustomPlan()"
+          [disabled]="fitness.aiPlanLoading() || fitness.activeSession() !== null"
+          [attr.aria-label]="
+            fitness.activeSession() !== null
+              ? 'Đang có buổi tập, hoàn thành trước khi tạo giáo án AI'
+              : 'Tạo giáo án AI riêng'
+          "
+        >
+          <ion-icon slot="start" name="sparkles-outline" />
+          {{ fitness.aiPlanLoading() ? 'Đang tạo...' : 'Tạo' }}
+        </ion-button>
+      </div>
+
+      <div class="plan-grid">
+        @for (plan of fitness.plans(); track plan.id) {
+          <article class="plan-card" [class.plan-card--active]="plan.is_active === 1">
+            <div>
+              <strong>{{ plan.name }}</strong>
+              <span>{{ plan.frequency }} buổi/tuần · {{ plan.planned_exercises }} bài</span>
+            </div>
+            <p>{{ plan.description }}</p>
+            <ion-button
+              fill="clear"
+              size="small"
+              (click)="fitness.activatePlan(plan.type)"
+              [disabled]="
+                fitness.activeSession() !== null || plan.type === 'ai_custom' || plan.is_active === 1
+              "
+              [attr.aria-label]="
+                fitness.activeSession() !== null
+                  ? 'Đang có buổi tập, hoàn thành trước khi đổi giáo án'
+                  : plan.is_active === 1
+                    ? plan.name + ' đang được chọn'
+                    : 'Chọn ' + plan.name
+              "
+            >
+              {{
+                fitness.activeSession() !== null && plan.is_active !== 1
+                  ? 'Hoàn thành buổi hiện tại'
+                  : plan.is_active === 1
+                    ? 'Đang dùng'
+                    : 'Chọn'
+              }}
+            </ion-button>
+          </article>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Active plan strip: compact card gộp tên giáo án + lịch tuần.
+       Render khi có activePlan. Tap chevron để bung danh sách giáo án khác. -->
+  @if (fitness.activePlan(); as activePlan) {
+    <section class="fitness-card active-plan-card" aria-labelledby="active-plan-title">
+      <header class="active-plan-card__head">
+        <div class="active-plan-card__meta">
+          <p class="eyebrow">Giáo án</p>
+          <h2 id="active-plan-title">{{ activePlan.name }}</h2>
+          <span class="active-plan-card__sub"
+            >{{ activePlan.frequency }} buổi/tuần · {{ activePlan.planned_exercises }} bài</span
+          >
+        </div>
+        <button
+          type="button"
+          class="active-plan-card__switch"
+          (click)="toggleSwitchPlan()"
+          [attr.aria-expanded]="switchPlanOpen()"
+          [attr.aria-label]="switchPlanOpen() ? 'Đóng danh sách giáo án' : 'Đổi giáo án'"
+        >
+          {{ switchPlanOpen() ? 'Đóng' : 'Đổi' }}
+        </button>
+      </header>
+
       <div class="week-strip" aria-label="Lịch tập trong tuần">
         @for (day of activePlan.days; track day.id) {
           <article class="week-day" [class.week-day--rest]="day.is_rest_day === 1">
@@ -114,6 +131,56 @@
           </article>
         }
       </div>
+
+      @if (switchPlanOpen()) {
+        <div class="ai-plan-callout ai-plan-callout--compact">
+          <div class="ai-plan-callout__text">
+            <strong>Giáo án AI riêng cho bạn</strong>
+            @if (fitness.aiPlanRationale(); as rationale) {
+              <small>{{ rationale }}</small>
+            }
+          </div>
+          <ion-button
+            fill="outline"
+            size="small"
+            (click)="fitness.generateAiCustomPlan()"
+            [disabled]="fitness.aiPlanLoading() || fitness.activeSession() !== null"
+          >
+            <ion-icon slot="start" name="sparkles-outline" />
+            {{ fitness.aiPlanLoading() ? 'Đang tạo...' : 'Tạo' }}
+          </ion-button>
+        </div>
+
+        <div class="plan-grid">
+          @for (plan of fitness.plans(); track plan.id) {
+            <article class="plan-card" [class.plan-card--active]="plan.is_active === 1">
+              <div>
+                <strong>{{ plan.name }}</strong>
+                <span>{{ plan.frequency }} buổi/tuần · {{ plan.planned_exercises }} bài</span>
+              </div>
+              <p>{{ plan.description }}</p>
+              <ion-button
+                fill="clear"
+                size="small"
+                (click)="fitness.activatePlan(plan.type)"
+                [disabled]="
+                  fitness.activeSession() !== null ||
+                  plan.type === 'ai_custom' ||
+                  plan.is_active === 1
+                "
+              >
+                {{
+                  fitness.activeSession() !== null && plan.is_active !== 1
+                    ? 'Hoàn thành buổi hiện tại'
+                    : plan.is_active === 1
+                      ? 'Đang dùng'
+                      : 'Chọn'
+                }}
+              </ion-button>
+            </article>
+          }
+        </div>
+      }
     </section>
   }
 

@@ -94,8 +94,19 @@ export default class FitnessPage {
    */
   readonly pickerOpen = signal(false);
 
+  /**
+   * Active plan card progressive-disclosure: collapsed by default to keep the
+   * hub focused on today's workout. User taps "Đổi" to expand the full plan
+   * grid + AI callout in the same card (no nav, Apple HIG: stay-in-place).
+   */
+  readonly switchPlanOpen = signal(false);
+
   openPicker(): void {
     this.pickerOpen.set(true);
+  }
+
+  toggleSwitchPlan(): void {
+    this.switchPlanOpen.update((v) => !v);
   }
 
   /**
