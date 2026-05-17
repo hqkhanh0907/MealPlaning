@@ -427,6 +427,39 @@ export class FitnessStore {
     }
   }
 
+  /**
+   * p3-2 — Skip the current set. Persists a placeholder row with status='skipped'
+   * so the session timeline reflects user intent and progressive overload logic
+   * can distinguish skipped sets from missing data. Uses the current draft's
+   * planned weight/reps as a hint (won't be counted toward volume).
+   */
+  async skipSet(): Promise<void> {
+    const exercise = this.selectedWorkoutExercise();
+    if (!exercise) {
+      this.errorMessage.set('Chọn một bài tập trước khi bỏ qua set.');
+      return;
+    }
+
+    const draftSnapshot = this.setDraft();
+    const plannedWeightKg = Number.parseFloat(draftSnapshot.weightKg) || 0;
+    const plannedReps = Number.parseInt(draftSnapshot.reps, 10) || 0;
+
+    this.errorMessage.set(null);
+    try {
+      const { session: refreshedSession } = await this.workoutRepo.skipSet(
+        exercise.id,
+        plannedWeightKg,
+        plannedReps,
+      );
+      this.activeSession.set(refreshedSession);
+      this.setDraft.update((current) => ({ ...current, notes: '' }));
+      this.clearPersistedDraft(exercise.id);
+      this.successMessage.set('Đã bỏ qua set.');
+    } catch (error) {
+      this.errorMessage.set(toErrorMessage(error));
+    }
+  }
+
   async completeWorkout(): Promise<void> {
     const session = this.activeSession();
     if (!session) return;

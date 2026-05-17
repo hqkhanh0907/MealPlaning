@@ -28,7 +28,7 @@
  *   docs/4-architecture/decisions/calendar-tracking.md (D8 v2)
  */
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 /**
  * Final DDL — gram-only nutrition, light-only theme. Idempotent
@@ -603,5 +603,37 @@ export function buildWorkoutSessionStatusMigration(): {
   return {
     version: 5,
     statements: WORKOUT_SESSION_STATUS_DDL,
+  };
+}
+
+const WORKOUT_SET_STATUS_DDL = [
+  // p3-2: workout_set.status state machine + completed_at.
+  //
+  // Pre-v6: every persisted set was implicitly "logged" — no distinction
+  // between completed reps and intentionally-skipped sets. v6 introduces a
+  // 2-state status ('logged' | 'skipped') so UI can render skip indicators,
+  // exclude skipped sets from totals/PR calc, and let the user resume a
+  // partially-skipped session deterministically.
+  //
+  // completed_at preserves the actual log time (vs. created_at which is set
+  // server-side on INSERT and used for ordering). Skipped sets have
+  // completed_at NULL.
+  //
+  // Backfill: all pre-v6 rows are 'logged' (they got persisted via addSet,
+  // which had no skip path). completed_at backfilled from created_at so
+  // historical sets keep a sensible timestamp.
+  `ALTER TABLE workout_set ADD COLUMN status TEXT NOT NULL DEFAULT 'logged'`,
+  `ALTER TABLE workout_set ADD COLUMN completed_at TEXT`,
+  `UPDATE workout_set SET completed_at = created_at WHERE status = 'logged'`,
+  `CREATE INDEX IF NOT EXISTS idx_ws_set_status ON workout_set(status)`,
+] as const;
+
+export function buildWorkoutSetStatusMigration(): {
+  version: number;
+  statements: readonly string[];
+} {
+  return {
+    version: 6,
+    statements: WORKOUT_SET_STATUS_DDL,
   };
 }

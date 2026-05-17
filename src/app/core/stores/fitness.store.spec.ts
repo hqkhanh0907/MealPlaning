@@ -77,6 +77,8 @@ describe('FitnessStore', () => {
         rest_seconds: 90,
         effort: 'just_right',
         notes: null,
+        status: 'logged',
+        completed_at: '2026-05-11T07:00:00',
         created_at: '2026-05-11T07:00:00',
       },
       session: workoutSession(),

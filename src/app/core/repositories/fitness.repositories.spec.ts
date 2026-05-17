@@ -234,6 +234,46 @@ describe('Fitness repositories', () => {
     await expectAsync(workoutRepo.deleteSet('does-not-exist')).toBeResolved();
   });
 
+  it('skipSet persists a skipped placeholder row that does not count toward volume', async () => {
+    await planRepo.ensurePresetPlans();
+    await seedProfile();
+    const today = await planRepo.getTodayTrainingDay('2026-05-11');
+    const session = await workoutRepo.startGuidedSession(
+      today!.id,
+      new Date('2026-05-11T08:30:00'),
+    );
+    const we = session.exercises[0];
+
+    await workoutRepo.addSet(we.id, {
+      weightKg: 40,
+      reps: 5,
+      restSeconds: 90,
+      effort: 'just_right',
+      notes: null,
+    });
+
+    const skipResult = await workoutRepo.skipSet(we.id, 50, 8);
+    expect(skipResult.set.status).toBe('skipped');
+    expect(skipResult.set.completed_at).toBeNull();
+    expect(skipResult.set.set_number).toBe(2);
+
+    await workoutRepo.addSet(we.id, {
+      weightKg: 40,
+      reps: 5,
+      restSeconds: 90,
+      effort: 'just_right',
+      notes: null,
+    });
+
+    const detail = await workoutRepo.getSession(session.id);
+    const sets = detail!.exercises[0].sets;
+    expect(sets.map((s) => s.set_number)).toEqual([1, 2, 3]);
+    expect(sets[1].status).toBe('skipped');
+    // 2 logged sets at 40x5 = 400; skipped row contributes 0.
+    expect(detail!.total_volume).toBe(400);
+    expect(detail!.exercises[0].total_volume).toBe(400);
+  });
+
   it('removeExerciseFromSession cascades sets and updates session totals', async () => {
     await planRepo.ensurePresetPlans();
     const today = await planRepo.getTodayTrainingDay('2026-05-11');

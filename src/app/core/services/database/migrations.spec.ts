@@ -3,34 +3,38 @@ import {
   buildHybridPolicySchemaMigration,
   buildInitialSchemaMigration,
   buildWorkoutSessionStatusMigration,
+  buildWorkoutSetStatusMigration,
   buildWorkoutSetUpdatedAtMigration,
   SCHEMA_VERSION,
 } from './schema';
 import { MIGRATION_REGISTRY } from './migrations';
 
 describe('MIGRATION_REGISTRY', () => {
-  it('exposes v1 + v2 + v3 + v4 + v5 migrations matching SCHEMA_VERSION', () => {
-    expect(SCHEMA_VERSION).toBe(5);
-    expect(MIGRATION_REGISTRY.length).toBe(5);
+  it('exposes v1..v6 migrations matching SCHEMA_VERSION', () => {
+    expect(SCHEMA_VERSION).toBe(6);
+    expect(MIGRATION_REGISTRY.length).toBe(6);
     expect(MIGRATION_REGISTRY[0].version).toBe(1);
     expect(MIGRATION_REGISTRY[1].version).toBe(2);
     expect(MIGRATION_REGISTRY[2].version).toBe(3);
     expect(MIGRATION_REGISTRY[3].version).toBe(4);
     expect(MIGRATION_REGISTRY[4].version).toBe(5);
-    expect(MIGRATION_REGISTRY[4].version).toBe(SCHEMA_VERSION);
+    expect(MIGRATION_REGISTRY[5].version).toBe(6);
+    expect(MIGRATION_REGISTRY[5].version).toBe(SCHEMA_VERSION);
   });
 
-  it('uses the canonical builders (v1, hybrid-policy v2, fiber snapshot v3, workout_set.updated_at v4, workout_session.status v5)', () => {
+  it('uses the canonical builders (v1, hybrid-policy v2, fiber snapshot v3, workout_set.updated_at v4, workout_session.status v5, workout_set.status v6)', () => {
     const v1 = buildInitialSchemaMigration();
     const v2 = buildHybridPolicySchemaMigration();
     const v3 = buildFiberSnapshotSchemaMigration();
     const v4 = buildWorkoutSetUpdatedAtMigration();
     const v5 = buildWorkoutSessionStatusMigration();
+    const v6 = buildWorkoutSetStatusMigration();
     expect(MIGRATION_REGISTRY[0].statements).toEqual(v1.statements);
     expect(MIGRATION_REGISTRY[1].statements).toEqual(v2.statements);
     expect(MIGRATION_REGISTRY[2].statements).toEqual(v3.statements);
     expect(MIGRATION_REGISTRY[3].statements).toEqual(v4.statements);
     expect(MIGRATION_REGISTRY[4].statements).toEqual(v5.statements);
+    expect(MIGRATION_REGISTRY[5].statements).toEqual(v6.statements);
   });
 
   it('keeps migrations sorted by ascending version', () => {

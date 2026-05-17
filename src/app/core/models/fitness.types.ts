@@ -76,6 +76,8 @@ export interface ActiveTrainingPlan extends TrainingPlanSummary {
   days: TrainingPlanDayWithExercises[];
 }
 
+export type WorkoutSetStatus = 'logged' | 'skipped';
+
 export interface WorkoutSet {
   id: string;
   workout_exercise_id: string;
@@ -85,6 +87,8 @@ export interface WorkoutSet {
   rest_seconds: number | null;
   effort: WorkoutEffort | null;
   notes: string | null;
+  status: WorkoutSetStatus;
+  completed_at: string | null;
   created_at: string;
 }
 

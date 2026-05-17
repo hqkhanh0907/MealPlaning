@@ -673,3 +673,22 @@
     opacity: 0.7;
   }
 }
+
+// p3-2 — Skipped set row variant. Muted background + strikethrough-style
+// emphasis so users see at a glance which sets were intentionally skipped
+// vs. logged. Doesn't count toward volume — the visual treatment must NOT
+// look like a primary completed row.
+.set-history__item--skipped {
+  opacity: 0.6;
+  background: var(--bg-card);
+
+  .set-history__main strong {
+    color: var(--text-secondary);
+  }
+}
+
+.set-history__skipped-label {
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: var(--font-size-body);
+}

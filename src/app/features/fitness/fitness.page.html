@@ -486,6 +486,14 @@
                 <ion-icon slot="start" name="add-outline" />
                 Ghi set
               </ion-button>
+              <ion-button
+                (click)="fitness.skipSet()"
+                fill="outline"
+                color="medium"
+                aria-label="Bỏ qua set này"
+              >
+                <ion-icon slot="icon-only" name="play-skip-forward-outline" />
+              </ion-button>
               @if (selected.sets.length > 0) {
                 <ion-button
                   (click)="fitness.repeatLastSet()"
@@ -501,12 +509,16 @@
             @if (selected.sets.length > 0) {
               <div class="set-history" aria-label="Set đã ghi">
                 @for (set of selected.sets; track set.id) {
-                  <article>
+                  <article [class.set-history__item--skipped]="set.status === 'skipped'">
                     <div class="set-history__main">
                       <strong>Set {{ set.set_number }}</strong>
-                      <span>{{ set.weight_kg }} kg × {{ set.reps }}</span>
-                      @if (set.effort) {
-                        <small>{{ effortLabel(set.effort) }}</small>
+                      @if (set.status === 'skipped') {
+                        <span class="set-history__skipped-label">Đã bỏ qua</span>
+                      } @else {
+                        <span>{{ set.weight_kg }} kg × {{ set.reps }}</span>
+                        @if (set.effort) {
+                          <small>{{ effortLabel(set.effort) }}</small>
+                        }
                       }
                     </div>
                     <button

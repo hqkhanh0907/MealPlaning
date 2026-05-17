@@ -198,11 +198,13 @@ export class WorkoutRepository {
     }
 
     const id = uuidv4();
+    const completedAt = new Date().toISOString();
     await this.db.withTransaction(async () => {
       await this.db.execute(
         `INSERT INTO workout_set (
-           id, workout_exercise_id, set_number, weight_kg, reps, rest_seconds, effort, notes
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+           id, workout_exercise_id, set_number, weight_kg, reps, rest_seconds, effort, notes,
+           status, completed_at
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'logged', ?)`,
         [
           id,
           workoutExerciseId,
@@ -212,6 +214,7 @@ export class WorkoutRepository {
           input.restSeconds,
           input.effort,
           input.notes,
+          completedAt,
         ],
       );
       await this.syncTotals(row.workout_session_id);
@@ -219,7 +222,7 @@ export class WorkoutRepository {
 
     const created = await this.db.getOne<WorkoutSet>(
       `SELECT id, workout_exercise_id, set_number, weight_kg, reps, rest_seconds,
-              effort, notes, created_at
+              effort, notes, status, completed_at, created_at
          FROM workout_set
         WHERE id = ?`,
       [id],
@@ -528,7 +531,7 @@ export class WorkoutRepository {
   private async getSets(workoutExerciseId: string): Promise<WorkoutSet[]> {
     return this.db.query<WorkoutSet>(
       `SELECT id, workout_exercise_id, set_number, weight_kg, reps, rest_seconds,
-              effort, notes, created_at
+              effort, notes, status, completed_at, created_at
          FROM workout_set
         WHERE workout_exercise_id = ?
         ORDER BY set_number ASC`,
@@ -536,13 +539,73 @@ export class WorkoutRepository {
     );
   }
 
+  /**
+   * Skip a set: insert a placeholder row with status='skipped' and the set's
+   * planned weight/reps preserved as a hint (for future repeat/edit). Skipped
+   * rows do NOT contribute to total_volume (enforced by syncTotals).
+   *
+   * Returns the persisted row + refreshed session for store sync.
+   */
+  async skipSet(
+    workoutExerciseId: string,
+    plannedWeightKg = 0,
+    plannedReps = 0,
+  ): Promise<{ set: WorkoutSet; session: WorkoutSessionDetail }> {
+    const row = await this.db.getOne<{ workout_session_id: string; set_number: number }>(
+      `SELECT
+         we.workout_session_id,
+         COALESCE(MAX(ws.set_number), 0) + 1 AS set_number
+       FROM workout_exercise we
+       LEFT JOIN workout_set ws ON ws.workout_exercise_id = we.id
+       WHERE we.id = ?
+       GROUP BY we.id`,
+      [workoutExerciseId],
+    );
+    if (!row) {
+      throw new Error(`WorkoutRepository: workout exercise '${workoutExerciseId}' not found.`);
+    }
+
+    const id = uuidv4();
+    await this.db.withTransaction(async () => {
+      await this.db.execute(
+        `INSERT INTO workout_set (
+           id, workout_exercise_id, set_number, weight_kg, reps, rest_seconds, effort, notes,
+           status, completed_at
+         ) VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, 'skipped', NULL)`,
+        [id, workoutExerciseId, row.set_number, plannedWeightKg, plannedReps],
+      );
+      await this.syncTotals(row.workout_session_id);
+    });
+
+    const created = await this.db.getOne<WorkoutSet>(
+      `SELECT id, workout_exercise_id, set_number, weight_kg, reps, rest_seconds,
+              effort, notes, status, completed_at, created_at
+         FROM workout_set
+        WHERE id = ?`,
+      [id],
+    );
+    if (!created) {
+      throw new Error('WorkoutRepository: failed to insert skipped set.');
+    }
+    const session = await this.getSession(row.workout_session_id);
+    if (!session) {
+      throw new Error(
+        `WorkoutRepository: session '${row.workout_session_id}' vanished after skipSet.`,
+      );
+    }
+    return { set: created, session };
+  }
+
   private async syncTotals(sessionId: string): Promise<void> {
+    // Only 'logged' sets contribute to total_volume — skipped placeholders
+    // must not inflate the session/exercise summary.
     await this.db.execute(
       `UPDATE workout_exercise
           SET total_volume = (
             SELECT COALESCE(SUM(weight_kg * reps), 0)
               FROM workout_set
              WHERE workout_set.workout_exercise_id = workout_exercise.id
+               AND workout_set.status = 'logged'
           )
         WHERE workout_session_id = ?`,
       [sessionId],
