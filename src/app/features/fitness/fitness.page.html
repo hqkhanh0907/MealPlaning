@@ -264,12 +264,11 @@
             [disabled]="!fitness.canCompleteWorkout()"
             [attr.aria-label]="
               fitness.canCompleteWorkout()
-                ? 'Hoàn thành buổi tập'
+                ? 'Hoàn thành (header)'
                 : 'Cần log ít nhất 1 set trước khi hoàn thành buổi tập'
             "
           >
-            <ion-icon slot="start" name="checkmark-circle-outline" />
-            Hoàn thành
+            <ion-icon slot="icon-only" name="checkmark-circle-outline" />
           </ion-button>
         </div>
       </header>
@@ -463,6 +462,15 @@
         <p class="eyebrow">Tiến trình</p>
         <h2 id="progress-title">Khối lượng & sức mạnh</h2>
       </div>
+      <ion-button
+        fill="clear"
+        size="small"
+        [routerLink]="['/tabs/fitness/history']"
+        aria-label="Xem lịch sử buổi tập"
+      >
+        <ion-icon slot="start" name="time-outline" aria-hidden="true" />
+        Lịch sử
+      </ion-button>
     </header>
 
     @if (fitness.progress(); as progress) {
@@ -529,3 +537,20 @@
     }
   </section>
 </ion-content>
+
+@if (fitness.activeSession() && fitness.canCompleteWorkout()) {
+  <ion-footer class="active-workout-footer">
+    <ion-toolbar>
+      <ion-button
+        expand="block"
+        fill="solid"
+        size="default"
+        (click)="fitness.completeWorkout()"
+        aria-label="Hoàn thành buổi tập"
+      >
+        <ion-icon slot="start" name="checkmark-circle-outline" aria-hidden="true" />
+        Hoàn thành buổi tập
+      </ion-button>
+    </ion-toolbar>
+  </ion-footer>
+}

@@ -576,3 +576,21 @@
     grid-template-columns: 1fr;
   }
 }
+
+// F-008-redux: bottom-anchored Hoàn thành footer on the hub when active session has ≥1 set.
+// Mirrors active-workout.page.scss footer pattern. Primary destination action lives at thumb reach,
+// destructive cancel stays demoted in the header.
+.active-workout-footer {
+  ion-toolbar {
+    --background: var(--ion-card-background);
+    --border-color: var(--border-color);
+    --padding-start: var(--space-lg);
+    --padding-end: var(--space-lg);
+    --padding-top: var(--space-sm);
+    --padding-bottom: var(--space-sm);
+  }
+  ion-button {
+    --border-radius: var(--radius-md);
+    font-weight: 600;
+  }
+}

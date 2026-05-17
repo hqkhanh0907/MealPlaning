@@ -3,13 +3,14 @@ import {
   IonButton,
   IonButtons,
   IonContent,
+  IonFooter,
   IonHeader,
   IonIcon,
   IonToolbar,
   IonTitle,
   AlertController,
 } from '@ionic/angular/standalone';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
 import {
   addOutline,
@@ -26,6 +27,7 @@ import {
   settingsOutline,
   sparklesOutline,
   statsChartOutline,
+  timeOutline,
   timerOutline,
   trashOutline,
 } from 'ionicons/icons';
@@ -45,7 +47,18 @@ const EFFORT_LABELS: Record<WorkoutEffort, string> = {
   templateUrl: './fitness.page.html',
   styleUrl: './fitness.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RestTimer, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon],
+  imports: [
+    RestTimer,
+    RouterLink,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonFooter,
+    IonButtons,
+    IonButton,
+    IonIcon,
+  ],
 })
 export default class FitnessPage {
   private readonly router = inject(Router);
@@ -68,6 +81,7 @@ export default class FitnessPage {
       settingsOutline,
       sparklesOutline,
       statsChartOutline,
+      timeOutline,
       timerOutline,
       trashOutline,
     });
