@@ -37,6 +37,7 @@ const ALLOWED_PREFIXES = [
   '.qa-evidence/',
   'docs/3-design/explorations/',  // pre-direction exploration artifacts (color/typo/spacing decks)
   'docs/superpowers/specs/',  // brainstorming design specs may discuss retired patterns
+  'docs/superpowers/plans/',  // implementation plans may reference guard script names / migration history
   '.github/instructions/memory/',  // historical session memory
   '.github/instructions/',  // legacy IDE-assistant instruction docs (will be cleaned up later)
   '.github/agents/',  // BMAD agent prompts
