@@ -281,6 +281,12 @@
       (closed)="pickerOpen.set(false)"
     />
 
+    <app-workout-summary-modal
+      [isOpen]="fitness.lastCompletedSession() !== null"
+      [session]="fitness.lastCompletedSession()"
+      (closed)="fitness.dismissCompletedSummary()"
+    />
+
   </section>
 
   @if (fitness.activeSession(); as session) {

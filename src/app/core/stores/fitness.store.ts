@@ -44,6 +44,13 @@ export class FitnessStore {
   readonly todayDay = signal<TrainingPlanDayWithExercises | null>(null);
   readonly exercises = signal<Exercise[]>([]);
   readonly activeSession = signal<WorkoutSessionDetail | null>(null);
+
+  /**
+   * Snapshot of the most recently completed session, used by the
+   * finish-summary modal in the hub. Cleared when the user dismisses
+   * the modal or starts a new workout.
+   */
+  readonly lastCompletedSession = signal<WorkoutSessionDetail | null>(null);
   readonly selectedWorkoutExerciseId = signal<string | null>(null);
   readonly setDraft = signal<WorkoutSetDraft>({ ...DEFAULT_SET_DRAFT });
   readonly progress = signal<FitnessProgressSummary | null>(null);
@@ -424,6 +431,10 @@ export class FitnessStore {
     this.errorMessage.set(null);
     try {
       await this.workoutRepo.completeSession(session.id);
+      // Fetch the finalized session (with completed_at + duration) so the
+      // summary modal can show duration alongside sets/volume.
+      const finalized = await this.workoutRepo.getSession(session.id);
+      this.lastCompletedSession.set(finalized ?? session);
       this.activeSession.set(null);
       this.selectedWorkoutExerciseId.set(null);
       await this.refresh();
@@ -431,6 +442,11 @@ export class FitnessStore {
     } catch (error) {
       this.errorMessage.set(toErrorMessage(error));
     }
+  }
+
+  /** Dismiss the finish-summary modal in the hub. */
+  dismissCompletedSummary(): void {
+    this.lastCompletedSession.set(null);
   }
 
   async cancelWorkout(): Promise<void> {

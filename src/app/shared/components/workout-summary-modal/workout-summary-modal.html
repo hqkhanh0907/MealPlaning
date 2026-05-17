@@ -1,0 +1,70 @@
+<ion-modal
+  [isOpen]="isOpen"
+  [breakpoints]="[0, 0.7, 0.95]"
+  [initialBreakpoint]="0.7"
+  [handle]="true"
+  (ionModalDidDismiss)="onIonDismiss()"
+>
+  <ng-template>
+    <ion-header class="wsm-header">
+      <ion-toolbar class="wsm-toolbar">
+        <ion-title class="wsm-title">Hoàn tất buổi tập</ion-title>
+        <button slot="end" type="button" class="wsm-close" aria-label="Đóng" (click)="close()">
+          <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+        </button>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="wsm-content">
+      @if (session; as s) {
+        <section class="wsm-hero">
+          <ion-icon
+            class="wsm-hero__badge"
+            name="checkmark-circle-outline"
+            aria-hidden="true"
+          ></ion-icon>
+          <h2 class="wsm-hero__name">{{ s.training_day_name || (s.mode === 'guided' ? 'Buổi theo giáo án' : 'Buổi tự do') }}</h2>
+        </section>
+
+        <section class="wsm-stats" aria-label="Tổng kết buổi tập">
+          <article class="wsm-stat">
+            <ion-icon name="barbell-outline" aria-hidden="true"></ion-icon>
+            <strong>{{ totalSets() }}</strong>
+            <span>set đã ghi</span>
+          </article>
+          <article class="wsm-stat">
+            <ion-icon name="trophy-outline" aria-hidden="true"></ion-icon>
+            <strong>{{ totalVolume() }} kg</strong>
+            <span>khối lượng</span>
+          </article>
+          <article class="wsm-stat">
+            <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+            <strong>{{ durationLabel() }}</strong>
+            <span>thời lượng</span>
+          </article>
+        </section>
+
+        @if (exerciseRows().length > 0) {
+          <section class="wsm-list" aria-label="Bài đã tập">
+            <h3 class="wsm-list__title">Bài đã tập</h3>
+            <ul role="list">
+              @for (row of exerciseRows(); track row.id) {
+                <li class="wsm-row">
+                  <div class="wsm-row__main">
+                    <strong>{{ row.name }}</strong>
+                    <span>{{ row.sets }} set · {{ row.volume }} kg</span>
+                  </div>
+                  @if (row.topSet) {
+                    <span class="wsm-row__top">{{ row.topSet }}</span>
+                  }
+                </li>
+              }
+            </ul>
+          </section>
+        }
+
+        <button type="button" class="wsm-done" (click)="close()">Xong</button>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

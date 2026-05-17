@@ -203,6 +203,40 @@ describe('FitnessStore', () => {
     expect(store.lastLoggedSet()).toBeNull();
   });
 
+  it('completeWorkout snapshots the finalized session into lastCompletedSession', async () => {
+    const sessionWithSets = workoutSession({
+      exercises: [workoutExercise({ sets: [{ id: 'st-1', set_number: 1, weight_kg: 50, reps: 8 } as never] })],
+    });
+    store.activeSession.set(sessionWithSets);
+    const finalized = { ...sessionWithSets, completed_at: '2025-01-01T10:30:00.000Z', duration_minutes: 42 };
+    workoutRepo.getSession.and.resolveTo(finalized);
+
+    await store.completeWorkout();
+
+    expect(workoutRepo.completeSession).toHaveBeenCalledOnceWith(sessionWithSets.id);
+    expect(store.lastCompletedSession()).toEqual(finalized);
+    expect(store.activeSession()).toBeNull();
+    expect(store.successMessage()).toBe('Đã hoàn thành buổi tập.');
+  });
+
+  it('completeWorkout falls back to in-memory session if repo returns null', async () => {
+    const sessionWithSets = workoutSession({
+      exercises: [workoutExercise({ sets: [{ id: 'st-1', set_number: 1, weight_kg: 50, reps: 8 } as never] })],
+    });
+    store.activeSession.set(sessionWithSets);
+    workoutRepo.getSession.and.resolveTo(null);
+
+    await store.completeWorkout();
+
+    expect(store.lastCompletedSession()).toEqual(sessionWithSets);
+  });
+
+  it('dismissCompletedSummary clears the snapshot', () => {
+    store.lastCompletedSession.set(workoutSession());
+    store.dismissCompletedSummary();
+    expect(store.lastCompletedSession()).toBeNull();
+  });
+
   it('cancelWorkout deletes the session and clears local state', async () => {
     store.activeSession.set(workoutSession());
     store.selectedWorkoutExerciseId.set('we-1');

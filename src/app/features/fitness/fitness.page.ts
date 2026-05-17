@@ -33,6 +33,7 @@ import {
 import { FitnessStore } from '../../core/stores/fitness.store';
 import { RestTimer } from './components/rest-timer/rest-timer';
 import { ExercisePickerSheet } from '../../shared/components/exercise-picker-sheet/exercise-picker-sheet';
+import { WorkoutSummaryModal } from '../../shared/components/workout-summary-modal/workout-summary-modal';
 import type { WorkoutEffort } from '../../core/models/fitness.types';
 
 const EFFORT_LABELS: Record<WorkoutEffort, string> = {
@@ -50,6 +51,7 @@ const EFFORT_LABELS: Record<WorkoutEffort, string> = {
   imports: [
     RestTimer,
     ExercisePickerSheet,
+    WorkoutSummaryModal,
     RouterLink,
     IonHeader,
     IonToolbar,
