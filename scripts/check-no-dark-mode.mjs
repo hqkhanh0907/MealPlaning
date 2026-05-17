@@ -36,6 +36,7 @@ const ALLOWED_PREFIXES = [
   '.hermes/plans/',      // retro / investigation plans
   '.qa-evidence/',
   'docs/3-design/explorations/',  // pre-direction exploration artifacts (color/typo/spacing decks)
+  'docs/superpowers/specs/',  // brainstorming design specs may discuss retired patterns
   '.github/instructions/memory/',  // historical session memory
   '.github/instructions/',  // legacy IDE-assistant instruction docs (will be cleaned up later)
   '.github/agents/',  // BMAD agent prompts
@@ -46,6 +47,7 @@ const ALLOWED_FILES = [
   '.github/PULL_REQUEST_TEMPLATE.md',
   '.github/copilot-instructions.md',  // legacy AI assistant instructions, scheduled for cleanup
   'docs/5-development/deferred-items.md',  // contains ~~B7~~ CANCELLED row mentioning dark mode
+  'DESIGN.md',  // Apple design analysis source (mentions dark-mode counterparts in Known Gaps)
 ];
 
 // Patterns to flag.
