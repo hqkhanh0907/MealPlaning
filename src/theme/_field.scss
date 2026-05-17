@@ -1,0 +1,72 @@
+// Apple Field — DS v3.0 §8 (replaces floating-label canonical pattern).
+// Markup:
+//   <div class="apple-field" [class.apple-field--error]="hasError">
+//     <label class="apple-field__label" for="x">Label</label>
+//     <input class="apple-field__input" id="x" />
+//     <p class="apple-field__hint">Hint</p>
+//     <p class="apple-field__error">Error</p>
+//   </div>
+.apple-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--apple-space-xs);
+  margin-bottom: var(--apple-space-lg);
+}
+
+.apple-field__label {
+  font: var(--apple-type-caption-strong);
+  letter-spacing: var(--apple-track-caption);
+  color: var(--apple-ink);
+}
+
+.apple-field__input,
+.apple-field__picker {
+  font: var(--apple-type-body);
+  letter-spacing: var(--apple-track-body);
+  color: var(--apple-ink);
+  background: var(--apple-canvas);
+  border: 1px solid var(--apple-hairline);
+  border-radius: var(--apple-radius-sm);
+  padding: 12px 16px;
+  height: 44px;
+  outline: none;
+  width: 100%;
+  &::placeholder {
+    color: var(--apple-ink-muted-48);
+  }
+  &:focus {
+    border-color: var(--apple-primary);
+    outline: 2px solid var(--apple-primary-focus);
+    outline-offset: -1px;
+  }
+  &[disabled] {
+    opacity: 0.4;
+  }
+}
+
+.apple-field__picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+}
+
+.apple-field--error .apple-field__input,
+.apple-field--error .apple-field__picker {
+  border-color: var(--apple-semantic-danger);
+}
+
+.apple-field__hint {
+  font: var(--apple-type-caption);
+  letter-spacing: var(--apple-track-caption);
+  color: var(--apple-ink-muted-48);
+  margin: 0;
+}
+
+.apple-field__error {
+  font: var(--apple-type-caption);
+  letter-spacing: var(--apple-track-caption);
+  color: var(--apple-semantic-danger);
+  margin: 0;
+}

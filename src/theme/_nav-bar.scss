@@ -1,0 +1,34 @@
+// Apple Nav Bar — DS v3.0 §3.1 (iOS UINavigationBar, 44px standard).
+// Applied to <ion-header class="apple-nav-bar">.
+// Large title behaviour: enable on tab roots via Ionic <ion-title size="large">.
+.apple-nav-bar {
+  ion-toolbar {
+    --background: var(--apple-canvas);
+    --color: var(--apple-ink);
+    --border-color: var(--apple-divider-soft);
+    --min-height: 44px;
+    --padding-start: var(--apple-space-lg);
+    --padding-end: var(--apple-space-lg);
+  }
+
+  ion-title {
+    font: var(--apple-type-tagline);
+    letter-spacing: var(--apple-track-tagline);
+    color: var(--apple-ink);
+    padding: 0;
+  }
+
+  // Large title (only when <ion-title size="large"> on tab root pages)
+  ion-title[size='large'] {
+    font: var(--apple-type-display-md);
+    letter-spacing: var(--apple-track-display-md);
+    padding: var(--apple-space-lg);
+  }
+
+  ion-back-button,
+  ion-button {
+    --color: var(--apple-primary);
+    font: var(--apple-type-body);
+    letter-spacing: var(--apple-track-body);
+  }
+}

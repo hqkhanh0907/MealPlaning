@@ -1,0 +1,44 @@
+// Apple Card — DS v3.0 §7. Light-only. Product photo gets single drop-shadow.
+.apple-card {
+  background: var(--apple-canvas);
+  border: 1px solid var(--apple-hairline);
+  border-radius: var(--apple-radius-lg);
+  padding: var(--apple-space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--apple-space-sm);
+  color: var(--apple-ink);
+}
+
+.apple-card__title {
+  font: var(--apple-type-tagline);
+  letter-spacing: var(--apple-track-tagline);
+  color: var(--apple-ink);
+  margin: 0;
+}
+
+.apple-card__body {
+  font: var(--apple-type-body);
+  letter-spacing: var(--apple-track-body);
+  color: var(--apple-ink);
+  margin: 0;
+}
+
+.apple-card__meta {
+  font: var(--apple-type-caption);
+  letter-spacing: var(--apple-track-caption);
+  color: var(--apple-ink-muted-48);
+  margin: 0;
+}
+
+.apple-card__image {
+  border-radius: var(--apple-radius-sm);
+  overflow: hidden;
+  display: block;
+}
+
+.apple-card__image--product {
+  box-shadow: var(
+    --apple-shadow-product
+  ); // allow-shadow: single product photo shadow (DS v3.0 §2.5)
+}

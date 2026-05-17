@@ -1,0 +1,30 @@
+// Apple Search — DS v3.0 §3.4. Pill-shaped input with leading icon.
+.apple-search {
+  display: flex;
+  align-items: center;
+  gap: var(--apple-space-sm);
+  background: var(--apple-canvas);
+  border: 1px solid var(--apple-hairline);
+  border-radius: var(--apple-radius-pill);
+  padding: 12px 20px;
+  height: 44px;
+}
+
+.apple-search__icon {
+  font-size: 14px; // allow-hardcode: icon glyph size, not text type-scale (DS v3.0 §3.4)
+  color: var(--apple-ink-muted-48);
+  flex-shrink: 0;
+}
+
+.apple-search__input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: var(--apple-type-body);
+  letter-spacing: var(--apple-track-body);
+  color: var(--apple-ink);
+  &::placeholder {
+    color: var(--apple-ink-muted-48);
+  }
+}

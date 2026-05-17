@@ -1,0 +1,28 @@
+// Apple Tab Bar — DS v3.0 §3.1 (iOS HIG bottom Tab Bar, 49px standard).
+// Applied to <ion-tabs class="apple-tab-bar">; styles target child <ion-tab-bar>.
+.apple-tab-bar {
+  ion-tab-bar {
+    --background: var(--apple-canvas);
+    --color: var(--apple-ink-muted-48);
+    --color-selected: var(--apple-primary);
+    --border: 1px solid var(--apple-hairline);
+    height: 49px;
+  }
+
+  ion-tab-button {
+    --color: var(--apple-ink-muted-48);
+    --color-selected: var(--apple-primary);
+    font: var(--apple-type-nav-link);
+    letter-spacing: var(--apple-track-fine);
+
+    ion-icon {
+      font-size: 22px; // allow-hardcode: icon glyph size, not text type-scale (DS v3.0 §3.1)
+    }
+
+    ion-label {
+      font: var(--apple-type-nav-link);
+      letter-spacing: var(--apple-track-fine);
+      margin-top: 2px;
+    }
+  }
+}

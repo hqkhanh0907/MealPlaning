@@ -10,6 +10,15 @@
  */
 @use './theme/section' as *;
 @use './theme/typography';
+@use './theme/button';
+@use './theme/card';
+@use './theme/chip';
+@use './theme/field';
+@use './theme/search';
+@use './theme/tile';
+@use './theme/sticky-bar';
+@use './theme/tab-bar';
+@use './theme/nav-bar';
 
 /* Core CSS required for Ionic components to work properly */
 @import '@ionic/angular/css/core.css';

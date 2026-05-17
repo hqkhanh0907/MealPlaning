@@ -1,0 +1,87 @@
+// Apple Buttons — DS v3.0 §7. 6 variants. Active state: scale(0.95).
+%apple-btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+  &:active {
+    transform: scale(0.95);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--apple-primary-focus);
+    outline-offset: 2px;
+  }
+  &[disabled] {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+}
+
+.apple-btn--primary {
+  @extend %apple-btn-base;
+  background: var(--apple-primary);
+  color: var(--apple-on-primary);
+  font: var(--apple-type-body);
+  letter-spacing: var(--apple-track-body);
+  border-radius: var(--apple-radius-pill);
+  padding: 11px 22px;
+  &:hover {
+    background: var(--apple-primary-focus);
+  }
+}
+
+.apple-btn--secondary {
+  @extend %apple-btn-base;
+  background: transparent;
+  color: var(--apple-primary);
+  border: 1px solid var(--apple-primary);
+  font: var(--apple-type-body);
+  letter-spacing: var(--apple-track-body);
+  border-radius: var(--apple-radius-pill);
+  padding: 11px 22px;
+}
+
+.apple-btn--dark-utility {
+  @extend %apple-btn-base;
+  background: var(--apple-ink);
+  color: var(--apple-on-dark);
+  font: var(--apple-type-button-utility);
+  letter-spacing: var(--apple-track-caption);
+  border-radius: var(--apple-radius-sm);
+  padding: 8px 15px;
+}
+
+.apple-btn--pearl {
+  @extend %apple-btn-base;
+  background: var(--apple-surface-pearl);
+  color: var(--apple-ink-muted-80);
+  font: var(--apple-type-caption);
+  letter-spacing: var(--apple-track-caption);
+  border: 3px solid var(--apple-divider-soft);
+  border-radius: var(--apple-radius-md);
+  padding: 8px 14px;
+}
+
+.apple-btn--hero {
+  @extend %apple-btn-base;
+  background: var(--apple-primary);
+  color: var(--apple-on-primary);
+  font: var(--apple-type-button-large);
+  border-radius: var(--apple-radius-pill);
+  padding: 14px 28px;
+}
+
+.apple-btn--icon-circular {
+  @extend %apple-btn-base;
+  width: 44px;
+  height: 44px;
+  background: var(--apple-surface-chip);
+  color: var(--apple-ink);
+  border-radius: var(--apple-radius-full);
+  padding: 0;
+}

@@ -1,0 +1,18 @@
+// Apple Tile — DS v3.0 §3.3. Full-bleed surface section.
+// Only two variants: light (white) + parchment. No dark tile (light-only invariant).
+.apple-tile--light,
+.apple-tile--parchment {
+  padding: var(--apple-space-section) var(--apple-space-lg);
+  color: var(--apple-ink);
+  display: flex;
+  flex-direction: column;
+  gap: var(--apple-space-lg);
+}
+
+.apple-tile--light {
+  background: var(--apple-canvas);
+}
+
+.apple-tile--parchment {
+  background: var(--apple-canvas-parchment);
+}

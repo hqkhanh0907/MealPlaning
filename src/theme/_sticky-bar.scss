@@ -1,0 +1,32 @@
+// Apple Sticky Bar — DS v3.0 §3.3. Bottom-floating frosted bar.
+// Used by: Calendar "Tổng calo trong ngày", Meal edit "Tổng dinh dưỡng".
+// Sits 8px above the .apple-tab-bar.
+.apple-sticky-bar {
+  position: fixed;
+  left: var(--apple-space-lg);
+  right: var(--apple-space-lg);
+  bottom: calc(49px + 8px); // tab bar height + gap
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 32px;
+  background: var(--apple-frosted-bg);
+  backdrop-filter: var(--apple-backdrop-blur);
+  -webkit-backdrop-filter: var(--apple-backdrop-blur);
+  border-radius: var(--apple-radius-pill);
+  color: var(--apple-ink);
+  font: var(--apple-type-body-strong);
+  letter-spacing: var(--apple-track-body);
+  z-index: 30;
+}
+
+.apple-sticky-bar__label {
+  font: var(--apple-type-caption);
+  color: var(--apple-ink-muted-48);
+}
+
+.apple-sticky-bar__value {
+  font: var(--apple-type-body-strong);
+  color: var(--apple-ink);
+}
