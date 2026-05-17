@@ -7,6 +7,69 @@
 // =============================================================================
 
 :root {
+  // ==========================================================================
+  // Apple Design tokens (DS v3.0, 2026-05-17 migration)
+  // Source of truth: DESIGN.md + spec 2026-05-17-apple-design-migration-design.md
+  // Legacy Sage tokens are still present below during migration and will be
+  // removed in Phase 6 once all consumers have been re-skinned.
+  // ==========================================================================
+
+  // --- Colors -------------------------------------------------------------
+  --apple-primary: #0066cc;
+  --apple-primary-focus: #0071e3;
+  --apple-primary-on-dark: #2997ff;
+  --apple-ink: #1d1d1f;
+  --apple-body-on-dark: #ffffff;
+  --apple-body-muted: #cccccc;
+  --apple-ink-muted-80: #333333;
+  --apple-ink-muted-48: #7a7a7a;
+  --apple-divider-soft: #f0f0f0;
+  --apple-hairline: #e0e0e0;
+  --apple-canvas: #ffffff;
+  --apple-canvas-parchment: #f5f5f7;
+  --apple-surface-pearl: #fafafc;
+  --apple-surface-chip: rgba(
+    210,
+    210,
+    215,
+    0.64
+  ); // allow-hardcode: Apple translucent chip surface (DS v3.0 §2)
+  --apple-surface-black: #000000;
+  --apple-on-primary: #ffffff;
+  --apple-on-dark: #ffffff;
+
+  // --- Semantic (Apple-pure single-accent rule) ---------------------------
+  --apple-semantic-success: #0066cc; // Action Blue — Apple has no semantic green
+  --apple-semantic-warning: #333333; // ink-muted-80 — warning by icon+text only
+  --apple-semantic-danger: #bf4800; // Apple system-alert red (sole exception)
+
+  // --- Spacing ------------------------------------------------------------
+  --apple-space-xxs: 4px;
+  --apple-space-xs: 8px;
+  --apple-space-sm: 12px;
+  --apple-space-md: 17px;
+  --apple-space-lg: 24px;
+  --apple-space-xl: 32px;
+  --apple-space-xxl: 48px;
+  --apple-space-section: 80px;
+
+  // --- Radius -------------------------------------------------------------
+  --apple-radius-none: 0;
+  --apple-radius-xs: 5px;
+  --apple-radius-sm: 8px;
+  --apple-radius-md: 11px;
+  --apple-radius-lg: 18px;
+  --apple-radius-pill: 9999px;
+  --apple-radius-full: 9999px;
+
+  // --- Elevation ----------------------------------------------------------
+  --apple-shadow-product: 3px 5px 30px 0 rgba(0, 0, 0, 0.22); // allow-hardcode: single product drop-shadow per DS v3.0 §2.5
+  --apple-shadow-none: none;
+
+  // --- Backdrop -----------------------------------------------------------
+  --apple-backdrop-blur: saturate(180%) blur(20px);
+  --apple-frosted-bg: rgba(245, 245, 247, 0.8); // allow-hardcode: frosted sticky bar (DS v3.0 §2.6)
+
   // ---------------------------------------------------------------------------
   // Primary — Sage (DS §2.1)
   // ---------------------------------------------------------------------------
@@ -246,3 +309,23 @@
 // =============================================================================
 // (Removed Story 2.6, 2026-05-08 — app is light-only; no dark palette tokens.)
 // =============================================================================
+
+// =============================================================================
+// Apple Design — responsive --apple-space-section (DS v3.0 §3 spacing)
+// Section-level vertical rhythm shrinks at narrower viewports per Apple HIG.
+// =============================================================================
+@media (max-width: 833px) {
+  :root {
+    --apple-space-section: 48px;
+  }
+}
+@media (max-width: 640px) {
+  :root {
+    --apple-space-section: 32px;
+  }
+}
+@media (max-width: 419px) {
+  :root {
+    --apple-space-section: 24px;
+  }
+}
