@@ -197,20 +197,22 @@ describe('Fitness repositories', () => {
     );
     const exerciseId = session.exercises[0].id;
 
-    const s1 = await workoutRepo.addSet(exerciseId, {
+    const r1 = await workoutRepo.addSet(exerciseId, {
       weightKg: 100,
       reps: 5,
       restSeconds: 90,
       effort: null,
       notes: null,
     });
-    const s2 = await workoutRepo.addSet(exerciseId, {
+    const r2 = await workoutRepo.addSet(exerciseId, {
       weightKg: 100,
       reps: 5,
       restSeconds: 90,
       effort: null,
       notes: null,
     });
+    const s1 = r1.set;
+    const s2 = r2.set;
     await workoutRepo.addSet(exerciseId, {
       weightKg: 100,
       reps: 5,

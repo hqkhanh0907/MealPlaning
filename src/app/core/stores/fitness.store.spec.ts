@@ -67,15 +67,18 @@ describe('FitnessStore', () => {
     workoutRepo.addExerciseToSession.and.resolveTo(workoutExercise({ id: 'we-2' }));
     workoutRepo.getSession.and.resolveTo(workoutSession());
     workoutRepo.addSet.and.resolveTo({
-      id: 'set-1',
-      workout_exercise_id: 'we-1',
-      set_number: 1,
-      weight_kg: 40,
-      reps: 8,
-      rest_seconds: 90,
-      effort: 'just_right',
-      notes: null,
-      created_at: '2026-05-11T07:00:00',
+      set: {
+        id: 'set-1',
+        workout_exercise_id: 'we-1',
+        set_number: 1,
+        weight_kg: 40,
+        reps: 8,
+        rest_seconds: 90,
+        effort: 'just_right',
+        notes: null,
+        created_at: '2026-05-11T07:00:00',
+      },
+      session: workoutSession(),
     });
     workoutRepo.completeSession.and.resolveTo();
     workoutRepo.deleteSet.and.resolveTo();

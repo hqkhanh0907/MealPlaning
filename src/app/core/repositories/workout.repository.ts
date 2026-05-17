@@ -170,7 +170,18 @@ export class WorkoutRepository {
     return created;
   }
 
-  async addSet(workoutExerciseId: string, input: WorkoutSetInput): Promise<WorkoutSet> {
+  /**
+   * F-015 fix — returns BOTH the created set AND the refreshed session in one transaction.
+   * Old API returned only WorkoutSet; callers then called getSession() separately, which
+   * raced against capacitor-sqlite WAL visibility (set visible to write tx but stale to
+   * subsequent read tx → activeSession signal showed empty exercise). Returning the
+   * session detail inline reads from the same connection AFTER the write tx commits,
+   * guaranteeing visibility.
+   */
+  async addSet(
+    workoutExerciseId: string,
+    input: WorkoutSetInput,
+  ): Promise<{ set: WorkoutSet; session: WorkoutSessionDetail }> {
     validateSetInput(input);
     const row = await this.db.getOne<{ workout_session_id: string; set_number: number }>(
       `SELECT
@@ -216,7 +227,13 @@ export class WorkoutRepository {
     if (!created) {
       throw new Error('WorkoutRepository: failed to insert workout set.');
     }
-    return created;
+    const session = await this.getSession(row.workout_session_id);
+    if (!session) {
+      throw new Error(
+        `WorkoutRepository: session '${row.workout_session_id}' vanished after addSet.`,
+      );
+    }
+    return { set: created, session };
   }
 
   async completeSession(sessionId: string, now: Date = new Date()): Promise<void> {

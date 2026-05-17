@@ -388,11 +388,13 @@ export class FitnessStore {
 
     this.errorMessage.set(null);
     try {
-      const createdSet = await this.workoutRepo.addSet(exercise.id, draft.value);
-      const sessionId = this.activeSession()?.id;
-      if (sessionId) {
-        this.activeSession.set(await this.workoutRepo.getSession(sessionId));
-      }
+      // F-015 — repo returns set + refreshed session in one shot, eliminating the
+      // stale-read race where getSession() ran before WAL flushed the new row.
+      const { set: createdSet, session: refreshedSession } = await this.workoutRepo.addSet(
+        exercise.id,
+        draft.value,
+      );
+      this.activeSession.set(refreshedSession);
       this.restSeconds.set(draft.value.restSeconds);
       this.setDraft.update((current) => ({ ...current, notes: '' }));
       // F-006 — clear persisted draft so a fresh log starts clean; user can still re-edit fields,
