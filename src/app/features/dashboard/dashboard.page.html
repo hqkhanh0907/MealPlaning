@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header class="apple-nav-bar">
   <ion-toolbar>
     <ion-title>Tổng quan</ion-title>
     <ion-buttons slot="end">
@@ -15,7 +15,7 @@
   }
 
   <!-- Hero — compact. 1 chip ngày + 1 dòng heading + 1 dòng body. -->
-  <section class="dashboard-hero" aria-labelledby="dashboard-title">
+  <section class="dashboard-hero apple-tile--light" aria-labelledby="dashboard-title">
     <div class="dashboard-hero__badge">
       <ion-icon name="calendar-outline" aria-hidden="true" />
       {{ dashboard.todayLabel() }}
@@ -46,7 +46,7 @@
         variant="calories"
       />
       <div>
-        <strong>{{ dashboard.roundedCalories() }} kcal</strong>
+        <strong class="dashboard-hero-number">{{ dashboard.roundedCalories() }} kcal</strong>
         <span>{{ dashboard.calorieTargetLabel() }}</span>
         <small>{{ dashboard.caloriePercentLabel() }} mục tiêu</small>
       </div>
