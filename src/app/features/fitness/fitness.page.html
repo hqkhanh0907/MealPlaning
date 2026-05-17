@@ -194,50 +194,26 @@
       </div>
     }
 
-    <!-- Free-mode picker: ẨN khi rest-day và CHƯA có active session (CTA "Bắt đầu buổi tự do" đã đủ). Hiển thị khi active session đang chạy (user cần thêm exercise vào buổi đang tập) hoặc khi có planned day. -->
+    <!-- Free-mode picker bottom-sheet trigger: ẨN khi rest-day và CHƯA có active session. -->
     @if (fitness.activeSession() !== null || !fitness.todayDay()?.is_rest_day) {
       <div class="free-mode">
         <button
           type="button"
           class="free-mode__toggle"
-          (click)="toggleFreeMode()"
-          [attr.aria-expanded]="freeModeOpen()"
+          (click)="openPicker()"
+          [attr.aria-expanded]="pickerOpen()"
         >
-          <ion-icon
-            [name]="freeModeOpen() ? 'chevron-up-outline' : 'add-outline'"
-            aria-hidden="true"
-          />
-          {{ freeModeOpen() ? 'Đóng danh sách bài tự do' : 'Thêm bài tập tự do' }}
+          <ion-icon name="add-outline" aria-hidden="true" />
+          Thêm bài tập tự do
         </button>
-
-        @if (freeModeOpen()) {
-          <div class="input-wrapper">
-            <label class="input-label" for="exercise-search">Tìm bài tập tự do</label>
-            <input
-              id="exercise-search"
-              class="input-native"
-              type="search"
-              [value]="fitness.exerciseSearch()"
-              (input)="onSearchInput($event)"
-              autocomplete="off"
-            />
-          </div>
-
-          <div class="exercise-picker" aria-label="Danh sách bài tập">
-            @for (exercise of fitness.filteredExercises(); track exercise.id) {
-              <button
-                type="button"
-                class="exercise-chip"
-                (click)="fitness.addExerciseToActive(exercise.id)"
-              >
-                <ion-icon name="add-outline" aria-hidden="true" />
-                {{ exercise.name_vi || exercise.name }}
-              </button>
-            }
-          </div>
-        }
       </div>
     }
+
+    <app-exercise-picker-sheet
+      [isOpen]="pickerOpen()"
+      (closed)="pickerOpen.set(false)"
+    />
+
   </section>
 
   @if (fitness.activeSession(); as session) {

@@ -1,0 +1,116 @@
+:host {
+  display: contents;
+}
+
+.eps-header {
+  --background: var(--bg-card);
+}
+
+.eps-toolbar {
+  --background: var(--bg-card);
+  --color: var(--text-primary);
+  --border-color: transparent;
+  --min-height: 52px;
+}
+
+.eps-title {
+  font-size: var(--font-size-headline);
+  font-weight: 600;
+  color: var(--text-primary);
+  padding-inline-start: var(--space-md);
+}
+
+.eps-close {
+  width: 36px;
+  height: 36px;
+  margin-inline-end: var(--space-md);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--bg-muted);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  ion-icon {
+    font-size: var(--font-size-body);
+    color: var(--text-secondary);
+  }
+
+  &:active {
+    background: var(--border-color);
+  }
+}
+
+.eps-content {
+  --background: var(--bg-card);
+  --padding-start: var(--space-md);
+  --padding-end: var(--space-md);
+  --padding-top: var(--space-sm);
+  --padding-bottom: var(--space-lg);
+}
+
+.eps-search {
+  margin-bottom: var(--space-md);
+}
+
+.eps-empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl) var(--space-md);
+  color: var(--text-secondary);
+
+  &__icon {
+    font-size: var(--font-size-display); // 36px-ish, empty-state illustration
+    color: var(--text-tertiary);
+  }
+
+  &__text {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-body-sm);
+    text-align: center;
+  }
+}
+
+.eps-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.eps-row {
+  width: 100%;
+  min-height: 52px;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  cursor: pointer;
+
+  &__name {
+    font-size: var(--font-size-body);
+    font-weight: 500;
+    color: var(--text-primary);
+    text-align: start;
+    flex: 1;
+  }
+
+  &__plus {
+    font-size: var(--font-size-body);
+    color: var(--text-secondary);
+  }
+
+  &:active {
+    background: var(--bg-muted);
+  }
+}

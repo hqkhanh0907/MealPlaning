@@ -1,0 +1,55 @@
+<ion-modal
+  [isOpen]="isOpen"
+  [breakpoints]="[0, 0.6, 0.95]"
+  [initialBreakpoint]="0.6"
+  [handle]="true"
+  (ionModalDidDismiss)="onIonDismiss()"
+>
+  <ng-template>
+    <ion-header class="eps-header">
+      <ion-toolbar class="eps-toolbar">
+        <ion-title class="eps-title">Chọn bài tập</ion-title>
+        <button slot="end" type="button" class="eps-close" aria-label="Đóng" (click)="close()">
+          <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+        </button>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="eps-content">
+      <div class="input-wrapper eps-search">
+        <label class="input-label" for="eps-search-input">Tìm bài tập</label>
+        <input
+          id="eps-search-input"
+          class="input-native"
+          type="search"
+          [value]="fitness.exerciseSearch()"
+          (input)="onSearchInput($event)"
+          autocomplete="off"
+          inputmode="search"
+        />
+      </div>
+
+      @if (fitness.filteredExercises().length === 0) {
+        <div class="eps-empty">
+          <ion-icon name="search-outline" class="eps-empty__icon" aria-hidden="true"></ion-icon>
+          <p class="eps-empty__text">Không tìm thấy bài tập phù hợp.</p>
+        </div>
+      } @else {
+        <ul class="eps-list" role="list">
+          @for (exercise of fitness.filteredExercises(); track exercise.id) {
+            <li>
+              <button
+                type="button"
+                class="eps-row"
+                (click)="onPick(exercise.id)"
+              >
+                <span class="eps-row__name">{{ exercise.name_vi || exercise.name }}</span>
+                <ion-icon class="eps-row__plus" name="add-outline" aria-hidden="true"></ion-icon>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

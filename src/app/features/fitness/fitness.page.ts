@@ -18,7 +18,6 @@ import {
   bodyOutline,
   calendarOutline,
   checkmarkCircleOutline,
-  chevronUpOutline,
   closeCircleOutline,
   flashOutline,
   flameOutline,
@@ -33,6 +32,7 @@ import {
 } from 'ionicons/icons';
 import { FitnessStore } from '../../core/stores/fitness.store';
 import { RestTimer } from './components/rest-timer/rest-timer';
+import { ExercisePickerSheet } from '../../shared/components/exercise-picker-sheet/exercise-picker-sheet';
 import type { WorkoutEffort } from '../../core/models/fitness.types';
 
 const EFFORT_LABELS: Record<WorkoutEffort, string> = {
@@ -49,6 +49,7 @@ const EFFORT_LABELS: Record<WorkoutEffort, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RestTimer,
+    ExercisePickerSheet,
     RouterLink,
     IonHeader,
     IonToolbar,
@@ -72,7 +73,6 @@ export default class FitnessPage {
       bodyOutline,
       calendarOutline,
       checkmarkCircleOutline,
-      chevronUpOutline,
       closeCircleOutline,
       flashOutline,
       flameOutline,
@@ -88,30 +88,22 @@ export default class FitnessPage {
   }
 
   /**
-   * Free-mode picker (search + ~100 exercise chips) is COLLAPSED by default
-   * to keep the Hôm nay card focused on planned-exercise list + Bắt đầu CTA.
-   * User opens it via "Thêm bài tập tự do" toggle below the planned list.
+   * Bottom-sheet picker open state. Replaces the inline `.free-mode` block — chips
+   * + search now live in `<app-exercise-picker-sheet>` so the hub stays focused
+   * on planned-day overview + active session controls (Apple HIG: one screen, one job).
    */
-  readonly freeModeOpen = signal(false);
+  readonly pickerOpen = signal(false);
 
-  toggleFreeMode(): void {
-    this.freeModeOpen.update((v) => !v);
+  openPicker(): void {
+    this.pickerOpen.set(true);
   }
 
   /**
-   * Apple-style entry path when active session has 0 exercises: opens the free-mode picker in the
-   * Hôm nay card and scrolls it into view, so user has a single tap from the empty active card to
-   * pick a first exercise.
+   * Apple-style entry path when active session has 0 exercises: opens the picker sheet
+   * from the empty active card so user has a single tap to pick a first exercise.
    */
   openFreeModeAndScroll(): void {
-    this.freeModeOpen.set(true);
-    // Wait for Angular CD + DOM paint before scrolling. queueMicrotask runs too early
-    // (signal update queued but DOM not yet patched) — 80ms covers OnPush + paint reliably.
-    setTimeout(() => {
-      const el = document.getElementById('exercise-search');
-      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => el?.focus(), 250);
-    }, 80);
+    this.pickerOpen.set(true);
   }
 
   ionViewWillEnter(): void {
@@ -136,10 +128,6 @@ export default class FitnessPage {
 
   onNotesInput(event: Event): void {
     this.fitness.updateNotes(inputValue(event));
-  }
-
-  onSearchInput(event: Event): void {
-    this.fitness.updateExerciseSearch(inputValue(event));
   }
 
   setEffort(effort: WorkoutEffort | null): void {
