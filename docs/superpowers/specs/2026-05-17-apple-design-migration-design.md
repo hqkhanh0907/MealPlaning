@@ -23,7 +23,7 @@ The previous migration (Material Blue → Sage Wellness v2.0) is fully retired. 
 | Theme files | 8 files: `_section.scss`, `button-row.scss`, `form-field.scss`, `form-modal.scss`, `header-elevation.scss`, `list-card.scss`, `segment-control.scss`, `variables.scss` | All 8 deleted. 11 new files: `_typography.scss`, `_button.scss`, `_card.scss`, `_chip.scss`, `_field.scss`, `_search.scss`, `_tile.scss`, `_sticky-bar.scss`, `_tab-bar.scss`, `_nav-bar.scss`, `variables.scss` (rewritten). Net +3 files. |
 | Form inputs | Floating-label `.input-wrapper > .input-label + .input-native` (4 HTML files) | Apple-field: label above, rectangular input (radius 8px), hairline border `#e0e0e0` |
 | Navigation | Ionic bottom tabs (4 tabs) — UI for Tổng quan / Lịch ăn / Quản lý / Tập luyện | **Bottom tabs re-skinned to Apple visual (iOS HIG)** + new top `app-nav-bar` (44px, iOS UINavigationBar pattern). No hamburger drawer, no apple.com-style global-nav black bar. |
-| CI guards | 7 guards | 12 entries (5 new + 1 retire + 2 update + 5 keep) |
+| CI guards | 11 guards in `npm run check:guards` | 15 entries (4 new + 1 retire + 3 update + 7 keep) |
 | Docs | 6 markdown files in `docs/3-design/` (4141 lines) | All rewritten. `design-system.md` becomes v3.0 "Apple". New ADR documents the decision. |
 | App pages | 43 HTML files in `src/app/features/**` | All re-skinned: pill CTAs, light-only surface alternation (parchment ↔ white ↔ pearl), single product drop-shadow used only on imagery. |
 | `--ion-color-*` aliases | Heavy use | Removed. Only `--apple-*` tokens. Hard-fail on first appearance in app code. |
@@ -379,9 +379,9 @@ Short rewrite (~80–120 lines each). Folder purpose, naming convention, point t
 | §N Typography (new) | Inter ladder 300/400/600/700. Weight 500 forbidden. Body always 17px. Display sizes carry tracking adjustments. |
 | §N Navigation (new) | Bottom `<ion-tab-bar>` allowed but must apply `.apple-tab-bar` styles. Top `<ion-header>` uses `.apple-nav-bar`. No alternative nav containers. |
 
-### 4.6 New ADR — `docs/4-architecture/decisions/ADR-NNN-apple-design-migration.md`
+### 4.6 New ADR — `docs/4-architecture/decisions/apple-design-migration.md`
 
-> **Implementation step prerequisite:** Before writing the ADR, list `ls docs/4-architecture/decisions/` and pick the next sequential ADR number. Replace `NNN` in the filename.
+> **Naming convention:** Existing ADRs in `docs/4-architecture/decisions/` use plain topic filenames (e.g., `calendar-tracking.md`), not `ADR-NNN-` prefixes. Follow the existing convention.
 
 ~200 lines. Sections:
 - Context: previous Sage Wellness v2.0 migration (after Material Blue → Sage). User directive on 2026-05-17 to adopt Apple 1:1.
@@ -409,29 +409,56 @@ Update these blocks:
 
 ## 5. CI Guards
 
+Project currently runs **11 guards** in `npm run check:guards` (verified by inspecting `package.json` and `scripts/check-*.mjs`). Spec covers all 11 plus 4 new ones.
+
 | Guard script | Status | Detail |
 |---|---|---|
-| `check-form-input-pattern.mjs` | **RETIRE** | Floating-label no longer canonical. Remove from `package.json` and Husky pre-commit. Delete file. |
-| `check-apple-input-pattern.mjs` | **NEW** | Enforce `.apple-field > .apple-field__label + .apple-field__input` markup. Forbid `.input-wrapper`, `.input-label`, `.input-native`, `.picker-trigger--floating`. Forbid inline input styles in `.ts` files. |
+| `check-form-input-pattern.mjs` | **RETIRE** | Floating-label no longer canonical. Remove from `package.json` `check:guards` script and Husky pre-commit. Delete file. |
+| `check-apple-input-pattern.mjs` | **NEW** | Enforce `.apple-field > .apple-field__label + .apple-field__input` markup. Forbid `.input-wrapper`, `.input-label`, `.input-native`, `.picker-trigger--floating`. Forbid inline input styles in `.ts` files. Add to `check:guards` aggregate. |
 | `check-pc1-external-templates.mjs` | **KEEP** | Unchanged. Every `@Component` uses external `templateUrl` + `styleUrl`. |
 | `check-style-2025-naming.mjs` | **KEEP** | Unchanged. |
 | `check-design-tokens.mjs` | **UPDATE** | Allowlist: `var(--apple-*)`. Hard-fail on `var(--ion-color-*)` outside of `variables.scss` itself. Raw hex / rgb / rgba / hsl / named colors / `<n>px` font-size still forbidden. Escape hatch `// allow-hardcode: <reason>` retained. |
-| `check-macro-naming.mjs` | **KEEP** | Unchanged (Protein/Carbs/Fat/Fiber, no abbrev). |
+| `check-css-vars.mjs` | **UPDATE** | Currently whitelists `--ion-` and `--swiper-` prefixes for external references. Change to whitelist `--apple-`, `--ion-` (transitional, for Ionic-internal variables Ionic 8 still emits), and `--swiper-`. Coordination with `check-design-tokens` is critical — design-tokens rejects `--ion-color-*` in app code, while css-vars must still permit Ionic's own internal `--ion-safe-area-*`, `--ion-toolbar-*` etc. that Ionic emits at runtime. Verify spec at implementation time by enumerating Ionic-emitted variables. |
+| `check-macro-naming.mjs` | **KEEP** | Unchanged (Protein/Carbs/Fat/Fiber). |
+| `check-version-sync.mjs` | **KEEP** | Unchanged. Version bump strategy for the migration (e.g., 0.2.2 → 0.3.0 to signal breaking visual change) is decided in the implementation plan, not this spec. |
 | `check-status-ssot.mjs` | **KEEP** | Unchanged. |
-| `check-no-dark-mode.mjs` | **STRENGTHEN** | Add forbidden patterns: `surface-tile-1`, `surface-tile-2`, `surface-tile-3`, `dark-tile`, `product-tile-dark`, `apple-tile--dark`. Keep existing rules. |
-| `check-no-segment-control.mjs` | **NEW** | Forbid `<ion-segment>` and `<ion-segment-button>` in `src/**/*.html`. Suggest `apple-chip-row`. |
-| `check-tab-bar-pattern.mjs` | **NEW** | If `<ion-tab-bar>` appears in any HTML, validate that the same template's parent `<ion-tabs>` element carries the literal class `apple-tab-bar`. Static check on HTML AST. Fail if `<ion-tab-bar>` exists without `class="apple-tab-bar"` on the enclosing `<ion-tabs>`. |
-| `check-no-box-shadow.mjs` | **NEW** | Forbid `box-shadow:` in `src/**/*.{scss,css}` except `box-shadow: var(--apple-shadow-product)`. Escape `// allow-shadow: <reason>` permitted. |
-| `check-no-weight-500.mjs` | **NEW** | Forbid `font-weight: 500` (or `font: ... 500 ...`) in `src/**/*.{scss,css}`. Inter ladder is 300/400/600/700. |
-| `check-inter-font.mjs` | **NEW** | Verify `@font-face` for Inter in `_typography.scss` references the 4 woff2 files. Verify the woff2 files exist in `src/assets/fonts/`. |
+| `check-no-dark-mode.mjs` | **STRENGTHEN** | Add forbidden patterns: `surface-tile-1`, `surface-tile-2`, `surface-tile-3`, `dark-tile`, `product-tile-dark`, `apple-tile--dark`. Keep existing rules (no OS-driven theme switching). `docs/superpowers/specs/` and `DESIGN.md` already allowlisted in commit `d810ef06`. |
+| `check-story-scope-stability.mjs` | **KEEP** | Unchanged. SSOT vs story files sync — not visual-design related. |
+| `check-repo-columns.mjs` | **KEEP** | Unchanged. DB column scanning — not visual-design related. |
+| `check-no-segment-control.mjs` | **NEW** | Forbid `<ion-segment>` and `<ion-segment-button>` in `src/**/*.html`. Suggest `apple-chip-row`. Add to `check:guards`. |
+| `check-tab-bar-pattern.mjs` | **NEW** | If `<ion-tab-bar>` appears in any HTML, validate that the same template's parent `<ion-tabs>` element carries the literal class `apple-tab-bar`. Static check on HTML AST. Fail if `<ion-tab-bar>` exists without `class="apple-tab-bar"` on the enclosing `<ion-tabs>`. Add to `check:guards`. |
+| `check-no-box-shadow.mjs` | **NEW** | Forbid `box-shadow:` in `src/**/*.{scss,css}` except `box-shadow: var(--apple-shadow-product)`. Escape `// allow-shadow: <reason>` permitted. Add to `check:guards`. |
+| `check-no-weight-500.mjs` | **NEW** | Forbid `font-weight: 500` (or `font: ... 500 ...`) in `src/**/*.{scss,css}`. Inter ladder is 300/400/600/700. Add to `check:guards`. |
+| `check-inter-font.mjs` | **NEW** | Verify `@font-face` for Inter in `_typography.scss` references the 4 woff2 files. Verify the woff2 files exist in `src/assets/fonts/`. Add to `check:guards`. |
 
-Aggregate runner `npm run check:guards` invokes all guards. Husky pre-commit runs all guards. GitHub Actions runs on `push` and `pull_request`.
+After migration, `npm run check:guards` runs **14 guards** (11 current − 1 retire + 4 first-batch new = 14, plus 1 batch deferrable: the table lists 15 entries because some new guards may be added later, see plan). Husky pre-commit runs all. GitHub Actions runs on `push` and `pull_request`.
 
 ---
 
 ## 6. App Page Re-skin Inventory
 
-All 43 HTML files in `src/app/features/**` need re-skinning. Grouping for plan-level breakdown:
+### 6.1 Migration Volume (measured 2026-05-17)
+
+Concrete counts of patterns that need migration, gathered via `grep` / `find` on the current `src/` tree. These numbers inform implementation-plan sequencing and risk assessment.
+
+| Pattern | Current count | Migration action |
+|---|---|---|
+| `.html` files in `src/app/` | 43 | All touched at least for typography / color re-skin |
+| `.scss` files in `src/app/` | 43 | All touched at least for token rewrite |
+| `.ts` files in `src/app/` | 216 | Most untouched; ~10–20 touched only if inline styles or template helpers exist |
+| `var(--ion-color-*)` references in `src/app/` | **152 lines** | All rewritten to `var(--apple-*)`. Hard-fail guard enabled on same PR. |
+| `box-shadow` declarations in `src/**/*.scss` | **36 lines** | All removed except those referring to `var(--apple-shadow-product)`. Guard `check-no-box-shadow.mjs` enforces. |
+| `font-weight: 500` declarations in `src/**/*.scss` | **50 lines** | All replaced with 400 (regular) or 600 (semibold). Guard `check-no-weight-500.mjs` enforces. |
+| `<ion-segment` + `<ion-tab` occurrences | 6 lines | Segments retired, tabs re-skinned in place. |
+| Floating-label markup (`.input-wrapper`, `.input-label`, `.input-native`) | 4 HTML files | All rewritten to `.apple-field`. |
+| Files in `src/theme/` | 8 | All 8 deleted, 11 new written. |
+| Markdown files in `docs/3-design/` | 6 (4141 lines) | All rewritten. |
+
+These counts will grow during implementation if new code is added. The implementation plan should re-measure before each phase and update its own progress tracker.
+
+### 6.2 Page area breakdown
+
+Grouping for plan-level breakdown:
 
 | Tab/page area | Folders | Re-skin notes |
 |---|---|---|
@@ -484,7 +511,7 @@ After all implementation steps complete:
 4. `grep -r "Sage\|Coral\|Plum" docs/3-design src/theme` returns no matches.
 5. `grep -r "box-shadow" src/**/*.scss src/**/*.css | grep -v "apple-shadow-product\|allow-shadow"` returns no matches.
 6. All 6 markdown files in `docs/3-design/` reflect Apple design system v3.0.
-7. New ADR `ADR-NNN-apple-design-migration.md` is committed (NNN resolved at implementation time).
+7. New ADR `docs/4-architecture/decisions/apple-design-migration.md` is committed (follows existing plain-filename convention, e.g., `calendar-tracking.md`).
 8. `CLAUDE.md` mentions only Apple tokens and patterns.
 9. The 4 Ionic tabs render with `.apple-tab-bar` re-skin (Action Blue active, outline icons, 49px height).
 10. At least one page on each tab uses `.apple-nav-bar` with large title scroll behavior.
