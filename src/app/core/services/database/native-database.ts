@@ -63,12 +63,16 @@ export class NativeDatabase extends Database {
 
       const currentVersion = await this.readUserVersion();
       if (currentVersion === 0 && (await this.isDatabaseEmpty())) {
+        // F-013 fix: applySchema() installs the v1 base DDL only. We must NOT
+        // jump user_version straight to SCHEMA_VERSION — the v2/v3/v4 ALTER
+        // migrations would never run on a fresh install, leaving the DB at v1
+        // shape with user_version lying about it. Set version to 1 here, then
+        // let MigrationRunner replay v2..vN.
         await this.applySchema();
-        await this.setUserVersion(SCHEMA_VERSION);
-        return;
+        await this.setUserVersion(1);
       }
 
-      await this.resetLegacyManagementSchemaIfNeeded(currentVersion);
+      await this.resetLegacyManagementSchemaIfNeeded(await this.readUserVersion());
       await new MigrationRunner(this, MIGRATION_REGISTRY).run();
     } catch (err) {
       this.initPromise = null;

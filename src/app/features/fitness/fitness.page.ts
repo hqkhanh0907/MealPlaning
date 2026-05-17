@@ -152,7 +152,7 @@ export default class FitnessPage {
           text: 'Hủy buổi',
           role: 'destructive',
           handler: () => {
-            void this.fitness.cancelActiveSession();
+            void this.fitness.cancelWorkout();
           },
         },
       ],

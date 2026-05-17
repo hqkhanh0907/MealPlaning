@@ -2,27 +2,31 @@ import {
   buildFiberSnapshotSchemaMigration,
   buildHybridPolicySchemaMigration,
   buildInitialSchemaMigration,
+  buildWorkoutSetUpdatedAtMigration,
   SCHEMA_VERSION,
 } from './schema';
 import { MIGRATION_REGISTRY } from './migrations';
 
 describe('MIGRATION_REGISTRY', () => {
-  it('exposes v1 + v2 + v3 migrations matching SCHEMA_VERSION', () => {
-    expect(SCHEMA_VERSION).toBe(3);
-    expect(MIGRATION_REGISTRY.length).toBe(3);
+  it('exposes v1 + v2 + v3 + v4 migrations matching SCHEMA_VERSION', () => {
+    expect(SCHEMA_VERSION).toBe(4);
+    expect(MIGRATION_REGISTRY.length).toBe(4);
     expect(MIGRATION_REGISTRY[0].version).toBe(1);
     expect(MIGRATION_REGISTRY[1].version).toBe(2);
     expect(MIGRATION_REGISTRY[2].version).toBe(3);
-    expect(MIGRATION_REGISTRY[2].version).toBe(SCHEMA_VERSION);
+    expect(MIGRATION_REGISTRY[3].version).toBe(4);
+    expect(MIGRATION_REGISTRY[3].version).toBe(SCHEMA_VERSION);
   });
 
-  it('uses the canonical builders (v1, hybrid-policy v2, fiber snapshot v3)', () => {
+  it('uses the canonical builders (v1, hybrid-policy v2, fiber snapshot v3, workout_set.updated_at v4)', () => {
     const v1 = buildInitialSchemaMigration();
     const v2 = buildHybridPolicySchemaMigration();
     const v3 = buildFiberSnapshotSchemaMigration();
+    const v4 = buildWorkoutSetUpdatedAtMigration();
     expect(MIGRATION_REGISTRY[0].statements).toEqual(v1.statements);
     expect(MIGRATION_REGISTRY[1].statements).toEqual(v2.statements);
     expect(MIGRATION_REGISTRY[2].statements).toEqual(v3.statements);
+    expect(MIGRATION_REGISTRY[3].statements).toEqual(v4.statements);
   });
 
   it('keeps migrations sorted by ascending version', () => {
@@ -97,5 +101,17 @@ describe('buildFiberSnapshotSchemaMigration', () => {
     const joined = buildFiberSnapshotSchemaMigration().statements.join('\n');
     expect(joined).toContain('NULL AS fiber');
     expect(joined).not.toContain('total_fiber');
+  });
+});
+
+describe('buildWorkoutSetUpdatedAtMigration (F-012)', () => {
+  it('declares version 4', () => {
+    expect(buildWorkoutSetUpdatedAtMigration().version).toBe(4);
+  });
+
+  it('adds nullable updated_at column to workout_set via ALTER (not a recreate)', () => {
+    const stmts = buildWorkoutSetUpdatedAtMigration().statements;
+    expect(stmts.length).toBe(1);
+    expect(stmts[0]).toBe('ALTER TABLE workout_set ADD COLUMN updated_at TEXT');
   });
 });

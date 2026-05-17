@@ -1,0 +1,239 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/fitness" text="" />
+    </ion-buttons>
+    <ion-title>Buổi tập</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="active-workout-page">
+  @if (fitness.errorMessage(); as error) {
+    <p class="status-banner status-banner--error" role="alert">{{ error }}</p>
+  }
+
+  @if (fitness.successMessage(); as success) {
+    <p class="status-banner status-banner--success" role="status">{{ success }}</p>
+  }
+
+  @if (fitness.activeSession(); as session) {
+    <section class="active-workout" aria-labelledby="active-workout-title">
+      <header class="active-workout__header">
+        <div>
+          <p class="eyebrow">Đang tập</p>
+          <h2 id="active-workout-title">{{ session.training_day_name }}</h2>
+          <span>{{ session.mode === 'guided' ? 'Theo giáo án' : 'Tự do' }}</span>
+        </div>
+        <div class="session-actions">
+          <ion-button
+            fill="clear"
+            size="small"
+            color="medium"
+            (click)="confirmCancelWorkout()"
+            aria-label="Hủy buổi tập"
+          >
+            Hủy
+          </ion-button>
+        </div>
+      </header>
+
+      <div class="workout-exercise-tabs" aria-label="Bài trong buổi tập">
+        @for (exercise of session.exercises; track exercise.id) {
+          <button
+            type="button"
+            class="workout-tab"
+            [class.workout-tab--active]="fitness.selectedWorkoutExercise()?.id === exercise.id"
+            (click)="fitness.selectWorkoutExercise(exercise.id)"
+          >
+            {{ exercise.exercise_name_vi || exercise.exercise_name }}
+            <small>{{ exercise.sets.length }} set</small>
+          </button>
+        }
+      </div>
+
+      @if (fitness.selectedWorkoutExercise(); as selected) {
+        <article class="set-logger">
+          <header>
+            <strong>{{ selected.exercise_name_vi || selected.exercise_name }}</strong>
+            <span>{{ selected.total_volume }} kg volume</span>
+          </header>
+
+          @if (selected.sets.length > 0) {
+            <div class="set-history" aria-label="Set đã log">
+              @for (set of selected.sets; track set.id) {
+                <article [class.set-history__item--last]="fitness.lastLoggedSet()?.id === set.id">
+                  <button
+                    type="button"
+                    class="set-history__main set-history__edit"
+                    (click)="editSet(set)"
+                    [attr.aria-label]="'Sửa set ' + set.set_number"
+                  >
+                    <strong>Set {{ set.set_number }}</strong>
+                    <span>{{ set.weight_kg }} kg × {{ set.reps }}</span>
+                    @if (set.effort) {
+                      <small class="set-history__effort">{{ effortLabel(set.effort) }}</small>
+                    }
+                  </button>
+                  @if (set.notes) {
+                    <p class="set-history__notes">{{ set.notes }}</p>
+                  }
+                  <button
+                    type="button"
+                    class="set-history__delete"
+                    (click)="confirmDeleteSet(set.id, set.set_number)"
+                    [attr.aria-label]="'Xóa set ' + set.set_number"
+                  >
+                    <ion-icon name="trash-outline" aria-hidden="true" />
+                  </button>
+                </article>
+              }
+            </div>
+          }
+
+          <div class="set-grid">
+            <div class="input-wrapper">
+              <label class="input-label" for="active-weight-kg">Tạ (kg)</label>
+              <input
+                id="active-weight-kg"
+                class="input-native"
+                type="number"
+                inputmode="decimal"
+                min="0"
+                max="500"
+                step="0.5"
+                [value]="fitness.setDraft().weightKg"
+                (input)="onWeightInput($event)"
+              />
+            </div>
+
+            <div class="input-wrapper">
+              <label class="input-label" for="active-reps">Số lần</label>
+              <input
+                id="active-reps"
+                class="input-native"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                max="100"
+                step="1"
+                [value]="fitness.setDraft().reps"
+                (input)="onRepsInput($event)"
+              />
+            </div>
+
+            <div class="input-wrapper">
+              <label class="input-label" for="active-rest-seconds">Nghỉ (giây)</label>
+              <input
+                id="active-rest-seconds"
+                class="input-native"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                max="600"
+                step="15"
+                [value]="fitness.setDraft().restSeconds"
+                (input)="onRestInput($event)"
+              />
+            </div>
+          </div>
+
+          <div class="effort-row" role="radiogroup" aria-label="Mức nỗ lực (không bắt buộc)">
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-pressed]="fitness.setDraft().effort === 'easy'"
+              [attr.aria-checked]="fitness.setDraft().effort === 'easy'"
+              [class.effort-chip--active]="fitness.setDraft().effort === 'easy'"
+              class="effort-chip"
+              (click)="setEffort('easy')"
+            >
+              Dễ
+            </button>
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-pressed]="fitness.setDraft().effort === 'just_right'"
+              [attr.aria-checked]="fitness.setDraft().effort === 'just_right'"
+              [class.effort-chip--active]="fitness.setDraft().effort === 'just_right'"
+              class="effort-chip"
+              (click)="setEffort('just_right')"
+            >
+              Vừa
+            </button>
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-pressed]="fitness.setDraft().effort === 'hard'"
+              [attr.aria-checked]="fitness.setDraft().effort === 'hard'"
+              [class.effort-chip--active]="fitness.setDraft().effort === 'hard'"
+              class="effort-chip"
+              (click)="setEffort('hard')"
+            >
+              Nặng
+            </button>
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-pressed]="fitness.setDraft().effort === 'maxed'"
+              [attr.aria-checked]="fitness.setDraft().effort === 'maxed'"
+              [class.effort-chip--active]="fitness.setDraft().effort === 'maxed'"
+              class="effort-chip"
+              (click)="setEffort('maxed')"
+            >
+              Tối đa
+            </button>
+          </div>
+
+          <div class="input-wrapper">
+            <label class="input-label" for="active-set-notes">Ghi chú set</label>
+            <input
+              id="active-set-notes"
+              class="input-native"
+              type="text"
+              [value]="fitness.setDraft().notes"
+              (input)="onNotesInput($event)"
+              autocomplete="off"
+            />
+          </div>
+
+          @if (fitness.lastLoggedSet(); as last) {
+            <p class="last-set-toast" role="status" aria-live="polite">
+              ✓ Đã ghi Set {{ last.setNumber }} · {{ last.weightKg }} kg × {{ last.reps }}
+            </p>
+          }
+
+          <div class="logger-actions">
+            <ion-button (click)="fitness.logSet()" fill="solid" expand="block">
+              <ion-icon slot="start" name="add-outline" aria-hidden="true" />
+              Ghi set {{ selected.sets.length + 1 }}
+            </ion-button>
+            <app-rest-timer [seconds]="fitness.restSeconds()" (skip)="fitness.skipRest()" />
+          </div>
+        </article>
+      }
+    </section>
+  } @else {
+    <section class="empty-workout" aria-labelledby="empty-workout-title">
+      <ion-icon name="barbell-outline" aria-hidden="true" />
+      <h2 id="empty-workout-title">Chưa có buổi tập đang mở</h2>
+      <p>Quay lại tab Tập luyện để bắt đầu buổi theo giáo án hoặc buổi tự do.</p>
+    </section>
+  }
+</ion-content>
+
+@if (fitness.activeSession() && fitness.canCompleteWorkout()) {
+  <ion-footer class="active-workout-footer">
+    <ion-toolbar>
+      <ion-button
+        expand="block"
+        fill="solid"
+        size="default"
+        (click)="confirmCompleteWorkout()"
+        aria-label="Hoàn thành buổi tập"
+      >
+        <ion-icon slot="start" name="checkmark-circle-outline" aria-hidden="true" />
+        Hoàn thành buổi tập
+      </ion-button>
+    </ion-toolbar>
+  </ion-footer>
+}

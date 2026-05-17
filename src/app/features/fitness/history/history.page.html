@@ -1,0 +1,68 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/fitness" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Lịch sử</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="history-content">
+  @if (loading()) {
+    <div class="state-block">
+      <ion-spinner name="dots"></ion-spinner>
+      <p>Đang tải lịch sử…</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="state-block state-block--error">
+      <p>{{ errorMessage() }}</p>
+    </div>
+  } @else if (groups().length === 0) {
+    <div class="state-block state-block--empty">
+      <ion-icon name="barbell-outline" aria-hidden="true"></ion-icon>
+      <h2>Chưa có buổi tập nào</h2>
+      <p>Hoàn tất một buổi tập để bắt đầu ghi lại hành trình của bạn.</p>
+    </div>
+  } @else {
+    <section class="history-list">
+      @for (group of groups(); track trackByGroup($index, group)) {
+        <div class="week-block">
+          <header class="week-block__header">
+            <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
+            <h3>{{ group.weekLabel }}</h3>
+            <span class="week-block__count">{{ group.sessions.length }} buổi</span>
+          </header>
+          <ul class="session-list">
+            @for (session of group.sessions; track trackBySession($index, session)) {
+              <li class="session-card">
+                <div class="session-card__date">
+                  <span class="session-card__date-text">{{ formatSessionDate(session.date) }}</span>
+                  <span class="session-card__day-name">
+                    {{
+                      session.training_day_name ??
+                        (session.mode === 'free' ? 'Tập tự do' : 'Buổi tập')
+                    }}
+                  </span>
+                </div>
+                <div class="session-card__stats">
+                  <span class="stat">
+                    <ion-icon name="barbell-outline" aria-hidden="true"></ion-icon>
+                    {{ setCount(session) }} set
+                  </span>
+                  <span class="stat">
+                    <ion-icon name="trophy-outline" aria-hidden="true"></ion-icon>
+                    {{ formatVolume(session.total_volume) }}
+                  </span>
+                  <span class="stat">
+                    <ion-icon name="timer-outline" aria-hidden="true"></ion-icon>
+                    {{ formatDuration(session.duration_minutes) }}
+                  </span>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </section>
+  }
+</ion-content>

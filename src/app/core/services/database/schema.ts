@@ -28,7 +28,7 @@
  *   docs/4-architecture/decisions/calendar-tracking.md (D8 v2)
  */
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 /**
  * Final DDL — gram-only nutrition, light-only theme. Idempotent
@@ -556,5 +556,23 @@ export function buildFiberSnapshotSchemaMigration(): {
   return {
     version: 3,
     statements: FIBER_SNAPSHOT_DDL,
+  };
+}
+
+const WORKOUT_SET_UPDATED_AT_DDL = [
+  // F-012: WorkoutRepository.updateSet writes updated_at, but the column was
+  // never added to the workout_set DDL. Without this migration, every "Sửa
+  // set" attempt throws a SQLite "no such column: updated_at" error.
+  // Nullable so existing rows (created before this migration) remain valid.
+  `ALTER TABLE workout_set ADD COLUMN updated_at TEXT`,
+] as const;
+
+export function buildWorkoutSetUpdatedAtMigration(): {
+  version: number;
+  statements: readonly string[];
+} {
+  return {
+    version: 4,
+    statements: WORKOUT_SET_UPDATED_AT_DDL,
   };
 }

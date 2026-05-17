@@ -2,6 +2,7 @@ import {
   buildFiberSnapshotSchemaMigration,
   buildHybridPolicySchemaMigration,
   buildInitialSchemaMigration,
+  buildWorkoutSetUpdatedAtMigration,
   SCHEMA_VERSION,
 } from './schema';
 import type { Migration } from './migration-runner';
@@ -13,11 +14,13 @@ import type { Migration } from './migration-runner';
  * v1 — initial canonical schema (Story 2.6, 2026-05-08).
  * v2 — Hybrid policy enforcement (D8 DEC-11, 2026-05-09).
  * v3 — Fiber snapshot column for logged meal nutrition details.
+ * v4 — workout_set.updated_at column (F-012 fix, 2026-05-17).
  */
 export const MIGRATION_REGISTRY: readonly Migration[] = [
   buildInitialSchemaMigration(),
   buildHybridPolicySchemaMigration(),
   buildFiberSnapshotSchemaMigration(),
+  buildWorkoutSetUpdatedAtMigration(),
 ];
 
 if (MIGRATION_REGISTRY[MIGRATION_REGISTRY.length - 1]?.version !== SCHEMA_VERSION) {

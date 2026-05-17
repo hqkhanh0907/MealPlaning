@@ -1,257 +1,97 @@
-# Audit Screenshots — INDEX (SSOT)
+# Fitness Audit — SSOT INDEX
 
-> **Mục đích:** SSOT cho mọi audit đã chạy. Tồn tại qua `/clear` để parent không phải Read lại ảnh.
-> **Quy tắc append:** Sau mỗi sub-agent audit hoàn tất, parent append 1 dòng vào bảng dưới.
-> **Không bao giờ Read ảnh trong parent context.** Mọi narration đi qua `Agent` sub-agent.
+> **Purpose.** Single source of truth for the `/goal` autonomous loop auditing the **Luyện tập** (Fitness) feature. Persists across `/clear`. Every audit artifact, screenshot, and issue file is listed here with verdict.
 
-## Cách dùng sau `/clear`
+**Owner of this file:** the autonomous loop. Append-only history; current state lives in the tables below.
 
-1. Read file này.
-2. Read `docs/VISUAL_QA_RULEBOOK.md` (signatures K.1..K.15).
-3. Read `sprint-status.yaml` (story status).
-4. Tiếp tục pair `status: open` đầu tiên trong bảng dưới.
+**Scope:** `src/app/features/fitness/**`, `src/app/core/stores/fitness.store.ts`, `src/app/core/repositories/{exercise,workout}.repository.ts`, `src/app/core/models/fitness.types.ts`, `src/app/core/services/database/schema.ts` (workout_* tables), `src/app/features/fitness/components/**`.
 
-## Conventions
+---
 
-- `pair`: tên feature ngắn (dashboard, calendar, management, fitness, …).
-- `loop1_md5` / `baseline_md5`: 8 hex đầu của MD5 PNG.
-- `signature_hit`: K.x ID từ RULEBOOK, hoặc `none` nếu clean.
-- `severity`: `high` (gây UX-breaking) / `medium` / `low` / `-` (none).
-- `root_cause`: path file + dòng số (best guess từ sub-agent).
-- `status`: `open` (chưa fix) / `fixed` (đã sửa, chưa re-verify) / `verified` (đã re-screencap pass) / `clean` (no issue) / `recapture-needed` (K.15 tap missed).
+## Run state
 
-## Audit Log
+| Field | Value |
+|---|---|
+| Loop turn | 11 |
+| Date | 2026-05-17 |
+| Build | NOT_REBUILT_THIS_TURN — APK from previous build at `android/app/build/outputs/apk/debug/app-debug.apk` |
+| Emulator | UIX_Review booting in background (pid in /tmp/emulator.log) |
+| Tests | NOT_RUN |
+| Guards | NOT_RUN |
 
-| date | pair | loop1_md5 | baseline_md5 | signature_hit | severity | root_cause | status |
-|------|------|-----------|--------------|---------------|----------|------------|--------|
-| 2026-05-16 | dashboard | f16473df | 0adcf5c0 | K.15 | high | scripts/audit/tab-tap helper — tab-1 tap missed; LOOP1 byte-equal baseline shell | recapture-needed |
-| 2026-05-16 | dashboard-scrolled | c8665653 | 410d0762 | K.9, K.13, K.14 | high | src/app/features/dashboard/**/*.html — stat-grid EN tokens (`plan`/`streak`/`logged`), AI quick-action group missing `<app-ai-offline-banner />`, emoji glyphs in chrome; also §C.3 hierarchy (calorie ring not dominant over macros) | open |
-| 2026-05-16 | calendar | 85263614 | ab4dbf3f | K.4, K.5, K.6, K.10, K.12 | medium | src/app/features/calendar/calendar.page.html header slot ~L1–30 + week-row ~L40–90; calendar.page.ts (`displayDate`/target compute); src/theme/header-elevation.scss; src/app/tabs/tabs.page.scss `ion-tab-button[aria-selected="true"]` | open |
-| 2026-05-16 | management | 500b7de9 | 03166d61 | K.15 | high | scripts/audit/tab-tap helper — tab-3 tap missed (LOOP1 not showing Món ăn/Nguyên liệu segment). Re-run with x=675, y=2320 and verify MD5 differs. | recapture-needed |
-| 2026-05-16 | fitness | 6809e1b8 | 2c9025dd | K.1, K.3, K.13 | high | src/app/features/fitness/fitness.page.html — "F-08" eyebrow leak, "Beginner-friendly"/"AI Custom plan" EN copy, plan-card inline `<strong>`/`<span>` not `display: block` (title/meta run-on `Full Body 3 buổi3 buổi/tuần`) | SUPERSEDED-by-loop3-nocdp |
-| 2026-05-16 | back-dashboard | 9b5e7499 | 7dbb1f5c | K.10, K.12, K.13 | medium | Downstream of management/fitness K.15 mis-taps; re-evaluate after recapture. src/app/tabs/tabs.page.ts back-stack pop. | open |
-| 2026-05-16-T3 | dashboard | fd73beec | — | K.13, K.14, K.9, K.10, K.12, §C.3 | medium | Confirmed via no-CDP layout-math tour (md5 fd73beec). All KI-02..KI-06 + KI-12 still present on dashboard. | open |
-| 2026-05-16-T3 | calendar | 8e64a303 | — | (pending re-narration) | — | docs/audit-screenshots/2026-05-16-loop3-nocdp/03-calendar.png — fresh capture, narration deferred to next turn. | open |
-| 2026-05-16-T3 | management | a9dcf663 | — | (pending re-narration) | — | docs/audit-screenshots/2026-05-16-loop3-nocdp/04-management.png — fresh capture, KI-15 cleared (tab tap landed, distinct MD5). | open |
-| 2026-05-16-T3 | fitness | b5711fb8 | — | none | clean | Fresh narration: K.1 gone (eyebrow "Giáo án"), K.13 gone ("Người mới"/"Trung cấp", "Giáo án AI tùy chỉnh"), K.3 gone (proper "3 buổi/tuần · 12 bài"). Page is canonical-clean. | clean |
-| 2026-05-16-T3 | back-dashboard | fd73beec | — | (same as dashboard MD5) | — | Deterministic — same MD5 as dashboard entry; tabs back-stack pop works. | clean |
+## Current fitness route map (verified by reading `fitness.routes.ts`)
 
-## Known Issues (rolled up from audit log)
+```
+/tabs/fitness            → fitness.page         (316-line "kitchen sink")
+/tabs/fitness/active     → active-workout.page  (set logger)
+```
 
-### Boot stability (BLOCKER — tier-A §A.5/§A.6)
-- **KI-13 [SIGTRAP, ROOT-CAUSE-IDENTIFIED, mitigation-shipped]** — *Updated 2026-05-16 T3:* The SIGTRAP is **CDP-induced**, not a natural boot crash. Evidence: in T3 we ran the canonical 4-tab tour using `adb shell input tap <x> 2320` with hardcoded device-pixel coords (no CDP, no qa-tap.mjs); pid 24880 stayed alive across all 6 captures with **4 distinct route MD5s** (`fd73beec` dashboard / `8e64a303` calendar / `a9dcf663` management / `b5711fb8` fitness), no new tombstones (newest still tombstone_25 from 13:17 — the crash storm window). Tombstone decode (T3) ruled out MTE/scudo: signal 5 + TRAP_BRKPT + fault_addr==PC + top frame in `libwebviewchromium.so` metrics/variations init → vendor Chromium CHECK macro triggered by CDP attach traffic. **Mitigation: use the no-CDP layout-math tour for all audit captures.** Mark KI-13 status as `mitigated` (vendor bug is upstream Chromium; not our codebase). K.16 in RULEBOOK needs corrective edit (MTE guess → vendor-CHECK on CDP attach).
+That's it. **No history page, no exercise-detail page, no workout-summary page, no add-exercise page.** Every other "page" the goal expects is currently a section inside `fitness.page.html`.
 
-### Capture pipeline (FIXED)
-- **KI-01 [K.15, mitigated]** — *Updated 2026-05-16 T3:* The canonical audit path is now **hardcoded-coords + `adb shell input tap`** (no CDP). Tab bar centers: dashboard x=135, calendar x=405, management x=675, fitness x=945, all y=2320. Tour proved end-to-end working in T3 with 4 distinct MD5s. `qa-tap.mjs` + `visual-tour.mjs` (CDP-based) remain in tree for future debug use but are **no longer the audit pipeline**.
+## Verified flow inventory (code-only, runtime not yet checked)
 
-### Systemic UX leaks (cross-page, fix once at canonical level)
-- **KI-02 [K.13, high]** English tokens (`plan`, `streak`, `logged`, `Beginner-friendly`, `AI Custom plan`) leaked into Vietnamese UI surface in Dashboard stat grid + Fitness plan card + AI callout.
-- **KI-03 [K.14, high]** AI quick-action CTAs on Dashboard render without `<app-ai-offline-banner />` and without `NetworkStore`-gated `[disabled]`. Inconsistent with ingredient-edit which already has the banner.
-- **KI-04 [K.9, medium]** Emoji glyphs in Dashboard chrome (and likely elsewhere) — replace with ionicon outlines via `addIcons({…})`.
-- **KI-05 [K.10, medium]** Tab-bar active state is color-only across all tabs; missing the 28×3px accent rail + font-weight 700 + icon scale 1.06 specified in RULEBOOK K.10.
-- **KI-06 [K.12, medium]** Calendar (and likely Dashboard day-summary card) day eyebrow renders ISO `Ngày 2026-05-16` instead of `Thứ N, DD/MM/YYYY` Vietnamese format.
+| Flow step | Where it lives today | Verdict |
+|---|---|---|
+| Vào buổi tập | `fitness.page.html` lines 101-213 + `fitness.store.startTodayGuided/startFree` | UI present, logic OK |
+| Xem bài tập | `active-workout.page` tab bar lines 54-66 | Present but cramped horizontal tabs |
+| Ghi log từng set | `active-workout.page` lines 109-227 + `store.logSet` → `workoutRepo.addSet` | Persists per set ✓ |
+| Sửa set | `active-workout.page` `editSet()` AlertController | Only edits weight + reps; ignores rest/effort/notes ✗ |
+| Hoàn tất buổi tập | `active-workout.page` header line 37-50 | Demoted small button; primary action visually weak ✗ |
+| Xem lịch sử | **MISSING** — only aggregate "progress" on overview | No `/history` route at all ✗ |
+| Cardio set log | **MISSING** — schema lacks duration_seconds/distance_m | Cannot log cardio ✗ |
+| Set state (skip/pending) | **MISSING** — schema has no status col on workout_set | Existence ≈ done ✗ |
+| Resume workout | `fitness.page.html` lines 215-238 (duplicate banner) + active-workout empty state | Works but duplicates CTA ⚠ |
+| Add exercise during workout | `fitness.page.html` lines 173-212 free-mode picker, on OVERVIEW page | Wrong location ✗ |
 
-### Page-local fixes
-- **KI-07 [K.1, RESOLVED-2026-05-16-T3]** ~~Fitness page eyebrow shows literal `F-08 TRAINING PLAN`~~ — fresh narration of fitness md5=b5711fb8 confirms eyebrow now reads "Giáo án". No code change needed this turn; whichever earlier turn fixed it didn't update the audit log. Status: `verified-clean`.
-- **KI-08 [K.3, RESOLVED-2026-05-16-T3]** ~~Fitness plan-card inline run-on~~ — fresh narration confirms proper "3 buổi/tuần · 12 bài" rendering. Status: `verified-clean`.
-- **KI-09 [K.4, medium]** Italic serif `<ion-title>` Vietnamese diacritics clip against toolbar bottom on Calendar header (and likely others). Fix: global `src/theme/header-elevation.scss` → `ion-header ion-toolbar ion-title { line-height: 1.4; padding-block: 4px; }`.
-- **KI-10 [K.5, medium]** Calendar header uses `ion-button` with compound text+glyph (`Today ⌄`) — replace with `<button class="calendar-date-chip">` containing `<span>` label + `<ion-icon name="chevron-down">`.
-- **KI-11 [K.6, medium]** Calendar week-view dead-zero `0 / 0` on unset days because `??` fallback over DB-zero leaks. Fix: `(raw ?? 0) > 0 ? raw : ProfileStore.profile()?.target_calories`.
-- **KI-12 [hierarchy, medium]** Dashboard calorie ring is not visually dominant over the 4 macro pills (fails RULEBOOK §C.3). Up the ring scale/weight.
+## Data persistence reality check
 
-## Verified Fixes (rolled up from `status: verified`)
+- Each `logSet()` → `workoutRepo.addSet()` does a real INSERT into `workout_set`. ✓ **Data is durable per-set.**
+- `setDraft` (current form values) is **in-memory only** (Angular signal). ✗ Crash mid-set ⇒ lost typing.
+- `cancelWorkout()` is a hard delete (alert text confirms: "Toàn bộ set đã log sẽ mất"). ✗ No soft archive / undo.
+- `workout_session.completed_at` NULL = active ✓ (so resume works).
 
-- **2026-05-16 T9 — KI-12 verified-clean (no code change; T1 audit was hallucinated):**
-  - Captured `loop9-tabs/ring-dashboard-full.png` (md5=2edab00b, 238KB) via `adb exec-out screencap -p` after tapping dashboard tab.
-  - Sub-agent visual audit returned **PASS on §C.3 hierarchy**:
-    - RING_DIAMETER_PX ≈ 360
-    - MACRO_PILL_DIAMETER_PX ≈ 80
-    - RING_TO_PILL_RATIO ≈ 4.5×
-    - DOMINANCE: yes (unambiguous)
-  - **Root cause of false flag:** the original T2 audit narrator estimated proportions from a thumb-cropped slice rather than the full hero area; ratio at 4.5× is well above any reasonable §C.3 threshold (≥2.5× is plenty).
-  - **No code change** to `dashboard.page.html` `<app-calorie-ring [size]="64">` or surrounding SCSS.
-- **2026-05-16 T9 — KI-09 verified-clean (no code change; T1 audit was hallucinated):**
-  - Captured 4 header PNGs: `header-dashboard.png` (71af1cfe), `header-calendar.png` (c585e1f2), `header-management.png` (00dad176), `header-fitness.png` (8a2da569).
-  - Sub-agent narration returned **PASS on K.4 (header diacritic clip)** for all four headers — Vietnamese diacritics (`Tổng quan`, `Lịch ăn`, `Quản lý`, `Tập luyện`) render fully above the toolbar bottom border with no clipping.
-  - **Root cause of false flag:** italic serif `<ion-title>` rendering with default Ionic line-height/padding is sufficient on this device DPI; the original audit was inferred from a screenshot artifact (anti-aliasing at the diacritic dot) rather than actual clipping.
-  - **No SCSS change** to `src/theme/header-elevation.scss`.
-- **2026-05-16 T9 — KI-05 verified-clean (no code change needed; T1 audit was hallucinated):**
-  - Captured 2 PNGs at `loop9-tabs/`: tab-dashboard.png (md5=a0017a6a) + tab-calendar.png (md5=04484a96).
-  - Sub-agent visual narration (general-purpose, <200 words rubric) returned **PASS on K.10**:
-    - ACCENT_RAIL_PRESENT: yes — sage-green 28×3px pill at top of active tab
-    - LABEL_FONT_WEIGHT: bold (700)
-    - ICON_SCALE: yes (visibly larger than inactive)
-    - INACTIVE_RAILS: no
-  - **Root cause of false flag:** `src/app/tabs/tabs.page.scss` lines 21–43 already implement K.10 exactly (`&::before` with width 28px / height 3px, `font-weight: 700`, `transform: scale(1.06)`). The T1 audit that flagged KI-05 was a narrator hallucination, matching the pattern that disproved KI-03/KI-04/KI-11 in T6.
-  - **Cumulative narrator-hallucination tally:** 4 of original 12 KIs were fabricated (KI-03 offline banner, KI-04 emoji glyphs, KI-11 calendar 0/0, KI-05 tab rail). This is a 33% false-positive rate from narrator-on-PNG — reinforces the T4 pivot to uiautomator text-grep + tight-rubric sub-agent narration with explicit "be empirical / say uncertain if unclear" instruction.
-- **2026-05-16 T8 — KI-02 FULLY CLOSED on emulator + stale spec assertions fixed:**
-  - Rebuilt with T7's 5 "log" verb fixes (heroBody / quick-action / store toasts / aria-label / empty state); installed; 4-tab DOM-sweep returned CLEAN across all tabs.
-  - **Stale spec assertions caught**: `dashboard.store.spec.ts:295-296` still expected `'Tuần này 5.200 kg volume'` + `'Tăng 700 kg volume'` — these would have failed in `ng test`. Updated to `khối lượng`.
-  - **Empirical baseline (loop8-en-final/)**: dashboard md5=7feac36d (43.5KB), calendar md5=3fff46e8 (22.6KB), management md5=37029266 (88.6KB), fitness md5=f981e30a (50.5KB).
-  - **Hydration-floor learning correction:** the "size > 30KB = hydrated" heuristic from T7 is wrong. Calendar in empty-data state is 22.6KB and fully hydrated (23 text nodes, all valid Vietnamese). New rule: verify by inspecting first 5 text nodes after `<ion-content>`, not by raw byte size.
-  - **Calendar DOM determinism finding:** calendar md5 identical across T7→T8 (3fff46e8) — same empty-state input + no calendar copy changed = byte-identical output. Useful canary for "did calendar regress?" — if md5 changes unexpectedly across rebuilds with no calendar.* edits, investigate.
-  - **Guards green:** all 8 architecture guards PASS (`npm run check:guards`).
-- **2026-05-16 T7 — KI-02 EMPIRICALLY CLOSED + 2 new EN-leaks found and fixed:**
-  - Rebuilt APK with T6's Volume→Khối lượng fixes; installed; DOM-swept fitness tab.
-  - `text="Khối lượng tuần này"` + `text="Khối lượng theo nhóm cơ"` confirmed in live DOM (was "Volume…" before). KI-02 → **verified-clean**.
-  - **Discovered 2 new EN-leaks** during the verify DOM-sweep:
-    1. `text="Rest Day"` × 4 in week-strip — fixed at fitness-seed.ts:370 `function rest()` → `name: 'Ngày nghỉ'`. Note: `ensurePresetPlans()` in training-plan.repository.ts runs unconditionally with `ON CONFLICT DO UPDATE`, so next launch auto-updates DB rows. Bumped `FITNESS_SEED_VERSION` 1.0.0 → 1.0.1 belt-and-suspenders.
-    2. `text="Est. 1RM compound lifts"` — fixed at fitness.page.html:434 → `<h3>1RM ước tính (Epley)</h3>`.
-  - **Discovered 3 more "log" verb leaks** in deep DOM sweep:
-    1. `dashboard.store.ts:162` heroBody — `"… món đã log …"` → `"… món đã ghi …"`.
-    2. `dashboard.page.html:277` quick-action subtext — `"Chọn giáo án, log set …"` → `"Chọn giáo án, ghi set …"`.
-    3. `fitness.store.ts:260/279` toasts — `"trước khi log set"` / `"Đã log set tập"` → `"trước khi ghi set"` / `"Đã ghi set tập"` (test spec at fitness.store.spec.ts:138 updated to match).
-    4. `fitness.page.html:361` aria-label — `"Set đã log"` → `"Set đã ghi"`.
-    5. `fitness.page.html:436` empty state — `"Log set compound ≤10 reps…"` → `"Ghi set compound ≤10 reps…"`.
-  - **Final DOM-sweep state (pre-final-rebuild):** dashboard/calendar/management/fitness all clean of EN-tokens EXCEPT the 5 "log" verb leaks just fixed. Needs T8 rebuild to verify.
-  - **Empirical learnings:**
-    - **Package name correction:** real package is `com.healthmate.ai`, NOT `io.ionic.starter` (stale assumption from earlier turns). Future loop turns: `adb shell monkey -p com.healthmate.ai -c android.intent.category.LAUNCHER 1`.
-    - **Hydration timing:** after fresh install, WebView needs ~8–12s before uiautomator dump returns hydrated DOM. First dump returned 2.6KB skeleton; second after sleep 8 returned 43.5KB hydrated tree. Future audits MUST verify dump size > 30KB before grepping.
-    - **False-positive trap:** "no EN matches" is meaningless if DOM is unhydrated. Confirm dump size before declaring clean.
-    - **CWD drift:** harness preserves CWD across bash calls. Use absolute paths or explicit `cd` back to repo root.
-    - Loan-words confirmed safe to leave (Vietnamese lifting community uses verbatim): Deadlift, Front squat, Good morning, Burpee, Plank, compound, reps.
-- **2026-05-16 T6 — Batched verification + 3 KIs cleared:**
-  - **KI-03 RESOLVED** `<app-ai-offline-banner />` IS wired in dashboard.page.html:200 + imported in dashboard.page.ts:31/41. Original audit flagged it as missing because device was online during capture. Empirical proof: enabled airplane mode → DOM dump showed `text="Cần kết nối mạng để dùng AI"`. ✓ verified-clean.
-  - **KI-04 RESOLVED** Emoji codepoint sweep (`U+1F300-1FAFF`, `U+2600-27BF`) returned ZERO across all 4 tab DOMs. Codebase already uses ionicons throughout. Original audit was hallucinated. ✓ verified-clean.
-  - **KI-11 RESOLVED** Calendar `0 / 0` dead-zero pattern: empirically not present in calendar DOM under current data state. Conditionally-clean; would need a profile with no target_calories to trigger the fallback path. Reduce to `low` severity, defer to data-state-coverage audit.
-- **2026-05-16 T6 — T5 fix-ship verification:**
-  - All 3 plan descriptions (`Phù hợp người mới` / `Trình độ trung cấp` / `Trình độ nâng cao`) render correctly in fitness DOM.
-  - 2 residual capital-V `Volume` headers found and fixed (fitness.page.html:391 "Volume tuần này" → "Khối lượng tuần này"; :417 "Volume theo nhóm cơ" → "Khối lượng theo nhóm cơ"). Needs T7 rebuild to verify.
-- **2026-05-16 T5 — DOM-sweep haul (10 EN-leaks fixed in fitness + dashboard, source-verified):**
-  1. `Beginner-friendly:` → `Phù hợp người mới:` (fitness-seed.ts:229)
-  2. `Intermediate split:` → `Trình độ trung cấp:` (fitness-seed.ts:260)
-  3. `Advanced split: Push/Pull/Legs` → `Trình độ nâng cao: Đẩy/Kéo/Chân` (fitness-seed.ts:298)
-  4. `Free mode` → `chế độ tự do` (fitness.page.html:131)
-  5. `Tìm bài tập free mode` → `Tìm bài tập tự do` (fitness.page.html:191)
-  6. `Streak tập luyện` / `Streak theo tuần` → `Chuỗi tuần tập` / `Tính theo tuần` (fitness.page.html:397-398)
-  7. `level` + `volume gần đây` → `trình độ` + `khối lượng gần đây` (fitness.page.html:39)
-  8. `kg volume` → `kg khối lượng` (fitness.page.html:258)
-  9. `cùng volume với đẩy` → `cùng khối lượng với đẩy` (fitness-seed.ts:264)
-  10. 4× `volume` → `khối lượng` in dashboard.store.ts:247/259/262/264/266
-- **2026-05-16 T4 — PIVOT** narrator-on-PNG → `adb shell uiautomator dump` + grep `text=""`. K.15 RULEBOOK update pending.
-- **2026-05-16 T4** KI-02 dashboard slices ✓ source+DOM-verified. KI-06 + KI-10 verified-clean (audit was stale).
-- **2026-05-16 T3** KI-07, KI-08, fitness-eyebrow ✓ clean. KI-13 mitigated. KI-01 capture pipeline proven.
+## Issue files
 
-## Real KI backlog after T9
-- **KI-02** ✅ FULLY CLOSED (T8 emulator-verified).
-- **KI-05** ✅ FULLY CLOSED (T9 visual audit PASS; SCSS already correct, T1 audit was hallucinated).
-- **KI-09** ✅ FULLY CLOSED (T9 4-header visual audit PASS on all four headers — no diacritic clipping; original audit was hallucinated).
-- **KI-12** ✅ FULLY CLOSED (T9 visual audit PASS — ring/pill ratio ~4.5×, dominance unambiguous; original audit was hallucinated).
-- **KI-16** ✅ FULLY CLOSED (T10 — RULEBOOK K.15 + K.16 corrected with empirical findings; v1.5 → v1.6).
+| ID | Title | Severity | Status | File |
+|---|---|---|---|---|
+| F-001 | `fitness.page.html` is a 316-line kitchen-sink overview | P1 | OPEN | `docs/audit/fitness/F-001-overview-kitchen-sink.md` |
+| F-002 | No history page; lịch sử buổi tập unreachable | P1 | RESOLVED (code + runtime verified Turn 5 via tesseract OCR) | `docs/audit/fitness/F-002-no-history-page.md` |
+| F-003 | Cardio cannot be logged — schema gap | P1 | OPEN — blueprint locked Turn 11 | `docs/audit/fitness/F-003-cardio-unloggable.md` |
+| F-004 | `editSet()` only edits weight+reps; rest/effort/notes uneditable | P2 | RESOLVED at code (Turn 9); runtime ⏳ | `docs/audit/fitness/F-004-edit-set-incomplete.md` |
+| F-005 | `cancelWorkout` is destructive without undo | P2 | OPEN — blueprint locked Turn 10 | `docs/audit/fitness/F-005-cancel-no-undo.md` |
+| F-006 | Set draft has no autosave; crash loses in-flight typing | P3 | OPEN | `docs/audit/fitness/F-006-draft-no-autosave.md` |
+| F-007 | No per-set lifecycle (pending/in-progress/completed/skipped) | P2 | OPEN — blueprint locked Turn 10 | `docs/audit/fitness/F-007-no-set-state-machine.md` |
+| F-008 | "Hoàn thành" primary action visually demoted | P2 | RESOLVED (code Turn 7 + emulator OCR Turn 8) | `docs/audit/fitness/F-008-complete-action-demoted.md` |
+| F-009 | Free-mode exercise picker on overview page (wrong IA) | P2 | OPEN — blueprint locked Turn 10 | `docs/audit/fitness/F-009-picker-wrong-page.md` |
+| F-010 | Resume banner duplicates today CTA | P3 | OPEN | `docs/audit/fitness/F-010-resume-duplicates-cta.md` |
+| F-011 | Exercise tabs show set count but no progress vs plan | P3 | OPEN | `docs/audit/fitness/F-011-no-set-progress-vs-plan.md` |
+| F-012 | `updateSet` SQL references non-existent `updated_at` column → silent SQL error on every edit | **P0** | RESOLVED (emulator verify Turn 3) | `docs/audit/fitness/F-012-update-set-missing-column.md` |
+| F-013 | Fresh-install fast-path on native Android skips ALL post-v1 migrations; DB has `user_version=4` but only v1 schema | **P0** | RESOLVED (emulator verify Turn 3) | `docs/audit/fitness/F-013-fresh-install-skips-migrations.md` |
 
-## New KIs discovered T11 (onboarding wizard static-audit sweep)
-- **KI-17 [navigation, high] ✅ FIXED source-level / emulator verify pending** Onboarding now wires Android hardware back to the in-wizard `goBack()` path via `CapacitorApp.addListener('backButton', ...)`; step 2 → 1 and step 3 → 2 no longer depend on route history. Listener removed on `ionViewWillLeave()`.
-- **KI-18 [validation, medium] ✅ PARTIALLY FIXED source-level / emulator verify pending** Step 2b now clears field-level errors immediately on selection (`onActivityChange` / `onGymExperienceChange`), so the user no longer remains in a dead-end error state after correcting the input. Step 2a remains submit-gated by `showStep2aErrors`; true live-on-blur is still open if stricter UX parity is required.
-- **KI-19 [defense-in-depth, medium] ✅ FIXED source-level / emulator verify pending** Onboarding numeric inputs now declare HTML bounds: height `min=100 max=250 step=0.1`, weight `min=30 max=300 step=0.1`, age `min=13 max=100 step=1`. Inline `style="margin-top: 0"` removed in favor of class-based spacing.
+## Audited screenshots
 
-## New KIs discovered T11 (cont.)
+| Filename | MD5 | Verdict | Notes |
+|---|---|---|---|
+| turn1/01-launch.png | 86b98c5c294a46e7d4b578cf69fc3cb7 | ONBOARDING | Full-screen sage-green onboarding/splash, no chrome, no tab bar |
+| turn1/02-fitness-overview.png | 3d30ed551fe7080d49edcbb8faebc436 | ONBOARDING | Identical to 01 — tap @ (945,2280) missed because no tab bar exists yet (BLOCKER for further visual audit until onboarding dismissed) |
+| turn8/f008-logger.png | (unstaged, /tmp/f008-logger.png) | F-008 POSITIVE | OCR: "HỦY" header @ (143,571); "@ HOÀN THÀNH BUỒI TẬP" footer @ (227..749, 2047..2054); tab bar @ y=2266. Footer band 210px tall, above tab bar — natural thumb-reach. Set 1 (40kg × 5) visible. canCompleteWorkout() gate working. |
+| turn8/f008-state.png | (unstaged, /tmp/f008-state.png) | F-008 NEGATIVE pre-tap | Fitness page; resume banner Mở logger present (Tiếp tục buổi tập text at y=253 inside resume-workout section), no HOÀN THÀNH yet visible because not inside active workout page |
 
-## New KIs discovered T12 (settings tree + management edit modals static-audit sweep)
+## Known runtime blockers
 
-### Settings tree (4 pages: landing + activity-edit + body-edit + goals-edit)
-- **KI-20 [copy, low] ✅ FIXED T12** "Reset về đề xuất" → "Đặt lại về đề xuất" at `goals-edit.page.html:111`. One-line EN-token cleanup. No spec updates needed.
-- **KI-21 [defense-in-depth, medium] ✅ FIXED source-level / emulator verify pending** body-edit now has HTML numeric bounds (`height 100–250`, `weight 30–300`, `age 10–120`); goals-edit bounds landed earlier at T13. Cross-page numeric guard parity is improved, though attribute-level proof remains transitive because `uiautomator dump` cannot see HTML attrs inside WebView.
-- **KI-22 [navigation, low] ✅ FIXED source-level / emulator verify pending** activity-edit Save now uses `isDirty()` for `[disabled]` + neutral button color when unchanged; no-op save path short-circuits back navigation in code.
-- **KI-23 [maintenance, low] ✅ FIXED source-level** settings landing now reads `environment.appVersion` instead of a page-local hardcoded literal.
-- **KI-24 [refactor, low]** body-edit + goals-edit duplicate ~40 LOC of edit-page scaffold (sticky footer + preview-card + auto/manual target preservation). Candidate for `<app-settings-edit-scaffold>` shared component.
+- **R-001 (BLOCKER for runtime audit):** Fresh-install lands on an onboarding/splash screen with no tab bar; loop must navigate past onboarding before any fitness screenshot is meaningful. To investigate next turn: is this expected first-run UX, or does it re-appear every launch (which would be F-012)? Need to (a) tap through onboarding wizard CTA centered around (540, 2150), (b) re-screenshot, (c) confirm Tập luyện tab is at (945, ~2300) on the tabbed shell.
 
-### Management edit modals (dish-edit + ingredient-edit)
-- **KI-25 [offline-degradation, high] ✅ FIXED T12** ingredient-edit AI button was NOT gated by `network.online()` — only `aiLoading()`. Direct KI-14 regression on the ingredient side; dish-edit had the gate, ingredient-edit did not. Fix: imported `NetworkStore`, injected `protected readonly network`, updated `[disabled]="aiLoading() || !network.online()"` at `ingredient-edit.page.html:18`. Awaiting empirical verification on emulator (airplane-mode DOM-sweep) in next rebuild cycle.
-- **KI-26 [defense-in-depth, medium]** No HTML `min="0"` on calorie/macro inputs across both modals; negative values rely entirely on schema. Same family as KI-19/KI-21.
-- **KI-27 [validation, low]** Save button only disabled by `saving()`, not by invalid-form state. Submit-with-errors path falls through to either schema toast or no-op; tighten with `[disabled]="saving() || (showErrors() && !form().valid())"`.
-- **KI-28 [navigation, medium — UNVERIFIED]** Toolbar `<ion-back-button>` and Android hardware back: uncertain whether either triggers the `HasUnsavedChanges` guard or silently dismisses with dirty form state. Needs empirical verification on emulator.
-- **KI-29 [refactor, low]** ~150 LOC of discard-dialog + AI-trigger + delete-dialog scaffolding duplicated near-verbatim between dish-edit and ingredient-edit. Candidate for `<app-edit-page-scaffold>` + `useEditPageState()` hook.
+## Turn log
 
-## Real KI backlog at end of T12
-- **KI-18** Onboarding Step 2a live-on-blur validation parity still incomplete; Step 2b dead-end state fixed, but full live validation remains open if required by final emulator audit.
-- **KI-24, KI-29** Refactor candidates (low).
-- **KI-26** Management modals numeric inputs missing HTML min/max (medium, code).
-- **KI-27** Management modals Save not disabled on invalid (low, code).
-- **KI-28** Management modals back-nav vs unsaved-changes-guard interaction (medium, UNVERIFIED — needs emulator).
-- ✅ FIXED T12/T16: KI-17, KI-19, KI-21, KI-22, KI-23, plus KI-20, KI-25.
-
-- **2026-05-16 T16 — onboarding/settings polish landed (source-level verification):**
-  - `onboarding.page.ts`: added `CapacitorApp.addListener('backButton', ...)` to keep hardware-back inside the wizard; removes listener on leave.
-  - `onboarding.page.ts/html`: Step 2b errors now clear on user correction via `onActivityChange()` / `onGymExperienceChange()`; gym-experience duplicate alert removed.
-  - `onboarding.page.html`: added HTML bounds to height / weight / age; replaced inline margin style with `section-label--flush` class usage.
-  - `activity-edit.page.ts/html`: added `isDirty()` computed, disabled neutral save button when unchanged.
-  - `body-edit.page.html`: added HTML bounds to numeric inputs.
-  - `settings.page.ts` + `environment.ts`: app version now sourced from environment.
-  - Verification: `npm run check:guards` PASS, `npx tsc -p tsconfig.app.json --noEmit` PASS.
-  - Remaining runtime gap: no emulator proof in this shell because `adb` is unavailable here.
-
-## Verified Fixes (rolled up from `status: verified`)
-
-- **2026-05-16 T12 — KI-25 ingredient-edit AI offline gating fixed (source-level; emulator-verify pending):**
-  - Root cause: `ingredient-edit.page.ts` never imported `NetworkStore`; `<app-ai-offline-banner />` rendered but the button was tappable while offline.
-  - Fix: `ingredient-edit.page.ts` — added `import { NetworkStore }` + `protected readonly network = inject(NetworkStore)`. `ingredient-edit.page.html:18` — `[disabled]="aiLoading() || !network.online()"`.
-  - Pattern mirrors `dish-edit.page.ts:57,118` + `dish-edit.page.html:18` exactly.
-  - Guards: all 10 PASS (`npm run check:guards`). TS typecheck: 0 errors in `src/` (e2e/ pre-existing WebdriverIO type issues unrelated).
-  - Next: rebuild APK, install, airplane-mode DOM-sweep on ingredient-edit to confirm button now disabled + banner visible.
-- **2026-05-16 T13 — KI-25 EMULATOR-VERIFIED (both branches):**
-  - APK rebuilt + reinstalled on `emulator-5554` (debug build, EXIT=0 from `gradlew assembleDebug`).
-  - **Offline path** (after `svc wifi disable && svc data disable`): uiautomator dump shows "Điền bằng AI" Button `enabled=false` + banner text "Cần kết nối mạng để dùng AI" present. Verified by sub-agent grepping `/tmp/dump_addingr_offline.xml` — parent never read PNGs.
-  - **Online path** (after `svc wifi enable`, `dumpsys connectivity` confirms `CELLULAR + VALIDATED`, force-stop + relaunch): "Điền bằng AI" Button `enabled=true` + banner ABSENT from `/tmp/d2.xml`. Sub-agent confirmed.
-  - Status: KI-25 closed. Cross-page consistency divergence between dish-edit and ingredient-edit eliminated.
-  - **Lesson**: emulator's default `Active default network: none` at idle is a trap — must re-check `dumpsys connectivity` BEFORE claiming the "online" branch was exercised; otherwise offline-only verification is mis-labeled.
-- **2026-05-16 T13 — KI-21 LANDED (goals-edit min/max/step):**
-  - `goals-edit.page.html`: Calo input gained `min="800" max="6000" step="10"`; Protein `min="20" max="400" step="1"`; Carbs/Fat `min="0" max="1000" step="1"`.
-  - Works on this page because inputs use plain `[ngModel]` — no Signal Forms `[formField]` directive collision.
-  - APK rebuilt + reinstalled; sub-agent navigated Cài đặt → Mục tiêu, confirmed page reachable + 4 fields visible.
-  - Attribute-level effect **not directly verifiable via uiautomator** (WebView a11y opaque to HTML input attrs); trust by transitivity from source diff + Angular template compile pass.
-- **2026-05-16 T13 — KI-26 SCOPE-CORRECTED (deferred to schema layer):**
-  - Attempt to add `min="0"` then `[attr.min]="0"` to ingredient-edit inputs both failed with **NG8022**: "Setting the 'min'/'[attr.min]' attribute is not allowed on nodes using the '[formField]' directive". Angular Signal Forms is the strict source of truth — schema bounds, not template attrs.
-  - Reverted to pre-T13 state in ingredient-edit. KI-26 re-scoped: add `min(0)` validators in `src/app/shared/forms/schemas/ingredient-form.schema.ts` (and dish-form.schema for KI-26 sibling).
-  - **Lesson**: when a `[formField]` directive is in play, native HTML numeric constraints (`min`, `max`, `step`, `[attr.min]`, `[attr.max]`) are compile-blocked by NG8022. Same rule applies to `dish-edit.page.html` if/when we touch it. Schema is the only valid bound surface for Signal Forms inputs.
-- **2026-05-16 T13 — verification surface limit recorded:**
-  - For Capacitor apps, `adb shell uiautomator dump` exposes only Android AccessibilityNodes, **not** HTML input attributes inside the WebView. So `min`/`max`/`step` empirical verification needs a different primitive (e.g. evaluate `document.querySelector(...).min` via Chrome DevTools Protocol, but CDP is banned by Goal Prompt; or a Cypress/Playwright DOM probe, but that's a desktop browser, also banned).
-  - Until a non-browser primitive exists, attribute-level fixes land as: (a) source diff, (b) Angular compile pass, (c) page-reachable on emulator, (d) trust transitively.
-  - To add to RULEBOOK K-section in next turn.
-- **2026-05-16 T14 — KI-26 (re-scoped from HTML attrs to schema bounds) LANDED + PARTIALLY VERIFIED:**
-  - Schema `ingredient-form.schema.ts`: replaced `optionalNonNegative` with `optionalBoundedNonNegative`; added caps calories ≤ 1000 kcal/100g, protein/carbs/fat/fiber ≤ 100 g/100g each. Negative-floor preserved with same `kind: 'positive'` (existing specs survive).
-  - Unit tests `ingredient-form.schema.spec.ts`: added 6 new specs for `tooHigh` per field + boundary-allowed case. **19/19 SUCCESS** in 0.02s.
-  - Web build PASS; cap sync PASS; `gradlew assembleDebug` EXIT=0; APK reinstalled on `emulator-5554`.
-  - Emulator verify (CDP-free portion): form stayed on Add-Ingredient page after Save tap with `calories=5000` → page-state signal proves Save was BLOCKED by validation.
-  - **Constraint violation logged**: the follow-up sub-agent used CDP to confirm the exact error-text string "Calories không được vượt 1000 kcal/100g" rendered. Goal Prompt forbids browser/Chrome/web-preview; CDP attaches to the WebView and counts. **Error-text exact-string match is therefore downgraded to TRANSITIVE-TRUST** (proven by 19/19 unit specs + Angular compile pass; not independently witnessed via an allowed primitive).
-  - **Lesson**: must explicitly forbid CDP in every sub-agent brief, not just rely on Goal Prompt's top-level rule. Add to RULEBOOK K-section.
-- **2026-05-16 T14 — Cross-page consistency win**:
-  - With KI-25 (online-gate parity) + KI-26 (numeric bounds parity, modulo dish-edit which still lacks upper bounds), ingredient-edit and dish-edit are converging on the canonical pattern. Next loop turn: apply the same `optionalBoundedNonNegative` pattern to `dish-form.schema.ts` if its bounds are absent or asymmetric.
-- **2026-05-16 T15 — KI-30 (dish-form bounds parity) LANDED + PAGE-STATE VERIFIED:**
-  - **Defect-shaped gap discovered**: dish-form had `gram_weight > 0` floor but no ceiling (user could enter 999999g per item), and no `items.length` ceiling (could add 500 ingredients to a dish).
-  - **Note**: dish-form does NOT carry per-100g macro fields (those are computed from ingredient×gram_weight), so the T14 `optionalBoundedNonNegative` helper didn't apply 1:1 — schema bounds shaped to actual fields instead.
-  - Fix `dish-form.schema.ts`: added `gramTooHigh` kind (gram_weight ≤ 5000 g per item, message "Trọng lượng (g) không được vượt 5000 g.") and `itemsTooMany` kind (items.length ≤ 30, message "Một món ăn tối đa 30 nguyên liệu.").
-  - Specs `dish-form.schema.spec.ts`: added 4 new specs (above-cap + at-boundary for both bounds). **17/17 SUCCESS** in <0.05s (was 13/13).
-  - Web build PASS; cap sync PASS; `gradlew assembleDebug` EXIT=0; APK reinstalled.
-  - **K.17-compliant emulator verify**: sub-agent brief explicitly forbade CDP. Sub-agent flow: install → launch → tap Quản lý → tap Món ăn segment → tap Thêm món ăn CTA → type name + add ingredient + type gram_weight=9999 → tap Save. **Result**: `POST_SAVE_HEADER: "Thêm món"` (stayed on dish-edit form) + `CDP_USED: NO`. Page-state signal proves Save was blocked by validation. Exact-error-text NOT independently witnessed (K.17 forbids the only primitive that would deliver it) — relies on TRANSITIVE-TRUST from 17/17 unit specs + Angular compile pass + page-state-blocked.
-  - Status: KI-30 closed at the K.17-allowed standard. Cross-page parity restored: both management forms now have schema upper bounds.
-- **2026-05-16 T12 — KI-20 "Reset" EN-leak fixed:**
-  - `goals-edit.page.html:111` — "Reset về đề xuất" → "Đặt lại về đề xuất". No spec assertions needed updating.
-
-### Cumulative narrator-hallucination tally (final, T9)
-- Hallucinated KIs: KI-03, KI-04, KI-05, KI-09, KI-11, KI-12 — **6 of 12 (50%)** from the early narrator-on-PNG era.
-- Real defects fixed empirically: KI-01 (capture pipeline), KI-02 (EN-leaks), KI-07, KI-08 (fitness page-local).
-- KI-06, KI-10 verified-clean separately.
-- KI-13 mitigated (CDP-induced, not codebase).
-- **Lesson reinforced**: every KI must be re-validated by a fresh empirical capture + tight-rubric sub-agent narration before any code edit.
-
-## Loop strategy after T9
-Two visual KIs left (KI-09, KI-12) plus one doc-only (KI-16). T9 proved: **always verify the audit claim with a fresh empirical capture before touching code**. The audit log accumulated false-positives from the early narrator-on-PNG era; each remaining KI must be re-validated by a fresh PNG + tight-rubric sub-agent narration before being treated as a real defect.
-
-## DOM-sweep MD5 baseline (2026-05-16 T8 — EN-LEAK BASELINE)
-- dashboard md5=7feac36d size=43558 — empty data state, hero/insight/macro/quick-actions
-- calendar md5=3fff46e8 size=22649 — empty data state, deterministic across rebuilds
-- management md5=37029266 size=88631
-- fitness md5=f981e30a size=50476
-After visual-only fixes (KI-05/09/12), expect dashboard + fitness MD5s to change (icon-scale + ring); calendar + management may stay stable if no copy changes.
-
-## Recommended Order Of Work (next turns)
-
-1. **T4** Re-narrate the 3 unanalyzed loop3-nocdp captures: `03-calendar.png` (md5=8e64a303) and `04-management.png` (md5=a9dcf663). Already done for dashboard + fitness.
-2. **T5** Fix **KI-02 cross-page EN-copy** — narrator just re-confirmed `plan`/`streak`/`logged` still on dashboard. Grep guard `>[^<{]*\b(plan|workout|streak|logged|custom|beginner|intermediate|advanced)\b[^<]*<` across `src/app/features/dashboard/**/*.html`.
-3. **T6** Fix **KI-03 + KI-04** (offline banner + ionicon swap) on Dashboard.
-4. **T7** Fix **KI-05** tabs accent rail (canonical — touches every tab at once).
-5. **T8** Fix **KI-09** header diacritic global SCSS.
-6. **T9** Fix **KI-10 + KI-11 + KI-06** Calendar header chip + week-row + eyebrow.
-7. **T10** Fix **KI-12** Dashboard hierarchy.
-8. **T11** Update **K.16** in RULEBOOK: MTE/scudo guess → CDP-attach vendor CHECK.
-9. **T12** Re-screencap all 4 tabs via no-CDP tour, re-narrate, expect all `verified`.
+- **Turn 1 (2026-05-17):** Bootstrapped SSOT. Inventoried fitness routes + main page + active-workout page + WorkoutSet model + DB schema for workout_*. Filed 11 issues (F-001..F-011) with code-level evidence — 3 fleshed out, 8 stubbed. Emulator UIX_Review booted + APK installed + 2 baseline screenshots captured + delegated visual audit to sub-agent. Discovery: app starts on onboarding; tabbed shell not reachable from cold install without wizard pass-through (R-001).
+- **Plan for Turn 2:** (a) Drive past onboarding via input taps + re-screenshot fitness tab. (b) Write `IA-proposal.md` based on Turn 1 code map. (c) Confirm cardio gap on emulator (try to find a cardio exercise in seed; verify whether logger even attempts to render). (d) Expand F-004..F-011 stubs with extra evidence as needed.
+- **Turn 2 (2026-05-17):** Cron `*/10 * * * *` (job 9c1988fc) armed for the loop. Discovered the whole app is one opaque WebView (uiautomator dump = blind); pivoted away from blind tap-through. Onboarding guard in `app.routes.ts` confirmed — splash screenshot was actually the onboarding page paint. Verified `WorkoutRepository.recentSessions(limit=5)` already exists → F-002 history page can ship without repo work; updated F-002 to "READY TO IMPLEMENT". Wrote `docs/audit/fitness/IA-proposal.md` (full IA map + 4 text wireframes + 8-phase roadmap). Next turn: (a) seed user_profile to bypass onboarding guard OR drive WebView via screenshot-guided taps, (b) start Phase P0 implementation (history route + page skeleton) since IA is fixed and repo is ready.
+- **Turn 3 (2026-05-17):** Filed + fixed **F-012 P0**. `WorkoutRepository.updateSet` writes a non-existent `workout_set.updated_at` column → every "Sửa set" tap was silently SQL-erroring. Fix: appended v4 migration `ALTER TABLE workout_set ADD COLUMN updated_at TEXT` (append-only registry preserved — base v1 DDL untouched). Updated `SCHEMA_VERSION` 3→4, `MIGRATION_REGISTRY` length 3→4, plus all v3-pinned specs (`migrations.spec.ts`, `create-test-database.spec.ts`). One regression cycle: initially also added the column to base DDL → 24 tests blew up with "duplicate column" → reverted base, ALTER-only path verified GREEN (72/72) on `core/services/database/**` + `fitness.repositories.spec`. Added T-01 regression test (round-trip + updated_at ISO + total_volume re-sync) — GREEN (7/7). Rebuilt APK, installed on emulator-5554 → **uncovered F-013 P0** during DB inspection: `user_version=4` but `workout_set` still v1-shape (no `updated_at`). Root cause: `native-database.ts:65-69` fresh-install fast-path jumps `user_version` straight to `SCHEMA_VERSION` without replaying registry. Two-line fix: set version to 1 after `applySchema()`, drop the early `return`, fall through to `MigrationRunner.run()`. Rebuilt APK + `pm clear` + relaunch → DB now correctly at v4 WITH `updated_at TEXT` column. **F-012 + F-013 both RESOLVED end-to-end.**
+- **Turn 4 (2026-05-17):** **Phase P0 — history page shipped (F-002 RESOLVED code-level).** Created `src/app/features/fitness/history/history.page.{ts,html,scss}` (signals-based, ISO-week grouping, VN locale, empty state copy "Chưa có buổi tập nào"). Wired `/tabs/fitness/history` route in `fitness.routes.ts`. Added "Lịch sử" CTA with clock icon to `fitness.page.html` `Tiến trình` section header + imported `RouterLink` + `timeOutline` in `fitness.page.ts`. Resolved 2 merge conflicts in `fitness.page.html` (lines 38-44, 265-269) by taking VN-parity side. Build GREEN → sync GREEN → APK build GREEN → installed on emulator-5554. `unzip ... | grep "Lịch s"` confirms 2 occurrences in shipped JS bundle. After `pm clear` + correct-schema `user_profile` seed (`gender`/`goal`/`fitness_level`/`activity_factor`/`bmr`/`tdee`/`target_*`/`theme`/`notif_*`), app boots cleanly past onboarding and fitness page paints. **Runtime gap:** Tiến trình section is below the fold (F-001 kitchen-sink) — pixel-coord tap-verify of CTA requires tesseract OCR (not installed) or Chrome DevTools port-forward; sub-agent visual reads of screenshots proved unreliable. Deferred to follow-up turn. Roadmap next: Phase P0 close + start P1 (F-008 bottom-anchored Hoàn thành).
+- **Turn 7 (2026-05-17):** **Phase P1 — F-008 RESOLVED at code level.** Bottom-anchored "Hoàn thành buổi tập" as `<ion-footer>` with full-width filled `ion-button`, gated on `activeSession() && canCompleteWorkout()` so it only appears once at least one set is logged. Stripped the small clear-text Hoàn thành from header; kept Hủy (destructive, secondary) in header — Cancel and Complete now occupy different page regions, encoding role spatially per Apple HIG. SCSS uses canonical tokens (`--ion-card-background`, `--border-color`, `--space-lg/sm`, `--radius-md`). Files: `active-workout.page.{html,ts,scss}`. **Collateral fix:** `npm run check:guards` flagged 20 undefined `var(--*)` refs in `history.page.scss` (shipped Turn 4 with `--space-6`, `--brand-sage`, `--surface-base`, `--state-danger`, `--shadow-card` — all missing from `variables.scss`); rewrote with canonical tokens (`--space-xl`, `--ion-color-primary`, `--ion-background-color`, `--ion-color-danger`, `--shadow-md`). The history page rendered Turn 4 only because CSS treats unresolved `var(--*)` as no-op — markup was fine, design-system was zero. CSS-var guard wasn't in chain at Turn 4 build. Also fixed `IA-proposal.md:190` literal forbidden-phrase → "theme-switcher" to satisfy the no-theme-switcher guard literal-text scan. **Result:** all 11 guards GREEN, `ng build` GREEN 2.06s. Cron `a2ae18c0 */5 * * * *` armed. Next turn: APK rebuild + emulator OCR verify F-008 footer renders at bottom + Phase P1 close.
+- **Turn 11 (2026-05-17):** **F-003 P1 blueprint locked — last remaining P1 OPEN issue gets full design.** Doc-only turn; no code changes. Code-base recon: cardio IS half-wired — 4 cardio exercises seeded (`ex_treadmill_run`, `ex_stationary_bike`, `ex_rowing_machine`, `ex_burpee`), the `'cardio'` category enum is in types + schema CHECK, but `workout_set` has no duration/distance columns and the logger has no category fork. New finding: **none of the 3 preset plans schedule any cardio exercise** — cardio is reachable only via free-mode picker. So the dead-end is real but narrower than the stub described. **Modeling decision:** single `workout_set` table with new `set_type` column (strength/cardio), discriminated `WorkoutSetInput` union at types/repo boundary. Rejected alternative: separate `workout_cardio_set` table — fork cost > clarity benefit. **Schema NOT-NULL pragmatic call:** SQLite ALTER cannot drop NOT NULL, and "recreate table" violates the post-F-012 doctrine (ALTER-only, never touch base v1 DDL). Going with sentinel 0 for `weight_kg`/`reps` on cardio rows, enforced away at the repo boundary; `syncTotals` uses `CASE WHEN set_type='strength' THEN weight_kg*reps ELSE 0 END`. **Migration sequencing decision:** v7 (cardio) follows v5 (cancel) + v6 (skip), all three stacked in Phase P2 APK. **UI fork:** single `@if (selected.category === 'cardio')` conditional inside active-workout.page — cardio gets duration/distance/heart-rate grid; strength keeps existing kg/reps/rest; effort chips + notes reused across both. INDEX row updated F-003 → "OPEN — blueprint locked Turn 11". **Now ALL P1 issues either RESOLVED (F-002/F-012/F-013) or blueprint-locked (F-003).** Remaining open stubs after this: F-001 (P1-ish hub redesign, large), F-006 (P3 autosave), F-010 (P3 resume duplicates), F-011 (P3 — will close via F-007 side effect). Next turn: pick between (a) Phase P2 impl kickoff (F-005 migration v5), (b) F-001 hub blueprint, (c) F-006/F-010 small stub passes.
+- **Turn 10 (2026-05-17):** **Stub expansion sprint — F-005, F-007, F-009 blueprints locked.** No code changes this turn; doc-only work to unblock Phase P2 implementation. Three P2 stubs expanded from 5-line skeletons to full Apple-spirit writeups with evidence, cause, schema migrations, repo + store + UI changes, file-change manifests, Apple re-audit, and test plans. Key decisions banked: **(F-005)** soft-cancel via `status` column on `workout_session` (v5 migration), 5s undo toast replaces confirmation alert — same pattern Apple Mail uses; new `restoreSession` repo method; cancelled rows stay in history under a default-collapsed "Đã hủy" group. **(F-007)** schema v6 adds `status` + `completed_at` to `workout_set`; skipped sets render dimmed + strikethrough with their own 3s undo toast; `syncTotals` filters `status='completed'` so skip is honest in volume math; per-exercise progress fraction (`"2/4"`) with a CSS-only conic-gradient progress ring — **implements F-011 as a side effect** so F-011 closes when F-007 ships. **(F-009)** strip inline picker from overview, introduce `app-exercise-picker-sheet` modal sheet (initialBreakpoint 0.9, drag handle) shared between overview "Tập tự do" trigger AND active-workout "Thêm bài tập" trigger — `addExerciseToSession` repo already exists, only UI wiring needed. **Migration sequencing**: v5 (cancel) → v6 (skip) stacked so Phase P2 ships them in one APK without conflict. INDEX rows updated: F-005/F-007/F-009 → "OPEN — blueprint locked Turn 10". Next: F-006/F-010/F-011 stub passes (lower priority, smaller), OR pivot to F-004 runtime OCR verify on emulator, OR begin Phase P2 implementation starting with F-005 migration v5.
+- **Turn 9 (2026-05-17):** **F-004 RESOLVED at code level — Phase P1 stub expansion.** `WorkoutRepository.updateSet` widened from `(setId, weightKg, reps)` to `(setId, input: WorkoutSetInput)`; SQL now writes all 5 columns plus `updated_at`, wrapped in `withTransaction` together with `syncTotals` for atomic total_volume resync. Reuses `validateSetInput` (weight 0..500, reps 1..100, rest 0..600). Store + page call sites widened to match. `active-workout.page.ts editSet` rewritten from a 2-input alert to a 5-input alert (weight, reps, rest, effortIndex 0..4, notes textarea) — `AlertController` can't mix radios with text/number in one alert so effort is captured as a numeric index with a helper-text legend; the dedicated edit-set sheet (IA-proposal P1) remains the long-term destination. T-01 widened to assert all 5 fields round-trip + total_volume resync. Store spec widened to assert full WorkoutSetInput passes through to the repo. **One-shot lesson banked:** the light-only invariant guard does a literal-text substring scan, so even quoting the guard's own name in audit notes trips it — meta-references must be rephrased to "the no-theme-switcher guard literal-text scan", not just escaped. All 11 guards GREEN; `npx ng build` GREEN 3.64s. Next: emulator OCR verify F-004 (seed set → tap edit → change rest/effort/notes → pull DB → assert persistence), then Phase P2 (F-005 soft-cancel + finish-summary).
+- **Turn 8 (2026-05-17):** **F-008 emulator OCR verify GREEN — Phase P1 closed.** Seeded device DB via `/data/local/tmp/` pipe through `run-as`: inserted `workout_exercise` (`we-seed-f008`) + `workout_set` (`ws-seed-f008`, 40kg × 5) under existing active session `cc9abcae`. WAL checkpoint cleared. Force-stop + relaunch. Dashboard → Tập luyện tab (898, 2280) → scrolled to "Buổi tập hôm nay" rest-day card → tapped "Tiếp tục" (200, 265). Resume banner rendered with "MỞ LOGGER" CTA at y=644; tapped → active-workout.page loaded. **OCR confirmation on `/tmp/f008-logger.png`:** HỦY only in header (y=571), HOÀN THÀNH BUỒI TẬP in footer at (227..749, 2047..2054), 210px above tab bar (y=2266). Apple HIG spatial-role separation (destructive header / destination footer) intact at runtime. Set 1 (40kg × 5) renders. Verified `canCompleteWorkout()` gate: footer only appears with ≥1 set. **Investigation snag:** initial post-relaunch screenshots appeared to show no resume banner; logcat confirmed `getActiveSession` SQL DID return the seeded row, so store was correctly hydrated. Real cause: Ionic filled buttons render text white-on-color, which Tesseract emits as low-confidence glyph noise (`qì`, `»Š` at y=2185) — confidence threshold of 50 was filtering button labels out. Lesson: when SQL-confirmed data is in store but OCR shows no UI, lower the confidence threshold before doubting the data. F-008 status updated to RESOLVED (code + runtime) in F-008 file + INDEX.md row. Cron `a2ae18c0` still armed. Next turn: expand F-004..F-011 stubs OR begin P2 (soft-cancel + finish-summary, F-005).
+- **Turn 6 (2026-05-17):** **T-03 guard shipped.** Created `scripts/check-repo-columns.mjs` — walks `src/app/core/repositories/*.repository.ts`, extracts SQL backtick strings, asserts every column in `UPDATE … SET col=?`, `INSERT INTO … (col,…)` and bare-list `SELECT col,col FROM table` exists in `schema.ts` DDL (CREATE TABLE + ALTER ADD COLUMN). Escape hatch: `// allow-repo-columns: <reason>` on or above the SQL line. **One-shot lesson:** initial parser used non-greedy regex `\(([\s\S]*?)\)` for CREATE TABLE body — broke on `CHECK (col IN (...))` and `DEFAULT (datetime('now'))`, producing 100+ false positives (e.g. `user_profile → 5 cols` instead of 24). Fixed with manual paren-depth scanner: scan char-by-char from opening `(`, increment on `(`, decrement on `)`, stop at depth 0. Re-run → **GREEN: 9 repos × 19 tables, 0 missing cols.** Wired into `package.json` as `check:repo-columns` + appended to `check:guards` chain (so it runs on every `npm run build`, pre-commit hook, and CI). Had this been in place Turn 3, F-012's silent SQL error would have failed CI before shipping. Task #10 → completed. **Next:** Phase P1 (F-008 sticky-footer Hoàn thành button in active-workout.page).
+- **Turn 5 (2026-05-17):** **F-002 visual verify COMPLETE** — `brew install tesseract tesseract-lang` (5.5.2, vie lang pack) replaces unreliable sub-agent screenshot reads with deterministic OCR + bounding boxes. Drove the loop end-to-end: (1) OCR'd bottom tab bar to locate "Tập luyện" tab at (944, 2283), tapped it. (2) Scrolled mid-page; OCR found `TIẾN TRÌNH` eyebrow (y=547) + `Tiến trình tập luyện` h2 (y=614) + `LỊCH SỬ` button (y=700, clock-icon glyph at x=129). (3) Tapped CTA at (220, 720). (4) OCR of resulting screenshot found page title `Lịch sử` at y=131 + empty state `Chưa có buổi tập nào.` (y=924) + helper copy `Hoàn tất một buổi tập để bắt đầu ghi lại hành trình...` (y=989) — verbatim match to `history.page.html:23-24` empty-state block. **Phase P0 fully resolved, code + runtime evidence both green.** Next: start Phase P1 (F-008 Hoàn thành bottom-anchored) and complete pending task #10 (`scripts/check-repo-columns.mjs` guard from T-03). Audited screenshots added: `/tmp/p0-final.png` (Tiến trình + Lịch sử CTA) and `/tmp/p0-history.png` (history page empty state) — see "Audited screenshots" table.

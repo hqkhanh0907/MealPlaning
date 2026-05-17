@@ -15,7 +15,7 @@ describe('createTestDatabase helper', () => {
     const rows = await db.query<{ user_version: number }>('PRAGMA user_version;');
     expect(rows.length).toBe(1);
     expect(rows[0].user_version).toBe(SCHEMA_VERSION);
-    expect(SCHEMA_VERSION).toBe(3);
+    expect(SCHEMA_VERSION).toBe(4);
   });
 
   it('returns a clean DB on each call (no cross-spec contamination)', async () => {

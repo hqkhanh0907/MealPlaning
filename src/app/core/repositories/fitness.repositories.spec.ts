@@ -136,6 +136,58 @@ describe('Fitness repositories', () => {
     ).toBeRejectedWithError('WorkoutRepository: weight must be between 0 and 500kg.');
   });
 
+  it('updateSet round-trips weight, reps, rest, effort, notes, and writes updated_at ISO', async () => {
+    await planRepo.ensurePresetPlans();
+    const today = await planRepo.getTodayTrainingDay('2026-05-11');
+    const session = await workoutRepo.startGuidedSession(
+      today!.id,
+      new Date('2026-05-11T07:00:00'),
+    );
+    const firstExercise = session.exercises[0];
+
+    await workoutRepo.addSet(firstExercise.id, {
+      weightKg: 80,
+      reps: 8,
+      restSeconds: 90,
+      effort: 'just_right',
+      notes: null,
+    });
+
+    const before = await workoutRepo.getSession(session.id);
+    const setId = before!.exercises[0].sets[0].id;
+
+    const tBefore = Date.now();
+    await workoutRepo.updateSet(setId, {
+      weightKg: 90,
+      reps: 6,
+      restSeconds: 120,
+      effort: 'hard',
+      notes: 'felt heavy',
+    });
+    const tAfter = Date.now();
+
+    const after = await workoutRepo.getSession(session.id);
+    const updatedSet = after!.exercises[0].sets[0];
+    expect(updatedSet.weight_kg).toBe(90);
+    expect(updatedSet.reps).toBe(6);
+    expect(updatedSet.rest_seconds).toBe(120);
+    expect(updatedSet.effort).toBe('hard');
+    expect(updatedSet.notes).toBe('felt heavy');
+
+    const row = await db.getOne<{ updated_at: string | null }>(
+      `SELECT updated_at FROM workout_set WHERE id = ?`,
+      [setId],
+    );
+    expect(row?.updated_at).toBeTruthy();
+    const ts = Date.parse(row!.updated_at as string);
+    expect(Number.isFinite(ts)).toBeTrue();
+    expect(ts).toBeGreaterThanOrEqual(tBefore);
+    expect(ts).toBeLessThanOrEqual(tAfter);
+
+    expect(after!.total_volume).toBe(540);
+    expect(after!.exercises[0].total_volume).toBe(540);
+  });
+
   it('deleteSet removes a single set, re-numbers remaining sets contiguously, and re-syncs totals', async () => {
     await planRepo.ensurePresetPlans();
     const today = await planRepo.getTodayTrainingDay('2026-05-11');

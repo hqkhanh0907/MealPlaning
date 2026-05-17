@@ -55,6 +55,10 @@ describe('FitnessStore', () => {
       'getSession',
       'addSet',
       'completeSession',
+      'deleteSet',
+      'updateSet',
+      'cancelSession',
+      'removeExerciseFromSession',
     ]);
     workoutRepo.getActiveSession.and.resolveTo(null);
     workoutRepo.progressSummary.and.resolveTo(progressSummary());
@@ -74,6 +78,10 @@ describe('FitnessStore', () => {
       created_at: '2026-05-11T07:00:00',
     });
     workoutRepo.completeSession.and.resolveTo();
+    workoutRepo.deleteSet.and.resolveTo();
+    workoutRepo.updateSet.and.resolveTo();
+    workoutRepo.cancelSession.and.resolveTo();
+    workoutRepo.removeExerciseFromSession.and.resolveTo();
     fitnessAi = jasmine.createSpyObj<FitnessAi>('FitnessAi', ['generateTrainingPlan']);
     fitnessAi.generateTrainingPlan.and.resolveTo(aiPlanDraft());
     online = signal(true);
@@ -135,7 +143,7 @@ describe('FitnessStore', () => {
       notes: null,
     });
     expect(store.restSeconds()).toBe(90);
-    expect(store.successMessage()).toBe('Đã ghi set tập.');
+    expect(store.successMessage()).toBe('Đã log set tập.');
   });
 
   it('rejects invalid set input before touching the repository', async () => {
@@ -147,6 +155,87 @@ describe('FitnessStore', () => {
 
     expect(workoutRepo.addSet).not.toHaveBeenCalled();
     expect(store.errorMessage()).toBe('Reps phải là số nguyên 1-100.');
+  });
+
+  it('captures lastLoggedSet after a successful logSet for inline confirmation', async () => {
+    store.activeSession.set(workoutSession());
+    store.selectedWorkoutExerciseId.set('we-1');
+    store.updateWeight('40');
+    store.updateReps('8');
+
+    await store.logSet();
+
+    const last = store.lastLoggedSet();
+    expect(last).not.toBeNull();
+    expect(last?.setNumber).toBe(1);
+    expect(last?.weightKg).toBe(40);
+    expect(last?.reps).toBe(8);
+  });
+
+  it('deleteSet calls repo and refreshes the active session', async () => {
+    store.activeSession.set(workoutSession());
+    store.selectedWorkoutExerciseId.set('we-1');
+    workoutRepo.getSession.and.resolveTo(workoutSession());
+
+    await store.deleteSet('set-1');
+
+    expect(workoutRepo.deleteSet).toHaveBeenCalledOnceWith('set-1');
+    expect(workoutRepo.getSession).toHaveBeenCalled();
+    expect(store.successMessage()).toBe('Đã xóa set.');
+  });
+
+  it('deleteSet clears lastLoggedSet if it referenced the deleted id', async () => {
+    store.activeSession.set(workoutSession());
+    store.selectedWorkoutExerciseId.set('we-1');
+    store.lastLoggedSet.set({
+      id: 'set-1',
+      setNumber: 1,
+      weightKg: 40,
+      reps: 8,
+      exerciseName: 'X',
+    });
+
+    await store.deleteSet('set-1');
+
+    expect(store.lastLoggedSet()).toBeNull();
+  });
+
+  it('cancelWorkout deletes the session and clears local state', async () => {
+    store.activeSession.set(workoutSession());
+    store.selectedWorkoutExerciseId.set('we-1');
+    store.restSeconds.set(60);
+
+    await store.cancelWorkout();
+
+    expect(workoutRepo.cancelSession).toHaveBeenCalled();
+    expect(store.activeSession()).toBeNull();
+    expect(store.selectedWorkoutExerciseId()).toBeNull();
+    expect(store.restSeconds()).toBe(0);
+    expect(store.successMessage()).toBe('Đã hủy buổi tập.');
+  });
+
+  it('updateSet calls repo with full draft and refreshes session', async () => {
+    store.activeSession.set(workoutSession());
+    workoutRepo.getSession.and.resolveTo(workoutSession());
+
+    const input = {
+      weightKg: 45,
+      reps: 10,
+      restSeconds: 90,
+      effort: 'just_right' as const,
+      notes: 'note',
+    };
+    await store.updateSet('set-1', input);
+
+    expect(workoutRepo.updateSet).toHaveBeenCalledOnceWith('set-1', input);
+    expect(workoutRepo.getSession).toHaveBeenCalled();
+    expect(store.successMessage()).toBe('Đã cập nhật set.');
+  });
+
+  it('skipRest resets restSeconds to 0', () => {
+    store.restSeconds.set(60);
+    store.skipRest();
+    expect(store.restSeconds()).toBe(0);
   });
 
   it('creates and activates an AI custom plan from current state', async () => {

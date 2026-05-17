@@ -277,6 +277,42 @@ export class WorkoutRepository {
   }
 
   /**
+   * Update a logged set with full field round-trip (weight, reps, rest, effort, notes).
+   * F-004 (Turn 9): widened from (setId, weightKg, reps) to (setId, input). Wrapped in
+   * a transaction with syncTotals so total_volume cannot diverge from the row.
+   */
+  async updateSet(setId: string, input: WorkoutSetInput): Promise<void> {
+    validateSetInput(input);
+    const row = await this.db.getOne<{ workout_session_id: string }>(
+      `SELECT we.workout_session_id
+         FROM workout_set ws
+         INNER JOIN workout_exercise we ON we.id = ws.workout_exercise_id
+        WHERE ws.id = ?`,
+      [setId],
+    );
+    if (!row) {
+      throw new Error(`WorkoutRepository: set '${setId}' not found.`);
+    }
+    await this.db.withTransaction(async () => {
+      await this.db.execute(
+        `UPDATE workout_set
+            SET weight_kg = ?, reps = ?, rest_seconds = ?, effort = ?, notes = ?, updated_at = ?
+          WHERE id = ?`,
+        [
+          input.weightKg,
+          input.reps,
+          input.restSeconds,
+          input.effort,
+          input.notes,
+          new Date().toISOString(),
+          setId,
+        ],
+      );
+      await this.syncTotals(row.workout_session_id);
+    });
+  }
+
+  /**
    * Remove an exercise (and all its logged sets, via FK ON DELETE CASCADE) from an active session.
    * Re-syncs session totals. Idempotent on missing exercise id.
    */

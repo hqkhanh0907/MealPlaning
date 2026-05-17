@@ -1,4 +1,4 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import type {
   ActiveTrainingPlan,
   Exercise,
@@ -13,7 +13,7 @@ import type {
 } from '../models/fitness.types';
 import { ExerciseRepository } from '../repositories/exercise.repository';
 import { TrainingPlanRepository } from '../repositories/training-plan.repository';
-import { WorkoutRepository } from '../repositories/workout.repository';
+import { WorkoutRepository, type WorkoutSetInput } from '../repositories/workout.repository';
 import { FitnessAi } from '../services/ai/fitness-ai';
 import { NetworkStore } from './network.store';
 import { ProfileStore } from './profile.store';
@@ -50,6 +50,44 @@ export class FitnessStore {
   readonly aiPlanRationale = signal<string | null>(null);
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
+  readonly lastLoggedSet = signal<{
+    id: string;
+    setNumber: number;
+    weightKg: number;
+    reps: number;
+    exerciseName: string;
+  } | null>(null);
+
+  private restIntervalId: ReturnType<typeof setInterval> | null = null;
+
+  constructor() {
+    // Auto countdown rest timer when restSeconds > 0. Stops at 0.
+    effect(() => {
+      const seconds = this.restSeconds();
+      if (this.restIntervalId !== null) {
+        clearInterval(this.restIntervalId);
+        this.restIntervalId = null;
+      }
+      if (seconds > 0) {
+        this.restIntervalId = setInterval(() => {
+          const next = this.restSeconds() - 1;
+          if (next <= 0) {
+            this.restSeconds.set(0);
+            if (this.restIntervalId !== null) {
+              clearInterval(this.restIntervalId);
+              this.restIntervalId = null;
+            }
+          } else {
+            this.restSeconds.set(next);
+          }
+        }, 1000);
+      }
+    });
+  }
+
+  skipRest(): void {
+    this.restSeconds.set(0);
+  }
 
   readonly isRestDay = computed(() => this.todayDay()?.is_rest_day === 1);
   readonly canCompleteWorkout = computed(
@@ -257,26 +295,33 @@ export class FitnessStore {
   async logSet(): Promise<void> {
     const exercise = this.selectedWorkoutExercise();
     if (!exercise) {
-      this.errorMessage.set('Chọn một bài tập trước khi ghi set.');
+      this.errorMessage.set('Chọn một bài tập trước khi log set.');
       return;
     }
 
     const draft = parseDraft(this.setDraft());
-    if (!draft.ok) {
+    if (draft.ok === false) {
       this.errorMessage.set(draft.message);
       return;
     }
 
     this.errorMessage.set(null);
     try {
-      await this.workoutRepo.addSet(exercise.id, draft.value);
+      const createdSet = await this.workoutRepo.addSet(exercise.id, draft.value);
       const sessionId = this.activeSession()?.id;
       if (sessionId) {
         this.activeSession.set(await this.workoutRepo.getSession(sessionId));
       }
       this.restSeconds.set(draft.value.restSeconds);
       this.setDraft.update((current) => ({ ...current, notes: '' }));
-      this.successMessage.set('Đã ghi set tập.');
+      this.lastLoggedSet.set({
+        id: createdSet.id,
+        setNumber: createdSet.set_number,
+        weightKg: createdSet.weight_kg,
+        reps: createdSet.reps,
+        exerciseName: exercise.exercise_name_vi || exercise.exercise_name,
+      });
+      this.successMessage.set('Đã log set tập.');
     } catch (error) {
       this.errorMessage.set(toErrorMessage(error));
     }
@@ -302,20 +347,17 @@ export class FitnessStore {
     }
   }
 
-  /**
-   * Cancel/discard the in-progress session entirely (removes the session row + all logged sets).
-   * Surface this in UI ONLY behind a confirm step — irreversible. No-op if no active session.
-   */
-  async cancelActiveSession(): Promise<void> {
+  async cancelWorkout(): Promise<void> {
     const session = this.activeSession();
     if (!session) return;
+
     this.errorMessage.set(null);
     try {
       await this.workoutRepo.cancelSession(session.id);
       this.activeSession.set(null);
       this.selectedWorkoutExerciseId.set(null);
-      this.setDraft.set({ ...DEFAULT_SET_DRAFT });
       this.restSeconds.set(0);
+      this.lastLoggedSet.set(null);
       await this.refresh();
       this.successMessage.set('Đã hủy buổi tập.');
     } catch (error) {
@@ -323,18 +365,33 @@ export class FitnessStore {
     }
   }
 
-  /**
-   * Delete a single logged set in the currently-selected workout exercise. UI must confirm
-   * (destructive). After delete we re-fetch the session to refresh set_number contiguity + totals.
-   */
   async deleteSet(setId: string): Promise<void> {
     const sessionId = this.activeSession()?.id;
     if (!sessionId) return;
+
     this.errorMessage.set(null);
     try {
       await this.workoutRepo.deleteSet(setId);
       this.activeSession.set(await this.workoutRepo.getSession(sessionId));
+      // Clear lastLoggedSet if it was this one.
+      if (this.lastLoggedSet()?.id === setId) {
+        this.lastLoggedSet.set(null);
+      }
       this.successMessage.set('Đã xóa set.');
+    } catch (error) {
+      this.errorMessage.set(toErrorMessage(error));
+    }
+  }
+
+  async updateSet(setId: string, input: WorkoutSetInput): Promise<void> {
+    const sessionId = this.activeSession()?.id;
+    if (!sessionId) return;
+
+    this.errorMessage.set(null);
+    try {
+      await this.workoutRepo.updateSet(setId, input);
+      this.activeSession.set(await this.workoutRepo.getSession(sessionId));
+      this.successMessage.set('Đã cập nhật set.');
     } catch (error) {
       this.errorMessage.set(toErrorMessage(error));
     }
