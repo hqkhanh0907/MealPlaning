@@ -26,6 +26,10 @@ const DEFAULT_SET_DRAFT: WorkoutSetDraft = {
   notes: '',
 };
 
+/** F-006 — localStorage key prefix for autosave drafts. Scoped per workout_exercise.id. */
+const DRAFT_STORAGE_PREFIX = 'fitness:draft:';
+const DRAFT_AUTOSAVE_DEBOUNCE_MS = 500;
+
 @Injectable({ providedIn: 'root' })
 export class FitnessStore {
   private readonly exerciseRepo = inject(ExerciseRepository);
@@ -59,6 +63,10 @@ export class FitnessStore {
   } | null>(null);
 
   private restIntervalId: ReturnType<typeof setInterval> | null = null;
+  /** F-006 — pending autosave timer handle. */
+  private draftSaveTimerId: ReturnType<typeof setTimeout> | null = null;
+  /** F-006 — last exercise id whose draft we hydrated, to avoid re-hydrating on every keystroke. */
+  private lastHydratedExerciseId: string | null = null;
 
   constructor() {
     // Auto countdown rest timer when restSeconds > 0. Stops at 0.
@@ -83,6 +91,77 @@ export class FitnessStore {
         }, 1000);
       }
     });
+
+    // F-006 — autosave set draft to localStorage debounced 500ms per workout_exercise.id.
+    // Avoids losing typed weight/reps/notes when OS kills the app before GHI SET.
+    effect(() => {
+      const exerciseId = this.selectedWorkoutExerciseId();
+      const draft = this.setDraft();
+      if (!exerciseId) {
+        return;
+      }
+      if (this.draftSaveTimerId !== null) {
+        clearTimeout(this.draftSaveTimerId);
+      }
+      this.draftSaveTimerId = setTimeout(() => {
+        this.persistDraft(exerciseId, draft);
+        this.draftSaveTimerId = null;
+      }, DRAFT_AUTOSAVE_DEBOUNCE_MS);
+    });
+
+    // F-006 hydration — when selectedWorkoutExerciseId changes (including internal sets from
+    // refreshActiveSession/startGuided/addExerciseToSession), restore any persisted draft.
+    // Tracks last-hydrated id to avoid re-applying on every setDraft tick.
+    effect(() => {
+      const exerciseId = this.selectedWorkoutExerciseId();
+      if (exerciseId === this.lastHydratedExerciseId) {
+        return;
+      }
+      this.lastHydratedExerciseId = exerciseId;
+      if (exerciseId === null) {
+        return;
+      }
+      this.setDraft.set(this.loadDraft(exerciseId));
+    });
+  }
+
+  /** F-006 helper — write draft to localStorage; silent on storage errors (private browsing). */
+  private persistDraft(exerciseId: string, draft: WorkoutSetDraft): void {
+    try {
+      localStorage.setItem(`${DRAFT_STORAGE_PREFIX}${exerciseId}`, JSON.stringify(draft));
+    } catch {
+      // localStorage may be unavailable (private mode, quota). Silent fail OK — non-critical.
+    }
+  }
+
+  /** F-006 helper — load draft for an exercise; falls back to DEFAULT_SET_DRAFT on miss/parse fail. */
+  private loadDraft(exerciseId: string): WorkoutSetDraft {
+    try {
+      const raw = localStorage.getItem(`${DRAFT_STORAGE_PREFIX}${exerciseId}`);
+      if (!raw) {
+        return { ...DEFAULT_SET_DRAFT };
+      }
+      const parsed = JSON.parse(raw) as Partial<WorkoutSetDraft>;
+      return {
+        weightKg: typeof parsed.weightKg === 'string' ? parsed.weightKg : DEFAULT_SET_DRAFT.weightKg,
+        reps: typeof parsed.reps === 'string' ? parsed.reps : DEFAULT_SET_DRAFT.reps,
+        restSeconds:
+          typeof parsed.restSeconds === 'string' ? parsed.restSeconds : DEFAULT_SET_DRAFT.restSeconds,
+        effort: (parsed.effort ?? null) as WorkoutEffort | null,
+        notes: typeof parsed.notes === 'string' ? parsed.notes : '',
+      };
+    } catch {
+      return { ...DEFAULT_SET_DRAFT };
+    }
+  }
+
+  /** F-006 helper — drop persisted draft after a successful logSet so next session starts clean. */
+  private clearPersistedDraft(exerciseId: string): void {
+    try {
+      localStorage.removeItem(`${DRAFT_STORAGE_PREFIX}${exerciseId}`);
+    } catch {
+      // ignored
+    }
   }
 
   skipRest(): void {
@@ -266,6 +345,8 @@ export class FitnessStore {
 
   selectWorkoutExercise(id: string): void {
     this.selectedWorkoutExerciseId.set(id);
+    // Hydration happens via the effect in constructor — fires for any selectedWorkoutExerciseId
+    // change, including internal sets from refresh/start/select paths.
   }
 
   updateWeight(value: string): void {
@@ -314,6 +395,9 @@ export class FitnessStore {
       }
       this.restSeconds.set(draft.value.restSeconds);
       this.setDraft.update((current) => ({ ...current, notes: '' }));
+      // F-006 — clear persisted draft so a fresh log starts clean; user can still re-edit fields,
+      // autosave effect will re-persist immediately if they do.
+      this.clearPersistedDraft(exercise.id);
       this.lastLoggedSet.set({
         id: createdSet.id,
         setNumber: createdSet.set_number,

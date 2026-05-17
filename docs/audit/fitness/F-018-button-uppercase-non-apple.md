@@ -1,7 +1,7 @@
 # F-018 — Button label uppercase ("GHI SET", "BẮT ĐẦU", "LỊCH SỬ", "HOÀN THÀNH BUỔI TẬP") trái với Apple style sentence-case
 
 **Severity:** P3 (visual polish; aggregate cognitive load)
-**Status:** OPEN
+**Status:** SHIPPED (Pha 1.5)
 **Discovered:** Turn 12, runtime vision + dump
 
 ## Evidence
@@ -46,3 +46,13 @@ Verify: `npm run check:design-tokens` không reject (text-transform không thu�
 ## Status
 
 OPEN — fix 3-dòng SCSS, ship cùng Pha 1 follow-up batch.
+
+## Resolution (Pha 1.5)
+
+Global override appended to `src/global.scss`:
+```scss
+ion-button { --text-transform: none; letter-spacing: 0; font-weight: 500; }
+ion-button::part(native) { text-transform: none; letter-spacing: 0; }
+```
+
+Runtime verify emulator: "Lịch sử" CTA + history rows render sentence-case ✓ (`/tmp/fitness-audit/40-history-after-p15.png`).

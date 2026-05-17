@@ -122,12 +122,31 @@ export class FitnessHistoryPage implements OnInit {
   }
 
   private isoWeekStart(isoDate: string): string {
+    return FitnessHistoryPage._isoWeekStart(isoDate);
+  }
+
+  /** F-016 spec hook — pure helper, tests bypass component DI. */
+  static _isoWeekStart(isoDate: string): string {
     // Monday-start ISO week. Returns YYYY-MM-DD of the Monday.
+    // F-016 fix: format local components — toISOString() converts to UTC and
+    // shifts the date by 1 day in GMT+7 locales (Mon midnight local → Sun 17:00 UTC).
     const d = new Date(`${isoDate}T00:00:00`);
     const dow = d.getDay(); // 0=Sun..6=Sat
     const diff = dow === 0 ? -6 : 1 - dow;
     d.setDate(d.getDate() + diff);
-    return d.toISOString().slice(0, 10);
+    return FitnessHistoryPage._formatLocalIsoDate(d);
+  }
+
+  private formatLocalIsoDate(d: Date): string {
+    return FitnessHistoryPage._formatLocalIsoDate(d);
+  }
+
+  /** F-016 spec hook. */
+  static _formatLocalIsoDate(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   }
 
   private weekLabel(weekStartIso: string): string {

@@ -1,7 +1,7 @@
 # F-016 — History page tuần grouping off-by-one cho buổi tập ngày Chủ Nhật
 
 **Severity:** P2
-**Status:** OPEN
+**Status:** SHIPPED (Pha 1.5, commit 5fb642e5+)
 **Discovered:** Turn 12, runtime emulator
 
 ## Evidence
@@ -44,3 +44,12 @@ Dùng cùng helper với streak calc + currentWeekStart (đã có ở `workout.r
 ## Status
 
 OPEN — fix nhỏ, có thể ship Pha 1 follow-up.
+
+## Resolution (Pha 1.5)
+
+Root cause confirmed: KHÔNG phải off-by-one weekday — là **timezone drift**. `d.toISOString().slice(0,10)` ở GMT+7 đã shift `Mon 2026-05-11T00:00 local` → `Sun 2026-05-10T17:00Z` → `"2026-05-10"`. Group key sai 1 ngày, header label tính từ Mon-1 nên hiển thị "10 thg 5 – 16 thg 5".
+
+Fix: thay `toISOString().slice(0,10)` bằng `formatLocalIsoDate()` (local Y/M/D components zero-padded).
+
+Verify runtime emulator: CN 17/5 nay group vào header `TUẦN 11 THG 5 – 17 THG 5` ✓.
+Spec: `history.page.spec.ts` 8 cases (Sun/Mon/Wed/Sat/month boundary/year boundary/format/regression guard 2026-05-10).

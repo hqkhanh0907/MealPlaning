@@ -192,3 +192,17 @@ app-management .options-sheet__cancel {
   background: transparent;
   color: var(--text-secondary);
 }
+
+/* F-018 — Apple-style sentence-case buttons.
+   Ionic ion-button defaults to uppercase + letter-spacing 0.06em (Material legacy).
+   Apple HIG buttons are sentence-case with normal tracking. Global override here so all
+   features inherit; specific opt-outs can set --text-transform locally if needed. */
+ion-button {
+  --text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+ion-button::part(native) {
+  text-transform: none;
+  letter-spacing: 0;
+}
