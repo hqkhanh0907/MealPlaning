@@ -21,3 +21,21 @@ p {
   flex: 1 1 12rem;
   min-width: 0;
 }
+
+input[type='date'] {
+  appearance: none;
+  padding-inline-end: var(--space-3xl);
+}
+input[type='date']::-webkit-calendar-picker-indicator {
+  opacity: 0;
+}
+.date-chevron {
+  position: absolute;
+  inset-inline-end: var(--space-lg);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--font-size-body);
+  height: var(--font-size-body);
+  color: var(--text-secondary);
+  pointer-events: none;
+}

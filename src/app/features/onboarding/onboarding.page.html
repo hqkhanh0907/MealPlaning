@@ -2,7 +2,7 @@
 <ion-header [class.body-step]="step() === 2">
   <ion-toolbar>
     @if (step() > 1) {
-      <ion-buttons slot="start">
+      <ion-buttons slot="start" [class.body-back-slot]="step() === 2">
         <ion-button fill="clear" (click)="goBack()" class="back-button" aria-label="Quay lại">
           <ion-icon slot="icon-only" name="arrow-back-outline" />
         </ion-button>

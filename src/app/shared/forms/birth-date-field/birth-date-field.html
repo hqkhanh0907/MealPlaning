@@ -20,6 +20,7 @@
       visibleError() ? errorId() : age() !== null ? idPrefix() + '-age-hint' : null
     "
   />
+  <ion-icon class="date-chevron" [icon]="calendarChevron" aria-hidden="true" />
 </app-form-field>
 @if (!visibleError() && age() !== null) {
   <p [id]="idPrefix() + '-age-hint'">{{ age() }} tuổi</p>

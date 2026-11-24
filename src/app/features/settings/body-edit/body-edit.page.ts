@@ -2,6 +2,7 @@ import { LocalDay } from '../../../core/stores/local-day';
 import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { SaveAndClose } from '../../../shared/forms/save-and-close';
 import { Location } from '@angular/common';
+import { arrowBackOutline } from 'ionicons/icons';
 import { FormsModule } from '@angular/forms';
 import {
   IonHeader,
@@ -49,6 +50,7 @@ import { AppFormField } from '../../../shared/forms/form-field/form-field';
   ],
 })
 export default class BodyEditPage implements OnInit {
+  protected readonly backIcon = arrowBackOutline;
   private readonly profileStore = inject(ProfileStore);
   private readonly location = inject(Location);
   readonly submission = new SaveAndClose(

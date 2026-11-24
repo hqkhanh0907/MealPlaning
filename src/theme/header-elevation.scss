@@ -82,3 +82,17 @@ ion-header {
 /* Settings push pages override this to 0 — they get the OS back-chevron which
    already provides the hierarchy cue. Override at the component level if a
    page genuinely needs a borderless header. */
+
+ion-header ion-toolbar ion-buttons.body-back-slot[slot='start'] {
+  margin-inline-start: var(--space-xs);
+}
+.body-back-slot ion-button,
+.body-back-slot ion-back-button {
+  width: 48px;
+  height: 48px;
+}
+.body-back-slot ion-icon,
+.body-back-slot ion-back-button::part(icon) {
+  width: 24px;
+  height: 24px;
+}
