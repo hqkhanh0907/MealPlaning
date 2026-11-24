@@ -1,4 +1,5 @@
 import type { ActivityLevel } from '../../models/user-profile.types';
+import { DEFAULT_ACTIVITY_LEVEL, getActivityLevelFromFactor } from './energy-targets';
 
 /**
  * Canonical Vietnamese labels for the four activity levels.
@@ -34,6 +35,12 @@ export function activityLabel(value: ActivityLevel): ActivityLabel {
  */
 export function activityLabelShort(value: ActivityLevel): string {
   return ACTIVITY_LABELS[value].short;
+}
+
+export function activitySummaryForFactor(factor: number): string {
+  const level = getActivityLevelFromFactor(factor);
+  if (level) return activityLabelShort(level);
+  return `Chưa xác định · tạm tính ${activityLabelShort(DEFAULT_ACTIVITY_LEVEL).toLocaleLowerCase('vi-VN')}`;
 }
 
 export function activityLabelLong(value: ActivityLevel): string {

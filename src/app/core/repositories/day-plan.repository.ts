@@ -1,14 +1,16 @@
 import { inject, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  DayPlan,
-  DayPlanWithSlots,
-  MealSlot,
-  MealSlotWithDishes,
-  MealType,
-  PlannedDishWithEffective,
+import {
+  MEAL_TYPES,
+  type DayPlan,
+  type DayPlanWithSlots,
+  type MealSlot,
+  type MealSlotWithDishes,
+  type PlannedDishWithEffective,
 } from '../models/meal-plan.types';
 import { Database } from '../services/database/database';
+import { NUTRIENTS } from '../models/nutrition';
+import { DISH_PER_SERVING, effectivePlannedNutrient } from './dish-per-serving.sql';
 
 /**
  * Default macro target row when bootstrapping a new day_plan. The user_profile
@@ -18,8 +20,6 @@ import { Database } from '../services/database/database';
  */
 const DEFAULT_TARGET_CALORIES = 0;
 const DEFAULT_TARGET_PROTEIN = 0;
-
-const MEAL_TYPES: readonly MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
 
 /**
  * SELECT projection that fans planned_dish through dish_with_totals to compute
@@ -40,11 +40,9 @@ const PLANNED_DISH_SELECT_FRAGMENT = `
   pd.fiber           AS fiber,
   pd.created_at      AS created_at,
   dwt.name           AS dish_name,
-  CASE WHEN pd.is_completed = 1 THEN pd.calories ELSE dwt.total_calories * pd.servings END AS effective_calories,
-  CASE WHEN pd.is_completed = 1 THEN pd.protein  ELSE dwt.total_protein  * pd.servings END AS effective_protein,
-  CASE WHEN pd.is_completed = 1 THEN pd.carbs    ELSE dwt.total_carbs    * pd.servings END AS effective_carbs,
-  CASE WHEN pd.is_completed = 1 THEN pd.fat      ELSE dwt.total_fat      * pd.servings END AS effective_fat,
-  CASE WHEN pd.is_completed = 1 THEN COALESCE(pd.fiber, 0) ELSE dwt.total_fiber * pd.servings END AS effective_fiber
+  ${NUTRIENTS.map(
+    (nutrient) => `${effectivePlannedNutrient(nutrient)} AS effective_${nutrient}`,
+  ).join(', ')}
 `.trim();
 
 interface PlannedDishWithEffectiveAndSlot extends PlannedDishWithEffective {
@@ -151,9 +149,9 @@ export class DayPlanRepository {
     const rows = await this.db.query<PlannedDishWithEffectiveAndSlot>(
       `SELECT ${PLANNED_DISH_SELECT_FRAGMENT}
        FROM planned_dish pd
-       INNER JOIN dish_with_totals dwt ON dwt.id = pd.dish_id
+       INNER JOIN ${DISH_PER_SERVING} dwt ON dwt.id = pd.dish_id
        WHERE pd.meal_slot_id IN (${placeholders})
-       ORDER BY pd.sort_order ASC, pd.created_at ASC`,
+       ORDER BY pd.sort_order ASC, pd.created_at ASC, pd.rowid ASC`,
       [...slotIds],
     );
     for (const row of rows) {

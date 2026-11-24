@@ -11,6 +11,14 @@
         <h2 id="dish-ctx-title" class="sheet-title">{{ dishName() }}</h2>
       </header>
       <ul class="sheet-actions">
+        @if (canEditServings()) {
+          <li>
+            <button type="button" class="sheet-action" (click)="select('servings')">
+              <ion-icon class="sheet-action-icon" name="create-outline" aria-hidden="true" />
+              <span class="sheet-action-label">Sửa khẩu phần</span>
+            </button>
+          </li>
+        }
         <li>
           <button type="button" class="sheet-action" (click)="select('copy')">
             <ion-icon class="sheet-action-icon" name="copy-outline" aria-hidden="true" />

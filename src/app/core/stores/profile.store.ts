@@ -1,41 +1,51 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { UserProfile } from '../models/user-profile.model';
 import { UserProfileRepository } from '../repositories/user-profile.repository';
+import { ageOnDate } from '../services/profile/profile-birth-date';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileStore {
   private readonly repo = inject(UserProfileRepository);
-
-  /** Current user profile — null if onboarding not completed */
+  private pending: Promise<void> = Promise.resolve();
   readonly profile = signal<UserProfile | null>(null);
-
-  /** Whether onboarding has been completed */
   readonly isOnboardingComplete = computed(() => !!this.profile()?.onboarding_completed);
 
-  /** Load profile from database. Called once at app startup. */
-  async loadProfile(): Promise<void> {
-    const p = await this.repo.getProfile();
-    this.profile.set(p);
+  loadProfile(onDate?: Date): Promise<void> {
+    return this.inOrder(async () =>
+      this.publish(await this.repo.getProfile(), onDate ?? new Date()),
+    );
   }
 
-  /** Save new profile after onboarding and update signal */
-  async saveOnboardingProfile(
+  refreshAge(onDate?: Date): Promise<void> {
+    return this.inOrder(() => this.publish(this.profile(), onDate ?? new Date()));
+  }
+
+  saveOnboardingProfile(
     data: Omit<UserProfile, 'id' | 'created_at' | 'updated_at'>,
   ): Promise<void> {
-    const saved = await this.repo.insert(data);
-    this.profile.set(saved);
+    return this.inOrder(async () => this.publish(await this.repo.insert(data), new Date()));
   }
 
-  /**
-   * Apply a partial patch to the user profile and refresh the signal.
-   *
-   * @throws if repo.update or repo.getProfile throws. On failure of either,
-   * the signal is NOT updated. On success of both, the signal is set to the
-   * latest row returned by getProfile.
-   */
-  async updateProfile(patch: Partial<UserProfile>): Promise<void> {
-    await this.repo.update(patch);
-    const fresh = await this.repo.getProfile();
-    this.profile.set(fresh);
+  updateProfile(patch: Partial<UserProfile>): Promise<void> {
+    return this.inOrder(async () => {
+      await this.repo.update(patch);
+      this.profile.set(await this.repo.getProfile());
+    });
+  }
+
+  private async publish(profile: UserProfile | null, today: Date): Promise<void> {
+    const age = profile?.birth_date ? ageOnDate(profile.birth_date, today) : null;
+    if (age !== null && age !== profile?.age) {
+      await this.repo.update({ age }, today);
+      this.profile.set(await this.repo.getProfile());
+      return;
+    }
+    this.profile.set(profile);
+  }
+
+  private inOrder(work: () => Promise<void>): Promise<void> {
+    const result = this.pending.then(work);
+    this.pending = result.catch(() => undefined);
+    return result;
   }
 }

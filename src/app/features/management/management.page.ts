@@ -1,5 +1,6 @@
+import { formatNutritionNumber } from '../../shared/nutrition-number';
 import { NgClass } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import {
   IonButton,
   IonButtons,
@@ -15,6 +16,7 @@ import { addIcons } from 'ionicons';
 import {
   addOutline,
   closeOutline,
+  createOutline,
   ellipsisVertical,
   nutritionOutline,
   restaurantOutline,
@@ -82,7 +84,8 @@ export default class ManagementPage {
   readonly pendingDishDeleteId = signal<string | null>(null);
   readonly pendingDishDeleteName = signal('');
   readonly dishDeleteReferenceCount = signal(0);
-  readonly fabMenuOpen = signal(false);
+  readonly createMenuOpen = signal(false);
+  readonly listError = signal<ManagementTab | null>(null);
 
   readonly filteredIngredients = computed(() => {
     const activeFilter = this.activeIngredientFilter();
@@ -158,34 +161,6 @@ export default class ManagementPage {
     return `${count} kết quả`;
   });
 
-  readonly hideFab = computed(() => {
-    if (this.pendingIngredientDeleteId() !== null || this.pendingDishDeleteId() !== null) {
-      return true;
-    }
-
-    if (
-      this.ingredientOptionsItem() !== null ||
-      this.dishOptionsItem() !== null ||
-      this.fabMenuOpen()
-    ) {
-      return true;
-    }
-
-    if (this.tab() === 'ingredients') {
-      return (
-        !this.ingredientStore.loading() &&
-        this.filteredIngredients().length === 0 &&
-        this.ingredientStore.searchQuery().trim().length === 0
-      );
-    }
-
-    return (
-      !this.dishStore.loading() &&
-      this.filteredDishes().length === 0 &&
-      this.dishStore.searchQuery().trim().length === 0
-    );
-  });
-
   readonly ingredientDeleteBlocked = computed(() => this.ingredientDeleteReferenceCount() > 0);
   readonly ingredientDeleteDialogTitle = computed(() =>
     this.ingredientDeleteBlocked() ? 'Không thể xóa' : 'Xóa nguyên liệu?',
@@ -233,6 +208,7 @@ export default class ManagementPage {
       settingsOutline,
       addOutline,
       closeOutline,
+      createOutline,
       nutritionOutline,
       restaurantOutline,
       searchOutline,
@@ -243,17 +219,13 @@ export default class ManagementPage {
 
     effect(() => {
       const activeTab = this.tab();
-      if (activeTab === 'ingredients') {
-        void this.ingredientStore.load();
-      } else {
-        void this.dishStore.load();
-      }
+      untracked(() => void this.loadList(activeTab));
     });
   }
 
   onTabChange(value: ManagementTab | string | null | undefined): void {
     this.tab.set(value === 'dishes' ? 'dishes' : 'ingredients');
-    this.closeFabMenu();
+    this.closeCreateMenu();
   }
 
   setIngredientFilter(category: IngredientFilter): void {
@@ -265,19 +237,30 @@ export default class ManagementPage {
   }
 
   async onIngredientSearch(query: string): Promise<void> {
-    await this.ingredientStore.search(query);
+    await this.requestList('ingredients', () => this.ingredientStore.search(query));
   }
 
   async onDishSearch(query: string): Promise<void> {
-    await this.dishStore.search(query);
+    await this.requestList('dishes', () => this.dishStore.search(query));
   }
 
-  clearIngredientSearch(): void {
-    void this.ingredientStore.search('');
+  retryActiveList(): void {
+    void this.loadList(this.tab());
   }
 
-  clearDishSearch(): void {
-    void this.dishStore.search('');
+  private async loadList(tab: ManagementTab): Promise<void> {
+    const store = tab === 'ingredients' ? this.ingredientStore : this.dishStore;
+    const query = store.searchQuery();
+    await this.requestList(tab, () => (query.trim() ? store.search(query) : store.load()));
+  }
+
+  private async requestList(tab: ManagementTab, request: () => Promise<void>): Promise<void> {
+    this.listError.set(null);
+    try {
+      await request();
+    } catch {
+      if (this.tab() === tab) this.listError.set(tab);
+    }
   }
 
   openCreateAction(): void {
@@ -286,7 +269,7 @@ export default class ManagementPage {
       return;
     }
 
-    this.fabMenuOpen.update((open) => !open);
+    this.createMenuOpen.update((open) => !open);
   }
 
   openIngredientOptions(item: IngredientListItem, event?: Event): void {
@@ -321,12 +304,12 @@ export default class ManagementPage {
     this.dishOptionsItem.set(null);
   }
 
-  closeFabMenu(): void {
-    this.fabMenuOpen.set(false);
+  closeCreateMenu(trigger?: HTMLButtonElement): void {
+    this.createMenuOpen.set(false);
+    trigger?.focus();
   }
 
   handleDishCreateMode(mode: DishCreateMode): void {
-    this.closeFabMenu();
     if (mode === 'ingredient') {
       void this.openCreateDish();
       return;
@@ -350,13 +333,13 @@ export default class ManagementPage {
   }
 
   async openCreateDish(): Promise<void> {
-    this.closeFabMenu();
+    this.closeCreateMenu();
     await this.router.navigate(['/tabs/management/dish/new']);
   }
 
   async openCreateAiDish(): Promise<void> {
-    this.closeFabMenu();
-    await this.router.navigate(['/tabs/management/dish/new']);
+    this.closeCreateMenu();
+    await this.router.navigate(['/tabs/management/dish/new'], { queryParams: { mode: 'ai' } });
   }
 
   async openEditDish(id: string): Promise<void> {
@@ -392,7 +375,6 @@ export default class ManagementPage {
     if (this.ingredientDeleteBlocked()) {
       this.closeIngredientDeleteDialog();
       this.tab.set('dishes');
-      await this.dishStore.load();
       return;
     }
 
@@ -479,9 +461,7 @@ export default class ManagementPage {
     return `Mặc định: ${defaultLabel}`;
   }
 
-  formatNumber(value: number): string {
-    return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, '');
-  }
+  readonly formatNumber = formatNutritionNumber;
 
   private sourceLabel(source: string): string {
     if (source === 'db') {

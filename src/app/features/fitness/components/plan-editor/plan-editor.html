@@ -9,85 +9,102 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content class="ion-padding">
-      @if (error(); as message) {
-        <p class="plan-error" role="alert">{{ message }}</p>
-      }
-      <div class="input-wrapper">
-        <label class="input-label" for="personal-plan-name">Tên giáo án</label>
-        <input
-          #planName
-          id="personal-plan-name"
-          class="input-native"
-          [value]="name()"
-          maxlength="80"
-          (input)="name.set(planName.value)"
-        />
-      </div>
-
-      <nav class="editor-week" aria-label="Ngày trong tuần">
-        @for (day of days(); track day.dayOfWeek) {
-          <ion-button
-            size="small"
-            [fill]="selectedWeekday() === day.dayOfWeek ? 'solid' : 'outline'"
-            [attr.aria-pressed]="selectedWeekday() === day.dayOfWeek"
-            (click)="useDay(day.dayOfWeek)"
-          >
-            {{ dayLabel(day.dayOfWeek) }}
-          </ion-button>
+    <ion-content class="editor-content">
+      <div class="editor-form">
+        @if (error(); as message) {
+          <p class="plan-error" role="alert">{{ message }}</p>
         }
-      </nav>
+        <div class="input-wrapper">
+          <label class="input-label" for="personal-plan-name">Tên giáo án</label>
+          <input
+            #planName
+            id="personal-plan-name"
+            class="input-native"
+            [value]="name()"
+            maxlength="80"
+            (input)="name.set(planName.value)"
+          />
+        </div>
 
-      @if (selectedDay(); as day) {
-        <h2>{{ dayLabel(day.dayOfWeek) }} · {{ day.name }}</h2>
-        @if (!day.isRestDay) {
-          <div class="input-wrapper">
-            <label class="input-label" for="personal-plan-move">Chuyển buổi sang</label>
-            <select
-              #dayPicker
-              id="personal-plan-move"
-              class="input-native"
-              [value]="day.dayOfWeek"
-              (change)="moveDay(dayPicker.value)"
+        <div class="editor-week" role="group" aria-label="Ngày trong tuần">
+          @for (day of days(); track day.dayOfWeek) {
+            <button
+              type="button"
+              [attr.aria-pressed]="selectedWeekday() === day.dayOfWeek"
+              [attr.aria-label]="dayLabel(day.dayOfWeek) + ': ' + day.name"
+              (click)="useDay(day.dayOfWeek)"
             >
-              @for (target of days(); track target.dayOfWeek) {
-                <option [value]="target.dayOfWeek">
-                  {{ dayLabel(target.dayOfWeek) }} · {{ target.name }}
-                </option>
-              }
-            </select>
-          </div>
+              <strong>{{ dayLabel(day.dayOfWeek) }}</strong>
+              <small>{{ day.isRestDay ? 'Nghỉ' : day.exercises.length + ' bài' }}</small>
+            </button>
+          }
+        </div>
+
+        @if (selectedDay(); as day) {
+          <h2>{{ dayLabel(day.dayOfWeek) }} · {{ day.name }}</h2>
+          @if (!day.isRestDay) {
+            <div class="input-wrapper">
+              <label class="input-label" for="personal-plan-move">Chuyển buổi sang</label>
+              <select
+                #dayPicker
+                id="personal-plan-move"
+                class="input-native"
+                [value]="day.dayOfWeek"
+                (change)="moveDay(dayPicker.value)"
+              >
+                @for (target of days(); track target.dayOfWeek) {
+                  <option [value]="target.dayOfWeek">
+                    {{ dayLabel(target.dayOfWeek) }} · {{ target.name }}
+                  </option>
+                }
+              </select>
+            </div>
+          }
+
+          @for (exercise of day.exercises; track exercise.exerciseId) {
+            <div class="editor-exercise">
+              <div>
+                <strong>{{ exerciseName(exercise.exerciseId) }}</strong>
+                <p>
+                  {{ exercise.sets }} × {{ exercise.repsMin }}–{{ exercise.repsMax }}
+                  {{ timed(exercise.exerciseId) ? 'giây' : 'lần' }} · nghỉ
+                  {{ exercise.restSeconds }} giây
+                </p>
+              </div>
+              <div class="editor-actions">
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  [attr.aria-label]="'Thay ' + exerciseName(exercise.exerciseId)"
+                  [attr.aria-expanded]="exerciseToReplace() === exercise.exerciseId"
+                  [disabled]="availableExercises().length === 0"
+                  (click)="
+                    exerciseToReplace.set(
+                      exerciseToReplace() === exercise.exerciseId ? null : exercise.exerciseId
+                    )
+                  "
+                  >Thay bài</ion-button
+                >
+                <ion-button
+                  size="small"
+                  fill="clear"
+                  [attr.aria-label]="'Bỏ ' + exerciseName(exercise.exerciseId)"
+                  (click)="removeExercise(exercise.exerciseId)"
+                  >Bỏ</ion-button
+                >
+              </div>
+            </div>
+            @if (exerciseToReplace() === exercise.exerciseId) {
+              <ng-container [ngTemplateOutlet]="exerciseChoices" />
+            }
+          }
+
+          @if (availableExercises().length > 0 && !exerciseToReplace()) {
+            <ng-container [ngTemplateOutlet]="exerciseChoices" />
+          }
         }
 
-        @for (exercise of day.exercises; track exercise.exerciseId) {
-          <div class="editor-exercise">
-            <div>
-              <strong>{{ exerciseName(exercise.exerciseId) }}</strong>
-              <p>
-                {{ exercise.sets }} × {{ exercise.repsMin }}–{{ exercise.repsMax }} · nghỉ
-                {{ exercise.restSeconds }} giây
-              </p>
-            </div>
-            <div class="editor-actions">
-              <ion-button
-                size="small"
-                fill="clear"
-                [attr.aria-label]="'Thay ' + exerciseName(exercise.exerciseId)"
-                (click)="exerciseToReplace.set(exercise.exerciseId)"
-                >Thay bài</ion-button
-              >
-              <ion-button
-                size="small"
-                fill="clear"
-                [attr.aria-label]="'Bỏ ' + exerciseName(exercise.exerciseId)"
-                (click)="removeExercise(exercise.exerciseId)"
-                >Bỏ</ion-button
-              >
-            </div>
-          </div>
-        }
-
-        @if (availableExercises().length > 0) {
+        <ng-template #exerciseChoices>
           <div class="input-wrapper">
             <label class="input-label" for="personal-plan-exercise">
               {{ exerciseToReplace() ? 'Chọn bài thay thế' : 'Thêm bài tập' }}
@@ -106,8 +123,8 @@
               }
             </select>
           </div>
-        }
-      }
+        </ng-template>
+      </div>
     </ion-content>
 
     <ion-footer>

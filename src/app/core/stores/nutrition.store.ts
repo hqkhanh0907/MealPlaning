@@ -1,10 +1,10 @@
+import { ZERO_TOTALS, type NutritionTotals } from '../models/nutrition';
 import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { CalendarStore } from './calendar.store';
 import { ProfileStore } from './profile.store';
 import {
   NutritionQuery,
   type DayTotals,
-  type NutritionTotals,
   type TrendPoint,
 } from '../services/nutrition/nutrition-query';
 import {
@@ -14,14 +14,6 @@ import {
   type KeyMetric,
   type KeyMetricVariant,
 } from '../utils/key-metric-router';
-
-const ZERO_TOTALS: NutritionTotals = Object.freeze({
-  calories: 0,
-  protein: 0,
-  carbs: 0,
-  fat: 0,
-  fiber: 0,
-});
 
 export const DEFAULT_FIBER_TARGET_GRAMS = 25;
 

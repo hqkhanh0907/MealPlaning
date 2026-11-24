@@ -3,13 +3,18 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/settings" text="" aria-label="Quay lại" />
     </ion-buttons>
-    <ion-title>Mức hoạt động</ion-title>
+    <ion-title>Vận động và trình độ tập</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
   <div class="form-content">
-    <ion-radio-group [value]="factor()" (ionChange)="factor.set($event.detail.value)">
+    <h2 class="section-caption" id="activity-level">Mức vận động</h2>
+    <ion-radio-group
+      aria-labelledby="activity-level"
+      [value]="factor()"
+      (ionChange)="factor.set($event.detail.value)"
+    >
       <ion-list lines="none" class="activity-list">
         @for (opt of options; track opt.factor) {
           <ion-item class="activity-item">
@@ -24,26 +29,51 @@
       </ion-list>
     </ion-radio-group>
 
+    <h2 class="section-caption" id="training-level">Trình độ tập luyện</h2>
+    <ion-radio-group
+      aria-labelledby="training-level"
+      [value]="fitnessLevel()"
+      (ionChange)="fitnessLevel.set($event.detail.value)"
+    >
+      <ion-list lines="none" class="activity-list">
+        @for (level of levels; track level) {
+          <ion-item class="activity-item">
+            <ion-radio slot="start" [value]="level" labelPlacement="end" justify="start">
+              {{ levelLabels[level] }}
+            </ion-radio>
+          </ion-item>
+        }
+      </ion-list>
+    </ion-radio-group>
+
     @if (preview(); as r) {
-      <h3 class="section-caption">Kết quả tính toán</h3>
+      <h3 class="section-caption">Ước tính hằng ngày</h3>
       <div class="preview-card">
+        @if (r.bmr > 0) {
+          <div class="preview-row">
+            <span class="preview-label">Năng lượng lúc nghỉ</span>
+            <span class="preview-value">{{ r.bmr }} kcal/ngày</span>
+          </div>
+          <div class="preview-row">
+            <span class="preview-label">Tổng năng lượng tiêu hao</span>
+            <span class="preview-value">{{ r.tdee }} kcal</span>
+          </div>
+        }
+        @if (r.energyNote; as note) {
+          <p class="preview-hint">{{ note }} Bạn vẫn có thể ghi bữa ăn.</p>
+        } @else {
+          <div class="preview-row preview-row--accent">
+            <span class="preview-label">Mục tiêu năng lượng đề xuất</span>
+            <span class="preview-value">{{ r.target_calories }} kcal/ngày</span>
+          </div>
+        }
         <div class="preview-row">
-          <span class="preview-label">BMR</span>
-          <span class="preview-value">{{ r.bmr }} kcal</span>
+          <span class="preview-label">Mục tiêu đạm tham khảo</span>
+          <span class="preview-value">{{
+            r.target_protein ? r.target_protein + ' g/ngày' : 'Chưa có đề xuất'
+          }}</span>
         </div>
-        <div class="preview-row">
-          <span class="preview-label">TDEE</span>
-          <span class="preview-value">{{ r.tdee }} kcal</span>
-        </div>
-        <div class="preview-row preview-row--accent">
-          <span class="preview-label">Mục tiêu đề xuất</span>
-          <span class="preview-value"
-            >Calo {{ r.target_calories }} kcal · Protein {{ r.target_protein }}g</span
-          >
-        </div>
-        <p class="preview-hint">
-          Nếu bạn đã chỉnh tay Calo/Protein, giá trị đã chỉnh sẽ được giữ nguyên.
-        </p>
+        <p class="preview-hint">Khi bạn đổi thông số, ứng dụng giữ mục tiêu bạn đã nhập tay.</p>
       </div>
     }
   </div>
@@ -51,14 +81,17 @@
 
 <ion-footer class="ion-no-border">
   <div class="sticky-save-bar">
+    @if (submission.error(); as error) {
+      <p class="field-error" role="alert">{{ error }}</p>
+    }
     <ion-button
       expand="block"
       class="save-button"
       [color]="isDirty() ? 'primary' : 'medium'"
-      [disabled]="!isDirty()"
+      [disabled]="!isDirty() || submission.locked()"
       (click)="save()"
     >
-      Lưu
+      {{ submission.locked() ? 'Đang lưu…' : 'Lưu' }}
     </ion-button>
   </div>
 </ion-footer>

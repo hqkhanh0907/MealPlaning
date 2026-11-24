@@ -17,7 +17,8 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { v4 as uuidv4 } from 'uuid';
+import { writeAiLog } from './ai-log';
+export { cleanupOldAiLogs } from './ai-log';
 
 import { Database } from '../database/database';
 import { GEMINI_API_KEY } from './gemini-key';
@@ -56,7 +57,7 @@ interface GeminiResponse {
 @Injectable({ providedIn: 'root' })
 export class GeminiClient {
   private readonly db = inject(Database);
-  private readonly apiKey = inject(GEMINI_API_KEY);
+  private readonly apiKey = inject(GEMINI_API_KEY).trim();
 
   /**
    * Generate a structured JSON response from Gemini.
@@ -88,7 +89,7 @@ export class GeminiClient {
         const parsed = this.parseAndValidate(text, options.schema);
 
         // Success — log full prompt + response + token count.
-        await this.logSuccess(options.feature, prompt, text, model, tokens);
+        await writeAiLog(this.db, options.feature, prompt, text, model, tokens);
         return parsed;
       } catch (err) {
         const geminiError =
@@ -203,16 +204,6 @@ export class GeminiClient {
     return result.data;
   }
 
-  private async logSuccess(
-    feature: string,
-    prompt: string,
-    response: string,
-    model: string,
-    tokens: number | undefined,
-  ): Promise<void> {
-    await this.writeLog(feature, prompt, response, model, tokens);
-  }
-
   private async logAttempt(
     feature: string,
     prompt: string,
@@ -225,27 +216,7 @@ export class GeminiClient {
       error: { kind: err.kind, message: err.message, httpStatus: err.httpStatus },
       ...(responseText ? { rawResponse: responseText } : {}),
     });
-    await this.writeLog(feature, prompt, responsePayload, model, tokens);
-  }
-
-  private async writeLog(
-    feature: string,
-    prompt: string,
-    response: string,
-    model: string,
-    tokens: number | undefined,
-  ): Promise<void> {
-    try {
-      await this.db.execute(
-        `INSERT INTO ai_chat_log (id, feature, prompt, response, model, tokens_used)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [uuidv4(), feature, prompt, response, model, tokens ?? null],
-      );
-    } catch (err) {
-      // Logging must never crash the AI flow — surface to console only.
-      // (e.g. DB locked, schema not migrated yet)
-      console.warn('[GeminiClient] ai_chat_log write failed:', err);
-    }
+    await writeAiLog(this.db, feature, prompt, responsePayload, model, tokens);
   }
 }
 
@@ -272,21 +243,4 @@ async function safeReadText(res: Response): Promise<string> {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/**
- * Delete `ai_chat_log` rows older than N days.
- *
- * Uses SQLite-side `datetime('now', '-N days')` to avoid timezone
- * mismatches between JS `toISOString()` and the schema's
- * `DEFAULT (datetime('now'))` (UTC, no Z suffix).
- *
- * Called once at app startup from `App` component (see `app.ts`).
- */
-export async function cleanupOldAiLogs(db: Database, retentionDays = 30): Promise<void> {
-  if (!Number.isInteger(retentionDays) || retentionDays <= 0) return;
-  await db.execute(
-    `DELETE FROM ai_chat_log WHERE created_at < datetime('now', '-' || ? || ' days')`,
-    [retentionDays],
-  );
 }

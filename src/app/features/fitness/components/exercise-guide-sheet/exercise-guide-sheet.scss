@@ -1,0 +1,32 @@
+.guide {
+  margin-inline: auto;
+  max-width: 40rem;
+  padding: var(--space-lg);
+  color: var(--text-primary);
+  line-height: 1.55;
+}
+h2 {
+  margin: 0;
+  font-size: var(--font-size-title);
+}
+.equipment,
+.source {
+  color: var(--text-secondary);
+}
+img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--space-sm);
+}
+ol {
+  padding-inline-start: var(--space-lg);
+}
+li {
+  margin-block: var(--space-md);
+  padding-inline-start: var(--space-xs);
+}
+.source {
+  border-top: 1px solid var(--border-color);
+  padding-top: var(--space-md);
+}

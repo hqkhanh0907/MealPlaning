@@ -80,13 +80,15 @@ describe('UserProfileRepository (singleton semantics)', () => {
   });
 
   it('updates only whitelisted profile fields', async () => {
+    const profile = await repo.insert(sampleData);
     await repo.update({ target_calories: 2100, notif_lunch: 0 });
 
     const [sql, params] = fakeDb.execute.calls.mostRecent().args;
     expect(sql).toContain('target_calories = ?');
     expect(sql).toContain('notif_lunch = ?');
     expect(sql).toContain('updated_at = datetime');
-    expect(params).toEqual([2100, 0]);
+    expect(sql).toContain('WHERE id = ?');
+    expect(params).toEqual([2100, 0, profile.id]);
   });
 
   it('rejects unknown update fields before building SQL', async () => {

@@ -1,4 +1,13 @@
+import {
+  addCalendarDays,
+  localIsoDate,
+  mondayOfWeek,
+  parseLocalDate,
+  shiftIsoDate,
+  weekDates,
+} from '../utils/local-date';
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { MEAL_CALENDAR_WINDOW_DAYS } from '../models/meal-plan.types';
 import type {
   DayPlanWithSlots,
   DeletedDishSnapshot,
@@ -13,48 +22,33 @@ import {
   type DateMealPlanItem,
 } from '../repositories/planned-dish.repository';
 import { DishStore } from './dish.store';
+import { IngredientStore } from './ingredient.store';
 import { ProfileStore } from './profile.store';
-
-const DAY_MS = 86_400_000;
-const CLAMP_DAYS = 365;
-const DEFAULT_TARGET_CAL = 2000;
 
 const VN_DAY_LABELS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'] as const;
 
+export interface PendingMealTarget {
+  date: string;
+  mealType: MealType;
+  plannedDishId: string;
+}
+
 /** Inclusive [today-365, today+365] window per F-03 §2.D2. */
 function clampDate(target: string, today: Date): string {
-  const t = parseIsoDate(target);
-  if (Number.isNaN(t.getTime())) return formatIsoDate(today);
-  const min = new Date(today.getTime() - CLAMP_DAYS * DAY_MS);
-  const max = new Date(today.getTime() + CLAMP_DAYS * DAY_MS);
-  if (t < min) return formatIsoDate(min);
-  if (t > max) return formatIsoDate(max);
-  return formatIsoDate(t);
-}
-
-function formatIsoDate(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
-function parseIsoDate(iso: string): Date {
-  // Force local-midnight interpretation so day arithmetic is timezone-stable.
-  const [y, m, d] = iso.split('-').map((p) => Number.parseInt(p, 10));
-  return new Date(y, (m ?? 1) - 1, d ?? 1);
-}
-
-/** Monday-anchored ISO week (Mon → Sun). */
-function weekStart(iso: string): Date {
-  const d = parseIsoDate(iso);
-  const day = d.getDay(); // Sun=0, Mon=1 … Sat=6
-  const offsetToMonday = (day + 6) % 7; // Mon→0, Sun→6
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate() - offsetToMonday);
+  const t = parseLocalDate(target);
+  if (Number.isNaN(t.getTime())) return localIsoDate(today);
+  const min = addCalendarDays(today, -MEAL_CALENDAR_WINDOW_DAYS);
+  const max = addCalendarDays(today, MEAL_CALENDAR_WINDOW_DAYS);
+  if (t < min) return localIsoDate(min);
+  if (t > max) return localIsoDate(max);
+  return localIsoDate(t);
 }
 
 @Injectable({ providedIn: 'root' })
 export class CalendarStore {
+  private readonly ingredientStore = inject(IngredientStore);
+  readonly addMealForDate = signal<string | null>(null);
+  readonly pendingMealNavigation = signal<PendingMealTarget | null>(null);
   private readonly dayPlanRepo = inject(DayPlanRepository);
   private readonly plannedDishRepo = inject(PlannedDishRepository);
   private readonly dishStore = inject(DishStore);
@@ -63,22 +57,18 @@ export class CalendarStore {
   /** Captured at construction so clamp behaviour stays test-deterministic. */
   private readonly today = new Date();
 
-  readonly currentDate = signal(formatIsoDate(this.today));
+  readonly currentDate = signal(localIsoDate(this.today));
   readonly currentView = signal<'day' | 'week'>('day');
   readonly invalidationTick = signal(0);
   readonly dayPlan = signal<DayPlanWithSlots | null>(null);
   readonly weekData = signal<WeekDayTotal[] | null>(null);
 
-  readonly weekDays = computed<string[]>(() => {
-    const start = weekStart(this.currentDate());
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
-      return formatIsoDate(d);
-    });
-  });
+  readonly weekDays = computed(() =>
+    weekDates(localIsoDate(mondayOfWeek(parseLocalDate(this.currentDate())))),
+  );
 
   /** ISO of "today" snapshotted at construction (used by week view). */
-  private readonly todayIso = formatIsoDate(this.today);
+  private readonly todayIso = localIsoDate(this.today);
 
   constructor() {
     // Auto-hydrate dayPlan when currentDate or invalidationTick changes.
@@ -95,13 +85,15 @@ export class CalendarStore {
       const days = this.weekDays();
       this.invalidationTick();
       if (view !== 'week') return;
-      void this.hydrateWeek(days);
+      const target = this.profileStore.profile()?.target_calories ?? 0;
+      void this.hydrateWeek(days, target);
     });
 
     // Cross-store wiring: any DishStore mutation invalidates Calendar.
     effect(() => {
-      const tick = this.dishStore.dishChanged();
-      if (tick > 0) {
+      const recipes = this.dishStore.dishChanged();
+      const ingredients = this.ingredientStore.nutritionRevision();
+      if (recipes > 0 || ingredients > 0) {
         this.invalidationTick.update((n) => n + 1);
       }
     });
@@ -197,25 +189,24 @@ export class CalendarStore {
 
   /** Mutable hint flag set by the page after probing yesterday on hydration. */
   readonly yesterdayHint = signal(false);
+  readonly copyingYesterday = signal(false);
 
   /**
    * Copy every planned dish from yesterday into today (same meal_type).
    * Returns count so the caller can toast.
    */
   async copyFromYesterday(): Promise<{ copiedCount: number }> {
+    if (this.copyingYesterday()) return { copiedCount: 0 };
     const today = this.currentDate();
-    const yesterday = formatIsoDate(new Date(parseIsoDate(today).getTime() - DAY_MS));
-    const yDayPlan = await this.dayPlanRepo.findByDate(yesterday);
-    if (!yDayPlan) return { copiedCount: 0 };
-    let copiedCount = 0;
-    for (const slot of yDayPlan.meal_slots) {
-      for (const pd of slot.planned_dishes) {
-        await this.plannedDishRepo.copyToDate(pd.id, today, slot.meal_type);
-        copiedCount += 1;
-      }
+    const yesterday = shiftIsoDate(today, -1);
+    this.copyingYesterday.set(true);
+    try {
+      const copiedCount = await this.plannedDishRepo.copyDayIntoEmpty(yesterday, today);
+      if (copiedCount > 0) this.invalidationTick.update((n) => n + 1);
+      return { copiedCount };
+    } finally {
+      this.copyingYesterday.set(false);
     }
-    if (copiedCount > 0) this.invalidationTick.update((n) => n + 1);
-    return { copiedCount };
   }
 
   async copyToDate(
@@ -235,8 +226,7 @@ export class CalendarStore {
   async copyPreviousWeek(): Promise<{ copiedCount: number; daysAffected: number }> {
     const days = this.weekDays();
     const currentWeekStart = days[0];
-    const prev = new Date(parseIsoDate(currentWeekStart).getTime() - 7 * DAY_MS);
-    const prevWeekStart = formatIsoDate(prev);
+    const prevWeekStart = shiftIsoDate(currentWeekStart, -7);
     const result = await this.plannedDishRepo.copyPreviousWeek(currentWeekStart, prevWeekStart);
     this.invalidationTick.update((n) => n + 1);
     return result;
@@ -261,20 +251,23 @@ export class CalendarStore {
     this.dayPlan.set(result);
   }
 
-  private async hydrateWeek(days: string[]): Promise<void> {
+  private async hydrateWeek(days: string[], profileTarget: number): Promise<void> {
     const start = days[0];
     const end = days[6];
     const dayPlans = await this.dayPlanRepo.findByDateRange(start, end);
     // Stale-result guard
     const current = this.weekDays();
-    if (current[0] !== start || current[6] !== end) return;
+    if (
+      current[0] !== start ||
+      current[6] !== end ||
+      profileTarget !== (this.profileStore.profile()?.target_calories ?? 0)
+    )
+      return;
 
     const byDate = new Map<string, DayPlanWithSlots>();
     for (const dp of dayPlans) byDate.set(dp.date, dp);
 
     const todayIso = this.todayIso;
-    const profileTarget = this.profileStore.profile()?.target_calories ?? 0;
-    const fallbackTarget = profileTarget > 0 ? profileTarget : DEFAULT_TARGET_CAL;
     const totals: WeekDayTotal[] = days.map((date, i) => {
       const dp = byDate.get(date);
       let logged = 0;
@@ -292,10 +285,8 @@ export class CalendarStore {
           }
         }
       }
-      // Treat 0 as "unset" — older day_plan rows seeded target_calories=0
-      // before goals were computed; fall back to user profile, then 2000.
       const rawTarget = dp?.target_calories ?? 0;
-      const targetCal = rawTarget > 0 ? rawTarget : fallbackTarget;
+      const targetCal = rawTarget > 0 ? rawTarget : Math.max(0, profileTarget);
       return {
         date,
         label: VN_DAY_LABELS[i],

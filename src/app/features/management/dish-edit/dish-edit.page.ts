@@ -1,3 +1,6 @@
+import { formatNutritionNumber } from '../../../shared/nutrition-number';
+import { DiscardChanges } from '../../../shared/forms/discard-changes';
+import { presentCatalogToast } from '../catalog-toast';
 /**
  * Dish edit page — gram-only revision (schema v6).
  *
@@ -9,11 +12,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  type OnDestroy,
-  type OnInit,
   ViewChild,
   afterNextRender,
   computed,
+  effect,
   inject,
   signal,
   untracked,
@@ -40,13 +42,23 @@ import { v4 as uuidv4 } from 'uuid';
 import type { IngredientListItem } from '../../../core/repositories/ingredient.repository';
 import { IngredientRepository } from '../../../core/repositories/ingredient.repository';
 import type { HasUnsavedChanges } from '../../../core/guards/unsaved-changes-guard';
+import {
+  ingredientPortion,
+  NUTRIENTS,
+  percentOfNutritionTarget,
+  scaleNutrition,
+  ZERO_TOTALS,
+  type NutritionTotals,
+} from '../../../core/models/nutrition';
+import { MEAL_LABELS } from '../../../core/models/meal-plan.types';
 import type { MealTag } from '../../../core/models/management.types';
 import { DishStore } from '../../../core/stores/dish.store';
-import { IngredientStore } from '../../../core/stores/ingredient.store';
 import { ProfileStore } from '../../../core/stores/profile.store';
+import { SeedLoader } from '../../../core/services/seed/seed-loader';
 import { DishAutofillApplier } from '../../../core/services/ai/dish-autofill-applier';
 import { NutritionAi, type DishAutofillResult } from '../../../core/services/ai/nutrition-ai';
-import { GEMINI_ERROR_TOAST, GeminiError } from '../../../core/services/ai/gemini-types';
+import { aiErrorMessage } from '../../../core/services/ai/ai-generation';
+import { AiAvailability } from '../../../shared/ai-availability';
 import {
   BottomSheetPicker,
   type PickerOption,
@@ -58,7 +70,6 @@ import {
 } from '../../../shared/components/dish-autofill-sheet/dish-autofill-sheet';
 import { AppFormField } from '../../../shared/forms';
 import { AiOfflineBanner } from '../../../shared/components/ai-offline-banner/ai-offline-banner';
-import { NetworkStore } from '../../../core/stores/network.store';
 import { dishFormSchema } from '../../../shared/forms/schemas/dish-form.schema';
 import type { DishEditFormValue, DishIngredientFormItem } from './dish-edit.types';
 
@@ -72,9 +83,9 @@ interface GramDraft {
 }
 
 const MEAL_TAG_OPTIONS: readonly { value: MealTag; label: string }[] = [
-  { value: 'breakfast', label: 'Bữa sáng' },
-  { value: 'lunch', label: 'Bữa trưa' },
-  { value: 'dinner', label: 'Bữa tối' },
+  { value: 'breakfast', label: MEAL_LABELS.breakfast },
+  { value: 'lunch', label: MEAL_LABELS.lunch },
+  { value: 'dinner', label: MEAL_LABELS.dinner },
 ];
 
 const emptyForm = (): DishEditFormValue => ({
@@ -111,26 +122,30 @@ const emptyForm = (): DishEditFormValue => ({
     DishAutofillSheet,
   ],
 })
-export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestroy {
+export default class DishEditPage implements HasUnsavedChanges {
   @ViewChild('ingredientPicker') private readonly ingredientPicker?: BottomSheetPicker;
   @ViewChild('mealTagPicker') private readonly mealTagPicker?: BottomSheetPicker;
-  @ViewChild('nameInput') private readonly nameInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('nameInput') private readonly nameInput?: ElementRef<HTMLTextAreaElement>;
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dishStore = inject(DishStore);
-  private readonly ingredientStore = inject(IngredientStore);
   private readonly profileStore = inject(ProfileStore);
-  protected readonly network = inject(NetworkStore);
+  protected readonly ai = inject(AiAvailability);
   private readonly ingredientRepo = inject(IngredientRepository);
+  private readonly seedLoader = inject(SeedLoader);
   private readonly nutritionAi = inject(NutritionAi);
   private readonly autofillApplier = inject(DishAutofillApplier);
   private readonly toastCtrl = inject(ToastController);
 
   readonly dishId = signal<string | null>(this.route.snapshot.paramMap.get('id'));
   readonly isEdit = computed(() => this.dishId() !== null);
+  protected readonly aiEntry = signal(false);
 
   readonly availableIngredients = signal<IngredientListItem[]>([]);
+  protected readonly ingredientsLoading = signal(true);
+  private readonly ingredientLoadFailed = signal(false);
+  private ingredientRequestId = 0;
   /** Recently-used ingredients (MRU) — top 5 by latest dish update. */
   readonly recentIngredients = signal<IngredientListItem[]>([]);
 
@@ -156,48 +171,31 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
   readonly pendingDeleteId = signal<string | null>(null);
   readonly deleteReferenceCount = signal(0);
   readonly deleteReferenceLoading = signal(false);
-  readonly discardDialogOpen = signal(false);
+  readonly discard = new DiscardChanges();
 
   // F-02 AI Dish Autofill state
   readonly aiAutofillLoading = signal(false);
   readonly aiAutofillResult = signal<DishAutofillResult | null>(null);
   readonly aiAutofillSheetOpen = signal(false);
 
-  private discardDialogResolver: ((value: boolean) => void) | null = null;
   private dirtyBaseline = '';
   private skipUnsavedPrompt = false;
 
   /** Aggregate nutrition preview per single serving. */
-  readonly previewTotals = computed<{
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-    fiber: number;
-  }>(() => {
-    const totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
+  readonly previewTotals = computed<NutritionTotals>(() => {
+    const totals = { ...ZERO_TOTALS };
     const index = this.ingredientIndex();
     for (const item of this.formSignal().items) {
       const ing = index.get(item.ingredient_id);
       if (!ing || !Number.isFinite(item.gram_weight) || item.gram_weight <= 0) {
         continue;
       }
-      const m = item.gram_weight / 100;
-      totals.calories += ing.calories * m;
-      totals.protein += ing.protein * m;
-      totals.carbs += ing.carbs * m;
-      totals.fat += ing.fat * m;
-      totals.fiber += ing.fiber * m;
+      const portion = ingredientPortion(ing, item.gram_weight);
+      for (const nutrient of NUTRIENTS) totals[nutrient] += portion[nutrient];
     }
     const servings = this.formSignal().servings;
-    const divisor = Number.isFinite(servings) && (servings ?? 0) > 0 ? (servings as number) : 1;
-    return {
-      calories: totals.calories / divisor,
-      protein: totals.protein / divisor,
-      carbs: totals.carbs / divisor,
-      fat: totals.fat / divisor,
-      fiber: totals.fiber / divisor,
-    };
+    const divisor = servings !== null && Number.isFinite(servings) && servings > 0 ? servings : 1;
+    return scaleNutrition(totals, 1 / divisor);
   });
 
   /**
@@ -215,12 +213,8 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
    * via `[style.--ring-percent.%]`.
    */
   readonly caloriePercent = computed<number>(() => {
-    const target = this.targetCalories();
-    if (target <= 0) {
-      return 0;
-    }
-    const pct = (this.previewTotals().calories / target) * 100;
-    return Math.max(0, Math.min(100, Math.round(pct)));
+    const pct = percentOfNutritionTarget(this.previewTotals().calories, this.targetCalories());
+    return Math.min(100, Math.round(pct ?? 0));
   });
 
   /**
@@ -258,32 +252,31 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
 
   constructor() {
     addIcons({ chevronDownOutline, closeOutline, sparklesOutline, trashOutline });
+    effect(() => {
+      this.seedLoader.dataRevision();
+      void this.refreshIngredientOptions();
+    });
     afterNextRender(() => {
       void this.bootstrap();
     });
   }
 
-  ngOnInit(): void {
+  ionViewWillEnter(): void {
     document.body.classList.add('edit-overlay-open');
+    this.aiEntry.set(this.route.snapshot.queryParams?.['mode'] === 'ai');
+    if (!this.isEdit()) {
+      this.formSignal.set(emptyForm());
+      this.showErrors.set(false);
+      this.dirtyBaseline = '';
+      this.resetDirtyBaseline();
+    }
   }
 
-  ngOnDestroy(): void {
+  ionViewWillLeave(): void {
     document.body.classList.remove('edit-overlay-open');
   }
 
   private async bootstrap(): Promise<void> {
-    if (this.ingredientStore.ingredients().length === 0) {
-      await this.ingredientStore.load();
-    }
-    this.availableIngredients.set(this.ingredientStore.ingredients());
-
-    try {
-      const recent = await this.ingredientRepo.findRecentlyUsed(5);
-      this.recentIngredients.set(recent);
-    } catch {
-      this.recentIngredients.set([]);
-    }
-
     const id = this.dishId();
     if (!id) {
       this.resetDirtyBaseline();
@@ -310,15 +303,30 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
     this.resetDirtyBaseline();
   }
 
+  private async refreshIngredientOptions(): Promise<void> {
+    const requestId = ++this.ingredientRequestId;
+    this.ingredientsLoading.set(true);
+    const [all, recent] = await Promise.allSettled([
+      this.ingredientRepo.list(),
+      this.ingredientRepo.findRecentlyUsed(5),
+    ]);
+    if (requestId !== this.ingredientRequestId) return;
+
+    if (all.status === 'fulfilled') this.availableIngredients.set(all.value);
+    this.recentIngredients.set(recent.status === 'fulfilled' ? recent.value : []);
+    this.ingredientLoadFailed.set(all.status === 'rejected');
+    this.ingredientsLoading.set(false);
+  }
+
   // ───────── picker options ─────────
 
-  get ingredientOptions(): PickerOption[] {
-    return this.availableIngredients().map((ingredient) => ({
+  readonly ingredientOptions = computed<PickerOption[]>(() =>
+    this.availableIngredients().map((ingredient) => ({
       value: ingredient.id,
       label: ingredient.name,
       description: `${ingredient.category} · ${this.formatNumber(ingredient.calories)} kcal/100g`,
-    }));
-  }
+    })),
+  );
 
   get recentIngredientOptions(): PickerOption[] {
     return this.recentIngredients().map((ingredient) => ({
@@ -352,7 +360,12 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
 
   // ───────── pickers ─────────
 
-  openIngredientPicker(): void {
+  async openIngredientPicker(): Promise<void> {
+    await this.refreshIngredientOptions();
+    if (this.ingredientLoadFailed() && this.availableIngredients().length === 0) {
+      await presentCatalogToast(this.toastCtrl, 'Không thể tải nguyên liệu. Vui lòng thử lại.');
+      return;
+    }
     this.ingredientPicker?.open();
   }
 
@@ -445,26 +458,17 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
     return this.ingredientIndex().get(ingredientId)?.name ?? 'Nguyên liệu';
   }
 
-  itemCalories(item: DishIngredientFormItem): string {
+  itemCalories(item: Pick<DishIngredientFormItem, 'ingredient_id' | 'gram_weight'>): string {
     const ing = this.ingredientIndex().get(item.ingredient_id);
     if (!ing || !Number.isFinite(item.gram_weight) || item.gram_weight <= 0) {
       return '0 kcal';
     }
-    const kcal = (ing.calories * item.gram_weight) / 100;
+    const kcal = ingredientPortion(ing, item.gram_weight).calories;
     return `${this.formatNumber(kcal)} kcal`;
   }
 
   itemDetail(item: DishIngredientFormItem): string {
     return `${this.formatNumber(item.gram_weight)} g`;
-  }
-
-  draftCalories(draft: GramDraft): string {
-    const ing = this.ingredientIndex().get(draft.ingredient_id);
-    if (!ing || !Number.isFinite(draft.gram_weight) || draft.gram_weight <= 0) {
-      return '0 kcal';
-    }
-    const kcal = (ing.calories * draft.gram_weight) / 100;
-    return `${this.formatNumber(kcal)} kcal`;
   }
 
   draftIngredientName(draft: GramDraft): string {
@@ -519,19 +523,30 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
   }
 
   confirmDiscardChanges(): Promise<boolean> {
-    this.discardDialogOpen.set(true);
-    return new Promise<boolean>((resolve) => {
-      this.discardDialogResolver = resolve;
-    });
-  }
-
-  cancelDiscardChanges(): void {
-    this.resolveDiscardDialog(false);
+    return this.discard.request();
   }
 
   confirmDiscardChangesDialog(): void {
     this.skipUnsavedPrompt = true;
-    this.resolveDiscardDialog(true);
+    this.discard.answer(true);
+  }
+
+  protected onNameBeforeInput(event: InputEvent): void {
+    const { inputType, isComposing } = event;
+    if (!isComposing && (inputType === 'insertLineBreak' || inputType === 'insertParagraph')) {
+      event.preventDefault();
+    }
+  }
+
+  protected onNamePaste(event: ClipboardEvent): void {
+    const text = event.clipboardData?.getData('text/plain') ?? '';
+    const singleLine = text.replace(/[\r\n]/g, '');
+    const input = this.nameInput?.nativeElement;
+    if (!input || singleLine === text) return;
+
+    event.preventDefault();
+    input.setRangeText(singleLine, input.selectionStart, input.selectionEnd, 'end');
+    input.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
   // ───────── save ─────────
@@ -592,7 +607,7 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
   async onAskAi(): Promise<void> {
     const dishName = this.formSignal().name.trim();
     if (!dishName) {
-      await this.presentToast('Nhập tên món ăn trước khi hỏi AI');
+      await presentCatalogToast(this.toastCtrl, 'Nhập tên món ăn trước khi hỏi AI');
       return;
     }
     if (this.aiAutofillLoading()) {
@@ -604,7 +619,7 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
     // tên với dish KHÁC trong DB.
     const existing = await this.dishStore.findByNormalizedName(dishName);
     if (existing && existing.id !== this.dishId()) {
-      await this.presentToast(`Món "${existing.name}" đã tồn tại`);
+      await presentCatalogToast(this.toastCtrl, `Món "${existing.name}" đã tồn tại`);
       return;
     }
 
@@ -618,11 +633,8 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
       this.aiAutofillResult.set(result);
       this.aiAutofillSheetOpen.set(true);
     } catch (err) {
-      const message =
-        err instanceof GeminiError
-          ? GEMINI_ERROR_TOAST[err.kind]
-          : 'Có lỗi xảy ra, vui lòng thử lại';
-      await this.presentToast(message);
+      const message = aiErrorMessage(err, 'Có lỗi xảy ra, vui lòng thử lại');
+      await presentCatalogToast(this.toastCtrl, message);
     } finally {
       this.aiAutofillLoading.set(false);
     }
@@ -638,8 +650,7 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
         fuzzyDecisions: payload.fuzzyDecisions,
       });
 
-      // Refresh availableIngredients từ store cache (đã được store bulk-merge).
-      this.availableIngredients.set(this.ingredientStore.ingredients());
+      await this.refreshIngredientOptions();
 
       // Append AI rows vào cuối list hiện tại (Decision: AI bổ sung, không thay thế).
       const newItems: DishIngredientFormItem[] = ops.dishIngredients.map((row) => ({
@@ -659,10 +670,10 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
         created > 0
           ? `Đã thêm ${total} nguyên liệu (${created} mới)`
           : `Đã thêm ${total} nguyên liệu`;
-      await this.presentToast(message);
+      await presentCatalogToast(this.toastCtrl, message);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Có lỗi xảy ra, vui lòng thử lại';
-      await this.presentToast(message);
+      await presentCatalogToast(this.toastCtrl, message);
     }
   }
 
@@ -671,28 +682,9 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
     this.aiAutofillResult.set(null);
   }
 
-  private async presentToast(message: string): Promise<void> {
-    const toast = await this.toastCtrl.create({
-      message,
-      duration: 2400,
-      position: 'bottom',
-      color: 'medium',
-    });
-    await toast.present();
-  }
-
   // ───────── utils ─────────
 
-  formatNumber(value: number): string {
-    return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, '');
-  }
-
-  private resolveDiscardDialog(value: boolean): void {
-    const resolver = this.discardDialogResolver;
-    this.discardDialogResolver = null;
-    this.discardDialogOpen.set(false);
-    resolver?.(value);
-  }
+  readonly formatNumber = formatNutritionNumber;
 
   private resetDirtyBaseline(): void {
     if (this.dirtyBaseline && this.createDirtySnapshot() !== this.dirtyBaseline) {
@@ -739,7 +731,7 @@ export default class DishEditPage implements HasUnsavedChanges, OnInit, OnDestro
   private firstDishErrorSelector(): string | null {
     const f = this.dishForm;
     if (f.name().errors().length) {
-      return 'input';
+      return '#dish-field-name';
     }
     if (f.servings().errors().length) {
       return 'input[type="number"]';

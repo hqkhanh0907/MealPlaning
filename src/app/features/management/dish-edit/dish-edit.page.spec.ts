@@ -1,20 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
+import { ToastController } from '@ionic/angular/standalone';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import type { IngredientListItem } from '../../../core/repositories/ingredient.repository';
 import { IngredientRepository } from '../../../core/repositories/ingredient.repository';
+import type { DishWithIngredients } from '../../../core/repositories/dish.repository';
 import type { UserProfile } from '../../../core/models/user-profile.model';
 import { NutritionAi } from '../../../core/services/ai/nutrition-ai';
 import { DishAutofillApplier } from '../../../core/services/ai/dish-autofill-applier';
 import { DishStore } from '../../../core/stores/dish.store';
-import { IngredientStore } from '../../../core/stores/ingredient.store';
 import { ProfileStore } from '../../../core/stores/profile.store';
+import { SeedLoader } from '../../../core/services/seed/seed-loader';
+import { BottomSheetPicker } from '../../../shared/components/bottom-sheet-picker/bottom-sheet-picker';
 import DishEditPage from './dish-edit.page';
 
 describe('DishEditPage (gram-only)', () => {
   let fixture: ComponentFixture<DishEditPage>;
   let component: DishEditPage;
   let navigateSpy: jasmine.Spy;
+  let dataRevision: ReturnType<typeof signal<number>>;
 
   const sampleIngredient: IngredientListItem = {
     id: 'ingredient-1',
@@ -33,11 +38,12 @@ describe('DishEditPage (gram-only)', () => {
   const setup = async (
     paramMap: Record<string, string> = {},
     profile: UserProfile | null = null,
+    existingDish: DishWithIngredients | null = null,
   ): Promise<void> => {
     const dishStore = {
       dishes: () => [],
       load: jasmine.createSpy().and.resolveTo(),
-      fetchById: jasmine.createSpy('fetchById').and.resolveTo(null),
+      fetchById: jasmine.createSpy('fetchById').and.resolveTo(existingDish),
       addFromIngredients: jasmine.createSpy('addFromIngredients').and.resolveTo(),
       edit: jasmine.createSpy('edit').and.resolveTo(),
       remove: jasmine.createSpy('remove').and.resolveTo(),
@@ -45,19 +51,16 @@ describe('DishEditPage (gram-only)', () => {
       findByNormalizedName: jasmine.createSpy('findByNormalizedName').and.resolveTo(null),
     };
 
-    const ingredientStore = {
-      ingredients: () => [sampleIngredient],
-      load: jasmine.createSpy().and.resolveTo(),
-    };
-
     const profileStore = {
       profile: signal<UserProfile | null>(profile),
     };
 
     const ingredientRepo = {
+      list: jasmine.createSpy('list').and.resolveTo([sampleIngredient]),
       findRecentlyUsed: jasmine.createSpy('findRecentlyUsed').and.resolveTo([]),
       findAllForFuzzy: jasmine.createSpy('findAllForFuzzy').and.resolveTo([]),
     };
+    dataRevision = signal(0);
 
     const nutritionAi = {
       autofillDish: jasmine.createSpy('autofillDish').and.resolveTo({
@@ -83,9 +86,9 @@ describe('DishEditPage (gram-only)', () => {
         provideRouter([]),
         { provide: ActivatedRoute, useValue: activatedRoute },
         { provide: DishStore, useValue: dishStore },
-        { provide: IngredientStore, useValue: ingredientStore },
         { provide: ProfileStore, useValue: profileStore },
         { provide: IngredientRepository, useValue: ingredientRepo },
+        { provide: SeedLoader, useValue: { dataRevision } },
         { provide: NutritionAi, useValue: nutritionAi },
         { provide: DishAutofillApplier, useValue: autofillApplier },
       ],
@@ -115,6 +118,29 @@ describe('DishEditPage (gram-only)', () => {
     };
     expect(repo.findRecentlyUsed).toHaveBeenCalledWith(5);
     expect(component.recentIngredientOptions.length).toBe(0);
+  });
+
+  it('refreshes an open picker after the bundled ingredients finish loading', async () => {
+    const repo = TestBed.inject(IngredientRepository) as jasmine.SpyObj<IngredientRepository>;
+    repo.list.and.resolveTo([]);
+    await component.openIngredientPicker();
+    fixture.detectChanges();
+
+    const picker: BottomSheetPicker = fixture.debugElement.query(
+      By.directive(BottomSheetPicker),
+    ).componentInstance;
+    expect(picker.isOpen()).toBeTrue();
+    expect(picker.filteredOptions()).toEqual([]);
+
+    repo.list.and.resolveTo([sampleIngredient]);
+    dataRevision.set(1);
+    TestBed.tick();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    TestBed.tick();
+
+    expect(picker.isOpen()).toBeTrue();
+    expect(component.availableIngredients()).toEqual([sampleIngredient]);
+    expect(picker.filteredOptions()[0]?.label).toBe(sampleIngredient.name);
   });
 
   it('reads native input event values defensively', () => {
@@ -208,37 +234,67 @@ describe('DishEditPage (gram-only)', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/tabs/management']);
   });
 
-  it('calls edit() with gram-only items in edit mode', async () => {
+  it('loads and edits a long dish name while keeping gram-only ingredients', async () => {
+    const name =
+      'Cơm gạo lứt trộn nấm đùi gà, đậu Hà Lan, cà rốt, trứng luộc và mè rang với nước tương';
     TestBed.resetTestingModule();
-    await setup({ id: 'dish-42' });
-
-    const access = component as unknown as {
-      formSignal: {
-        set: (v: {
-          name: string;
-          description: string;
-          servings: number;
-          meal_tag: null;
-          items: { local_id: string; ingredient_id: string; gram_weight: number }[];
-        }) => void;
-      };
-    };
-
-    access.formSignal.set({
-      name: 'Cơm trứng',
-      description: '',
+    await setup({ id: 'dish-42' }, null, {
+      id: 'dish-42',
+      name,
+      description: null,
+      type: 'ingredient_based',
+      source: 'custom',
       servings: 2,
+      image_url: null,
       meal_tag: null,
-      items: [{ local_id: 'item-1', ingredient_id: 'ingredient-1', gram_weight: 80 }],
+      is_favorite: 0,
+      created_at: '2026-04-26T00:00:00Z',
+      updated_at: null,
+      total_calories: 62,
+      total_protein: 5.2,
+      total_carbs: 0.44,
+      total_fat: 4.4,
+      total_fiber: 0,
+      ingredients: [
+        {
+          id: 'item-1',
+          dish_id: 'dish-42',
+          ingredient_id: 'ingredient-1',
+          gram_weight: 80,
+          sort_order: 0,
+        },
+      ],
     });
 
+    const input: HTMLTextAreaElement = fixture.nativeElement.querySelector('#dish-field-name');
+    expect(input.tagName).toBe('TEXTAREA');
+    expect(input.value).toBe(name);
+
+    const lineBreak = new InputEvent('beforeinput', {
+      bubbles: true,
+      cancelable: true,
+      inputType: 'insertLineBreak',
+    });
+    input.dispatchEvent(lineBreak);
+    expect(lineBreak.defaultPrevented).toBeTrue();
+
+    input.setSelectionRange(name.length, name.length);
+    const clipboardData = new DataTransfer();
+    clipboardData.setData('text/plain', '\n 2');
+    input.dispatchEvent(
+      new ClipboardEvent('paste', { bubbles: true, cancelable: true, clipboardData }),
+    );
+    fixture.detectChanges();
+
+    expect(input.value).toBe(`${name} 2`);
+    expect(input.selectionStart).toBe(input.value.length);
     await component.onSave();
 
     const dishStore = TestBed.inject(DishStore) as unknown as { edit: jasmine.Spy };
     expect(dishStore.edit).toHaveBeenCalled();
     const [id, payload, items] = dishStore.edit.calls.mostRecent().args;
     expect(id).toBe('dish-42');
-    expect(payload.name).toBe('Cơm trứng');
+    expect(payload.name).toBe(`${name} 2`);
     expect(items.length).toBe(1);
     expect(items[0].gram_weight).toBe(80);
   });
@@ -383,17 +439,20 @@ describe('DishEditPage (gram-only)', () => {
         autofillDish: jasmine.Spy;
       };
       dishStore.findByNormalizedName.and.resolveTo({ id: 'dish-existing', name: 'Phở bò' });
-      const toastSpy = spyOn(
-        component as unknown as { presentToast: (m: string) => Promise<void> },
-        'presentToast',
-      ).and.resolveTo();
+      const present = jasmine.createSpy('present').and.resolveTo();
+      const toast = spyOn(TestBed.inject(ToastController), 'create').and.resolveTo(
+        Object.assign(document.createElement('ion-toast'), { present }),
+      );
 
       setName('  phở bò  ');
       await component.onAskAi();
 
       expect(dishStore.findByNormalizedName).toHaveBeenCalledWith('phở bò');
       expect(nutritionAi.autofillDish).not.toHaveBeenCalled();
-      expect(toastSpy).toHaveBeenCalledWith('Món "Phở bò" đã tồn tại');
+      expect(toast).toHaveBeenCalledWith(
+        jasmine.objectContaining({ message: 'Món "Phở bò" đã tồn tại' }),
+      );
+      expect(present).toHaveBeenCalledOnceWith();
     });
 
     it('proceeds to AI when name is not used by any other dish', async () => {

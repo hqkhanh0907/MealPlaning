@@ -1,26 +1,111 @@
-.editor-week,
-.editor-actions {
-  display: flex;
-  flex-wrap: wrap;
+.editor-content {
+  --background: var(--bg-page);
+  --padding-start: var(--space-lg);
+  --padding-end: var(--space-lg);
+  --padding-top: var(--space-lg);
+  --padding-bottom: var(--space-xl);
+}
+
+.editor-form {
+  display: grid;
+  gap: var(--space-md);
+
+  h2 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-title);
+    font-weight: 750;
+    overflow-wrap: anywhere;
+  }
 }
 
 .editor-week {
-  margin-block: 16px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(44px, 1fr));
+  gap: var(--space-xs);
+
+  button {
+    display: grid;
+    gap: 2px;
+    align-content: center;
+    min-height: 52px;
+    padding: var(--space-xs) 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: var(--font-size-body-sm);
+    cursor: pointer;
+
+    &[aria-pressed='true'] {
+      border-color: var(--ion-color-primary);
+      background: var(--primary-50);
+      color: var(--primary-700);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--primary-700);
+      outline-offset: 2px;
+    }
+  }
+
+  small {
+    color: var(--text-secondary);
+  }
+}
+
+.editor-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-xs);
+
+  ion-button {
+    min-width: 44px;
+    min-height: 44px;
+    margin: 0;
+    --padding-start: var(--space-xs);
+    --padding-end: var(--space-xs);
+  }
 }
 
 .editor-exercise {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding-block: 8px;
+  gap: var(--space-sm);
+  padding-block: var(--space-xs) var(--space-sm);
   border-bottom: 1px solid var(--border-color);
+  overflow-wrap: anywhere;
+
+  strong {
+    color: var(--text-primary);
+  }
 
   p {
-    margin: 4px 0 0;
+    margin: var(--space-xs) 0 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-body-sm);
   }
 }
 
 .plan-error {
-  color: var(--ion-color-danger);
+  margin: 0;
+  color: var(--ion-color-danger-shade);
+}
+
+ion-footer ion-toolbar {
+  --padding-start: var(--space-lg);
+  --padding-end: var(--space-lg);
+  --padding-top: var(--space-xs);
+  --padding-bottom: var(--space-xs);
+}
+
+ion-footer ion-button {
+  min-height: 44px;
+}
+
+@media (max-width: 363px) {
+  .editor-week {
+    grid-template-columns: repeat(4, minmax(44px, 1fr));
+  }
 }

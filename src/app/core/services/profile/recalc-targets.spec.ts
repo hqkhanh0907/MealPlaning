@@ -1,6 +1,18 @@
 import { recalcTargets } from './recalc-targets';
 
 describe('recalcTargets', () => {
+  it('withholds adult protein suggestions for children and quantities outside the editor range', () => {
+    const person = {
+      weight_kg: 65,
+      height_cm: 175,
+      age: 30,
+      gender: 'male',
+      goal: 'gain_muscle',
+      activity_factor: 1.55,
+    } as const;
+    expect(recalcTargets({ ...person, age: 13 }).target_protein).toBe(0);
+    expect(recalcTargets({ ...person, weight_kg: 200 }).target_protein).toBe(0);
+  });
   it('computes targets for male maintain at moderate (1.55)', () => {
     const result = recalcTargets({
       weight_kg: 70,
@@ -20,7 +32,7 @@ describe('recalcTargets', () => {
     expect(result.target_protein).toBe(112);
   });
 
-  it('applies lose_weight adjustments (-500 cal, 2.2 protein) for female sedentary (1.2)', () => {
+  it('withholds a 1096 kcal automatic target for a sedentary adult', () => {
     const result = recalcTargets({
       weight_kg: 60,
       height_cm: 165,
@@ -33,8 +45,27 @@ describe('recalcTargets', () => {
     expect(result.bmr).toBe(1330);
     // tdee = round(1330 * 1.2) = 1596
     expect(result.tdee).toBe(1596);
-    expect(result.target_calories).toBe(1096);
+    expect(result.target_calories).toBe(0);
     expect(result.target_protein).toBe(132);
+  });
+
+  it('keeps food logging available without suggesting 642 kcal or a negative daily intake', () => {
+    const person = {
+      weight_kg: 50,
+      height_cm: 150,
+      age: 65,
+      gender: 'female',
+      goal: 'lose_weight',
+      activity_factor: 1.2,
+    } as const;
+    const adult = recalcTargets(person);
+    expect([adult.bmr, adult.tdee, adult.target_calories]).toEqual([952, 1142, 0]);
+    expect(adult.energyNote).toBeTruthy();
+    for (const age of [13, 18, 79, 120]) {
+      const unsupported = recalcTargets({ ...person, age, weight_kg: 30, height_cm: 130 });
+      expect([unsupported.bmr, unsupported.tdee, unsupported.target_calories]).toEqual([0, 0, 0]);
+      expect(unsupported.energyNote).toContain('19 đến 78');
+    }
   });
 
   it('computes tdee for light activity (1.375)', () => {

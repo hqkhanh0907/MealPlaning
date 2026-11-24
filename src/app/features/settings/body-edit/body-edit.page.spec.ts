@@ -3,6 +3,7 @@ import { signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { ProfileStore } from '../../../core/stores/profile.store';
+import { updateMeasurementTargets } from '../../../core/services/profile/profile-measurement-update';
 import { recalcTargets } from '../../../core/services/profile/recalc-targets';
 import { UserProfile } from '../../../core/models/user-profile.model';
 import BodyEditPage from './body-edit.page';
@@ -50,7 +51,8 @@ describe('BodyEditPage', () => {
         .createSpy('updateProfile')
         .and.callFake(async (patch: Partial<UserProfile>) => {
           const cur = profileSignal();
-          if (cur) profileSignal.set({ ...cur, ...patch });
+          if (cur)
+            profileSignal.set({ ...cur, ...updateMeasurementTargets(cur, patch, new Date()) });
         }),
     };
     location = jasmine.createSpyObj<Location>('Location', ['back']);
@@ -80,7 +82,7 @@ describe('BodyEditPage', () => {
 
   it('does nothing in ngOnInit when profile is null', async () => {
     await setup(null);
-    expect(component.height()).toBe(0);
+    expect(component.height()).toBeNull();
     expect(component.formInvalid()).toBe(true);
   });
 
@@ -158,9 +160,25 @@ describe('BodyEditPage', () => {
     expect(profileStore.updateProfile).toHaveBeenCalled();
     const patch = profileStore.updateProfile.calls.mostRecent().args[0] as Partial<UserProfile>;
     expect(patch.weight_kg).toBe(70);
-    expect(patch.target_calories).toBeDefined();
-    expect(patch.target_protein).toBeDefined();
+    expect(profileSignal()?.target_calories).toBe(2023);
+    expect(profileSignal()?.target_protein).toBe(154);
     expect(location.back).toHaveBeenCalled();
+  });
+
+  it('keeps an explicit manual protein target equal to the old suggestion while calories update', async () => {
+    await setup(
+      makeProfile({
+        calorie_target_mode: 'auto',
+        protein_target_mode: 'manual',
+        target_protein: 143,
+      }),
+    );
+    component.weight.set(70);
+    await component.save();
+    const patch = profileStore.updateProfile.calls.mostRecent().args[0] as Partial<UserProfile>;
+    expect(profileSignal()?.target_calories).toBe(2023);
+    expect(profileSignal()?.target_protein).toBe(143);
+    expect(patch.target_protein).toBeUndefined();
   });
 
   it('save() preserves customized target_calories and target_protein when overridden', async () => {
@@ -177,8 +195,61 @@ describe('BodyEditPage', () => {
     expect(patch.weight_kg).toBe(70);
     expect('target_calories' in patch).toBe(false);
     expect('target_protein' in patch).toBe(false);
-    expect(patch.bmr).toBeDefined();
-    expect(patch.tdee).toBeDefined();
+    expect(profileSignal()?.target_calories).toBe(9999);
+    expect(profileSignal()?.target_protein).toBe(999);
+    expect(profileSignal()?.tdee).not.toBe(2000);
+  });
+
+  function enter(selector: string, value: string): void {
+    const element: HTMLInputElement = fixture.nativeElement.querySelector(selector);
+    element.value = value;
+    element.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+  }
+
+  it('uses an entered birthday as the only age source', async () => {
+    await setup(makeProfile());
+    const year = new Date().getFullYear() - 24;
+    enter('#body-field-birth-date', `${year}-01-01`);
+    const age: HTMLInputElement = fixture.nativeElement.querySelector('#body-field-age');
+    expect(age.readOnly).toBeTrue();
+    expect(age.value).toBe('24');
+    await component.save();
+    expect(profileStore.updateProfile).toHaveBeenCalledOnceWith({ birth_date: `${year}-01-01` });
+  });
+
+  it('keeps the actual age when switching from a birthday to manual entry', async () => {
+    const date = `${new Date().getFullYear() - 24}-01-01`;
+    await setup(makeProfile({ birth_date: date, age: 23 }));
+    fixture.nativeElement.querySelector('.clear-date').click();
+    fixture.detectChanges();
+    const age: HTMLInputElement = fixture.nativeElement.querySelector('#body-field-age');
+    expect(age.readOnly).toBeFalse();
+    expect(age.value).toBe('24');
+    enter('#body-field-age', '25');
+    await component.save();
+    expect(profileStore.updateProfile).toHaveBeenCalledOnceWith({ birth_date: null, age: 25 });
+  });
+
+  it('retains an existing birthday beyond the manual entry limit when editing weight', async () => {
+    const date = `${new Date().getFullYear() - 121}-01-01`;
+    await setup(makeProfile({ birth_date: date, age: 121 }));
+    enter('#body-field-weight', '70');
+    await component.save();
+    expect(profileStore.updateProfile).toHaveBeenCalledOnceWith({ weight_kg: 70 });
+    expect(profileSignal()?.birth_date).toBe(date);
+  });
+
+  it('blocks empty, fractional and future age entries through the form', async () => {
+    await setup(makeProfile());
+    for (const value of ['', '26.5']) {
+      enter('#body-field-age', value);
+      expect(component.formInvalid()).toBeTrue();
+      await component.save();
+    }
+    enter('#body-field-birth-date', '2999-01-01');
+    expect(component.formInvalid()).toBeTrue();
+    expect(profileStore.updateProfile).not.toHaveBeenCalled();
   });
 
   it('save() bails when profile is null', async () => {
@@ -188,10 +259,36 @@ describe('BodyEditPage', () => {
     expect(location.back).not.toHaveBeenCalled();
   });
 
+  it('keeps the edited value available for a retry after a failed save', async () => {
+    await setup(makeProfile());
+    enter('#body-field-weight', '72.5');
+    profileStore.updateProfile.and.rejectWith(new Error('offline storage unavailable'));
+    await component.save();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain('thử lại');
+    expect(component.weight()).toBe(72.5);
+    expect(location.back).not.toHaveBeenCalled();
+    profileStore.updateProfile.and.resolveTo();
+    await component.save();
+    expect(location.back).toHaveBeenCalledTimes(1);
+  });
+
   it('save() bails when preview is null (invalid form)', async () => {
     await setup(makeProfile());
     component.height.set(50);
     await component.save();
     expect(profileStore.updateProfile).not.toHaveBeenCalled();
+  });
+
+  it('handles two save taps with one write and one navigation', async () => {
+    await setup(makeProfile());
+    component.weight.set(72.5);
+    fixture.detectChanges();
+    const button: HTMLElement = fixture.nativeElement.querySelector('.save-button');
+    button.click();
+    button.click();
+    await fixture.whenStable();
+    expect(profileStore.updateProfile).toHaveBeenCalledOnceWith({ weight_kg: 72.5 });
+    expect(location.back).toHaveBeenCalledTimes(1);
   });
 });

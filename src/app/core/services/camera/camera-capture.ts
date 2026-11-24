@@ -11,7 +11,11 @@ export interface CameraPluginLike {
     quality: number;
     allowEditing: boolean;
     resultType: CameraResultType.Base64;
-    source: CameraSource.Camera;
+    source: CameraSource.Prompt;
+    promptLabelHeader: string;
+    promptLabelPhoto: string;
+    promptLabelPicture: string;
+    promptLabelCancel: string;
     width: number;
     height: number;
   }): Promise<Photo>;
@@ -31,7 +35,11 @@ export class CameraCapture {
       quality: 85,
       allowEditing: false,
       resultType: CameraResultType.Base64,
-      source: CameraSource.Camera,
+      source: CameraSource.Prompt,
+      promptLabelHeader: 'Ảnh món ăn',
+      promptLabelPhoto: 'Chọn từ thư viện',
+      promptLabelPicture: 'Chụp ảnh',
+      promptLabelCancel: 'Hủy',
       width: 1024,
       height: 1024,
     });

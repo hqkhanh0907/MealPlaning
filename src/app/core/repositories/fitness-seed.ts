@@ -1,6 +1,7 @@
 import type { ExerciseCategory, MuscleGroup, TrainingPlanType } from '../models/fitness.types';
+import { exerciseGuide } from '../models/exercise-guides';
 
-export const FITNESS_SEED_VERSION = '1.0.1';
+export const FITNESS_SEED_VERSION = '1.1.0';
 
 export interface SeedExercise {
   id: string;
@@ -60,6 +61,30 @@ export const SEED_EXERCISES: readonly SeedExercise[] = [
   ex('ex_pull_up', 'Pull-up', 'Kéo xà', 'back', 'compound', 'Bodyweight'),
   ex('ex_lat_pulldown', 'Lat Pulldown', 'Kéo xô máy', 'back', 'compound', 'Cable'),
   ex('ex_barbell_row', 'Barbell Row', 'Kéo lưng tạ đòn', 'back', 'compound', 'Barbell'),
+  ex(
+    'ex_dumbbell_bent_over_row',
+    'Two-arm Bent-over Dumbbell Row',
+    'Kéo hai tạ đơn không tựa ghế',
+    'back',
+    'compound',
+    'Dumbbell',
+  ),
+  ex(
+    'ex_dumbbell_goblet_squat',
+    'Dumbbell Goblet Squat',
+    'Squat ôm một tạ đơn',
+    'quads',
+    'compound',
+    'Dumbbell',
+  ),
+  ex(
+    'ex_dumbbell_romanian_deadlift',
+    'Dumbbell Romanian Deadlift',
+    'Deadlift Romania hai tạ đơn',
+    'hamstrings',
+    'compound',
+    'Dumbbell',
+  ),
   ex('ex_seated_cable_row', 'Seated Cable Row', 'Kéo cáp ngồi', 'back', 'compound', 'Cable'),
   ex('ex_deadlift', 'Deadlift', 'Deadlift', 'back', 'compound', 'Barbell'),
   ex('ex_face_pull', 'Face Pull', 'Kéo cáp mặt', 'shoulders', 'isolation', 'Cable'),
@@ -222,6 +247,15 @@ export const SEED_EXERCISES: readonly SeedExercise[] = [
 
 export const SEED_TRAINING_PLANS: readonly SeedTrainingPlan[] = [
   {
+    id: 'plan_two_dumbbells_floor',
+    name: 'Hai tạ đơn và sàn',
+    type: 'full_body',
+    frequency: 2,
+    description:
+      'Mẫu khởi đầu cho người lớn khỏe mạnh. Tập thứ Ba và thứ Sáu với hai tạ đơn, không cần ghế.',
+    days: [rest(1), dumbbellDay(2), rest(3), rest(4), dumbbellDay(5), rest(6), rest(0)],
+  },
+  {
     id: 'plan_full_body_3x',
     name: 'Full Body 3 buổi',
     type: 'full_body',
@@ -232,7 +266,7 @@ export const SEED_TRAINING_PLANS: readonly SeedTrainingPlan[] = [
         pe('ex_back_squat', 3, 8, 10, 120, 'Giữ form ổn định trước khi tăng tạ.'),
         pe('ex_barbell_bench_press', 3, 8, 10, 120, 'Tăng 2,5kg khi đạt đủ reps.'),
         pe('ex_seated_cable_row', 3, 10, 12, 90, 'Kéo khuỷu về sau, không giật người.'),
-        pe('ex_plank', 3, 30, 45, 60, 'Ghi reps là số giây giữ plank.'),
+        pe('ex_plank', 3, 30, 45, 60, 'Ghi thời gian giữ plank.'),
       ]),
       rest(2),
       day(3, 'Full Body B', [
@@ -329,7 +363,7 @@ export const SEED_TRAINING_PLANS: readonly SeedTrainingPlan[] = [
         pe('ex_seated_cable_row', 4, 8, 12, 90, 'Mid-back.'),
         pe('ex_assisted_pull_up', 3, 8, 10, 90, 'Volume bổ sung.'),
         pe('ex_hammer_curl', 3, 10, 12, 60, 'Biceps/forearm.'),
-        pe('ex_farmer_carry', 3, 30, 45, 90, 'Ghi reps là số giây carry.'),
+        pe('ex_farmer_carry', 3, 30, 45, 90, 'Ghi tổng tạ mang theo và thời gian đi.'),
       ]),
       day(6, 'Legs B', [
         pe('ex_front_squat', 4, 6, 8, 150, 'Quad focus.'),
@@ -358,7 +392,9 @@ function ex(
     muscle_group: muscleGroup,
     category,
     equipment,
-    instructions: 'Khởi động kỹ, kiểm soát biên độ và dừng set khi form xuống cấp.',
+    instructions:
+      exerciseGuide(id)?.steps.join('\n') ??
+      'Khởi động kỹ, kiểm soát biên độ và dừng set khi form xuống cấp.',
   };
 }
 
@@ -368,6 +404,15 @@ function day(dayOfWeek: number, name: string, exercises: SeedPlannedExercise[]):
 
 function rest(dayOfWeek: number): SeedTrainingDay {
   return { dayOfWeek, name: 'Ngày nghỉ', isRestDay: true, exercises: [] };
+}
+
+function dumbbellDay(dayOfWeek: number): SeedTrainingDay {
+  return day(dayOfWeek, 'Toàn thân với tạ đơn', [
+    pe('ex_dumbbell_goblet_squat', 2, 8, 12, 90, ''),
+    pe('ex_push_up', 2, 8, 12, 90, ''),
+    pe('ex_dumbbell_bent_over_row', 2, 8, 12, 90, ''),
+    pe('ex_dumbbell_romanian_deadlift', 2, 8, 12, 90, ''),
+  ]);
 }
 
 function pe(

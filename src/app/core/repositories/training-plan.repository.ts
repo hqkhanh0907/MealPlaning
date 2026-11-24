@@ -13,8 +13,19 @@ import type {
 } from '../models/fitness.types';
 import { SEED_TRAINING_PLANS } from './fitness-seed';
 import { ExerciseRepository } from './exercise.repository';
+import { parseLocalDate } from '../utils/local-date';
+import { normalizeTrainingPrescription } from '../models/fitness-prescription';
 
 const AI_CUSTOM_PLAN_ID = 'plan_ai_custom_current';
+
+const PLAN_SUMMARY = `
+  SELECT tp.id, tp.name, tp.type, tp.frequency, tp.is_active, tp.description, tp.source,
+         tp.created_at, tp.updated_at,
+         COUNT(DISTINCT CASE WHEN tpd.is_rest_day = 0 THEN tpd.id END) AS training_days,
+         COUNT(DISTINCT pe.id) AS planned_exercises
+    FROM training_plan tp
+    LEFT JOIN training_plan_day tpd ON tpd.training_plan_id = tp.id
+    LEFT JOIN planned_exercise pe ON pe.training_plan_day_id = tpd.id`;
 
 @Injectable({ providedIn: 'root' })
 export class TrainingPlanRepository {
@@ -93,22 +104,7 @@ export class TrainingPlanRepository {
 
   async listPlans(): Promise<TrainingPlanSummary[]> {
     return this.db.query<TrainingPlanSummary>(
-      `SELECT
-         tp.id,
-         tp.name,
-         tp.type,
-         tp.frequency,
-         tp.is_active,
-         tp.description,
-         tp.source,
-         tp.created_at,
-         tp.updated_at,
-         COALESCE(COUNT(DISTINCT CASE WHEN tpd.is_rest_day = 0 THEN tpd.id END), 0)
-           AS training_days,
-         COALESCE(COUNT(DISTINCT pe.id), 0) AS planned_exercises
-       FROM training_plan tp
-       LEFT JOIN training_plan_day tpd ON tpd.training_plan_id = tp.id
-       LEFT JOIN planned_exercise pe ON pe.training_plan_day_id = tpd.id
+      `${PLAN_SUMMARY}
        GROUP BY tp.id
        ORDER BY CASE tp.source WHEN 'preset' THEN 0 WHEN 'custom' THEN 1 ELSE 2 END,
          tp.frequency ASC, tp.name ASC`,
@@ -120,6 +116,7 @@ export class TrainingPlanRepository {
       `SELECT id FROM training_plan
         WHERE type = ?
           AND source = CASE WHEN ? = 'ai_custom' THEN 'ai' ELSE 'preset' END
+        ORDER BY CASE WHEN id = 'plan_full_body_3x' THEN 0 ELSE 1 END, id
         LIMIT 1`,
       [type, type],
     );
@@ -262,22 +259,7 @@ export class TrainingPlanRepository {
     });
 
     const created = await this.db.getOne<TrainingPlanSummary>(
-      `SELECT
-         tp.id,
-         tp.name,
-         tp.type,
-         tp.frequency,
-         tp.is_active,
-         tp.description,
-         tp.source,
-         tp.created_at,
-         tp.updated_at,
-         COALESCE(COUNT(DISTINCT CASE WHEN tpd.is_rest_day = 0 THEN tpd.id END), 0)
-           AS training_days,
-         COALESCE(COUNT(DISTINCT pe.id), 0) AS planned_exercises
-       FROM training_plan tp
-       LEFT JOIN training_plan_day tpd ON tpd.training_plan_id = tp.id
-       LEFT JOIN planned_exercise pe ON pe.training_plan_day_id = tpd.id
+      `${PLAN_SUMMARY}
        WHERE tp.id = ?
        GROUP BY tp.id
        LIMIT 1`,
@@ -327,6 +309,7 @@ export class TrainingPlanRepository {
     exercise: TrainingPlanExerciseDraft,
     index: number,
   ): Promise<void> {
+    const prescription = normalizeTrainingPrescription(exercise);
     await this.db.execute(
       `INSERT INTO planned_exercise (id, training_plan_day_id, exercise_id, sets, reps_min, reps_max,
          rest_seconds, notes, sort_order)
@@ -335,10 +318,10 @@ export class TrainingPlanRepository {
         uuidv4(),
         dayId,
         exercise.exerciseId,
-        clampInt(exercise.sets, 1, 10),
-        clampInt(exercise.repsMin, 1, 50),
-        clampInt(Math.max(exercise.repsMin, exercise.repsMax), 1, 50),
-        clampInt(exercise.restSeconds, 30, 600),
+        prescription.sets,
+        prescription.repsMin,
+        prescription.repsMax,
+        prescription.restSeconds,
         exercise.notes,
         index,
       ],
@@ -347,22 +330,7 @@ export class TrainingPlanRepository {
 
   async getActivePlan(): Promise<ActiveTrainingPlan | null> {
     const active = await this.db.getOne<TrainingPlanSummary>(
-      `SELECT
-         tp.id,
-         tp.name,
-         tp.type,
-         tp.frequency,
-         tp.is_active,
-         tp.description,
-         tp.source,
-         tp.created_at,
-         tp.updated_at,
-         COALESCE(COUNT(DISTINCT CASE WHEN tpd.is_rest_day = 0 THEN tpd.id END), 0)
-           AS training_days,
-         COALESCE(COUNT(DISTINCT pe.id), 0) AS planned_exercises
-       FROM training_plan tp
-       LEFT JOIN training_plan_day tpd ON tpd.training_plan_id = tp.id
-       LEFT JOIN planned_exercise pe ON pe.training_plan_day_id = tpd.id
+      `${PLAN_SUMMARY}
        WHERE tp.is_active = 1
        GROUP BY tp.id
        LIMIT 1`,
@@ -392,7 +360,7 @@ export class TrainingPlanRepository {
     return { ...day, exercises: await this.getDayExercises(day.id) };
   }
 
-  private async getPlanDays(planId: string): Promise<TrainingPlanDayWithExercises[]> {
+  async getPlanDays(planId: string): Promise<TrainingPlanDayWithExercises[]> {
     const days = await this.db.query<Omit<TrainingPlanDayWithExercises, 'exercises'>>(
       `SELECT id, training_plan_id, day_of_week, name, is_rest_day, sort_order
          FROM training_plan_day
@@ -435,7 +403,7 @@ export class TrainingPlanRepository {
 }
 
 function dayOfWeekFromIso(date: string): number {
-  const parsed = new Date(`${date}T00:00:00`);
+  const parsed = parseLocalDate(date);
   if (Number.isNaN(parsed.getTime())) {
     return new Date().getDay();
   }
@@ -448,11 +416,4 @@ function normalizeDayOfWeek(value: number): number {
   }
   const normalized = Math.round(value) % 7;
   return normalized < 0 ? normalized + 7 : normalized;
-}
-
-function clampInt(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) {
-    return min;
-  }
-  return Math.min(max, Math.max(min, Math.round(value)));
 }

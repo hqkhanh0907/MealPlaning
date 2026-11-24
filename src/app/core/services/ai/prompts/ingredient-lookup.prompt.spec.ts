@@ -67,16 +67,16 @@ describe('ingredient-lookup.prompt', () => {
     });
 
     it('uses NUMBER for the 5 macros', () => {
-      const props = ingredientLookupGeminiSchema.properties;
-      expect(props.calories.type).toBe('NUMBER');
-      expect(props.protein.type).toBe('NUMBER');
-      expect(props.carbs.type).toBe('NUMBER');
-      expect(props.fat.type).toBe('NUMBER');
-      expect(props.fiber.type).toBe('NUMBER');
+      const props = ingredientLookupGeminiSchema.properties!;
+      expect(props['calories'].type).toBe('NUMBER');
+      expect(props['protein'].type).toBe('NUMBER');
+      expect(props['carbs'].type).toBe('NUMBER');
+      expect(props['fat'].type).toBe('NUMBER');
+      expect(props['fiber'].type).toBe('NUMBER');
     });
 
     it('restricts confidence to high/medium/low', () => {
-      expect(ingredientLookupGeminiSchema.properties.confidence.enum).toEqual([
+      expect(ingredientLookupGeminiSchema.properties!['confidence'].enum).toEqual([
         'high',
         'medium',
         'low',

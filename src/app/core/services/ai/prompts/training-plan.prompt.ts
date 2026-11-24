@@ -1,15 +1,33 @@
+import type { FitnessLevel } from '../../../models/user-profile.types';
 import { z } from 'zod';
-import type { Exercise } from '../../../models/fitness.types';
+import { trainingPrescriptionLimits } from '../../../models/fitness-prescription';
+import { isTimedExercise, workoutNumber, type Exercise } from '../../../models/fitness.types';
 
 const DAY_NAMES = ['Push', 'Pull', 'Legs', 'Upper', 'Lower', 'Full Body'] as const;
 
 export const aiPlannedExerciseSchema = z
   .object({
     exercise_id: z.string().min(1),
-    sets: z.number().int().min(1).max(10),
-    reps_min: z.number().int().min(1).max(50),
-    reps_max: z.number().int().min(1).max(50),
-    rest_seconds: z.number().int().min(30).max(600),
+    sets: z
+      .number()
+      .int()
+      .min(trainingPrescriptionLimits.minSets)
+      .max(trainingPrescriptionLimits.maxSets),
+    reps_min: z
+      .number()
+      .int()
+      .min(trainingPrescriptionLimits.minReps)
+      .max(trainingPrescriptionLimits.maxReps),
+    reps_max: z
+      .number()
+      .int()
+      .min(trainingPrescriptionLimits.minReps)
+      .max(trainingPrescriptionLimits.maxReps),
+    rest_seconds: z
+      .number()
+      .int()
+      .min(trainingPrescriptionLimits.minRestSeconds)
+      .max(trainingPrescriptionLimits.maxRestSeconds),
     notes: z.string().max(160).nullable(),
   })
   .strict()
@@ -36,46 +54,8 @@ export const aiTrainingPlanResponseSchema = z
 
 export type AiTrainingPlanResponse = z.infer<typeof aiTrainingPlanResponseSchema>;
 
-export const aiTrainingPlanGeminiSchema = {
-  type: 'OBJECT',
-  properties: {
-    name: { type: 'STRING' },
-    description: { type: 'STRING' },
-    frequency: { type: 'NUMBER' },
-    rationale: { type: 'STRING' },
-    days: {
-      type: 'ARRAY',
-      items: {
-        type: 'OBJECT',
-        properties: {
-          day_of_week: { type: 'NUMBER' },
-          name: { type: 'STRING' },
-          is_rest_day: { type: 'BOOLEAN' },
-          exercises: {
-            type: 'ARRAY',
-            items: {
-              type: 'OBJECT',
-              properties: {
-                exercise_id: { type: 'STRING' },
-                sets: { type: 'NUMBER' },
-                reps_min: { type: 'NUMBER' },
-                reps_max: { type: 'NUMBER' },
-                rest_seconds: { type: 'NUMBER' },
-                notes: { type: 'STRING', nullable: true },
-              },
-              required: ['exercise_id', 'sets', 'reps_min', 'reps_max', 'rest_seconds', 'notes'],
-            },
-          },
-        },
-        required: ['day_of_week', 'name', 'is_rest_day', 'exercises'],
-      },
-    },
-  },
-  required: ['name', 'description', 'frequency', 'rationale', 'days'],
-} as const;
-
 export interface BuildTrainingPlanPromptInput {
-  readonly fitnessLevel: string;
+  readonly fitnessLevel: FitnessLevel;
   readonly goal: string;
   readonly exercises: readonly Exercise[];
   readonly weeklyVolumeKg: number;
@@ -84,10 +64,9 @@ export interface BuildTrainingPlanPromptInput {
 
 export function buildTrainingPlanPrompt(input: BuildTrainingPlanPromptInput): string {
   const exerciseRows = input.exercises
-    .slice(0, 80)
     .map(
       (exercise) =>
-        `- id=${exercise.id}; name="${exercise.name_vi || exercise.name}"; muscle=${exercise.muscle_group}; category=${exercise.category}; equipment=${exercise.equipment ?? 'unknown'}`,
+        `- id=${exercise.id}; name="${exercise.name_vi || exercise.name}"; muscle=${exercise.muscle_group}; category=${exercise.category}; equipment=${exercise.equipment ?? 'unknown'}; unit=${isTimedExercise(exercise.id) ? 'seconds' : 'repetitions'}`,
     )
     .join('\n');
 
@@ -96,15 +75,16 @@ export function buildTrainingPlanPrompt(input: BuildTrainingPlanPromptInput): st
     '',
     `Level: ${input.fitnessLevel}`,
     `Goal: ${input.goal}`,
-    `Current weekly volume: ${Math.round(input.weeklyVolumeKg)} kg`,
+    `Tổng tạ × số lần đã ghi trong các buổi hoàn thành tuần này: ${workoutNumber.format(input.weeklyVolumeKg)} kg. Bài tính theo giây không góp vào tổng này.`,
     `Workout streak: ${input.workoutStreakWeeks} tuần`,
     '',
     'Exercise database được phép dùng:',
     exerciseRows || '- Không có bài tập.',
     '',
-    'Science rules bắt buộc:',
+    'Hướng dẫn lập giáo án:',
     '- 2-6 buổi/tuần, còn lại rest day.',
-    '- Mỗi nhóm cơ chính nên có 10-20 working sets/tuần nếu level phù hợp.',
+    '- Điều chỉnh số hiệp theo lịch và mức kinh nghiệm. Tổng khối lượng tuần không xác định mức tạ cho từng bài.',
+    '- reps_min và reps_max dùng đơn vị unit của từng bài: seconds là giây, repetitions là số lần.',
     '- Beginner ưu tiên Full Body 3x, kỹ thuật, volume thấp.',
     '- Intermediate/advanced có thể dùng Upper/Lower hoặc PPL.',
     '- Có progressive overload note cụ thể.',

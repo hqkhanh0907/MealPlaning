@@ -1,34 +1,40 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <button
-        type="button"
-        class="calendar-date-chip"
-        (click)="onDateChipTap()"
-        aria-label="Chọn ngày"
-      >
-        <span class="calendar-date-chip__label">{{ headerLabel() }}</span>
-        <ion-icon class="calendar-date-chip__chevron" name="chevron-down" aria-hidden="true" />
-      </button>
-    </ion-buttons>
     <ion-title>Lịch ăn</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="onWeekToggle()" aria-label="Chuyển sang Tuần">
-        <ion-icon slot="icon-only" name="calendar-outline"></ion-icon>
-      </ion-button>
       <ion-button (click)="openSettings()" aria-label="Cài đặt">
         <ion-icon slot="icon-only" name="settings-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
+  <div class="calendar-controls">
+    <button
+      type="button"
+      class="calendar-date-chip"
+      (click)="onDateChipTap()"
+      aria-label="Chọn ngày"
+    >
+      <span>{{ headerLabel() }}</span>
+      <ion-icon name="chevron-down" aria-hidden="true" />
+    </button>
+    <button
+      type="button"
+      class="calendar-view-toggle"
+      (click)="onWeekToggle()"
+      [attr.aria-label]="store.currentView() === 'week' ? 'Chuyển sang Ngày' : 'Chuyển sang Tuần'"
+    >
+      <ion-icon name="calendar-outline" aria-hidden="true" />
+      <span>{{ store.currentView() === 'week' ? 'Ngày' : 'Tuần' }}</span>
+    </button>
+  </div>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   @if (store.currentView() === 'week') {
-    <section class="week-view" aria-label="Tuần hiện tại">
+    <section class="week-view" aria-labelledby="calendar-week-title">
       <header class="week-view__header">
         <div class="week-view__title-block">
-          <h2 class="week-view__title">Tuần này</h2>
+          <h2 class="week-view__title" id="calendar-week-title">Lịch theo tuần</h2>
           <span class="week-view__range">{{ weekRangeLabel() }}</span>
         </div>
         <nav class="week-view__nav" aria-label="Điều hướng tuần">
@@ -57,10 +63,10 @@
         (click)="onCopyPreviousWeek()"
       >
         <ion-icon name="copy-outline" aria-hidden="true" />
-        <span>Sao chép tuần trước</span>
+        <span>{{ copyingPreviousWeek() ? 'Đang sao chép…' : 'Sao chép tuần trước' }}</span>
       </button>
       @if (store.weekData() === null) {
-        <p class="calendar-loading">Đang tải dữ liệu tuần…</p>
+        <p class="calendar-loading" role="status">Đang tải dữ liệu tuần…</p>
       } @else {
         <ul class="week-view__list">
           @for (day of store.weekData(); track day.date) {
@@ -75,10 +81,14 @@
     <div #swipeArea class="calendar-swipe-area">
       <app-day-summary-card [date]="store.currentDate()" />
 
-      @if (store.dayPlan() === null) {
-        <p class="calendar-loading">Đang tải kế hoạch ngày…</p>
+      @if (store.dayPlan()?.date !== store.currentDate()) {
+        <p class="calendar-loading" role="status">Đang tải kế hoạch ngày…</p>
       } @else if (isEmpty()) {
         <app-empty-day-state
+          [online]="network.online()"
+          [aiIssue]="ai.textIssue()"
+          [aiPlanning]="aiPlanning()"
+          [copying]="store.copyingYesterday()"
           (planClicked)="onPlanFromEmpty()"
           (copyDeferred)="onCopyFromYesterday()"
           (aiDeferred)="onAiFromEmpty()"
@@ -98,20 +108,30 @@
         <button
           type="button"
           class="calendar-ai-cta"
-          [disabled]="aiPlanning() || !network.online()"
-          [attr.aria-label]="
-            !network.online()
-              ? 'Cần kết nối mạng để AI chọn món'
-              : aiPlanning()
-                ? 'AI đang chọn món'
-                : 'AI chọn món hôm nay'
-          "
+          [disabled]="aiPlanning() || !!ai.textIssue()"
           (click)="onAiCta()"
         >
           <ion-icon name="sparkles-outline" aria-hidden="true" />
-          <span>{{ aiPlanning() ? 'AI đang chọn món…' : 'AI chọn món hôm nay' }}</span>
+          <span>
+            {{
+              !network.online()
+                ? 'Cần kết nối mạng để AI chọn món'
+                : aiPlanning()
+                  ? 'AI đang chọn món…'
+                  : ai.textIssue() || 'AI chọn món hôm nay'
+            }}
+          </span>
         </button>
       }
+    </div>
+  }
+  @if (activeUndo(); as toast) {
+    <div class="undo-toast" slot="fixed">
+      <output class="undo-toast__msg" aria-live="polite">{{ toast.message }}</output>
+      <button type="button" class="undo-toast__btn" (click)="onUndoTap()">Hoàn tác</button>
+      <button type="button" class="undo-toast__close" aria-label="Đóng" (click)="onUndoDismiss()">
+        <ion-icon name="close" aria-hidden="true" />
+      </button>
     </div>
   }
 </ion-content>
@@ -144,8 +164,16 @@
 <app-dish-context-menu-modal
   [isOpen]="contextMenuOpen()"
   [dishName]="contextMenuDishName()"
+  [canEditServings]="contextMenuCanEditServings()"
   (actionSelected)="onContextAction($event)"
   (dismissed)="onContextMenuDismiss()"
+/>
+
+<app-meal-slot-picker-modal
+  [isOpen]="choosingNewMeal()"
+  title="Thêm món vào bữa nào?"
+  (slotSelected)="addToChosenMeal($event)"
+  (dismissed)="choosingNewMeal.set(false)"
 />
 
 <app-meal-slot-picker-modal
@@ -177,13 +205,3 @@
   (createDishRequested)="onCreateDishRequested()"
   (dismissed)="onLoggingDismiss()"
 />
-
-@if (activeUndo(); as toast) {
-  <output class="undo-toast" aria-live="polite">
-    <span class="undo-toast__msg">{{ toast.message }}</span>
-    <button type="button" class="undo-toast__btn" (click)="onUndoTap()">Hoàn tác</button>
-    <button type="button" class="undo-toast__close" aria-label="Đóng" (click)="onUndoDismiss()">
-      <ion-icon name="close" aria-hidden="true" />
-    </button>
-  </output>
-}

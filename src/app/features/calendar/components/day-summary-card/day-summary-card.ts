@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { NutritionStore } from '../../../../core/stores/nutrition.store';
-import type { NutritionTotals } from '../../../../core/services/nutrition/nutrition-query';
+import { percentOfNutritionTarget, type NutritionTotals } from '../../../../core/models/nutrition';
 import type { KeyMetric } from '../../../../core/utils/key-metric-router';
+import { parseLocalDate } from '../../../../core/utils/local-date';
 import { CalorieRing } from '../../../../shared/components/calorie-ring/calorie-ring';
 import { MacroRow, type MacroValue } from '../../../../shared/components/macro-row/macro-row';
 
@@ -45,17 +46,12 @@ export class DaySummaryCard {
   /** Vietnamese long date, e.g. "Thứ Sáu, 15/05/2026". Falls back to raw ISO if invalid. */
   readonly displayDate = computed<string>(() => {
     const iso = this.date();
-    const parts = iso.split('-');
-    if (parts.length !== 3) return iso;
-    const [y, m, d] = parts.map((p) => parseInt(p, 10));
-    if (!y || !m || !d) return iso;
-    const dt = new Date(Date.UTC(y, m - 1, d));
+    const dt = parseLocalDate(iso);
     if (Number.isNaN(dt.getTime())) return iso;
     const weekdayVi = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-    const w = weekdayVi[dt.getUTCDay()];
-    const dd = String(d).padStart(2, '0');
-    const mm = String(m).padStart(2, '0');
-    return `${w}, ${dd}/${mm}/${y}`;
+    const w = weekdayVi[dt.getDay()];
+    const [year, month, day] = iso.split('-');
+    return `${w}, ${day}/${month}/${year}`;
   });
 
   readonly calories = computed<MacroValue>(() => this.macroValue('calories'));
@@ -77,9 +73,10 @@ export class DaySummaryCard {
   readonly primaryPct = computed<number>(() =>
     this.percent(this.primaryValue(), this.primaryTarget()),
   );
-  readonly ariaSummary = computed<string>(
-    () =>
-      `${this.primaryLabel()} ${this.primaryValue()} trên ${this.primaryTarget()} ${this.primaryUnit()}, ${this.primaryPct()} phần trăm mục tiêu`,
+  readonly ariaSummary = computed<string>(() =>
+    this.primaryTarget() > 0
+      ? `${this.primaryLabel()} ${this.primaryValue()} trên ${this.primaryTarget()} ${this.primaryUnit()}, ${this.primaryPct()} phần trăm mục tiêu`
+      : `${this.primaryLabel()} ${this.primaryValue()} ${this.primaryUnit()}, chưa đặt mục tiêu`,
   );
 
   toggleDetails(): void {
@@ -87,10 +84,7 @@ export class DaySummaryCard {
   }
 
   percent(value: number, target: number): number {
-    if (!Number.isFinite(target) || target <= 0) {
-      return 0;
-    }
-    return Math.round(Math.min(Math.max((value / target) * 100, 0), 200));
+    return Math.round(percentOfNutritionTarget(value, target) ?? 0);
   }
 
   private macroValue(metric: SummaryMetric): MacroValue {

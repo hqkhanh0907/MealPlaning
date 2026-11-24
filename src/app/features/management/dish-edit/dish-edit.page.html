@@ -23,21 +23,6 @@
   <div class="form-content">
     @if (!isEdit()) {
       <app-ai-offline-banner />
-      <button
-        type="button"
-        class="btn-ai-lookup"
-        data-testid="btn-ask-ai"
-        [disabled]="aiAutofillLoading() || !network.online()"
-        (click)="onAskAi()"
-      >
-        @if (aiAutofillLoading()) {
-          <ion-spinner name="crescent" />
-          <span>Đang hỏi AI...</span>
-        } @else {
-          <ion-icon name="sparkles-outline" aria-hidden="true" />
-          <span>Điền bằng AI</span>
-        }
-      </button>
     }
 
     <div class="section-label">Thông tin cơ bản</div>
@@ -49,17 +34,45 @@
       [invalid]="showErrors() && dishForm.name().errors().length > 0"
       [errorMessage]="dishForm.name().errors()[0]?.message ?? ''"
     >
-      <input
-        id="dish-field-name"
-        class="input-native"
-        #nameInput
-        [formField]="dishForm.name"
-        [attr.aria-invalid]="showErrors() && dishForm.name().errors().length > 0 ? 'true' : null"
-        [attr.aria-describedby]="
-          showErrors() && dishForm.name().errors().length > 0 ? 'err-dish-name' : null
-        "
-      />
+      <div class="dish-name-editor" [attr.data-name]="dishForm.name().value()">
+        <textarea
+          id="dish-field-name"
+          class="input-native dish-name-input"
+          #nameInput
+          rows="1"
+          wrap="soft"
+          enterkeyhint="done"
+          [formField]="dishForm.name"
+          [attr.aria-invalid]="showErrors() && dishForm.name().errors().length > 0 ? 'true' : null"
+          [attr.aria-describedby]="
+            showErrors() && dishForm.name().errors().length > 0 ? 'err-dish-name' : null
+          "
+          (beforeinput)="onNameBeforeInput($event)"
+          (paste)="onNamePaste($event)"
+        ></textarea>
+      </div>
     </app-form-field>
+
+    @if (!isEdit()) {
+      @if (aiEntry() && !ai.textIssue()) {
+        <p class="section-hint">Nhập tên món rồi chọn Điền bằng AI.</p>
+      }
+      <button
+        type="button"
+        class="btn-ai-lookup"
+        data-testid="btn-ask-ai"
+        [disabled]="aiAutofillLoading() || !!ai.textIssue()"
+        (click)="onAskAi()"
+      >
+        @if (aiAutofillLoading()) {
+          <ion-spinner name="crescent" aria-hidden="true" />
+          <span>Đang hỏi AI…</span>
+        } @else {
+          <ion-icon name="sparkles-outline" aria-hidden="true" />
+          <span>{{ ai.textIssue() || 'Điền bằng AI' }}</span>
+        }
+      </button>
+    }
 
     <!-- Nutrition Hero Card (DS §2.6) — shows up high so user sees impact of edits. -->
     <section
@@ -222,8 +235,13 @@
         [class.invalid]="showErrors() && itemsErrorMessages().length > 0"
       >
         <div class="ingredient-empty-title">Chưa có nguyên liệu nào</div>
-        <button type="button" class="btn-outline" (click)="openIngredientPicker()">
-          + Thêm nguyên liệu đầu tiên
+        <button
+          type="button"
+          class="btn-outline"
+          [disabled]="ingredientsLoading()"
+          (click)="openIngredientPicker()"
+        >
+          {{ ingredientsLoading() ? 'Đang tải nguyên liệu…' : '+ Thêm nguyên liệu đầu tiên' }}
         </button>
       </div>
     } @else {
@@ -256,8 +274,13 @@
         }
       </div>
 
-      <button type="button" class="btn-outline" (click)="openIngredientPicker()">
-        + Thêm nguyên liệu
+      <button
+        type="button"
+        class="btn-outline"
+        [disabled]="ingredientsLoading()"
+        (click)="openIngredientPicker()"
+      >
+        {{ ingredientsLoading() ? 'Đang tải nguyên liệu…' : '+ Thêm nguyên liệu' }}
       </button>
     }
 
@@ -301,7 +324,7 @@
           <div class="amount-sheet__header">
             <div>
               <div class="ingredient-item__name">{{ draftIngredientName(draft) }}</div>
-              <div class="ingredient-item__detail">{{ draftCalories(draft) }}</div>
+              <div class="ingredient-item__detail">{{ itemCalories(draft) }}</div>
             </div>
           </div>
 
@@ -356,20 +379,20 @@
 />
 
 <app-confirm-dialog
-  [isOpen]="discardDialogOpen()"
+  [isOpen]="discard.open()"
   title="Bỏ thay đổi?"
   message="Bạn có thay đổi chưa lưu. Nếu rời khỏi màn hình này, các thay đổi sẽ bị mất."
   cancelLabel="Ở lại"
   confirmLabel="Bỏ thay đổi"
   confirmVariant="danger"
-  (cancelled)="cancelDiscardChanges()"
+  (cancelled)="discard.answer(false)"
   (confirmed)="confirmDiscardChangesDialog()"
 />
 
 <app-bottom-sheet-picker
   #ingredientPicker
   title="Chọn nguyên liệu"
-  [options]="ingredientOptions"
+  [options]="ingredientOptions()"
   [recentOptions]="recentIngredientOptions"
   [searchable]="true"
   (valueChange)="onIngredientSelected($event)"

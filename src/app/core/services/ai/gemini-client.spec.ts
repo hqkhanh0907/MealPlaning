@@ -257,7 +257,7 @@ describe('GeminiClient', () => {
     });
     expect(result).toEqual({ value: 'ok' });
     expect(warnSpy).toHaveBeenCalledWith(
-      '[GeminiClient] ai_chat_log write failed:',
+      jasmine.stringContaining('ai_chat_log write failed:'),
       jasmine.any(Error),
     );
   });

@@ -12,6 +12,7 @@ export class IngredientStore {
 
   readonly ingredients = signal<IngredientListItem[]>([]);
   readonly loading = signal(false);
+  readonly nutritionRevision = signal(0);
   readonly searchQuery = signal('');
 
   async load(): Promise<void> {
@@ -61,6 +62,7 @@ export class IngredientStore {
 
   async edit(id: string, input: UpdateIngredientInput): Promise<void> {
     await this.repo.update(id, input);
+    this.nutritionRevision.update((value) => value + 1);
     await this.reloadActiveView();
   }
 

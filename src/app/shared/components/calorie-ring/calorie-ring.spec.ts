@@ -43,9 +43,10 @@ describe('CalorieRing', () => {
       expect(component.pct()).toBe(0);
     });
 
-    it('clamps pct to 200 when value greatly exceeds target', () => {
-      setInputs(5000, 1000); // 500% raw
-      expect(component.pct()).toBe(200);
+    it('announces the actual percentage when intake greatly exceeds the target', () => {
+      setInputs(5000, 1000);
+      expect(component.pct()).toBe(500);
+      expect(component.ariaLabel()).toContain('500 phần trăm');
     });
 
     it('returns the raw percentage inside [0, 200]', () => {
@@ -82,8 +83,8 @@ describe('CalorieRing', () => {
       expect(component.circumference()).toBeCloseTo(2 * Math.PI * 46, 4);
     });
 
-    it('caps visual dashOffset at pct=100 even when pct=200', () => {
-      setInputs(5000, 1000); // pct=200 raw, visual capped to 100
+    it('draws a full circle above the target', () => {
+      setInputs(5000, 1000);
       expect(component.dashOffset()).toBeCloseTo(0, 4);
     });
   });

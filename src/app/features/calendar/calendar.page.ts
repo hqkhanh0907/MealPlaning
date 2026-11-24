@@ -4,6 +4,7 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  afterRenderEffect,
   computed,
   effect,
   inject,
@@ -18,6 +19,7 @@ import {
   IonButtons,
   IonButton,
   IonIcon,
+  AlertController,
   ToastController,
   GestureController,
   type Gesture,
@@ -34,6 +36,13 @@ import {
   settingsOutline,
   sparklesOutline,
 } from 'ionicons/icons';
+import { localIsoDate, parseLocalDate, shiftIsoDate } from '../../core/utils/local-date';
+import {
+  MAX_PLANNED_SERVINGS,
+  MEAL_LABELS,
+  MEAL_TYPES,
+  MIN_PLANNED_SERVINGS,
+} from '../../core/models/meal-plan.types';
 import type {
   DeletedDishSnapshot,
   MealSlotWithDishes,
@@ -41,14 +50,19 @@ import type {
   PlannedDishWithEffective,
 } from '../../core/models/meal-plan.types';
 import type { DishListItem } from '../../core/repositories/dish.repository';
-import { CalendarStore } from '../../core/stores/calendar.store';
+import { CalendarStore, type PendingMealTarget } from '../../core/stores/calendar.store';
 import { DayPlanRepository } from '../../core/repositories/day-plan.repository';
 import { DishStore } from '../../core/stores/dish.store';
 import { NetworkStore } from '../../core/stores/network.store';
 import { NutritionStore } from '../../core/stores/nutrition.store';
-import { MealPlanAi } from '../../core/services/ai/meal-plan-ai';
+import {
+  loggedMealContext,
+  MealPlanAi,
+  MealPlanBudgetError,
+} from '../../core/services/ai/meal-plan-ai';
 import { MenuSuggestionAi, type MenuSuggestion } from '../../core/services/ai/menu-suggestion-ai';
-import { GEMINI_ERROR_TOAST, GeminiError } from '../../core/services/ai/gemini-types';
+import { aiErrorMessage } from '../../core/services/ai/ai-generation';
+import { AiAvailability } from '../../shared/ai-availability';
 import { UndoToastQueue } from '../../core/services/undo-toast-queue';
 import { relativeDateLabel } from '../../core/utils/relative-date-label';
 import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
@@ -68,9 +82,7 @@ import { EmptyDayState } from './components/empty-day-state/empty-day-state';
 import { LoggingModal, type LoggingDishSelection } from './components/logging-modal/logging-modal';
 import { MealSlotCard } from './components/meal-slot-card/meal-slot-card';
 
-const MEAL_ORDER: readonly MealType[] = ['breakfast', 'lunch', 'dinner', 'snack'];
 const SWIPE_THRESHOLD_PX = 60;
-const DAY_MS = 86_400_000;
 const UNDO_DURATION_MS = 8_000;
 
 interface PendingConfirm {
@@ -88,29 +100,6 @@ interface ContextMenuState {
 
 interface PendingDishAction extends ContextMenuState {
   action: 'move' | 'copy';
-}
-
-function todayIso(): string {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-function shiftIsoDate(iso: string, deltaDays: number): string {
-  const [y, m, d] = iso.split('-').map((p) => Number.parseInt(p, 10));
-  const dt = new Date(y, m - 1, d);
-  dt.setTime(dt.getTime() + deltaDays * DAY_MS);
-  const yy = dt.getFullYear();
-  const mm = String(dt.getMonth() + 1).padStart(2, '0');
-  const dd = String(dt.getDate()).padStart(2, '0');
-  return `${yy}-${mm}-${dd}`;
-}
-
-function parseIsoLocal(iso: string): Date {
-  const [y, m, d] = iso.split('-').map((p) => Number.parseInt(p, 10));
-  return new Date(y, (m ?? 1) - 1, d ?? 1);
 }
 
 @Component({
@@ -140,6 +129,7 @@ function parseIsoLocal(iso: string): Date {
 })
 export default class CalendarPage implements AfterViewInit {
   private readonly router = inject(Router);
+  private readonly alertCtrl = inject(AlertController);
   private readonly toastCtrl = inject(ToastController);
   private readonly gestureCtrl = inject(GestureController);
   private readonly destroyRef = inject(DestroyRef);
@@ -150,11 +140,15 @@ export default class CalendarPage implements AfterViewInit {
   private readonly undoQueue = inject(UndoToastQueue);
   protected readonly dishStore = inject(DishStore);
   protected readonly network = inject(NetworkStore);
+  protected readonly ai = inject(AiAvailability);
   protected readonly store = inject(CalendarStore);
 
-  private readonly today = todayIso();
+  private readonly today = localIsoDate();
   private gesture: Gesture | undefined;
+  private lastToast: HTMLIonToastElement | undefined;
   private readonly swipeTarget = viewChild<ElementRef<HTMLElement>>('swipeArea');
+  private readonly pendingMealFocus = signal<PendingMealTarget | null>(null);
+  private readonly viewEntered = signal(false);
 
   readonly headerLabel = computed<string>(() =>
     relativeDateLabel(this.store.currentDate(), this.today),
@@ -164,9 +158,9 @@ export default class CalendarPage implements AfterViewInit {
   readonly weekRangeLabel = computed<string>(() => {
     const days = this.store.weekDays();
     if (days.length !== 7) return '';
-    const a = parseIsoLocal(days[0]);
-    const b = parseIsoLocal(days[6]);
-    const monthLabel = (m: number) => `tháng ${m + 1}`;
+    const a = parseLocalDate(days[0]);
+    const b = parseLocalDate(days[6]);
+    const monthLabel = (m: number): string => `tháng ${m + 1}`;
     const sameMonth = a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
     if (sameMonth) return `${a.getDate()} – ${b.getDate()} ${monthLabel(b.getMonth())}`;
     return `${a.getDate()} ${monthLabel(a.getMonth())} – ${b.getDate()} ${monthLabel(b.getMonth())}`;
@@ -180,7 +174,7 @@ export default class CalendarPage implements AfterViewInit {
     const dp = this.store.dayPlan();
     if (!dp) return [];
     const byType = new Map(dp.meal_slots.map((s) => [s.meal_type, s]));
-    return MEAL_ORDER.map((mt) => byType.get(mt)).filter(
+    return MEAL_TYPES.map((mt) => byType.get(mt)).filter(
       (s): s is MealSlotWithDishes => s !== undefined,
     );
   });
@@ -191,7 +185,7 @@ export default class CalendarPage implements AfterViewInit {
       this.slotsInOrder().every((s) => s.planned_dishes.length === 0),
   );
 
-  readonly mealOrder = MEAL_ORDER;
+  readonly mealOrder = MEAL_TYPES;
 
   readonly pendingConfirm = signal<PendingConfirm | null>(null);
   readonly confirmModalOpen = computed<boolean>(() => this.pendingConfirm() !== null);
@@ -203,6 +197,10 @@ export default class CalendarPage implements AfterViewInit {
   readonly contextMenu = signal<ContextMenuState | null>(null);
   readonly contextMenuOpen = computed<boolean>(() => this.contextMenu() !== null);
   readonly contextMenuDishName = computed<string>(() => this.contextMenu()?.dishName ?? '');
+  readonly contextMenuCanEditServings = computed(() => {
+    const ctx = this.contextMenu();
+    return ctx !== null && this.findDish(ctx.plannedDishId)?.is_completed === 0;
+  });
 
   private readonly pendingDishAction = signal<PendingDishAction | null>(null);
   readonly slotPickerOpen = computed<boolean>(() => this.pendingDishAction()?.action === 'move');
@@ -218,13 +216,14 @@ export default class CalendarPage implements AfterViewInit {
   readonly copyingPreviousWeek = signal(false);
 
   readonly loggingModalOpen = signal(false);
+  readonly choosingNewMeal = signal(false);
   readonly loggingMealType = signal<MealType>('breakfast');
   readonly loggingLoading = signal(false);
   readonly recentLoggedDishes = signal<readonly DishListItem[]>([]);
   readonly loggingAiSuggestions = signal<readonly MenuSuggestion[]>([]);
   readonly loggingAiLoading = signal(false);
   readonly loggingAiDisabledReason = computed<string | null>(() =>
-    this.network.online() ? null : 'Cần kết nối mạng để AI gợi ý món.',
+    this.network.online() ? this.ai.textIssue() : 'Cần kết nối mạng để AI gợi ý món.',
   );
   readonly loggingMealLabel = computed<string>(() => this.mealLabel(this.loggingMealType()));
   readonly aiPlanning = signal(false);
@@ -248,6 +247,7 @@ export default class CalendarPage implements AfterViewInit {
       const today = this.store.currentDate();
       void this.probeYesterday(today);
     });
+    afterRenderEffect(() => this.revealPendingMeal());
   }
 
   private async probeYesterday(today: string): Promise<void> {
@@ -279,6 +279,51 @@ export default class CalendarPage implements AfterViewInit {
 
   openSettings(): void {
     void this.router.navigate(['/settings']);
+  }
+
+  ionViewWillEnter(): void {
+    const pendingMeal = this.store.pendingMealNavigation();
+    this.pendingMealFocus.set(pendingMeal);
+    this.store.pendingMealNavigation.set(null);
+    const date = pendingMeal?.date ?? this.store.addMealForDate();
+    if (!date) return;
+    this.store.addMealForDate.set(null);
+    this.store.setDate(date);
+    this.store.setView('day');
+    this.choosingNewMeal.set(pendingMeal === null);
+  }
+
+  ionViewDidEnter(): void {
+    this.viewEntered.set(true);
+  }
+
+  ionViewWillLeave(): void {
+    this.viewEntered.set(false);
+    this.pendingMealFocus.set(null);
+  }
+
+  private revealPendingMeal(): void {
+    const target = this.pendingMealFocus();
+    if (!target || !this.viewEntered()) return;
+    if (this.store.currentDate() !== target.date || this.store.currentView() !== 'day') {
+      this.pendingMealFocus.set(null);
+      return;
+    }
+    const plan = this.store.dayPlan();
+    if (plan?.date !== target.date) return;
+    const action = this.swipeTarget()?.nativeElement.querySelector<HTMLButtonElement>(
+      `[data-meal="${target.mealType}"] [data-planned-dish-action="${CSS.escape(target.plannedDishId)}"]`,
+    );
+    if (!action) return;
+
+    this.pendingMealFocus.set(null);
+    action.scrollIntoView({ block: 'center', behavior: 'instant' });
+    action.focus({ preventScroll: true });
+  }
+
+  async addToChosenMeal(meal: MealType): Promise<void> {
+    this.choosingNewMeal.set(false);
+    await this.onMealAddTap(meal);
   }
 
   // -- Date picker (AC-1) ----------------------------------------------------
@@ -345,6 +390,7 @@ export default class CalendarPage implements AfterViewInit {
       return;
     }
 
+    const requestedDate = this.store.currentDate();
     this.aiPlanning.set(true);
     try {
       await this.dishStore.load();
@@ -354,11 +400,29 @@ export default class CalendarPage implements AfterViewInit {
         return;
       }
 
+      const before = loggedMealContext(await this.dayPlanRepo.findByDate(requestedDate));
+      const targets = this.nutritionStore.targets();
+      if (requestedDate !== this.store.currentDate()) return;
       const suggestions = await this.mealPlanAi.planDay({
-        date: this.store.currentDate(),
-        targets: this.nutritionStore.targets(),
+        date: requestedDate,
+        targets,
+        logged: before.logged,
+        loggedMeals: before.loggedMeals,
         dishes,
       });
+      const after = loggedMealContext(await this.dayPlanRepo.findByDate(requestedDate));
+      if (
+        requestedDate !== this.store.currentDate() ||
+        before.key !== after.key ||
+        targets !== this.nutritionStore.targets()
+      ) {
+        void this.showToast('Ngày, mục tiêu hoặc bữa đã ghi đã thay đổi. Hãy tạo lại gợi ý.');
+        return;
+      }
+      if (!suggestions.length) {
+        void this.showToast('Đã đạt mục tiêu đang áp dụng. Lịch ăn hiện tại được giữ nguyên.');
+        return;
+      }
       const inserted = await this.store.replaceCurrentDatePlan(
         suggestions.map((item) => ({
           mealType: item.mealType,
@@ -370,9 +434,9 @@ export default class CalendarPage implements AfterViewInit {
     } catch (err) {
       console.warn('[CalendarPage] AI meal plan failed:', err);
       void this.showToast(
-        err instanceof GeminiError
-          ? GEMINI_ERROR_TOAST[err.kind]
-          : 'AI chưa tạo được kế hoạch, vui lòng thử lại',
+        err instanceof MealPlanBudgetError
+          ? err.message
+          : aiErrorMessage(err, 'AI chưa tạo được kế hoạch, vui lòng thử lại'),
       );
     } finally {
       this.aiPlanning.set(false);
@@ -409,6 +473,8 @@ export default class CalendarPage implements AfterViewInit {
       void this.showToast('Cần kết nối mạng để AI gợi ý món');
       return;
     }
+    const date = this.store.currentDate();
+    const mealType = this.loggingMealType();
     this.loggingAiLoading.set(true);
     try {
       await this.dishStore.load();
@@ -418,21 +484,23 @@ export default class CalendarPage implements AfterViewInit {
         return;
       }
       const suggestions = await this.menuSuggestionAi.suggest({
-        date: this.store.currentDate(),
-        mealType: this.loggingMealType(),
+        date,
+        mealType,
         targets: this.nutritionStore.targets(),
         currentTotals: this.nutritionStore.today(),
         dishes,
       });
+      if (
+        !this.loggingModalOpen() ||
+        date !== this.store.currentDate() ||
+        mealType !== this.loggingMealType()
+      )
+        return;
       this.loggingAiSuggestions.set(suggestions);
       void this.showToast(`AI đã gợi ý ${suggestions.length} món cho ${this.loggingMealLabel()}`);
     } catch (err) {
       console.warn('[CalendarPage] AI menu suggestion failed:', err);
-      void this.showToast(
-        err instanceof GeminiError
-          ? GEMINI_ERROR_TOAST[err.kind]
-          : 'AI chưa gợi ý được món, vui lòng thử lại',
-      );
+      void this.showToast(aiErrorMessage(err, 'AI chưa gợi ý được món, vui lòng thử lại'));
     } finally {
       this.loggingAiLoading.set(false);
     }
@@ -489,11 +557,19 @@ export default class CalendarPage implements AfterViewInit {
 
   // -- Empty-state copy-from-yesterday (AC-2) --------------------------------
   async onCopyFromYesterday(): Promise<void> {
-    const result = await this.store.copyFromYesterday();
-    if (result.copiedCount === 0) {
-      void this.showToast('Hôm qua không có món để sao chép');
-    } else {
-      void this.showToast(`Đã sao chép ${result.copiedCount} món từ hôm qua`);
+    if (this.store.copyingYesterday()) return;
+    const date = this.store.currentDate();
+    try {
+      const { copiedCount } = await this.store.copyFromYesterday();
+      if (date !== this.store.currentDate()) return;
+      void this.showToast(
+        copiedCount > 0
+          ? `Đã sao chép ${copiedCount} món từ hôm qua`
+          : 'Không có món mới để sao chép.',
+      );
+    } catch {
+      if (date === this.store.currentDate())
+        void this.showToast('Chưa thể sao chép món. Hãy thử lại.');
     }
   }
 
@@ -525,9 +601,70 @@ export default class CalendarPage implements AfterViewInit {
     this.contextMenu.set(null);
     if (action === 'delete') {
       void this.handleDelete(ctx);
+    } else if (action === 'servings') {
+      void this.openServingsEditor(ctx);
     } else {
       this.pendingDishAction.set({ ...ctx, action });
     }
+  }
+
+  private async openServingsEditor(ctx: ContextMenuState): Promise<void> {
+    const dish = this.findDish(ctx.plannedDishId);
+    if (dish?.is_completed !== 0) return;
+
+    let saving = false;
+    const alert = await this.alertCtrl.create({
+      header: 'Sửa khẩu phần',
+      message: 'Nhập số phần từ 0,1 đến 20.',
+      inputs: [
+        {
+          name: 'servings',
+          type: 'number',
+          value: dish.servings,
+          min: MIN_PLANNED_SERVINGS,
+          max: MAX_PLANNED_SERVINGS,
+          attributes: { inputmode: 'decimal', step: 'any', 'aria-label': 'Khẩu phần' },
+        },
+      ],
+      buttons: [
+        { text: 'Hủy', role: 'cancel' },
+        {
+          text: 'Lưu khẩu phần',
+          handler: async (values: { servings: string }) => {
+            const servings = Number(values.servings);
+            if (
+              !Number.isFinite(servings) ||
+              servings < MIN_PLANNED_SERVINGS ||
+              servings > MAX_PLANNED_SERVINGS
+            ) {
+              void this.showToast('Nhập khẩu phần từ 0,1 đến 20.');
+              return false;
+            }
+            if (saving) return false;
+            if (
+              this.store.currentDate() !== ctx.date ||
+              this.store.dayPlan()?.date !== ctx.date ||
+              this.findDish(ctx.plannedDishId)?.is_completed !== 0
+            ) {
+              void this.showToast('Món đã thay đổi. Hãy mở lại tùy chọn.');
+              return true;
+            }
+
+            saving = true;
+            try {
+              await this.store.editServings(ctx.plannedDishId, servings);
+              return true;
+            } catch {
+              void this.showToast('Không thể lưu khẩu phần. Vui lòng thử lại.');
+              return false;
+            } finally {
+              saving = false;
+            }
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 
   // -- Move flow -------------------------------------------------------------
@@ -625,17 +762,8 @@ export default class CalendarPage implements AfterViewInit {
     return undefined;
   }
 
-  private mealLabel(t: MealType): string {
-    switch (t) {
-      case 'breakfast':
-        return 'bữa sáng';
-      case 'lunch':
-        return 'bữa trưa';
-      case 'dinner':
-        return 'bữa chiều';
-      case 'snack':
-        return 'bữa phụ';
-    }
+  private mealLabel(type: MealType): string {
+    return MEAL_LABELS[type].toLocaleLowerCase('vi');
   }
 
   private async showToast(message: string): Promise<void> {
@@ -643,7 +771,14 @@ export default class CalendarPage implements AfterViewInit {
       message,
       duration: 2000,
       position: 'bottom',
+      positionAnchor:
+        document.querySelector<HTMLElement>('app-calendar .undo-toast') ??
+        document.querySelector('ion-tab-bar') ??
+        undefined,
     });
+    const previous = this.lastToast;
+    this.lastToast = toast;
+    await previous?.dismiss();
     await toast.present();
   }
 }

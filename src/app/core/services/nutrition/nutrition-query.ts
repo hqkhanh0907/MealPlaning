@@ -1,22 +1,18 @@
 import { inject, Injectable } from '@angular/core';
 import { Database } from '../database/database';
+import { NUTRIENTS, ZERO_TOTALS, type NutritionTotals } from '../../models/nutrition';
+import {
+  DISH_PER_SERVING,
+  effectivePlannedNutrient,
+} from '../../repositories/dish-per-serving.sql';
 import type { KeyMetric } from '../../utils/key-metric-router';
+import { addCalendarDays, localIsoDate, parseLocalDate, weekDates } from '../../utils/local-date';
 
-/**
- * Per-day totals for a single date — sums effective_* across all planned_dish
- * rows whose meal_slot belongs to the day_plan for that date.
- *
- * `dailyTotals` INCLUDES both planned (is_completed=0) and logged
- * (is_completed=1) rows per F-04 §2.7 (Sally rationale: Dashboard shows
- * "ngày sẽ thế nào", not "ngày đã ăn gì").
- */
-export interface NutritionTotals {
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-}
+export type { NutritionTotals } from '../../models/nutrition';
+
+const DAILY_NUTRITION_SUM = NUTRIENTS.map(
+  (nutrient) => `COALESCE(SUM(${effectivePlannedNutrient(nutrient)}), 0) AS ${nutrient}`,
+).join(', ');
 
 /** One row of `weekTotals` — Mon..Sun, logged-only. */
 export interface DayTotals extends NutritionTotals {
@@ -28,14 +24,6 @@ export interface TrendPoint {
   date: string; // yyyy-MM-dd
   value: number;
 }
-
-const ZERO_TOTALS: NutritionTotals = Object.freeze({
-  calories: 0,
-  protein: 0,
-  carbs: 0,
-  fat: 0,
-  fiber: 0,
-});
 
 const METRIC_TO_COLUMN: Readonly<Record<KeyMetric, 'calories' | 'protein' | 'carbs' | 'fat'>> = {
   calories: 'calories',
@@ -61,44 +49,16 @@ export class NutritionQuery {
    * Index usage (DEC-06): `idx_day_plan_date` for the WHERE day_plan.date.
    */
   async dailyTotals(date: string): Promise<NutritionTotals> {
-    const row = await this.db.getOne<{
-      calories: number | null;
-      protein: number | null;
-      carbs: number | null;
-      fat: number | null;
-      fiber: number | null;
-    }>(
-      `SELECT
-         COALESCE(SUM(CASE WHEN pd.is_completed = 1
-                           THEN pd.calories
-                           ELSE dwt.total_calories * pd.servings END), 0) AS calories,
-         COALESCE(SUM(CASE WHEN pd.is_completed = 1
-                           THEN pd.protein
-                           ELSE dwt.total_protein  * pd.servings END), 0) AS protein,
-         COALESCE(SUM(CASE WHEN pd.is_completed = 1
-                           THEN pd.carbs
-                           ELSE dwt.total_carbs    * pd.servings END), 0) AS carbs,
-          COALESCE(SUM(CASE WHEN pd.is_completed = 1
-                            THEN pd.fat
-                            ELSE dwt.total_fat      * pd.servings END), 0) AS fat,
-          COALESCE(SUM(CASE WHEN pd.is_completed = 1
-                            THEN pd.fiber
-                            ELSE dwt.total_fiber    * pd.servings END), 0) AS fiber
+    const row = await this.db.getOne<NutritionTotals>(
+      `SELECT ${DAILY_NUTRITION_SUM}
        FROM day_plan dp
        INNER JOIN meal_slot ms       ON ms.day_plan_id = dp.id
        INNER JOIN planned_dish pd    ON pd.meal_slot_id = ms.id
-       INNER JOIN dish_with_totals dwt ON dwt.id = pd.dish_id
+       INNER JOIN ${DISH_PER_SERVING} dwt ON dwt.id = pd.dish_id
        WHERE dp.date = ?`,
       [date],
     );
-    if (!row) return { ...ZERO_TOTALS };
-    return {
-      calories: row.calories ?? 0,
-      protein: row.protein ?? 0,
-      carbs: row.carbs ?? 0,
-      fat: row.fat ?? 0,
-      fiber: row.fiber ?? 0,
-    };
+    return row ?? { ...ZERO_TOTALS };
   }
 
   /**
@@ -111,7 +71,7 @@ export class NutritionQuery {
    * `pd.is_completed = 1` filter.
    */
   async weekTotals(weekStart: string): Promise<DayTotals[]> {
-    const dates = enumerate7Days(weekStart);
+    const dates = weekDates(weekStart);
     if (dates.length === 0) return [];
 
     return this.loggedTotalsForDates(dates);
@@ -203,32 +163,13 @@ export class NutritionQuery {
 
 // ─── helpers ──────────────────────────────────────────────────────────────
 
-function enumerate7Days(weekStart: string): string[] {
-  const out: string[] = [];
-  const base = new Date(weekStart + 'T00:00:00');
-  if (Number.isNaN(base.getTime())) return [];
-  for (let i = 0; i < 7; i += 1) {
-    const d = new Date(base);
-    d.setDate(d.getDate() + i);
-    out.push(toIso(d));
-  }
-  return out;
-}
-
 function enumerateDateRange(startIso: string, endIso: string): string[] {
   const out: string[] = [];
-  const start = new Date(startIso + 'T00:00:00');
-  const end = new Date(endIso + 'T00:00:00');
+  const start = parseLocalDate(startIso);
+  const end = parseLocalDate(endIso);
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) return [];
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    out.push(toIso(d));
+  for (let d = start; d <= end; d = addCalendarDays(d, 1)) {
+    out.push(localIsoDate(d));
   }
   return out;
-}
-
-function toIso(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
 }

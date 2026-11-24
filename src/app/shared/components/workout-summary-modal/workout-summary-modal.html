@@ -23,17 +23,19 @@
             name="checkmark-circle-outline"
             aria-hidden="true"
           ></ion-icon>
-          <h2 class="wsm-hero__name">{{ s.training_day_name || (s.mode === 'guided' ? 'Buổi theo giáo án' : 'Buổi tự do') }}</h2>
+          <h2 class="wsm-hero__name">
+            {{ s.training_day_name || (s.mode === 'guided' ? 'Buổi theo giáo án' : 'Buổi tự do') }}
+          </h2>
         </section>
 
         <section class="wsm-stats" aria-label="Tổng kết buổi tập">
           <article class="wsm-stat">
-            <ion-icon name="barbell-outline" aria-hidden="true"></ion-icon>
+            <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
             <strong>{{ totalSets() }}</strong>
-            <span>set đã ghi</span>
+            <span>hiệp đã ghi</span>
           </article>
           <article class="wsm-stat">
-            <ion-icon name="trophy-outline" aria-hidden="true"></ion-icon>
+            <ion-icon name="barbell-outline" aria-hidden="true"></ion-icon>
             <strong>{{ totalVolume() }} kg</strong>
             <span>khối lượng</span>
           </article>
@@ -52,7 +54,7 @@
                 <li class="wsm-row">
                   <div class="wsm-row__main">
                     <strong>{{ row.name }}</strong>
-                    <span>{{ row.sets }} set · {{ row.volume }} kg</span>
+                    <span>{{ row.sets }} hiệp · {{ row.measure }}</span>
                   </div>
                   @if (row.topSet) {
                     <span class="wsm-row__top">{{ row.topSet }}</span>

@@ -1,8 +1,19 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  inject,
+  Injector,
+  signal,
+  viewChild,
+} from '@angular/core';
 import {
   IonButton,
   IonButtons,
   IonContent,
+  IonFooter,
   IonHeader,
   IonIcon,
   IonTitle,
@@ -22,10 +33,12 @@ import {
   sparklesOutline,
 } from 'ionicons/icons';
 import { DashboardStore } from '../../core/stores/dashboard.store';
-import { NetworkStore } from '../../core/stores/network.store';
-import { GEMINI_ERROR_TOAST, GeminiError } from '../../core/services/ai/gemini-types';
+import { CalendarStore, type PendingMealTarget } from '../../core/stores/calendar.store';
+import { MEAL_LABELS, MEAL_TYPES, type MealType } from '../../core/models/meal-plan.types';
+import { MAX_PHOTO_GRAMS, portionNutrition, validPhotoGrams } from '../../core/models/photo-meal';
+import { aiErrorMessage } from '../../core/services/ai/ai-generation';
+import { AiAvailability } from '../../shared/ai-availability';
 import { AiOfflineBanner } from '../../shared/components/ai-offline-banner/ai-offline-banner';
-import { CalorieRing } from '../../shared/components/calorie-ring/calorie-ring';
 
 @Component({
   selector: 'app-dashboard',
@@ -33,13 +46,15 @@ import { CalorieRing } from '../../shared/components/calorie-ring/calorie-ring';
   styleUrl: './dashboard.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    DecimalPipe,
+    DatePipe,
     RouterLink,
     AiOfflineBanner,
-    CalorieRing,
     IonHeader,
     IonToolbar,
     IonTitle,
     IonContent,
+    IonFooter,
     IonButtons,
     IonButton,
     IonIcon,
@@ -47,9 +62,21 @@ import { CalorieRing } from '../../shared/components/calorie-ring/calorie-ring';
 })
 export default class DashboardPage {
   private readonly router = inject(Router);
+  private readonly calendar = inject(CalendarStore);
   private readonly toastCtrl = inject(ToastController);
   protected readonly dashboard = inject(DashboardStore);
-  protected readonly network = inject(NetworkStore);
+  protected readonly ai = inject(AiAvailability);
+  protected readonly maxPhotoGrams = MAX_PHOTO_GRAMS;
+  protected readonly portionNutrition = portionNutrition;
+  protected readonly isFinite = Number.isFinite;
+  protected readonly validPhotoGrams = validPhotoGrams;
+  protected readonly photoError = signal('');
+  protected readonly insightError = signal('');
+  private readonly insightTitle = viewChild<ElementRef<HTMLElement>>('insightTitle');
+  private readonly reviewTitle = viewChild<ElementRef<HTMLElement>>('reviewTitle');
+  private readonly injector = inject(Injector);
+  protected readonly mealLabels = MEAL_LABELS;
+  protected readonly mealTypes = MEAL_TYPES;
 
   constructor() {
     addIcons({
@@ -72,6 +99,36 @@ export default class DashboardPage {
     void this.router.navigate(['/settings']);
   }
 
+  async addMeal(): Promise<void> {
+    this.calendar.addMealForDate.set(this.dashboard.todayIso());
+    if (!(await this.router.navigate(['/tabs/calendar']))) this.calendar.addMealForDate.set(null);
+  }
+
+  async openPendingMeal(event: MouseEvent, target: PendingMealTarget): Promise<void> {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    this.calendar.pendingMealNavigation.set(target);
+    let reachedCalendar = false;
+    try {
+      reachedCalendar =
+        (await this.router.navigate(['/tabs/calendar'])) && this.router.url === '/tabs/calendar';
+    } finally {
+      if (!reachedCalendar && this.calendar.pendingMealNavigation() === target) {
+        this.calendar.pendingMealNavigation.set(null);
+      }
+    }
+  }
+
   confidenceLabel(value: 'high' | 'medium' | 'low'): string {
     switch (value) {
       case 'high':
@@ -84,33 +141,53 @@ export default class DashboardPage {
   }
 
   async generateDailyInsight(): Promise<void> {
+    this.insightError.set('');
     try {
       const insight = await this.dashboard.generateDailyAiInsight();
-      void this.showToast(`AI đã tạo insight: ${insight.action}`);
+      if (insight) this.focusResult(this.insightTitle);
     } catch (err) {
-      console.warn('[DashboardPage] AI daily insight failed:', err);
-      void this.showToast(this.aiErrorMessage(err, 'AI chưa tạo được insight, vui lòng thử lại'));
+      this.insightError.set(aiErrorMessage(err, 'AI chưa tạo được nhận xét. Vui lòng thử lại.'));
     }
   }
 
   async analyzeMealPhoto(): Promise<void> {
+    this.photoError.set('');
     try {
-      const result = await this.dashboard.analyzeMealPhoto();
-      void this.showToast(`AI đã phân tích ${result.items.length} mục trong ảnh`);
+      await this.dashboard.analyzeMealPhoto();
+      this.focusResult(this.reviewTitle);
     } catch (err) {
-      console.warn('[DashboardPage] AI food image analysis failed:', err);
-      void this.showToast(this.aiErrorMessage(err, 'AI chưa phân tích được ảnh, vui lòng thử lại'));
+      if (err instanceof Error && /cancelled|canceled/i.test(err.message)) return;
+      this.photoError.set(aiErrorMessage(err, 'Chưa phân tích được ảnh. Hãy thử lại.'));
     }
   }
 
-  private aiErrorMessage(err: unknown, fallback: string): string {
-    if (err instanceof GeminiError) {
-      return GEMINI_ERROR_TOAST[err.kind];
+  selectPhotoMeal(value: string): void {
+    if (Object.hasOwn(this.mealLabels, value)) this.dashboard.setPhotoMealType(value as MealType);
+  }
+
+  cancelPhoto(): void {
+    this.dashboard.discardPhoto();
+    this.photoError.set('');
+  }
+
+  async savePhoto(): Promise<void> {
+    this.photoError.set('');
+    try {
+      if (await this.dashboard.savePhoto()) void this.showToast('Đã lưu bữa ăn vào nhật ký.');
+    } catch {
+      this.photoError.set('Chưa lưu được bữa ăn. Khẩu phần vừa sửa vẫn còn để thử lại.');
     }
-    if (err instanceof Error && err.message.includes('requires network')) {
-      return 'Cần kết nối mạng để dùng AI';
-    }
-    return fallback;
+  }
+
+  private focusResult(heading: () => ElementRef<HTMLElement> | undefined): void {
+    afterNextRender(
+      () => {
+        const element = heading()?.nativeElement;
+        element?.scrollIntoView({ block: 'start' });
+        element?.focus({ preventScroll: true });
+      },
+      { injector: this.injector },
+    );
   }
 
   private async showToast(message: string): Promise<void> {
@@ -118,6 +195,7 @@ export default class DashboardPage {
       message,
       duration: 2200,
       position: 'bottom',
+      positionAnchor: 'ion-tab-bar',
     });
     await toast.present();
   }

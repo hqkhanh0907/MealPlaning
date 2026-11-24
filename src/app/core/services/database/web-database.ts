@@ -90,11 +90,6 @@ export class WebDatabase extends Database {
     return results;
   }
 
-  override async getOne<T>(sql: string, params?: unknown[]): Promise<T | null> {
-    const rows = await this.query<T>(sql, params);
-    return rows.length > 0 ? rows[0] : null;
-  }
-
   /**
    * Persist database to localStorage so data survives page refresh
    * during development. Not used in production (Android uses native SQLite).

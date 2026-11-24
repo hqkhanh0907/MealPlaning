@@ -18,10 +18,12 @@ export class MigrationRunner {
       .sort((left, right) => left.version - right.version);
 
     for (const migration of pending) {
-      for (const statement of migration.statements) {
-        await this.db.execute(statement);
-      }
-      await this.db.execute(`PRAGMA user_version = ${migration.version};`);
+      await this.db.withTransaction(async () => {
+        for (const statement of migration.statements) {
+          await this.db.execute(statement);
+        }
+        await this.db.execute(`PRAGMA user_version = ${migration.version};`);
+      });
     }
   }
 

@@ -1,35 +1,16 @@
-/**
- * NutritionAi — wrapper service trên GeminiClient cho 2 method nghiệp vụ:
- *   1. `lookupIngredient(name)` — F-01 (Phase 1.5B.2). Implemented đầy đủ.
- *   2. `autofillDish(name, dbIngredients)` — F-02 (Phase 1.5B.3). NOT YET — sẽ
- *      thêm trong commit kế tiếp; ngoài scope 1.5B.2.
- *
- * Source-of-truth:
- *   - docs/5-development/phase-1.5b-ai-foundation.md §3
- *   - docs/5-ai/ai-strategy.md §3.9
- *
- * Decision log (1.5B.2):
- *   - #2 Duplicate check: exact match có normalize nhẹ (lowercase + trim
- *        + collapse whitespace, KHÔNG bỏ dấu).
- *   - #10 Category mismatch: fuzzy map AI output → IngredientCategory enum;
- *         fallback "Khác".
- */
-
 import { Injectable, inject } from '@angular/core';
 
 import { INGREDIENT_CATEGORIES, type IngredientCategory } from '../../models/management.constants';
 import { findFuzzyMatches, type FuzzyCandidate } from '../../utils/fuzzy-match';
-import { GeminiClient } from './gemini-client';
+import { AiGeneration } from './ai-generation';
 import {
   buildDishAutofillPrompt,
-  dishAutofillGeminiSchema,
   dishAutofillResponseSchema,
   DISH_AUTOFILL_SYSTEM_INSTRUCTION,
   type DishAutofillResponse,
 } from './prompts/dish-autofill.prompt';
 import {
   buildIngredientLookupPrompt,
-  ingredientLookupGeminiSchema,
   ingredientLookupResponseSchema,
   INGREDIENT_LOOKUP_SYSTEM_INSTRUCTION,
   type IngredientLookupResponse,
@@ -96,13 +77,13 @@ export interface DishAutofillFuzzyConfirmRow {
   /**
    * Top-1 fuzzy candidate từ DB (distance ≤ 2). UI dùng cái này để hỏi user.
    * Nếu user confirm → row trở thành `existing` với matchedIngredientId này.
-   * Nếu user reject → row trở thành `new` (Gemini đã cung cấp full nutrition
+   * Nếu user reject → row trở thành `new` (AI đã cung cấp full nutrition
    *   trong `pendingNew`).
    */
   readonly suggestedMatchId: string;
   readonly suggestedMatchName: string;
   readonly distance: number;
-  /** Nutrition Gemini đã sinh — dùng nếu user reject suggestion. */
+  /** Nutrition AI đã sinh — dùng nếu user reject suggestion. */
   readonly pendingNew: Omit<DishAutofillNewRow, 'kind'>;
 }
 
@@ -183,22 +164,20 @@ export function mapCategory(raw: string): IngredientCategory {
 
 @Injectable({ providedIn: 'root' })
 export class NutritionAi {
-  private readonly gemini = inject(GeminiClient);
+  private readonly ai = inject(AiGeneration);
 
   /**
-   * F-01 — gọi Gemini với prompt ingredient-lookup, validate qua zod,
+   * F-01 — gọi AI với prompt ingredient-lookup, validate qua zod,
    * fuzzy-map category, trả về result đã ready-to-prefill.
-   *
-   * Errors propagate as-is từ GeminiClient (caller bắt + show toast theo
-   * `GEMINI_ERROR_TOAST` map).
+
    */
   async lookupIngredient(name: string): Promise<IngredientLookupResult> {
     const prompt = buildIngredientLookupPrompt(name);
 
-    const response = await this.gemini.generateContent(prompt, {
+    const response = await this.ai.generateText(prompt, {
       feature: 'ingredient_lookup',
       systemInstruction: INGREDIENT_LOOKUP_SYSTEM_INSTRUCTION,
-      responseSchema: ingredientLookupGeminiSchema,
+
       schema: ingredientLookupResponseSchema,
     });
 
@@ -216,7 +195,7 @@ export class NutritionAi {
   }
 
   /**
-   * F-02 — gọi Gemini với prompt dish-autofill (KHÔNG truyền DB list),
+   * F-02 — gọi AI với prompt dish-autofill (KHÔNG truyền DB list),
    * validate qua zod (flat schema), sau đó match local per row vs
    * `dbIngredients` bằng `findFuzzyMatches`:
    *
@@ -224,7 +203,7 @@ export class NutritionAi {
    *   - distance ∈ {1, 2} → kind=`fuzzyConfirm` (UI hỏi user).
    *   - distance > 2 → kind=`new` (tạo ingredient mới).
    *
-   * @param dishName Tên món để Gemini phân tích.
+   * @param dishName Tên món để AI phân tích.
    * @param dbIngredients Ingredient hiện có trong DB (id + name) — CHỈ
    *   dùng cho fuzzy match local, KHÔNG đưa vào prompt.
    */
@@ -234,10 +213,10 @@ export class NutritionAi {
   ): Promise<DishAutofillResult> {
     const prompt = buildDishAutofillPrompt(dishName);
 
-    const response = await this.gemini.generateContent(prompt, {
+    const response = await this.ai.generateText(prompt, {
       feature: 'dish_autofill',
       systemInstruction: DISH_AUTOFILL_SYSTEM_INSTRUCTION,
-      responseSchema: dishAutofillGeminiSchema,
+
       schema: dishAutofillResponseSchema,
       // Gemini 2.5-flash burns ~2k internal "thinking" tokens before content.
       // Default 2048 caps content mid-array → JSON.parse fail. Dish autofill

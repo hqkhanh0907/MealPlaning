@@ -15,19 +15,24 @@
   </header>
 
   <div class="day-summary-card__hero" [attr.aria-label]="ariaSummary()">
-    <app-calorie-ring
-      [value]="calories().value"
-      [target]="calories().target"
-      [size]="64"
-      [strokeWidth]="8"
-      variant="calories"
-    />
+    @if (primaryTarget() > 0) {
+      <app-calorie-ring
+        [value]="primaryValue()"
+        [target]="primaryTarget()"
+        [size]="64"
+        [strokeWidth]="8"
+        [variant]="primaryMetric()"
+      />
+    }
     <div class="day-summary-card__metric">
-      <span class="day-summary-card__metric-label">{{ primaryLabel() }} trọng tâm</span>
+      <span class="day-summary-card__metric-label">{{ primaryLabel() }} theo lịch</span>
       <strong class="day-summary-card__metric-value">
-        {{ primaryValue() }} / {{ primaryTarget() }} {{ primaryUnit() }}
+        {{ primaryValue() }}{{ primaryTarget() > 0 ? ' / ' + primaryTarget() : '' }}
+        {{ primaryUnit() }}
       </strong>
-      <span class="day-summary-card__metric-note">{{ primaryPct() }}% mục tiêu</span>
+      <span class="day-summary-card__metric-note">
+        {{ primaryTarget() > 0 ? primaryPct() + '% mục tiêu' : 'Chưa đặt mục tiêu' }}
+      </span>
     </div>
   </div>
 
@@ -52,8 +57,8 @@
         [highlightedMetric]="primaryMetric()"
       />
       <p class="day-summary-card__fiber-note">
-        Fiber dùng mục tiêu tham chiếu 25g/ngày; dữ liệu đã ăn trước bản v3 hiển thị 0g nếu chưa
-        từng được snapshot.
+        Mục tiêu tham chiếu của Fiber là 25 g mỗi ngày. Món đã ăn từ bản cũ hiển thị 0 g nếu trước
+        đó chưa lưu chỉ số này.
       </p>
     </div>
   }

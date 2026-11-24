@@ -11,6 +11,7 @@
   margin: 0 var(--space-md) var(--space-lg);
   padding: 0;
   background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
@@ -21,8 +22,7 @@
   --background: transparent;
   --color: var(--text-tertiary);
   min-height: auto;
-  padding-top: var(--space-sm);
-  padding-bottom: var(--space-xs);
+  padding-block: var(--space-md) var(--space-xs);
 
   ion-label h2 {
     margin: 0;
@@ -39,6 +39,21 @@
   --inner-padding-end: var(--space-md);
   --border-color: var(--border-color);
   --min-height: 52px;
+
+  ion-label {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  ion-label h3 {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  ion-label p,
+  ion-note {
+    color: var(--text-tertiary);
+  }
 }
 
 .settings-list ion-item:last-of-type {
@@ -50,5 +65,15 @@
   margin: 0 var(--space-md) var(--space-md);
   color: var(--text-tertiary);
   font-size: var(--font-size-body-sm);
-  opacity: 0.95;
+}
+
+.resume-notifications {
+  display: block;
+  width: fit-content;
+  height: auto;
+  margin-block: var(--space-sm);
+
+  &::part(native) {
+    min-height: 48px;
+  }
 }

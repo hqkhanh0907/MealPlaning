@@ -8,6 +8,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import {
   IonButton,
   IonButtons,
@@ -22,7 +23,9 @@ import type {
   ActiveTrainingPlan,
   TrainingPlanDayDraft,
 } from '../../../../core/models/fitness.types';
+import { defaultTrainingRange } from '../../../../core/models/fitness-prescription';
 import { FitnessStore } from '../../../../core/stores/fitness.store';
+import { isTimedExercise } from '../../../../core/models/fitness.types';
 
 const WEEK_DAYS = [1, 2, 3, 4, 5, 6, 0];
 
@@ -32,6 +35,7 @@ const WEEK_DAYS = [1, 2, 3, 4, 5, 6, 0];
   styleUrl: './plan-editor.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    NgTemplateOutlet,
     IonButton,
     IonButtons,
     IonContent,
@@ -43,6 +47,7 @@ const WEEK_DAYS = [1, 2, 3, 4, 5, 6, 0];
   ],
 })
 export class PlanEditor implements OnInit {
+  protected readonly timed = isTimedExercise;
   private readonly fitness = inject(FitnessStore);
   readonly plan = input.required<ActiveTrainingPlan>();
   readonly closed = output<void>();
@@ -129,12 +134,25 @@ export class PlanEditor implements OnInit {
         const exercises = originalId
           ? day.exercises.map((exercise) =>
               exercise.exerciseId === originalId
-                ? { ...exercise, exerciseId: id, notes: null }
+                ? {
+                    ...exercise,
+                    exerciseId: id,
+                    ...(isTimedExercise(id) !== isTimedExercise(originalId)
+                      ? defaultTrainingRange(id)
+                      : {}),
+                    notes: null,
+                  }
                 : exercise,
             )
           : [
               ...day.exercises,
-              { exerciseId: id, sets: 3, repsMin: 8, repsMax: 12, restSeconds: 90, notes: null },
+              {
+                exerciseId: id,
+                sets: 3,
+                ...defaultTrainingRange(id),
+                restSeconds: 90,
+                notes: null,
+              },
             ];
         return { ...day, exercises, name: day.isRestDay ? 'Buổi tập' : day.name, isRestDay: false };
       }),

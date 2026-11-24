@@ -14,16 +14,16 @@
       inputId="body-field-height"
       errorId="err-body-height"
       [invalid]="heightInvalid()"
-      errorMessage="Chiều cao cần từ 100 đến 250 cm"
+      [errorMessage]="heightError() || ''"
     >
       <input
         id="body-field-height"
         class="input-native"
         type="number"
         inputmode="decimal"
-        min="100"
-        max="250"
-        step="0.1"
+        [min]="limits.heightCm.min"
+        [max]="limits.heightCm.max"
+        step="any"
         [attr.aria-invalid]="heightInvalid() ? 'true' : null"
         [attr.aria-describedby]="heightInvalid() ? 'err-body-height' : null"
         [ngModel]="height()"
@@ -36,16 +36,16 @@
       inputId="body-field-weight"
       errorId="err-body-weight"
       [invalid]="weightInvalid()"
-      errorMessage="Cân nặng cần từ 30 đến 300 kg"
+      [errorMessage]="weightError() || ''"
     >
       <input
         id="body-field-weight"
         class="input-native"
         type="number"
         inputmode="decimal"
-        min="30"
-        max="300"
-        step="0.1"
+        [min]="limits.weightKg.min"
+        [max]="limits.weightKg.max"
+        step="any"
         [attr.aria-invalid]="weightInvalid() ? 'true' : null"
         [attr.aria-describedby]="weightInvalid() ? 'err-body-weight' : null"
         [ngModel]="weight()"
@@ -53,27 +53,14 @@
       />
     </app-form-field>
 
-    <app-form-field
-      label="Tuổi"
-      inputId="body-field-age"
+    <app-profile-age-field
+      idPrefix="body-field"
       errorId="err-body-age"
-      [invalid]="ageInvalid()"
-      errorMessage="Tuổi cần từ 10 đến 120"
-    >
-      <input
-        id="body-field-age"
-        class="input-native"
-        type="number"
-        inputmode="numeric"
-        min="10"
-        max="120"
-        step="1"
-        [attr.aria-invalid]="ageInvalid() ? 'true' : null"
-        [attr.aria-describedby]="ageInvalid() ? 'err-body-age' : null"
-        [ngModel]="age()"
-        (ngModelChange)="age.set($event)"
-      />
-    </app-form-field>
+      [age]="displayedAge()"
+      [birthDate]="birthDate()"
+      [errorMessage]="ageError()"
+      (edited)="onAgeEdit($event)"
+    />
 
     <h3 class="section-caption">Giới tính</h3>
     <div
@@ -89,7 +76,7 @@
         [attr.aria-checked]="gender() === 'male'"
         (click)="gender.set('male')"
       >
-        Nam
+        {{ genderLabels.male }}
       </button>
       <button
         type="button"
@@ -99,30 +86,38 @@
         [attr.aria-checked]="gender() === 'female'"
         (click)="gender.set('female')"
       >
-        Nữ
+        {{ genderLabels.female }}
       </button>
     </div>
 
     @if (preview(); as r) {
-      <h3 class="section-caption">Kết quả tính toán</h3>
+      <h3 class="section-caption">Ước tính hằng ngày</h3>
       <div class="preview-card">
+        @if (r.bmr > 0) {
+          <div class="preview-row">
+            <span class="preview-label">Năng lượng lúc nghỉ</span>
+            <span class="preview-value">{{ r.bmr }} kcal/ngày</span>
+          </div>
+          <div class="preview-row">
+            <span class="preview-label">Tổng năng lượng tiêu hao</span>
+            <span class="preview-value">{{ r.tdee }} kcal · {{ activityLabel() }}</span>
+          </div>
+        }
+        @if (r.energyNote; as note) {
+          <p class="preview-hint">{{ note }} Bạn vẫn có thể ghi bữa ăn.</p>
+        } @else {
+          <div class="preview-row preview-row--accent">
+            <span class="preview-label">Mục tiêu năng lượng đề xuất</span>
+            <span class="preview-value">{{ r.target_calories }} kcal/ngày</span>
+          </div>
+        }
         <div class="preview-row">
-          <span class="preview-label">BMR</span>
-          <span class="preview-value">{{ r.bmr }} kcal</span>
+          <span class="preview-label">Mục tiêu đạm tham khảo</span>
+          <span class="preview-value">{{
+            r.target_protein ? r.target_protein + ' g/ngày' : 'Chưa có đề xuất'
+          }}</span>
         </div>
-        <div class="preview-row">
-          <span class="preview-label">TDEE</span>
-          <span class="preview-value">{{ r.tdee }} kcal · {{ activityLabel() }}</span>
-        </div>
-        <div class="preview-row preview-row--accent">
-          <span class="preview-label">Mục tiêu đề xuất</span>
-          <span class="preview-value"
-            >Calo {{ r.target_calories }} kcal · Protein {{ r.target_protein }}g</span
-          >
-        </div>
-        <p class="preview-hint">
-          Nếu bạn đã chỉnh tay Calo/Protein, giá trị đã chỉnh sẽ được giữ nguyên.
-        </p>
+        <p class="preview-hint">Khi bạn đổi thông số, ứng dụng giữ mục tiêu bạn đã nhập tay.</p>
       </div>
     }
   </div>
@@ -130,14 +125,17 @@
 
 <ion-footer class="ion-no-border">
   <div class="sticky-save-bar">
+    @if (submission.error(); as error) {
+      <p class="field-error" role="alert">{{ error }}</p>
+    }
     <ion-button
       expand="block"
       class="save-button"
       [color]="formInvalid() ? 'medium' : 'primary'"
-      [disabled]="formInvalid()"
+      [disabled]="formInvalid() || submission.locked()"
       (click)="save()"
     >
-      Lưu
+      {{ submission.locked() ? 'Đang lưu…' : 'Lưu' }}
     </ion-button>
   </div>
 </ion-footer>

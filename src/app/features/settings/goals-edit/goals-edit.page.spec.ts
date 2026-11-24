@@ -155,6 +155,39 @@ describe('GoalsEditPage', () => {
     expect(component.calo()).toBe(r2.target_calories);
   });
 
+  it('retains a saved manual protein target after reopening and changing the goal', async () => {
+    await setup(makeProfile());
+    component.setProtein(137);
+    await component.save();
+    fixture.destroy();
+    fixture = TestBed.createComponent(GoalsEditPage);
+    fixture.detectChanges();
+    fixture.componentInstance.setGoal('gain_muscle');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(fixture.componentInstance.protein()).toBe(137);
+  });
+
+  it('saves an empty protein target independently of the calorie target', async () => {
+    await setup(makeProfile());
+    component.setProtein(null);
+    await component.save();
+    expect(profileSignal()?.target_protein).toBe(0);
+    expect(profileSignal()?.protein_target_mode).toBe('manual');
+    expect(profileSignal()?.target_calories).toBe(2000);
+  });
+
+  it('keeps an explicit manual target equal to the previous suggestion until reset', async () => {
+    await setup(makeProfile({ target_protein: 104, protein_target_mode: 'manual' }));
+    component.setGoal('gain_muscle');
+    fixture.detectChanges();
+    expect(component.protein()).toBe(104);
+    component.reset();
+    await component.save();
+    expect(profileSignal()?.protein_target_mode).toBe('auto');
+    expect(profileSignal()?.target_protein).toBe(143);
+  });
+
   it('reset() bails when profile is null', async () => {
     await setup(null);
     component.reset();
@@ -234,6 +267,22 @@ describe('GoalsEditPage', () => {
     expect(patch.target_fat).toBeNull();
   });
 
+  it('remembers a cleared energy goal across goal changes and allows saving food tracking alone', async () => {
+    await setup(makeProfile({ target_calories: 0, calorie_target_mode: 'manual' }));
+    component.setGoal('performance');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.calo()).toBeNull();
+    expect(component.formInvalid()).toBeFalse();
+    await component.save();
+    expect(profileStore.updateProfile).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        target_calories: 0,
+        calorie_target_mode: 'manual',
+      }),
+    );
+  });
+
   it('setCarbs treats NaN as null (cleared input emits NaN)', async () => {
     await setup(makeProfile());
     component.setCarbs(Number.NaN);
@@ -308,5 +357,33 @@ describe('GoalsEditPage', () => {
     await component.save();
     expect(profileStore.updateProfile).not.toHaveBeenCalled();
     expect(location.back).not.toHaveBeenCalled();
+  });
+
+  it('keeps the edit after a failed write and handles two retry taps only once', async () => {
+    await setup(makeProfile());
+    component.setCalo(2150);
+    fixture.detectChanges();
+    const button: HTMLIonButtonElement = fixture.nativeElement.querySelector('.save-button');
+    profileStore.updateProfile.and.rejectWith(new Error('write failed'));
+    button.click();
+    button.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(profileStore.updateProfile).toHaveBeenCalledTimes(1);
+    expect(location.back).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('ion-footer [role="alert"]')?.textContent).toContain(
+      'thử lại',
+    );
+    expect(button.disabled).toBeFalse();
+    expect(component.calo()).toBe(2150);
+
+    profileStore.updateProfile.and.resolveTo();
+    button.click();
+    button.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(profileStore.updateProfile).toHaveBeenCalledTimes(2);
+    expect(location.back).toHaveBeenCalledTimes(1);
+    expect(fixture.nativeElement.querySelector('ion-footer [role="alert"]')).toBeNull();
   });
 });

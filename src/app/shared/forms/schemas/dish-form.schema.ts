@@ -11,10 +11,8 @@
  */
 
 import { applyEach, schema, validate, type ValidationError } from '@angular/forms/signals';
-import type {
-  DishEditFormValue,
-  DishIngredientFormItem,
-} from '../../../features/management/dish-edit/dish-edit.types';
+import { validateVnName } from './common';
+import type { DishEditFormValue, DishIngredientFormItem } from '../dish-edit.types';
 
 const itemSchema = schema<DishIngredientFormItem>((p) => {
   validate(p.gram_weight, ({ value }) => {
@@ -43,16 +41,7 @@ const itemSchema = schema<DishIngredientFormItem>((p) => {
 });
 
 export const dishFormSchema = schema<DishEditFormValue>((p) => {
-  validate(p.name, ({ value }) => {
-    const trimmed = value().trim();
-    if (!trimmed) {
-      return { kind: 'required', message: 'Vui lòng nhập tên món ăn' };
-    }
-    if (trimmed.length > 100) {
-      return { kind: 'maxLength', message: 'Tối đa 100 ký tự' };
-    }
-    return null;
-  });
+  validate(p.name, ({ value }) => validateVnName(value(), 'Vui lòng nhập tên món ăn'));
 
   validate(p.servings, ({ value }) => {
     const v = value();

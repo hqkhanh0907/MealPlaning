@@ -8,6 +8,8 @@ import {
   output,
 } from '@angular/core';
 
+import { MAX_PLANNED_SERVINGS, MIN_PLANNED_SERVINGS } from '../../../core/models/meal-plan.types';
+
 const HOLD_DELAY_MS = 500;
 const HOLD_INTERVAL_MS = 50;
 
@@ -20,8 +22,8 @@ const HOLD_INTERVAL_MS = 50;
 })
 export class ServingsStepper implements OnDestroy {
   readonly value = model.required<number>();
-  readonly min = input<number>(0.1);
-  readonly max = input<number>(20);
+  readonly min = input<number>(MIN_PLANNED_SERVINGS);
+  readonly max = input<number>(MAX_PLANNED_SERVINGS);
   readonly step = input<number>(0.1);
   readonly disabled = input<boolean>(false);
   readonly committed = output<number>();

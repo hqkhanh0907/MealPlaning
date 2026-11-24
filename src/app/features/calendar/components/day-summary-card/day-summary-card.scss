@@ -1,34 +1,35 @@
 .day-summary-card {
-  margin: var(--space-md);
-  padding: var(--space-md);
+  margin: var(--space-lg) var(--space-lg) var(--space-sm);
+  padding: var(--space-lg);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
-  box-shadow: var(--shadow-sm);
+  background: var(--primary-50);
 
   &__header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-md);
+    flex-wrap: wrap;
+    gap: var(--space-sm);
     margin-bottom: var(--space-md);
   }
 
   &__eyebrow {
     margin: 0;
-    color: var(--text-tertiary);
+    color: var(--primary-700);
     font-size: var(--font-size-caption);
-    font-weight: 500;
+    font-weight: 600;
   }
 
   &__title {
     margin: var(--space-xs) 0 0;
     color: var(--text-primary);
-    font-size: var(--font-size-title);
+    font-size: var(--font-size-headline);
     font-weight: 700;
   }
 
   &__sync {
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     font-size: var(--font-size-caption);
     white-space: nowrap;
   }
@@ -39,6 +40,10 @@
     gap: var(--space-md);
   }
 
+  app-calorie-ring {
+    flex-shrink: 0;
+  }
+
   &__metric {
     min-width: 0;
   }
@@ -46,7 +51,7 @@
   &__metric-label,
   &__metric-note {
     display: block;
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     font-size: var(--font-size-body-sm);
   }
 
@@ -54,7 +59,8 @@
     display: block;
     margin: var(--space-xs) 0;
     color: var(--text-primary);
-    font-size: var(--font-size-headline);
+    font-size: var(--font-size-display);
+    line-height: 1.18;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
   }
@@ -66,7 +72,7 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     background: var(--bg-card);
-    color: var(--ion-color-primary-shade);
+    color: var(--primary-700);
     font-size: var(--font-size-body-sm);
     font-weight: 600;
   }
@@ -77,7 +83,7 @@
 
   &__fiber-note {
     margin: var(--space-sm) 0 0;
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     font-size: var(--font-size-caption);
     line-height: 1.5;
   }

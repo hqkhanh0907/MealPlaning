@@ -134,7 +134,7 @@ describe('FitnessHistoryPage session details', () => {
 
     expect(details.open).toBeTrue();
     expect(details.textContent).toContain('Đẩy ngực');
-    expect(details.textContent).toContain('42.5 kg × 12 lần');
+    expect(details.textContent).toContain('42,5 kg × 12 lần');
     expect(details.textContent).toContain('Đã bỏ qua');
     expect(details.textContent).not.toContain('70 kg');
   });
@@ -145,5 +145,11 @@ describe('FitnessHistoryPage session details', () => {
     details.querySelector('summary')!.click();
 
     expect(details.textContent).toContain('Không có chi tiết bài tập.');
+  });
+
+  it('shows decimal kilograms for a workout above one tonne', async () => {
+    const host = await showHistory([{ ...completedWorkout, total_volume: 1254.25 }]);
+
+    expect(host.querySelector('summary')?.textContent).toContain('1.254,25 kg');
   });
 });

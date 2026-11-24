@@ -3,6 +3,7 @@
   <input
     class="search-input"
     type="text"
+    [attr.aria-label]="ariaLabel"
     [value]="query"
     [placeholder]="placeholder"
     (input)="handleInput($event)"

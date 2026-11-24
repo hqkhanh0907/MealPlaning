@@ -84,6 +84,43 @@ describe('SettingsPage', () => {
     expect(component.bodySummary()).toBe('170cm · 65kg · 28 tuổi · Nam');
   });
 
+  it('labels an unknown legacy activity factor as an estimate', () => {
+    profileSignal.set(makeProfile({ activity_factor: 1.31 }));
+    expect(component.activitySummary()).toBe('Chưa xác định · tạm tính vận động vừa');
+  });
+
+  it('keeps other saved reminders paused when one is turned off after permission was denied', async () => {
+    profileSignal.set(makeProfile({ notif_morning: 1, notif_weekly: 1 }));
+    notifications.requestPermission.and.resolveTo(false);
+    await component.resumeNotifications();
+    await component.toggleNotif('morning', false);
+    expect(profileSignal()?.notif_weekly).toBe(1);
+    expect(notifications.sync).toHaveBeenCalledOnceWith({
+      morning: false,
+      lunch: false,
+      evening: false,
+      weekly: false,
+    });
+  });
+
+  it('keeps saved reminders visible as paused after denial and resumes them when permission returns', async () => {
+    profileSignal.set(makeProfile({ notif_morning: 1, notif_weekly: 1 }));
+    notifications.requestPermission.and.resolveTo(false);
+    await component.resumeNotifications();
+    expect(component.notificationsPaused()).toBeTrue();
+    expect(notifications.sync).not.toHaveBeenCalled();
+    notifications.requestPermission.and.resolveTo(true);
+    await component.resumeNotifications();
+    expect(component.notificationsPaused()).toBeFalse();
+    expect(notifications.sync).toHaveBeenCalledWith({
+      morning: true,
+      lunch: false,
+      evening: false,
+      weekly: true,
+    });
+    expect(profileStore.updateProfile).not.toHaveBeenCalled();
+  });
+
   it('goalSummary maps goal value to Vietnamese label', () => {
     expect(component.goalSummary()).toBe('Giảm cân');
   });
@@ -115,6 +152,24 @@ describe('SettingsPage', () => {
 
   it('activitySummary maps activity_factor 1.55 to "Vận động vừa"', () => {
     expect(component.activitySummary()).toBe('Vận động vừa');
+  });
+
+  it('shows training experience separately from activity and displays all reminder times', () => {
+    profileSignal.set(makeProfile({ activity_factor: 1.375, fitness_level: 'advanced' }));
+    fixture.detectChanges();
+    const screen = fixture.nativeElement as HTMLElement;
+    expect(screen.querySelector('ion-item[routerLink="activity"]')?.textContent).toContain(
+      'Vận động nhẹ · Nâng cao',
+    );
+    const reminders = Array.from(screen.querySelectorAll('ion-toggle p'), (p) =>
+      p.textContent?.trim(),
+    );
+    expect(reminders).toEqual([
+      'Khoảng 07:30',
+      'Khoảng 12:00',
+      'Khoảng 18:30',
+      'Chủ nhật, khoảng 20:00',
+    ]);
   });
 
   it('toggleNotif denied path does not update profile', async () => {

@@ -3,7 +3,7 @@
   <ion-toolbar>
     @if (step() > 1) {
       <ion-buttons slot="start">
-        <ion-button fill="clear" (click)="goBack()" class="back-button">
+        <ion-button fill="clear" (click)="goBack()" class="back-button" aria-label="Quay lại">
           <ion-icon slot="icon-only" name="arrow-back-outline" />
         </ion-button>
       </ion-buttons>
@@ -34,7 +34,7 @@
           >
             <span class="radio-circle" aria-hidden="true"></span>
             <ion-icon name="body-outline" class="radio-icon" />
-            <span class="radio-label">Giảm cân</span>
+            <span class="radio-label">{{ goalLabels.lose_weight }}</span>
             @if (goal() === 'lose_weight') {
               <ion-icon name="checkmark" class="check-icon" />
             }
@@ -51,7 +51,7 @@
           >
             <span class="radio-circle" aria-hidden="true"></span>
             <ion-icon name="barbell-outline" class="radio-icon" />
-            <span class="radio-label">Tăng cơ</span>
+            <span class="radio-label">{{ goalLabels.gain_muscle }}</span>
             @if (goal() === 'gain_muscle') {
               <ion-icon name="checkmark" class="check-icon" />
             }
@@ -68,7 +68,7 @@
           >
             <span class="radio-circle" aria-hidden="true"></span>
             <ion-icon name="scale-outline" class="radio-icon" />
-            <span class="radio-label">Duy trì</span>
+            <span class="radio-label">{{ goalLabels.maintain }}</span>
             @if (goal() === 'maintain') {
               <ion-icon name="checkmark" class="check-icon" />
             }
@@ -85,7 +85,7 @@
           >
             <span class="radio-circle" aria-hidden="true"></span>
             <ion-icon name="trophy-outline" class="radio-icon" />
-            <span class="radio-label">Tăng sức mạnh</span>
+            <span class="radio-label">{{ goalLabels.performance }}</span>
             @if (goal() === 'performance') {
               <ion-icon name="checkmark" class="check-icon" />
             }
@@ -121,6 +121,7 @@
           <input
             #heightInput
             id="field-height"
+            step="any"
             data-testid="onb-height"
             type="number"
             inputmode="decimal"
@@ -141,6 +142,7 @@
           <input
             #weightInput
             id="field-weight"
+            step="any"
             data-testid="onb-weight"
             type="number"
             inputmode="decimal"
@@ -151,25 +153,15 @@
           />
         </app-form-field>
 
-        <app-form-field
-          label="Tuổi"
-          inputId="field-age"
+        <app-profile-age-field
+          idPrefix="field"
+          ageTestId="onb-age"
           errorId="err-age"
-          [invalid]="!!step2aFieldError('age')"
+          [age]="step2aFormSignal().age"
+          [birthDate]="birthDate()"
           [errorMessage]="step2aFieldError('age')"
-        >
-          <input
-            #ageInput
-            id="field-age"
-            data-testid="onb-age"
-            type="number"
-            inputmode="numeric"
-            class="input-native"
-            [formField]="step2aForm.age"
-            [attr.aria-invalid]="step2aFieldError('age') ? 'true' : null"
-            [attr.aria-describedby]="step2aFieldError('age') ? 'err-age' : null"
-          />
-        </app-form-field>
+          (edited)="onAgeEdit($event)"
+        />
 
         <span class="section-label segment-label" [class.invalid]="step2aFieldError('gender')"
           >Giới tính</span
@@ -190,7 +182,7 @@
             [attr.aria-checked]="step2aFormSignal().gender === 'male'"
             (click)="onGenderChange('male')"
           >
-            Nam
+            {{ genderLabels.male }}
           </button>
           <button
             type="button"
@@ -200,7 +192,7 @@
             [attr.aria-checked]="step2aFormSignal().gender === 'female'"
             (click)="onGenderChange('female')"
           >
-            Nữ
+            {{ genderLabels.female }}
           </button>
         </div>
         @if (step2aFieldError('gender')) {
@@ -235,7 +227,7 @@
     @if (step() === 3) {
       <div class="step-content">
         <h1 #step2bHeading class="step-title" tabindex="-1">Mức hoạt động</h1>
-        <p class="step-subtitle">Giúp chúng tôi tính nhu cầu calo phù hợp</p>
+        <p class="step-subtitle">Chọn mức vận động thường ngày và kinh nghiệm tập.</p>
 
         <p class="section-label section-label--flush">Mức vận động</p>
         <div
@@ -342,6 +334,11 @@
           </div>
         }
 
+        @if (estimate()?.energyNote; as note) {
+          <p class="step-subtitle" role="status">
+            {{ note }} Bạn vẫn có thể lên lịch và ghi bữa ăn.
+          </p>
+        }
         @if (saveError()) {
           <div class="error-toast" role="alert" aria-live="assertive">
             <ion-text color="danger">{{ saveError() }}</ion-text>

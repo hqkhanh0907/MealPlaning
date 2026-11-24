@@ -27,7 +27,7 @@
         type="button"
         class="btn-ai-lookup"
         data-testid="btn-ask-ai"
-        [disabled]="aiLoading() || !network.online()"
+        [disabled]="aiLoading() || !!ai.textIssue()"
         (click)="onAskAi()"
       >
         @if (aiLoading()) {
@@ -35,7 +35,7 @@
           <span>Đang hỏi AI...</span>
         } @else {
           <ion-icon name="sparkles-outline" aria-hidden="true" />
-          <span>Điền bằng AI</span>
+          <span>{{ ai.textIssue() || 'Điền bằng AI' }}</span>
         }
       </button>
     }
@@ -85,8 +85,7 @@
       </button>
     </app-form-field>
 
-    <div class="section-label">Thông tin dinh dưỡng (per 100g)</div>
-    <p class="section-hint">Nhập trị số dinh dưỡng cho mỗi 100 g nguyên liệu.</p>
+    <div class="section-label">Dinh dưỡng trong 100 g</div>
 
     <app-form-field
       label="Calories (kcal)"
@@ -231,13 +230,13 @@
 />
 
 <app-confirm-dialog
-  [isOpen]="discardDialogOpen()"
+  [isOpen]="discard.open()"
   title="Bỏ thay đổi?"
   message="Bạn có thay đổi chưa lưu. Nếu rời khỏi màn hình này, các thay đổi sẽ bị mất."
   cancelLabel="Ở lại"
   confirmLabel="Bỏ thay đổi"
   confirmVariant="danger"
-  (cancelled)="cancelDiscardChanges()"
+  (cancelled)="discard.answer(false)"
   (confirmed)="confirmDiscardChangesDialog()"
 />
 

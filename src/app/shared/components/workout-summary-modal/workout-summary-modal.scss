@@ -21,8 +21,8 @@
 }
 
 .wsm-close {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   margin-inline-end: var(--space-md);
   border: none;
   border-radius: var(--radius-full);
@@ -68,12 +68,13 @@
     font-size: var(--font-size-title);
     font-weight: 600;
     color: var(--text-primary);
+    overflow-wrap: anywhere;
   }
 }
 
 .wsm-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-sm);
   margin-bottom: var(--space-lg);
 }
@@ -97,6 +98,7 @@
     font-size: var(--font-size-headline);
     font-weight: 600;
     color: var(--text-primary);
+    overflow-wrap: anywhere;
   }
 
   span {
@@ -139,10 +141,12 @@
   &__main {
     display: grid;
     gap: 2px;
+    min-width: 0;
+    overflow-wrap: anywhere;
 
     strong {
       font-size: var(--font-size-body);
-      font-weight: 500;
+      font-weight: 600;
       color: var(--text-primary);
     }
 

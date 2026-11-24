@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { FieldTree } from '@angular/forms/signals';
 import { form } from '@angular/forms/signals';
-import type { IngredientEditFormValue } from '../../../features/management/ingredient-edit/ingredient-edit.types';
+import type { IngredientEditFormValue } from '../ingredient-edit.types';
 import { ingredientFormSchema } from './ingredient-form.schema';
 
 const baseValue = (overrides: Partial<IngredientEditFormValue> = {}): IngredientEditFormValue => ({

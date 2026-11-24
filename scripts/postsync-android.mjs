@@ -10,6 +10,7 @@
  *  - Story 2.5 (AC-3 + AC-4): release signing config + versionCode/versionName
  *    trong android/app/build.gradle.
  *  - Story 2.5 (AC-3): keystore.properties + *.jks vào android/.gitignore.
+ *  - Light theme for the native activity and system bars.
  *
  * Usage:
  *   node scripts/postsync-android.mjs
@@ -22,6 +23,7 @@ import { dirname, resolve } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
 const MANIFEST = resolve(ROOT, 'android/app/src/main/AndroidManifest.xml');
+const STYLES = resolve(ROOT, 'android/app/src/main/res/values/styles.xml');
 const BUILD_GRADLE = resolve(ROOT, 'android/app/build.gradle');
 const ANDROID_GITIGNORE = resolve(ROOT, 'android/.gitignore');
 
@@ -69,6 +71,28 @@ function patchManifest() {
     console.log(`[postsync] + applied: ${patch.name}`);
   }
   if (changed) writeFileSync(MANIFEST, xml, 'utf8');
+}
+
+function patchStyles() {
+  if (!existsSync(STYLES)) return;
+  const source = readFileSync(STYLES, 'utf8');
+  const activityTheme = /(<style name="AppTheme\.NoActionBar" parent=")[^"]+("\s*>)([\s\S]*?)(<\/style>)/;
+  if (!activityTheme.test(source)) {
+    throw new Error('[postsync] AppTheme.NoActionBar is missing from styles.xml');
+  }
+  const updated = source.replace(activityTheme, (_, open, attributesEnd, body, close) => {
+    const items = {
+      'android:windowLightStatusBar': 'true',
+      'android:forceDarkAllowed': 'false',
+    };
+    for (const [name, value] of Object.entries(items)) {
+      const item = `<item name="${name}">${value}</item>`;
+      const existing = new RegExp(`<item name="${name}">[^<]*</item>`);
+      body = existing.test(body) ? body.replace(existing, item) : `${body.trimEnd()}\n        ${item}\n    `;
+    }
+    return `${open}Theme.AppCompat.Light.NoActionBar${attributesEnd}${body}${close}`;
+  });
+  if (updated !== source) writeFileSync(STYLES, updated, 'utf8');
 }
 
 const SIGNING_BLOCK = `
@@ -166,6 +190,7 @@ function patchAndroidGitignore() {
 
 function main() {
   patchManifest();
+  patchStyles();
   patchBuildGradle();
   patchAndroidGitignore();
   console.log('[postsync] done');

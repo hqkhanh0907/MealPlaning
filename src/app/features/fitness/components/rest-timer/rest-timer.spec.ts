@@ -36,6 +36,20 @@ describe('RestTimer', () => {
     expect(component.label()).toBe('0:05');
     expect(component.isRunning()).toBeFalse();
   }));
+
+  it('counts elapsed time when Android delays interval callbacks', fakeAsync(() => {
+    const clock = spyOn(Date, 'now').and.returnValue(10000);
+    component.reset(10);
+    component.start();
+    clock.and.returnValue(16000);
+    tick(1000);
+    expect(component.remaining()).toBe(4);
+    clock.and.returnValue(21000);
+    tick(1000);
+    expect(component.remaining()).toBe(0);
+    expect(component.isRunning()).toBeFalse();
+    component.reset(0);
+  }));
 });
 
 describe('RestTimer input', () => {

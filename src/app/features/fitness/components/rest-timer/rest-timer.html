@@ -1,22 +1,19 @@
-<section class="rest-timer" aria-label="Rest timer">
+<section class="rest-timer" [class.rest-timer--running]="isRunning()" aria-label="Bộ đếm nghỉ">
   <div class="rest-timer__status">
     <ion-icon name="timer-outline" aria-hidden="true" />
     <div>
-      <span>Rest timer</span>
+      <span role="status">{{ isRunning() ? 'Đang nghỉ' : 'Bộ đếm nghỉ' }}</span>
       <strong>{{ label() }}</strong>
     </div>
   </div>
 
   <div class="rest-timer__actions">
-    <ion-button
-      fill="clear"
-      size="small"
-      (click)="start()"
-      [disabled]="remaining() <= 0 || isRunning()"
-    >
-      Bắt đầu
-    </ion-button>
-    <ion-button fill="clear" size="small" (click)="reset()" aria-label="Reset rest timer">
+    @if (!isRunning()) {
+      <ion-button fill="clear" size="small" (click)="start()" [disabled]="remaining() <= 0">
+        Bắt đầu
+      </ion-button>
+    }
+    <ion-button fill="clear" size="small" (click)="reset()" aria-label="Đặt lại bộ đếm nghỉ">
       <ion-icon slot="icon-only" name="refresh-outline" />
     </ion-button>
   </div>

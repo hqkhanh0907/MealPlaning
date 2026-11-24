@@ -31,8 +31,8 @@
 
     <ion-item button detail="false" routerLink="activity">
       <ion-label>
-        <h3>Hoạt động</h3>
-        <p>{{ activitySummary() }}</p>
+        <h3>Vận động và trình độ tập</h3>
+        <p>{{ activitySummary() }} · {{ trainingLevelLabel() }}</p>
       </ion-label>
       <ion-icon slot="end" name="chevron-forward-outline" aria-hidden="true" />
     </ion-item>
@@ -45,12 +45,16 @@
 
     <ion-item>
       <ion-label>Năng lượng</ion-label>
-      <ion-note slot="end">{{ profile()?.target_calories }} kcal</ion-note>
+      <ion-note slot="end">{{
+        profile()?.target_calories ? profile()!.target_calories + ' kcal' : 'Chưa đặt'
+      }}</ion-note>
     </ion-item>
 
     <ion-item>
       <ion-label>Protein</ion-label>
-      <ion-note slot="end">{{ profile()?.target_protein }} g</ion-note>
+      <ion-note slot="end">{{
+        profile()?.target_protein ? profile()!.target_protein + ' g' : 'Chưa đặt'
+      }}</ion-note>
     </ion-item>
 
     <ion-item>
@@ -76,48 +80,30 @@
     <ion-list-header>
       <ion-label><h2>Nhắc nhở</h2></ion-label>
     </ion-list-header>
-
-    <ion-item>
-      <ion-toggle
-        [checked]="morningEnabled()"
-        (ionChange)="onToggleChange('morning', $any($event))"
-      >
-        <ion-label>
-          <h3>Bữa sáng</h3>
-          <p>07:30</p>
+    @if (notificationsPaused()) {
+      <ion-item>
+        <ion-label class="ion-text-wrap">
+          Android đang tắt quyền thông báo. Các giờ nhắc đã chọn đang tạm dừng.
+          <ion-button class="resume-notifications" fill="outline" (click)="resumeNotifications()"
+            >Cho phép thông báo</ion-button
+          >
         </ion-label>
-      </ion-toggle>
-    </ion-item>
+      </ion-item>
+    }
 
-    <ion-item>
-      <ion-toggle [checked]="lunchEnabled()" (ionChange)="onToggleChange('lunch', $any($event))">
-        <ion-label>
-          <h3>Bữa trưa</h3>
-          <p>12:00</p>
-        </ion-label>
-      </ion-toggle>
-    </ion-item>
-
-    <ion-item>
-      <ion-toggle
-        [checked]="eveningEnabled()"
-        (ionChange)="onToggleChange('evening', $any($event))"
-      >
-        <ion-label>
-          <h3>Bữa tối</h3>
-          <p>18:30</p>
-        </ion-label>
-      </ion-toggle>
-    </ion-item>
-
-    <ion-item>
-      <ion-toggle [checked]="weeklyEnabled()" (ionChange)="onToggleChange('weekly', $any($event))">
-        <ion-label>
-          <h3>Tổng kết tuần</h3>
-          <p>CN 20:00</p>
-        </ion-label>
-      </ion-toggle>
-    </ion-item>
+    @for (slot of reminderSlots; track slot.key) {
+      <ion-item>
+        <ion-toggle
+          [checked]="selectedNotifications()[slot.key]"
+          (ionChange)="onToggleChange(slot.key, $event)"
+        >
+          <ion-label>
+            <h3>{{ slot.title }}</h3>
+            <p>{{ reminderTimeLabel(slot) }}</p>
+          </ion-label>
+        </ion-toggle>
+      </ion-item>
+    }
   </ion-list>
 
   <ion-list lines="full" class="settings-list">

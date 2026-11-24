@@ -438,3 +438,39 @@
     cursor: not-allowed;
   }
 }
+
+.sticky-save-bar .save-button,
+.sticky-save-bar .save-button::part(native) {
+  min-height: 48px;
+}
+
+.dish-name-editor,
+.dish-name-input {
+  font: 400 var(--font-size-subtitle) / 1.5 var(--ion-font-family);
+}
+
+.dish-name-input {
+  display: block;
+  min-height: 1.5em;
+  field-sizing: content;
+}
+
+@supports not (field-sizing: content) {
+  .dish-name-editor {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dish-name-editor::after,
+  .dish-name-input {
+    grid-area: 1 / 1;
+  }
+
+  .dish-name-editor::after {
+    // Match the textarea's wrap on WebViews without intrinsic field sizing.
+    content: attr(data-name) ' ';
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    visibility: hidden;
+  }
+}

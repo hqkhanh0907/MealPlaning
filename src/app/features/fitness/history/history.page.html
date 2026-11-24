@@ -3,33 +3,34 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/tabs/fitness" text=""></ion-back-button>
     </ion-buttons>
-    <ion-title>Lịch sử</ion-title>
+    <ion-title>Lịch sử tập luyện</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="history-content">
   @if (loading()) {
-    <div class="state-block">
-      <ion-spinner name="dots"></ion-spinner>
+    <div class="state-block" role="status">
+      <ion-spinner name="dots" aria-hidden="true"></ion-spinner>
       <p>Đang tải lịch sử…</p>
     </div>
   } @else if (errorMessage()) {
     <div class="state-block state-block--error">
-      <p>{{ errorMessage() }}</p>
+      <p role="alert">{{ errorMessage() }}</p>
+      <ion-button fill="outline" (click)="refresh()">Thử lại</ion-button>
     </div>
   } @else if (groups().length === 0) {
     <div class="state-block state-block--empty">
-      <ion-icon name="barbell-outline" aria-hidden="true"></ion-icon>
+      <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
       <h2>Chưa có buổi tập nào</h2>
-      <p>Hoàn tất một buổi tập để bắt đầu ghi lại hành trình của bạn.</p>
+      <p>Hoàn thành một buổi tập để xem lại các hiệp đã ghi.</p>
     </div>
   } @else {
-    <section class="history-list">
+    <section class="history-list" aria-label="Các buổi tập đã hoàn thành">
       @for (group of groups(); track trackByGroup($index, group)) {
         <div class="week-block">
           <header class="week-block__header">
             <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
-            <h3>{{ group.weekLabel }}</h3>
+            <h2>{{ group.weekLabel }}</h2>
             <span class="week-block__count">{{ group.sessions.length }} buổi</span>
           </header>
           <ul class="session-list">
@@ -38,24 +39,24 @@
                 <details>
                   <summary class="session-card__summary">
                     <span class="session-card__date">
-                      <span class="session-card__date-text">
-                        {{ formatSessionDate(session.date) }}
-                      </span>
                       <span class="session-card__day-name">
                         {{
                           session.training_day_name ??
                             (session.mode === 'free' ? 'Tập tự do' : 'Buổi tập')
                         }}
                       </span>
+                      <time class="session-card__date-text" [attr.datetime]="session.date">
+                        {{ formatSessionDate(session.date) }}
+                      </time>
                     </span>
                     <span class="session-card__stats">
                       <span class="stat">
-                        <ion-icon name="barbell-outline" aria-hidden="true"></ion-icon>
+                        <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
                         {{ setCount(session) }} hiệp đã ghi
                       </span>
                       <span class="stat">
-                        <ion-icon name="trophy-outline" aria-hidden="true"></ion-icon>
-                        {{ formatVolume(session.total_volume) }}
+                        <ion-icon name="barbell-outline" aria-hidden="true"></ion-icon>
+                        Tổng khối lượng {{ formatVolume(session.total_volume) }}
                       </span>
                       <span class="stat">
                         <ion-icon name="timer-outline" aria-hidden="true"></ion-icon>
@@ -71,16 +72,16 @@
                   <div class="session-card__details">
                     @for (exercise of session.exercises; track exercise.id) {
                       <section class="session-exercise">
-                        <h4>{{ exercise.exercise_name_vi || exercise.exercise_name }}</h4>
+                        <h3>{{ exercise.exercise_name_vi || exercise.exercise_name }}</h3>
                         @if (exercise.sets.length) {
                           <ul class="session-sets">
                             @for (set of exercise.sets; track set.id) {
                               <li>
                                 <span>Hiệp {{ set.set_number }}</span>
                                 @if (set.status === 'skipped') {
-                                  <span>Đã bỏ qua</span>
+                                  <span class="session-set--skipped">Đã bỏ qua</span>
                                 } @else {
-                                  <span>{{ set.weight_kg }} kg × {{ set.reps }} lần</span>
+                                  <span>{{ setValue(set) }}</span>
                                 }
                               </li>
                             }

@@ -11,7 +11,7 @@ export function weekDayStatus(d: WeekDayTotal): WeekDayStatus {
   if (d.isToday) return 'today-recording';
   if (!d.isPast) return 'future-planned';
 
-  if (d.targetCal <= 0) return 'past-extreme';
+  if (d.targetCal <= 0) return 'past-no-target';
   const pct = Math.round((d.loggedCal / d.targetCal) * 100);
   if (pct < 50 || pct > 120) return 'past-extreme';
   if (pct >= 110) return 'past-over';
@@ -20,6 +20,7 @@ export function weekDayStatus(d: WeekDayTotal): WeekDayStatus {
 }
 
 const STATUS_ICON: Record<WeekDayStatus, string> = {
+  'past-no-target': 'ellipse-outline',
   'no-plan': 'ellipse-outline',
   'future-planned': 'ellipse-outline',
   'today-recording': 'radio-button-on-outline',

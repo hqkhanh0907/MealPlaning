@@ -21,8 +21,7 @@
 }
 
 .logging-modal__eyebrow {
-  color: var(--ion-color-primary-contrast);
-  opacity: 0.78; // allow-hardcode: contrast tier between full-white title and tertiary
+  color: var(--primary-700);
   font-size: var(--font-size-caption);
   font-weight: 600;
   text-transform: uppercase;
@@ -53,7 +52,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-md);
-  margin: var(--space-md) 0;
+  margin: 0 0 var(--space-md);
 }
 
 .logging-modal__servings-label {
@@ -95,6 +94,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-xs);
   padding: var(--space-xs);
+  margin-bottom: var(--space-md);
   border-radius: var(--radius-sm);
   background: var(--bg-muted);
 
@@ -103,7 +103,7 @@
     border: 0;
     border-radius: var(--radius-xs);
     background: transparent;
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     font-size: var(--font-size-body-sm);
     font-weight: 600;
   }
@@ -178,7 +178,8 @@
   font-weight: 700;
 
   &:disabled {
-    opacity: 0.5;
+    background: var(--bg-muted);
+    color: var(--text-secondary);
   }
 }
 
@@ -210,6 +211,8 @@
   span {
     display: grid;
     gap: var(--space-xs);
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   strong {
@@ -236,8 +239,8 @@
   padding: var(--space-sm) var(--space-lg);
   border: 0;
   border-radius: var(--radius-sm);
-  background: var(--ion-color-secondary);
-  color: var(--ion-color-secondary-contrast);
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
   font-size: var(--font-size-body-sm);
   font-weight: 700;
 }
@@ -273,12 +276,10 @@
 }
 
 .logging-modal__dish-name {
-  overflow: hidden;
   color: var(--text-primary);
   font-size: var(--font-size-body);
   font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .logging-modal__dish-meta {

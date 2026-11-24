@@ -81,6 +81,16 @@ describe('ActivityEditPage', () => {
     expect(component.preview()).toBeNull();
   });
 
+  it('saves a new training level independently of activity and energy targets', async () => {
+    await setup(makeProfile({ fitness_level: 'intermediate', calorie_target_mode: 'manual' }));
+    expect(component.fitnessLevel()).toBe('intermediate');
+    component.fitnessLevel.set('advanced');
+    expect(component.isDirty()).toBeTrue();
+    await component.save();
+    expect(profileStore.updateProfile).toHaveBeenCalledOnceWith({ fitness_level: 'advanced' });
+    expect(location.back).toHaveBeenCalled();
+  });
+
   it('preview reflects current factor (1.2 vs 1.55 yields different tdee)', async () => {
     await setup(makeProfile());
     component.factor.set(1.2);
@@ -113,55 +123,48 @@ describe('ActivityEditPage', () => {
     expect(component.activeLabel()).toBe('Vận động nặng');
   });
 
-  it('save() updates targets when they were auto-computed', async () => {
-    const auto = recalcTargets({
-      height_cm: 170,
-      weight_kg: 65,
-      age: 28,
-      gender: 'male',
-      goal: 'lose_weight',
-      activity_factor: 1.55,
+  for (const mode of ['auto', 'manual'] as const) {
+    it(`passes only the edited activity factor with ${mode} targets`, async () => {
+      await setup(makeProfile({ calorie_target_mode: mode, protein_target_mode: mode }));
+      component.factor.set(1.725);
+      await component.save();
+      expect(profileStore.updateProfile).toHaveBeenCalledOnceWith({ activity_factor: 1.725 });
+      expect(location.back).toHaveBeenCalled();
     });
-    await setup(
-      makeProfile({
-        target_calories: auto.target_calories,
-        target_protein: auto.target_protein,
-      }),
-    );
-    component.factor.set(1.725);
-    await component.save();
-
-    const patch = profileStore.updateProfile.calls.mostRecent().args[0] as Partial<UserProfile>;
-    expect(patch.activity_factor).toBe(1.725);
-    expect(patch.bmr).toBeDefined();
-    expect(patch.tdee).toBeDefined();
-    expect(patch.target_calories).toBeDefined();
-    expect(patch.target_protein).toBeDefined();
-    expect(location.back).toHaveBeenCalled();
-  });
-
-  it('save() preserves customized target_calories and target_protein when overridden', async () => {
-    await setup(
-      makeProfile({
-        target_calories: 9999,
-        target_protein: 999,
-      }),
-    );
-    component.factor.set(1.725);
-    await component.save();
-
-    const patch = profileStore.updateProfile.calls.mostRecent().args[0] as Partial<UserProfile>;
-    expect(patch.activity_factor).toBe(1.725);
-    expect('target_calories' in patch).toBe(false);
-    expect('target_protein' in patch).toBe(false);
-    expect(patch.bmr).toBeDefined();
-    expect(patch.tdee).toBeDefined();
-  });
+  }
 
   it('save() bails when profile is null', async () => {
     await setup(null);
     await component.save();
     expect(profileStore.updateProfile).not.toHaveBeenCalled();
     expect(location.back).not.toHaveBeenCalled();
+  });
+
+  it('keeps the edit after a failed write and handles two retry taps only once', async () => {
+    await setup(makeProfile());
+    component.fitnessLevel.set('advanced');
+    fixture.detectChanges();
+    const button: HTMLIonButtonElement = fixture.nativeElement.querySelector('.save-button');
+    profileStore.updateProfile.and.rejectWith(new Error('write failed'));
+    button.click();
+    button.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(profileStore.updateProfile).toHaveBeenCalledTimes(1);
+    expect(location.back).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.querySelector('ion-footer [role="alert"]')?.textContent).toContain(
+      'thử lại',
+    );
+    expect(button.disabled).toBeFalse();
+    expect(component.fitnessLevel()).toBe('advanced');
+
+    profileStore.updateProfile.and.resolveTo();
+    button.click();
+    button.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(profileStore.updateProfile).toHaveBeenCalledTimes(2);
+    expect(location.back).toHaveBeenCalledTimes(1);
+    expect(fixture.nativeElement.querySelector('ion-footer [role="alert"]')).toBeNull();
   });
 });

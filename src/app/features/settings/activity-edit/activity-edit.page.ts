@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal, OnInit } from '@angular/core';
+import { SaveAndClose } from '../../../shared/forms/save-and-close';
 import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -19,8 +20,17 @@ import {
 import { ProfileStore } from '../../../core/stores/profile.store';
 import { recalcTargets } from '../../../core/services/profile/recalc-targets';
 import { activityLabelShort } from '../../../core/services/profile/activity-label';
-import { getActivityFactor } from '../../onboarding/onboarding-calculation';
-import type { ActivityLevel } from '../../../core/models/user-profile.types';
+import {
+  DEFAULT_ACTIVITY_LEVEL,
+  getActivityFactor,
+} from '../../../core/services/profile/energy-targets';
+import {
+  ACTIVITY_LEVELS,
+  FITNESS_LEVEL_LABELS,
+  FITNESS_LEVELS,
+  type ActivityLevel,
+  type FitnessLevel,
+} from '../../../core/models/user-profile.types';
 
 interface ActivityOption {
   readonly factor: number;
@@ -64,12 +74,17 @@ const ACTIVITY_DESCRIPTIONS: Readonly<Record<ActivityLevel, string>> = {
 export default class ActivityEditPage implements OnInit {
   private readonly profileStore = inject(ProfileStore);
   private readonly location = inject(Location);
+  readonly submission = new SaveAndClose(
+    () => this.location.back(),
+    'Chưa lưu được mức vận động và trình độ tập. Hãy thử lại.',
+  );
 
-  readonly factor = signal(1.55);
+  readonly factor = signal(getActivityFactor(DEFAULT_ACTIVITY_LEVEL));
+  readonly fitnessLevel = signal<FitnessLevel>('beginner');
+  readonly levels = FITNESS_LEVELS;
+  readonly levelLabels = FITNESS_LEVEL_LABELS;
 
-  readonly options: readonly ActivityOption[] = (
-    ['sedentary', 'light', 'moderate', 'heavy'] as const
-  ).map<ActivityOption>((level) => ({
+  readonly options: readonly ActivityOption[] = ACTIVITY_LEVELS.map((level) => ({
     factor: getActivityFactor(level),
     label: activityLabelShort(level),
     desc: ACTIVITY_DESCRIPTIONS[level],
@@ -79,19 +94,13 @@ export default class ActivityEditPage implements OnInit {
     const p = this.profileStore.profile();
     if (!p) return;
     this.factor.set(p.activity_factor);
+    this.fitnessLevel.set(p.fitness_level);
   }
 
   readonly preview = computed(() => {
     const p = this.profileStore.profile();
     if (!p) return null;
-    return recalcTargets({
-      height_cm: p.height_cm,
-      weight_kg: p.weight_kg,
-      age: p.age,
-      gender: p.gender,
-      goal: p.goal,
-      activity_factor: this.factor(),
-    });
+    return recalcTargets({ ...p, activity_factor: this.factor() });
   });
 
   readonly activeLabel = computed(
@@ -99,35 +108,18 @@ export default class ActivityEditPage implements OnInit {
   );
   readonly isDirty = computed(() => {
     const p = this.profileStore.profile();
-    return !!p && p.activity_factor !== this.factor();
+    return !!p && (p.activity_factor !== this.factor() || p.fitness_level !== this.fitnessLevel());
   });
 
   async save(): Promise<void> {
     const p = this.profileStore.profile();
-    const r = this.preview();
-    if (!p || !r) return;
-    if (!this.isDirty()) {
-      this.location.back();
-      return;
-    }
-    const currentRecalc = recalcTargets({
-      height_cm: p.height_cm,
-      weight_kg: p.weight_kg,
-      age: p.age,
-      gender: p.gender,
-      goal: p.goal,
-      activity_factor: p.activity_factor,
+    if (!p) return;
+    await this.submission.submit(() => {
+      if (!this.isDirty()) return;
+      return this.profileStore.updateProfile({
+        ...(p.fitness_level !== this.fitnessLevel() ? { fitness_level: this.fitnessLevel() } : {}),
+        ...(p.activity_factor !== this.factor() ? { activity_factor: this.factor() } : {}),
+      });
     });
-    const wasAutoCals = p.target_calories === currentRecalc.target_calories;
-    const wasAutoProtein = p.target_protein === currentRecalc.target_protein;
-
-    await this.profileStore.updateProfile({
-      activity_factor: this.factor(),
-      bmr: r.bmr,
-      tdee: r.tdee,
-      ...(wasAutoCals ? { target_calories: r.target_calories } : {}),
-      ...(wasAutoProtein ? { target_protein: r.target_protein } : {}),
-    });
-    this.location.back();
   }
 }

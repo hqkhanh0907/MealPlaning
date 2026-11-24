@@ -18,6 +18,49 @@
       (valueChange)="onTabChange($event)"
     />
 
+    <div class="management-create">
+      <button
+        #createTrigger
+        class="management-create__trigger"
+        type="button"
+        [attr.aria-label]="
+          tab() === 'dishes' ? (createMenuOpen() ? 'Đóng menu tạo món' : 'Mở menu tạo món') : null
+        "
+        [attr.aria-expanded]="tab() === 'dishes' ? createMenuOpen() : null"
+        [attr.aria-controls]="createMenuOpen() ? 'dish-create-options' : null"
+        (click)="openCreateAction()"
+        (keydown.escape)="closeCreateMenu()"
+      >
+        <ion-icon [name]="createMenuOpen() ? 'close-outline' : 'add-outline'" aria-hidden="true" />
+        {{ tab() === 'ingredients' ? 'Thêm nguyên liệu' : 'Tạo món' }}
+      </button>
+
+      @if (createMenuOpen()) {
+        <div class="management-create__options" id="dish-create-options">
+          <button
+            type="button"
+            class="management-create__option"
+            aria-label="Tạo món từ nguyên liệu"
+            (click)="handleDishCreateMode('ingredient')"
+            (keydown.escape)="closeCreateMenu(createTrigger)"
+          >
+            <ion-icon name="create-outline" aria-hidden="true" />
+            <span>Tạo món từ nguyên liệu</span>
+          </button>
+          <button
+            type="button"
+            class="management-create__option"
+            aria-label="AI tự điền từ tên món"
+            (click)="handleDishCreateMode('ai')"
+            (keydown.escape)="closeCreateMenu(createTrigger)"
+          >
+            <ion-icon name="sparkles-outline" aria-hidden="true" />
+            <span>AI tự điền từ tên món</span>
+          </button>
+        </div>
+      }
+    </div>
+
     @if (tab() === 'ingredients') {
       @if (showIngredientSearch()) {
         <app-search-toolbar
@@ -45,24 +88,30 @@
       }
 
       @if (ingredientStore.loading()) {
-        <p class="state-text">Đang tải nguyên liệu...</p>
+        <p class="state-text" role="status">Đang tải nguyên liệu…</p>
+      } @else if (listError() === 'ingredients') {
+        <div class="management-error">
+          <p class="state-text" role="alert">Không thể tải nguyên liệu.</p>
+          <button type="button" (click)="retryActiveList()">Thử lại</button>
+        </div>
       } @else if (filteredIngredients().length === 0) {
         <app-empty-state
+          [class.search-empty]="ingredientStore.searchQuery().trim()"
           [icon]="ingredientStore.searchQuery().trim() ? 'search-outline' : 'nutrition-outline'"
           [title]="
             ingredientStore.searchQuery().trim()
               ? 'Không tìm thấy nguyên liệu nào'
-              : 'Chưa có nguyên liệu nào'
+              : activeIngredientFilter() !== 'Tất cả'
+                ? 'Không có nguyên liệu trong nhóm này'
+                : 'Chưa có nguyên liệu nào'
           "
           [description]="
             ingredientStore.searchQuery().trim()
               ? 'Thử từ khóa khác hoặc thêm nguyên liệu mới.'
-              : 'Bắt đầu thêm nguyên liệu để quản lý dinh dưỡng.'
+              : activeIngredientFilter() !== 'Tất cả'
+                ? 'Chọn nhóm khác hoặc thêm nguyên liệu.'
+                : 'Thêm nguyên liệu để tạo công thức cho món ăn.'
           "
-          [actionLabel]="
-            ingredientStore.searchQuery().trim() ? null : '+ Thêm nguyên liệu đầu tiên'
-          "
-          (action)="openCreateIngredient()"
         />
       } @else {
         <div class="card-list">
@@ -71,7 +120,7 @@
               <button
                 type="button"
                 class="kebab-button"
-                aria-haspopup="menu"
+                aria-haspopup="dialog"
                 [attr.aria-label]="'Tuỳ chọn cho ' + ingredient.name"
                 (click)="openIngredientOptions(ingredient, $event)"
               >
@@ -120,9 +169,15 @@
       }
 
       @if (dishStore.loading()) {
-        <p class="state-text">Đang tải món ăn...</p>
+        <p class="state-text" role="status">Đang tải món ăn…</p>
+      } @else if (listError() === 'dishes') {
+        <div class="management-error">
+          <p class="state-text" role="alert">Không thể tải món ăn.</p>
+          <button type="button" (click)="retryActiveList()">Thử lại</button>
+        </div>
       } @else if (filteredDishes().length === 0) {
         <app-empty-state
+          [class.search-empty]="dishStore.searchQuery().trim()"
           [icon]="dishStore.searchQuery().trim() ? 'search-outline' : 'restaurant-outline'"
           [title]="
             dishStore.searchQuery().trim() ? 'Không tìm thấy món ăn nào' : 'Chưa có món ăn nào'
@@ -132,8 +187,6 @@
               ? 'Thử tên món khác hoặc thêm món ăn mới.'
               : 'Thêm món ăn đầu tiên để bắt đầu lập kế hoạch bữa ăn.'
           "
-          [actionLabel]="dishStore.searchQuery().trim() ? null : '+ Thêm món ăn đầu tiên'"
-          (action)="openCreateDish()"
         />
       } @else {
         <div class="card-list">
@@ -142,7 +195,7 @@
               <button
                 type="button"
                 class="kebab-button"
-                aria-haspopup="menu"
+                aria-haspopup="dialog"
                 [attr.aria-label]="'Tuỳ chọn cho ' + dish.name"
                 (click)="openDishOptions(dish, $event)"
               >
@@ -164,7 +217,7 @@
                   </div>
                 </div>
 
-                <div class="dish-calories">{{ formatNumber(dish.total_calories) }} kcal</div>
+                <div class="dish-calories">{{ formatNumber(dish.total_calories) }} kcal/phần</div>
                 <p class="dish-macros">
                   <span class="macro macro--protein"
                     >Protein {{ formatNumber(dish.total_protein) }}g</span
@@ -175,7 +228,7 @@
                   <span class="macro macro--fat">Fat {{ formatNumber(dish.total_fat) }}g</span>
                 </p>
                 <p class="item-card__detail item-card__detail--dish">
-                  {{ formatNumber(dish.servings) }} phần ·
+                  Công thức {{ formatNumber(dish.servings) }} phần ·
                   <span class="badge badge--source-inline">{{ dishSourceLabel(dish.source) }}</span>
                 </p>
               </button>
@@ -187,61 +240,6 @@
           <p class="result-hint result-hint--centered">{{ hint }}</p>
         }
       }
-    }
-
-    @if (!hideFab()) {
-      <button
-        class="fab"
-        type="button"
-        [attr.aria-label]="
-          tab() === 'dishes'
-            ? fabMenuOpen()
-              ? 'Đóng menu tạo món'
-              : 'Mở menu tạo món'
-            : 'Thêm mới'
-        "
-        (click)="openCreateAction()"
-      >
-        <ion-icon [name]="tab() === 'dishes' && fabMenuOpen() ? 'close-outline' : 'add-outline'" />
-      </button>
-    }
-
-    @if (tab() === 'dishes' && fabMenuOpen()) {
-      <div class="fab-menu-backdrop" role="presentation" (click)="closeFabMenu()">
-        <div
-          class="fab-menu"
-          tabindex="-1"
-          (click)="$event.stopPropagation()"
-          (keydown.escape)="closeFabMenu()"
-        >
-          <button
-            type="button"
-            class="fab-menu-item fab-menu-item--primary"
-            aria-label="Tạo món từ nguyên liệu"
-            (click)="handleDishCreateMode('ingredient')"
-          >
-            <ion-icon class="fab-menu-icon" name="create-outline" />
-            <span class="fab-menu-text">
-              <span class="fab-menu-label">Tạo từ nguyên liệu</span>
-              <span class="fab-menu-sublabel">Tính dinh dưỡng tự động, quản lý chi tiết</span>
-            </span>
-          </button>
-          <button
-            type="button"
-            class="fab-menu-item"
-            aria-label="AI tự điền từ tên món"
-            (click)="handleDishCreateMode('ai')"
-          >
-            <ion-icon class="fab-menu-icon" name="sparkles-outline" />
-            <span class="fab-menu-text">
-              <span class="fab-menu-label">AI tự điền</span>
-              <span class="fab-menu-sublabel"
-                >Nhập tên món để AI gợi ý nguyên liệu và khối lượng</span
-              >
-            </span>
-          </button>
-        </div>
-      </div>
     }
 
     <app-confirm-dialog

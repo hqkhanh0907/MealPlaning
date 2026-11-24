@@ -7,21 +7,21 @@
   text-align: center;
 
   &__icon {
-    font-size: 56px; // allow-hardcode: oversized empty-state illustration glyph (one-off)
+    font-size: var(--font-size-hero);
     line-height: 1;
-    color: var(--text-tertiary);
+    color: var(--ion-color-primary);
   }
 
   &__title {
     margin: 0;
     color: var(--text-primary);
     font-size: var(--font-size-title);
-    font-weight: 500;
+    font-weight: 700;
   }
 
   &__subtitle {
     margin: 0 0 var(--space-md);
-    color: var(--text-tertiary);
+    color: var(--text-secondary);
     font-size: var(--font-size-body);
   }
 
@@ -40,25 +40,30 @@
     background: var(--bg-muted);
     color: var(--ion-text-color);
     font-size: var(--font-size-body);
-    font-weight: 500;
+    font-weight: 600;
     border: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-xs);
+    gap: var(--space-sm);
 
     ion-icon {
-      font-size: var(--font-size-subtitle);
+      flex: 0 0 auto;
+      font-size: var(--font-size-icon-md);
     }
 
     &--primary {
-      background: var(--ion-color-secondary);
-      color: var(--ion-color-secondary-contrast);
+      background: var(--ion-color-primary);
+      color: var(--ion-color-primary-contrast);
     }
 
     &--ghost {
       background: transparent;
-      color: var(--text-tertiary);
+      color: var(--primary-700);
+    }
+
+    &:disabled {
+      color: var(--text-secondary);
     }
   }
 }

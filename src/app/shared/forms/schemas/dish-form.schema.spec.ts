@@ -2,10 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { FieldTree } from '@angular/forms/signals';
 import { form } from '@angular/forms/signals';
-import type {
-  DishEditFormValue,
-  DishIngredientFormItem,
-} from '../../../features/management/dish-edit/dish-edit.types';
+import type { DishEditFormValue, DishIngredientFormItem } from '../dish-edit.types';
 import { dishFormSchema } from './dish-form.schema';
 
 const baseItem = (overrides: Partial<DishIngredientFormItem> = {}): DishIngredientFormItem => ({

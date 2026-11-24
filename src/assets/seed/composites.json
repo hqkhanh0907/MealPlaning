@@ -1,7 +1,7 @@
 [
   {
-    "calories": 88.04,
-    "carbs": 21.28,
+    "calories": 89.64,
+    "carbs": 21.44,
     "category": "composite",
     "derived_from": {
       "component_ingredient_ids": [
@@ -19,13 +19,13 @@
     "name_en": "Nước chấm chua ngọt (base)",
     "name_vi": "Nước chấm chua ngọt (base)",
     "notes": "Standard Northern/Central ratio; macros approximated.",
-    "protein": 1.45,
+    "protein": 1.68,
     "source": "derived",
     "source_citation": "sources/wikipedia-vi.md#nuoc-cham-chua-ngot"
   },
   {
-    "calories": 28.32,
-    "carbs": 0.81,
+    "calories": 28.42,
+    "carbs": 0.82,
     "category": "composite",
     "derived_from": {
       "component_ingredient_ids": [
@@ -44,13 +44,13 @@
     "name_en": "Nước dùng phở bò",
     "name_vi": "Nước dùng phở bò",
     "notes": "Light beef broth — meat trimmings simmered with charred aromatics, then strained.",
-    "protein": 2.73,
+    "protein": 2.74,
     "source": "derived",
     "source_citation": "sources/wikipedia-vi.md#nuoc-dung-pho"
   },
   {
-    "calories": 30.92,
-    "carbs": 1.53,
+    "calories": 31.08,
+    "carbs": 1.55,
     "category": "composite",
     "derived_from": {
       "component_ingredient_ids": [
@@ -69,13 +69,13 @@
     "name_en": "Nước dùng bún bò Huế",
     "name_vi": "Nước dùng bún bò Huế",
     "notes": "Spicy lemongrass beef broth — Huế signature.",
-    "protein": 2.78,
+    "protein": 2.81,
     "source": "derived",
     "source_citation": "sources/wikipedia-vi.md#nuoc-dung-bun-bo-hue"
   },
   {
-    "calories": 73.3,
-    "carbs": 1.52,
+    "calories": 73.54,
+    "carbs": 1.54,
     "category": "composite",
     "derived_from": {
       "component_ingredient_ids": [
@@ -93,13 +93,13 @@
     "name_en": "Nước dùng mì Quảng",
     "name_vi": "Nước dùng mì Quảng",
     "notes": "Reduced pork-bone gravy — Quảng Nam style; smaller pour than phở.",
-    "protein": 4.85,
+    "protein": 4.88,
     "source": "derived",
     "source_citation": "sources/wikipedia-vi.md#nuoc-dung-mi-quang"
   },
   {
-    "calories": 18.06,
-    "carbs": 4.56,
+    "calories": 18.2,
+    "carbs": 4.57,
     "category": "composite",
     "derived_from": {
       "component_ingredient_ids": [
@@ -118,13 +118,13 @@
     "name_en": "Nước canh chua",
     "name_vi": "Nước canh chua",
     "notes": "Southern-style sour broth — tamarind + pineapple + tomato base.",
-    "protein": 0.29,
+    "protein": 0.31,
     "source": "derived",
     "source_citation": "sources/wikipedia-vi.md#nuoc-canh-chua"
   },
   {
-    "calories": 20.01,
-    "carbs": 4.96,
+    "calories": 20.18,
+    "carbs": 4.98,
     "category": "composite",
     "derived_from": {
       "component_ingredient_ids": [
@@ -144,13 +144,13 @@
     "name_en": "Nước lẩu Thái",
     "name_vi": "Nước lẩu Thái",
     "notes": "VN-Thai fusion hotpot base — sour + spicy aromatic.",
-    "protein": 0.36,
+    "protein": 0.38,
     "source": "derived",
     "source_citation": "sources/wikipedia-vi.md#nuoc-lau-thai"
   },
   {
-    "calories": 20.66,
-    "carbs": 1.23,
+    "calories": 20.76,
+    "carbs": 1.24,
     "category": "composite",
     "derived_from": {
       "component_ingredient_ids": [
@@ -169,7 +169,7 @@
     "name_en": "Nước riêu cua",
     "name_vi": "Nước riêu cua",
     "notes": "Field-crab broth with tomato — bún riêu signature.",
-    "protein": 2.97,
+    "protein": 2.99,
     "source": "derived",
     "source_citation": "sources/wikipedia-vi.md#nuoc-rieu-cua"
   }

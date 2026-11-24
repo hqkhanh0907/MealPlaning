@@ -20,10 +20,12 @@ import { refreshOutline, timerOutline } from 'ionicons/icons';
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './rest-timer.html',
   styleUrl: './rest-timer.scss',
+  host: { '(document:visibilitychange)': 'updateRemaining()' },
 })
 export class RestTimer {
   private readonly destroyRef = inject(DestroyRef);
   private intervalId: ReturnType<typeof setInterval> | null = null;
+  private endsAt = 0;
 
   readonly seconds = input(0);
   readonly restartKey = input<string | null>(null);
@@ -57,16 +59,18 @@ export class RestTimer {
     if (this.remaining() <= 0 || this.isRunning()) return;
     this.isRunning.set(true);
     this.clearInterval();
-    this.intervalId = setInterval(() => {
-      this.remaining.update((value) => {
-        const next = Math.max(0, value - 1);
-        if (next === 0) {
-          this.isRunning.set(false);
-          this.clearInterval();
-        }
-        return next;
-      });
-    }, 1000);
+    this.endsAt = Date.now() + this.remaining() * 1000;
+    this.intervalId = setInterval(() => this.updateRemaining(), 1000);
+  }
+
+  protected updateRemaining(): void {
+    if (!this.isRunning()) return;
+    const secondsLeft = Math.max(0, Math.ceil((this.endsAt - Date.now()) / 1000));
+    this.remaining.set(Math.min(this.remaining(), secondsLeft));
+    if (secondsLeft === 0) {
+      this.isRunning.set(false);
+      this.clearInterval();
+    }
   }
 
   reset(seconds = this.seconds()): void {

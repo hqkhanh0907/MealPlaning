@@ -1,0 +1,52 @@
+<details #panel (toggle)="expanded.set(panel.open)">
+  <summary>Xem trước giáo án</summary>
+  @if (expanded()) {
+    @if (details.error()) {
+      <p role="alert">
+        Chưa đọc được giáo án. <button type="button" (click)="details.reload()">Thử lại</button>
+      </p>
+    } @else if (details.isLoading()) {
+      <p role="status">Đang đọc giáo án…</p>
+    } @else {
+      @for (day of trainingDays(); track day.id; let first = $first) {
+        <details class="preview-day" [open]="first">
+          <summary>
+            {{ day.day_of_week ? 'Thứ ' + (day.day_of_week + 1) : 'Chủ nhật' }} · {{ day.name }}
+          </summary>
+          <ul>
+            @for (exercise of day.exercises; track exercise.id) {
+              <li>
+                <strong>{{ exercise.exercise_name_vi || exercise.exercise_name }}</strong
+                ><br />{{ purpose(exercise) }}
+              </li>
+            }
+          </ul>
+        </details>
+      }
+      @if (planId() === 'plan_two_dumbbells_floor') {
+        <p>
+          Mỗi tuần có 4 hiệp trực tiếp cho từng nhóm trong mẫu: đùi trước, ngực, lưng và đùi sau.
+          Đây là mẫu khởi đầu cho người lớn khỏe mạnh.
+        </p>
+        <p>
+          Mẫu chọn 2 hiệp × 8–12 lần trong khoảng tham khảo cho người mới. Mốc nghỉ 90 giây dùng để
+          ước tính thời lượng. Bạn có thể nghỉ thêm và tự chọn mức tạ.
+        </p>
+        <p>
+          <a
+            href="https://pubmed.ncbi.nlm.nih.gov/19204579/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >ACSM 2009 · số hiệp và số lần</a
+          ><br />
+          <a
+            href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12965823/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >ACSM 2026 · tần suất và cá nhân hóa</a
+          >
+        </p>
+      }
+    }
+  }
+</details>

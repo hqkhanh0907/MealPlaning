@@ -4,11 +4,12 @@ import type {
   Exercise,
   FitnessProgressSummary,
 } from '../../models/fitness.types';
+import { normalizeTrainingPrescription } from '../../models/fitness-prescription';
 import type { UserProfile } from '../../models/user-profile.model';
-import { GeminiClient } from './gemini-client';
+import { catalogForPrompt } from './prompts/ai-catalog';
+import { AiGeneration } from './ai-generation';
 import {
   TRAINING_PLAN_SYSTEM_INSTRUCTION,
-  aiTrainingPlanGeminiSchema,
   aiTrainingPlanResponseSchema,
   buildTrainingPlanPrompt,
   type AiTrainingPlanResponse,
@@ -22,26 +23,26 @@ export interface FitnessAiInput {
 
 @Injectable({ providedIn: 'root' })
 export class FitnessAi {
-  private readonly gemini = inject(GeminiClient);
+  private readonly ai = inject(AiGeneration);
 
   async generateTrainingPlan(input: FitnessAiInput): Promise<AiTrainingPlanDraft> {
-    const exerciseIds = new Set(input.exercises.map((exercise) => exercise.id));
+    const candidates = catalogForPrompt(input.exercises);
+    const exerciseIds = new Set(candidates.map((exercise) => exercise.id));
     if (exerciseIds.size < 20) {
       throw new Error('FitnessAi: exercise database is too small for AI plan generation.');
     }
 
-    const response = await this.gemini.generateContent<AiTrainingPlanResponse>(
+    const response = await this.ai.generateText<AiTrainingPlanResponse>(
       buildTrainingPlanPrompt({
         fitnessLevel: input.profile?.fitness_level ?? 'beginner',
         goal: input.profile?.goal ?? 'maintain',
-        exercises: input.exercises,
+        exercises: candidates,
         weeklyVolumeKg: input.progress?.currentWeekVolume ?? 0,
         workoutStreakWeeks: input.progress?.workoutStreakWeeks ?? 0,
       }),
       {
         feature: 'training_plan',
         systemInstruction: TRAINING_PLAN_SYSTEM_INSTRUCTION,
-        responseSchema: aiTrainingPlanGeminiSchema,
         schema: aiTrainingPlanResponseSchema,
         maxOutputTokens: 8192,
         timeoutMs: 60_000,
@@ -57,16 +58,18 @@ export class FitnessAi {
         .slice(0, 8)
         .map((exercise) => ({
           exerciseId: exercise.exercise_id,
-          sets: clampInt(exercise.sets, 1, 10),
-          repsMin: clampInt(exercise.reps_min, 1, 50),
-          repsMax: clampInt(Math.max(exercise.reps_min, exercise.reps_max), 1, 50),
-          restSeconds: clampInt(exercise.rest_seconds, 30, 600),
-          notes: cleanOptional(exercise.notes),
+          ...normalizeTrainingPrescription({
+            sets: exercise.sets,
+            repsMin: exercise.reps_min,
+            repsMax: exercise.reps_max,
+            restSeconds: exercise.rest_seconds,
+          }),
+          notes: exercise.notes?.trim() || null,
         })),
     }));
 
     if (days.filter((day) => !day.isRestDay && day.exercises.length > 0).length < 2) {
-      throw new Error('FitnessAi: Gemini returned too few valid training days.');
+      throw new Error('AI chưa tạo đủ hai ngày tập có bài hợp lệ.');
     }
 
     return {
@@ -81,9 +84,4 @@ export class FitnessAi {
 
 function clampInt(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, Math.round(value)));
-}
-
-function cleanOptional(value: string | null): string | null {
-  const clean = value?.trim();
-  return clean ? clean : null;
 }

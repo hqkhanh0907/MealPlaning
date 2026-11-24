@@ -1,0 +1,18 @@
+summary {
+  min-height: 44px;
+  align-content: center;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.preview-day > summary {
+  font-size: var(--font-size-body);
+  margin: var(--space-sm) 0;
+}
+ul {
+  padding-inline-start: var(--space-lg);
+}
+li,
+p {
+  margin-block: var(--space-sm);
+  line-height: 1.5;
+}

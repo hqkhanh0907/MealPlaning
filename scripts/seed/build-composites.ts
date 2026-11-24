@@ -17,10 +17,10 @@
  *   AC9  unit conversion goes through scripts/seed/units.ts (single source of truth)
  *   (AC6 cross-ref vs dishes lives in validate-seed.ts §5.2.4.)
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { stableStringify, SeedValidationError } from './build-ingredients';
+import { ingredientPer100g, SeedValidationError, writeSeedArtifact } from './build-ingredients';
 import { VI_COMPOSITES } from './curated/vi-composites';
 import { VI_INGREDIENTS } from './curated/vi-ingredients';
 import type { CompositeRecipe, DerivedCompositeIngredient, IngredientSeed } from './types';
@@ -177,9 +177,11 @@ function round(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
-export function buildCompositesToDisk(outDir: string): DerivedCompositeIngredient[] {
-  const composites = buildComposites(VI_COMPOSITES, VI_INGREDIENTS);
+export function buildCompositesToDisk(
+  outDir: string,
+  composites = buildComposites(VI_COMPOSITES, VI_INGREDIENTS),
+): DerivedCompositeIngredient[] {
   mkdirSync(outDir, { recursive: true });
-  writeFileSync(resolve(outDir, 'composites.json'), stableStringify(composites), 'utf8');
+  writeSeedArtifact(resolve(outDir, 'composites.json'), composites.map(ingredientPer100g));
   return composites;
 }

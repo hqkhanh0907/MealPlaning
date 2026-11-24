@@ -13,14 +13,28 @@
       <span>Lên kế hoạch</span>
     </button>
 
-    <button type="button" class="empty-day__btn" (click)="copyDeferred.emit()">
+    <button
+      type="button"
+      class="empty-day__btn"
+      [disabled]="copying()"
+      (click)="copyDeferred.emit()"
+    >
       <ion-icon name="copy-outline" aria-hidden="true" />
-      <span>Sao chép từ hôm qua</span>
+      <span>{{ copying() ? 'Đang sao chép…' : 'Sao chép từ hôm qua' }}</span>
     </button>
 
-    <button type="button" class="empty-day__btn empty-day__btn--ghost" (click)="aiDeferred.emit()">
+    <button
+      type="button"
+      class="empty-day__btn empty-day__btn--ghost"
+      [disabled]="!online() || !!aiIssue() || aiPlanning()"
+      (click)="aiDeferred.emit()"
+    >
       <ion-icon name="sparkles-outline" aria-hidden="true" />
-      <span>AI chọn món hôm nay</span>
+      @if (!online()) {
+        <span>Cần kết nối mạng để AI chọn món</span>
+      } @else {
+        <span>{{ aiPlanning() ? 'AI đang chọn món…' : aiIssue() || 'AI chọn món hôm nay' }}</span>
+      }
     </button>
   </div>
 </section>

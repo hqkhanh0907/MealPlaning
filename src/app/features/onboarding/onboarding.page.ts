@@ -29,15 +29,23 @@ import {
   checkmark,
 } from 'ionicons/icons';
 import { ProfileStore } from '../../core/stores/profile.store';
-import { ActivityLevel, Gender, Goal, GymExperience } from '../../core/models/user-profile.types';
 import {
-  calculateBmr,
-  calculateTargetCalories,
-  calculateTargetProtein,
-  calculateTdee,
+  ACTIVITY_LEVELS,
+  GENDER_LABELS,
+  GOAL_LABELS,
   deriveFitnessLevel,
-  getActivityFactor,
-} from './onboarding-calculation';
+  type ActivityLevel,
+  type Gender,
+  type Goal,
+  type GymExperience,
+} from '../../core/models/user-profile.types';
+import { ageOnDate } from '../../core/services/profile/profile-birth-date';
+import {
+  ProfileAgeField,
+  type ProfileAgeInput,
+} from '../../shared/forms/profile-age-field/profile-age-field';
+import { getActivityFactor } from '../../core/services/profile/energy-targets';
+import { recalcTargets } from '../../core/services/profile/recalc-targets';
 import { EMPTY_2B, Step2bErrors, validateStep2b } from './onboarding-validation';
 import { activityLabelLong } from '../../core/services/profile/activity-label';
 
@@ -60,6 +68,7 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
   imports: [
     FormField,
     AppFormField,
+    ProfileAgeField,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -110,6 +119,15 @@ export default class OnboardingPage {
     ...EMPTY_ONBOARDING_STEP2A_FORM,
   });
   protected readonly step2aForm = form(this.step2aFormSignal, onboardingStep2aSchema);
+  readonly birthDate = signal('');
+  readonly genderLabels = GENDER_LABELS;
+  readonly goalLabels = GOAL_LABELS;
+
+  onAgeEdit(value: ProfileAgeInput): void {
+    this.birthDate.set(value.birthDate);
+    this.step2aFormSignal.update((body) => ({ ...body, age: value.age }));
+  }
+
   /** True after first submit attempt — gates live error rendering. */
   protected readonly showStep2aErrors = signal(false);
 
@@ -134,12 +152,32 @@ export default class OnboardingPage {
    */
   protected readonly step2aValid = computed(() => {
     const v = this.step2aFormSignal();
-    return v.heightCm != null && v.weightKg != null && v.age != null && v.gender != null;
+    return (
+      v.heightCm != null &&
+      v.weightKg != null &&
+      (v.age != null || !!this.birthDate()) &&
+      v.gender != null
+    );
   });
 
   // Step 2b — Activity info
   readonly activityLevel = signal<ActivityLevel | null>(null);
   readonly gymExperience = signal<GymExperience | null>(null);
+  protected readonly estimate = computed(() => {
+    const body = this.step2aFormSignal();
+    const activity = this.activityLevel();
+    const goal = this.goal();
+    if (!body.heightCm || !body.weightKg || !body.age || !body.gender || !activity || !goal)
+      return null;
+    return recalcTargets({
+      weight_kg: body.weightKg,
+      height_cm: body.heightCm,
+      age: body.age,
+      gender: body.gender,
+      activity_factor: getActivityFactor(activity),
+      goal,
+    });
+  });
 
   /** Step 2b presence check — both selects picked. */
   protected readonly step2bValid = computed(
@@ -149,7 +187,7 @@ export default class OnboardingPage {
   readonly saveError = signal('');
 
   /** Activity level options rendered as radio cards (§8.6c: N=4 → radio) */
-  readonly activityLevels: readonly ActivityLevel[] = ['sedentary', 'light', 'moderate', 'heavy'];
+  readonly activityLevels = ACTIVITY_LEVELS;
   /** Expose label map to template */
   readonly ACTIVITY_LABEL_MAP = ACTIVITY_LABEL;
 
@@ -226,6 +264,15 @@ export default class OnboardingPage {
   }
 
   async complete(): Promise<void> {
+    if (this.saving()) return;
+    const birthDate = this.birthDate();
+    if (birthDate) this.onAgeEdit({ birthDate, age: ageOnDate(birthDate) });
+    if (!this.step2aForm().valid()) {
+      this.step.set(2);
+      this.showStep2aErrors.set(true);
+      this.focusFirstInvalidField2a();
+      return;
+    }
     const errors = validateStep2b({
       activityLevel: this.activityLevel(),
       gymExperience: this.gymExperience(),
@@ -249,30 +296,31 @@ export default class OnboardingPage {
       const gym = this.gymExperience()!;
       const activityLevel = this.activityLevel()!;
       const fitnessLevel = deriveFitnessLevel(gym);
-      const bmr = calculateBmr({ weightKg, heightCm, age, gender });
-      const tdee = calculateTdee(bmr, activityLevel);
-      const targetCalories = calculateTargetCalories(tdee, goal);
-      const targetProtein = calculateTargetProtein(weightKg, goal);
+      const estimate = this.estimate();
+      if (!estimate) return;
 
       await this.profileStore.saveOnboardingProfile({
         height_cm: heightCm,
         weight_kg: weightKg,
         age,
+        birth_date: birthDate || null,
         gender,
         goal,
         fitness_level: fitnessLevel,
         activity_factor: getActivityFactor(activityLevel),
-        bmr,
-        tdee,
-        target_calories: targetCalories,
-        target_protein: targetProtein,
+        bmr: estimate.bmr,
+        tdee: estimate.tdee,
+        target_calories: estimate.target_calories,
+        calorie_target_mode: 'auto',
+        target_protein: estimate.target_protein,
+        protein_target_mode: 'auto',
         target_carbs: null,
         target_fat: null,
         theme: 'light',
-        notif_morning: 1,
-        notif_lunch: 1,
-        notif_evening: 1,
-        notif_weekly: 1,
+        notif_morning: 0,
+        notif_lunch: 0,
+        notif_evening: 0,
+        notif_weekly: 0,
         onboarding_completed: 1,
       });
 

@@ -28,12 +28,14 @@ export type IngredientCategory =
   | 'composite';
 
 export type IngredientSource =
+  | 'usda-fdc'
   | 'vien-dinh-duong'
   | 'wikipedia-vi'
   | 'manual'
   | 'derived'; // 'derived' is set automatically by build-composites.ts
 
-export type MealTag = 'breakfast' | 'lunch' | 'dinner';
+import type { MealTag } from '../../src/app/core/models/management.types';
+export type { MealTag } from '../../src/app/core/models/management.types';
 
 /**
  * Atomic ingredient as authored in `curated/vi-ingredients.ts`.

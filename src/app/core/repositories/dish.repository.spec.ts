@@ -143,7 +143,7 @@ describe('DishRepository', () => {
       db.getOne.and.resolveTo({ id: 'dish-9', name: 'Phở bò' } as never);
       const result = await repo.findByNormalizedName('  Phở bò  ');
       expect(db.getOne).toHaveBeenCalledWith(
-        'SELECT * FROM dish_with_totals WHERE LOWER(TRIM(name)) = LOWER(?) LIMIT 1',
+        jasmine.stringContaining('WHERE LOWER(TRIM(name)) = LOWER(?) LIMIT 1'),
         ['Phở bò'],
       );
       expect(result?.id).toBe('dish-9');

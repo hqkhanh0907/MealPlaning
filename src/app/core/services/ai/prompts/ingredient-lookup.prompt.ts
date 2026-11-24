@@ -14,6 +14,7 @@
  */
 
 import { z } from 'zod';
+import { geminiResponseSchema } from '../gemini-response-schema';
 
 import { INGREDIENT_CATEGORIES } from '../../../models/management.constants';
 
@@ -38,20 +39,7 @@ export type IngredientLookupResponse = z.infer<typeof ingredientLookupResponseSc
 // Gemini responseSchema (JSON-Schema subset for `generationConfig`)
 // ---------------------------------------------------------------------------
 
-export const ingredientLookupGeminiSchema = {
-  type: 'OBJECT',
-  properties: {
-    name: { type: 'STRING' },
-    category: { type: 'STRING' },
-    calories: { type: 'NUMBER' },
-    protein: { type: 'NUMBER' },
-    carbs: { type: 'NUMBER' },
-    fat: { type: 'NUMBER' },
-    fiber: { type: 'NUMBER' },
-    confidence: { type: 'STRING', enum: ['high', 'medium', 'low'] },
-  },
-  required: ['name', 'category', 'calories', 'protein', 'carbs', 'fat', 'fiber', 'confidence'],
-} as const;
+export const ingredientLookupGeminiSchema = geminiResponseSchema(ingredientLookupResponseSchema);
 
 // ---------------------------------------------------------------------------
 // Prompt builder

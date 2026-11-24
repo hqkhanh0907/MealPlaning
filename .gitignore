@@ -94,3 +94,4 @@ src/environments/environment.prod.ts
 # E2E test artifacts (screenshots, page-source dumps)
 /e2e/artifacts/
 tmp-qa/
+src/environments/groq.local.ts

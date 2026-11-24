@@ -12,6 +12,7 @@ import {
 } from 'ionicons/icons';
 import type { WeekDayTotal } from '../../../../core/models/meal-plan.types';
 import { weekDayStatus, weekDayStatusIcon } from '../../../../core/utils/week-day-status';
+import { parseLocalDate } from '../../../../core/utils/local-date';
 
 @Component({
   selector: 'app-day-row',
@@ -38,9 +39,8 @@ export class DayRow {
   readonly status = computed(() => weekDayStatus(this.day()));
   readonly statusIcon = computed(() => weekDayStatusIcon(this.status()));
   readonly dayOfMonth = computed(() => {
-    const iso = this.day().date;
-    const parts = iso.split('-');
-    return parts.length === 3 ? String(parseInt(parts[2], 10)) : '';
+    const day = parseLocalDate(this.day().date).getDate();
+    return Number.isNaN(day) ? '' : String(day);
   });
   readonly displayCal = computed(() => {
     const d = this.day();

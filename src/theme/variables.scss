@@ -1,33 +1,23 @@
-// HealthMate AI — Design System Theme Variables
-// Source: docs/3-design/design-system.md v2.0 (Sage Wellness)
-// Palette: Sage primary + Coral CTA + warm neutrals (hue ~30°, low chroma)
-// Migration: từ Material Blue (v1.x) sang Lifesum Sage Wellness (v2.0)
-// =============================================================================
-// LIGHT MODE
-// =============================================================================
-
 :root {
+  color-scheme: light;
   // ==========================================================================
-  // Apple Design tokens (DS v3.0, 2026-05-17 migration)
-  // Source of truth: DESIGN.md + spec 2026-05-17-apple-design-migration-design.md
-  // Legacy Sage tokens are still present below during migration and will be
-  // removed in Phase 6 once all consumers have been re-skinned.
+  // Compatibility tokens for dashboard and navigation.
   // ==========================================================================
 
   // --- Colors -------------------------------------------------------------
-  --apple-primary: #0066cc;
-  --apple-primary-focus: #0071e3;
+  --apple-primary: var(--ion-color-primary);
+  --apple-primary-focus: var(--primary-700);
   --apple-primary-on-dark: #2997ff;
-  --apple-ink: #1d1d1f;
+  --apple-ink: var(--text-primary);
   --apple-body-on-dark: #ffffff;
   --apple-body-muted: #cccccc;
-  --apple-ink-muted-80: #333333;
-  --apple-ink-muted-48: #7a7a7a;
-  --apple-divider-soft: #f0f0f0;
-  --apple-hairline: #e0e0e0;
-  --apple-canvas: #ffffff;
-  --apple-canvas-parchment: #f5f5f7;
-  --apple-surface-pearl: #fafafc;
+  --apple-ink-muted-80: var(--text-secondary);
+  --apple-ink-muted-48: var(--text-tertiary);
+  --apple-divider-soft: var(--bg-muted);
+  --apple-hairline: var(--border-color);
+  --apple-canvas: var(--bg-card);
+  --apple-canvas-parchment: var(--bg-page);
+  --apple-surface-pearl: var(--bg-elevated);
   --apple-surface-chip: rgba(
     210,
     210,
@@ -38,10 +28,10 @@
   --apple-on-primary: #ffffff;
   --apple-on-dark: #ffffff;
 
-  // --- Semantic (Apple-pure single-accent rule) ---------------------------
-  --apple-semantic-success: #0066cc; // Action Blue — Apple has no semantic green
-  --apple-semantic-warning: #333333; // ink-muted-80 — warning by icon+text only
-  --apple-semantic-danger: #bf4800; // Apple system-alert red (sole exception)
+  // --- Semantic colors ---------------------------
+  --apple-semantic-success: var(--ion-color-success);
+  --apple-semantic-warning: var(--ion-color-warning-shade);
+  --apple-semantic-danger: var(--ion-color-danger);
 
   // --- Spacing ------------------------------------------------------------
   --apple-space-xxs: 4px;
@@ -71,24 +61,24 @@
   --apple-frosted-bg: rgba(245, 245, 247, 0.8); // allow-hardcode: frosted sticky bar (DS v3.0 §2.6)
 
   // ---------------------------------------------------------------------------
-  // Primary — Sage (DS §2.1)
+  // Primary
   // ---------------------------------------------------------------------------
-  --ion-color-primary: #6f8b6e;
-  --ion-color-primary-rgb: 111, 139, 110;
+  --ion-color-primary: #3049bf;
+  --ion-color-primary-rgb: 48, 73, 191;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #5a745a;
-  --ion-color-primary-tint: #8aa086;
+  --ion-color-primary-shade: var(--primary-700);
+  --ion-color-primary-tint: #455bc5;
 
   // ---------------------------------------------------------------------------
-  // Secondary — Coral CTA (DS §2.2) — primary call-to-action color
+  // Secondary buttons
   // ---------------------------------------------------------------------------
-  --ion-color-secondary: #d97757;
-  --ion-color-secondary-rgb: 217, 119, 87;
+  --ion-color-secondary: #3049bf;
+  --ion-color-secondary-rgb: 48, 73, 191;
   --ion-color-secondary-contrast: #ffffff;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #c26344;
-  --ion-color-secondary-tint: #e8a287;
+  --ion-color-secondary-shade: var(--primary-700);
+  --ion-color-secondary-tint: #455bc5;
 
   // ---------------------------------------------------------------------------
   // Tertiary — Plum (rare accent)
@@ -101,14 +91,14 @@
   --ion-color-tertiary-tint: #a288a4;
 
   // ---------------------------------------------------------------------------
-  // Semantic colors (Sage-tuned saturation, low chroma)
+  // Feedback colors
   // ---------------------------------------------------------------------------
-  --ion-color-success: #6f8b6e;
-  --ion-color-success-rgb: 111, 139, 110;
+  --ion-color-success: #257247;
+  --ion-color-success-rgb: 37, 114, 71;
   --ion-color-success-contrast: #ffffff;
   --ion-color-success-contrast-rgb: 255, 255, 255;
-  --ion-color-success-shade: #5a745a;
-  --ion-color-success-tint: #8aa086;
+  --ion-color-success-shade: #1f633d;
+  --ion-color-success-tint: #39805a;
 
   --ion-color-warning: #d9a857;
   --ion-color-warning-rgb: 217, 168, 87;
@@ -117,50 +107,50 @@
   --ion-color-warning-shade: #b88e44;
   --ion-color-warning-tint: #e3bb7a;
 
-  --ion-color-danger: #c2493e;
-  --ion-color-danger-rgb: 194, 73, 62;
+  --ion-color-danger: #b83737;
+  --ion-color-danger-rgb: 184, 55, 55;
   --ion-color-danger-contrast: #ffffff;
   --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-shade: #a23a31;
-  --ion-color-danger-tint: #d06b62;
+  --ion-color-danger-shade: #a32f2f;
+  --ion-color-danger-tint: #bf4b4b;
 
   // ---------------------------------------------------------------------------
-  // Medium / Light (warm neutrals — DS §2.4)
+  // Neutral colors
   // ---------------------------------------------------------------------------
-  --ion-color-medium: #80776a;
-  --ion-color-medium-rgb: 128, 119, 106;
+  --ion-color-medium: #546078;
+  --ion-color-medium-rgb: 84, 96, 120;
   --ion-color-medium-contrast: #ffffff;
   --ion-color-medium-contrast-rgb: 255, 255, 255;
-  --ion-color-medium-shade: #6a6258;
-  --ion-color-medium-tint: #9a9286;
+  --ion-color-medium-shade: #454f63;
+  --ion-color-medium-tint: #667187;
 
-  --ion-color-light: #f2f2ee;
-  --ion-color-light-rgb: 242, 242, 238;
-  --ion-color-light-contrast: #1c1a17;
-  --ion-color-light-contrast-rgb: 28, 26, 23;
-  --ion-color-light-shade: #e5e1d6;
-  --ion-color-light-tint: #fbf7ef;
+  --ion-color-light: #eef1f8;
+  --ion-color-light-rgb: 238, 241, 248;
+  --ion-color-light-contrast: #17213a;
+  --ion-color-light-contrast-rgb: 23, 33, 58;
+  --ion-color-light-shade: #dce2ee;
+  --ion-color-light-tint: #f3f5fa;
 
   // ---------------------------------------------------------------------------
-  // Background & Surfaces (warm hue ~30°, very low chroma)
+  // Background and surfaces
   // ---------------------------------------------------------------------------
-  --ion-background-color: #f7f2ea;
-  --ion-background-color-rgb: 247, 242, 234;
-  --ion-card-background: #ffffff;
-  --ion-toolbar-background: #6b8e6f;
-  --ion-toolbar-color: #ffffff;
-  --ion-tab-bar-background: #ffffff;
-  --ion-tab-bar-color: #80776a;
-  --ion-tab-bar-color-selected: #6f8b6e;
+  --ion-background-color: var(--bg-page);
+  --ion-background-color-rgb: 245, 247, 252;
+  --ion-card-background: var(--bg-card);
+  --ion-toolbar-background: var(--bg-card);
+  --ion-toolbar-color: var(--text-primary);
+  --ion-tab-bar-background: var(--bg-card);
+  --ion-tab-bar-color: var(--text-tertiary);
+  --ion-tab-bar-color-selected: var(--ion-color-primary);
 
-  // Text (warm dark — hue ~30°, near black)
-  --ion-text-color: #1c1a17;
-  --ion-text-color-rgb: 28, 26, 23;
+  // Text
+  --ion-text-color: var(--text-primary);
+  --ion-text-color-rgb: 23, 33, 58;
 
   // Border
-  --ion-border-color: #e8e3d9;
+  --ion-border-color: var(--border-color);
 
-  // Font — Inter for UI, Fraunces for display headings
+  // Font
   --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   // ==========================================================================
@@ -168,7 +158,7 @@
   // ==========================================================================
 
   // Display font (DS §3.1) — used for h1, hero metrics
-  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-display: var(--ion-font-family);
 
   // Type Scale (DS §3.3) — token-based font sizes. All UI font-size MUST
   // reference one of these (enforced by scripts/check-design-tokens.mjs).
@@ -202,64 +192,61 @@
   --z-dialog: 50;
   --z-toast: 60;
 
-  // Sage Scale (replaces v1 --primary-*)
-  --primary-900: #1f2820;
-  --primary-800: #324033;
-  --primary-700: #455b45;
-  --primary-600: #5a745a;
-  --primary-500: #6f8b6e;
-  --primary-400: #8aa086;
-  --primary-300: #a8b7a5;
-  --primary-200: #c8d2c5;
-  --primary-100: #e5eae3;
-  --primary-50: #f2f4f1;
+  // Cobalt scale
+  --primary-900: #182451;
+  --primary-800: #1d2c70;
+  --primary-700: #263b96;
+  --primary-600: #3049bf;
+  --primary-500: #405be1;
+  --primary-400: #6b87ee;
+  --primary-300: #a2b8ff;
+  --primary-200: #cbdaff;
+  --primary-100: #e6ecff;
+  --primary-50: #f1f4ff;
 
-  // Coral Scale (CTA + accent)
-  --accent-700: #9a4f36;
-  --accent-600: #c26344;
-  --accent-500: #d97757;
-  --accent-300: #e8a287;
-  --accent-100: #f8ddd2;
-  --accent-50: #fcf1ed;
+  // Accent aliases
+  --accent-700: var(--primary-700);
+  --accent-600: var(--primary-600);
+  --accent-500: var(--primary-500);
+  --accent-300: var(--primary-300);
+  --accent-100: var(--primary-100);
+  --accent-50: var(--primary-50);
 
-  // Neutral (warm — DS §2.4)
-  --bg-page: #f7f2ea;
-  --bg-card: #ffffff;
-  --bg-elevated: #f2f2ee;
-  --bg-muted: #e8e3d9;
-  // Sunken — surface "chìm" hơn --bg-page, dùng cho segment track + search bar
-  // (cần tách layer rõ với page khi không có border). Đậm hơn --bg-muted một
-  // nấc để diff lightness vs --bg-page (#f7f2ea) đạt ~12%, đủ visible.
-  --bg-sunken: #ded5c2;
-  --text-primary: #1c1a17;
-  --text-secondary: #4a453e;
-  --text-tertiary: #80776a;
-  --text-disabled: #b5ac9c;
-  --border-color: #e8e3d9;
+  // Neutral surfaces
+  --bg-page: #f5f7fc;
+  --bg-card: #fbfcff;
+  --bg-elevated: #eef1f8;
+  --bg-muted: #e4e9f3;
+  --bg-sunken: #dce3f1;
+  --text-primary: #17213a;
+  --text-secondary: #34425a;
+  --text-tertiary: #546078;
+  --text-disabled: #75809a;
+  --border-color: #d9e0ee;
 
   // Input-specific border (DS §8.6 — slightly darker than --border-color)
-  --input-border-color: #d4ccbc;
-  --input-bg: #f5f1e8;
+  --input-border-color: #7b88a2;
+  --input-bg: #f5f7fc;
 
   // Macro nutrient palette (DS §2.6)
-  --macro-protein: #6f8b6e; // sage
-  --macro-carbs: #c99b6e; // warm amber
-  --macro-fat: #d97757; // coral
-  --macro-fiber: #7ab0b5; // pale aqua
+  --macro-protein: #257247;
+  --macro-carbs: #906124;
+  --macro-fat: #b64a68;
+  --macro-fiber: #2d747c;
 
-  // AI Card (DS §2.5) — sage tint
-  --ai-card-bg: #f2f4f1;
-  --ai-card-border: #c8d2c5;
-  --ai-avatar-bg: #6f8b6e;
-  --ai-text-color: #455b45;
+  // AI card
+  --ai-card-bg: var(--primary-50);
+  --ai-card-border: var(--primary-200);
+  --ai-avatar-bg: var(--primary-600);
+  --ai-text-color: var(--primary-800);
 
-  // Streak Card — coral tint
-  --streak-card-bg: #fcf1ed;
-  --streak-number-color: #d97757;
+  // Streak card
+  --streak-card-bg: #fff3dd;
+  --streak-number-color: #906124;
 
-  // Quick Action — sage tint
-  --quick-action-bg: #f2f4f1;
-  --quick-action-text: #455b45;
+  // Quick action
+  --quick-action-bg: var(--primary-50);
+  --quick-action-text: var(--primary-800);
 
   // Spacing (DS §4 — 4px grid)
   --space-xs: 4px;
@@ -276,10 +263,7 @@
   // rhythm stays consistent across hub + edit pages.
   --spacing-section: var(--space-2xl); // 24px
 
-  // Bg accent — Story 2.5 (P1-6 Mục tiêu mới block highlight)
-  // Subtle sage tint over --bg-card so the "result" block stands out from
-  // BMR/TDEE rows without breaking light/dark contrast budget.
-  --bg-card-accent: rgba(111, 139, 110, 0.08);
+  --bg-card-accent: var(--primary-50);
 
   // Border Radius (DS §5)
   --radius-micro: 4px;
@@ -290,14 +274,14 @@
   --radius-xl: 20px;
   --radius-full: 9999px;
 
-  // Shadows (DS §6) — warm hue ~30°, low chroma; subtle depth
-  --shadow-sm: 0 1px 2px rgba(60, 45, 25, 0.04);
-  --shadow-md: 0 2px 8px rgba(60, 45, 25, 0.06);
-  --shadow-lg: 0 8px 24px rgba(60, 45, 25, 0.1);
-  --shadow-xl: 0 16px 48px rgba(60, 45, 25, 0.14);
+  // Shadows
+  --shadow-sm: 0 1px 2px rgba(23, 33, 58, 0.06);
+  --shadow-md: 0 2px 8px rgba(23, 33, 58, 0.08);
+  --shadow-lg: 0 8px 24px rgba(23, 33, 58, 0.12);
+  --shadow-xl: 0 16px 48px rgba(23, 33, 58, 0.16);
 
-  // Focus Ring (DS §6) — sage
-  --focus-ring: 0 0 0 2px rgba(111, 139, 110, 0.18);
+  // Focus ring
+  --focus-ring: 0 0 0 2px var(--primary-600);
 
   // Easing (DS §8f)
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);

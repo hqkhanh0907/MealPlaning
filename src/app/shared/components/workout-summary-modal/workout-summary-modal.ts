@@ -1,3 +1,4 @@
+import { isLoggedSet } from '../../../core/models/fitness-workout-set';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -21,9 +22,15 @@ import {
   checkmarkCircleOutline,
   closeOutline,
   timeOutline,
-  trophyOutline,
+  listOutline,
 } from 'ionicons/icons';
-import type { WorkoutSessionDetail } from '../../../core/models/fitness.types';
+import {
+  isTimedExercise,
+  setValueLabel,
+  workoutNumber,
+  type WorkoutSessionDetail,
+  type WorkoutSet,
+} from '../../../core/models/fitness.types';
 
 /**
  * Finish-summary modal — Apple-style acknowledgment after `completeWorkout()`.
@@ -65,9 +72,7 @@ export class WorkoutSummaryModal {
   @Output() readonly closed = new EventEmitter<void>();
 
   protected readonly totalVolume = computed(() => {
-    const s = this._session();
-    if (!s) return 0;
-    return Math.round(s.total_volume);
+    return workoutNumber.format(this._session()?.total_volume ?? 0);
   });
 
   protected readonly durationLabel = computed(() => {
@@ -83,7 +88,8 @@ export class WorkoutSummaryModal {
     const s = this._session();
     if (!s) return [];
     return s.exercises.flatMap((ex) => {
-      const logged = ex.sets.filter((set) => set.status === 'logged');
+      const logged = ex.sets.filter(isLoggedSet);
+      const seconds = logged.reduce((sum, set) => sum + (set.duration_seconds ?? 0), 0);
       return logged.length === 0
         ? []
         : [
@@ -91,7 +97,11 @@ export class WorkoutSummaryModal {
               id: ex.id,
               name: ex.exercise_name_vi || ex.exercise_name,
               sets: logged.length,
-              volume: Math.round(ex.total_volume),
+              measure: isTimedExercise(ex.exercise_id)
+                ? seconds > 0
+                  ? seconds + ' giây'
+                  : 'Chưa rõ thời gian'
+                : workoutNumber.format(ex.total_volume) + ' kg',
               topSet: bestSet(logged),
             },
           ];
@@ -108,7 +118,7 @@ export class WorkoutSummaryModal {
       checkmarkCircleOutline,
       closeOutline,
       timeOutline,
-      trophyOutline,
+      listOutline,
     });
   }
 
@@ -124,14 +134,17 @@ export class WorkoutSummaryModal {
   }
 }
 
-function bestSet(sets: { weight_kg: number; reps: number }[]): string {
-  if (sets.length === 0) return '';
-  // Top set = max weight, tiebreak by reps.
-  let top = sets[0];
+function bestSet(sets: WorkoutSet[]): string {
+  let top: WorkoutSet | undefined;
   for (const s of sets) {
+    if (s.legacy_unit_unknown || s.duration_seconds != null) continue;
+    if (!top) {
+      top = s;
+      continue;
+    }
     if (s.weight_kg > top.weight_kg || (s.weight_kg === top.weight_kg && s.reps > top.reps)) {
       top = s;
     }
   }
-  return `${top.weight_kg} kg × ${top.reps}`;
+  return top ? setValueLabel(top) : '';
 }

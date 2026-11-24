@@ -1,8 +1,12 @@
 import {
+  buildCalorieTargetModeMigration,
   buildFiberSnapshotSchemaMigration,
   buildHybridPolicySchemaMigration,
   buildInitialSchemaMigration,
+  buildProteinTargetModeMigration,
+  buildProfileBirthDateMigration,
   buildWorkoutSessionStatusMigration,
+  buildWorkoutMeasuresMigration,
   buildWorkoutSetStatusMigration,
   buildWorkoutSetUpdatedAtMigration,
   SCHEMA_VERSION,
@@ -27,6 +31,10 @@ export const MIGRATION_REGISTRY: readonly Migration[] = [
   buildWorkoutSetUpdatedAtMigration(),
   buildWorkoutSessionStatusMigration(),
   buildWorkoutSetStatusMigration(),
+  buildCalorieTargetModeMigration(),
+  buildWorkoutMeasuresMigration(),
+  buildProteinTargetModeMigration(),
+  buildProfileBirthDateMigration(),
 ];
 
 if (MIGRATION_REGISTRY[MIGRATION_REGISTRY.length - 1]?.version !== SCHEMA_VERSION) {

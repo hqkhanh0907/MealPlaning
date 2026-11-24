@@ -9,7 +9,7 @@ function makeSession(overrides: Partial<WorkoutSessionDetail> = {}): WorkoutSess
     training_plan_day_id: null,
     training_day_name: 'Push A',
     mode: 'guided',
-    total_volume: 1234.6,
+    total_volume: 297.5,
     duration_minutes: 42,
     started_at: '2025-01-01T09:00:00.000Z',
     completed_at: '2025-01-01T09:42:00.000Z',
@@ -23,12 +23,12 @@ function makeSession(overrides: Partial<WorkoutSessionDetail> = {}): WorkoutSess
         muscle_group: 'chest',
         category: 'strength',
         sort_order: 1,
-        total_volume: 900,
+        total_volume: 297.5,
         sets: [
           {
             id: 'st-1',
             set_number: 1,
-            weight_kg: 50,
+            weight_kg: 0,
             reps: 8,
             status: 'logged',
             effort: null,
@@ -39,8 +39,8 @@ function makeSession(overrides: Partial<WorkoutSessionDetail> = {}): WorkoutSess
           {
             id: 'st-2',
             set_number: 2,
-            weight_kg: 60,
-            reps: 6,
+            weight_kg: 42.5,
+            reps: 7,
             status: 'logged',
             effort: null,
             notes: null,
@@ -81,17 +81,18 @@ describe('WorkoutSummaryModal', () => {
     fixture.detectChanges();
     const aggregates = cmp as unknown as {
       totalSets(): number;
-      totalVolume(): number;
+      totalVolume(): string;
       durationLabel(): string;
-      exerciseRows(): { id: string; name: string; sets: number; volume: number; topSet: string }[];
+      exerciseRows(): { id: string; name: string; sets: number; measure: string; topSet: string }[];
     };
     expect(aggregates.totalSets()).toBe(2);
-    expect(aggregates.totalVolume()).toBe(1235);
+    expect(aggregates.totalVolume()).toBe('297,5');
     expect(aggregates.durationLabel()).toBe('42 phút');
     const rows = aggregates.exerciseRows();
     expect(rows.length).toBe(1); // empty exercise filtered out
     expect(rows[0].name).toBe('Đẩy ngực');
-    expect(rows[0].topSet).toBe('60 kg × 6');
+    expect(rows[0].measure).toBe('297,5 kg');
+    expect(rows[0].topSet).toBe('42,5 kg × 7 lần');
   });
 
   it('renders "<1 phút" for sub-minute sessions', () => {
@@ -120,12 +121,12 @@ describe('WorkoutSummaryModal', () => {
     fixture.detectChanges();
     const aggregates = cmp as unknown as {
       totalSets(): number;
-      totalVolume(): number;
+      totalVolume(): string;
       durationLabel(): string;
       exerciseRows(): unknown[];
     };
     expect(aggregates.totalSets()).toBe(0);
-    expect(aggregates.totalVolume()).toBe(0);
+    expect(aggregates.totalVolume()).toBe('0');
     expect(aggregates.durationLabel()).toBe('—');
     expect(aggregates.exerciseRows().length).toBe(0);
   });

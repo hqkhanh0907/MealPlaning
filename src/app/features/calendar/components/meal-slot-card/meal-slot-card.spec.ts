@@ -69,9 +69,9 @@ describe('MealSlotCard', () => {
       expect(component.label()).toBe('Bữa trưa');
     });
 
-    it('dinner → Bữa chiều', () => {
+    it('dinner → Bữa tối', () => {
       setInputs(makeSlot([]), 'dinner');
-      expect(component.label()).toBe('Bữa chiều');
+      expect(component.label()).toBe('Bữa tối');
     });
 
     it('snack → Bữa phụ', () => {
@@ -196,6 +196,18 @@ describe('MealSlotCard', () => {
   });
 
   describe('rendered DOM', () => {
+    it('opens the dish context actions from its named button', () => {
+      const dish = makeDish({ id: 'pd-option', dish_name: 'Phở gà' });
+      setInputs(makeSlot([dish]), 'breakfast');
+      const open = jasmine.createSpy('open');
+      component.dishLongPress.subscribe(open);
+      const options = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>(
+        'button[aria-label="Tùy chọn cho Phở gà"]',
+      );
+      options?.click();
+      expect(open).toHaveBeenCalledOnceWith(dish.id);
+    });
+
     it('renders empty hint when no dishes', () => {
       setInputs(makeSlot([]), 'breakfast');
       const empty = (fixture.nativeElement as HTMLElement).querySelector('.meal-slot__empty');
@@ -228,7 +240,7 @@ describe('MealSlotCard', () => {
     it('action button label switches with completion state', () => {
       setInputs(makeSlot([makeDish({ is_completed: 0 })]), 'breakfast');
       let btn = (fixture.nativeElement as HTMLElement).querySelector('.meal-slot__action');
-      expect(btn?.textContent?.trim()).toBe('Đã ăn');
+      expect(btn?.textContent?.trim()).toBe('Ghi đã ăn');
 
       setInputs(
         makeSlot([makeDish({ is_completed: 1, completed_at: '2026-05-10T08:00:00Z' })]),

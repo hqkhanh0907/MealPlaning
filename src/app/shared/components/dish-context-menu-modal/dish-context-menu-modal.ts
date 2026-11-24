@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { copyOutline, swapHorizontalOutline, trashOutline } from 'ionicons/icons';
+import { copyOutline, createOutline, swapHorizontalOutline, trashOutline } from 'ionicons/icons';
 
-export type DishContextMenuAction = 'copy' | 'move' | 'delete';
+export type DishContextMenuAction = 'servings' | 'copy' | 'move' | 'delete';
 
 @Component({
   selector: 'app-dish-context-menu-modal',
@@ -15,10 +15,11 @@ export type DishContextMenuAction = 'copy' | 'move' | 'delete';
 })
 export class DishContextMenuModal {
   constructor() {
-    addIcons({ copyOutline, swapHorizontalOutline, trashOutline });
+    addIcons({ copyOutline, createOutline, swapHorizontalOutline, trashOutline });
   }
 
   readonly isOpen = input<boolean>(false);
+  readonly canEditServings = input(false);
   readonly dishName = input.required<string>();
   readonly actionSelected = output<DishContextMenuAction>();
   readonly dismissed = output<void>();

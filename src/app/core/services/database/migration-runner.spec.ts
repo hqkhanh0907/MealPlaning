@@ -8,7 +8,8 @@ describe('MigrationRunner', () => {
   let db: jasmine.SpyObj<Database>;
 
   beforeEach(() => {
-    db = jasmine.createSpyObj<Database>('DatabaseService', ['execute', 'query']);
+    db = jasmine.createSpyObj<Database>('DatabaseService', ['execute', 'query', 'withTransaction']);
+    db.withTransaction.and.callFake((work) => work());
   });
 
   it('applies pending migrations in version order and stamps user_version', async () => {
@@ -65,6 +66,105 @@ describe('MigrationRunner', () => {
 });
 
 describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
+  it('preserves ambiguous timed entries from v7 without counting seconds as lifted kilograms', async () => {
+    const db = await createTestDatabase();
+    try {
+      for (const column of ['planned_sets', 'planned_min', 'planned_max', 'planned_rest']) {
+        await db.execute('ALTER TABLE workout_exercise DROP COLUMN ' + column);
+      }
+      await db.execute('ALTER TABLE workout_set DROP COLUMN duration_seconds');
+      await db.execute('ALTER TABLE workout_set DROP COLUMN legacy_unit_unknown');
+      await db.execute('ALTER TABLE user_profile DROP COLUMN protein_target_mode');
+      await db.execute('PRAGMA user_version = 7');
+      await db.execute('ALTER TABLE user_profile DROP COLUMN birth_date');
+      await db.execute(`INSERT INTO exercise (id,name,muscle_group,category,source) VALUES
+        ('ex_farmer_carry','Carry','forearms','compound','db'),('ex_back_squat','Squat','quads','compound','db')`);
+      await db.execute(`INSERT INTO workout_session
+        (id,date,training_day_name,mode,total_volume,started_at,status,completed_at)
+        VALUES ('s','2026-11-24','Free Workout','free',827.5,'2026-11-24T08:00:00','completed','2026-11-24T08:10:00')`);
+      await db.execute(`INSERT INTO workout_exercise (id,workout_session_id,exercise_id,total_volume)
+        VALUES ('carry','s','ex_farmer_carry',600),('squat','s','ex_back_squat',227.5)`);
+      await db.execute(`INSERT INTO workout_set (id,workout_exercise_id,set_number,weight_kg,reps,status)
+        VALUES ('c','carry',1,20,30,'logged'),('a','squat',1,32.5,7,'logged')`);
+      await new MigrationRunner(db, MIGRATION_REGISTRY).run();
+      expect(await db.getOne('SELECT training_day_name,total_volume FROM workout_session')).toEqual(
+        {
+          training_day_name: 'Tập tự do',
+          total_volume: 227.5,
+        },
+      );
+      expect(
+        await db.getOne(
+          "SELECT weight_kg,reps,legacy_unit_unknown,duration_seconds FROM workout_set WHERE id='c'",
+        ),
+      ).toEqual({
+        weight_kg: 20,
+        reps: 30,
+        legacy_unit_unknown: 1,
+        duration_seconds: null,
+      });
+      expect(
+        await db.getOne("SELECT weight_kg,reps,legacy_unit_unknown FROM workout_set WHERE id='a'"),
+      ).toEqual({
+        weight_kg: 32.5,
+        reps: 7,
+        legacy_unit_unknown: 0,
+      });
+    } finally {
+      teardownTestDatabase();
+    }
+  });
+
+  it('migrates old energy goals and preserves manual targets and previous day plans', async () => {
+    const liveDb = await createTestDatabase();
+    try {
+      await liveDb.execute('ALTER TABLE user_profile DROP COLUMN calorie_target_mode');
+      await liveDb.execute('PRAGMA user_version = 6');
+      for (const [id, age, tdee, target] of [
+        ['low', 65, 1142, 642],
+        ['supervised', 28, 1596, 1096],
+        ['manual', 65, 1142, 1800],
+        ['manual-low', 65, 1142, 1150],
+        ['young', 17, 2200, 1700],
+        ['adult', 30, 2600, 2100],
+      ]) {
+        await liveDb.execute(
+          `INSERT INTO user_profile
+             (id, height_cm, weight_kg, age, gender, goal, fitness_level, activity_factor, bmr, tdee, target_calories, target_protein)
+           VALUES (?, 150, 50, ?, 'female', 'lose_weight', 'beginner', 1.2, 952, ?, ?, 110)`,
+          [id, age, tdee, target],
+        );
+      }
+      await liveDb.execute(
+        "INSERT INTO day_plan (id, date, target_calories, target_protein) VALUES ('past','2026-01-01',1900,110)",
+      );
+      await new MigrationRunner(
+        liveDb,
+        MIGRATION_REGISTRY.filter((m) => m.version <= 7),
+      ).run();
+      const rows = await liveDb.query<{
+        id: string;
+        target_calories: number;
+        calorie_target_mode: string;
+      }>('SELECT id, target_calories, calorie_target_mode FROM user_profile ORDER BY id');
+      expect(rows.map((r) => [r.id, r.target_calories, r.calorie_target_mode])).toEqual([
+        ['adult', 2100, 'auto'],
+        ['low', 0, 'auto'],
+        ['manual', 1800, 'manual'],
+        ['manual-low', 1150, 'manual'],
+        ['supervised', 0, 'auto'],
+        ['young', 0, 'auto'],
+      ]);
+      expect(
+        await liveDb.getOne<{ target_calories: number }>(
+          "SELECT target_calories FROM day_plan WHERE id = 'past'",
+        ),
+      ).toEqual({ target_calories: 1900 });
+    } finally {
+      teardownTestDatabase();
+    }
+  });
+
   it('is idempotent when MigrationRunner.run() executes a second time', async () => {
     const liveDb = await createTestDatabase();
     try {
@@ -117,6 +217,34 @@ describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
       // re-executed-and-recreated-with-same-shape.
       expect(afterDayPlanCount[0].count).toBe(1);
       expect(afterMealSlotCount[0].count).toBe(1);
+    } finally {
+      teardownTestDatabase();
+    }
+  });
+
+  it('migrates protein provenance without changing historical gram amounts', async () => {
+    const db = await createTestDatabase();
+    try {
+      await db.execute('ALTER TABLE user_profile DROP COLUMN protein_target_mode');
+      await db.execute('PRAGMA user_version = 8');
+      await db.execute('ALTER TABLE user_profile DROP COLUMN birth_date');
+      for (const grams of [104, 137]) {
+        await db.execute(
+          `INSERT INTO user_profile
+           (id,height_cm,weight_kg,age,gender,goal,fitness_level,activity_factor,bmr,tdee,target_calories,target_protein)
+           VALUES (?,170,65,28,'male','maintain','beginner',1.55,1564,2424,2424,?)`,
+          [String(grams), grams],
+        );
+      }
+      await new MigrationRunner(db, MIGRATION_REGISTRY).run();
+      expect(
+        await db.query(
+          'SELECT target_protein, protein_target_mode FROM user_profile ORDER BY target_protein',
+        ),
+      ).toEqual([
+        { target_protein: 104, protein_target_mode: 'auto' },
+        { target_protein: 137, protein_target_mode: 'manual' },
+      ]);
     } finally {
       teardownTestDatabase();
     }

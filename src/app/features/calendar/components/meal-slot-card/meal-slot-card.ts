@@ -1,25 +1,29 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import type { MealSlotWithDishes, MealType } from '../../../../core/models/meal-plan.types';
+import { IonIcon } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { ellipsisHorizontal } from 'ionicons/icons';
+import {
+  MEAL_LABELS,
+  type MealSlotWithDishes,
+  type MealType,
+} from '../../../../core/models/meal-plan.types';
 import { StatusPill } from '../../../../shared/components/status-pill/status-pill';
 
 const LONG_PRESS_MS = 500;
-
-const MEAL_LABEL_VI: Record<MealType, string> = {
-  breakfast: 'Bữa sáng',
-  lunch: 'Bữa trưa',
-  dinner: 'Bữa chiều',
-  snack: 'Bữa phụ',
-};
 
 @Component({
   selector: 'app-meal-slot-card',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [StatusPill],
+  imports: [IonIcon, StatusPill],
   templateUrl: './meal-slot-card.html',
   styleUrl: './meal-slot-card.scss',
 })
 export class MealSlotCard {
+  constructor() {
+    addIcons({ ellipsisHorizontal });
+  }
+
   readonly slot = input.required<MealSlotWithDishes>();
   readonly mealType = input.required<MealType>();
 
@@ -29,7 +33,7 @@ export class MealSlotCard {
   /** Emits planned_dish.id when user long-presses a row (Story 3.7 AC-3). */
   readonly dishLongPress = output<string>();
 
-  readonly label = computed<string>(() => MEAL_LABEL_VI[this.mealType()]);
+  readonly label = computed<string>(() => MEAL_LABELS[this.mealType()]);
 
   /**
    * Planning view must show expected kcal for planned rows and immutable
@@ -47,6 +51,14 @@ export class MealSlotCard {
 
   onAddTap(): void {
     this.openLog.emit(this.mealType());
+  }
+
+  onOptionsTap(plannedDishId: string): void {
+    if (this.pressTriggered) {
+      this.pressTriggered = false;
+      return;
+    }
+    this.dishLongPress.emit(plannedDishId);
   }
 
   onActionTap(plannedDishId: string, isCompleted: 0 | 1): void {

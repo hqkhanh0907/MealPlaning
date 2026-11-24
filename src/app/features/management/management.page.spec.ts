@@ -95,6 +95,23 @@ describe('ManagementPage', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/tabs/management/dish/new']);
   });
 
+  it('opens dish creation with the AI entry instructions when requested', async () => {
+    await component.openCreateAiDish();
+    expect(router.navigate).toHaveBeenCalledWith(['/tabs/management/dish/new'], {
+      queryParams: { mode: 'ai' },
+    });
+  });
+
+  it('shows a retry action when ingredient search fails', async () => {
+    const store = TestBed.inject(IngredientStore) as unknown as { search: jasmine.Spy };
+    store.search.and.rejectWith(new Error('Read failed'));
+    await component.onIngredientSearch('trứng');
+    fixture.detectChanges();
+    const error = fixture.nativeElement.querySelector('.management-error');
+    expect(error?.textContent).toContain('Không thể tải nguyên liệu.');
+    expect(error?.querySelector('button')?.textContent).toContain('Thử lại');
+  });
+
   it('navigates to edit-dish route when openEditDish is called', async () => {
     await component.openEditDish('dish-1');
     expect(router.navigate).toHaveBeenCalledWith(['/tabs/management/dish/edit', 'dish-1']);

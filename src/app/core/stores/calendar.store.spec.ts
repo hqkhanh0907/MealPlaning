@@ -5,6 +5,7 @@ import { DayPlanRepository } from '../repositories/day-plan.repository';
 import { PlannedDishRepository } from '../repositories/planned-dish.repository';
 import { CalendarStore } from './calendar.store';
 import { DishStore } from './dish.store';
+import { IngredientStore } from './ingredient.store';
 import { ProfileStore } from './profile.store';
 
 describe('CalendarStore', () => {
@@ -12,6 +13,8 @@ describe('CalendarStore', () => {
   let dayPlanRepo: jasmine.SpyObj<DayPlanRepository>;
   let plannedDishRepo: jasmine.SpyObj<PlannedDishRepository>;
   let dishChangedSignal: ReturnType<typeof signal<number>>;
+  let ingredientRevision: ReturnType<typeof signal<number>>;
+  let profile: ReturnType<typeof signal<{ target_calories: number } | null>>;
 
   const samplePlanned: PlannedDish = {
     id: 'pd-1',
@@ -64,9 +67,12 @@ describe('CalendarStore', () => {
       'restoreDeletedDish',
       'moveToSlot',
       'copyToDate',
+      'copyDayIntoEmpty',
       'listRecentLogged',
     ]);
     dishChangedSignal = signal(0);
+    ingredientRevision = signal(0);
+    profile = signal<{ target_calories: number } | null>(null);
 
     dayPlanRepo.findByDate.and.returnValue(Promise.resolve(sampleDayPlan));
     plannedDishRepo.addToSlot.and.returnValue(Promise.resolve(samplePlanned));
@@ -86,7 +92,8 @@ describe('CalendarStore', () => {
         { provide: DayPlanRepository, useValue: dayPlanRepo },
         { provide: PlannedDishRepository, useValue: plannedDishRepo },
         { provide: DishStore, useValue: { dishChanged: dishChangedSignal } },
-        { provide: ProfileStore, useValue: { profile: signal(null) } },
+        { provide: IngredientStore, useValue: { nutritionRevision: ingredientRevision } },
+        { provide: ProfileStore, useValue: { profile } },
       ],
     });
     store = TestBed.inject(CalendarStore);
@@ -262,6 +269,26 @@ describe('CalendarStore', () => {
   });
 
   describe('hydration effect (AC-7)', () => {
+    it('reads the day again when ingredient nutrition changes', async () => {
+      await flush();
+      dayPlanRepo.findByDate.calls.reset();
+      ingredientRevision.set(1);
+      await flush();
+      expect(dayPlanRepo.findByDate).toHaveBeenCalledWith(store.currentDate());
+    });
+
+    it('updates week rows when a goal is set or cleared on the same week', async () => {
+      dayPlanRepo.findByDateRange.and.resolveTo([]);
+      store.setView('week');
+      await flush();
+      expect(store.weekData()?.map((day) => day.targetCal)).toEqual(Array(7).fill(0));
+      profile.set({ target_calories: 1850 });
+      await flush();
+      expect(store.weekData()?.map((day) => day.targetCal)).toEqual(Array(7).fill(1850));
+      profile.set({ target_calories: 0 });
+      await flush();
+      expect(store.weekData()?.map((day) => day.targetCal)).toEqual(Array(7).fill(0));
+    });
     it('calls dayPlanRepo.findByDate when currentDate changes and updates dayPlan signal', async () => {
       dayPlanRepo.findByDate.calls.reset();
       store.setDate('2026-05-12');
@@ -334,11 +361,11 @@ describe('CalendarStore', () => {
         fat: 12,
         fiber: 7,
       };
-      plannedDishRepo.restoreDeletedDish.and.resolveTo({ ...snap, id: 'pd-new' });
+      plannedDishRepo.restoreDeletedDish.and.resolveTo(snap);
 
       const created = await store.restoreDish(snap);
 
-      expect(created.id).toBe('pd-new');
+      expect(created.id).toBe(snap.id);
       expect(created.completed_at).toBe(snap.completed_at);
       expect(created.calories).toBe(snap.calories);
       expect(plannedDishRepo.restoreDeletedDish).toHaveBeenCalledWith(snap);
@@ -352,79 +379,21 @@ describe('CalendarStore', () => {
     });
   });
 
-  describe('Story 3.7 — copyFromYesterday', () => {
-    it('returns 0 when yesterday day_plan does not exist', async () => {
-      dayPlanRepo.findByDate.and.callFake(async (date: string) => {
-        if (date === store.currentDate()) return sampleDayPlan;
-        return null as never;
-      });
-
-      const result = await store.copyFromYesterday();
-      expect(result.copiedCount).toBe(0);
-      expect(plannedDishRepo.copyToDate).not.toHaveBeenCalled();
+  describe('copyFromYesterday', () => {
+    it('leaves the revision unchanged when the repository copies nothing', async () => {
+      plannedDishRepo.copyDayIntoEmpty.and.resolveTo(0);
+      const revision = store.invalidationTick();
+      expect((await store.copyFromYesterday()).copiedCount).toBe(0);
+      expect(store.invalidationTick()).toBe(revision);
     });
 
-    it('copies every dish from yesterday into today preserving meal_type', async () => {
-      const today = store.currentDate();
-      const yesterdayIso = (() => {
-        const [y, m, d] = today.split('-').map(Number);
-        const dt = new Date(y, m - 1, d - 1);
-        return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(
-          dt.getDate(),
-        ).padStart(2, '0')}`;
-      })();
-      const yesterdayPlan: DayPlanWithSlots = {
-        ...sampleDayPlan,
-        date: yesterdayIso,
-        meal_slots: [
-          {
-            id: 's-y-lunch',
-            day_plan_id: 'dp-y',
-            meal_type: 'lunch',
-            position: 2,
-            created_at: 'x',
-            planned_dishes: [
-              {
-                ...samplePlanned,
-                id: 'pd-y-1',
-                meal_slot_id: 's-y-lunch',
-                dish_name: 'D1',
-                effective_calories: 100,
-                effective_protein: 5,
-                effective_carbs: 10,
-                effective_fat: 2,
-                effective_fiber: 3,
-              },
-              {
-                ...samplePlanned,
-                id: 'pd-y-2',
-                meal_slot_id: 's-y-lunch',
-                dish_name: 'D2',
-                effective_calories: 100,
-                effective_protein: 5,
-                effective_carbs: 10,
-                effective_fat: 2,
-                effective_fiber: 3,
-              },
-            ],
-          },
-        ],
-      };
-      dayPlanRepo.findByDate.and.callFake(async (date: string) => {
-        if (date === yesterdayIso) return yesterdayPlan;
-        return sampleDayPlan;
-      });
-      plannedDishRepo.copyToDate.and.returnValue(Promise.resolve(samplePlanned));
-
-      const result = await store.copyFromYesterday();
-
-      expect(result.copiedCount).toBe(2);
-      expect(plannedDishRepo.copyToDate).toHaveBeenCalledTimes(2);
-      const calls = plannedDishRepo.copyToDate.calls.allArgs();
-      for (const args of calls) {
-        expect(args[1]).toBe(today);
-        expect(args[2]).toBe('lunch');
-      }
+    it('copies the previous local date into the selected day and refreshes once', async () => {
+      store.currentDate.set('2026-03-01');
+      plannedDishRepo.copyDayIntoEmpty.and.resolveTo(2);
+      const revision = store.invalidationTick();
+      expect((await store.copyFromYesterday()).copiedCount).toBe(2);
+      expect(plannedDishRepo.copyDayIntoEmpty).toHaveBeenCalledOnceWith('2026-02-28', '2026-03-01');
+      expect(store.invalidationTick()).toBe(revision + 1);
     });
   });
 

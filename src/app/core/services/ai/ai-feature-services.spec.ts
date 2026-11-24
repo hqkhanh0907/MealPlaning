@@ -2,11 +2,15 @@ import { TestBed } from '@angular/core/testing';
 
 import type { Exercise, FitnessProgressSummary } from '../../models/fitness.types';
 import type { UserProfile } from '../../models/user-profile.model';
-import type { DishListItem } from '../../repositories/dish.repository';
+import type { DishListItem } from '../../models/management.model';
 import type { NutritionTotals } from '../nutrition/nutrition-query';
 import { FitnessAi } from './fitness-ai';
 import { FoodImageAi } from './food-image-ai';
 import { GeminiClient } from './gemini-client';
+import { GEMINI_API_KEY } from './gemini-key';
+import { GROQ_API_KEY } from './groq-client';
+import { AiGeneration } from './ai-generation';
+import { foodImageResponseSchema } from './prompts/food-image-analysis.prompt';
 import { InsightAi } from './insight-ai';
 import { MenuSuggestionAi } from './menu-suggestion-ai';
 import type { AiTrainingPlanResponse } from './prompts/training-plan.prompt';
@@ -19,6 +23,8 @@ describe('AI feature services', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        { provide: GROQ_API_KEY, useValue: '' },
+        { provide: GEMINI_API_KEY, useValue: 'test-only' },
         FitnessAi,
         FoodImageAi,
         InsightAi,
@@ -32,8 +38,10 @@ describe('AI feature services', () => {
     TestBed.resetTestingModule();
   });
 
-  it('sends inline image data and normalizes food image analysis output', async () => {
-    gemini.generateContent.and.resolveTo({
+  it('sends inline image data and preserves decimal portions and nutrients', async () => {
+    const ai = jasmine.createSpyObj<AiGeneration>('AiGeneration', ['generatePhoto']);
+    TestBed.overrideProvider(AiGeneration, { useValue: ai });
+    ai.generatePhoto.and.resolveTo({
       overall_confidence: 'medium',
       image_quality_warning: '  Ảnh hơi tối  ',
       items: [
@@ -57,26 +65,57 @@ describe('AI feature services', () => {
       'bữa trưa',
     );
 
-    const [, options] = gemini.generateContent.calls.mostRecent().args;
-    expect(options.feature).toBe('image_analysis');
-    expect(options.imageParts).toEqual([{ mimeType: 'image/jpeg', data: 'BASE64_IMAGE' }]);
+    expect(ai.generatePhoto).toHaveBeenCalledWith(
+      jasmine.stringContaining('bữa trưa'),
+      { mimeType: 'image/jpeg', data: 'BASE64_IMAGE' },
+      foodImageResponseSchema,
+    );
     expect(result).toEqual({
       overallConfidence: 'medium',
       imageQualityWarning: 'Ảnh hơi tối',
       items: [
         {
           name: 'Cơm gà',
-          estimatedGrams: 349,
-          calories: 520,
-          protein: 35,
-          carbs: 62,
-          fat: 14,
-          fiber: 4,
+          estimatedGrams: 348.6,
+          calories: 520.4,
+          protein: 34.6,
+          carbs: 62.2,
+          fat: 13.8,
+          fiber: 4.2,
           confidence: 'medium',
           warning: 'Ước tính theo khẩu phần nhìn thấy',
         },
       ],
     });
+  });
+
+  it('preserves sub-gram nutrients when a portion doubles', async () => {
+    const ai = jasmine.createSpyObj<AiGeneration>('AiGeneration', ['generatePhoto']);
+    TestBed.overrideProvider(AiGeneration, { useValue: ai });
+    ai.generatePhoto.and.resolveTo({
+      overall_confidence: 'medium',
+      image_quality_warning: null,
+      items: [
+        {
+          name: 'Dưa leo',
+          estimated_grams: 24.5,
+          calories: 3.7,
+          protein: 0.16,
+          carbs: 0.9,
+          fat: 0.03,
+          fiber: 0.12,
+          confidence: 'medium',
+          warning: null,
+        },
+      ],
+    });
+    const { items } = await TestBed.inject(FoodImageAi).analyzeMealPhoto({
+      data: 'BASE64_IMAGE',
+      mimeType: 'image/jpeg',
+    });
+    const portionScale = 49 / items[0].estimatedGrams;
+    expect(items[0].protein * portionScale).toBeCloseTo(0.32, 6);
+    expect(items[0].fiber * portionScale).toBeCloseTo(0.24, 6);
   });
 
   it('filters menu suggestions to known dishes and rounds servings to half steps', async () => {
@@ -107,6 +146,30 @@ describe('AI feature services', () => {
     ]);
   });
 
+  it('ignores a suggested dish outside the catalog shown to the provider', async () => {
+    const dishes = Array.from({ length: 81 }, (_, index) => ({
+      ...dish(),
+      id: 'candidate-' + index,
+    }));
+    gemini.generateContent.and.resolveTo({
+      suggestions: [
+        { dish_id: 'candidate-79', servings: 1, reason: 'Trong danh sách' },
+        { dish_id: 'candidate-80', servings: 2, reason: 'Ngoài danh sách' },
+      ],
+    });
+    const result = await TestBed.inject(MenuSuggestionAi).suggest({
+      date: '2026-05-10',
+      mealType: 'lunch',
+      targets: totals({}),
+      currentTotals: totals({}),
+      dishes,
+    });
+    const [prompt] = gemini.generateContent.calls.mostRecent().args;
+    expect(prompt).toContain('id=candidate-79;');
+    expect(prompt).not.toContain('id=candidate-80;');
+    expect(result.map((item) => item.dishId)).toEqual(['candidate-79']);
+  });
+
   it('maps daily insight response without leaking transport details', async () => {
     gemini.generateContent.and.resolveTo({
       tone: 'success',
@@ -120,6 +183,7 @@ describe('AI feature services', () => {
       date: '2026-05-10',
       level: 'beginner',
       totals: totals({ calories: 1600, protein: 100 }),
+      logged: totals({ calories: 600, protein: 40 }),
       targets: totals({ calories: 2200, protein: 130 }),
       workoutVolumeKg: 3000,
       workoutStreakWeeks: 2,
@@ -158,7 +222,7 @@ describe('AI feature services', () => {
         exercises: exercises(24),
         progress: progressSummary(),
       }),
-    ).toBeRejectedWithError('FitnessAi: Gemini returned too few valid training days.');
+    ).toBeRejectedWithError('AI chưa tạo đủ hai ngày tập có bài hợp lệ.');
   });
 });
 

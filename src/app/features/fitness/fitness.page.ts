@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  afterRenderEffect,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import {
   IonButton,
   IonButtons,
@@ -11,6 +20,8 @@ import {
   AlertController,
 } from '@ionic/angular/standalone';
 import { Router, RouterLink } from '@angular/router';
+import { NgTemplateOutlet } from '@angular/common';
+import { AiAvailability } from '../../shared/ai-availability';
 import { addIcons } from 'ionicons';
 import {
   addOutline,
@@ -22,8 +33,6 @@ import {
   flashOutline,
   flameOutline,
   pulseOutline,
-  repeatOutline,
-  playSkipForwardOutline,
   settingsOutline,
   sparklesOutline,
   statsChartOutline,
@@ -31,12 +40,23 @@ import {
   timerOutline,
   trashOutline,
 } from 'ionicons/icons';
+import { isLoggedSet, workoutSetLimits } from '../../core/models/fitness-workout-set';
 import { FitnessStore } from '../../core/stores/fitness.store';
 import { RestTimer } from './components/rest-timer/rest-timer';
+import { ExerciseGuideSheet } from './components/exercise-guide-sheet/exercise-guide-sheet';
+import { PlanPreview } from './components/plan-preview/plan-preview';
+import { exerciseGuide, exercisePurpose } from '../../core/models/exercise-guides';
 import { PlanEditor } from './components/plan-editor/plan-editor';
 import { ExercisePickerSheet } from '../../shared/components/exercise-picker-sheet/exercise-picker-sheet';
 import { WorkoutSummaryModal } from '../../shared/components/workout-summary-modal/workout-summary-modal';
-import type { ActiveTrainingPlan, WorkoutEffort } from '../../core/models/fitness.types';
+import {
+  isTimedExercise,
+  setValueLabel,
+  workoutNumber,
+  type ActiveTrainingPlan,
+  type WorkoutEffort,
+  type WorkoutExerciseDetail,
+} from '../../core/models/fitness.types';
 
 const EFFORT_LABELS: Record<WorkoutEffort, string> = {
   easy: 'Dễ',
@@ -44,14 +64,24 @@ const EFFORT_LABELS: Record<WorkoutEffort, string> = {
   hard: 'Nặng',
   maxed: 'Tối đa',
 };
+const SET_TAP_INTERVAL_MS = 250;
+type SetAction = 'logSet' | 'skipSet' | 'repeatLastSet';
 
 @Component({
   selector: 'app-fitness',
   templateUrl: './fitness.page.html',
   styleUrl: './fitness.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:keyboardWillShow)': 'keyboardOpen.set(true)',
+    '(window:ionKeyboardDidShow)': 'onKeyboardShown()',
+    '(window:ionKeyboardDidHide)': 'keyboardOpen.set(false)',
+  },
   imports: [
+    NgTemplateOutlet,
     RestTimer,
+    ExerciseGuideSheet,
+    PlanPreview,
     PlanEditor,
     ExercisePickerSheet,
     WorkoutSummaryModal,
@@ -67,9 +97,27 @@ const EFFORT_LABELS: Record<WorkoutEffort, string> = {
   ],
 })
 export default class FitnessPage {
+  protected readonly guideOpen = signal(false);
+  protected readonly purpose = exercisePurpose;
+  protected readonly guideFor = exerciseGuide;
+  protected readonly ai = inject(AiAvailability);
+  protected readonly setLimits = workoutSetLimits;
+  protected readonly timed = isTimedExercise;
+  protected readonly setValue = setValueLabel;
+  protected readonly number = workoutNumber;
+  protected setCount(exercise: WorkoutExerciseDetail): string {
+    const logged = exercise.sets.filter(isLoggedSet).length;
+    const skipped = exercise.sets.length - logged;
+    return logged + ' hiệp đã ghi' + (skipped ? ' · ' + skipped + ' bỏ qua' : '');
+  }
   private readonly router = inject(Router);
   private readonly alertCtrl = inject(AlertController);
+  private readonly content = viewChild(IonContent);
+  private readonly setEntry = viewChild<ElementRef<HTMLElement>>('setEntry');
+  private visibleSessionId: string | null = null;
+  private lastSetTap: { action: SetAction; at: number } | null = null;
   protected readonly fitness = inject(FitnessStore);
+  protected readonly keyboardOpen = signal(false);
 
   constructor() {
     addIcons({
@@ -82,8 +130,6 @@ export default class FitnessPage {
       flashOutline,
       flameOutline,
       pulseOutline,
-      repeatOutline,
-      playSkipForwardOutline,
       settingsOutline,
       sparklesOutline,
       statsChartOutline,
@@ -91,6 +137,50 @@ export default class FitnessPage {
       timerOutline,
       trashOutline,
     });
+
+    afterRenderEffect(() => {
+      const content = this.content();
+      const sessionId = this.fitness.activeSession()?.id ?? null;
+      if (!content || this.visibleSessionId === sessionId) return;
+      const wasCancelled =
+        this.visibleSessionId !== null &&
+        this.fitness.lastCancelledSessionId() === this.visibleSessionId;
+      this.visibleSessionId = sessionId;
+      if (sessionId || wasCancelled) void content.scrollToTop();
+    });
+  }
+
+  protected submitSet(action: SetAction): void {
+    const at = performance.now();
+    const last = this.lastSetTap;
+    if (last?.action === action && at - last.at < SET_TAP_INTERVAL_MS) return;
+    this.lastSetTap = { action, at };
+    void this.fitness[action]();
+  }
+
+  protected onKeyboardShown(): void {
+    this.keyboardOpen.set(true);
+    requestAnimationFrame(() => void this.revealSetEntry());
+  }
+
+  protected async revealSetEntry(): Promise<void> {
+    const content = this.content();
+    const entry = this.setEntry()?.nativeElement;
+    if (!content || !entry || !this.keyboardOpen()) return;
+
+    const scroll = await content.getScrollElement();
+    if (!this.keyboardOpen() || !entry.querySelector('.set-grid input:focus')) return;
+
+    const viewport = scroll.getBoundingClientRect();
+    const form = entry.getBoundingClientRect();
+    const visible = window.visualViewport;
+    const top = Math.max(viewport.top, visible?.offsetTop ?? 0);
+    const bottom = Math.min(
+      viewport.bottom,
+      visible ? visible.offsetTop + visible.height : Infinity,
+    );
+    const offset = form.top < top ? form.top - top : Math.max(0, form.bottom - bottom);
+    if (offset) await content.scrollByPoint(0, offset, 0);
   }
 
   /**
@@ -102,7 +192,7 @@ export default class FitnessPage {
 
   /**
    * Active plan card progressive-disclosure: collapsed by default to keep the
-   * hub focused on today's workout. User taps "Đổi" to expand the full plan
+   * hub focused on today's workout. User taps "Đổi giáo án" to expand the full plan
    * grid + AI callout in the same card (no nav, Apple HIG: stay-in-place).
    */
   readonly switchPlanOpen = signal(false);
@@ -120,12 +210,8 @@ export default class FitnessPage {
     this.switchPlanOpen.update((v) => !v);
   }
 
-  /**
-   * Apple-style entry path when active session has 0 exercises: opens the picker sheet
-   * from the empty active card so user has a single tap to pick a first exercise.
-   */
-  openFreeModeAndScroll(): void {
-    this.pickerOpen.set(true);
+  protected dayLabel(dayOfWeek: number): string {
+    return dayOfWeek === 0 ? 'Chủ nhật' : `Thứ ${dayOfWeek + 1}`;
   }
 
   ionViewWillEnter(): void {
@@ -187,7 +273,7 @@ export default class FitnessPage {
   async confirmRemoveExercise(workoutExerciseId: string): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Xóa bài khỏi buổi tập?',
-      message: 'Toàn bộ set đã ghi cho bài này sẽ bị xóa.',
+      message: 'Bạn sẽ mất các hiệp đã ghi cho bài này.',
       buttons: [
         { text: 'Hủy', role: 'cancel' },
         {
@@ -205,8 +291,8 @@ export default class FitnessPage {
   /** Destructive: delete a single logged set. Re-numbers remaining sets server-side. */
   async confirmDeleteSet(setId: string, setNumber: number): Promise<void> {
     const alert = await this.alertCtrl.create({
-      header: `Xóa Set ${setNumber}?`,
-      message: 'Hành động không thể hoàn tác.',
+      header: `Xóa hiệp ${setNumber}?`,
+      message: 'Ứng dụng sẽ xóa vĩnh viễn hiệp này.',
       buttons: [
         { text: 'Hủy', role: 'cancel' },
         {

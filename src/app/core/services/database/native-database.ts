@@ -186,11 +186,6 @@ export class NativeDatabase extends Database {
     return (res.values ?? []) as T[];
   }
 
-  override async getOne<T>(sql: string, params?: unknown[]): Promise<T | null> {
-    const rows = await this.query<T>(sql, params);
-    return rows.length > 0 ? rows[0] : null;
-  }
-
   private ensureDb(): void {
     if (!this.db) {
       throw new Error('NativeDatabaseService: not initialized. Call initialize() first.');

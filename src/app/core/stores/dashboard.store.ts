@@ -1,20 +1,22 @@
+import { percentOfNutritionTarget, ZERO_TOTALS, type NutritionTotals } from '../models/nutrition';
+import { addCalendarDays, localIsoDate, parseLocalDate } from '../utils/local-date';
 import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
-import { CalendarStore } from './calendar.store';
+import { v4 as uuid } from 'uuid';
+import type { MealType } from '../models/meal-plan.types';
+import { validPhotoGrams, type PhotoMealPortion } from '../models/photo-meal';
+import { PhotoMealRepository } from '../repositories/photo-meal.repository';
+import { CalendarStore, type PendingMealTarget } from './calendar.store';
 import { NutritionStore } from './nutrition.store';
 import { ProfileStore } from './profile.store';
 import { NetworkStore } from './network.store';
 import { UserProfileRepository } from '../repositories/user-profile.repository';
+import { DayPlanRepository } from '../repositories/day-plan.repository';
 import { WorkoutRepository } from '../repositories/workout.repository';
-import type { FitnessProgressSummary } from '../models/fitness.types';
+import { workoutNumber, type FitnessProgressSummary } from '../models/fitness.types';
 import { CameraCapture } from '../services/camera/camera-capture';
 import { FoodImageAi, type FoodImageAnalysisResult } from '../services/ai/food-image-ai';
-import { InsightAi, type DailyInsight } from '../services/ai/insight-ai';
-import {
-  NutritionQuery,
-  type DayTotals,
-  type NutritionTotals,
-} from '../services/nutrition/nutrition-query';
-import type { KeyMetric } from '../utils/key-metric-router';
+import { InsightAi, type DailyInsight, type DailyInsightAiInput } from '../services/ai/insight-ai';
+import { NutritionQuery, type DayTotals } from '../services/nutrition/nutrition-query';
 
 type DashboardInsightTone = 'info' | 'warning';
 type MacroMetric = 'protein' | 'carbs' | 'fat' | 'fiber';
@@ -53,30 +55,23 @@ export interface DashboardWorkoutSummary {
   lastSessionLabel: string | null;
 }
 
-const ZERO_TOTALS: NutritionTotals = Object.freeze({
-  calories: 0,
-  protein: 0,
-  carbs: 0,
-  fat: 0,
-  fiber: 0,
-});
-
 const STREAK_LOOKBACK_DAYS = 30;
 const CALORIE_STREAK_MIN_PCT = 80;
 const CALORIE_STREAK_MAX_PCT = 120;
+
+interface MealPhotoDraft {
+  captureId: string;
+  date: string;
+  mealType: MealType;
+  analysis: FoodImageAnalysisResult;
+  portions: readonly PhotoMealPortion[];
+}
 
 const MACRO_LABELS: Record<MacroMetric, string> = {
   protein: 'Protein',
   carbs: 'Carbs',
   fat: 'Fat',
   fiber: 'Fiber',
-};
-
-const METRIC_LABELS: Record<KeyMetric, string> = {
-  calories: 'Calo',
-  protein: 'Protein',
-  carbs: 'Carbs',
-  fat: 'Fat',
 };
 
 @Injectable({ providedIn: 'root' })
@@ -86,17 +81,24 @@ export class DashboardStore {
   private readonly profileStore = inject(ProfileStore);
   private readonly networkStore = inject(NetworkStore);
   private readonly profileRepo = inject(UserProfileRepository);
+  private readonly dayPlanRepo = inject(DayPlanRepository);
   private readonly nutritionQuery = inject(NutritionQuery);
   private readonly workoutRepo = inject(WorkoutRepository);
   private readonly cameraCapture = inject(CameraCapture);
   private readonly foodImageAi = inject(FoodImageAi);
+  private readonly photoMeals = inject(PhotoMealRepository);
   private readonly insightAi = inject(InsightAi);
+  readonly insightProvider = this.insightAi.providerName;
 
   private refreshSeq = 0;
 
-  readonly todayIso = signal(todayIso());
+  readonly todayIso = signal(localIsoDate());
   readonly totals = signal<NutritionTotals>({ ...ZERO_TOTALS });
-  readonly loading = signal(false);
+  readonly loggedTotals = signal<NutritionTotals>({ ...ZERO_TOTALS });
+  readonly loggedCalories = computed(() => Math.round(this.loggedTotals().calories));
+  readonly pendingMeal = signal<PendingMealTarget | null>(null);
+  readonly loading = signal(true);
+  readonly refreshFailed = signal(false);
   readonly nutritionStreakDays = signal<number | null>(null);
   readonly weightSummary = signal<DashboardWeightSummary>({
     currentKg: null,
@@ -110,23 +112,46 @@ export class DashboardStore {
     streakWeeks: 0,
     lastSessionLabel: null,
   });
-  readonly dailyAiInsight = signal<DailyInsight | null>(null);
+  private insightRequest = 0;
+  private readonly savedInsight = signal<{ key: string; value: DailyInsight } | null>(null);
   readonly dailyAiLoading = signal(false);
-  readonly foodImageAnalysis = signal<FoodImageAnalysisResult | null>(null);
+  readonly photoDraft = signal<MealPhotoDraft | null>(null);
   readonly foodImageLoading = signal(false);
+  readonly photoSaving = signal(false);
+  readonly canSavePhoto = computed(() => {
+    const draft = this.photoDraft();
+    return (
+      !!draft?.portions.length &&
+      draft.portions.every(({ grams }) => validPhotoGrams(grams)) &&
+      !this.photoSaving()
+    );
+  });
 
   readonly targets = computed(() => this.nutritionStore.targets());
-  readonly keyMetric = computed(() => this.nutritionStore.keyMetric());
+
+  private readonly insightInput = computed<DailyInsightAiInput>(() => ({
+    date: this.todayIso(),
+    level: this.profileStore.profile()?.fitness_level ?? 'beginner',
+    totals: this.totals(),
+    logged: this.loggedTotals(),
+    targets: this.targets(),
+    workoutVolumeKg: this.workoutSummary().currentWeekVolume,
+    workoutStreakWeeks: this.workoutSummary().streakWeeks,
+  }));
+  private readonly insightKey = computed(() => JSON.stringify(this.insightInput()));
+  readonly dailyAiInsight = computed(() => {
+    const saved = this.savedInsight();
+    return saved?.key === this.insightKey() ? saved.value : null;
+  });
 
   readonly todayLabel = computed(() => formatDisplayDate(this.todayIso()));
   readonly roundedCalories = computed(() => Math.round(this.totals().calories));
   readonly caloriePercent = computed(() =>
-    progressPercent(this.totals().calories, this.targets().calories),
+    percentOfNutritionTarget(this.totals().calories, this.targets().calories),
   );
   readonly proteinPercent = computed(() =>
-    progressPercent(this.totals().protein, this.targets().protein),
+    percentOfNutritionTarget(this.totals().protein, this.targets().protein),
   );
-  readonly calorieProgressCss = computed(() => percentCss(this.caloriePercent()));
   readonly caloriePercentLabel = computed(() => percentLabel(this.caloriePercent()));
   readonly calorieTargetLabel = computed(() => {
     const target = this.targets().calories;
@@ -134,44 +159,13 @@ export class DashboardStore {
       ? `${formatNumber(Math.round(target))} kcal`
       : 'Chưa có mục tiêu kcal';
   });
-  readonly remainingCalories = computed(() => {
-    const target = this.targets().calories;
-    if (!isPositive(target)) return null;
-    return Math.max(0, Math.round(target - this.totals().calories));
-  });
-
-  readonly heroTitle = computed(() => {
-    const pct = this.caloriePercent();
-    if (pct === null) return 'Thiết lập mục tiêu để bắt đầu';
-    if (this.totals().calories <= 0) return 'Sẵn sàng cho hôm nay';
-    if (pct < CALORIE_STREAK_MIN_PCT) {
-      const remaining = this.remainingCalories();
-      return remaining === null
-        ? 'Còn thiếu dữ liệu mục tiêu'
-        : `Còn ${formatNumber(remaining)} kcal`;
-    }
-    if (pct <= 110) return 'Hôm nay đang đúng nhịp';
-    if (pct <= CALORIE_STREAK_MAX_PCT) return 'Hơi cao so với mục tiêu';
-    return 'Vượt mục tiêu kcal';
-  });
-
-  readonly heroBody = computed(() => {
-    const cal = Math.round(this.totals().calories);
-    if (cal <= 0) return 'Bắt đầu ghi bữa đầu tiên để Dashboard sống động hơn.';
-    const key = this.keyMetric();
-    const label = METRIC_LABELS[key];
-    const value = Math.round(this.totals()[key]);
-    return `${label} hôm nay: ${formatNumber(value)}.`;
-  });
-
-  /** True khi user chưa log bữa nào hôm nay → Dashboard hiển thị empty-state gọn. */
   readonly hasNutritionData = computed(() => this.totals().calories > 0);
 
   readonly macroRows = computed<DashboardMacroRow[]>(() => {
     const totals = this.totals();
     const targets = this.targets();
     return (['protein', 'carbs', 'fat', 'fiber'] as const).map((metric) => {
-      const pct = progressPercent(totals[metric], targets[metric]);
+      const pct = percentOfNutritionTarget(totals[metric], targets[metric]);
       return {
         metric,
         label: MACRO_LABELS[metric],
@@ -194,15 +188,13 @@ export class DashboardStore {
     const caloriePct = this.caloriePercent();
     const proteinPct = this.proteinPercent();
 
-    // Empty state đã được Hero card cover (heroTitle + heroBody) — không cần
-    // duplicate AI Insight card cho cùng thông điệp. Hide khi chưa có dữ liệu.
     if (totals.calories <= 0) return null;
 
     if (caloriePct !== null && caloriePct > CALORIE_STREAK_MAX_PCT) {
       return {
         tone: 'warning',
         title: 'Kế hoạch calo đang vượt mục tiêu',
-        body: `Bạn đang ở ${Math.round(caloriePct)}% mục tiêu kcal. Hãy giảm khẩu phần hoặc đổi món trước khi log bữa tiếp theo.`,
+        body: `Các món theo lịch cả ngày tương ứng ${Math.round(caloriePct)}% mục tiêu kcal.`,
         ctaLabel: 'Điều chỉnh lịch ăn',
         ctaRoute: '/tabs/calendar',
       };
@@ -214,7 +206,7 @@ export class DashboardStore {
         return {
           tone: 'warning',
           title: 'Protein đang thấp so với kế hoạch',
-          body: `Bạn mới đạt ${Math.round(proteinPct)}% mục tiêu Protein trong khi calo đã qua nửa ngày kế hoạch.`,
+          body: `Các món theo lịch cung cấp ${Math.round(proteinPct)}% mục tiêu Protein và ${Math.round(caloriePct)}% mục tiêu kcal.`,
           ctaLabel: 'Thêm món giàu Protein',
           ctaRoute: '/tabs/calendar',
         };
@@ -242,11 +234,12 @@ export class DashboardStore {
   });
 
   readonly workoutTitle = computed(() => {
-    const volume = this.workoutSummary().currentWeekVolume;
-    if (volume > 0) return `Tuần này ${formatNumber(volume)} kg khối lượng`;
-    return this.workoutSummary().lastSessionLabel
-      ? 'Tuần này chưa có buổi tập'
-      : 'Chưa có buổi tập nào';
+    const summary = this.workoutSummary();
+    if (summary.currentWeekVolume > 0) {
+      return `Tuần này ${workoutNumber.format(summary.currentWeekVolume)} kg khối lượng`;
+    }
+    if (summary.streakWeeks > 0) return 'Đã tập trong tuần này';
+    return summary.lastSessionLabel ? 'Tuần này chưa có buổi tập' : 'Chưa có buổi tập nào';
   });
 
   readonly workoutBody = computed(() => {
@@ -255,14 +248,14 @@ export class DashboardStore {
       if (summary.previousWeekVolume > 0) {
         const delta = summary.currentWeekVolume - summary.previousWeekVolume;
         if (delta > 0) {
-          return `Tăng ${formatNumber(delta)} kg khối lượng so với tuần trước. Tiếp tục giữ nhịp và ưu tiên kỹ thuật đúng.`;
+          return `Tăng ${workoutNumber.format(delta)} kg khối lượng so với tuần trước.`;
         }
         if (delta < 0) {
-          return `Giảm ${formatNumber(Math.abs(delta))} kg khối lượng so với tuần trước. Kiểm tra lịch tập để không mất nhịp.`;
+          return `Giảm ${workoutNumber.format(Math.abs(delta))} kg khối lượng so với tuần trước.`;
         }
-        return 'Khối lượng đang ngang tuần trước. Nếu cơ thể ổn, tăng nhẹ mức tạ hoặc số set.';
+        return 'Khối lượng hiện bằng tuần trước.';
       }
-      return 'Đã ghi nhận khối lượng tập luyện tuần này. Hoàn thành thêm buổi để Dashboard bắt đầu so sánh xu hướng.';
+      return 'Tuần trước chưa ghi nhận khối lượng tạ để so sánh.';
     }
     if (summary.lastSessionLabel) {
       return `Buổi gần nhất: ${summary.lastSessionLabel}. Mở tab Tập luyện để bắt đầu buổi mới.`;
@@ -289,23 +282,31 @@ export class DashboardStore {
 
   async refresh(now: Date = new Date()): Promise<void> {
     const seq = ++this.refreshSeq;
-    const date = todayIso(now);
+    const date = localIsoDate(now);
     this.todayIso.set(date);
     this.loading.set(true);
+    this.refreshFailed.set(false);
 
     try {
-      const [totals, weightSummary, nutritionStreakDays, workoutSummary] = await Promise.all([
-        this.nutritionQuery.dailyTotals(date),
-        this.loadWeightSummary(),
-        this.loadNutritionStreak(now),
-        this.loadWorkoutSummary(now),
-      ]);
+      const [totals, logged, weightSummary, nutritionStreakDays, workoutSummary, pendingMeal] =
+        await Promise.all([
+          this.nutritionQuery.dailyTotals(date),
+          this.nutritionQuery.loggedTotalsForDates([date]),
+          this.loadWeightSummary(),
+          this.loadNutritionStreak(now),
+          this.loadWorkoutSummary(now),
+          this.findPendingMeal(date),
+        ]);
 
       if (seq !== this.refreshSeq) return;
       this.totals.set(totals);
+      this.loggedTotals.set(logged.find((day) => day.date === date) ?? ZERO_TOTALS);
       this.weightSummary.set(weightSummary);
       this.nutritionStreakDays.set(nutritionStreakDays);
       this.workoutSummary.set(workoutSummary);
+      this.pendingMeal.set(pendingMeal);
+    } catch {
+      if (seq === this.refreshSeq) this.refreshFailed.set(true);
     } finally {
       if (seq === this.refreshSeq) {
         this.loading.set(false);
@@ -313,25 +314,29 @@ export class DashboardStore {
     }
   }
 
-  async generateDailyAiInsight(): Promise<DailyInsight> {
+  private async findPendingMeal(date: string): Promise<PendingMealTarget | null> {
+    const plan = await this.dayPlanRepo.findByDate(date);
+    for (const slot of plan?.meal_slots ?? []) {
+      const dish = slot.planned_dishes.find((item) => item.is_completed === 0);
+      if (dish) return { date, mealType: slot.meal_type, plannedDishId: dish.id };
+    }
+    return null;
+  }
+
+  async generateDailyAiInsight(): Promise<DailyInsight | null> {
     if (!this.networkStore.online()) {
       throw new Error('DashboardStore: daily insight requires network connection.');
     }
+    const request = ++this.insightRequest;
+    const key = this.insightKey();
     this.dailyAiLoading.set(true);
     try {
-      const profile = this.profileStore.profile();
-      const insight = await this.insightAi.generateDailyInsight({
-        date: this.todayIso(),
-        level: profile?.fitness_level ?? 'beginner',
-        totals: this.totals(),
-        targets: this.targets(),
-        workoutVolumeKg: this.workoutSummary().currentWeekVolume,
-        workoutStreakWeeks: this.workoutSummary().streakWeeks,
-      });
-      this.dailyAiInsight.set(insight);
+      const insight = await this.insightAi.generateDailyInsight(this.insightInput());
+      if (request !== this.insightRequest || key !== this.insightKey()) return null;
+      this.savedInsight.set({ key, value: insight });
       return insight;
     } finally {
-      this.dailyAiLoading.set(false);
+      if (request === this.insightRequest) this.dailyAiLoading.set(false);
     }
   }
 
@@ -339,14 +344,60 @@ export class DashboardStore {
     if (!this.networkStore.online()) {
       throw new Error('DashboardStore: food image analysis requires network connection.');
     }
+    if (this.foodImageLoading() || this.photoDraft()) {
+      throw new Error('Một ảnh món ăn đang chờ xác nhận.');
+    }
+    const now = new Date();
     this.foodImageLoading.set(true);
     try {
       const image = await this.cameraCapture.captureMealPhoto();
       const analysis = await this.foodImageAi.analyzeMealPhoto(image, 'bữa ăn hôm nay');
-      this.foodImageAnalysis.set(analysis);
+      const hour = now.getHours();
+      this.photoDraft.set({
+        captureId: uuid(),
+        date: localIsoDate(now),
+        mealType: hour < 10 ? 'breakfast' : hour < 15 ? 'lunch' : 'dinner',
+        analysis,
+        portions: analysis.items.map((item) => ({ item, grams: item.estimatedGrams })),
+      });
       return analysis;
     } finally {
       this.foodImageLoading.set(false);
+    }
+  }
+
+  setPhotoGrams(index: number, grams: number): void {
+    if (this.photoSaving()) return;
+    this.photoDraft.update(
+      (draft) =>
+        draft && {
+          ...draft,
+          portions: draft.portions.map((portion, i) =>
+            i === index ? { ...portion, grams } : portion,
+          ),
+        },
+    );
+  }
+
+  setPhotoMealType(mealType: MealType): void {
+    if (!this.photoSaving()) this.photoDraft.update((draft) => draft && { ...draft, mealType });
+  }
+
+  discardPhoto(): void {
+    if (!this.photoSaving()) this.photoDraft.set(null);
+  }
+
+  async savePhoto(): Promise<boolean> {
+    const draft = this.photoDraft();
+    if (!draft || !this.canSavePhoto()) return false;
+    this.photoSaving.set(true);
+    try {
+      await this.photoMeals.save(draft.date, draft.mealType, draft.portions, draft.captureId);
+      this.photoDraft.set(null);
+      this.calendarStore.invalidationTick.update((n) => n + 1);
+      return true;
+    } finally {
+      this.photoSaving.set(false);
     }
   }
 
@@ -391,11 +442,6 @@ export class DashboardStore {
   }
 }
 
-function progressPercent(value: number, target: number): number | null {
-  if (!isPositive(target)) return null;
-  return Math.max(0, Math.min(200, (value / target) * 100));
-}
-
 function percentCss(pct: number | null): string {
   if (pct === null) return '0%';
   return `${Math.min(100, Math.round(pct))}%`;
@@ -408,7 +454,7 @@ function percentLabel(pct: number | null): string {
 function countConsecutiveStreak(rows: readonly DayTotals[], targetCalories: number): number {
   let count = 0;
   for (const row of rows) {
-    const pct = progressPercent(row.calories, targetCalories);
+    const pct = percentOfNutritionTarget(row.calories, targetCalories);
     if (
       pct === null ||
       row.calories <= 0 ||
@@ -425,18 +471,9 @@ function countConsecutiveStreak(rows: readonly DayTotals[], targetCalories: numb
 function previousDates(now: Date, count: number): string[] {
   const dates: string[] = [];
   for (let i = 1; i <= count; i += 1) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    dates.push(todayIso(d));
+    dates.push(localIsoDate(addCalendarDays(now, -i)));
   }
   return dates;
-}
-
-function todayIso(now: Date = new Date()): string {
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
 }
 
 function formatDisplayDate(iso: string): string {
@@ -444,7 +481,7 @@ function formatDisplayDate(iso: string): string {
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',
-  }).format(new Date(`${iso}T00:00:00`));
+  }).format(parseLocalDate(iso));
 }
 
 function toDashboardWorkoutSummary(
@@ -452,11 +489,11 @@ function toDashboardWorkoutSummary(
   lastSession: { date: string; total_volume: number } | null,
 ): DashboardWorkoutSummary {
   return {
-    currentWeekVolume: Math.round(progress.currentWeekVolume),
-    previousWeekVolume: Math.round(progress.previousWeekVolume),
+    currentWeekVolume: progress.currentWeekVolume,
+    previousWeekVolume: progress.previousWeekVolume,
     streakWeeks: progress.workoutStreakWeeks,
     lastSessionLabel: lastSession
-      ? `${formatDisplayDate(lastSession.date)} · ${formatNumber(Math.round(lastSession.total_volume))} kg`
+      ? `${formatDisplayDate(lastSession.date)} · ${workoutNumber.format(lastSession.total_volume)} kg khối lượng tạ`
       : null,
   };
 }

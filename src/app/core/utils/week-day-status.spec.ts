@@ -99,10 +99,10 @@ describe('weekDayStatus', () => {
         ),
       ).toBe('past-extreme');
     });
-    it('targetCal=0 (degenerate) → extreme', () => {
+    it('keeps a recorded day neutral when there is no calorie target', () => {
       expect(
         weekDayStatus(makeWeekDay({ hasPlan: true, isPast: true, loggedCal: 100, targetCal: 0 })),
-      ).toBe('past-extreme');
+      ).toBe('past-no-target');
     });
   });
 });

@@ -54,6 +54,7 @@ describe('FitnessStore', () => {
       'addExerciseToSession',
       'getSession',
       'addSet',
+      'skipSet',
       'completeSession',
       'deleteSet',
       'updateSet',
@@ -150,7 +151,7 @@ describe('FitnessStore', () => {
       notes: null,
     });
     expect(store.restSeconds()).toBe(90);
-    expect(store.successMessage()).toBe('Đã log set tập.');
+    expect(store.successMessage()).toBe('Đã ghi hiệp tập.');
   });
 
   it('rejects invalid set input before touching the repository', async () => {
@@ -161,7 +162,23 @@ describe('FitnessStore', () => {
     await store.logSet();
 
     expect(workoutRepo.addSet).not.toHaveBeenCalled();
-    expect(store.errorMessage()).toBe('Reps phải là số nguyên 1-100.');
+    expect(store.errorMessage()).toBe('Số lần phải là số nguyên từ 1 đến 100.');
+  });
+
+  it('ignores overlapping log and skip taps while a set is being saved', async () => {
+    store.activeSession.set(workoutSession());
+    store.selectedWorkoutExerciseId.set('we-1');
+    store.updateWeight('40');
+    store.updateReps('8');
+
+    const saving = store.logSet();
+    await Promise.all([saving, store.logSet(), store.skipSet()]);
+
+    expect(workoutRepo.addSet).toHaveBeenCalledTimes(1);
+    expect(workoutRepo.skipSet).not.toHaveBeenCalled();
+
+    await store.logSet();
+    expect(workoutRepo.addSet).toHaveBeenCalledTimes(2);
   });
 
   it('captures lastLoggedSet after a successful logSet for inline confirmation', async () => {
@@ -188,7 +205,7 @@ describe('FitnessStore', () => {
 
     expect(workoutRepo.deleteSet).toHaveBeenCalledOnceWith('set-1');
     expect(workoutRepo.getSession).toHaveBeenCalled();
-    expect(store.successMessage()).toBe('Đã xóa set.');
+    expect(store.successMessage()).toBe('Đã xóa hiệp.');
   });
 
   it('deleteSet clears lastLoggedSet if it referenced the deleted id', async () => {
@@ -247,7 +264,7 @@ describe('FitnessStore', () => {
     expect(store.lastCompletedSession()).toEqual(sessionWithSets);
   });
 
-  it('repeats the last logged set instead of a skipped set', async () => {
+  it('repeats the last logged set with a known unit', async () => {
     store.activeSession.set(
       workoutSession({
         exercises: [
@@ -255,6 +272,7 @@ describe('FitnessStore', () => {
             sets: [
               { weight_kg: 45, reps: 8, rest_seconds: 75, status: 'logged', effort: null } as never,
               { weight_kg: 65, reps: 10, rest_seconds: 120, status: 'skipped' } as never,
+              { weight_kg: 20, reps: 30, status: 'logged', legacy_unit_unknown: 1 } as never,
             ],
           }),
         ],
@@ -329,7 +347,7 @@ describe('FitnessStore', () => {
 
     expect(workoutRepo.updateSet).toHaveBeenCalledOnceWith('set-1', input);
     expect(workoutRepo.getSession).toHaveBeenCalled();
-    expect(store.successMessage()).toBe('Đã cập nhật set.');
+    expect(store.successMessage()).toBe('Đã cập nhật hiệp.');
   });
 
   it('skipRest resets restSeconds to 0', () => {

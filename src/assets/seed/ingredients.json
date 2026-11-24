@@ -1,17 +1,17 @@
 [
   {
-    "calories": 29.17,
-    "carbs": 3.0,
+    "calories": 35,
+    "carbs": 3.6,
     "category": "staple",
-    "fat": 0.0,
-    "fiber": 0.0,
+    "fat": 0.01,
+    "fiber": 0,
     "id": "7c4e8b1a-0002-4000-8000-000000000001",
     "name_en": "Vietnamese fish sauce",
     "name_vi": "nước mắm",
-    "notes": "Average across 35°N grade. Refine if user feedback flags drift.",
-    "protein": 4.25,
-    "source": "wikipedia-vi",
-    "source_citation": "sources/wikipedia-vi.md#nuoc-mam"
+    "notes": "Ước tính từ mục 13017 “Nước mắm cá” trên 100 g phần ăn được. Dùng 1,2 g/ml khi đổi thể tích trong công thức.",
+    "protein": 5.1,
+    "source": "vien-dinh-duong",
+    "source_citation": "https://www.fao.org/fileadmin/templates/food_composition/documents/pdf/VTN_FCT_2007.pdf#page=542"
   },
   {
     "calories": 0.0,
@@ -159,17 +159,17 @@
     "source_citation": "sources/wikipedia-vi.md#bot-ngot"
   },
   {
-    "calories": 165.0,
+    "calories": 120.0,
     "carbs": 0.0,
     "category": "meat",
-    "fat": 3.6,
+    "fat": 2.62,
     "fiber": 0.0,
     "id": "7c4e8b1a-0002-4000-8000-000000000101",
     "name_en": "Chicken breast, raw",
-    "name_vi": "ức gà",
-    "protein": 31.0,
-    "source": "wikipedia-vi",
-    "source_citation": "sources/wikipedia-vi.md#uc-ga"
+    "name_vi": "ức gà sống bỏ da, bỏ xương",
+    "protein": 22.5,
+    "source": "usda-fdc",
+    "source_citation": "https://fdc.nal.usda.gov/food-details/171077/nutrients"
   },
   {
     "calories": 109.0,

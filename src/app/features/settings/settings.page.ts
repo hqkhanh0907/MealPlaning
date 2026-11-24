@@ -1,10 +1,12 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import {
   IonHeader,
   IonToolbar,
   IonTitle,
   IonContent,
   IonButtons,
+  IonButton,
   IonBackButton,
   IonList,
   IonListHeader,
@@ -19,41 +21,23 @@ import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { chevronForwardOutline } from 'ionicons/icons';
 import { ProfileStore } from '../../core/stores/profile.store';
-import { LocalNotifications, SlotKey } from '../../core/services/notifications/local-notifications';
-import { UserProfile } from '../../core/models/user-profile.model';
-import { activityLabelShort } from '../../core/services/profile/activity-label';
-import { getActivityLevelFromFactor } from '../onboarding/onboarding-calculation';
+import { LocalNotifications } from '../../core/services/notifications/local-notifications';
+import {
+  notificationFlags,
+  notificationPatch,
+  type SlotKey,
+} from '../../core/services/notifications/notification-preferences';
+import {
+  FITNESS_LEVEL_LABELS,
+  GENDER_LABELS,
+  GOAL_LABELS,
+} from '../../core/models/user-profile.types';
+import {
+  REMINDER_SLOTS,
+  reminderTimeLabel,
+} from '../../core/services/notifications/notification-schedule';
+import { activitySummaryForFactor } from '../../core/services/profile/activity-label';
 import { environment } from '../../../environments/environment';
-
-const GENDER_LABELS: Record<UserProfile['gender'], string> = {
-  male: 'Nam',
-  female: 'Nữ',
-};
-
-const GOAL_LABELS: Record<UserProfile['goal'], string> = {
-  lose_weight: 'Giảm cân',
-  gain_muscle: 'Tăng cơ',
-  maintain: 'Duy trì',
-  performance: 'Tăng sức mạnh',
-};
-
-function activityLabel(factor: number): string {
-  const level = getActivityLevelFromFactor(factor) ?? 'sedentary';
-  return activityLabelShort(level);
-}
-
-function notificationPatch(key: SlotKey, value: 0 | 1): Partial<UserProfile> {
-  switch (key) {
-    case 'morning':
-      return { notif_morning: value };
-    case 'lunch':
-      return { notif_lunch: value };
-    case 'evening':
-      return { notif_evening: value };
-    case 'weekly':
-      return { notif_weekly: value };
-  }
-}
 
 @Component({
   selector: 'app-settings',
@@ -65,6 +49,7 @@ function notificationPatch(key: SlotKey, value: 0 | 1): Partial<UserProfile> {
     IonTitle,
     IonContent,
     IonButtons,
+    IonButton,
     IonBackButton,
     IonList,
     IonListHeader,
@@ -96,13 +81,30 @@ export default class SettingsPage {
 
   readonly activitySummary = computed(() => {
     const p = this.profile();
-    return p ? activityLabel(p.activity_factor) : '';
+    return p ? activitySummaryForFactor(p.activity_factor) : '';
   });
 
-  readonly morningEnabled = computed(() => !!this.profile()?.notif_morning);
-  readonly lunchEnabled = computed(() => !!this.profile()?.notif_lunch);
-  readonly eveningEnabled = computed(() => !!this.profile()?.notif_evening);
-  readonly weeklyEnabled = computed(() => !!this.profile()?.notif_weekly);
+  readonly trainingLevelLabel = computed(() => {
+    const p = this.profile();
+    return p ? FITNESS_LEVEL_LABELS[p.fitness_level] : '';
+  });
+
+  readonly reminderSlots = REMINDER_SLOTS;
+  readonly reminderTimeLabel = reminderTimeLabel;
+  readonly selectedNotifications = computed(() => notificationFlags(this.profile()));
+  private readonly permissionMissing = signal(false);
+  readonly notificationsPaused = computed(
+    () => this.permissionMissing() && Object.values(this.selectedNotifications()).some(Boolean),
+  );
+
+  async ionViewWillEnter(): Promise<void> {
+    if (Capacitor.isNativePlatform())
+      this.permissionMissing.set(!(await this.notifications.hasPermission()));
+  }
+
+  async resumeNotifications(): Promise<void> {
+    if (await this.allowNotifications()) await this.syncSelectedNotifications();
+  }
 
   readonly appVersion = environment.appVersion;
 
@@ -112,7 +114,7 @@ export default class SettingsPage {
 
   async onToggleChange(key: SlotKey, event: CustomEvent<{ checked: boolean }>): Promise<void> {
     const enabled = event.detail.checked;
-    const current = this.readFlag(key);
+    const current = this.selectedNotifications()[key];
     if (enabled === current) return;
     const ok = await this.toggleNotif(key, enabled);
     if (!ok) {
@@ -125,43 +127,29 @@ export default class SettingsPage {
   }
 
   async toggleNotif(key: SlotKey, enabled: boolean): Promise<boolean> {
-    if (enabled) {
-      const granted = await this.notifications.requestPermission();
-      if (!granted) {
-        const t = await this.toastCtrl.create({
-          message: 'Vui lòng vào Cài đặt > Ứng dụng > HealthMate AI > Thông báo để bật quyền.',
-          duration: 4000,
-          position: 'bottom',
-        });
-        await t.present();
-        return false;
-      }
-    }
-    await this.profileStore.updateProfile(notificationPatch(key, enabled ? 1 : 0));
-    const p = this.profile();
-    if (p) {
-      await this.notifications.sync({
-        morning: !!p.notif_morning,
-        lunch: !!p.notif_lunch,
-        evening: !!p.notif_evening,
-        weekly: !!p.notif_weekly,
-      });
-    }
+    if (enabled && !(await this.allowNotifications())) return false;
+    await this.profileStore.updateProfile(notificationPatch(key, enabled));
+    await this.syncSelectedNotifications();
     return true;
   }
 
-  private readFlag(key: SlotKey): boolean {
-    const p = this.profile();
-    if (!p) return false;
-    switch (key) {
-      case 'morning':
-        return !!p.notif_morning;
-      case 'lunch':
-        return !!p.notif_lunch;
-      case 'evening':
-        return !!p.notif_evening;
-      case 'weekly':
-        return !!p.notif_weekly;
+  private async allowNotifications(): Promise<boolean> {
+    const granted = await this.notifications.requestPermission();
+    this.permissionMissing.set(!granted);
+    if (!granted) {
+      const toast = await this.toastCtrl.create({
+        message: 'Vui lòng vào Cài đặt > Ứng dụng > HealthMate AI > Thông báo để bật quyền.',
+        duration: 4000,
+        position: 'bottom',
+      });
+      await toast.present();
     }
+    return granted;
+  }
+
+  private async syncSelectedNotifications(): Promise<void> {
+    const profile = this.profile();
+    if (profile)
+      await this.notifications.sync(notificationFlags(profile, !this.permissionMissing()));
   }
 }

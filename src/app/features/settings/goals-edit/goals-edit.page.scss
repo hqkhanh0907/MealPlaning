@@ -14,6 +14,17 @@
   gap: 8px;
 }
 
+.goal-estimates {
+  color: var(--text-secondary);
+  font-size: var(--font-size-body);
+
+  summary {
+    padding-block: var(--space-md);
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+}
+
 .goal-button {
   display: flex;
   align-items: center;

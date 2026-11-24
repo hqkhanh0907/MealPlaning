@@ -1,53 +1,41 @@
 import { inject, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { Database } from '../services/database/database';
+import { workoutSetIssue, type WorkoutSetInput } from '../models/fitness-workout-set';
+import { localIsoDate, mondayOfWeek, shiftIsoDate } from '../utils/local-date';
+import { muscleLabels } from '../models/fitness.types';
 import type {
   FitnessProgressSummary,
   MuscleGroup,
   StrengthPoint,
   WeeklyVolumePoint,
-  WorkoutEffort,
   WorkoutExerciseDetail,
-  WorkoutMode,
   WorkoutSessionDetail,
   WorkoutSet,
 } from '../models/fitness.types';
 
-export interface WorkoutSetInput {
-  weightKg: number;
-  reps: number;
-  restSeconds: number;
-  effort: WorkoutEffort | null;
-  notes: string | null;
-}
+export type { WorkoutSetInput } from '../models/fitness-workout-set';
 
-interface SessionRow {
-  id: string;
-  date: string;
-  training_plan_day_id: string | null;
-  training_day_name: string | null;
-  mode: WorkoutMode;
-  total_volume: number;
-  duration_minutes: number | null;
-  started_at: string;
-  completed_at: string | null;
-  created_at: string;
-}
+const LOGGED_REPETITION_SET =
+  "ws.status = 'logged' AND ws.duration_seconds IS NULL AND ws.legacy_unit_unknown = 0";
+const TOTAL_REPETITION_VOLUME = 'COALESCE(SUM(ws.weight_kg * ws.reps), 0)';
 
-const MUSCLE_LABELS: Record<MuscleGroup, string> = {
-  chest: 'Ngực',
-  back: 'Lưng',
-  shoulders: 'Vai',
-  biceps: 'Tay trước',
-  triceps: 'Tay sau',
-  quads: 'Đùi trước',
-  hamstrings: 'Đùi sau',
-  glutes: 'Mông',
-  calves: 'Bắp chân',
-  abs: 'Core',
-  forearms: 'Cẳng tay',
-  full_body: 'Toàn thân',
-};
+const SESSION_PROJECTION = `
+  SELECT id, date, training_plan_day_id, training_day_name, mode, total_volume,
+         duration_minutes, started_at, completed_at, created_at
+    FROM workout_session`;
+const EXERCISE_PROJECTION = `
+  SELECT we.id, we.workout_session_id, we.exercise_id,
+         e.name AS exercise_name, e.name_vi AS exercise_name_vi, e.muscle_group, e.category, e.equipment,
+         we.planned_sets, we.planned_min, we.planned_max, we.planned_rest, we.sort_order, we.total_volume
+    FROM workout_exercise we
+    INNER JOIN exercise e ON e.id = we.exercise_id`;
+
+type SessionRow = Omit<WorkoutSessionDetail, 'exercises'>;
+
+type SetToAppend =
+  | ({ status: 'logged' } & WorkoutSetInput)
+  | { status: 'skipped'; weightKg: number; reps: number };
 
 @Injectable({ providedIn: 'root' })
 export class WorkoutRepository {
@@ -55,9 +43,7 @@ export class WorkoutRepository {
 
   async getActiveSession(): Promise<WorkoutSessionDetail | null> {
     const row = await this.db.getOne<SessionRow>(
-      `SELECT id, date, training_plan_day_id, training_day_name, mode, total_volume,
-              duration_minutes, started_at, completed_at, created_at
-         FROM workout_session
+      `${SESSION_PROJECTION}
         WHERE status = 'active'
         ORDER BY started_at DESC
         LIMIT 1`,
@@ -81,23 +67,22 @@ export class WorkoutRepository {
     }
 
     const sessionId = uuidv4();
-    await this.db.execute(
-      `INSERT INTO workout_session (
+    await this.db.withTransaction(async () => {
+      await this.db.execute(
+        `INSERT INTO workout_session (
          id, date, training_plan_day_id, training_day_name, mode, started_at
        ) VALUES (?, ?, ?, ?, 'guided', ?)`,
-      [sessionId, toIsoDate(now), trainingPlanDayId, day.name, now.toISOString()],
-    );
+        [sessionId, localIsoDate(now), trainingPlanDayId, day.name, now.toISOString()],
+      );
 
-    const planned = await this.db.query<{ exercise_id: string; sort_order: number }>(
-      `SELECT exercise_id, sort_order
-         FROM planned_exercise
-        WHERE training_plan_day_id = ?
-        ORDER BY sort_order ASC`,
-      [trainingPlanDayId],
-    );
-    for (const item of planned) {
-      await this.addExerciseToSession(sessionId, item.exercise_id, item.sort_order);
-    }
+      await this.db.execute(
+        `INSERT INTO workout_exercise
+          (id, workout_session_id, exercise_id, sort_order, planned_sets, planned_min, planned_max, planned_rest)
+          SELECT ? || ':' || id, ?, exercise_id, sort_order, sets, reps_min, reps_max, rest_seconds
+          FROM planned_exercise WHERE training_plan_day_id = ?`,
+        [sessionId, sessionId, trainingPlanDayId],
+      );
+    });
 
     const created = await this.getSession(sessionId);
     if (!created) {
@@ -114,8 +99,8 @@ export class WorkoutRepository {
     await this.db.execute(
       `INSERT INTO workout_session (
          id, date, training_plan_day_id, training_day_name, mode, started_at
-       ) VALUES (?, ?, NULL, 'Free Workout', 'free', ?)`,
-      [sessionId, toIsoDate(now), now.toISOString()],
+       ) VALUES (?, ?, NULL, 'Tập tự do', 'free', ?)`,
+      [sessionId, localIsoDate(now), now.toISOString()],
     );
 
     const created = await this.getSession(sessionId);
@@ -170,73 +155,70 @@ export class WorkoutRepository {
     return created;
   }
 
-  /**
-   * F-015 fix — returns BOTH the created set AND the refreshed session in one transaction.
-   * Old API returned only WorkoutSet; callers then called getSession() separately, which
-   * raced against capacitor-sqlite WAL visibility (set visible to write tx but stale to
-   * subsequent read tx → activeSession signal showed empty exercise). Returning the
-   * session detail inline reads from the same connection AFTER the write tx commits,
-   * guaranteeing visibility.
-   */
   async addSet(
     workoutExerciseId: string,
     input: WorkoutSetInput,
   ): Promise<{ set: WorkoutSet; session: WorkoutSessionDetail }> {
-    validateSetInput(input);
-    const row = await this.db.getOne<{ workout_session_id: string; set_number: number }>(
-      `SELECT
-         we.workout_session_id,
-         COALESCE(MAX(ws.set_number), 0) + 1 AS set_number
-       FROM workout_exercise we
-       LEFT JOIN workout_set ws ON ws.workout_exercise_id = we.id
-       WHERE we.id = ?
-       GROUP BY we.id`,
-      [workoutExerciseId],
-    );
-    if (!row) {
-      throw new Error(`WorkoutRepository: workout exercise '${workoutExerciseId}' not found.`);
-    }
+    return this.appendSet(workoutExerciseId, { ...input, status: 'logged' });
+  }
 
+  async skipSet(
+    workoutExerciseId: string,
+    plannedWeightKg = 0,
+    plannedReps = 0,
+  ): Promise<{ set: WorkoutSet; session: WorkoutSessionDetail }> {
+    return this.appendSet(workoutExerciseId, {
+      status: 'skipped',
+      weightKg: plannedWeightKg,
+      reps: plannedReps,
+    });
+  }
+
+  private async appendSet(
+    workoutExerciseId: string,
+    entry: SetToAppend,
+  ): Promise<{ set: WorkoutSet; session: WorkoutSessionDetail }> {
     const id = uuidv4();
-    const completedAt = new Date().toISOString();
-    await this.db.withTransaction(async () => {
+    const sessionId = await this.db.withTransaction(async () => {
+      const exercise = await this.db.getOne<{ workout_session_id: string; exercise_id: string }>(
+        `SELECT workout_session_id, exercise_id FROM workout_exercise WHERE id = ?`,
+        [workoutExerciseId],
+      );
+      if (!exercise)
+        throw new Error(`WorkoutRepository: workout exercise '${workoutExerciseId}' not found.`);
+      const logged = entry.status === 'logged' ? entry : null;
+      if (logged) validateSetInput(logged, exercise.exercise_id);
       await this.db.execute(
         `INSERT INTO workout_set (
            id, workout_exercise_id, set_number, weight_kg, reps, rest_seconds, effort, notes,
-           status, completed_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'logged', ?)`,
+           status, completed_at, duration_seconds
+         )
+         SELECT ?, ?, COALESCE(MAX(set_number), 0) + 1, ?, ?, ?, ?, ?, ?, ?, ?
+           FROM workout_set WHERE workout_exercise_id = ?`,
         [
           id,
           workoutExerciseId,
-          row.set_number,
-          input.weightKg,
-          input.reps,
-          input.restSeconds,
-          input.effort,
-          input.notes,
-          completedAt,
+          entry.weightKg,
+          entry.reps,
+          logged?.restSeconds ?? null,
+          logged?.effort ?? null,
+          logged?.notes ?? null,
+          entry.status,
+          logged ? new Date().toISOString() : null,
+          logged?.durationSeconds ?? null,
+          workoutExerciseId,
         ],
       );
-      await this.syncTotals(row.workout_session_id);
+      await this.syncTotals(exercise.workout_session_id);
+      return exercise.workout_session_id;
     });
-
-    const created = await this.db.getOne<WorkoutSet>(
-      `SELECT id, workout_exercise_id, set_number, weight_kg, reps, rest_seconds,
-              effort, notes, status, completed_at, created_at
-         FROM workout_set
-        WHERE id = ?`,
-      [id],
-    );
-    if (!created) {
-      throw new Error('WorkoutRepository: failed to insert workout set.');
-    }
-    const session = await this.getSession(row.workout_session_id);
-    if (!session) {
-      throw new Error(
-        `WorkoutRepository: session '${row.workout_session_id}' vanished after addSet.`,
-      );
-    }
-    return { set: created, session };
+    const session = await this.getSession(sessionId);
+    const set = session?.exercises
+      .find((exercise) => exercise.id === workoutExerciseId)
+      ?.sets.find((item) => item.id === id);
+    if (!session || !set)
+      throw new Error('WorkoutRepository: failed to read the recorded workout set.');
+    return { set, session };
   }
 
   async completeSession(sessionId: string, now: Date = new Date()): Promise<void> {
@@ -310,9 +292,8 @@ export class WorkoutRepository {
    * a transaction with syncTotals so total_volume cannot diverge from the row.
    */
   async updateSet(setId: string, input: WorkoutSetInput): Promise<void> {
-    validateSetInput(input);
-    const row = await this.db.getOne<{ workout_session_id: string }>(
-      `SELECT we.workout_session_id
+    const row = await this.db.getOne<{ workout_session_id: string; exercise_id: string }>(
+      `SELECT we.workout_session_id, we.exercise_id
          FROM workout_set ws
          INNER JOIN workout_exercise we ON we.id = ws.workout_exercise_id
         WHERE ws.id = ?`,
@@ -321,10 +302,12 @@ export class WorkoutRepository {
     if (!row) {
       throw new Error(`WorkoutRepository: set '${setId}' not found.`);
     }
+    validateSetInput(input, row.exercise_id);
     await this.db.withTransaction(async () => {
       await this.db.execute(
         `UPDATE workout_set
-            SET weight_kg = ?, reps = ?, rest_seconds = ?, effort = ?, notes = ?, updated_at = ?
+            SET weight_kg = ?, reps = ?, rest_seconds = ?, effort = ?, notes = ?, updated_at = ?,
+                duration_seconds = ?, legacy_unit_unknown = 0
           WHERE id = ?`,
         [
           input.weightKg,
@@ -333,6 +316,7 @@ export class WorkoutRepository {
           input.effort,
           input.notes,
           new Date().toISOString(),
+          input.durationSeconds ?? null,
           setId,
         ],
       );
@@ -426,9 +410,7 @@ export class WorkoutRepository {
 
   async getSession(sessionId: string): Promise<WorkoutSessionDetail | null> {
     const row = await this.db.getOne<SessionRow>(
-      `SELECT id, date, training_plan_day_id, training_day_name, mode, total_volume,
-              duration_minutes, started_at, completed_at, created_at
-         FROM workout_session
+      `${SESSION_PROJECTION}
         WHERE id = ?`,
       [sessionId],
     );
@@ -437,9 +419,7 @@ export class WorkoutRepository {
 
   async recentSessions(limit = 5): Promise<WorkoutSessionDetail[]> {
     const rows = await this.db.query<SessionRow>(
-      `SELECT id, date, training_plan_day_id, training_day_name, mode, total_volume,
-              duration_minutes, started_at, completed_at, created_at
-         FROM workout_session
+      `${SESSION_PROJECTION}
         WHERE completed_at IS NOT NULL
         ORDER BY date DESC, completed_at DESC
         LIMIT ?`,
@@ -454,12 +434,12 @@ export class WorkoutRepository {
   }
 
   async progressSummary(now: Date = new Date()): Promise<FitnessProgressSummary> {
-    const currentWeekStart = startOfWeekIso(now);
+    const currentWeekStart = localIsoDate(mondayOfWeek(now));
     const previousWeekStart = shiftIsoDate(currentWeekStart, -7);
     const currentWeekEnd = shiftIsoDate(currentWeekStart, 6);
     const previousWeekEnd = shiftIsoDate(previousWeekStart, 6);
     const strengthStart = shiftIsoDate(currentWeekStart, -77);
-    const weightStart = shiftIsoDate(toIsoDate(now), -6);
+    const weightStart = shiftIsoDate(localIsoDate(now), -6);
 
     const [currentWeekVolume, previousWeekVolume, volumeByMuscle, strength, streak, weight] =
       await Promise.all([
@@ -468,7 +448,7 @@ export class WorkoutRepository {
         this.volumeByMuscle(currentWeekStart, currentWeekEnd),
         this.strengthSummary(strengthStart, currentWeekEnd),
         this.workoutStreakWeeks(currentWeekStart),
-        this.weeklyAverageWeight(weightStart, toIsoDate(now)),
+        this.weeklyAverageWeight(weightStart, localIsoDate(now)),
       ]);
 
     return {
@@ -484,18 +464,7 @@ export class WorkoutRepository {
 
   private async hydrateSession(row: SessionRow): Promise<WorkoutSessionDetail> {
     const exercises = await this.db.query<Omit<WorkoutExerciseDetail, 'sets'>>(
-      `SELECT
-         we.id,
-         we.workout_session_id,
-         we.exercise_id,
-         e.name AS exercise_name,
-         e.name_vi AS exercise_name_vi,
-         e.muscle_group,
-         e.category,
-         we.sort_order,
-         we.total_volume
-       FROM workout_exercise we
-       INNER JOIN exercise e ON e.id = we.exercise_id
+      `${EXERCISE_PROJECTION}
        WHERE we.workout_session_id = ?
        ORDER BY we.sort_order ASC`,
       [row.id],
@@ -510,18 +479,7 @@ export class WorkoutRepository {
 
   private async getWorkoutExercise(id: string): Promise<WorkoutExerciseDetail | null> {
     const row = await this.db.getOne<Omit<WorkoutExerciseDetail, 'sets'>>(
-      `SELECT
-         we.id,
-         we.workout_session_id,
-         we.exercise_id,
-         e.name AS exercise_name,
-         e.name_vi AS exercise_name_vi,
-         e.muscle_group,
-         e.category,
-         we.sort_order,
-         we.total_volume
-       FROM workout_exercise we
-       INNER JOIN exercise e ON e.id = we.exercise_id
+      `${EXERCISE_PROJECTION}
        WHERE we.id = ?`,
       [id],
     );
@@ -531,69 +489,12 @@ export class WorkoutRepository {
   private async getSets(workoutExerciseId: string): Promise<WorkoutSet[]> {
     return this.db.query<WorkoutSet>(
       `SELECT id, workout_exercise_id, set_number, weight_kg, reps, rest_seconds,
-              effort, notes, status, completed_at, created_at
+              duration_seconds, legacy_unit_unknown, effort, notes, status, completed_at, created_at
          FROM workout_set
         WHERE workout_exercise_id = ?
         ORDER BY set_number ASC`,
       [workoutExerciseId],
     );
-  }
-
-  /**
-   * Skip a set: insert a placeholder row with status='skipped' and the set's
-   * planned weight/reps preserved as a hint (for future repeat/edit). Skipped
-   * rows do NOT contribute to total_volume (enforced by syncTotals).
-   *
-   * Returns the persisted row + refreshed session for store sync.
-   */
-  async skipSet(
-    workoutExerciseId: string,
-    plannedWeightKg = 0,
-    plannedReps = 0,
-  ): Promise<{ set: WorkoutSet; session: WorkoutSessionDetail }> {
-    const row = await this.db.getOne<{ workout_session_id: string; set_number: number }>(
-      `SELECT
-         we.workout_session_id,
-         COALESCE(MAX(ws.set_number), 0) + 1 AS set_number
-       FROM workout_exercise we
-       LEFT JOIN workout_set ws ON ws.workout_exercise_id = we.id
-       WHERE we.id = ?
-       GROUP BY we.id`,
-      [workoutExerciseId],
-    );
-    if (!row) {
-      throw new Error(`WorkoutRepository: workout exercise '${workoutExerciseId}' not found.`);
-    }
-
-    const id = uuidv4();
-    await this.db.withTransaction(async () => {
-      await this.db.execute(
-        `INSERT INTO workout_set (
-           id, workout_exercise_id, set_number, weight_kg, reps, rest_seconds, effort, notes,
-           status, completed_at
-         ) VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, 'skipped', NULL)`,
-        [id, workoutExerciseId, row.set_number, plannedWeightKg, plannedReps],
-      );
-      await this.syncTotals(row.workout_session_id);
-    });
-
-    const created = await this.db.getOne<WorkoutSet>(
-      `SELECT id, workout_exercise_id, set_number, weight_kg, reps, rest_seconds,
-              effort, notes, status, completed_at, created_at
-         FROM workout_set
-        WHERE id = ?`,
-      [id],
-    );
-    if (!created) {
-      throw new Error('WorkoutRepository: failed to insert skipped set.');
-    }
-    const session = await this.getSession(row.workout_session_id);
-    if (!session) {
-      throw new Error(
-        `WorkoutRepository: session '${row.workout_session_id}' vanished after skipSet.`,
-      );
-    }
-    return { set: created, session };
   }
 
   private async syncTotals(sessionId: string): Promise<void> {
@@ -602,10 +503,10 @@ export class WorkoutRepository {
     await this.db.execute(
       `UPDATE workout_exercise
           SET total_volume = (
-            SELECT COALESCE(SUM(weight_kg * reps), 0)
-              FROM workout_set
-             WHERE workout_set.workout_exercise_id = workout_exercise.id
-               AND workout_set.status = 'logged'
+            SELECT ${TOTAL_REPETITION_VOLUME}
+              FROM workout_set ws
+             WHERE ws.workout_exercise_id = workout_exercise.id
+               AND ${LOGGED_REPETITION_SET}
           )
         WHERE workout_session_id = ?`,
       [sessionId],
@@ -625,27 +526,27 @@ export class WorkoutRepository {
 
   private async volumeBetween(start: string, end: string): Promise<number> {
     const row = await this.db.getOne<{ volume: number | null }>(
-      `SELECT COALESCE(SUM(ws.weight_kg * ws.reps), 0) AS volume
+      `SELECT ${TOTAL_REPETITION_VOLUME} AS volume
          FROM workout_session session
          INNER JOIN workout_exercise we ON we.workout_session_id = session.id
          INNER JOIN workout_set ws ON ws.workout_exercise_id = we.id
         WHERE session.completed_at IS NOT NULL
-          AND ws.status = 'logged'
+          AND ${LOGGED_REPETITION_SET}
           AND session.date BETWEEN ? AND ?`,
       [start, end],
     );
-    return Math.round(row?.volume ?? 0);
+    return row?.volume ?? 0;
   }
 
   private async volumeByMuscle(start: string, end: string): Promise<WeeklyVolumePoint[]> {
     const rows = await this.db.query<{ muscle_group: MuscleGroup; volume: number | null }>(
-      `SELECT e.muscle_group, COALESCE(SUM(ws.weight_kg * ws.reps), 0) AS volume
+      `SELECT e.muscle_group, ${TOTAL_REPETITION_VOLUME} AS volume
          FROM workout_session session
          INNER JOIN workout_exercise we ON we.workout_session_id = session.id
          INNER JOIN workout_set ws ON ws.workout_exercise_id = we.id
          INNER JOIN exercise e ON e.id = we.exercise_id
         WHERE session.completed_at IS NOT NULL
-          AND ws.status = 'logged'
+          AND ${LOGGED_REPETITION_SET}
           AND session.date BETWEEN ? AND ?
         GROUP BY e.muscle_group
         ORDER BY volume DESC
@@ -654,8 +555,8 @@ export class WorkoutRepository {
     );
     return rows.map((row) => ({
       muscle_group: row.muscle_group,
-      label: MUSCLE_LABELS[row.muscle_group],
-      volume: Math.round(row.volume ?? 0),
+      label: muscleLabels[row.muscle_group],
+      volume: row.volume ?? 0,
     }));
   }
 
@@ -665,15 +566,17 @@ export class WorkoutRepository {
          e.id AS exercise_id,
          e.name AS exercise_name,
          e.name_vi AS exercise_name_vi,
-         MAX(ws.weight_kg * (1 + ws.reps / 30.0)) AS estimated_1rm
+         MAX(CASE WHEN ws.reps = 1 THEN ws.weight_kg
+             ELSE ws.weight_kg * (1 + ws.reps / 30.0) END) AS estimated_1rm
        FROM workout_session session
        INNER JOIN workout_exercise we ON we.workout_session_id = session.id
        INNER JOIN workout_set ws ON ws.workout_exercise_id = we.id
        INNER JOIN exercise e ON e.id = we.exercise_id
        WHERE session.completed_at IS NOT NULL
-         AND ws.status = 'logged'
+         AND ${LOGGED_REPETITION_SET}
          AND session.date BETWEEN ? AND ?
-         AND e.category = 'compound'
+         AND e.id IN ('ex_barbell_bench_press', 'ex_back_squat', 'ex_deadlift')
+         AND ws.weight_kg > 0 AND ws.effort = 'maxed'
          AND ws.reps BETWEEN 1 AND 10
        GROUP BY e.id
        ORDER BY estimated_1rm DESC
@@ -737,40 +640,17 @@ export class WorkoutRepository {
   }
 }
 
-function validateSetInput(input: WorkoutSetInput): void {
-  if (!isFiniteWithin(input.weightKg, 0, 500)) {
-    throw new Error('WorkoutRepository: weight must be between 0 and 500kg.');
+function validateSetInput(input: WorkoutSetInput, exerciseId: string): void {
+  const issue = workoutSetIssue(exerciseId, input);
+  if (issue) {
+    const messages = {
+      weight: 'WorkoutRepository: weight must be between 0 and 500kg.',
+      duration: 'Nhập thời gian tập từ 1 đến 86.400 giây.',
+      reps: 'WorkoutRepository: reps must be an integer between 1 and 100.',
+      rest: 'WorkoutRepository: rest_seconds must be between 0 and 600.',
+    };
+    throw new Error(messages[issue]);
   }
-  if (!Number.isInteger(input.reps) || input.reps < 1 || input.reps > 100) {
-    throw new Error('WorkoutRepository: reps must be an integer between 1 and 100.');
-  }
-  if (!Number.isInteger(input.restSeconds) || input.restSeconds < 0 || input.restSeconds > 600) {
-    throw new Error('WorkoutRepository: rest_seconds must be between 0 and 600.');
-  }
-}
-
-function isFiniteWithin(value: number, min: number, max: number): boolean {
-  return Number.isFinite(value) && value >= min && value <= max;
-}
-
-function toIsoDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-function startOfWeekIso(date: Date): string {
-  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const offset = (d.getDay() + 6) % 7;
-  d.setDate(d.getDate() - offset);
-  return toIsoDate(d);
-}
-
-function shiftIsoDate(iso: string, days: number): string {
-  const d = new Date(`${iso}T00:00:00`);
-  d.setDate(d.getDate() + days);
-  return toIsoDate(d);
 }
 
 function roundOneDecimal(value: number): number {

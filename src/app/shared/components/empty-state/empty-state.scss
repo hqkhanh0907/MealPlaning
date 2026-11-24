@@ -20,6 +20,20 @@
   color: var(--primary-700);
 }
 
+:host(.search-empty) {
+  .empty-state {
+    align-items: flex-start;
+    gap: var(--space-xs);
+    min-height: 0;
+    padding: var(--space-md) 0;
+    text-align: start;
+  }
+
+  .empty-icon-shell {
+    display: none;
+  }
+}
+
 .empty-icon {
   font-size: var(--font-size-display);
 }

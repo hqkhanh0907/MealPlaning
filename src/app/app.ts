@@ -1,4 +1,4 @@
-import { Component, afterNextRender, inject } from '@angular/core';
+import { Component, DestroyRef, NgZone, afterNextRender, inject } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
@@ -9,13 +9,19 @@ import { NetworkStore } from './core/stores/network.store';
 import { ProfileStore } from './core/stores/profile.store';
 import { Theme } from './core/services/theme/theme-service';
 import { LocalNotifications } from './core/services/notifications/local-notifications';
-import { cleanupOldAiLogs } from './core/services/ai/gemini-client';
+import { notificationFlags } from './core/services/notifications/notification-preferences';
+import { cleanupOldAiLogs } from './core/services/ai/ai-log';
+import { localIsoDate } from './core/utils/local-date';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
   imports: [IonApp, IonRouterOutlet],
+  host: {
+    '(document:visibilitychange)': 'onVisibilityChange()',
+    '(window:pageshow)': 'onVisibilityChange()',
+  },
 })
 export class App {
   private readonly db = inject(Database);
@@ -23,8 +29,11 @@ export class App {
   private readonly profileStore = inject(ProfileStore);
   private readonly themeService = inject(Theme);
   private readonly notifications = inject(LocalNotifications);
+  private readonly zone = inject(NgZone);
+  private dateTimer?: number;
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => window.clearTimeout(this.dateTimer));
     // Profile is loaded by APP_INITIALIZER (xem database.provider.ts) before
     // the App component is instantiated, so the signal is already populated
     // (or null if onboarding hasn't been completed).
@@ -32,14 +41,20 @@ export class App {
     this.themeService.apply('light');
 
     afterNextRender(() => {
+      this.onVisibilityChange();
       SplashScreen.hide();
-      this.syncNotificationsFromProfile();
-
-      // Sage wellness status bar (Android native only — sage tinted, light icons).
-      // No-op on web platform; safe to call without try/catch (Capacitor returns Promise.reject silently).
       if (Capacitor.isNativePlatform()) {
-        void StatusBar.setBackgroundColor({ color: '#6B8E6F' });
-        void StatusBar.setStyle({ style: Style.Dark });
+        void this.syncNotificationsFromProfile().catch((err) =>
+          console.warn('[App] notification sync failed:', err),
+        );
+      }
+
+      if (Capacitor.isNativePlatform()) {
+        const color = getComputedStyle(document.documentElement)
+          .getPropertyValue('--ion-toolbar-background')
+          .trim();
+        void StatusBar.setBackgroundColor({ color });
+        void StatusBar.setStyle({ style: Style.Light });
       }
 
       // Phase 1.5B infra hooks — fire-and-forget; failures must NOT block UI.
@@ -51,17 +66,38 @@ export class App {
     });
   }
 
-  private syncNotificationsFromProfile(): void {
+  protected onVisibilityChange(): void {
+    window.clearTimeout(this.dateTimer);
+    if (!document.hidden) this.watchLocalDay();
+  }
+
+  private watchLocalDay(previousDay?: string, quickChecks = 5): void {
+    if (document.hidden) return;
+    const now = new Date();
+    const today = localIsoDate(now);
+    if (today !== previousDay) {
+      void this.profileStore
+        .refreshAge(now)
+        .catch((err) => console.warn('[App] profile age refresh failed:', err));
+    }
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    // Android can publish a new time zone after the WebView becomes visible.
+    const delay = Math.min(midnight.getTime() - now.getTime(), quickChecks > 0 ? 1000 : 60_000);
+    this.zone.runOutsideAngular(() => {
+      this.dateTimer = window.setTimeout(
+        () => this.watchLocalDay(today, Math.max(0, quickChecks - 1)),
+        delay,
+      );
+    });
+  }
+
+  private async syncNotificationsFromProfile(): Promise<void> {
     const p = this.profileStore.profile();
     if (!p) {
       return;
     }
 
-    void this.notifications.sync({
-      morning: !!p.notif_morning,
-      lunch: !!p.notif_lunch,
-      evening: !!p.notif_evening,
-      weekly: !!p.notif_weekly,
-    });
+    const granted = await this.notifications.hasPermission();
+    await this.notifications.sync(notificationFlags(p, granted));
   }
 }

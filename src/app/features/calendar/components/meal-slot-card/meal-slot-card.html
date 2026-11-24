@@ -27,22 +27,37 @@
           (pointermove)="onPressCancel()"
           (pointercancel)="onPressCancel()"
         >
-          <span class="meal-slot__name">{{ dish.dish_name }}</span>
-          @if (dish.is_completed === 1) {
-            <app-status-pill status="logged" [completedAt]="dish.completed_at" />
-            <span class="meal-slot__cal">{{ roundKcal(dish.effective_calories) }} kcal</span>
-          } @else {
-            <span class="meal-slot__cal"
-              >{{ roundKcal(dish.effective_calories) }} kcal dự kiến</span
-            >
-          }
+          <div class="meal-slot__details">
+            <span class="meal-slot__name">{{ dish.dish_name }}</span>
+            <div class="meal-slot__meta">
+              @if (dish.is_completed === 1) {
+                <app-status-pill status="logged" [completedAt]="dish.completed_at" />
+                <span class="meal-slot__cal">{{ roundKcal(dish.effective_calories) }} kcal</span>
+              } @else {
+                <span class="meal-slot__cal"
+                  >{{ roundKcal(dish.effective_calories) }} kcal dự kiến</span
+                >
+              }
+              <span class="meal-slot__servings">{{ dish.servings }} phần</span>
+            </div>
+          </div>
           <button
             type="button"
             class="meal-slot__action"
+            [attr.data-planned-dish-action]="dish.id"
             [class.meal-slot__action--logged]="dish.is_completed === 1"
             (click)="onActionTap(dish.id, dish.is_completed)"
           >
-            {{ dish.is_completed === 1 ? 'Bỏ đánh dấu' : 'Đã ăn' }}
+            {{ dish.is_completed === 1 ? 'Bỏ đánh dấu' : 'Ghi đã ăn' }}
+          </button>
+          <button
+            type="button"
+            class="meal-slot__options"
+            [attr.aria-label]="'Tùy chọn cho ' + dish.dish_name"
+            aria-haspopup="dialog"
+            (click)="onOptionsTap(dish.id)"
+          >
+            <ion-icon name="ellipsis-horizontal" aria-hidden="true" />
           </button>
         </li>
       }

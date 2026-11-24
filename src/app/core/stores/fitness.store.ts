@@ -1,4 +1,5 @@
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { isTimedExercise, workoutNumber } from '../models/fitness.types';
 import type {
   ActiveTrainingPlan,
   Exercise,
@@ -13,13 +14,15 @@ import type {
 } from '../models/fitness.types';
 import { ExerciseRepository } from '../repositories/exercise.repository';
 import { TrainingPlanRepository } from '../repositories/training-plan.repository';
-import { WorkoutRepository, type WorkoutSetInput } from '../repositories/workout.repository';
+import { isLoggedSet, workoutSetIssue, type WorkoutSetInput } from '../models/fitness-workout-set';
+import { localIsoDate } from '../utils/local-date';
+import { WorkoutRepository } from '../repositories/workout.repository';
 import { FitnessAi } from '../services/ai/fitness-ai';
 import { NetworkStore } from './network.store';
 import { ProfileStore } from './profile.store';
 
 const DEFAULT_SET_DRAFT: WorkoutSetDraft = {
-  weightKg: '20',
+  weightKg: '',
   reps: '10',
   restSeconds: '90',
   effort: null,
@@ -64,6 +67,7 @@ export class FitnessStore {
   readonly exerciseSearch = signal('');
   readonly restSeconds = signal(0);
   readonly loading = signal(false);
+  readonly savingSet = signal(false);
   readonly aiPlanLoading = signal(false);
   readonly aiPlanRationale = signal<string | null>(null);
   readonly errorMessage = signal<string | null>(null);
@@ -95,7 +99,8 @@ export class FitnessStore {
         clearTimeout(this.draftSaveTimerId);
       }
       this.draftSaveTimerId = setTimeout(() => {
-        this.persistDraft(exerciseId, draft);
+        const movement = this.activeSession()?.exercises.find((ex) => ex.id === exerciseId);
+        if (movement) this.persistDraft(exerciseId, draft, isTimedExercise(movement.exercise_id));
         this.draftSaveTimerId = null;
       }, DRAFT_AUTOSAVE_DEBOUNCE_MS);
     });
@@ -112,40 +117,49 @@ export class FitnessStore {
       if (exerciseId === null) {
         return;
       }
-      this.setDraft.set(this.loadDraft(exerciseId));
+      const selected = this.selectedWorkoutExercise();
+      if (selected) this.setDraft.set(this.loadDraft(selected));
     });
   }
 
   /** F-006 helper — write draft to localStorage; silent on storage errors (private browsing). */
-  private persistDraft(exerciseId: string, draft: WorkoutSetDraft): void {
+  private persistDraft(exerciseId: string, draft: WorkoutSetDraft, timed: boolean): void {
     try {
-      localStorage.setItem(`${DRAFT_STORAGE_PREFIX}${exerciseId}`, JSON.stringify(draft));
+      localStorage.setItem(
+        `${DRAFT_STORAGE_PREFIX}${exerciseId}`,
+        JSON.stringify({ ...draft, unit: timed ? 'seconds' : 'reps' }),
+      );
     } catch {
       // localStorage may be unavailable (private mode, quota). Silent fail OK — non-critical.
     }
   }
 
   /** F-006 helper — load draft for an exercise; falls back to DEFAULT_SET_DRAFT on miss/parse fail. */
-  private loadDraft(exerciseId: string): WorkoutSetDraft {
+  private loadDraft(exercise: WorkoutExerciseDetail): WorkoutSetDraft {
+    const defaults: WorkoutSetDraft = {
+      ...DEFAULT_SET_DRAFT,
+      weightKg:
+        exercise.equipment?.includes('Bodyweight') || exercise.category === 'cardio' ? '0' : '',
+      reps: String(exercise.planned_min ?? (isTimedExercise(exercise.exercise_id) ? 30 : 10)),
+      restSeconds: String(exercise.planned_rest ?? 90),
+    };
     try {
-      const raw = localStorage.getItem(`${DRAFT_STORAGE_PREFIX}${exerciseId}`);
+      const raw = localStorage.getItem(`${DRAFT_STORAGE_PREFIX}${exercise.id}`);
       if (!raw) {
-        return { ...DEFAULT_SET_DRAFT };
+        return defaults;
       }
-      const parsed = JSON.parse(raw) as Partial<WorkoutSetDraft>;
+      const parsed = JSON.parse(raw) as Partial<WorkoutSetDraft> & { unit?: string };
+      if (isTimedExercise(exercise.exercise_id) && parsed.unit !== 'seconds') return defaults;
       return {
-        weightKg:
-          typeof parsed.weightKg === 'string' ? parsed.weightKg : DEFAULT_SET_DRAFT.weightKg,
-        reps: typeof parsed.reps === 'string' ? parsed.reps : DEFAULT_SET_DRAFT.reps,
+        weightKg: typeof parsed.weightKg === 'string' ? parsed.weightKg : defaults.weightKg,
+        reps: typeof parsed.reps === 'string' ? parsed.reps : defaults.reps,
         restSeconds:
-          typeof parsed.restSeconds === 'string'
-            ? parsed.restSeconds
-            : DEFAULT_SET_DRAFT.restSeconds,
+          typeof parsed.restSeconds === 'string' ? parsed.restSeconds : defaults.restSeconds,
         effort: (parsed.effort ?? null) as WorkoutEffort | null,
         notes: typeof parsed.notes === 'string' ? parsed.notes : '',
       };
     } catch {
-      return { ...DEFAULT_SET_DRAFT };
+      return defaults;
     }
   }
 
@@ -165,9 +179,9 @@ export class FitnessStore {
   readonly isRestDay = computed(() => this.todayDay()?.is_rest_day === 1);
   readonly canCompleteWorkout = computed(
     () =>
-      this.activeSession()?.exercises.some((exercise) =>
-        exercise.sets.some((set) => set.status === 'logged'),
-      ) ?? false,
+      !this.savingSet() &&
+      (this.activeSession()?.exercises.some((exercise) => exercise.sets.some(isLoggedSet)) ??
+        false),
   );
 
   readonly selectedWorkoutExercise = computed<WorkoutExerciseDetail | null>(() => {
@@ -180,7 +194,7 @@ export class FitnessStore {
     this.selectedWorkoutExercise()
       ?.sets.slice()
       .reverse()
-      .find((set) => set.status === 'logged'),
+      .find((set) => isLoggedSet(set) && !set.legacy_unit_unknown),
   );
 
   readonly filteredExercises = computed(() => {
@@ -198,12 +212,12 @@ export class FitnessStore {
 
   readonly currentWeekVolumeLabel = computed(() => {
     const value = this.progress()?.currentWeekVolume ?? 0;
-    return `${formatNumber(value)} kg`;
+    return `${workoutNumber.format(value)} kg`;
   });
 
   readonly previousWeekVolumeLabel = computed(() => {
     const value = this.progress()?.previousWeekVolume ?? 0;
-    return `${formatNumber(value)} kg`;
+    return `${workoutNumber.format(value)} kg`;
   });
 
   readonly volumeChangeLabel = computed(() => {
@@ -239,7 +253,7 @@ export class FitnessStore {
   }
 
   async refresh(now: Date = new Date()): Promise<void> {
-    const today = toIsoDate(now);
+    const today = localIsoDate(now);
     const [plans, activePlan, todayDay, activeSession, progress] = await Promise.all([
       this.planRepo.listPlans(),
       this.planRepo.getActivePlan(),
@@ -402,18 +416,20 @@ export class FitnessStore {
   }
 
   async logSet(): Promise<void> {
+    if (this.savingSet()) return;
     const exercise = this.selectedWorkoutExercise();
     if (!exercise) {
-      this.errorMessage.set('Chọn một bài tập trước khi log set.');
+      this.errorMessage.set('Chọn một bài tập trước khi ghi hiệp.');
       return;
     }
 
-    const draft = parseDraft(this.setDraft());
+    const draft = parseDraft(this.setDraft(), exercise.exercise_id);
     if (draft.ok === false) {
       this.errorMessage.set(draft.message);
       return;
     }
 
+    this.savingSet.set(true);
     this.errorMessage.set(null);
     try {
       // F-015 — repo returns set + refreshed session in one shot, eliminating the
@@ -435,9 +451,11 @@ export class FitnessStore {
         reps: createdSet.reps,
         exerciseName: exercise.exercise_name_vi || exercise.exercise_name,
       });
-      this.successMessage.set('Đã log set tập.');
+      this.successMessage.set('Đã ghi hiệp tập.');
     } catch (error) {
       this.errorMessage.set(toErrorMessage(error));
+    } finally {
+      this.savingSet.set(false);
     }
   }
 
@@ -448,9 +466,10 @@ export class FitnessStore {
    * planned weight/reps as a hint (won't be counted toward volume).
    */
   async skipSet(): Promise<void> {
+    if (this.savingSet()) return;
     const exercise = this.selectedWorkoutExercise();
     if (!exercise) {
-      this.errorMessage.set('Chọn một bài tập trước khi bỏ qua set.');
+      this.errorMessage.set('Chọn một bài tập trước khi bỏ qua hiệp.');
       return;
     }
 
@@ -458,27 +477,30 @@ export class FitnessStore {
     const plannedWeightKg = Number.parseFloat(draftSnapshot.weightKg) || 0;
     const plannedReps = Number.parseInt(draftSnapshot.reps, 10) || 0;
 
+    this.savingSet.set(true);
     this.errorMessage.set(null);
     try {
       const { session: refreshedSession } = await this.workoutRepo.skipSet(
         exercise.id,
         plannedWeightKg,
-        plannedReps,
+        isTimedExercise(exercise.exercise_id) ? 0 : plannedReps,
       );
       this.activeSession.set(refreshedSession);
       this.setDraft.update((current) => ({ ...current, notes: '' }));
       this.clearPersistedDraft(exercise.id);
-      this.successMessage.set('Đã bỏ qua set.');
+      this.successMessage.set('Đã bỏ qua hiệp.');
     } catch (error) {
       this.errorMessage.set(toErrorMessage(error));
+    } finally {
+      this.savingSet.set(false);
     }
   }
 
   async completeWorkout(): Promise<void> {
     const session = this.activeSession();
-    if (!session) return;
+    if (!session || this.savingSet()) return;
     if (!this.canCompleteWorkout()) {
-      this.errorMessage.set('Cần log ít nhất 1 set trước khi hoàn thành buổi tập.');
+      this.errorMessage.set('Ghi ít nhất một hiệp trước khi hoàn thành buổi tập.');
       return;
     }
 
@@ -506,7 +528,7 @@ export class FitnessStore {
 
   async cancelWorkout(): Promise<void> {
     const session = this.activeSession();
-    if (!session) return;
+    if (!session || this.savingSet()) return;
 
     this.errorMessage.set(null);
     try {
@@ -563,7 +585,7 @@ export class FitnessStore {
       if (this.lastLoggedSet()?.id === setId) {
         this.lastLoggedSet.set(null);
       }
-      this.successMessage.set('Đã xóa set.');
+      this.successMessage.set('Đã xóa hiệp.');
     } catch (error) {
       this.errorMessage.set(toErrorMessage(error));
     }
@@ -577,7 +599,7 @@ export class FitnessStore {
     try {
       await this.workoutRepo.updateSet(setId, input);
       this.activeSession.set(await this.workoutRepo.getSession(sessionId));
-      this.successMessage.set('Đã cập nhật set.');
+      this.successMessage.set('Đã cập nhật hiệp.');
     } catch (error) {
       this.errorMessage.set(toErrorMessage(error));
     }
@@ -605,14 +627,15 @@ export class FitnessStore {
   }
 
   async repeatLastSet(): Promise<void> {
+    if (this.savingSet()) return;
     const lastSet = this.selectedExerciseLastLoggedSet();
     if (!lastSet) {
-      this.errorMessage.set('Chưa có set nào để lặp lại.');
+      this.errorMessage.set('Chưa có hiệp nào để lặp lại.');
       return;
     }
     this.setDraft.set({
       weightKg: String(lastSet.weight_kg),
-      reps: String(lastSet.reps),
+      reps: String(lastSet.duration_seconds ?? lastSet.reps),
       restSeconds: String(lastSet.rest_seconds ?? 90),
       effort: lastSet.effort,
       notes: '',
@@ -626,49 +649,34 @@ export class FitnessStore {
   }
 }
 
-function parseDraft(draft: WorkoutSetDraft):
-  | {
-      ok: true;
-      value: {
-        weightKg: number;
-        reps: number;
-        restSeconds: number;
-        effort: WorkoutEffort | null;
-        notes: string | null;
-      };
-    }
-  | { ok: false; message: string } {
-  const weightKg = Number(draft.weightKg);
-  const reps = Number(draft.reps);
-  const restSeconds = Number(draft.restSeconds);
-
-  if (!Number.isFinite(weightKg) || weightKg < 0 || weightKg > 500) {
-    return { ok: false, message: 'Weight phải nằm trong khoảng 0-500 kg.' };
-  }
-  if (!Number.isInteger(reps) || reps < 1 || reps > 100) {
-    return { ok: false, message: 'Reps phải là số nguyên 1-100.' };
-  }
-  if (!Number.isInteger(restSeconds) || restSeconds < 0 || restSeconds > 600) {
-    return { ok: false, message: 'Rest timer phải nằm trong khoảng 0-600 giây.' };
-  }
-
-  return {
-    ok: true,
-    value: {
-      weightKg,
-      reps,
-      restSeconds,
-      effort: draft.effort,
-      notes: draft.notes.trim() || null,
-    },
+function parseDraft(
+  draft: WorkoutSetDraft,
+  exerciseId: string,
+): { ok: true; value: WorkoutSetInput } | { ok: false; message: string } {
+  const amount = Number(draft.reps);
+  const timed = isTimedExercise(exerciseId);
+  const value: WorkoutSetInput = {
+    weightKg: Number(draft.weightKg),
+    reps: timed ? 0 : amount,
+    ...(timed ? { durationSeconds: amount } : {}),
+    restSeconds: Number(draft.restSeconds),
+    effort: draft.effort,
+    notes: draft.notes.trim() || null,
   };
-}
-
-function toIsoDate(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  const issue = workoutSetIssue(exerciseId, value);
+  if (draft.weightKg.trim() === '' && (issue === null || issue === 'rest')) {
+    return { ok: false, message: 'Nhập mức tạ thực tế. Nhập 0 nếu tập không thêm tạ.' };
+  }
+  if (issue) {
+    const messages = {
+      weight: 'Mức tạ phải từ 0 đến 500 kg.',
+      duration: 'Nhập thời gian tập từ 1 đến 86.400 giây.',
+      reps: 'Số lần phải là số nguyên từ 1 đến 100.',
+      rest: 'Thời gian nghỉ phải từ 0 đến 600 giây.',
+    };
+    return { ok: false, message: messages[issue] };
+  }
+  return { ok: true, value };
 }
 
 function toErrorMessage(error: unknown): string {
@@ -680,8 +688,4 @@ function normalize(value: string): string {
     .toLocaleLowerCase('vi-VN')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '');
-}
-
-function formatNumber(value: number): string {
-  return new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(value);
 }

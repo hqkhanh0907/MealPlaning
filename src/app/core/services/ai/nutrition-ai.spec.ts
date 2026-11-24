@@ -2,6 +2,8 @@ import { TestBed } from '@angular/core/testing';
 
 import { NutritionAi, mapCategory, normalizeIngredientName } from './nutrition-ai';
 import { GeminiClient } from './gemini-client';
+import { GEMINI_API_KEY } from './gemini-key';
+import { GROQ_API_KEY } from './groq-client';
 import type { IngredientLookupResponse } from './prompts/ingredient-lookup.prompt';
 
 describe('NutritionAi', () => {
@@ -85,7 +87,12 @@ describe('NutritionAi', () => {
     beforeEach(() => {
       geminiSpy = jasmine.createSpyObj<GeminiClient>('GeminiClient', ['generateContent']);
       TestBed.configureTestingModule({
-        providers: [NutritionAi, { provide: GeminiClient, useValue: geminiSpy }],
+        providers: [
+          { provide: GROQ_API_KEY, useValue: '' },
+          { provide: GEMINI_API_KEY, useValue: 'test-only' },
+          NutritionAi,
+          { provide: GeminiClient, useValue: geminiSpy },
+        ],
       });
       nutritionAi = TestBed.inject(NutritionAi);
     });
@@ -179,7 +186,12 @@ describe('NutritionAi', () => {
     beforeEach(() => {
       geminiSpy = jasmine.createSpyObj<GeminiClient>('GeminiClient', ['generateContent']);
       TestBed.configureTestingModule({
-        providers: [NutritionAi, { provide: GeminiClient, useValue: geminiSpy }],
+        providers: [
+          { provide: GROQ_API_KEY, useValue: '' },
+          { provide: GEMINI_API_KEY, useValue: 'test-only' },
+          NutritionAi,
+          { provide: GeminiClient, useValue: geminiSpy },
+        ],
       });
       nutritionAi = TestBed.inject(NutritionAi);
     });

@@ -1,0 +1,44 @@
+<ion-modal [isOpen]="open()" (ionModalDidDismiss)="closed.emit()" aria-label="Cách thực hiện">
+  <ng-template>
+    <ion-header
+      ><ion-toolbar>
+        <ion-title>Cách thực hiện</ion-title>
+        <ion-buttons slot="end"
+          ><ion-button (click)="open.set(false)">Đóng</ion-button></ion-buttons
+        >
+      </ion-toolbar></ion-header
+    >
+    <ion-content>
+      <article class="guide">
+        <h2>{{ exerciseName() }}</h2>
+        @if (guide(); as movement) {
+          <p class="equipment">{{ movement.equipment }}</p>
+          @if (movement.illustration; as figure) {
+            @if (failedImage() !== figure.path) {
+              <img [src]="figure.path" [alt]="figure.alt" (error)="failedImage.set(figure.path)" />
+            } @else {
+              <p>Chưa có hình cho biến thể này.</p>
+            }
+          } @else {
+            <p>Chưa có hình cho biến thể này.</p>
+          }
+          <ol>
+            @for (step of movement.steps; track step) {
+              <li>{{ step }}</li>
+            }
+          </ol>
+          <p class="source">
+            Nguồn kỹ thuật<br /><a
+              [href]="movement.sourceUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              >{{ movement.source }}</a
+            >
+          </p>
+        } @else {
+          <p>Chưa có hướng dẫn và hình minh họa cho đúng biến thể này.</p>
+        }
+      </article>
+    </ion-content>
+  </ng-template>
+</ion-modal>

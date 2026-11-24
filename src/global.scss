@@ -216,3 +216,11 @@ ion-button::part(native) {
   text-transform: none;
   letter-spacing: 0;
 }
+
+ion-button:focus-visible,
+ion-button.ion-focused,
+ion-tab-button:focus-visible,
+ion-tab-button.ion-focused {
+  outline: 2px solid var(--apple-primary-focus);
+  outline-offset: -2px;
+}

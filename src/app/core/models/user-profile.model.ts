@@ -1,16 +1,21 @@
+import type { FitnessLevel, Gender, Goal } from './user-profile.types';
+
 export interface UserProfile {
   id: string;
   height_cm: number;
   weight_kg: number;
   age: number;
-  gender: 'male' | 'female';
-  goal: 'lose_weight' | 'gain_muscle' | 'maintain' | 'performance';
-  fitness_level: 'beginner' | 'intermediate' | 'advanced';
+  birth_date?: string | null;
+  gender: Gender;
+  goal: Goal;
+  fitness_level: FitnessLevel;
   activity_factor: number;
   bmr: number;
   tdee: number;
   target_calories: number;
+  calorie_target_mode?: 'auto' | 'manual';
   target_protein: number;
+  protein_target_mode?: 'auto' | 'manual';
   target_carbs: number | null;
   target_fat: number | null;
   theme: 'light';

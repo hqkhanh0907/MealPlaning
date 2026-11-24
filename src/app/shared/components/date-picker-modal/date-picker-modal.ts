@@ -8,19 +8,9 @@ import {
   signal,
 } from '@angular/core';
 import { IonDatetime } from '@ionic/angular/standalone';
+import { addCalendarDays, localIsoDate } from '../../../core/utils/local-date';
 
-const CLAMP_DAYS = 365;
-
-function isoLocal(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-}
-
-function todayIso(): string {
-  return isoLocal(new Date());
-}
+import { MEAL_CALENDAR_WINDOW_DAYS } from '../../../core/models/meal-plan.types';
 
 function clampToBounds(iso: string, minIso: string, maxIso: string): string {
   if (iso < minIso) return minIso;
@@ -41,26 +31,17 @@ export class DatePickerModal {
   readonly firstDayOfWeek = 1;
 
   readonly isOpen = input<boolean>(false);
-  readonly initialDate = input<string>(todayIso());
-  readonly clampDays = input<number>(CLAMP_DAYS);
+  readonly initialDate = input<string>(localIsoDate());
+  readonly clampDays = input<number>(MEAL_CALENDAR_WINDOW_DAYS);
 
   readonly dateSelected = output<string>();
   readonly dismissed = output<void>();
 
   /** Internal selection buffer; commit on "Chọn". */
-  private readonly selectionInternal = signal<string>(todayIso());
+  private readonly selectionInternal = signal<string>(localIsoDate());
 
-  readonly minIso = computed<string>(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - this.clampDays());
-    return isoLocal(d);
-  });
-
-  readonly maxIso = computed<string>(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + this.clampDays());
-    return isoLocal(d);
-  });
+  readonly minIso = computed(() => localIsoDate(addCalendarDays(new Date(), -this.clampDays())));
+  readonly maxIso = computed(() => localIsoDate(addCalendarDays(new Date(), this.clampDays())));
 
   readonly selection = computed<string>(() => this.selectionInternal());
 
@@ -68,7 +49,7 @@ export class DatePickerModal {
     effect(() => {
       if (this.isOpen()) {
         this.selectionInternal.set(
-          clampToBounds(this.initialDate() || todayIso(), this.minIso(), this.maxIso()),
+          clampToBounds(this.initialDate() || localIsoDate(), this.minIso(), this.maxIso()),
         );
       }
     });
@@ -83,7 +64,7 @@ export class DatePickerModal {
   }
 
   jumpToday(): void {
-    this.selectionInternal.set(clampToBounds(todayIso(), this.minIso(), this.maxIso()));
+    this.selectionInternal.set(clampToBounds(localIsoDate(), this.minIso(), this.maxIso()));
   }
 
   confirm(): void {

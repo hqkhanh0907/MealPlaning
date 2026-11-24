@@ -17,10 +17,10 @@ import { type FormError, maxLengthError, positiveError, requiredError } from '..
 /**
  * Required Vietnamese label, max 100 chars (matches DB `name` columns).
  */
-export const validateVnName = (raw: string): FormError | null => {
+export const validateVnName = (raw: string, requiredMessage?: string): FormError | null => {
   const trimmed = raw.trim();
   if (!trimmed) {
-    return requiredError();
+    return requiredError(requiredMessage);
   }
   if (trimmed.length > 100) {
     return maxLengthError(100);

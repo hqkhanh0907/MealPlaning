@@ -28,6 +28,7 @@
  */
 
 import { z } from 'zod';
+import { geminiResponseSchema } from '../gemini-response-schema';
 
 import { INGREDIENT_CATEGORIES } from '../../../models/management.constants';
 
@@ -60,40 +61,7 @@ export type DishAutofillResponse = z.infer<typeof dishAutofillResponseSchema>;
 // Gemini responseSchema — flat, mọi field required
 // ---------------------------------------------------------------------------
 
-export const dishAutofillGeminiSchema = {
-  type: 'OBJECT',
-  properties: {
-    ingredients: {
-      type: 'ARRAY',
-      items: {
-        type: 'OBJECT',
-        properties: {
-          name: { type: 'STRING' },
-          gram_weight: { type: 'NUMBER' },
-          category: { type: 'STRING' },
-          calories_per_100g: { type: 'NUMBER' },
-          protein_per_100g: { type: 'NUMBER' },
-          carbs_per_100g: { type: 'NUMBER' },
-          fat_per_100g: { type: 'NUMBER' },
-          fiber_per_100g: { type: 'NUMBER' },
-          confidence: { type: 'STRING', enum: ['high', 'medium', 'low'] },
-        },
-        required: [
-          'name',
-          'gram_weight',
-          'category',
-          'calories_per_100g',
-          'protein_per_100g',
-          'carbs_per_100g',
-          'fat_per_100g',
-          'fiber_per_100g',
-          'confidence',
-        ],
-      },
-    },
-  },
-  required: ['ingredients'],
-} as const;
+export const dishAutofillGeminiSchema = geminiResponseSchema(dishAutofillResponseSchema);
 
 // ---------------------------------------------------------------------------
 // Prompt builder

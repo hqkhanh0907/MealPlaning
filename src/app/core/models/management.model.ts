@@ -1,4 +1,5 @@
 import type { DishSource, DishType, IngredientSource, MealTag } from './management.types';
+import type { NutritionTotals } from './nutrition';
 
 /**
  * Ingredient — gram-only revision (schema v6).
@@ -9,20 +10,10 @@ import type { DishSource, DishType, IngredientSource, MealTag } from './manageme
  *
  * Nguồn: docs/3-design/data-model.md §4.1 (v1.1).
  */
-export interface IngredientModel {
+export interface IngredientModel extends NutritionTotals {
   id: string;
   name: string;
   category: string;
-  /** Calories per 100 g. */
-  calories: number;
-  /** Protein in g per 100 g. */
-  protein: number;
-  /** Carbs in g per 100 g. */
-  carbs: number;
-  /** Fat in g per 100 g. */
-  fat: number;
-  /** Fiber in g per 100 g. */
-  fiber: number;
   source: IngredientSource;
   created_at: string;
   updated_at: string | null;
@@ -40,6 +31,15 @@ export interface DishModel {
   is_favorite: 0 | 1;
   created_at: string;
   updated_at: string | null;
+}
+
+/** Nutrition totals in the library and meal picker describe one recipe serving. */
+export interface DishListItem extends DishModel {
+  total_calories: number;
+  total_protein: number;
+  total_carbs: number;
+  total_fat: number;
+  total_fiber: number;
 }
 
 /**

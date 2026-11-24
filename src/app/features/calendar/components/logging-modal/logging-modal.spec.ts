@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { IonModal } from '@ionic/angular/standalone';
 import type { DishListItem } from '../../../../core/repositories/dish.repository';
 import { LoggingModal } from './logging-modal';
 
@@ -63,6 +65,21 @@ describe('LoggingModal', () => {
     component.selectDish(makeDish({ id: 'dish-9', name: 'Bún bò' }));
 
     expect(emitted).toEqual([{ dishId: 'dish-9', dishName: 'Bún bò', servings: 1.5 }]);
+  });
+
+  it('requests the recipe editor only after the logging sheet has dismissed', async () => {
+    fixture.detectChanges();
+    const modal: IonModal = fixture.debugElement.query(By.directive(IonModal)).componentInstance;
+    let finishDismiss!: (dismissed: boolean) => void;
+    spyOn(modal, 'dismiss').and.returnValue(new Promise((resolve) => (finishDismiss = resolve)));
+    const create = jasmine.createSpy('create dish');
+    component.createDishRequested.subscribe(create);
+
+    const request = component.requestCreateDish();
+    expect(create).not.toHaveBeenCalled();
+    finishDismiss(true);
+    await request;
+    expect(create).toHaveBeenCalledTimes(1);
   });
 
   it('emits AI suggestion with AI-proposed servings when dish exists', () => {

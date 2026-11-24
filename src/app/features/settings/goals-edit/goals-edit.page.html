@@ -30,20 +30,23 @@
     <h3 class="section-caption">Chỉ số dinh dưỡng</h3>
 
     <app-form-field
-      label="Calo (kcal)"
+      label="Năng lượng (kcal/ngày)"
       inputId="goals-field-calo"
       errorId="err-goals-calo"
       [invalid]="caloInvalid()"
-      errorMessage="Calo cần từ 800 đến 6000 kcal"
+      errorMessage="Nhập từ {{ limits.calories.min }} đến {{
+        limits.calories.max
+      }} kcal hoặc để trống để chỉ ghi bữa ăn."
     >
       <input
         id="goals-field-calo"
         class="input-native"
         type="number"
         inputmode="numeric"
-        min="800"
-        max="6000"
-        step="10"
+        [min]="limits.calories.min"
+        [max]="limits.calories.max"
+        step="1"
+        placeholder="Chưa đặt mục tiêu"
         [attr.aria-invalid]="caloInvalid() ? 'true' : null"
         [attr.aria-describedby]="caloInvalid() ? 'err-goals-calo' : null"
         [ngModel]="calo()"
@@ -51,20 +54,27 @@
       />
     </app-form-field>
 
+    @if (calo() === null) {
+      <p class="form-hint">Bạn có thể lên lịch và ghi bữa ăn khi chưa đặt mục tiêu năng lượng.</p>
+    } @else if (calo()! >= limits.calories.min && calo()! <= 1200) {
+      <p class="form-hint">Mức năng lượng này cần hướng dẫn và theo dõi chuyên môn.</p>
+    }
+
     <app-form-field
-      label="Protein (g)"
+      label="Protein (g/ngày)"
       inputId="goals-field-protein"
       errorId="err-goals-protein"
       [invalid]="proteinInvalid()"
-      errorMessage="Protein cần từ 20 đến 400 g"
+      errorMessage="Protein cần từ {{ limits.protein.min }} đến {{ limits.protein.max }} g"
     >
       <input
         id="goals-field-protein"
+        placeholder="Chưa đặt mục tiêu"
         class="input-native"
         type="number"
         inputmode="numeric"
-        min="20"
-        max="400"
+        [min]="limits.protein.min"
+        [max]="limits.protein.max"
         step="1"
         [attr.aria-invalid]="proteinInvalid() ? 'true' : null"
         [attr.aria-describedby]="proteinInvalid() ? 'err-goals-protein' : null"
@@ -78,17 +88,17 @@
       inputId="goals-field-carbs"
       errorId="err-goals-carbs"
       [invalid]="carbsInvalid()"
-      errorMessage="Carbs cần từ 0 đến 1000 g"
+      errorMessage="Carbs cần từ {{ limits.carbs.min }} đến {{ limits.carbs.max }} g"
     >
       <input
         id="goals-field-carbs"
         class="input-native"
         type="number"
         inputmode="numeric"
-        min="0"
-        max="1000"
+        [min]="limits.carbs.min"
+        [max]="limits.carbs.max"
         step="1"
-        placeholder="Tự động"
+        placeholder="Chưa đặt mục tiêu"
         [attr.aria-invalid]="carbsInvalid() ? 'true' : null"
         [attr.aria-describedby]="carbsInvalid() ? 'err-goals-carbs' : null"
         [ngModel]="carbs()"
@@ -101,17 +111,17 @@
       inputId="goals-field-fat"
       errorId="err-goals-fat"
       [invalid]="fatInvalid()"
-      errorMessage="Fat cần từ 0 đến 1000 g"
+      errorMessage="Fat cần từ {{ limits.fat.min }} đến {{ limits.fat.max }} g"
     >
       <input
         id="goals-field-fat"
         class="input-native"
         type="number"
         inputmode="numeric"
-        min="0"
-        max="1000"
+        [min]="limits.fat.min"
+        [max]="limits.fat.max"
         step="1"
-        placeholder="Tự động"
+        placeholder="Chưa đặt mục tiêu"
         [attr.aria-invalid]="fatInvalid() ? 'true' : null"
         [attr.aria-describedby]="fatInvalid() ? 'err-goals-fat' : null"
         [ngModel]="fat()"
@@ -123,23 +133,38 @@
       Đặt lại về đề xuất
     </ion-button>
 
-    <p class="form-hint">
-      Khi đổi mục tiêu, hệ thống đề xuất Calo và Protein mới. Bạn có thể chỉnh tay sau đó. Carbs và
-      Fat luôn nhập tay (để trống = tự động theo Phase 3 tracking).
-    </p>
+    <details class="goal-estimates">
+      <summary>Cách ứng dụng ước tính mục tiêu</summary>
+      <p>
+        Năng lượng nghỉ dùng phương trình Mifflin–St Jeor. Ứng dụng nhân kết quả với hệ số hoạt động
+        rồi điều chỉnh theo mục tiêu.
+      </p>
+      <p>
+        Protein dùng mức tham khảo 1,6–2,2 g/kg cân nặng mỗi ngày. Nghiên cứu cơ sở chủ yếu xét
+        người lớn khỏe mạnh tập kháng lực.
+      </p>
+      <p>
+        Bạn có thể để trống mục tiêu đạm. Ứng dụng chỉ đề xuất cho người lớn khi kết quả nằm trong
+        khoảng 20–400 g/ngày.
+      </p>
+      <p>Bạn có thể nhập mục tiêu riêng theo nhu cầu hoặc hướng dẫn chuyên môn.</p>
+    </details>
   </div>
 </ion-content>
 
 <ion-footer class="ion-no-border">
   <div class="sticky-save-bar">
+    @if (submission.error(); as error) {
+      <p class="field-error" role="alert">{{ error }}</p>
+    }
     <ion-button
       expand="block"
       class="save-button"
       [color]="formInvalid() ? 'medium' : 'primary'"
-      [disabled]="formInvalid()"
+      [disabled]="formInvalid() || submission.locked()"
       (click)="save()"
     >
-      Lưu
+      {{ submission.locked() ? 'Đang lưu…' : 'Lưu' }}
     </ion-button>
   </div>
 </ion-footer>

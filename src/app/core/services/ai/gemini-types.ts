@@ -101,8 +101,8 @@ export class GeminiError extends Error {
 export const GEMINI_ERROR_TOAST: Readonly<Record<GeminiErrorKind, string>> = {
   network: 'Cần kết nối mạng để dùng AI',
   http_400: 'Lỗi gửi yêu cầu AI, vui lòng thử lại',
-  http_401: 'Lỗi cấu hình AI, vui lòng cập nhật app',
-  http_403: 'Lỗi cấu hình AI, vui lòng cập nhật app',
+  http_401: 'Khóa Gemini chưa hợp lệ. Hãy kiểm tra khóa API.',
+  http_403: 'Gemini từ chối quyền truy cập. Hãy kiểm tra quyền của khóa Gemini.',
   http_429: 'Đã đạt giới hạn AI, thử lại sau',
   http_5xx: 'AI đang bận, thử lại sau',
   parse: 'AI trả kết quả lạ, vui lòng thử lại',

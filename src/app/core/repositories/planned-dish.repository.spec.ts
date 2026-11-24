@@ -340,14 +340,11 @@ describe('PlannedDishRepository', () => {
 
   describe('restoreDeletedDish', () => {
     it('inserts the original completion time and nutrition without querying the recipe', async () => {
-      const restored = { ...logged, id: 'new-id' };
-      db.getOne.and.returnValues(Promise.resolve({ max_sort: 2 }), Promise.resolve(restored));
-
-      expect(await repo.restoreDeletedDish(logged)).toBe(restored);
+      expect(await repo.restoreDeletedDish(logged)).toBe(logged);
 
       expect(db.withTransaction).toHaveBeenCalledTimes(1);
-      expect(db.getOne).toHaveBeenCalledTimes(2);
-      expect(db.execute.calls.first().args[1]?.slice(5)).toEqual([
+      expect(db.getOne).not.toHaveBeenCalled();
+      expect(db.execute.calls.mostRecent().args[1]?.slice(5)).toEqual([
         logged.is_completed,
         logged.completed_at,
         logged.calories,
@@ -355,6 +352,7 @@ describe('PlannedDishRepository', () => {
         logged.carbs,
         logged.fat,
         logged.fiber,
+        logged.created_at,
       ]);
     });
   });
@@ -544,8 +542,6 @@ describe('PlannedDishRepository', () => {
         };
       });
 
-      // db.getOne — only called for "SELECT id FROM day_plan WHERE date = ?"
-      // (prev-week probe). Other getOne paths in this method are absent.
       db.getOne.and.callFake(async <T>(_sql: string, params?: unknown[]) => {
         const date = params?.[0] as string;
         const prev = opts.prevDayPlans[date];

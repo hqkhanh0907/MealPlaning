@@ -20,13 +20,17 @@
  *     - ingredients[] non-empty, every component has positive quantity
  *     - duplicate dish ids rejected
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { SeedValidationError, stableStringify } from './build-ingredients';
+import { SeedValidationError, writeSeedArtifact } from './build-ingredients';
+import { VI_COMPOSITES } from './curated/vi-composites';
 import { VI_DISHES } from './curated/vi-dishes';
+import { VI_INGREDIENTS } from './curated/vi-ingredients';
 import type { DishSeed, MealTag } from './types';
+import { toGrams } from './units';
+import type { SeedDishRecord } from '../../src/app/core/services/seed/seed-records';
 
 const MEAL_TAGS: ReadonlyArray<MealTag> = ['breakfast', 'lunch', 'dinner'];
 const UUID_V4_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -141,10 +145,26 @@ export function buildDishes(input: ReadonlyArray<DishSeed>): DishSeed[] {
     .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
 }
 
-export function buildDishesToDisk(outDir: string): DishSeed[] {
-  const dishes = buildDishes(VI_DISHES);
+export function buildDishesToDisk(outDir: string, dishes = buildDishes(VI_DISHES)): DishSeed[] {
+  const ingredients = new Map(
+    [...VI_INGREDIENTS, ...VI_COMPOSITES].map((ingredient) => [ingredient.id, ingredient]),
+  );
+  const gramDishes = dishes.map<SeedDishRecord>((dish) => ({
+    ...dish,
+    ingredients: dish.ingredients.map((item) => {
+      const ingredient = ingredients.get(item.ingredient_id);
+      if (!ingredient) {
+        throw new Error(`Unknown ingredient '${item.ingredient_id}' in '${dish.name_vi}'`);
+      }
+      const grams = toGrams(item.quantity, item.unit_id, ingredient.density_g_per_ml);
+      if (!Number.isFinite(grams) || grams <= 0) {
+        throw new Error(`Invalid gram weight for '${ingredient.name_vi}' in '${dish.name_vi}'`);
+      }
+      return { ingredient_id: item.ingredient_id, gram_weight: Number(grams.toFixed(6)) };
+    }),
+  }));
   mkdirSync(outDir, { recursive: true });
-  writeFileSync(resolve(outDir, 'dishes.json'), stableStringify(dishes), 'utf8');
+  writeSeedArtifact(resolve(outDir, 'dishes.json'), gramDishes);
   return dishes;
 }
 

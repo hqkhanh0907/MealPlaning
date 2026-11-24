@@ -12,6 +12,21 @@ export type MuscleGroup =
   | 'forearms'
   | 'full_body';
 
+export const muscleLabels: Record<MuscleGroup, string> = {
+  chest: 'Ngực',
+  back: 'Lưng',
+  shoulders: 'Vai',
+  biceps: 'Tay trước',
+  triceps: 'Tay sau',
+  quads: 'Đùi trước',
+  hamstrings: 'Đùi sau',
+  glutes: 'Mông',
+  calves: 'Bắp chân',
+  abs: 'Core',
+  forearms: 'Cẳng tay',
+  full_body: 'Toàn thân',
+};
+
 export type ExerciseCategory = 'compound' | 'isolation' | 'cardio';
 export type ExerciseSource = 'db' | 'custom' | 'ai';
 export type TrainingPlanType = 'full_body' | 'upper_lower' | 'ppl' | 'ai_custom';
@@ -78,12 +93,26 @@ export interface ActiveTrainingPlan extends TrainingPlanSummary {
 
 export type WorkoutSetStatus = 'logged' | 'skipped';
 
+export function isTimedExercise(id: string): boolean {
+  return [
+    'ex_plank',
+    'ex_farmer_carry',
+    'ex_treadmill_run',
+    'ex_stationary_bike',
+    'ex_rowing_machine',
+  ].includes(id);
+}
+
+export const workoutNumber = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 });
+
 export interface WorkoutSet {
   id: string;
   workout_exercise_id: string;
   set_number: number;
   weight_kg: number;
   reps: number;
+  duration_seconds?: number | null;
+  legacy_unit_unknown?: number;
   rest_seconds: number | null;
   effort: WorkoutEffort | null;
   notes: string | null;
@@ -102,7 +131,21 @@ export interface WorkoutExerciseDetail {
   category: ExerciseCategory;
   sort_order: number;
   total_volume: number;
+  planned_sets?: number | null;
+  planned_min?: number | null;
+  planned_max?: number | null;
+  planned_rest?: number | null;
+  equipment?: string | null;
   sets: WorkoutSet[];
+}
+
+export function setValueLabel(set: WorkoutSet): string {
+  const load = workoutNumber.format(set.weight_kg) + ' kg';
+  if (set.legacy_unit_unknown) return load + ' · ' + set.reps + ' (bản cũ chưa ghi đơn vị)';
+  if (set.duration_seconds != null) {
+    return (set.weight_kg ? load + ' · ' : '') + set.duration_seconds + ' giây';
+  }
+  return load + ' × ' + set.reps + ' lần';
 }
 
 export interface WorkoutSessionDetail {

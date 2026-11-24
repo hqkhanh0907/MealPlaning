@@ -1,35 +1,28 @@
 import { z } from 'zod';
-import type { NutritionTotals } from '../../nutrition/nutrition-query';
+import { NUTRIENTS, type NutritionTotals } from '../../../models/nutrition';
+import { workoutNumber } from '../../../models/fitness.types';
+import type { FitnessLevel } from '../../../models/user-profile.types';
 
 const TONES = ['info', 'warning', 'success'] as const;
-export type DailyInsightLevel = 'beginner' | 'intermediate' | 'advanced';
+
+export type DailyInsightLevel = FitnessLevel;
 
 export const dailyInsightResponseSchema = z
   .object({
     tone: z.enum(TONES),
-    title: z.string().min(1).max(80),
-    body: z.string().min(1).max(260),
-    action: z.string().min(1).max(120),
+    title: z.string().trim().min(1).max(80),
+    body: z.string().trim().min(1).max(260),
+    action: z.string().trim().min(1).max(120),
   })
   .strict();
 
 export type DailyInsightResponse = z.infer<typeof dailyInsightResponseSchema>;
 
-export const dailyInsightGeminiSchema = {
-  type: 'OBJECT',
-  properties: {
-    tone: { type: 'STRING', enum: TONES },
-    title: { type: 'STRING' },
-    body: { type: 'STRING' },
-    action: { type: 'STRING' },
-  },
-  required: ['tone', 'title', 'body', 'action'],
-} as const;
-
 export interface BuildDailyInsightPromptInput {
   readonly date: string;
   readonly level: DailyInsightLevel;
   readonly totals: NutritionTotals;
+  readonly logged: NutritionTotals;
   readonly targets: NutritionTotals;
   readonly workoutVolumeKg: number;
   readonly workoutStreakWeeks: number;
@@ -39,15 +32,16 @@ export function buildDailyInsightPrompt(input: BuildDailyInsightPromptInput): st
   return [
     `Viết insight ngày ${input.date} cho user level=${input.level}.`,
     '',
-    'Dinh dưỡng hôm nay:',
-    `- Calories: ${round(input.totals.calories)}/${round(input.targets.calories)} kcal`,
-    `- Protein: ${round(input.totals.protein)}/${round(input.targets.protein)}g`,
-    `- Carbs: ${round(input.totals.carbs)}/${round(input.targets.carbs)}g`,
-    `- Fat: ${round(input.totals.fat)}/${round(input.targets.fat)}g`,
-    `- Fiber: ${round(input.totals.fiber)}/${round(input.targets.fiber)}g`,
+    'Dinh dưỡng hôm nay. Theo lịch là tổng dự kiến cả ngày, đã bao gồm các món đã ăn.',
+    ...NUTRIENTS.map((key) => {
+      const unit = key === 'calories' ? 'kcal' : 'g';
+      const target = input.targets[key] > 0 ? `${round(input.targets[key])} ${unit}` : 'chưa đặt';
+      return `${key}: đã ăn ${round(input.logged[key])} ${unit}, theo lịch ${round(input.totals[key])} ${unit}, mục tiêu ${target}.`;
+    }),
+    'Chỉ so sánh với mục tiêu đã đặt. Không tự đề xuất mức năng lượng hoặc chế độ giảm cân.',
     '',
     'Tập luyện:',
-    `- Volume tuần này: ${round(input.workoutVolumeKg)} kg`,
+    `- Tổng tạ × số lần trong các hiệp đã ghi của buổi đã hoàn thành tuần này: ${workoutNumber.format(input.workoutVolumeKg)} kg. Bài tính theo giây không góp vào tổng này.`,
     `- Workout streak: ${input.workoutStreakWeeks} tuần`,
     '',
     'Rules:',

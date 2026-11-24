@@ -3,10 +3,10 @@ import {
   calculateTargetCalories,
   calculateTargetProtein,
   calculateTdee,
-  deriveFitnessLevel,
   getActivityFactor,
   getActivityLevelFromFactor,
-} from './onboarding-calculation';
+} from '../../core/services/profile/energy-targets';
+import { deriveFitnessLevel } from './onboarding-calculation';
 
 describe('onboarding-calculation', () => {
   it('calculates male BMR with Mifflin-St Jeor formula', () => {
@@ -23,10 +23,19 @@ describe('onboarding-calculation', () => {
   });
 
   it('calculates target calories by goal', () => {
-    expect(calculateTargetCalories(2508, 'lose_weight')).toBe(2008);
-    expect(calculateTargetCalories(2508, 'gain_muscle')).toBe(2808);
-    expect(calculateTargetCalories(2508, 'maintain')).toBe(2508);
-    expect(calculateTargetCalories(2508, 'performance')).toBe(2708);
+    const body = { weightKg: 70, heightCm: 170 };
+    expect(calculateTargetCalories(2508, 'lose_weight', body)).toBe(2008);
+    expect(calculateTargetCalories(2508, 'gain_muscle', body)).toBe(2808);
+    expect(calculateTargetCalories(2508, 'maintain', body)).toBe(2508);
+    expect(calculateTargetCalories(2508, 'performance', body)).toBe(2708);
+  });
+
+  it('withholds low-energy suggestions and weight-loss targets for underweight adults', () => {
+    const body = { weightKg: 70, heightCm: 170 };
+    expect(calculateTargetCalories(1700, 'lose_weight', body)).toBe(0);
+    expect(calculateTargetCalories(1701, 'lose_weight', body)).toBe(1201);
+    expect(calculateTargetCalories(2500, 'lose_weight', { weightKg: 50, heightCm: 172 })).toBe(0);
+    expect(calculateTargetCalories(2500, 'maintain', { weightKg: 50, heightCm: 172 })).toBe(2500);
   });
 
   it('calculates target protein by goal', () => {

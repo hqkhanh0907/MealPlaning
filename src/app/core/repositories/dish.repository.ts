@@ -1,20 +1,15 @@
 import { inject, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
-import type { DishIngredientModel, DishModel } from '../models/management.model';
+import type { DishIngredientModel, DishListItem, DishModel } from '../models/management.model';
 import type { DishSource, DishType, MealTag } from '../models/management.types';
 import { Database } from '../services/database/database';
+import { DISH_PER_SERVING } from './dish-per-serving.sql';
 import {
   DishIngredientRepository,
   type CreateDishIngredientInput,
 } from './dish-ingredient.repository';
 
-export interface DishListItem extends DishModel {
-  total_calories: number;
-  total_protein: number;
-  total_carbs: number;
-  total_fat: number;
-  total_fiber: number;
-}
+export type { DishListItem } from '../models/management.model';
 
 export interface DishWithIngredients extends DishListItem {
   ingredients: DishIngredientModel[];
@@ -37,13 +32,13 @@ export class DishRepository {
 
   async list(): Promise<DishListItem[]> {
     return this.db.query<DishListItem>(
-      'SELECT * FROM dish_with_totals ORDER BY name COLLATE NOCASE ASC',
+      `SELECT * FROM ${DISH_PER_SERVING} ORDER BY name COLLATE NOCASE ASC`,
     );
   }
 
   async searchByName(query: string): Promise<DishListItem[]> {
     return this.db.query<DishListItem>(
-      'SELECT * FROM dish_with_totals WHERE name LIKE ? ORDER BY name COLLATE NOCASE ASC',
+      `SELECT * FROM ${DISH_PER_SERVING} WHERE name LIKE ? ORDER BY name COLLATE NOCASE ASC`,
       [`%${query}%`],
     );
   }
@@ -60,15 +55,16 @@ export class DishRepository {
       return null;
     }
     return this.db.getOne<DishListItem>(
-      'SELECT * FROM dish_with_totals WHERE LOWER(TRIM(name)) = LOWER(?) LIMIT 1',
+      `SELECT * FROM ${DISH_PER_SERVING} WHERE LOWER(TRIM(name)) = LOWER(?) LIMIT 1`,
       [trimmed],
     );
   }
 
   async getById(id: string): Promise<DishWithIngredients | null> {
-    const dish = await this.db.getOne<DishListItem>('SELECT * FROM dish_with_totals WHERE id = ?', [
-      id,
-    ]);
+    const dish = await this.db.getOne<DishListItem>(
+      `SELECT * FROM ${DISH_PER_SERVING} WHERE id = ?`,
+      [id],
+    );
     if (!dish) {
       return null;
     }
@@ -83,12 +79,11 @@ export class DishRepository {
   async insert(
     data: CreateDishInput,
     ingredients: CreateDishIngredientInput[],
+    dishId: string = uuidv4(),
   ): Promise<DishWithIngredients> {
     if (ingredients.length === 0) {
       throw new Error('Dish must contain at least one ingredient.');
     }
-
-    const dishId = uuidv4();
 
     await this.db.withTransaction(async () => {
       await this.db.execute(
@@ -166,7 +161,7 @@ export class DishRepository {
   async findDishesUsingIngredient(ingredientId: string): Promise<DishListItem[]> {
     return this.db.query<DishListItem>(
       `SELECT DISTINCT d.*
-       FROM dish_with_totals d
+       FROM ${DISH_PER_SERVING} d
        INNER JOIN dish_ingredient di ON di.dish_id = d.id
        WHERE di.ingredient_id = ?
        ORDER BY d.name COLLATE NOCASE ASC`,

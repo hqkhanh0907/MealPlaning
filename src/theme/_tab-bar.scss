@@ -6,7 +6,7 @@
     --color: var(--apple-ink-muted-48);
     --color-selected: var(--apple-primary);
     --border: 1px solid var(--apple-hairline);
-    height: 49px;
+    min-height: 56px;
   }
 
   ion-tab-button {
@@ -22,7 +22,15 @@
     ion-label {
       font: var(--apple-type-nav-link);
       letter-spacing: var(--apple-track-fine);
-      margin-top: 2px;
+      margin-top: 3px;
+      font-weight: 600;
+    }
+
+    &.tab-selected ion-icon {
+      box-sizing: content-box;
+      padding: 3px var(--space-md);
+      border-radius: var(--radius-full);
+      background: var(--primary-100);
     }
   }
 }

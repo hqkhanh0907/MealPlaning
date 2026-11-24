@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, signal, OnInit } from '@angular/core';
+import { SaveAndClose } from '../../../shared/forms/save-and-close';
 import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -16,7 +17,11 @@ import { addIcons } from 'ionicons';
 import { checkmarkCircle } from 'ionicons/icons';
 import { ProfileStore } from '../../../core/stores/profile.store';
 import { recalcTargets } from '../../../core/services/profile/recalc-targets';
-import { Goal } from '../../../core/models/user-profile.types';
+import {
+  manualTargetLimits,
+  validManualTarget,
+} from '../../../core/services/profile/manual-targets';
+import { GOAL_LABELS, type Goal } from '../../../core/models/user-profile.types';
 import { AppFormField } from '../../../shared/forms/form-field/form-field';
 
 interface GoalOption {
@@ -45,38 +50,33 @@ interface GoalOption {
 export default class GoalsEditPage implements OnInit {
   private readonly profileStore = inject(ProfileStore);
   private readonly location = inject(Location);
+  readonly submission = new SaveAndClose(
+    () => this.location.back(),
+    'Chưa lưu được mục tiêu. Hãy thử lại.',
+  );
 
   readonly goal = signal<Goal>('maintain');
-  readonly calo = signal(0);
-  readonly protein = signal(0);
+  readonly calo = signal<number | null>(0);
+  readonly calorieMode = signal<'auto' | 'manual'>('auto');
+  readonly protein = signal<number | null>(null);
   readonly carbs = signal<number | null>(null);
   readonly fat = signal<number | null>(null);
 
-  // Tracks whether user manually edited targets in this session.
-  // While false, changing the goal auto-suggests new targets via recalc.
-  private readonly userTouchedTargets = signal(false);
+  private readonly proteinMode = signal<'auto' | 'manual'>('auto');
 
   // Tracks last seen goal so the effect only auto-fills on actual goal CHANGES,
   // not on the initial load (which would otherwise overwrite stored manual targets).
   private prevGoal: Goal | null = null;
 
-  readonly goalOptions: readonly GoalOption[] = [
-    { value: 'lose_weight', label: 'Giảm cân' },
-    { value: 'maintain', label: 'Duy trì' },
-    { value: 'gain_muscle', label: 'Tăng cơ' },
-    { value: 'performance', label: 'Tăng sức mạnh' },
-  ];
+  readonly goalOptions: readonly GoalOption[] = (Object.keys(GOAL_LABELS) as Goal[]).map(
+    (value) => ({ value, label: GOAL_LABELS[value] }),
+  );
 
-  readonly caloInvalid = computed(() => this.calo() < 800 || this.calo() > 6000);
-  readonly proteinInvalid = computed(() => this.protein() < 20 || this.protein() > 400);
-  readonly carbsInvalid = computed(() => {
-    const v = this.carbs();
-    return v !== null && (v < 0 || v > 1000);
-  });
-  readonly fatInvalid = computed(() => {
-    const v = this.fat();
-    return v !== null && (v < 0 || v > 1000);
-  });
+  readonly limits = manualTargetLimits;
+  readonly caloInvalid = computed(() => !validManualTarget('calories', this.calo()));
+  readonly proteinInvalid = computed(() => !validManualTarget('protein', this.protein()));
+  readonly carbsInvalid = computed(() => !validManualTarget('carbs', this.carbs()));
+  readonly fatInvalid = computed(() => !validManualTarget('fat', this.fat()));
   readonly formInvalid = computed(
     () => this.caloInvalid() || this.proteinInvalid() || this.carbsInvalid() || this.fatInvalid(),
   );
@@ -91,17 +91,9 @@ export default class GoalsEditPage implements OnInit {
       const prev = this.prevGoal;
       this.prevGoal = g;
       if (!p || prev === null || prev === g) return;
-      if (this.userTouchedTargets()) return;
-      const r = recalcTargets({
-        height_cm: p.height_cm,
-        weight_kg: p.weight_kg,
-        age: p.age,
-        gender: p.gender,
-        goal: g,
-        activity_factor: p.activity_factor,
-      });
-      this.calo.set(r.target_calories);
-      this.protein.set(r.target_protein);
+      const r = recalcTargets({ ...p, goal: g });
+      if (this.calorieMode() === 'auto') this.calo.set(r.target_calories || null);
+      if (this.proteinMode() === 'auto') this.protein.set(r.target_protein || null);
     });
   }
 
@@ -114,8 +106,10 @@ export default class GoalsEditPage implements OnInit {
     // differs from the signal default ('maintain').
     this.prevGoal = p.goal;
     this.goal.set(p.goal);
-    this.calo.set(p.target_calories);
-    this.protein.set(p.target_protein);
+    this.calo.set(p.target_calories || null);
+    this.calorieMode.set(p.calorie_target_mode ?? 'auto');
+    this.protein.set(p.target_protein || null);
+    this.proteinMode.set(p.protein_target_mode ?? 'auto');
     this.carbs.set(p.target_carbs ?? null);
     this.fat.set(p.target_fat ?? null);
   }
@@ -124,54 +118,49 @@ export default class GoalsEditPage implements OnInit {
     this.goal.set(g);
   }
 
-  setCalo(v: number): void {
-    this.userTouchedTargets.set(true);
+  setCalo(v: number | null): void {
+    this.calorieMode.set('manual');
     this.calo.set(v);
   }
 
-  setProtein(v: number): void {
-    this.userTouchedTargets.set(true);
+  setProtein(v: number | null): void {
+    this.proteinMode.set('manual');
     this.protein.set(v);
   }
 
   setCarbs(v: number | null): void {
     // Treat empty/NaN/0-string as null so we persist "unset" rather than 0.
     const norm = v === null || (typeof v === 'number' && Number.isNaN(v)) ? null : v;
-    if (norm !== null) this.userTouchedTargets.set(true);
     this.carbs.set(norm);
   }
 
   setFat(v: number | null): void {
     const norm = v === null || (typeof v === 'number' && Number.isNaN(v)) ? null : v;
-    if (norm !== null) this.userTouchedTargets.set(true);
     this.fat.set(norm);
   }
 
   reset(): void {
     const p = this.profileStore.profile();
     if (!p) return;
-    const r = recalcTargets({
-      height_cm: p.height_cm,
-      weight_kg: p.weight_kg,
-      age: p.age,
-      gender: p.gender,
-      goal: this.goal(),
-      activity_factor: p.activity_factor,
-    });
-    this.calo.set(r.target_calories);
-    this.protein.set(r.target_protein);
-    this.userTouchedTargets.set(false);
+    const r = recalcTargets({ ...p, goal: this.goal() });
+    this.calorieMode.set('auto');
+    this.calo.set(r.target_calories || null);
+    this.protein.set(r.target_protein || null);
+    this.proteinMode.set('auto');
   }
 
   async save(): Promise<void> {
     if (this.formInvalid()) return;
-    await this.profileStore.updateProfile({
-      goal: this.goal(),
-      target_calories: this.calo(),
-      target_protein: this.protein(),
-      target_carbs: this.carbs(),
-      target_fat: this.fat(),
-    });
-    this.location.back();
+    await this.submission.submit(() =>
+      this.profileStore.updateProfile({
+        goal: this.goal(),
+        target_calories: this.calo() ?? 0,
+        calorie_target_mode: this.calorieMode(),
+        target_protein: this.protein() ?? 0,
+        protein_target_mode: this.proteinMode(),
+        target_carbs: this.carbs(),
+        target_fat: this.fat(),
+      }),
+    );
   }
 }

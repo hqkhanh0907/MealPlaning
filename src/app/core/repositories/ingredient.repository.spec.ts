@@ -1,6 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { Database } from '../services/database/database';
 import {
+  createTestDatabase,
+  teardownTestDatabase,
+} from '../services/database/__test__/create-test-database';
+import {
   IngredientRepository,
   type CreateIngredientInput,
   type UpdateIngredientInput,
@@ -182,5 +186,47 @@ describe('IngredientRepository (gram-only v6)', () => {
       expect(result).toBeNull();
       expect(db.query).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('IngredientRepository search with Vietnamese names in SQLite', () => {
+  let repo: IngredientRepository;
+
+  beforeEach(async () => {
+    const db = await createTestDatabase();
+    TestBed.configureTestingModule({ providers: [{ provide: Database, useValue: db }] });
+    repo = TestBed.inject(IngredientRepository);
+    for (const name of ['Ức gà sống', 'Gan heo', 'Đậu đỏ', 'Cá lóc', 'Trứng gà']) {
+      await repo.insert({
+        name,
+        category: 'Khác',
+        source: 'manual',
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        fiber: 0,
+      });
+    }
+  });
+
+  afterEach(teardownTestDatabase);
+
+  it('combines direct and accent-folded substrings, preserving the library order and rows', async () => {
+    const expected = (await repo.list()).filter((row) =>
+      ['Gan heo', 'Trứng gà', 'Ức gà sống'].includes(row.name),
+    );
+    expect(await repo.searchByName('ga')).toEqual(expected);
+    expect((await repo.searchByName('UC   GA')).map((row) => row.name)).toEqual(['Ức gà sống']);
+    expect((await repo.searchByName('ĐẬU ĐỎ'.normalize('NFD'))).map((row) => row.name)).toEqual([
+      'Đậu đỏ',
+    ]);
+    expect((await repo.searchByName('dau do')).map((row) => row.name)).toEqual(['Đậu đỏ']);
+    expect(await repo.searchByName('táo')).toEqual([]);
+  });
+
+  it('keeps existing SQLite LIKE pattern matches', async () => {
+    expect((await repo.searchByName('G_n')).map((row) => row.name)).toEqual(['Gan heo']);
+    expect(await repo.searchByName('')).toEqual(await repo.list());
   });
 });

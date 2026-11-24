@@ -13,12 +13,14 @@
  *
  * (AC1 cross-ref against dishes/composites lives in validate-seed.ts §5.2.4.)
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { VI_INGREDIENTS } from './curated/vi-ingredients';
-import type { IngredientSeed } from './types';
+import type { DerivedCompositeIngredient, IngredientSeed } from './types';
+import { toGrams } from './units';
+import type { SeedIngredientRecord } from '../../src/app/core/services/seed/seed-records';
 
 /**
  * Mandatory Vietnamese kitchen staples. Whitelisted by name_vi (lowercased).
@@ -132,18 +134,53 @@ export function stableStringify(value: unknown, indent = 2): string {
   return JSON.stringify(sortKeys(value), null, indent) + '\n';
 }
 
+export function ingredientPer100g(ingredient: IngredientSeed | DerivedCompositeIngredient) {
+  const basisGrams = toGrams(
+    ingredient.nutrition_basis_quantity,
+    ingredient.nutrition_basis_unit,
+    ingredient.density_g_per_ml,
+  );
+  if (!Number.isFinite(basisGrams) || basisGrams <= 0) {
+    throw new Error(`Ingredient '${ingredient.name_vi}' has an invalid gram basis`);
+  }
+  const per100g = (value: number) => Number(((value * 100) / basisGrams).toFixed(2));
+  const record = {
+    id: ingredient.id,
+    name_vi: ingredient.name_vi,
+    name_en: ingredient.name_en,
+    category: ingredient.category,
+    source: ingredient.source,
+    source_citation: ingredient.source_citation,
+    notes: ingredient.notes,
+    calories: per100g(ingredient.calories),
+    protein: per100g(ingredient.protein),
+    carbs: per100g(ingredient.carbs),
+    fat: per100g(ingredient.fat),
+    fiber: per100g(ingredient.fiber),
+    ...('derived_from' in ingredient ? { derived_from: ingredient.derived_from } : {}),
+  };
+  return record satisfies SeedIngredientRecord;
+}
+
+export function writeSeedArtifact(path: string, value: unknown): void {
+  const json = stableStringify(value);
+  if (existsSync(path)) {
+    const previous: unknown = JSON.parse(readFileSync(path, 'utf8'));
+    if (stableStringify(previous) === json) return;
+  }
+  writeFileSync(path, json, 'utf8');
+}
+
 /**
  * CLI entrypoint: build + write JSON files. Invoked by scripts/seed/build.ts.
  */
-export function buildIngredientsToDisk(outDir: string): BuildIngredientsResult {
-  const result = buildIngredients(VI_INGREDIENTS);
+export function buildIngredientsToDisk(
+  outDir: string,
+  result = buildIngredients(VI_INGREDIENTS),
+): BuildIngredientsResult {
   mkdirSync(outDir, { recursive: true });
-  writeFileSync(resolve(outDir, 'ingredients.json'), stableStringify(result.ingredients), 'utf8');
-  writeFileSync(
-    resolve(outDir, 'ingredient-units.json'),
-    stableStringify(result.ingredient_units),
-    'utf8',
-  );
+  writeSeedArtifact(resolve(outDir, 'ingredients.json'), result.ingredients.map(ingredientPer100g));
+  writeSeedArtifact(resolve(outDir, 'ingredient-units.json'), result.ingredient_units);
   return result;
 }
 

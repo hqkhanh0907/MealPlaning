@@ -1,8 +1,12 @@
 import {
+  buildCalorieTargetModeMigration,
   buildFiberSnapshotSchemaMigration,
   buildHybridPolicySchemaMigration,
   buildInitialSchemaMigration,
   buildWorkoutSessionStatusMigration,
+  buildWorkoutMeasuresMigration,
+  buildProteinTargetModeMigration,
+  buildProfileBirthDateMigration,
   buildWorkoutSetStatusMigration,
   buildWorkoutSetUpdatedAtMigration,
   SCHEMA_VERSION,
@@ -10,16 +14,19 @@ import {
 import { MIGRATION_REGISTRY } from './migrations';
 
 describe('MIGRATION_REGISTRY', () => {
-  it('exposes v1..v6 migrations matching SCHEMA_VERSION', () => {
-    expect(SCHEMA_VERSION).toBe(6);
-    expect(MIGRATION_REGISTRY.length).toBe(6);
+  it('exposes each migration through the current schema', () => {
+    expect(SCHEMA_VERSION).toBe(10);
+    expect(MIGRATION_REGISTRY.length).toBe(10);
     expect(MIGRATION_REGISTRY[0].version).toBe(1);
     expect(MIGRATION_REGISTRY[1].version).toBe(2);
     expect(MIGRATION_REGISTRY[2].version).toBe(3);
     expect(MIGRATION_REGISTRY[3].version).toBe(4);
     expect(MIGRATION_REGISTRY[4].version).toBe(5);
     expect(MIGRATION_REGISTRY[5].version).toBe(6);
-    expect(MIGRATION_REGISTRY[5].version).toBe(SCHEMA_VERSION);
+    expect(MIGRATION_REGISTRY[6].version).toBe(7);
+    expect(MIGRATION_REGISTRY[7].version).toBe(8);
+    expect(MIGRATION_REGISTRY[8].version).toBe(9);
+    expect(MIGRATION_REGISTRY[9].version).toBe(SCHEMA_VERSION);
   });
 
   it('uses the canonical builders (v1, hybrid-policy v2, fiber snapshot v3, workout_set.updated_at v4, workout_session.status v5, workout_set.status v6)', () => {
@@ -35,6 +42,10 @@ describe('MIGRATION_REGISTRY', () => {
     expect(MIGRATION_REGISTRY[3].statements).toEqual(v4.statements);
     expect(MIGRATION_REGISTRY[4].statements).toEqual(v5.statements);
     expect(MIGRATION_REGISTRY[5].statements).toEqual(v6.statements);
+    expect(MIGRATION_REGISTRY[6].statements).toEqual(buildCalorieTargetModeMigration().statements);
+    expect(MIGRATION_REGISTRY[7].statements).toEqual(buildWorkoutMeasuresMigration().statements);
+    expect(MIGRATION_REGISTRY[8].statements).toEqual(buildProteinTargetModeMigration().statements);
+    expect(MIGRATION_REGISTRY[9].statements).toEqual(buildProfileBirthDateMigration().statements);
   });
 
   it('keeps migrations sorted by ascending version', () => {

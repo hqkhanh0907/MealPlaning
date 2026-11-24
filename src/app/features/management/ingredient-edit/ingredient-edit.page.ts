@@ -1,9 +1,9 @@
+import { DiscardChanges } from '../../../shared/forms/discard-changes';
+import { presentCatalogToast } from '../catalog-toast';
 import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  type OnDestroy,
-  type OnInit,
   ViewChild,
   afterNextRender,
   computed,
@@ -32,8 +32,8 @@ import { chevronDownOutline, sparklesOutline, trashOutline } from 'ionicons/icon
 import { INGREDIENT_CATEGORIES } from '../../../core/models/management.constants';
 import type { HasUnsavedChanges } from '../../../core/guards/unsaved-changes-guard';
 import { IngredientStore } from '../../../core/stores/ingredient.store';
-import { NetworkStore } from '../../../core/stores/network.store';
-import { GEMINI_ERROR_TOAST, GeminiError } from '../../../core/services/ai/gemini-types';
+import { aiErrorMessage } from '../../../core/services/ai/ai-generation';
+import { AiAvailability } from '../../../shared/ai-availability';
 import {
   NutritionAi,
   normalizeIngredientName,
@@ -92,7 +92,7 @@ const emptyForm = (): IngredientEditFormValue => ({
     AiLookupSheet,
   ],
 })
-export default class IngredientEditPage implements HasUnsavedChanges, OnInit, OnDestroy {
+export default class IngredientEditPage implements HasUnsavedChanges {
   @ViewChild('categoryPicker') private readonly categoryPicker?: BottomSheetPicker;
   @ViewChild('nameInput') private readonly nameInput?: ElementRef<HTMLInputElement>;
 
@@ -102,7 +102,7 @@ export default class IngredientEditPage implements HasUnsavedChanges, OnInit, On
   private readonly nutritionAi = inject(NutritionAi);
   private readonly toastCtrl = inject(ToastController);
   private readonly alertCtrl = inject(AlertController);
-  protected readonly network = inject(NetworkStore);
+  protected readonly ai = inject(AiAvailability);
 
   readonly categories = INGREDIENT_CATEGORIES;
 
@@ -115,8 +115,7 @@ export default class IngredientEditPage implements HasUnsavedChanges, OnInit, On
   readonly pendingDeleteId = signal<string | null>(null);
   readonly deleteReferenceCount = signal(0);
   readonly deleteReferenceLoading = signal(false);
-  readonly discardDialogOpen = signal(false);
-  private discardDialogResolver: ((value: boolean) => void) | null = null;
+  readonly discard = new DiscardChanges();
   private dirtyBaseline = '';
   private skipUnsavedPrompt = false;
 
@@ -148,11 +147,16 @@ export default class IngredientEditPage implements HasUnsavedChanges, OnInit, On
     });
   }
 
-  ngOnInit(): void {
+  ionViewWillEnter(): void {
     document.body.classList.add('edit-overlay-open');
+    if (!this.isEdit()) {
+      this.formSignal.set(emptyForm());
+      this.showErrors.set(false);
+      this.resetDirtyBaseline();
+    }
   }
 
-  ngOnDestroy(): void {
+  ionViewWillLeave(): void {
     document.body.classList.remove('edit-overlay-open');
   }
 
@@ -267,19 +271,12 @@ export default class IngredientEditPage implements HasUnsavedChanges, OnInit, On
   }
 
   confirmDiscardChanges(): Promise<boolean> {
-    this.discardDialogOpen.set(true);
-    return new Promise<boolean>((resolve) => {
-      this.discardDialogResolver = resolve;
-    });
-  }
-
-  cancelDiscardChanges(): void {
-    this.resolveDiscardDialog(false);
+    return this.discard.request();
   }
 
   confirmDiscardChangesDialog(): void {
     this.skipUnsavedPrompt = true;
-    this.resolveDiscardDialog(true);
+    this.discard.answer(true);
   }
 
   async onSave(): Promise<void> {
@@ -320,13 +317,6 @@ export default class IngredientEditPage implements HasUnsavedChanges, OnInit, On
     } finally {
       this.saving.set(false);
     }
-  }
-
-  private resolveDiscardDialog(value: boolean): void {
-    const resolver = this.discardDialogResolver;
-    this.discardDialogResolver = null;
-    this.discardDialogOpen.set(false);
-    resolver?.(value);
   }
 
   private resetDirtyBaseline(): void {
@@ -377,7 +367,7 @@ export default class IngredientEditPage implements HasUnsavedChanges, OnInit, On
   async onAskAi(): Promise<void> {
     const rawName = this.formSignal().name.trim();
     if (!rawName) {
-      await this.presentToast('Nhập tên nguyên liệu trước khi hỏi AI');
+      await presentCatalogToast(this.toastCtrl, 'Nhập tên nguyên liệu trước khi hỏi AI');
       return;
     }
     if (this.aiLoading()) {
@@ -432,12 +422,8 @@ export default class IngredientEditPage implements HasUnsavedChanges, OnInit, On
       this.aiExistingId.set(existingId);
       this.aiSheetOpen.set(true);
     } catch (err) {
-      // Decision #6: show toast from GEMINI_ERROR_TOAST map.
-      const message =
-        err instanceof GeminiError
-          ? GEMINI_ERROR_TOAST[err.kind]
-          : 'Có lỗi xảy ra, vui lòng thử lại';
-      await this.presentToast(message);
+      const message = aiErrorMessage(err, 'Có lỗi xảy ra, vui lòng thử lại');
+      await presentCatalogToast(this.toastCtrl, message);
     } finally {
       this.aiLoading.set(false);
     }
@@ -472,15 +458,5 @@ export default class IngredientEditPage implements HasUnsavedChanges, OnInit, On
   onAiSheetDismissed(): void {
     this.aiSheetOpen.set(false);
     this.aiResult.set(null);
-  }
-
-  private async presentToast(message: string): Promise<void> {
-    const toast = await this.toastCtrl.create({
-      message,
-      duration: 2400,
-      position: 'bottom',
-      color: 'medium',
-    });
-    await toast.present();
   }
 }

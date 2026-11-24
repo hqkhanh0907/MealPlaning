@@ -1,7 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import type { IngredientModel } from '../models/management.model';
-import type { IngredientSource } from '../models/management.types';
 import { Database } from '../services/database/database';
 import { normalize as normalizeForMatch } from '../utils/fuzzy-match';
 
@@ -14,18 +13,7 @@ import { normalize as normalizeForMatch } from '../utils/fuzzy-match';
 
 export type IngredientListItem = IngredientModel;
 
-export interface CreateIngredientInput {
-  name: string;
-  category: string;
-  /** kcal per 100 g */
-  calories: number;
-  /** g per 100 g */
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-  source: IngredientSource;
-}
+export type CreateIngredientInput = Omit<IngredientModel, 'id' | 'created_at' | 'updated_at'>;
 
 export type UpdateIngredientInput = Partial<CreateIngredientInput>;
 
@@ -53,10 +41,18 @@ export class IngredientRepository {
   }
 
   async searchByName(query: string): Promise<IngredientListItem[]> {
-    return this.db.query<IngredientRow>(
-      'SELECT * FROM ingredient WHERE name LIKE ? ORDER BY name COLLATE NOCASE ASC',
+    const term = normalizeForMatch(query);
+    const rows = await this.db.query<IngredientRow & { direct_match: number }>(
+      'SELECT *, name LIKE ? AS direct_match FROM ingredient ORDER BY name COLLATE NOCASE ASC',
       [`%${query}%`],
     );
+    const matches: IngredientListItem[] = [];
+    for (const { direct_match, ...ingredient } of rows) {
+      if (direct_match || (term && normalizeForMatch(ingredient.name).includes(term))) {
+        matches.push(ingredient);
+      }
+    }
+    return matches;
   }
 
   /**

@@ -12,9 +12,9 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { buildCompositesToDisk } from './build-composites';
-import { buildDishesToDisk } from './build-dishes';
-import { buildIngredientsToDisk } from './build-ingredients';
+import { buildComposites, buildCompositesToDisk } from './build-composites';
+import { buildDishes, buildDishesToDisk } from './build-dishes';
+import { buildIngredients, buildIngredientsToDisk } from './build-ingredients';
 import { VI_COMPOSITES } from './curated/vi-composites';
 import { VI_DISHES } from './curated/vi-dishes';
 import { VI_INGREDIENTS } from './curated/vi-ingredients';
@@ -29,23 +29,18 @@ console.log(`  curated composite recipes:  ${VI_COMPOSITES.length}`);
 console.log(`  curated dishes:             ${VI_DISHES.length}`);
 console.log(`  outDir:                     ${outDir}`);
 
-const { ingredients, ingredient_units } = buildIngredientsToDisk(outDir);
-console.log(
-  `  [§5.2.2] wrote ${ingredients.length} ingredients, ${ingredient_units.length} ingredient_units`,
-);
-
-const composites = buildCompositesToDisk(outDir);
-console.log(`  [§5.2.3] wrote ${composites.length} composites`);
-
-const dishes = buildDishesToDisk(outDir);
-console.log(`  [§5.2.4] wrote ${dishes.length} dishes`);
-
+const ingredientBuild = buildIngredients(VI_INGREDIENTS);
+const composites = buildComposites(VI_COMPOSITES, ingredientBuild.ingredients);
+const dishes = buildDishes(VI_DISHES);
 const report = validateSeed({
-  ingredients,
+  ingredients: ingredientBuild.ingredients,
   composites,
   composite_recipes: VI_COMPOSITES,
   dishes,
 });
+buildIngredientsToDisk(outDir, ingredientBuild);
+buildCompositesToDisk(outDir, composites);
+buildDishesToDisk(outDir, dishes);
 console.log(
   `  [§5.2.4] cross-artifact validate: ok (${report.dish_macros.length} dishes, ${report.warnings.length} warnings)`,
 );

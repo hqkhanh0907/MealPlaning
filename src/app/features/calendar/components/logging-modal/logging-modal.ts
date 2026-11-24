@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  output,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { IonContent, IonHeader, IonIcon, IonModal, IonToolbar } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { closeOutline } from 'ionicons/icons';
@@ -42,6 +50,7 @@ function round(value: number): number {
   styleUrl: './logging-modal.scss',
 })
 export class LoggingModal {
+  private readonly modal = viewChild(IonModal);
   readonly isOpen = input(false);
   readonly mealLabel = input('bữa ăn');
   readonly allDishes = input<readonly DishListItem[]>([]);
@@ -127,8 +136,8 @@ export class LoggingModal {
     });
   }
 
-  requestCreateDish(): void {
-    this.createDishRequested.emit();
+  async requestCreateDish(): Promise<void> {
+    if (await this.modal()?.dismiss()) this.createDishRequested.emit();
   }
 
   requestAiSuggestions(): void {
@@ -145,7 +154,7 @@ export class LoggingModal {
   }
 
   describeDish(dish: DishListItem): string {
-    return `${round(dish.total_calories)} kcal • Protein ${round(dish.total_protein)}g • Carbs ${round(dish.total_carbs)}g • Fat ${round(dish.total_fat)}g`;
+    return `Mỗi phần: ${round(dish.total_calories)} kcal • Protein ${round(dish.total_protein)}g • Carbs ${round(dish.total_carbs)}g • Fat ${round(dish.total_fat)}g`;
   }
 
   private sourceDishes(): readonly DishListItem[] {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -8,13 +8,6 @@ import {
   addCircleOutline,
 } from 'ionicons/icons';
 
-/**
- * Empty day state per F-03 §5.
- *
- * Story 3.5 scope: render 3 CTAs but only [Lên kế hoạch] is wired.
- * [Sao chép từ hôm qua] and [AI] are visible-but-defer-toast — owner
- * is Story 3.7 (copy) and Phase 5 (AI).
- */
 @Component({
   selector: 'app-empty-day-state',
   standalone: true,
@@ -24,6 +17,11 @@ import {
   styleUrl: './empty-day-state.scss',
 })
 export class EmptyDayState {
+  readonly online = input(true);
+  readonly aiIssue = input<string | null>(null);
+  readonly aiPlanning = input(false);
+  readonly copying = input(false);
+
   constructor() {
     addIcons({ calendarClearOutline, copyOutline, sparklesOutline, addCircleOutline });
   }

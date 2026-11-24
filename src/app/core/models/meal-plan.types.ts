@@ -9,7 +9,23 @@
  * derived fields here — that belongs in component view models.
  */
 
-export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+export const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
+export const MEAL_CALENDAR_WINDOW_DAYS = 365;
+export type MealType = (typeof MEAL_TYPES)[number];
+
+export const MEAL_LABELS: Readonly<Record<MealType, string>> = {
+  breakfast: 'Bữa sáng',
+  lunch: 'Bữa trưa',
+  dinner: 'Bữa tối',
+  snack: 'Bữa phụ',
+};
+
+export const MIN_PLANNED_SERVINGS = 0.1;
+export const MAX_PLANNED_SERVINGS = 20;
+
+export function roundSuggestedServings(servings: number): number {
+  return Math.min(3, Math.max(0.5, Math.round(servings * 2) / 2));
+}
 
 export interface DayPlan {
   id: string;
@@ -54,7 +70,7 @@ export interface PlannedDish {
  * Repository SELECT shape — `effective_*` cols computed via CASE in SQL
  * so consumers (store / component / pipe) MUST NOT re-compute (DEC-02).
  *   is_completed=1 → effective_X = snapshot column X.
- *   is_completed=0 → effective_X = dish_with_totals.total_X * servings.
+ *   is_completed=0 → effective_X = nutrition per recipe serving × planned servings.
  */
 export interface PlannedDishWithEffective extends PlannedDish {
   dish_name: string;
@@ -89,9 +105,10 @@ export interface WeekDayTotal {
   hasPlan: boolean; // ≥1 dish (planned or logged) exists for this day
 }
 
-export type DeletedDishSnapshot = Omit<PlannedDish, 'id' | 'sort_order' | 'created_at'>;
+export type DeletedDishSnapshot = PlannedDish;
 
 export type WeekDayStatus =
+  | 'past-no-target'
   | 'no-plan'
   | 'future-planned'
   | 'today-recording'

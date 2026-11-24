@@ -126,18 +126,12 @@ describe('dish-autofill.prompt — buildDishAutofillPrompt (rev 1.5)', () => {
 describe('dish-autofill.prompt — Gemini responseSchema (rev 1.5 flat)', () => {
   it('exposes flat OBJECT with `ingredients` array', () => {
     expect(dishAutofillGeminiSchema.type).toBe('OBJECT');
-    expect(
-      (dishAutofillGeminiSchema.properties as { ingredients: { type: string } }).ingredients.type,
-    ).toBe('ARRAY');
+    expect(dishAutofillGeminiSchema.properties!['ingredients'].type).toBe('ARRAY');
   });
 
   it('marks ALL row fields as required (no nullable since flat schema)', () => {
-    const items = (
-      dishAutofillGeminiSchema.properties as {
-        ingredients: { items: { required: readonly string[] } };
-      }
-    ).ingredients.items;
-    expect([...items.required]).toEqual([
+    const items = dishAutofillGeminiSchema.properties!['ingredients'].items!;
+    expect(items.required).toEqual([
       'name',
       'gram_weight',
       'category',
@@ -151,11 +145,7 @@ describe('dish-autofill.prompt — Gemini responseSchema (rev 1.5 flat)', () => 
   });
 
   it('does NOT declare is_in_db / matched_ingredient_id fields', () => {
-    const props = (
-      dishAutofillGeminiSchema.properties as {
-        ingredients: { items: { properties: Record<string, unknown> } };
-      }
-    ).ingredients.items.properties;
+    const props = dishAutofillGeminiSchema.properties!['ingredients'].items!.properties!;
     expect(props['is_in_db']).toBeUndefined();
     expect(props['matched_ingredient_id']).toBeUndefined();
   });

@@ -4,6 +4,9 @@ const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
 const prettier = require('eslint-config-prettier');
 
+const presentationImports = ['**/features/**', '**/shared/**'];
+const aiClientImports = ['**/ai/gemini-client', '**/ai/groq-client', '**/ai/gemini-key', '@groq-config'];
+
 module.exports = tseslint.config(
   {
     files: ['**/*.ts'],
@@ -39,6 +42,47 @@ module.exports = tseslint.config(
       ],
       '@typescript-eslint/no-floating-promises': 'off', // we use void prefix
       'no-console': ['warn', { allow: ['warn', 'error'] }],
+    },
+  },
+  {
+    files: ['src/app/core/**/*.ts'],
+    ignores: ['**/*.spec.ts'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: presentationImports }],
+    },
+  },
+  {
+    files: ['src/app/core/models/**/*.ts', 'src/app/core/services/profile/**/*.ts'],
+    ignores: ['**/*.spec.ts'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [
+          ...presentationImports,
+          '@angular/**', '@ionic/**', '@capacitor/**', '@capacitor-community/**',
+          '**/repositories/**', '**/stores/**', '**/database/**', '**/ai/**',
+        ],
+      }],
+    },
+  },
+  {
+    files: ['src/app/core/stores/**/*.ts'],
+    ignores: ['**/*.spec.ts'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [...presentationImports, ...aiClientImports] }],
+    },
+  },
+  {
+    files: ['src/app/features/**/*.ts', 'src/app/shared/**/*.ts'],
+    ignores: ['**/*.spec.ts'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: aiClientImports }],
+    },
+  },
+  {
+    files: ['src/app/shared/**/*.ts'],
+    ignores: ['**/*.spec.ts'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: ['**/features/**', ...aiClientImports] }],
     },
   },
   {

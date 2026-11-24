@@ -20,7 +20,7 @@
 | Native Wrapper | Capacitor | 8.3 | Android only |
 | Database | SQLite | sql.js + @capacitor-community/sqlite | Dual implementation |
 | State Management | Angular Signals | built-in | signal(), computed(), effect() |
-| AI | Google Gemini API | paid tier | Via HTTP service |
+| AI | Groq, Gemini | Theo cấu hình | Văn bản và ảnh có quy tắc chọn nhà cung cấp riêng tại mục 6. |
 | Testing | Karma + Jasmine | — | Angular default test runner |
 | Styling | Ionic theme + SCSS | — | CSS custom properties + SCSS |
 | Build | Angular CLI | esbuild | Official Angular builder |
@@ -86,7 +86,7 @@
 > Coding conventions chi tiết (naming style 2016 vs 2025, file/folder rules, AI agent guidelines): xem `./coding-conventions.md`.
 > Audit baseline (snapshot 2026-04-28): xoá khỏi repo trong cleanup 2026-04-29 sau khi Style 2025 migration (Phase C) đã ship. Convention canonical hiện tại: `./coding-conventions.md`.
 
-### 2.1 Current — đang dùng Style 2016
+### 2.1 Cấu trúc tại ngày 2026-04-28
 
 Đây là cấu trúc THỰC TẾ trong `src/` tại thời điểm 2026-04-28. **Không** thêm/bớt file ảo.
 
@@ -485,86 +485,39 @@ export class IngredientStore {
 
 ---
 
-## 6. AI Layer — GeminiService + Strategies
+## 6. Ranh giới nghiệp vụ và dịch vụ AI
 
-### Architecture
+[Bản đồ mã hiện hành](domain-map.md) nối từng nghiệp vụ với điểm nhập, nơi ghi dữ liệu, màn hình đọc và kiểm thử. Mục 2.1 ghi lại cấu trúc tháng 4.
 
-```
-Feature Component
-    │
-    ▼
-AI Strategy Service (prompt building + response parsing)
-    │
-    ▼
-GeminiService (HTTP call to Gemini API)
-    │
-    ▼
-Google Gemini API
-```
+### Nơi sở hữu quy tắc
 
-### GeminiService (Core — API caller + JSON parser)
+| Nghiệp vụ | Quy tắc chung | Nơi dùng |
+|---|---|---|
+| Hồ sơ cá nhân | Hồ sơ giữ thông số cơ thể, vận động, trình độ tập, mục tiêu và tùy chọn nhắc lịch. `recalc-targets.ts` giữ mục tiêu thủ công khi tính lại. | Thiết lập ban đầu, Cài đặt, Tổng quan, gợi ý AI và nhắc lịch |
+| Danh mục và dinh dưỡng | `nutrition.ts` quy đổi khối lượng và nhân khẩu phần. `DishListItem` mô tả dinh dưỡng của một khẩu phần. | Sửa món, chọn món, xem trước bữa từ ảnh, gợi ý AI |
+| Lịch ăn | `dish-per-serving.sql.ts` đọc công thức hiện tại cho món dự kiến và số liệu đã lưu cho món đã ăn. | Lịch ăn và Tổng quan |
+| Giáo án | `fitness-prescription.ts` quy định giới hạn của bài tập dự kiến. | Sửa giáo án, tiếp nhận giáo án AI, lưu giáo án |
+| Buổi tập | `fitness-workout-set.ts` kiểm tra hiệp thực tế. Kho buổi tập tính khối lượng từ tạ và số lần đã ghi. | Màn tập, lịch sử, thống kê tuần |
+| Lịch địa phương | `local-date.ts` tính ngày và tuần theo múi giờ thiết bị. Thời điểm bắt đầu và kết thúc buổi tập vẫn có múi giờ. | Chọn ngày, sao chép tuần, lịch ăn và lịch sử tập |
+| Nhắc lịch | `notification-preferences.ts` chuyển lựa chọn trong hồ sơ thành các lịch có thể bật theo quyền hệ điều hành. | Khởi động và Cài đặt |
+| Dữ liệu mẫu | `seed-records.ts` định nghĩa trường mà bộ tạo dữ liệu xuất và bộ nạp SQLite đọc. | Tạo dữ liệu mẫu, nạp nguyên liệu và món |
 
-```typescript
-@Injectable({ providedIn: 'root' })
-export class GeminiService {
-  private readonly apiKey = environment.geminiApiKey;
-  private readonly baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
+Mỗi nghiệp vụ giữ các quyết định riêng. Bữa đã ăn giữ số liệu tại lúc xác nhận. Gợi ý từ ảnh cho phép sửa số gram trước khi lưu.
+Giáo án mô tả bài dự kiến. Nhật ký buổi tập giữ từng hiệp đã ghi hoặc bỏ qua. Hiệp tính bằng giây có đơn vị riêng.
+SQLite web và Android cùng dùng giao diện `Database`. Mỗi nền tảng giữ cách mở kết nối, giao dịch và lưu dữ liệu phù hợp.
 
-  buildSystemInstruction(userProfile: UserProfile): string {
-    // Build shared system instruction with {user_level} and {user_goal}
-  }
+### Chọn nhà cung cấp AI
 
-  async generateContent(prompt: string, options?: AiOptions): Promise<string> {
-    // HTTP POST to Gemini API (text-only)
-    // Returns raw text response
-  }
+`AiGeneration` chọn nhà cung cấp và kiểm tra cấu trúc kết quả. `AiAvailability` kết hợp cùng cấu hình với trạng thái mạng để màn hình báo lý do khi một thao tác chưa dùng được.
 
-  async generateContentWithImage(image: Blob, prompt: string, options?: AiOptions): Promise<string> {
-    // HTTP POST with image + prompt to Gemini Vision
-    // Returns raw text response
-  }
+| Yêu cầu | Quy tắc chọn | Nghiệp vụ |
+|---|---|---|
+| Văn bản | Ưu tiên Groq. Dùng Gemini khi chỉ có khóa Gemini. | Tra nguyên liệu, điền món, gợi ý thực đơn, lập lịch ăn, tạo giáo án, nhận xét ngày |
+| Ảnh | Cần khóa Groq. | Nhận diện món và tạo bản nháp khẩu phần |
 
-  parseJsonResponse<T>(response: string, schema: ZodSchema<T>): T {
-    // Parse JSON from Gemini response, validate with schema
-    // Throws on invalid JSON
-  }
-}
-```
-
-### AI Strategy Services
-
-```typescript
-@Injectable({ providedIn: 'root' })
-export class NutritionAiService {
-  private readonly gemini = inject(GeminiService);
-  private readonly profile = inject(ProfileStore);
-  private readonly dishRepo = inject(DishRepository);
-
-  async lookupIngredient(name: string): Promise<IngredientLookupResult> { /* F-01 — Phase 1.5 */ }
-  async autofillDish(dishName: string, dbIngredients: string[]): Promise<DishIngredient[]> { /* F-02 — Phase 1.5 */ }
-  async analyzeImage(image: Blob, mealType: string, dbIngredients: string[]): Promise<FoodRecognition> { /* F-05 — Phase 6 */ }
-  async suggestMenu(remaining: MacroRemaining, mealType: string, dbDishes: DishSummary[]): Promise<MenuSuggestion[]> { /* F-06 — Phase 6 */ }
-  async planDay(date: string, targets: MacroTargets, dbDishes: DishSummary[]): Promise<DayMealPlan> { /* F-03 — Phase 3 */ }
-  async planWeek(startDate: string, targets: MacroTargets, dbDishes: DishSummary[]): Promise<WeekMealPlan> { /* F-03 — Phase 3 */ }
-}
-
-@Injectable({ providedIn: 'root' })
-export class FitnessAiService {
-  private readonly gemini = inject(GeminiService);
-  private readonly profile = inject(ProfileStore);
-
-  async generateTrainingPlan(profile: UserProfile, frequency: number, equipment: string[], dbExercises: ExerciseSummary[]): Promise<TrainingPlan> { /* F-11 — Phase 6 */ }
-}
-
-@Injectable({ providedIn: 'root' })
-export class InsightAiService {
-  private readonly gemini = inject(GeminiService);
-  private readonly profile = inject(ProfileStore);
-
-  async dailyInsight(dayData: DaySummary, profile: UserProfile): Promise<DailyInsightResult> { /* F-07 — Phase 6 */ }
-  async weeklyReview(weekData: WeekSummary, profile: UserProfile): Promise<WeeklyReviewResult> { /* F-07 — Phase 6 */ }
-}
-```
+Một lần bấm gửi tới một nhà cung cấp. Nếu nhà cung cấp từ chối yêu cầu, màn hình báo lỗi. Người dùng quyết định khi nào thử lại.
+Mỗi nghiệp vụ kiểm tra kết quả theo mục đích. Gợi ý lịch ăn phải tham chiếu món đã gửi và đáp ứng giới hạn năng lượng.
+Giáo án phải tham chiếu bài tập có trong danh sách. Với ảnh, người dùng xem và chỉnh bản nháp trước khi lưu vào nhật ký.
 
 ---
 
@@ -763,22 +716,10 @@ export default config;
 
 ---
 
-## 13. Environment Config
+## 13. Cấu hình khi build
 
-```typescript
-// src/environments/environment.ts
-export const environment = {
-  production: false,
-  geminiApiKey: 'YOUR_DEV_KEY',
-  geminiModel: 'gemini-2.0-flash',
-  dbName: 'healthmate_dev.db'
-};
+Đặt khóa thử cá nhân trong `.env`. Lệnh `npm run build` chuẩn bị cấu hình Groq và cấu hình Gemini cho bản production.
+Bản development dùng cấu hình Gemini trong `src/environments/environment.ts`. Chọn nhà cung cấp theo mục 6.
 
-// src/environments/environment.prod.ts
-export const environment = {
-  production: true,
-  geminiApiKey: 'YOUR_PROD_KEY',
-  geminiModel: 'gemini-2.0-flash',
-  dbName: 'healthmate.db'
-};
-```
+Bản development mở `healthmate_dev.db`. Bản production mở `healthmate.db`.
+Khi cập nhật giả lập chứa hồ sơ cá nhân, dùng cùng cấu hình build với bản đang cài để mở lại đúng hồ sơ.

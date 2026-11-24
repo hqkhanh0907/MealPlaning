@@ -34,5 +34,8 @@ export abstract class Database {
   /**
    * Query a single row. Returns null if no row matches.
    */
-  abstract getOne<T>(sql: string, params?: unknown[]): Promise<T | null>;
+  async getOne<T>(sql: string, params?: unknown[]): Promise<T | null> {
+    const rows = await this.query<T>(sql, params);
+    return rows.length > 0 ? rows[0] : null;
+  }
 }

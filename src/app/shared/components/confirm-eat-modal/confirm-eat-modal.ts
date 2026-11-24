@@ -32,15 +32,13 @@ export class ConfirmEatModal {
 
   readonly body = computed<string>(() =>
     this.mode() === 'mark'
-      ? 'Số liệu sẽ được lưu cố định.'
-      : 'Số liệu hiện tại sẽ bị xoá và quay về realtime theo recipe.',
+      ? 'Lưu calo và dinh dưỡng của bữa này.'
+      : 'Món trở về trạng thái dự kiến. Lịch ăn tính lại theo công thức hiện tại.',
   );
 
   /** Microcopy explaining Hybrid policy — only shown for mark mode (see F-03 §6.2). */
   readonly hybridMicrocopy = computed<string | null>(() =>
-    this.mode() === 'mark'
-      ? 'Khi đã đánh dấu, calo & dinh dưỡng tại thời điểm này được snapshot, không đổi khi recipe thay đổi.'
-      : null,
+    this.mode() === 'mark' ? 'Số liệu đã ăn giữ nguyên khi bạn sửa công thức.' : null,
   );
 
   confirm(): void {

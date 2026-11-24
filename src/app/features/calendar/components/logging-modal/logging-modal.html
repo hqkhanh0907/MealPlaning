@@ -30,37 +30,33 @@
           ariaLabel="Tìm món ăn để thêm vào lịch"
           (queryChange)="onQueryChange($event)"
         />
-
-        <div class="logging-modal__servings" aria-label="Chọn khẩu phần">
-          <span class="logging-modal__servings-label">Khẩu phần</span>
-          <div class="logging-modal__stepper">
-            <button type="button" aria-label="Giảm khẩu phần" (click)="decreaseServings()">
-              −
-            </button>
-            <output>{{ servings() }}</output>
-            <button type="button" aria-label="Tăng khẩu phần" (click)="increaseServings()">
-              +
-            </button>
-          </div>
-        </div>
-
-        <div class="logging-modal__tabs" role="tablist" aria-label="Bộ lọc món ăn">
-          @for (tab of tabs; track tab.value) {
-            <button
-              type="button"
-              role="tab"
-              [class.logging-modal__tab--active]="activeTab() === tab.value"
-              [attr.aria-selected]="activeTab() === tab.value"
-              (click)="setTab(tab.value)"
-            >
-              {{ tab.label }}
-            </button>
-          }
-        </div>
       </ion-toolbar>
     </ion-header>
 
     <ion-content class="logging-modal__content">
+      <div class="logging-modal__servings" role="group" aria-label="Chọn khẩu phần">
+        <span class="logging-modal__servings-label">Khẩu phần</span>
+        <div class="logging-modal__stepper">
+          <button type="button" aria-label="Giảm khẩu phần" (click)="decreaseServings()">−</button>
+          <output>{{ servings() }}</output>
+          <button type="button" aria-label="Tăng khẩu phần" (click)="increaseServings()">+</button>
+        </div>
+      </div>
+
+      <div class="logging-modal__tabs" role="tablist" aria-label="Bộ lọc món ăn">
+        @for (tab of tabs; track tab.value) {
+          <button
+            type="button"
+            role="tab"
+            [class.logging-modal__tab--active]="activeTab() === tab.value"
+            [attr.aria-selected]="activeTab() === tab.value"
+            (click)="setTab(tab.value)"
+          >
+            {{ tab.label }}
+          </button>
+        }
+      </div>
+
       <section class="logging-modal__ai" aria-labelledby="logging-ai-title">
         <div class="logging-modal__ai-header">
           <div>
@@ -79,7 +75,7 @@
         </div>
 
         @if (aiDisabledReason()) {
-          <p class="logging-modal__ai-state">{{ aiDisabledReason() }}</p>
+          <p class="logging-modal__ai-state" role="status">{{ aiDisabledReason() }}</p>
         } @else if (aiSuggestions().length > 0) {
           <div class="logging-modal__ai-list">
             @for (suggestion of aiSuggestions(); track suggestion.dishId) {
@@ -101,7 +97,7 @@
       </section>
 
       @if (loading()) {
-        <p class="logging-modal__loading">Đang tải thư viện món…</p>
+        <p class="logging-modal__loading" role="status">Đang tải thư viện món…</p>
       } @else if (visibleDishes().length === 0) {
         <div class="logging-modal__empty">
           <p>{{ emptyMessage() }}</p>

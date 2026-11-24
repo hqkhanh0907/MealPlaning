@@ -69,6 +69,18 @@ describe('DaySummaryCard', () => {
     expect(el?.getAttribute('aria-label')).toBe('Tổng quan dinh dưỡng');
   });
 
+  it('renders the same metric in the ring and the summary after a profile change', () => {
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('app-calorie-ring svg')?.getAttribute('aria-label')).toContain(
+      'Đạm 120 trên 150',
+    );
+    keyMetric.set('calories');
+    fixture.detectChanges();
+    expect(el.querySelector('app-calorie-ring svg')?.getAttribute('aria-label')).toContain(
+      'Calo 1600 trên 2000',
+    );
+  });
+
   it('updates data-date when input changes', () => {
     fixture.componentRef.setInput('date', '2026-05-11');
     fixture.detectChanges();
@@ -84,6 +96,8 @@ describe('DaySummaryCard', () => {
     fixture.detectChanges();
 
     expect(el.querySelector('.day-summary-card__details')?.textContent).toContain('Fiber');
-    expect(el.querySelector('.day-summary-card__fiber-note')?.textContent).toContain('25g/ngày');
+    expect(el.querySelector('.day-summary-card__fiber-note')?.textContent).toContain(
+      '25 g mỗi ngày',
+    );
   });
 });

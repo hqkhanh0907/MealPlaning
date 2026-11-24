@@ -26,12 +26,12 @@ describe('ConfirmEatModal', () => {
 
     it('uses fixed body explaining snapshot', () => {
       setInputs('mark');
-      expect(component.body()).toBe('Số liệu sẽ được lưu cố định.');
+      expect(component.body()).toBe('Lưu calo và dinh dưỡng của bữa này.');
     });
 
     it('exposes hybrid microcopy', () => {
       setInputs('mark');
-      expect(component.hybridMicrocopy()).toContain('snapshot');
+      expect(component.hybridMicrocopy()).toBe('Số liệu đã ăn giữ nguyên khi bạn sửa công thức.');
     });
   });
 
@@ -43,7 +43,9 @@ describe('ConfirmEatModal', () => {
 
     it('uses fixed body explaining revert to realtime', () => {
       setInputs('unmark');
-      expect(component.body()).toBe('Số liệu hiện tại sẽ bị xoá và quay về realtime theo recipe.');
+      expect(component.body()).toBe(
+        'Món trở về trạng thái dự kiến. Lịch ăn tính lại theo công thức hiện tại.',
+      );
     });
 
     it('does NOT show hybrid microcopy', () => {

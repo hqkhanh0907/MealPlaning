@@ -13,12 +13,6 @@
  * tab pages we keep a single `<ion-header>` without collapse, so the shadow has
  * to be on the base selector. Tuned to be visible but not aggressive on the
  * cream background.
- *
- * Sage-wellness foundation (2026-04-28):
- *   - Toolbar `--background` now reads from `--ion-toolbar-background` token
- *     (sage `#6B8E6F` light / `#4A6B4E` dark) instead of `--bg-card` white.
- *     This is what makes every page (onboarding + 5 phase-1 tabs) sage.
- *   - Hairline border kept (visible against cream page bg even with sage bar).
  */
 ion-header ion-toolbar {
   --background: var(--ion-toolbar-background);
@@ -28,9 +22,13 @@ ion-header ion-toolbar {
   --border-style: solid;
 }
 
+ion-header ion-toolbar ion-back-button {
+  --color: var(--ion-color-primary);
+  min-width: 44px;
+  min-height: 44px;
+}
+
 ion-header ion-toolbar ion-button {
-  width: 44px;
-  height: 44px;
   min-width: 44px;
   min-height: 44px;
 }
@@ -78,7 +76,7 @@ ion-header ion-toolbar ion-title {
 }
 
 ion-header {
-  box-shadow: 0 2px 6px rgba(60, 45, 25, 0.06);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Settings push pages override this to 0 — they get the OS back-chevron which

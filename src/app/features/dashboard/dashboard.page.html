@@ -11,217 +11,309 @@
 
 <ion-content class="dashboard-page">
   @if (dashboard.loading()) {
-    <p class="dashboard-loading" role="status">Đang cập nhật số liệu...</p>
-  }
-
-  <!-- Hero — compact. 1 chip ngày + 1 dòng heading + 1 dòng body. -->
-  <section class="dashboard-hero apple-tile--light" aria-labelledby="dashboard-title">
-    <div class="dashboard-hero__badge">
-      <ion-icon name="calendar-outline" aria-hidden="true" />
-      {{ dashboard.todayLabel() }}
+    <p class="dashboard-loading" role="status">Đang cập nhật số liệu…</p>
+  } @else if (dashboard.refreshFailed()) {
+    <div class="dashboard-card dashboard-error">
+      <p role="alert">Không thể tải số liệu tổng quan.</p>
+      <ion-button fill="outline" (click)="dashboard.refresh()">Thử lại</ion-button>
     </div>
-    <h1 id="dashboard-title">{{ dashboard.heroTitle() }}</h1>
-    <p>{{ dashboard.heroBody() }}</p>
-  </section>
-
-  <!-- Nutrition — luôn hiển thị, là core metric. -->
-  <section class="dashboard-card nutrition-card" aria-labelledby="nutrition-card-title">
-    <header class="dashboard-card__header">
-      <div>
-        <p class="dashboard-card__eyebrow">Dinh dưỡng hôm nay</p>
-        <h2 id="nutrition-card-title">Calo và macro</h2>
+  } @else {
+    <section class="dashboard-hero" aria-labelledby="dashboard-title">
+      <div class="dashboard-hero__date">
+        <ion-icon name="calendar-outline" aria-hidden="true" />
+        {{ dashboard.todayLabel() }}
       </div>
-      <a class="card-link" routerLink="/tabs/calendar">
-        Chi tiết
-        <ion-icon name="chevron-forward-outline" aria-hidden="true" />
-      </a>
-    </header>
-
-    <div class="nutrition-overview">
-      <app-calorie-ring
-        [value]="dashboard.roundedCalories()"
-        [target]="dashboard.targets().calories"
-        [size]="64"
-        [strokeWidth]="8"
-        variant="calories"
-      />
-      <div>
-        <strong class="dashboard-hero-number">{{ dashboard.roundedCalories() }} kcal</strong>
-        <span>{{ dashboard.calorieTargetLabel() }}</span>
-        <small>{{ dashboard.caloriePercentLabel() }} mục tiêu</small>
-      </div>
-    </div>
-
-    @if (dashboard.hasNutritionData()) {
-      <div class="progress-track" aria-hidden="true">
-        <span
-          class="progress-fill progress-fill--calories"
-          [style.--progress]="dashboard.calorieProgressCss()"
-        ></span>
-      </div>
-
-      <div class="macro-list" aria-label="Macro hôm nay">
-        @for (row of dashboard.macroRows(); track row.metric) {
-          <article [class]="'macro-item macro-item--' + row.metric">
-            <div class="macro-item__header">
-              <span>{{ row.label }}</span>
-              <strong>{{ row.percentLabel }}</strong>
-            </div>
-            <div class="macro-item__meta">
-              <span>{{ row.valueLabel }}</span>
-              <span>{{ row.targetLabel }}</span>
-            </div>
-            <div class="progress-track" aria-hidden="true">
-              <span class="progress-fill" [style.--progress]="row.progressCss"></span>
-            </div>
-          </article>
+      <h1 id="dashboard-title">Hôm nay</h1>
+      <dl class="today-nutrition">
+        <div>
+          <dt>Đã ăn</dt>
+          <dd>{{ dashboard.loggedCalories() }} <small>kcal</small></dd>
+        </div>
+        <div>
+          <dt>Theo lịch cả ngày</dt>
+          <dd>{{ dashboard.roundedCalories() }} <small>kcal</small></dd>
+        </div>
+      </dl>
+      <div class="dashboard-hero__actions">
+        @let pendingMeal = dashboard.pendingMeal();
+        @if (pendingMeal) {
+          <a
+            class="card-link today-primary-action"
+            href="/tabs/calendar"
+            [attr.aria-label]="mealLabels[pendingMeal.mealType] + ' chưa ghi. Mở lịch ăn'"
+            (click)="openPendingMeal($event, pendingMeal)"
+          >
+            {{ mealLabels[pendingMeal.mealType] }} chưa ghi
+            <ion-icon name="chevron-forward-outline" aria-hidden="true" />
+          </a>
+        }
+        <button
+          class="card-link add-today-meal"
+          [class.today-primary-action]="!pendingMeal"
+          type="button"
+          (click)="addMeal()"
+        >
+          Thêm món
+        </button>
+        @if (!pendingMeal) {
+          <a class="card-link" routerLink="/tabs/calendar">
+            Mở lịch ăn
+            <ion-icon name="chevron-forward-outline" aria-hidden="true" />
+          </a>
         }
       </div>
-    }
-  </section>
-
-  <!-- AI Insight — CHỈ render khi thực sự có insight (không show "chưa có dữ liệu" rỗng). -->
-  @if (dashboard.dailyAiInsight(); as aiInsight) {
-    <section
-      class="dashboard-card ai-card"
-      [class.ai-card--warning]="aiInsight.tone === 'warning'"
-      aria-labelledby="ai-insight-title"
-    >
-      <div class="dashboard-card__icon" aria-hidden="true">
-        <ion-icon name="sparkles-outline" />
-      </div>
-      <div class="dashboard-card__content">
-        <p class="dashboard-card__eyebrow">AI Insight</p>
-        <h2 id="ai-insight-title">{{ aiInsight.title }}</h2>
-        <p>{{ aiInsight.body }}</p>
-        <p class="ai-card__action">{{ aiInsight.action }}</p>
-      </div>
     </section>
-  } @else if (dashboard.insight(); as insight) {
-    <section
-      class="dashboard-card ai-card"
-      [class.ai-card--warning]="insight.tone === 'warning'"
-      aria-labelledby="ai-insight-title"
-    >
-      <div class="dashboard-card__icon" aria-hidden="true">
-        <ion-icon name="sparkles-outline" />
-      </div>
-      <div class="dashboard-card__content">
-        <p class="dashboard-card__eyebrow">AI Insight</p>
-        <h2 id="ai-insight-title">{{ insight.title }}</h2>
-        <p>{{ insight.body }}</p>
-        <a class="card-link" [routerLink]="insight.ctaRoute">
-          {{ insight.ctaLabel }}
-          <ion-icon name="chevron-forward-outline" aria-hidden="true" />
-        </a>
-      </div>
-    </section>
-  }
 
-  <!-- Photo analysis — CHỈ render khi có result. -->
-  @if (dashboard.foodImageAnalysis(); as analysis) {
-    <section class="dashboard-card photo-card" aria-labelledby="photo-analysis-title">
-      <div class="dashboard-card__icon dashboard-card__icon--accent" aria-hidden="true">
-        <ion-icon name="camera-outline" />
-      </div>
-      <div class="dashboard-card__content">
-        <p class="dashboard-card__eyebrow">Phân tích ảnh món ăn</p>
-        <h2 id="photo-analysis-title">
-          Độ tin cậy {{ confidenceLabel(analysis.overallConfidence) }}
-        </h2>
-        @if (analysis.imageQualityWarning) {
-          <p>{{ analysis.imageQualityWarning }}</p>
-        }
-        <ul class="photo-card__list">
-          @for (item of analysis.items; track item.name) {
-            <li>
-              <strong>{{ item.name }}</strong>
-              <span>
-                {{ item.calories }} kcal · Protein {{ item.protein }}g · Carbs {{ item.carbs }}g ·
-                Fat {{ item.fat }}g
-              </span>
-            </li>
-          }
-        </ul>
-      </div>
-    </section>
-  }
+    <section class="dashboard-card nutrition-card" aria-labelledby="nutrition-card-title">
+      <header class="dashboard-card__header">
+        <h2 id="nutrition-card-title">Dinh dưỡng theo lịch</h2>
+      </header>
 
-  <!-- Tiến độ: streak + weight + workout-row inline. Gọn 1 section. -->
-  <section class="stat-section" aria-labelledby="stat-section-title">
-    <header class="section-header">
-      <p class="dashboard-card__eyebrow">Tiến độ</p>
-      <h2 id="stat-section-title">Streak & cân nặng</h2>
-    </header>
-
-    <div class="stat-grid">
-      <article class="stat-card">
-        <ion-icon name="flame-outline" aria-hidden="true" />
-        <strong>
-          @if (dashboard.nutritionStreakDays() === null) {
-            —
+      <div class="nutrition-overview">
+        <div>
+          <span>{{ dashboard.calorieTargetLabel() }}</span>
+          @if (dashboard.targets().calories > 0) {
+            <small>Theo lịch đạt {{ dashboard.caloriePercentLabel() }} mục tiêu.</small>
           } @else {
-            {{ dashboard.nutritionStreakDays() }} ngày
+            <small>Bạn vẫn có thể ghi bữa ăn.</small>
           }
-        </strong>
-        <span>Chuỗi ngày ghi dinh dưỡng</span>
-      </article>
+        </div>
+      </div>
 
-      <article class="stat-card">
-        <ion-icon name="fitness-outline" aria-hidden="true" />
-        <strong>{{ dashboard.workoutStreakDisplay() }}</strong>
-        <span>Chuỗi tuần tập đều</span>
-      </article>
+      @if (dashboard.hasNutritionData()) {
+        <div class="macro-list" aria-label="Dinh dưỡng của các món theo lịch hôm nay">
+          @for (row of dashboard.macroRows(); track row.metric) {
+            <article [class]="'macro-item macro-item--' + row.metric">
+              <div class="macro-item__header">
+                <span>{{ row.label }}</span>
+                <strong>{{ row.percentLabel }}</strong>
+              </div>
+              <div class="macro-item__meta">
+                <span>{{ row.valueLabel }}</span>
+                <span>{{ row.target > 0 ? 'Mục tiêu ' + row.targetLabel : row.targetLabel }}</span>
+              </div>
+              <div class="progress-track" aria-hidden="true">
+                <span class="progress-fill" [style.--progress]="row.progressCss"></span>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
 
-      <article class="stat-card stat-card--wide">
-        <ion-icon name="scale-outline" aria-hidden="true" />
-        <strong>{{ dashboard.weightDisplay() }}</strong>
-        <span>{{ dashboard.weightMeta() }}</span>
-      </article>
-    </div>
-  </section>
+    <!-- AI Insight — CHỈ render khi thực sự có insight (không show "chưa có dữ liệu" rỗng). -->
+    @if (dashboard.dailyAiInsight(); as aiInsight) {
+      <section
+        class="dashboard-card ai-card"
+        [class.ai-card--warning]="aiInsight.tone === 'warning'"
+        aria-labelledby="ai-insight-title"
+      >
+        <div class="dashboard-card__icon" aria-hidden="true">
+          <ion-icon name="sparkles-outline" />
+        </div>
+        <div class="dashboard-card__content">
+          <p class="dashboard-card__eyebrow">Nhận xét của AI</p>
+          <h2 id="ai-insight-title" #insightTitle tabindex="-1">{{ aiInsight.title }}</h2>
+          <p>{{ aiInsight.body }}</p>
+          <p class="ai-card__action">{{ aiInsight.action }}</p>
+        </div>
+      </section>
+    } @else if (dashboard.insight(); as insight) {
+      <section
+        class="dashboard-card ai-card"
+        [class.ai-card--warning]="insight.tone === 'warning'"
+        aria-labelledby="ai-insight-title"
+      >
+        <div class="dashboard-card__icon" aria-hidden="true">
+          <ion-icon name="sparkles-outline" />
+        </div>
+        <div class="dashboard-card__content">
+          <p class="dashboard-card__eyebrow">Gợi ý dinh dưỡng</p>
+          <h2 id="ai-insight-title">{{ insight.title }}</h2>
+          <p>{{ insight.body }}</p>
+          <a class="card-link" [routerLink]="insight.ctaRoute">
+            {{ insight.ctaLabel }}
+            <ion-icon name="chevron-forward-outline" aria-hidden="true" />
+          </a>
+        </div>
+      </section>
+    }
 
-  <!-- Quick actions: CHỈ 2 unique AI features. Tab bar đã handle còn lại. -->
-  <section class="quick-actions" aria-label="Hành động nhanh">
-    <app-ai-offline-banner />
-    <button
-      type="button"
-      class="quick-action quick-action--primary quick-action--button"
-      [disabled]="dashboard.dailyAiLoading() || !network.online()"
-      [attr.aria-label]="
-        dashboard.dailyAiLoading() ? 'AI đang tạo insight hôm nay' : 'Tạo AI insight hôm nay'
-      "
-      (click)="generateDailyInsight()"
-    >
-      <span class="quick-action__icon" aria-hidden="true">
-        <ion-icon name="sparkles-outline" />
-      </span>
-      <span>
-        <strong>{{ dashboard.dailyAiLoading() ? 'AI đang phân tích…' : 'Tạo AI insight' }}</strong>
-        <small>Gợi ý cá nhân hoá cho hôm nay.</small>
-      </span>
-    </button>
+    <section class="stat-section" aria-labelledby="stat-section-title">
+      <header class="section-header">
+        <h2 id="stat-section-title">Chuỗi theo dõi và cân nặng</h2>
+      </header>
 
-    <button
-      type="button"
-      class="quick-action quick-action--button"
-      [disabled]="dashboard.foodImageLoading() || !network.online()"
-      [attr.aria-label]="
-        dashboard.foodImageLoading()
-          ? 'AI đang phân tích ảnh món ăn'
-          : 'Chụp ảnh để AI phân tích món ăn'
-      "
-      (click)="analyzeMealPhoto()"
-    >
-      <span class="quick-action__icon" aria-hidden="true">
-        <ion-icon name="camera-outline" />
-      </span>
-      <span>
-        <strong>{{
-          dashboard.foodImageLoading() ? 'Đang phân tích ảnh…' : 'Phân tích ảnh món ăn'
-        }}</strong>
-        <small>Ảnh chỉ gửi khi bấm chụp, không lưu vào máy.</small>
-      </span>
-    </button>
-  </section>
+      <dl class="stat-list">
+        <div>
+          <dt>
+            <ion-icon name="flame-outline" aria-hidden="true" />Ngày liên tiếp ăn gần mục tiêu
+          </dt>
+          <dd>
+            @if (dashboard.nutritionStreakDays() === null) {
+              —
+            } @else {
+              {{ dashboard.nutritionStreakDays() }} ngày
+            }
+          </dd>
+          @if (dashboard.nutritionStreakDays() !== null) {
+            <small>Tính đến hôm qua, trong khoảng 80–120% mục tiêu kcal hiện tại.</small>
+          }
+        </div>
+        <div>
+          <dt><ion-icon name="fitness-outline" aria-hidden="true" />Tuần tập liên tiếp</dt>
+          <dd>{{ dashboard.workoutStreakDisplay() }}</dd>
+        </div>
+        <div>
+          <dt><ion-icon name="scale-outline" aria-hidden="true" />Cân nặng gần nhất</dt>
+          <dd>{{ dashboard.weightDisplay() }}</dd>
+          <small>{{ dashboard.weightMeta() }}</small>
+        </div>
+      </dl>
+    </section>
+
+    <!-- Quick actions: CHỈ 2 unique AI features. Tab bar đã handle còn lại. -->
+    <section class="quick-actions" aria-label="Hành động nhanh">
+      <app-ai-offline-banner />
+      <button
+        type="button"
+        class="quick-action quick-action--primary quick-action--button"
+        [disabled]="dashboard.dailyAiLoading() || !!ai.textIssue()"
+        [attr.aria-busy]="dashboard.dailyAiLoading()"
+        (click)="generateDailyInsight()"
+      >
+        <span class="quick-action__icon" aria-hidden="true">
+          <ion-icon name="sparkles-outline" />
+        </span>
+        <span>
+          <strong>{{
+            dashboard.dailyAiLoading() ? 'AI đang phân tích…' : 'Nhận xét của AI'
+          }}</strong>
+          @if (dashboard.insightProvider; as provider) {
+            <small>Gửi tổng dinh dưỡng và tập luyện tới {{ provider }} để nhận gợi ý.</small>
+          } @else {
+            <small>{{ ai.textIssue() }}</small>
+          }
+        </span>
+      </button>
+
+      @if (insightError()) {
+        <p class="quick-action-error" role="alert">{{ insightError() }}</p>
+      }
+      @if (dashboard.photoDraft(); as draft) {
+        <section class="dashboard-card photo-card" aria-labelledby="photo-analysis-title">
+          <header>
+            <h2 id="photo-analysis-title" #reviewTitle tabindex="-1">Kiểm tra khẩu phần</h2>
+            <p>
+              Độ tin cậy {{ confidenceLabel(draft.analysis.overallConfidence) }}. Sửa số gram theo
+              lượng thực tế đã ăn.
+            </p>
+            @if (draft.analysis.imageQualityWarning) {
+              <p>{{ draft.analysis.imageQualityWarning }}</p>
+            }
+          </header>
+          <div class="apple-field">
+            <label class="apple-field__label" for="photo-meal-type"
+              >Bữa ăn · {{ draft.date | date: 'dd/MM/yyyy' }}</label
+            >
+            <select
+              id="photo-meal-type"
+              class="apple-field__input"
+              #mealType
+              [value]="draft.mealType"
+              (change)="selectPhotoMeal(mealType.value)"
+              [disabled]="dashboard.photoSaving()"
+            >
+              @for (meal of mealTypes; track meal) {
+                <option [value]="meal">{{ mealLabels[meal] }}</option>
+              }
+            </select>
+          </div>
+          <ul class="photo-card__list">
+            @for (portion of draft.portions; track $index; let i = $index) {
+              <li>
+                <strong>{{ portion.item.name }}</strong>
+                <div class="apple-field">
+                  <label class="apple-field__label" [for]="'photo-grams-' + i"
+                    >Khối lượng (g)</label
+                  >
+                  <input
+                    class="apple-field__input"
+                    type="number"
+                    inputmode="decimal"
+                    min="0"
+                    [max]="maxPhotoGrams"
+                    step="any"
+                    [id]="'photo-grams-' + i"
+                    #weight
+                    [attr.aria-label]="'Khối lượng ' + portion.item.name + ' (g)'"
+                    [value]="isFinite(portion.grams) ? portion.grams : ''"
+                    [disabled]="dashboard.photoSaving()"
+                    [attr.aria-invalid]="!validPhotoGrams(portion.grams)"
+                    [attr.aria-describedby]="'photo-hint-' + i"
+                    (input)="dashboard.setPhotoGrams(i, weight.valueAsNumber)"
+                  />
+                </div>
+                @if (validPhotoGrams(portion.grams)) {
+                  @let n = portionNutrition(portion);
+                  <span [id]="'photo-hint-' + i">
+                    {{ n.calories | number: '1.0-0' }} kcal · Protein
+                    {{ n.protein | number: '1.0-1' }} g · Carbs {{ n.carbs | number: '1.0-1' }} g ·
+                    Fat {{ n.fat | number: '1.0-1' }} g
+                  </span>
+                } @else {
+                  <span class="photo-card__error" [id]="'photo-hint-' + i"
+                    >Nhập khối lượng lớn hơn 0 và tối đa 2.000 g.</span
+                  >
+                }
+                @if (portion.item.warning) {
+                  <span>{{ portion.item.warning }}</span>
+                }
+                @if (portion.item.confidence === 'low') {
+                  <span>Ước tính có độ tin cậy thấp. Hãy đối chiếu với ảnh trước khi lưu.</span>
+                }
+              </li>
+            }
+          </ul>
+        </section>
+      } @else {
+        <button
+          type="button"
+          class="quick-action quick-action--button"
+          [disabled]="dashboard.foodImageLoading() || !!ai.photoIssue()"
+          [attr.aria-label]="
+            dashboard.foodImageLoading()
+              ? 'AI đang phân tích ảnh món ăn'
+              : 'Chụp hoặc chọn ảnh món ăn'
+          "
+          (click)="analyzeMealPhoto()"
+        >
+          <span class="quick-action__icon" aria-hidden="true">
+            <ion-icon name="camera-outline" />
+          </span>
+          <span>
+            <strong>{{
+              dashboard.foodImageLoading() ? 'Đang phân tích ảnh…' : 'Phân tích ảnh món ăn'
+            }}</strong>
+            <small>{{ ai.photoIssue() || 'Chụp hoặc chọn ảnh để gửi tới Groq.' }}</small>
+          </span>
+        </button>
+      }
+      @if (photoError()) {
+        <p class="photo-card__error" role="alert">{{ photoError() }}</p>
+      }
+    </section>
+  }
 </ion-content>
+@if (dashboard.photoDraft()) {
+  <ion-footer class="ion-no-border">
+    <div class="photo-card__actions" role="group" aria-label="Xác nhận khẩu phần từ ảnh">
+      <ion-button fill="clear" (click)="cancelPhoto()" [disabled]="dashboard.photoSaving()"
+        >Hủy</ion-button
+      >
+      <ion-button (click)="savePhoto()" [disabled]="!dashboard.canSavePhoto()">
+        {{ dashboard.photoSaving() ? 'Đang lưu…' : 'Lưu vào nhật ký' }}
+      </ion-button>
+    </div>
+  </ion-footer>
+}

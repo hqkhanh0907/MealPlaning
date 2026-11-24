@@ -14,7 +14,8 @@
  */
 
 import { schema, validate, type ValidationError } from '@angular/forms/signals';
-import type { IngredientEditFormValue } from '../../../features/management/ingredient-edit/ingredient-edit.types';
+import { validateVnName } from './common';
+import type { IngredientEditFormValue } from '../ingredient-edit.types';
 
 const optionalBoundedNonNegative = (
   v: number | null,
@@ -39,16 +40,7 @@ const optionalBoundedNonNegative = (
 };
 
 export const ingredientFormSchema = schema<IngredientEditFormValue>((p) => {
-  validate(p.name, ({ value }) => {
-    const trimmed = value().trim();
-    if (!trimmed) {
-      return { kind: 'required', message: 'Vui lòng nhập tên nguyên liệu' };
-    }
-    if (trimmed.length > 100) {
-      return { kind: 'maxLength', message: 'Tối đa 100 ký tự' };
-    }
-    return null;
-  });
+  validate(p.name, ({ value }) => validateVnName(value(), 'Vui lòng nhập tên nguyên liệu'));
 
   validate(p.category, ({ value }) => {
     if (!value().trim()) {

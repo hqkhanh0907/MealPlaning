@@ -1,0 +1,313 @@
+{
+  "test_date": "2026-11-24",
+  "device": "emulator-5558",
+  "android_api": 36,
+  "dataset": "Synthetic QA profiles only",
+  "baseline_apk_sha256": "53ec67bb6e7f6141ff48c834aab8ed39bb5f24c8ba71b1f6e4517867849abc4e",
+  "final_apk_sha256": "a12d8f87cab020b692f54504df6a1f46df3ad806150bee70a1bb14139684bc02",
+  "before_upgrade": {
+    "profile": [
+      {
+        "height_cm": 170,
+        "weight_kg": 70,
+        "age": 30,
+        "fitness_level": "beginner",
+        "activity_factor": 1.375,
+        "bmr": 1618,
+        "tdee": 2225,
+        "target_calories": 2100,
+        "calorie_target_mode": "manual",
+        "target_protein": 130,
+        "protein_target_mode": "manual"
+      }
+    ],
+    "weights": [
+      {
+        "date": "2026-11-22",
+        "weight_kg": 68,
+        "notes": "fixture-older"
+      }
+    ],
+    "version": [
+      {
+        "user_version": 9
+      }
+    ]
+  },
+  "after_upgrading_and_editing": {
+    "profile": [
+      {
+        "birth_date": "1991-11-25",
+        "height_cm": 170,
+        "weight_kg": 72.5,
+        "age": 34,
+        "fitness_level": "advanced",
+        "activity_factor": 1.375,
+        "bmr": 1623,
+        "tdee": 2232,
+        "target_calories": 2100,
+        "calorie_target_mode": "manual",
+        "target_protein": 130,
+        "protein_target_mode": "manual"
+      }
+    ],
+    "weights": [
+      {
+        "date": "2026-11-22",
+        "weight_kg": 68,
+        "notes": "fixture-older"
+      },
+      {
+        "date": "2026-11-24",
+        "weight_kg": 72.5,
+        "notes": null
+      }
+    ],
+    "version": [
+      {
+        "user_version": 10
+      }
+    ]
+  },
+  "older_profile_birthday_by_android_timezone": {
+    "profile": [
+      {
+        "birth_date": "1991-11-25",
+        "height_cm": 170,
+        "weight_kg": 72.5,
+        "age": 35,
+        "fitness_level": "advanced",
+        "activity_factor": 1.375,
+        "bmr": 1618,
+        "tdee": 2225,
+        "target_calories": 2100,
+        "calorie_target_mode": "manual",
+        "target_protein": 130,
+        "protein_target_mode": "manual"
+      }
+    ],
+    "weights": [
+      {
+        "date": "2026-11-22",
+        "weight_kg": 68,
+        "notes": "fixture-older"
+      },
+      {
+        "date": "2026-11-24",
+        "weight_kg": 72.5,
+        "notes": null
+      }
+    ],
+    "version": [
+      {
+        "user_version": 10
+      }
+    ]
+  },
+  "older_profile_restored_day": {
+    "profile": [
+      {
+        "birth_date": "1991-11-25",
+        "height_cm": 170,
+        "weight_kg": 72.5,
+        "age": 34,
+        "fitness_level": "advanced",
+        "activity_factor": 1.375,
+        "bmr": 1623,
+        "tdee": 2232,
+        "target_calories": 2100,
+        "calorie_target_mode": "manual",
+        "target_protein": 130,
+        "protein_target_mode": "manual"
+      }
+    ],
+    "weights": [
+      {
+        "date": "2026-11-22",
+        "weight_kg": 68,
+        "notes": "fixture-older"
+      },
+      {
+        "date": "2026-11-24",
+        "weight_kg": 72.5,
+        "notes": null
+      }
+    ],
+    "version": [
+      {
+        "user_version": 10
+      }
+    ]
+  },
+  "after_fresh_onboarding": {
+    "profile": [
+      {
+        "birth_date": "1996-11-25",
+        "height_cm": 170,
+        "weight_kg": 70,
+        "age": 29,
+        "fitness_level": "beginner",
+        "activity_factor": 1.375,
+        "bmr": 1623,
+        "tdee": 2232,
+        "target_calories": 2232,
+        "calorie_target_mode": "auto",
+        "target_protein": 112,
+        "protein_target_mode": "auto"
+      }
+    ],
+    "weights": [],
+    "version": [
+      {
+        "user_version": 10
+      }
+    ]
+  },
+  "after_midnight_in_android_foreground": {
+    "profile": [
+      {
+        "birth_date": "1996-11-25",
+        "height_cm": 170,
+        "weight_kg": 70,
+        "age": 30,
+        "fitness_level": "beginner",
+        "activity_factor": 1.375,
+        "bmr": 1618,
+        "tdee": 2225,
+        "target_calories": 2225,
+        "calorie_target_mode": "auto",
+        "target_protein": 112,
+        "protein_target_mode": "auto"
+      }
+    ],
+    "weights": [],
+    "version": [
+      {
+        "user_version": 10
+      }
+    ]
+  },
+  "rapid_timezone_before_timer_fix": {
+    "phases": [
+      {
+        "zone": "Pacific/Kiritimati",
+        "android_time": "2026-11-25T02:54:13+1400",
+        "first": {
+          "elapsed_ms": 347,
+          "webview": [
+            "Wed Nov 25 2026 02:54:13 GMT+1400 (Line Islands Time)",
+            "visible",
+            false
+          ],
+          "age": 29,
+          "target_calories": 2232
+        },
+        "last": {
+          "elapsed_ms": 9961,
+          "webview": [
+            "Wed Nov 25 2026 02:54:23 GMT+1400 (Line Islands Time)",
+            "visible",
+            false
+          ],
+          "age": 29,
+          "target_calories": 2232
+        }
+      }
+    ],
+    "webview_visibility_events": []
+  },
+  "rapid_timezone_after_timer_fix": {
+    "phases": [
+      {
+        "zone": "Pacific/Kiritimati",
+        "android_time": "2026-11-25T02:54:37+1400",
+        "first": {
+          "elapsed_ms": 351,
+          "webview": [
+            "Wed Nov 25 2026 02:54:37 GMT+1400 (Line Islands Time)",
+            "visible",
+            false
+          ],
+          "age": 29,
+          "target_calories": 2232
+        },
+        "last": {
+          "elapsed_ms": 458,
+          "webview": [
+            "Wed Nov 25 2026 02:54:37 GMT+1400 (Line Islands Time)",
+            "visible",
+            true
+          ],
+          "age": 30,
+          "target_calories": 2225
+        }
+      },
+      {
+        "zone": "Asia/Ho_Chi_Minh",
+        "android_time": "2026-11-24T19:54:37+0700",
+        "first": {
+          "elapsed_ms": 329,
+          "webview": [
+            "Tue Nov 24 2026 19:54:37 GMT+0700 (Indochina Time)",
+            "visible",
+            false
+          ],
+          "age": 30,
+          "target_calories": 2225
+        },
+        "last": {
+          "elapsed_ms": 843,
+          "webview": [
+            "Tue Nov 24 2026 19:54:38 GMT+0700 (Indochina Time)",
+            "visible",
+            true
+          ],
+          "age": 29,
+          "target_calories": 2232
+        }
+      }
+    ],
+    "webview_visibility_events": []
+  },
+  "timezone_change_without_app_lifecycle": {
+    "phases": [
+      {
+        "zone": "Pacific/Kiritimati",
+        "android_time": "2026-11-25T02:55:21+1400",
+        "first": {
+          "elapsed_ms": 131,
+          "webview": [
+            "Wed Nov 25 2026 02:55:21 GMT+1400 (Line Islands Time)",
+            "visible",
+            false
+          ],
+          "age": 29,
+          "target_calories": 2232
+        },
+        "last": {
+          "elapsed_ms": 54032,
+          "webview": [
+            "Wed Nov 25 2026 02:56:15 GMT+1400 (Line Islands Time)",
+            "visible",
+            true
+          ],
+          "age": 30,
+          "target_calories": 2225
+        }
+      }
+    ],
+    "webview_visibility_events": []
+  },
+  "notification_permission_recovery": {
+    "received_android_permission": "granted",
+    "pending_ids": [
+      101
+    ],
+    "profile_flags": [
+      1,
+      0,
+      0,
+      0
+    ]
+  }
+}

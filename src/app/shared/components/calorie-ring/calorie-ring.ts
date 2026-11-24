@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { percentOfNutritionTarget } from '../../../core/models/nutrition';
 import { bandColor, type BandClass, type KeyMetric } from '../../../core/utils/band-color';
 
 const VARIANT_LABEL_VI: Record<KeyMetric, string> = {
@@ -23,13 +24,7 @@ export class CalorieRing {
   readonly showCenterLabel = input<boolean>(true);
   readonly variant = input<KeyMetric>('calories');
 
-  /** Percentage clamped [0, 200] per F-03 §2.D2 ring contract. */
-  readonly pct = computed<number>(() => {
-    const t = this.target();
-    if (!Number.isFinite(t) || t <= 0) return 0;
-    const raw = (this.value() / t) * 100;
-    return Math.min(Math.max(raw, 0), 200);
-  });
+  readonly pct = computed(() => percentOfNutritionTarget(this.value(), this.target()) ?? 0);
 
   readonly colorClass = computed<BandClass>(() => bandColor(this.pct(), this.variant()));
 

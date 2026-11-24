@@ -9,6 +9,11 @@ import {
   type WeightLogEntry,
 } from '../repositories/user-profile.repository';
 import { WorkoutRepository } from '../repositories/workout.repository';
+import { DayPlanRepository } from '../repositories/day-plan.repository';
+import { PhotoMealRepository } from '../repositories/photo-meal.repository';
+import type { MealSlotWithDishes, PlannedDishWithEffective } from '../models/meal-plan.types';
+import { buildDailyInsightPrompt } from '../services/ai/prompts/daily-insight.prompt';
+import { buildTrainingPlanPrompt } from '../services/ai/prompts/training-plan.prompt';
 import type { FitnessProgressSummary, WorkoutSessionDetail } from '../models/fitness.types';
 import {
   NutritionQuery,
@@ -58,11 +63,13 @@ const PROFILE: UserProfile = {
 describe('DashboardStore', () => {
   let store: DashboardStore;
   let query: jasmine.SpyObj<NutritionQuery>;
+  let dayPlanRepo: jasmine.SpyObj<DayPlanRepository>;
   let profileRepo: jasmine.SpyObj<UserProfileRepository>;
   let workoutRepo: jasmine.SpyObj<WorkoutRepository>;
   let insightAi: jasmine.SpyObj<InsightAi>;
   let foodImageAi: jasmine.SpyObj<FoodImageAi>;
   let cameraCapture: jasmine.SpyObj<CameraCapture>;
+  let photoMeals: jasmine.SpyObj<PhotoMealRepository>;
   let onlineSignal: WritableSignal<boolean>;
   let profileSignal: WritableSignal<UserProfile | null>;
   let targetsSignal: WritableSignal<NutritionTotals>;
@@ -85,6 +92,8 @@ describe('DashboardStore', () => {
     ]);
     query.dailyTotals.and.resolveTo({ ...ZERO_TOTALS });
     query.loggedTotalsForDates.and.resolveTo([]);
+    dayPlanRepo = jasmine.createSpyObj<DayPlanRepository>('DayPlanRepository', ['findByDate']);
+    dayPlanRepo.findByDate.and.resolveTo(null);
 
     profileRepo = jasmine.createSpyObj<UserProfileRepository>('UserProfileRepository', [
       'getLatestWeightLog',
@@ -125,6 +134,7 @@ describe('DashboardStore', () => {
         },
       ],
     });
+    photoMeals = jasmine.createSpyObj<PhotoMealRepository>('PhotoMealRepository', ['save']);
     cameraCapture = jasmine.createSpyObj<CameraCapture>('CameraCapture', ['captureMealPhoto']);
     cameraCapture.captureMealPhoto.and.resolveTo({
       data: 'base64',
@@ -143,11 +153,13 @@ describe('DashboardStore', () => {
         { provide: ProfileStore, useValue: { profile: profileSignal } },
         { provide: NetworkStore, useValue: { online: onlineSignal } },
         { provide: NutritionQuery, useValue: query },
+        { provide: DayPlanRepository, useValue: dayPlanRepo },
         { provide: UserProfileRepository, useValue: profileRepo },
         { provide: WorkoutRepository, useValue: workoutRepo },
         { provide: InsightAi, useValue: insightAi },
         { provide: FoodImageAi, useValue: foodImageAi },
         { provide: CameraCapture, useValue: cameraCapture },
+        { provide: PhotoMealRepository, useValue: photoMeals },
       ],
     });
 
@@ -199,6 +211,88 @@ describe('DashboardStore', () => {
     expect(requestedDates[0]).toBe('2026-05-09');
     expect(requestedDates).not.toContain('2026-05-10');
     expect(store.nutritionStreakDays()).toBe(2);
+  });
+
+  it('targets the first still-unlogged dish from today’s plan', async () => {
+    const date = '2026-05-10';
+    const now = new Date(`${date}T19:00:00`);
+    const dish: PlannedDishWithEffective = {
+      id: 'dish',
+      meal_slot_id: 'lunch',
+      dish_id: 'recipe',
+      servings: 1,
+      sort_order: 0,
+      is_completed: 0,
+      completed_at: null,
+      calories: null,
+      protein: null,
+      carbs: null,
+      fat: null,
+      fiber: null,
+      created_at: date,
+      dish_name: 'Cơm gà',
+      effective_calories: 500,
+      effective_protein: 30,
+      effective_carbs: 60,
+      effective_fat: 16,
+      effective_fiber: 3,
+    };
+    const lunch: MealSlotWithDishes = {
+      id: 'lunch',
+      day_plan_id: 'plan',
+      meal_type: 'lunch',
+      position: 1,
+      created_at: date,
+      planned_dishes: [dish, { ...dish, id: 'soup', sort_order: 1 }],
+    };
+    dayPlanRepo.findByDate.and.resolveTo({
+      id: 'plan',
+      date,
+      target_calories: 2000,
+      target_protein: 120,
+      created_at: date,
+      updated_at: null,
+      meal_slots: [
+        {
+          ...lunch,
+          id: 'breakfast',
+          meal_type: 'breakfast',
+          position: 0,
+          planned_dishes: [
+            {
+              ...dish,
+              id: 'logged',
+              meal_slot_id: 'breakfast',
+              is_completed: 1,
+              completed_at: date,
+            },
+          ],
+        },
+        lunch,
+      ],
+    });
+
+    await store.refresh(now);
+    expect(dayPlanRepo.findByDate).toHaveBeenCalledWith(date);
+    expect(store.pendingMeal()).toEqual({ date, mealType: 'lunch', plannedDishId: dish.id });
+
+    dayPlanRepo.findByDate.and.resolveTo(null);
+    await store.refresh(now);
+    expect(store.pendingMeal()).toBeNull();
+  });
+
+  it('clears loading after a failed refresh and recovers on retry', async () => {
+    query.dailyTotals.and.rejectWith(new Error('Read failed'));
+
+    await expectAsync(store.refresh()).toBeResolved();
+    expect(store.loading()).toBeFalse();
+    expect(store.refreshFailed()).toBeTrue();
+
+    query.dailyTotals.and.resolveTo({ calories: 500, protein: 30, carbs: 40, fat: 15, fiber: 5 });
+    await store.refresh();
+
+    expect(store.refreshFailed()).toBeFalse();
+    expect(store.roundedCalories()).toBe(500);
   });
 
   it('falls back to profile weight when weight_log is empty', async () => {
@@ -269,6 +363,7 @@ describe('DashboardStore', () => {
       jasmine.objectContaining({
         tone: 'warning',
         title: 'Kế hoạch calo đang vượt mục tiêu',
+        body: 'Các món theo lịch cả ngày tương ứng 125% mục tiêu kcal.',
         ctaRoute: '/tabs/calendar',
       }),
     );
@@ -316,11 +411,60 @@ describe('DashboardStore', () => {
       date: '2026-05-10',
       level: 'beginner',
       totals: store.totals(),
+      logged: store.loggedTotals(),
       targets: targetsSignal(),
       workoutVolumeKg: 3200,
       workoutStreakWeeks: 2,
     });
     expect(store.dailyAiInsight()?.title).toBe('Đúng nhịp');
+  });
+
+  it('discards a late insight when the logged meal changes, and expires a displayed insight', async () => {
+    await store.refresh(new Date('2026-05-10T08:00:00'));
+    await store.generateDailyAiInsight();
+    store.loggedTotals.update((totals) => ({ ...totals, calories: 150 }));
+    expect(store.dailyAiInsight()).toBeNull();
+    const pending = store.generateDailyAiInsight();
+    store.todayIso.set('2026-05-11');
+    await pending;
+    expect(store.dailyAiInsight()).toBeNull();
+  });
+
+  it('preserves fractional volume across weekly totals, last session and both AI prompts', async () => {
+    workoutRepo.progressSummary.and.resolveTo(
+      progressSummary({
+        currentWeekVolume: 642.5,
+        previousWeekVolume: 400,
+        workoutStreakWeeks: 1,
+      }),
+    );
+    workoutRepo.recentSessions.and.resolveTo([workoutSession({ total_volume: 642.5 })]);
+    await store.refresh(new Date('2026-11-24T08:00:00'));
+    expect(store.workoutTitle()).toContain('642,5 kg');
+    expect(store.workoutBody()).toContain('242,5 kg');
+    expect(store.workoutSummary().lastSessionLabel).toContain('642,5 kg');
+    await store.generateDailyAiInsight();
+    const input = insightAi.generateDailyInsight.calls.mostRecent().args[0];
+    expect(input.workoutVolumeKg).toBe(642.5);
+    expect(buildDailyInsightPrompt(input)).toContain('642,5 kg');
+    expect(
+      buildTrainingPlanPrompt({
+        fitnessLevel: 'beginner',
+        goal: 'maintain',
+        exercises: [],
+        weeklyVolumeKg: store.workoutSummary().currentWeekVolume,
+        workoutStreakWeeks: 1,
+      }),
+    ).toContain('642,5 kg');
+  });
+
+  it('recognizes a completed workout with zero external volume this week', async () => {
+    workoutRepo.progressSummary.and.resolveTo(
+      progressSummary({ currentWeekVolume: 0, workoutStreakWeeks: 1 }),
+    );
+    workoutRepo.recentSessions.and.resolveTo([workoutSession({ total_volume: 0 })]);
+    await store.refresh(new Date('2026-11-24T08:00:00'));
+    expect(store.workoutTitle()).toBe('Đã tập trong tuần này');
   });
 
   it('captures and analyzes a meal photo only when online', async () => {
@@ -337,6 +481,38 @@ describe('DashboardStore', () => {
     await expectAsync(store.analyzeMealPhoto()).toBeRejectedWithError(
       'DashboardStore: food image analysis requires network connection.',
     );
+  });
+
+  it('discards an edited portion without writing or refreshing the journal', async () => {
+    await store.analyzeMealPhoto();
+    store.setPhotoGrams(0, 100);
+    store.discardPhoto();
+    expect(store.photoDraft()).toBeNull();
+    expect(await store.savePhoto()).toBeFalse();
+    expect(photoMeals.save).not.toHaveBeenCalled();
+    expect(invalidationTick()).toBe(0);
+  });
+
+  it('retains edits on failure, allows offline saving and ignores a repeated save', async () => {
+    await store.analyzeMealPhoto();
+    const captureId = store.photoDraft()!.captureId;
+    onlineSignal.set(false);
+    store.setPhotoGrams(0, NaN);
+    expect(await store.savePhoto()).toBeFalse();
+    store.setPhotoGrams(0, 100);
+    store.setPhotoMealType('snack');
+    photoMeals.save.and.rejectWith(new Error('disk full'));
+    await expectAsync(store.savePhoto()).toBeRejected();
+    expect(store.photoDraft()?.portions[0].grams).toBe(100);
+    photoMeals.save.and.resolveTo();
+    const saving = store.savePhoto();
+    expect(await store.savePhoto()).toBeFalse();
+    expect(await saving).toBeTrue();
+    const [, mealType, portions, savedId] = photoMeals.save.calls.mostRecent().args;
+    expect([mealType, portions[0].grams, savedId]).toEqual(['snack', 100, captureId]);
+    expect(photoMeals.save).toHaveBeenCalledTimes(2);
+    expect(invalidationTick()).toBe(1);
+    expect(store.photoDraft()).toBeNull();
   });
 });
 

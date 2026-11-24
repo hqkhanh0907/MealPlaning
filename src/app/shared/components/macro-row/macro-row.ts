@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { percentOfNutritionTarget } from '../../../core/models/nutrition';
 import { bandColor, type BandClass, type KeyMetric } from '../../../core/utils/band-color';
 import { CalorieRing } from '../calorie-ring/calorie-ring';
 
@@ -53,9 +54,7 @@ export class MacroRow {
   });
 
   pct(m: MacroValue): number {
-    if (!Number.isFinite(m.target) || m.target <= 0) return 0;
-    const raw = (m.value / m.target) * 100;
-    return Math.min(Math.max(raw, 0), 200);
+    return Math.min(percentOfNutritionTarget(m.value, m.target) ?? 0, 200);
   }
 
   /** Visual fill % capped at 100 (over-target shows full bar + high color band). */
@@ -74,7 +73,14 @@ export class MacroRow {
     return h !== null && h === macro.key;
   }
 
+  valueLabel(data: MacroValue): string {
+    return data.target > 0
+      ? `${data.value}/${data.target} g`
+      : `${data.value} g · chưa đặt mục tiêu`;
+  }
+
   ariaLabel(macro: MacroDescriptor): string {
+    if (macro.data.target <= 0) return `${macro.label} ${this.valueLabel(macro.data)}`;
     return `${macro.label} ${macro.data.value} trên ${macro.data.target}, ${Math.round(this.pct(macro.data))} phần trăm`;
   }
 }

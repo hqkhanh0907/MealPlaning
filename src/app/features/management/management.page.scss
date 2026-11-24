@@ -1,19 +1,140 @@
 .management-shell {
-  /* FAB sits at bottom: calc(96px + safe-area) and is 56px tall.
-     To keep last card's kebab menu free of FAB occlusion:
-     padding-bottom = FAB bottom (96) + FAB height (56) + gap (16) = 168px. */
-  padding: 12px 16px calc(168px + env(safe-area-inset-bottom, 0px));
-  background: var(--bg-page);
+  display: flow-root;
   min-height: 100%;
+  max-width: 720px;
+  margin-inline: auto;
+  padding: var(--space-lg) var(--space-lg) var(--space-2xl);
 }
 
-/* Gap segment → search/filter — fix #5: search bar đứng quá sát segment
-   gây cảm giác "dính". 20px tách bạch rõ ràng giữa control switch tabs
-   và search-and-filter zone. */
-.management-shell app-segmented-control + app-search-toolbar {
-  display: block;
-  margin-top: 20px;
+.management-create {
+  display: grid;
+  gap: var(--space-sm);
+  margin: var(--space-md) 0 var(--space-lg);
+
+  &__trigger,
+  &__option {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-height: 44px;
+    padding: var(--space-sm) var(--space-md);
+    border: 0;
+    border-radius: var(--radius-sm);
+    font: inherit;
+    font-size: var(--font-size-body);
+    font-weight: 600;
+    text-align: start;
+
+    ion-icon {
+      flex-shrink: 0;
+      font-size: var(--font-size-icon-md);
+    }
+  }
+
+  &__trigger {
+    justify-self: start;
+    background: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+  }
+
+  &__options {
+    display: grid;
+    gap: var(--space-xs);
+    padding: var(--space-xs);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+  }
+
+  &__option {
+    background: var(--primary-50);
+    color: var(--primary-700);
+  }
 }
-.management-shell app-segmented-control + .filter-strip {
-  margin-top: 20px;
+
+.management-shell {
+  button:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+  }
+
+  .filter-strip {
+    padding: var(--space-xs);
+    mask-image: none;
+  }
+
+  .filter-chip {
+    min-height: 44px;
+    font-size: var(--font-size-caption);
+    color: var(--text-secondary);
+  }
+
+  .filter-chip--active {
+    background: var(--primary-50);
+    color: var(--primary-700);
+  }
+
+  .card-list {
+    gap: 0;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .item-card {
+    border: 0;
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 0;
+    padding-inline-start: var(--space-xs);
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .item-card__main-action {
+    min-height: 44px;
+  }
+
+  .item-card__heading h3 {
+    overflow-wrap: anywhere;
+  }
+
+  .kebab-button,
+  .result-hint,
+  .state-text {
+    color: var(--text-secondary);
+  }
+
+  .dish-calories {
+    color: var(--primary-700);
+  }
+
+  .badge--source,
+  .badge--source-inline {
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: var(--font-size-caption);
+  }
+}
+
+.management-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+
+  .state-text {
+    margin: 0;
+  }
+
+  button {
+    min-height: 44px;
+    padding: var(--space-sm) var(--space-md);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: var(--primary-50);
+    color: var(--primary-700);
+    font-weight: 600;
+  }
 }

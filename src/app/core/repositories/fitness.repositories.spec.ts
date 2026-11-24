@@ -48,11 +48,12 @@ describe('Fitness repositories', () => {
     expect(legs.length).toBeGreaterThanOrEqual(5);
   });
 
-  it('creates three preset plans and activates Full Body by default', async () => {
+  it('offers the dumbbell template while keeping the three-day default', async () => {
     const plans = await planRepo.ensurePresetPlans();
     const active = await planRepo.getActivePlan();
 
-    expect(plans.map((plan) => plan.type)).toEqual(['full_body', 'upper_lower', 'ppl']);
+    expect(plans.map((plan) => plan.frequency)).toEqual([2, 3, 4, 6]);
+    expect(active?.id).toBe('plan_full_body_3x');
     expect(plans.find((plan) => plan.type === 'ppl')?.frequency).toBe(6);
     expect(active?.type).toBe('full_body');
     expect(active?.training_days).toBe(3);
@@ -188,7 +189,7 @@ describe('Fitness repositories', () => {
     expect(completed?.exercises[0].total_volume).toBe(500);
     expect(progress.currentWeekVolume).toBe(500);
     expect(progress.workoutStreakWeeks).toBe(1);
-    expect(progress.strength[0].estimated_1rm).toBe(117);
+    expect(progress.strength).toEqual([]);
     expect(progress.weeklyAvgWeightKg).toBe(65);
     expect(progress.weightSource).toBe('profile');
   });
@@ -210,6 +211,108 @@ describe('Fitness repositories', () => {
         notes: null,
       }),
     ).toBeRejectedWithError('WorkoutRepository: weight must be between 0 and 500kg.');
+  });
+
+  it('keeps seconds, repetitions, skipped sets and fractional volume distinct after reopening', async () => {
+    await planRepo.ensurePresetPlans();
+    const start = new Date('2026-11-24T08:00:00');
+    const session = await workoutRepo.startFreeSession(start);
+    const squat = await workoutRepo.addExerciseToSession(session.id, 'ex_back_squat');
+    const carry = await workoutRepo.addExerciseToSession(session.id, 'ex_farmer_carry');
+    const set = { weightKg: 32.5, reps: 7, restSeconds: 90, effort: 'easy' as const, notes: null };
+    await workoutRepo.addSet(squat.id, set);
+    await workoutRepo.skipSet(squat.id, 99, 8);
+    await workoutRepo.addSet(squat.id, set);
+    await workoutRepo.addSet(squat.id, { ...set, weightKg: 37.5, reps: 5 });
+    await expectAsync(
+      workoutRepo.addSet(carry.id, { ...set, weightKg: 20, reps: 30 }),
+    ).toBeRejected();
+    await workoutRepo.addSet(carry.id, { ...set, weightKg: 20, reps: 0, durationSeconds: 30 });
+    await workoutRepo.cancelSession(session.id);
+    expect(await workoutRepo.recentSessions()).toEqual([]);
+    await workoutRepo.undoCancel(session.id);
+    expect((await workoutRepo.getActiveSession())?.total_volume).toBe(642.5);
+    await workoutRepo.completeSession(session.id, new Date('2026-11-24T08:05:00'));
+
+    const reopened = new WebDatabase();
+    await reopened.initialize();
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [WorkoutRepository, { provide: Database, useValue: reopened }],
+    });
+    const reader = TestBed.inject(WorkoutRepository);
+    const [history] = await reader.recentSessions();
+    expect(history.training_day_name).toBe('Tập tự do');
+    expect(history.total_volume).toBe(642.5);
+    expect(history.exercises[0].sets.map((s) => s.status)).toEqual([
+      'logged',
+      'skipped',
+      'logged',
+      'logged',
+    ]);
+    expect(history.exercises[1].sets[0]).toEqual(
+      jasmine.objectContaining({ weight_kg: 20, reps: 0, duration_seconds: 30 }),
+    );
+    const progress = await reader.progressSummary(start);
+    expect(progress.currentWeekVolume).toBe(642.5);
+    expect(progress.volumeByMuscle.map((x) => x.volume)).toEqual([642.5]);
+    expect(progress.strength).toEqual([]);
+  });
+
+  it('keeps legacy sets visible and excludes unknown units from all load statistics', async () => {
+    await planRepo.ensurePresetPlans();
+    const date = new Date('2026-11-24T08:00:00');
+    const session = await workoutRepo.startFreeSession(date);
+    const carry = await workoutRepo.addExerciseToSession(session.id, 'ex_farmer_carry');
+    await db.execute(
+      `INSERT INTO workout_set
+         (id, workout_exercise_id, set_number, weight_kg, reps, status, legacy_unit_unknown)
+       VALUES ('old-carry', ?, 1, 20, 45, 'logged', 1)`,
+      [carry.id],
+    );
+    await workoutRepo.completeSession(session.id, date);
+
+    const [saved] = await workoutRepo.recentSessions();
+    expect(saved.exercises[0].sets[0]).toEqual(
+      jasmine.objectContaining({ reps: 45, legacy_unit_unknown: 1 }),
+    );
+    expect(saved.exercises[0].total_volume).toBe(0);
+    expect(saved.total_volume).toBe(0);
+    const progress = await workoutRepo.progressSummary(date);
+    expect(progress.currentWeekVolume).toBe(0);
+    expect(progress.volumeByMuscle).toEqual([]);
+    expect(progress.workoutStreakWeeks).toBe(1);
+  });
+
+  it('captures guided targets and limits strength estimates to supported maximal-effort lifts', async () => {
+    await planRepo.ensurePresetPlans();
+    const day = (await planRepo.getTodayTrainingDay('2026-11-23'))!;
+    const start = new Date('2026-11-23T08:00:00');
+    const session = await workoutRepo.startGuidedSession(day.id, start);
+    const squat = session.exercises.find((ex) => ex.exercise_id === 'ex_back_squat')!;
+    const plank = session.exercises.find((ex) => ex.exercise_id === 'ex_plank')!;
+    expect(squat).toEqual(
+      jasmine.objectContaining({
+        planned_sets: 3,
+        planned_min: 8,
+        planned_max: 10,
+        planned_rest: 120,
+      }),
+    );
+    expect(plank).toEqual(
+      jasmine.objectContaining({ planned_min: 30, planned_max: 45, planned_rest: 60 }),
+    );
+    const set = { weightKg: 60, reps: 5, restSeconds: 90, effort: 'maxed' as const, notes: null };
+    await workoutRepo.addSet(squat.id, set);
+    await workoutRepo.addSet(squat.id, { ...set, weightKg: 90, effort: 'easy' });
+    await workoutRepo.addSet(squat.id, { ...set, weightKg: 150, reps: 11 });
+    const assisted = await workoutRepo.addExerciseToSession(session.id, 'ex_assisted_pull_up');
+    await workoutRepo.addSet(assisted.id, { ...set, weightKg: 100 });
+    await workoutRepo.completeSession(session.id, start);
+    const progress = await workoutRepo.progressSummary(start);
+    expect(progress.strength.map((row) => [row.exercise_id, row.estimated_1rm])).toEqual([
+      ['ex_back_squat', 70],
+    ]);
   });
 
   it('updateSet round-trips weight, reps, rest, effort, notes, and writes updated_at ISO', async () => {
@@ -353,7 +456,7 @@ describe('Fitness repositories', () => {
     const progress = await workoutRepo.progressSummary(new Date('2026-05-11T10:00:00'));
     expect(progress.currentWeekVolume).toBe(400);
     expect(progress.volumeByMuscle.reduce((total, point) => total + point.volume, 0)).toBe(400);
-    expect(progress.strength[0]?.estimated_1rm).toBe(47);
+    expect(progress.strength).toEqual([]);
   });
 
   it('removeExerciseFromSession cascades sets and updates session totals', async () => {

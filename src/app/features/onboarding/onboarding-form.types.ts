@@ -1,11 +1,6 @@
-import { Gender } from '../../core/models/user-profile.types';
+import type { BodyMeasurementsDraft } from '../../core/models/body-measurements';
 
-export interface OnboardingStep2aFormValue {
-  heightCm: number | null;
-  weightKg: number | null;
-  age: number | null;
-  gender: Gender | null;
-}
+export type OnboardingStep2aFormValue = BodyMeasurementsDraft;
 
 export const EMPTY_ONBOARDING_STEP2A_FORM: OnboardingStep2aFormValue = {
   heightCm: null,
