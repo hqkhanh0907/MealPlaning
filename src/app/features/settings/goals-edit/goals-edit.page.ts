@@ -1,3 +1,4 @@
+import { LocalDay } from '../../../core/stores/local-day';
 import { Component, computed, effect, inject, signal, OnInit } from '@angular/core';
 import { SaveAndClose } from '../../../shared/forms/save-and-close';
 import { Location } from '@angular/common';
@@ -16,7 +17,10 @@ import {
 import { addIcons } from 'ionicons';
 import { checkmarkCircle } from 'ionicons/icons';
 import { ProfileStore } from '../../../core/stores/profile.store';
-import { recalcTargets } from '../../../core/services/profile/recalc-targets';
+import {
+  profileCalculationInput,
+  recalcTargets,
+} from '../../../core/services/profile/recalc-targets';
 import {
   manualTargetLimits,
   validManualTarget,
@@ -48,6 +52,7 @@ interface GoalOption {
   ],
 })
 export default class GoalsEditPage implements OnInit {
+  private readonly day = inject(LocalDay);
   private readonly profileStore = inject(ProfileStore);
   private readonly location = inject(Location);
   readonly submission = new SaveAndClose(
@@ -64,8 +69,7 @@ export default class GoalsEditPage implements OnInit {
 
   private readonly proteinMode = signal<'auto' | 'manual'>('auto');
 
-  // Tracks last seen goal so the effect only auto-fills on actual goal CHANGES,
-  // not on the initial load (which would otherwise overwrite stored manual targets).
+  private previousDay = this.day.iso();
   private prevGoal: Goal | null = null;
 
   readonly goalOptions: readonly GoalOption[] = (Object.keys(GOAL_LABELS) as Goal[]).map(
@@ -83,15 +87,16 @@ export default class GoalsEditPage implements OnInit {
 
   constructor() {
     addIcons({ checkmarkCircle });
-    // Auto-suggest calo/protein when goal CHANGES (not on initial run),
-    // unless user has manually edited targets.
     effect(() => {
       const g = this.goal();
       const p = this.profileStore.profile();
       const prev = this.prevGoal;
+      const day = this.day.iso();
+      const sameDay = this.previousDay === day;
+      this.previousDay = day;
       this.prevGoal = g;
-      if (!p || prev === null || prev === g) return;
-      const r = recalcTargets({ ...p, goal: g });
+      if (!p || prev === null || (prev === g && sameDay)) return;
+      const r = recalcTargets(profileCalculationInput({ ...p, goal: g }, this.day.date()));
       if (this.calorieMode() === 'auto') this.calo.set(r.target_calories || null);
       if (this.proteinMode() === 'auto') this.protein.set(r.target_protein || null);
     });
@@ -100,10 +105,6 @@ export default class GoalsEditPage implements OnInit {
   ngOnInit(): void {
     const p = this.profileStore.profile();
     if (!p) return;
-    // Seed prevGoal BEFORE goal.set so the auto-suggest effect treats this as
-    // "no change" and skips recalc. Otherwise stored manual target_calories/
-    // target_protein would be overwritten on every load when persisted goal
-    // differs from the signal default ('maintain').
     this.prevGoal = p.goal;
     this.goal.set(p.goal);
     this.calo.set(p.target_calories || null);
@@ -142,7 +143,7 @@ export default class GoalsEditPage implements OnInit {
   reset(): void {
     const p = this.profileStore.profile();
     if (!p) return;
-    const r = recalcTargets({ ...p, goal: this.goal() });
+    const r = recalcTargets(profileCalculationInput({ ...p, goal: this.goal() }, this.day.date()));
     this.calorieMode.set('auto');
     this.calo.set(r.target_calories || null);
     this.protein.set(r.target_protein || null);

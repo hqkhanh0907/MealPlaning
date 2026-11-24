@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { UserProfile } from '../models/user-profile.model';
 import { UserProfileRepository } from '../repositories/user-profile.repository';
-import { ageOnDate } from '../services/profile/profile-birth-date';
+import { updateMeasurementTargets } from '../services/profile/profile-measurement-update';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileStore {
@@ -16,7 +16,7 @@ export class ProfileStore {
     );
   }
 
-  refreshAge(onDate?: Date): Promise<void> {
+  refreshTargets(onDate?: Date): Promise<void> {
     return this.inOrder(() => this.publish(this.profile(), onDate ?? new Date()));
   }
 
@@ -34,11 +34,13 @@ export class ProfileStore {
   }
 
   private async publish(profile: UserProfile | null, today: Date): Promise<void> {
-    const age = profile?.birth_date ? ageOnDate(profile.birth_date, today) : null;
-    if (age !== null && age !== profile?.age) {
-      await this.repo.update({ age }, today);
-      this.profile.set(await this.repo.getProfile());
-      return;
+    if (profile) {
+      const patch = updateMeasurementTargets(profile, {}, today);
+      if (Object.keys(patch).length) {
+        await this.repo.update(patch, today);
+        this.profile.set(await this.repo.getProfile());
+        return;
+      }
     }
     this.profile.set(profile);
   }

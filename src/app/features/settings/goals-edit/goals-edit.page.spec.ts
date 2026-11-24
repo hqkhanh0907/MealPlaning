@@ -5,6 +5,7 @@ import { provideRouter } from '@angular/router';
 import { ProfileStore } from '../../../core/stores/profile.store';
 import { recalcTargets } from '../../../core/services/profile/recalc-targets';
 import { UserProfile } from '../../../core/models/user-profile.model';
+import { LocalDay } from '../../../core/stores/local-day';
 import GoalsEditPage from './goals-edit.page';
 
 function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
@@ -12,7 +13,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     id: 'p1',
     height_cm: 170,
     weight_kg: 65,
-    age: 28,
+    birth_date: `${new Date().getFullYear() - 28}-01-01`,
     gender: 'male',
     goal: 'maintain',
     fitness_level: 'beginner',
@@ -75,6 +76,21 @@ describe('GoalsEditPage', () => {
     expect(component.goal()).toBe('maintain');
     expect(component.calo()).toBe(2000);
     expect(component.protein()).toBe(120);
+  });
+
+  it('updates the automatic target on a birthday while keeping an unsaved manual edit', async () => {
+    await setup(makeProfile({ birth_date: '1996-11-25', weight_kg: 70, activity_factor: 1.375 }));
+    const day = TestBed.inject(LocalDay);
+    day.iso.set('2026-11-23');
+    fixture.detectChanges();
+    day.iso.set('2026-11-24');
+    fixture.detectChanges();
+    expect(component.calo()).toBe(2232);
+    component.setProtein(130);
+    day.iso.set('2026-11-25');
+    fixture.detectChanges();
+    expect(component.calo()).toBe(2225);
+    expect(component.protein()).toBe(130);
   });
 
   it('does nothing in ngOnInit when profile is null', async () => {

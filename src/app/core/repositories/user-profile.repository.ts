@@ -20,7 +20,6 @@ export interface WeightLogEntry {
 const USER_PROFILE_UPDATE_COLUMNS = new Set<string>([
   'height_cm',
   'weight_kg',
-  'age',
   'birth_date',
   'gender',
   'goal',
@@ -96,21 +95,20 @@ export class UserProfileRepository {
       calorie_target_mode: input.calorie_target_mode ?? 'manual',
       protein_target_mode: input.protein_target_mode ?? 'manual',
     };
-    const data = { ...initial, ...updateMeasurementTargets(initial, { age: input.age }, today) };
+    const data = { ...initial, ...updateMeasurementTargets(initial, {}, today) };
     const id = uuidv4();
     await this.db.execute(
       `INSERT INTO user_profile (
-        id, height_cm, weight_kg, age, gender, goal, fitness_level,
+        id, height_cm, weight_kg, gender, goal, fitness_level,
         activity_factor, bmr, tdee, target_calories, target_protein,
         target_carbs, target_fat, theme,
         notif_morning, notif_lunch, notif_evening, notif_weekly,
         onboarding_completed, calorie_target_mode, protein_target_mode, birth_date
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         data.height_cm,
         data.weight_kg,
-        data.age,
         data.gender,
         data.goal,
         data.fitness_level,
@@ -129,7 +127,7 @@ export class UserProfileRepository {
         data.onboarding_completed,
         data.calorie_target_mode,
         data.protein_target_mode,
-        data.birth_date ?? null,
+        data.birth_date,
       ],
     );
     return (await this.getProfile())!;

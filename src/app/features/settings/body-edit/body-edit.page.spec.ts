@@ -13,7 +13,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     id: 'p1',
     height_cm: 170,
     weight_kg: 65,
-    age: 28,
+    birth_date: `${new Date().getFullYear() - 28}-01-01`,
     gender: 'male',
     goal: 'lose_weight',
     fitness_level: 'beginner',
@@ -76,7 +76,7 @@ describe('BodyEditPage', () => {
     await setup(makeProfile());
     expect(component.height()).toBe(170);
     expect(component.weight()).toBe(65);
-    expect(component.age()).toBe(28);
+    expect(component.birthDate()).toBe(makeProfile().birth_date);
     expect(component.gender()).toBe('male');
   });
 
@@ -112,14 +112,14 @@ describe('BodyEditPage', () => {
 
   it('ageInvalid: 9 invalid, 10 valid, 120 valid, 121 invalid', async () => {
     await setup(makeProfile());
-    component.age.set(9);
-    expect(component.ageInvalid()).toBe(true);
-    component.age.set(10);
-    expect(component.ageInvalid()).toBe(false);
-    component.age.set(120);
-    expect(component.ageInvalid()).toBe(false);
-    component.age.set(121);
-    expect(component.ageInvalid()).toBe(true);
+    component.birthDate.set(`${new Date().getFullYear() - 9}-01-01`);
+    expect(!!component.dateError()).toBe(true);
+    component.birthDate.set(`${new Date().getFullYear() - 10}-01-01`);
+    expect(!!component.dateError()).toBe(false);
+    component.birthDate.set(`${new Date().getFullYear() - 120}-01-01`);
+    expect(!!component.dateError()).toBe(false);
+    component.birthDate.set(`${new Date().getFullYear() - 121}-01-01`);
+    expect(!!component.dateError()).toBe(true);
   });
 
   it('preview returns null when form invalid, recalc result when valid', async () => {
@@ -211,39 +211,36 @@ describe('BodyEditPage', () => {
     await setup(makeProfile());
     const year = new Date().getFullYear() - 24;
     enter('#body-field-birth-date', `${year}-01-01`);
-    const age: HTMLInputElement = fixture.nativeElement.querySelector('#body-field-age');
-    expect(age.readOnly).toBeTrue();
-    expect(age.value).toBe('24');
+    expect(fixture.nativeElement.querySelector('#body-field-age')).toBeNull();
+    expect(fixture.nativeElement.querySelector('#body-field-age-hint').textContent).toContain(
+      '24 tuổi',
+    );
     await component.save();
     expect(profileStore.updateProfile).toHaveBeenCalledOnceWith({ birth_date: `${year}-01-01` });
   });
 
-  it('keeps the actual age when switching from a birthday to manual entry', async () => {
-    const date = `${new Date().getFullYear() - 24}-01-01`;
-    await setup(makeProfile({ birth_date: date, age: 23 }));
-    fixture.nativeElement.querySelector('.clear-date').click();
-    fixture.detectChanges();
-    const age: HTMLInputElement = fixture.nativeElement.querySelector('#body-field-age');
-    expect(age.readOnly).toBeFalse();
-    expect(age.value).toBe('24');
-    enter('#body-field-age', '25');
+  it('keeps the saved date when the user clears the required field', async () => {
+    await setup(makeProfile());
+    enter('#body-field-birth-date', '');
     await component.save();
-    expect(profileStore.updateProfile).toHaveBeenCalledOnceWith({ birth_date: null, age: 25 });
+    expect(component.formInvalid()).toBeTrue();
+    expect(profileStore.updateProfile).not.toHaveBeenCalled();
+    expect(profileSignal()?.birth_date).toBe(makeProfile().birth_date);
   });
 
   it('retains an existing birthday beyond the manual entry limit when editing weight', async () => {
     const date = `${new Date().getFullYear() - 121}-01-01`;
-    await setup(makeProfile({ birth_date: date, age: 121 }));
+    await setup(makeProfile({ birth_date: date }));
     enter('#body-field-weight', '70');
     await component.save();
     expect(profileStore.updateProfile).toHaveBeenCalledOnceWith({ weight_kg: 70 });
     expect(profileSignal()?.birth_date).toBe(date);
   });
 
-  it('blocks empty, fractional and future age entries through the form', async () => {
+  it('blocks empty, malformed and future dates through the form', async () => {
     await setup(makeProfile());
     for (const value of ['', '26.5']) {
-      enter('#body-field-age', value);
+      enter('#body-field-birth-date', value);
       expect(component.formInvalid()).toBeTrue();
       await component.save();
     }

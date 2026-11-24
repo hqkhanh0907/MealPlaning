@@ -1,3 +1,4 @@
+import { LocalDay } from '../../core/stores/local-day';
 import { Component, computed, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { App as CapacitorApp, type BackButtonListenerEvent } from '@capacitor/app';
@@ -39,13 +40,10 @@ import {
   type Goal,
   type GymExperience,
 } from '../../core/models/user-profile.types';
-import { ageOnDate } from '../../core/services/profile/profile-birth-date';
-import {
-  ProfileAgeField,
-  type ProfileAgeInput,
-} from '../../shared/forms/profile-age-field/profile-age-field';
+import { birthDateError } from '../../core/services/profile/profile-birth-date';
+import { BirthDateField } from '../../shared/forms/birth-date-field/birth-date-field';
 import { getActivityFactor } from '../../core/services/profile/energy-targets';
-import { recalcTargets } from '../../core/services/profile/recalc-targets';
+import { profileCalculationInput, recalcTargets } from '../../core/services/profile/recalc-targets';
 import { EMPTY_2B, Step2bErrors, validateStep2b } from './onboarding-validation';
 import { activityLabelLong } from '../../core/services/profile/activity-label';
 
@@ -68,7 +66,7 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
   imports: [
     FormField,
     AppFormField,
-    ProfileAgeField,
+    BirthDateField,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -118,14 +116,16 @@ export default class OnboardingPage {
   protected readonly step2aFormSignal = signal<OnboardingStep2aFormValue>({
     ...EMPTY_ONBOARDING_STEP2A_FORM,
   });
-  protected readonly step2aForm = form(this.step2aFormSignal, onboardingStep2aSchema);
-  readonly birthDate = signal('');
+  private readonly day = inject(LocalDay);
+  protected readonly step2aForm = form(
+    this.step2aFormSignal,
+    onboardingStep2aSchema(this.day.date),
+  );
   readonly genderLabels = GENDER_LABELS;
   readonly goalLabels = GOAL_LABELS;
 
-  onAgeEdit(value: ProfileAgeInput): void {
-    this.birthDate.set(value.birthDate);
-    this.step2aFormSignal.update((body) => ({ ...body, age: value.age }));
+  onBirthDateEdit(birthDate: string): void {
+    this.step2aFormSignal.update((body) => ({ ...body, birthDate }));
   }
 
   /** True after first submit attempt — gates live error rendering. */
@@ -136,7 +136,7 @@ export default class OnboardingPage {
    * or `''` if the form hasn't been submitted yet. Drives both
    * `<app-form-field [errorMessage]>` and the gender segment-control error UI.
    */
-  protected step2aFieldError(field: 'heightCm' | 'weightKg' | 'age' | 'gender'): string {
+  protected step2aFieldError(field: 'heightCm' | 'weightKg' | 'birthDate' | 'gender'): string {
     if (!this.showStep2aErrors()) return '';
     return this.step2aForm[field]().errors()[0]?.message ?? '';
   }
@@ -152,12 +152,7 @@ export default class OnboardingPage {
    */
   protected readonly step2aValid = computed(() => {
     const v = this.step2aFormSignal();
-    return (
-      v.heightCm != null &&
-      v.weightKg != null &&
-      (v.age != null || !!this.birthDate()) &&
-      v.gender != null
-    );
+    return v.heightCm != null && v.weightKg != null && !!v.birthDate && v.gender != null;
   });
 
   // Step 2b — Activity info
@@ -167,16 +162,28 @@ export default class OnboardingPage {
     const body = this.step2aFormSignal();
     const activity = this.activityLevel();
     const goal = this.goal();
-    if (!body.heightCm || !body.weightKg || !body.age || !body.gender || !activity || !goal)
+    if (
+      !body.heightCm ||
+      !body.weightKg ||
+      birthDateError(body.birthDate, this.day.date()) ||
+      !body.gender ||
+      !activity ||
+      !goal
+    )
       return null;
-    return recalcTargets({
-      weight_kg: body.weightKg,
-      height_cm: body.heightCm,
-      age: body.age,
-      gender: body.gender,
-      activity_factor: getActivityFactor(activity),
-      goal,
-    });
+    return recalcTargets(
+      profileCalculationInput(
+        {
+          weight_kg: body.weightKg,
+          height_cm: body.heightCm,
+          birth_date: body.birthDate,
+          gender: body.gender,
+          activity_factor: getActivityFactor(activity),
+          goal,
+        },
+        this.day.date(),
+      ),
+    );
   });
 
   /** Step 2b presence check — both selects picked. */
@@ -265,8 +272,6 @@ export default class OnboardingPage {
 
   async complete(): Promise<void> {
     if (this.saving()) return;
-    const birthDate = this.birthDate();
-    if (birthDate) this.onAgeEdit({ birthDate, age: ageOnDate(birthDate) });
     if (!this.step2aForm().valid()) {
       this.step.set(2);
       this.showStep2aErrors.set(true);
@@ -292,7 +297,6 @@ export default class OnboardingPage {
       const gender = v.gender!;
       const heightCm = v.heightCm!;
       const weightKg = v.weightKg!;
-      const age = v.age!;
       const gym = this.gymExperience()!;
       const activityLevel = this.activityLevel()!;
       const fitnessLevel = deriveFitnessLevel(gym);
@@ -302,8 +306,7 @@ export default class OnboardingPage {
       await this.profileStore.saveOnboardingProfile({
         height_cm: heightCm,
         weight_kg: weightKg,
-        age,
-        birth_date: birthDate || null,
+        birth_date: v.birthDate,
         gender,
         goal,
         fitness_level: fitnessLevel,
@@ -346,12 +349,12 @@ export default class OnboardingPage {
   }
 
   private focusFirstInvalidField2a(): void {
-    type Step2aField = 'heightCm' | 'weightKg' | 'age' | 'gender';
-    const order: Step2aField[] = ['heightCm', 'weightKg', 'age', 'gender'];
+    type Step2aField = 'heightCm' | 'weightKg' | 'birthDate' | 'gender';
+    const order: Step2aField[] = ['heightCm', 'weightKg', 'birthDate', 'gender'];
     const idMap: Record<Step2aField, string> = {
       heightCm: 'err-height',
       weightKg: 'err-weight',
-      age: 'err-age',
+      birthDate: 'err-birth-date',
       gender: 'err-gender',
     };
     const first = order.find((f) => !this.step2aForm[f]().valid());

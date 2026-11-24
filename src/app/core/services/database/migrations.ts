@@ -5,6 +5,7 @@ import {
   buildInitialSchemaMigration,
   buildProteinTargetModeMigration,
   buildProfileBirthDateMigration,
+  buildRequiredBirthDateMigration,
   buildWorkoutSessionStatusMigration,
   buildWorkoutMeasuresMigration,
   buildWorkoutSetStatusMigration,
@@ -35,6 +36,7 @@ export const MIGRATION_REGISTRY: readonly Migration[] = [
   buildWorkoutMeasuresMigration(),
   buildProteinTargetModeMigration(),
   buildProfileBirthDateMigration(),
+  buildRequiredBirthDateMigration(),
 ];
 
 if (MIGRATION_REGISTRY[MIGRATION_REGISTRY.length - 1]?.version !== SCHEMA_VERSION) {

@@ -43,38 +43,39 @@ describe('OnboardingPage body information', () => {
     await fixture.whenStable();
   }
 
-  it('allows the same body limits as Settings without inventing a birthday', async () => {
+  it('allows the same body limits as Settings with a required birthday', async () => {
     const height: HTMLInputElement = fixture.nativeElement.querySelector('#field-height');
     expect([height.min, height.max]).toEqual(['100', '250']);
     input('#field-height', '100');
     input('#field-weight', '300');
-    input('#field-age', '10');
+    const date = `${new Date().getFullYear() - 10}-01-01`;
+    input('#field-birth-date', date);
     click('[aria-label="Giới tính"] [role="radio"]');
     await finish();
     expect(save).toHaveBeenCalledOnceWith(
       jasmine.objectContaining({
         height_cm: 100,
         weight_kg: 300,
-        age: 10,
-        birth_date: null,
+        birth_date: date,
         target_calories: 0,
       }),
     );
   });
 
-  it('shows an inline error for a fractional age, then uses a birthday throughout the wizard', async () => {
+  it('shows an inline error for a future date, then uses a birthday throughout the wizard', async () => {
     input('#field-height', '170');
     input('#field-weight', '65');
-    input('#field-age', '29.5');
+    input('#field-birth-date', '2999-01-01');
     click('[aria-label="Giới tính"] [role="radio"]');
     click('[data-testid="onb-step2-continue"]');
-    expect(fixture.nativeElement.querySelector('#err-age')?.textContent).toContain('số năm tròn');
+    expect(fixture.nativeElement.querySelector('#err-birth-date')?.textContent).toContain(
+      'tương lai',
+    );
     const date = `${new Date().getFullYear() - 29}-01-01`;
     input('#field-birth-date', date);
-    const age: HTMLInputElement = fixture.nativeElement.querySelector('#field-age');
-    expect(age.readOnly).toBeTrue();
-    expect(age.value).toBe('29');
+    expect(fixture.nativeElement.querySelector('#field-age')).toBeNull();
+    expect(fixture.nativeElement.querySelector('#field-age-hint').textContent).toContain('29 tuổi');
     await finish();
-    expect(save).toHaveBeenCalledOnceWith(jasmine.objectContaining({ age: 29, birth_date: date }));
+    expect(save).toHaveBeenCalledOnceWith(jasmine.objectContaining({ birth_date: date }));
   });
 });

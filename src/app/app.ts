@@ -1,3 +1,4 @@
+import { LocalDay } from './core/stores/local-day';
 import { Component, DestroyRef, NgZone, afterNextRender, inject } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { SplashScreen } from '@capacitor/splash-screen';
@@ -30,6 +31,7 @@ export class App {
   private readonly themeService = inject(Theme);
   private readonly notifications = inject(LocalNotifications);
   private readonly zone = inject(NgZone);
+  private readonly localDay = inject(LocalDay);
   private dateTimer?: number;
 
   constructor() {
@@ -76,9 +78,10 @@ export class App {
     const now = new Date();
     const today = localIsoDate(now);
     if (today !== previousDay) {
+      this.localDay.iso.set(today);
       void this.profileStore
-        .refreshAge(now)
-        .catch((err) => console.warn('[App] profile age refresh failed:', err));
+        .refreshTargets(now)
+        .catch((err) => console.warn('[App] profile targets refresh failed:', err));
     }
     const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     // Android can publish a new time zone after the WebView becomes visible.

@@ -11,13 +11,13 @@ describe('ProfileStore', () => {
     id: 'p1',
     height_cm: 170,
     weight_kg: 65,
-    age: 30,
+    birth_date: `${new Date().getFullYear() - 30}-01-01`,
     gender: 'male',
     goal: 'maintain',
     fitness_level: 'beginner',
     activity_factor: 1.55,
-    bmr: 1600,
-    tdee: 2480,
+    bmr: 1568,
+    tdee: 2430,
     target_calories: 2480,
     target_protein: 130,
     target_carbs: null,
@@ -73,7 +73,7 @@ describe('ProfileStore', () => {
       return baseProfile;
     });
 
-    await store.updateProfile({ age: 31 });
+    await store.updateProfile({ birth_date: '1995-01-01' });
 
     expect(callOrder).toEqual(['update', 'getProfile']);
     expect(store.profile()).toEqual(baseProfile);
@@ -104,13 +104,13 @@ describe('ProfileStore', () => {
       const data: Omit<UserProfile, 'id' | 'created_at' | 'updated_at'> = {
         height_cm: 170,
         weight_kg: 65,
-        age: 30,
+        birth_date: `${new Date().getFullYear() - 30}-01-01`,
         gender: 'male',
         goal: 'maintain',
         fitness_level: 'beginner',
         activity_factor: 1.55,
-        bmr: 1600,
-        tdee: 2480,
+        bmr: 1568,
+        tdee: 2430,
         target_calories: 2480,
         target_protein: 130,
         target_carbs: null,
@@ -154,7 +154,7 @@ describe('ProfileStore', () => {
       const err = new Error('update failed');
       repoSpy.update.and.rejectWith(err);
 
-      await expectAsync(store.updateProfile({ age: 31 })).toBeRejectedWith(err);
+      await expectAsync(store.updateProfile({ birth_date: '1995-01-01' })).toBeRejectedWith(err);
 
       expect(repoSpy.getProfile).not.toHaveBeenCalled();
       expect(store.profile()).toEqual(baseProfile);
@@ -166,7 +166,7 @@ describe('ProfileStore', () => {
       repoSpy.update.and.resolveTo();
       repoSpy.getProfile.and.rejectWith(err);
 
-      await expectAsync(store.updateProfile({ age: 31 })).toBeRejectedWith(err);
+      await expectAsync(store.updateProfile({ birth_date: '1995-01-01' })).toBeRejectedWith(err);
 
       expect(store.profile()).toEqual(baseProfile);
     });
