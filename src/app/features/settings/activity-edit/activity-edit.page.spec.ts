@@ -12,7 +12,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     id: 'p1',
     height_cm: 170,
     weight_kg: 65,
-    age: 28,
+    birth_date: `${new Date().getFullYear() - 28}-01-01`,
     gender: 'male',
     goal: 'lose_weight',
     fitness_level: 'beginner',

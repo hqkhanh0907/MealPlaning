@@ -53,13 +53,12 @@
       />
     </app-form-field>
 
-    <app-profile-age-field
+    <app-birth-date-field
       idPrefix="body-field"
-      errorId="err-body-age"
-      [age]="displayedAge()"
+      errorId="err-body-birth-date"
       [birthDate]="birthDate()"
-      [errorMessage]="ageError()"
-      (edited)="onAgeEdit($event)"
+      [errorMessage]="dateError()"
+      (edited)="birthDate.set($event)"
     />
 
     <h3 class="section-caption">Giới tính</h3>

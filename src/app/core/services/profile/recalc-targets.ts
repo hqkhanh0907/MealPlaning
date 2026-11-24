@@ -1,3 +1,4 @@
+import { ageOnDate } from './profile-birth-date';
 import {
   DEFAULT_ACTIVITY_LEVEL,
   calculateBmr,
@@ -53,6 +54,22 @@ export function recalcTargets(i: RecalcInput): RecalcOutput {
     target_calories: target,
     target_protein: i.age >= 18 && protein >= 20 && protein <= 400 ? protein : 0,
     energyNote,
+  };
+}
+
+export function profileCalculationInput(
+  profile: Omit<RecalcInput, 'age'> & Pick<UserProfile, 'birth_date'>,
+  today: Date,
+): RecalcInput {
+  const age = ageOnDate(profile.birth_date, today);
+  if (age === null) throw new Error('Ngày sinh không hợp lệ.');
+  return {
+    weight_kg: profile.weight_kg,
+    height_cm: profile.height_cm,
+    gender: profile.gender,
+    activity_factor: profile.activity_factor,
+    goal: profile.goal,
+    age,
   };
 }
 

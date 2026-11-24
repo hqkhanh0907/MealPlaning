@@ -89,7 +89,7 @@ CREATE TABLE user_profile (
   -- Thông tin cơ bản (Onboarding Bước 2)
   height_cm         REAL NOT NULL,                -- Chiều cao (cm)
   weight_kg         REAL NOT NULL,                -- Cân nặng (kg)
-  age               INTEGER NOT NULL,             -- Tuổi
+  birth_date        TEXT NOT NULL,                -- Ngày sinh theo lịch (YYYY-MM-DD)
   gender            TEXT NOT NULL CHECK (gender IN ('male', 'female')),
   
   -- Mục tiêu (Onboarding Bước 1)

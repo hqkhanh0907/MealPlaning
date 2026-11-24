@@ -1,3 +1,4 @@
+import { bodyMeasurementError } from '../../models/body-measurements';
 import { parseLocalDate } from '../../utils/local-date';
 
 export function ageOnDate(birthDate: string, onDate = new Date()): number | null {
@@ -13,4 +14,11 @@ export function ageOnDate(birthDate: string, onDate = new Date()): number | null
   const beforeBirthday =
     onDate.getMonth() < month || (onDate.getMonth() === month && onDate.getDate() < anniversaryDay);
   return year - birth.getFullYear() - Number(beforeBirthday);
+}
+
+export function birthDateError(value: string, onDate = new Date()): string | null {
+  if (!value) return 'Vui lòng nhập ngày sinh.';
+  const age = ageOnDate(value, onDate);
+  if (age === null) return 'Ngày sinh cần hợp lệ và không ở tương lai.';
+  return bodyMeasurementError('age', age);
 }

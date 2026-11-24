@@ -550,7 +550,7 @@ describe('Fitness repositories', () => {
   async function seedProfile(): Promise<void> {
     await db.execute(
       `INSERT INTO user_profile (
-         id, height_cm, weight_kg, age, gender, goal, fitness_level,
+         id, height_cm, weight_kg, birth_date, gender, goal, fitness_level,
          activity_factor, bmr, tdee, target_calories, target_protein,
          target_carbs, target_fat, theme, onboarding_completed
        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -558,7 +558,7 @@ describe('Fitness repositories', () => {
         'profile-1',
         170,
         65,
-        30,
+        '1996-01-01',
         'male',
         'maintain',
         'beginner',

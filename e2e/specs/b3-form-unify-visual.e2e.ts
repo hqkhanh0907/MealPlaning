@@ -10,6 +10,7 @@
  */
 import { browser } from '@wdio/globals';
 import {
+  chooseBirthYear,
   clearAppData,
   forceStop,
   launchApp,
@@ -36,7 +37,7 @@ describe('B3 — Settings forms render after floating-label normalize', () => {
     await waitForText('Chiều cao', 15_000);
     await typeByResourceId('field-height', '170');
     await typeByResourceId('field-weight', '65');
-    await typeByResourceId('field-age', '30');
+    await chooseBirthYear(1996);
     await tapByText('Nam');
     await tapByText('Tiếp tục');
 

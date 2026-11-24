@@ -110,6 +110,25 @@ export async function typeByResourceId(
   adb('shell', 'input', 'text', text);
 }
 
+export async function chooseBirthYear(year: number): Promise<string> {
+  if (await browser.isKeyboardShown()) await browser.hideKeyboard();
+  const field = await browser.$('android=new UiSelector().resourceId("field-birth-date")');
+  await field.click();
+  await (await browser.$('id=android:id/date_picker_header_year')).click();
+  const list = await browser.$('id=android:id/date_picker_year_picker');
+  const item = await browser.$(`android=new UiSelector().resourceId("android:id/text1").text("${year}")`);
+  await browser.waitUntil(async () => {
+    if (await item.isExisting()) return true;
+    await browser.execute('mobile: scrollGesture', {
+      elementId: list.elementId, direction: 'up', percent: 0.85,
+    });
+    return false;
+  }, {timeout: 30_000});
+  await item.click();
+  await (await browser.$('id=android:id/button1')).click();
+  return `${year}-${adb('shell', 'date', '+%m-%d').trim()}`;
+}
+
 /**
  * @deprecated Prefer `typeByResourceId` — ion-input EditTexts trip
  * ACTION_SET_PROGRESS when WDIO's setValue() is used.

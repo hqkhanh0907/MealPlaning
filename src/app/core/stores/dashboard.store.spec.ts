@@ -39,7 +39,7 @@ const PROFILE: UserProfile = {
   id: 'profile-1',
   height_cm: 170,
   weight_kg: 65,
-  age: 30,
+  birth_date: `${new Date().getFullYear() - 30}-01-01`,
   gender: 'male',
   goal: 'maintain',
   fitness_level: 'beginner',

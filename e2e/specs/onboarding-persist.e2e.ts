@@ -13,14 +13,14 @@
  *
  * Default seed (matches `references/emulator-fast-qa.md` §2):
  *   Goal: Giảm cân
- *   Body: 170 cm / 60 kg / 30 yo / Nam
+ *   Body: 170 cm / 60 kg / born in 1996 / Nam
  *   Activity: Ít vận động
  *   Gym: Chưa bao giờ
  */
 import { browser } from '@wdio/globals';
 import * as assert from 'node:assert/strict';
 import {
-  adb,
+  chooseBirthYear,
   clearAppData,
   forceStop,
   launchApp,
@@ -55,14 +55,12 @@ describe('HealthMate AI — onboarding persists across restart', function () {
     await tapByText('Giảm cân');
     await tapByText('Tiếp tục');
 
-    // ── Step 2: Body info (height/weight/age + gender) ────────────────
+    // ── Step 2: Body info (height/weight/birth date + gender) ────────────────
     await waitForText('Chiều cao', 15_000);
     await snapshot(RUN, '02-step2-body-empty');
     await typeByResourceId('field-height', '170');
     await typeByResourceId('field-weight', '60');
-    await typeByResourceId('field-age', '30');
-    // Hide the soft keyboard so the Tiếp tục button is reachable.
-    adb('shell', 'input', 'keyevent', '4');
+    const birthDate = await chooseBirthYear(1996);
     await browser.pause(500);
     await tapByText('Nam');
     await snapshot(RUN, '03-step2-body-filled');
@@ -95,7 +93,8 @@ describe('HealthMate AI — onboarding persists across restart', function () {
     const p = profiles[0];
     assert.equal(p['height_cm'], 170);
     assert.equal(p['weight_kg'], 60);
-    assert.equal(p['age'], 30);
+    assert.equal(p['birth_date'], birthDate);
+    assert.equal('age' in p, false);
 
     // onboarding_completed flag — column name verified via schema dump
     // (see Story 2.6 collapsed v1 schema). If this assertion fails after

@@ -153,14 +153,12 @@
           />
         </app-form-field>
 
-        <app-profile-age-field
+        <app-birth-date-field
           idPrefix="field"
-          ageTestId="onb-age"
-          errorId="err-age"
-          [age]="step2aFormSignal().age"
-          [birthDate]="birthDate()"
-          [errorMessage]="step2aFieldError('age')"
-          (edited)="onAgeEdit($event)"
+          errorId="err-birth-date"
+          [birthDate]="step2aFormSignal().birthDate"
+          [errorMessage]="step2aFieldError('birthDate')"
+          (edited)="onBirthDateEdit($event)"
         />
 
         <span class="section-label segment-label" [class.invalid]="step2aFieldError('gender')"

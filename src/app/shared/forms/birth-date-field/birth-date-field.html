@@ -1,0 +1,26 @@
+<app-form-field
+  label="Ngày sinh"
+  [inputId]="idPrefix() + '-birth-date'"
+  [invalid]="!!visibleError()"
+  [errorMessage]="visibleError() || ''"
+  [errorId]="errorId()"
+>
+  <input
+    #field
+    class="input-native"
+    type="date"
+    required
+    [id]="idPrefix() + '-birth-date'"
+    [max]="day.iso()"
+    [value]="birthDate()"
+    (blur)="touched.set(true)"
+    (input)="edited.emit(field.value)"
+    [attr.aria-invalid]="visibleError() ? 'true' : null"
+    [attr.aria-describedby]="
+      visibleError() ? errorId() : age() !== null ? idPrefix() + '-age-hint' : null
+    "
+  />
+</app-form-field>
+@if (!visibleError() && age() !== null) {
+  <p [id]="idPrefix() + '-age-hint'">{{ age() }} tuổi</p>
+}

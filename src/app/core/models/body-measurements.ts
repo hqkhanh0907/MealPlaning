@@ -3,7 +3,7 @@ import { GENDER_LABELS, type Gender } from './user-profile.types';
 export interface BodyMeasurementsDraft {
   heightCm: number | null;
   weightKg: number | null;
-  age: number | null;
+  birthDate: string;
   gender: Gender | null;
 }
 

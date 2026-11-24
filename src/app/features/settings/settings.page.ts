@@ -1,3 +1,5 @@
+import { LocalDay } from '../../core/stores/local-day';
+import { ageOnDate } from '../../core/services/profile/profile-birth-date';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import {
@@ -62,6 +64,7 @@ import { environment } from '../../../environments/environment';
   ],
 })
 export default class SettingsPage {
+  private readonly day = inject(LocalDay);
   private readonly profileStore = inject(ProfileStore);
   private readonly notifications = inject(LocalNotifications);
   private readonly toastCtrl = inject(ToastController);
@@ -71,7 +74,7 @@ export default class SettingsPage {
   readonly bodySummary = computed(() => {
     const p = this.profile();
     if (!p) return '';
-    return `${p.height_cm}cm · ${p.weight_kg}kg · ${p.age} tuổi · ${GENDER_LABELS[p.gender]}`;
+    return `${p.height_cm}cm · ${p.weight_kg}kg · ${ageOnDate(p.birth_date, this.day.date())} tuổi · ${GENDER_LABELS[p.gender]}`;
   });
 
   readonly goalSummary = computed(() => {

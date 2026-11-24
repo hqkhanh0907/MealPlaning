@@ -18,7 +18,7 @@ describe('NutritionStore', () => {
       id: 'p1',
       height_cm: 170,
       weight_kg: 70,
-      age: 30,
+      birth_date: `${new Date().getFullYear() - 30}-01-01`,
       gender: 'male',
       goal: 'gain_muscle',
       fitness_level: 'intermediate',

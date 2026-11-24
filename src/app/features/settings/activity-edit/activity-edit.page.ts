@@ -1,3 +1,4 @@
+import { LocalDay } from '../../../core/stores/local-day';
 import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { SaveAndClose } from '../../../shared/forms/save-and-close';
 import { Location } from '@angular/common';
@@ -18,7 +19,10 @@ import {
   IonList,
 } from '@ionic/angular/standalone';
 import { ProfileStore } from '../../../core/stores/profile.store';
-import { recalcTargets } from '../../../core/services/profile/recalc-targets';
+import {
+  profileCalculationInput,
+  recalcTargets,
+} from '../../../core/services/profile/recalc-targets';
 import { activityLabelShort } from '../../../core/services/profile/activity-label';
 import {
   DEFAULT_ACTIVITY_LEVEL,
@@ -72,6 +76,7 @@ const ACTIVITY_DESCRIPTIONS: Readonly<Record<ActivityLevel, string>> = {
   ],
 })
 export default class ActivityEditPage implements OnInit {
+  private readonly day = inject(LocalDay);
   private readonly profileStore = inject(ProfileStore);
   private readonly location = inject(Location);
   readonly submission = new SaveAndClose(
@@ -100,7 +105,9 @@ export default class ActivityEditPage implements OnInit {
   readonly preview = computed(() => {
     const p = this.profileStore.profile();
     if (!p) return null;
-    return recalcTargets({ ...p, activity_factor: this.factor() });
+    return recalcTargets(
+      profileCalculationInput({ ...p, activity_factor: this.factor() }, this.day.date()),
+    );
   });
 
   readonly activeLabel = computed(

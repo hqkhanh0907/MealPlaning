@@ -8,7 +8,7 @@ import { onboardingStep2aSchema } from './onboarding-step2a-form.schema';
 const baseValue = (overrides: Partial<BodyMeasurementsDraft> = {}): BodyMeasurementsDraft => ({
   heightCm: 170,
   weightKg: 65,
-  age: 30,
+  birthDate: '1996-01-01',
   gender: 'male',
   ...overrides,
 });
@@ -16,7 +16,10 @@ const baseValue = (overrides: Partial<BodyMeasurementsDraft> = {}): BodyMeasurem
 const buildForm = (initial: BodyMeasurementsDraft): FieldTree<BodyMeasurementsDraft> => {
   return TestBed.runInInjectionContext(() => {
     const model = signal(initial);
-    return form(model, onboardingStep2aSchema);
+    return form(
+      model,
+      onboardingStep2aSchema(() => new Date()),
+    );
   });
 };
 
@@ -77,16 +80,16 @@ describe('onboardingStep2aSchema', () => {
 
   it('flags age out of 10-120 range', () => {
     expect(
-      buildForm(baseValue({ age: 9 }))
-        .age()
+      buildForm(baseValue({ birthDate: `${new Date().getFullYear() - 9}-01-01` }))
+        .birthDate()
         .errors()
-        .some((e) => e.kind === 'range'),
+        .some((e) => e.kind === 'date'),
     ).toBeTrue();
     expect(
-      buildForm(baseValue({ age: 121 }))
-        .age()
+      buildForm(baseValue({ birthDate: `${new Date().getFullYear() - 121}-01-01` }))
+        .birthDate()
         .errors()
-        .some((e) => e.kind === 'range'),
+        .some((e) => e.kind === 'date'),
     ).toBeTrue();
   });
 
