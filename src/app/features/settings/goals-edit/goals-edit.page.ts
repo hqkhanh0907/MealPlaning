@@ -72,6 +72,8 @@ export default class GoalsEditPage implements OnInit {
   private previousDay = this.day.iso();
   private prevGoal: Goal | null = null;
 
+  readonly hasBirthDate = computed(() => !!this.profileStore.profile()?.birth_date);
+
   readonly goalOptions: readonly GoalOption[] = (Object.keys(GOAL_LABELS) as Goal[]).map(
     (value) => ({ value, label: GOAL_LABELS[value] }),
   );
@@ -95,7 +97,7 @@ export default class GoalsEditPage implements OnInit {
       const sameDay = this.previousDay === day;
       this.previousDay = day;
       this.prevGoal = g;
-      if (!p || prev === null || (prev === g && sameDay)) return;
+      if (!p?.birth_date || prev === null || (prev === g && sameDay)) return;
       const r = recalcTargets(profileCalculationInput({ ...p, goal: g }, this.day.date()));
       if (this.calorieMode() === 'auto') this.calo.set(r.target_calories || null);
       if (this.proteinMode() === 'auto') this.protein.set(r.target_protein || null);
@@ -142,7 +144,7 @@ export default class GoalsEditPage implements OnInit {
 
   reset(): void {
     const p = this.profileStore.profile();
-    if (!p) return;
+    if (!p?.birth_date) return;
     const r = recalcTargets(profileCalculationInput({ ...p, goal: this.goal() }, this.day.date()));
     this.calorieMode.set('auto');
     this.calo.set(r.target_calories || null);

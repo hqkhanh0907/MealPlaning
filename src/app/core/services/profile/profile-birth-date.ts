@@ -1,7 +1,8 @@
 import { bodyMeasurementError } from '../../models/body-measurements';
 import { parseLocalDate } from '../../utils/local-date';
 
-export function ageOnDate(birthDate: string, onDate = new Date()): number | null {
+export function ageOnDate(birthDate: string | null, onDate = new Date()): number | null {
+  if (!birthDate) return null;
   const birth = parseLocalDate(birthDate);
   if (!Number.isFinite(birth.getTime()) || !Number.isFinite(onDate.getTime()) || birth > onDate) {
     return null;

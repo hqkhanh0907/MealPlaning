@@ -104,7 +104,7 @@ export default class ActivityEditPage implements OnInit {
 
   readonly preview = computed(() => {
     const p = this.profileStore.profile();
-    if (!p) return null;
+    if (!p?.birth_date) return null;
     return recalcTargets(
       profileCalculationInput({ ...p, activity_factor: this.factor() }, this.day.date()),
     );
