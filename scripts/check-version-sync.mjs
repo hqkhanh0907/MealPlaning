@@ -16,9 +16,18 @@ import path from 'node:path';
 import url from 'node:url';
 
 const ROOT = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), '..');
+const androidDir = path.join(ROOT, 'android');
+
+if (
+  process.argv.includes('--if-android-present') &&
+  !fs.lstatSync(androidDir, { throwIfNoEntry: false })
+) {
+  console.log('Version sync guard skipped: android directory is absent.');
+  process.exit(0);
+}
 
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
-const gradle = fs.readFileSync(path.join(ROOT, 'android/app/build.gradle'), 'utf8');
+const gradle = fs.readFileSync(path.join(androidDir, 'app/build.gradle'), 'utf8');
 
 const versionNameMatch = gradle.match(/versionName\s+"([^"]+)"/);
 if (!versionNameMatch) {

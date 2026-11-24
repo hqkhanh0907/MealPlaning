@@ -12,7 +12,7 @@
     "start": "ng serve",
     "prebuild": "node scripts/prepare-groq-config.mjs && npm run obfuscate:key",
     "build": "npm run check:guards && ng build",
-    "check:guards": "npm run check:form-pattern && npm run check:pc1 && npm run check:style-2025 && npm run check:design-tokens && npm run check:css-vars && npm run check:macro-naming && npm run check:version-sync && npm run check:status-ssot && npm run check:no-dark-mode && npm run check:story-scope && npm run check:repo-columns && npm run check:no-box-shadow && npm run check:no-weight-500 && npm run check:no-segment-control && npm run check:apple-input-pattern && npm run check:tab-bar-pattern && npm run check:inter-font",
+    "check:guards": "npm run check:form-pattern && npm run check:pc1 && npm run check:style-2025 && npm run check:design-tokens && npm run check:css-vars && npm run check:macro-naming && npm run check:version-sync -- --if-android-present && npm run check:status-ssot && npm run check:no-dark-mode && npm run check:story-scope && npm run check:repo-columns && npm run check:no-box-shadow && npm run check:no-weight-500 && npm run check:no-segment-control && npm run check:apple-input-pattern && npm run check:tab-bar-pattern && npm run check:inter-font",
     "check:no-box-shadow": "node scripts/check-no-box-shadow.mjs",
     "check:no-weight-500": "node scripts/check-no-weight-500.mjs",
     "check:no-segment-control": "node scripts/check-no-segment-control.mjs",
