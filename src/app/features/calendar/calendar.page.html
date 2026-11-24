@@ -50,7 +50,12 @@
           </button>
         </nav>
       </header>
-      <button type="button" class="week-view__copy-btn" (click)="onCopyPreviousWeek()">
+      <button
+        type="button"
+        class="week-view__copy-btn"
+        [disabled]="copyingPreviousWeek()"
+        (click)="onCopyPreviousWeek()"
+      >
         <ion-icon name="copy-outline" aria-hidden="true" />
         <span>Sao chép tuần trước</span>
       </button>
@@ -110,6 +115,16 @@
     </div>
   }
 </ion-content>
+
+<app-confirm-dialog
+  [isOpen]="copyWeekConfirmationOpen()"
+  title="Sao chép tuần trước?"
+  message="Món chưa ăn ở các ngày được sao chép sẽ bị thay thế. Món đã ăn được giữ nguyên."
+  cancelLabel="Hủy"
+  confirmLabel="Sao chép"
+  (cancelled)="onCancelCopyPreviousWeek()"
+  (confirmed)="onConfirmCopyPreviousWeek()"
+/>
 
 <app-confirm-eat-modal
   [isOpen]="confirmModalOpen()"

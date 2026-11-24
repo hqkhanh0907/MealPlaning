@@ -89,18 +89,7 @@ export interface WeekDayTotal {
   hasPlan: boolean; // ≥1 dish (planned or logged) exists for this day
 }
 
-/**
- * Story 3.7 undo flow snapshot — minimal fields to recreate the dish via
- * `addToSlot` (+ `markCompleted` if was logged). Excludes id/sort_order
- * because both are auto-generated on re-insert (new uuid + MAX+1 sort).
- */
-export interface DeletedDishSnapshot {
-  meal_slot_id: string;
-  dish_id: string;
-  dish_name: string;
-  servings: number;
-  is_completed: 0 | 1;
-}
+export type DeletedDishSnapshot = Omit<PlannedDish, 'id' | 'sort_order' | 'created_at'>;
 
 export type WeekDayStatus =
   | 'no-plan'

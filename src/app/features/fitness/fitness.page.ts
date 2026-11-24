@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import {
   IonButton,
   IonButtons,
@@ -33,9 +33,10 @@ import {
 } from 'ionicons/icons';
 import { FitnessStore } from '../../core/stores/fitness.store';
 import { RestTimer } from './components/rest-timer/rest-timer';
+import { PlanEditor } from './components/plan-editor/plan-editor';
 import { ExercisePickerSheet } from '../../shared/components/exercise-picker-sheet/exercise-picker-sheet';
 import { WorkoutSummaryModal } from '../../shared/components/workout-summary-modal/workout-summary-modal';
-import type { WorkoutEffort } from '../../core/models/fitness.types';
+import type { ActiveTrainingPlan, WorkoutEffort } from '../../core/models/fitness.types';
 
 const EFFORT_LABELS: Record<WorkoutEffort, string> = {
   easy: 'Dễ',
@@ -51,6 +52,7 @@ const EFFORT_LABELS: Record<WorkoutEffort, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RestTimer,
+    PlanEditor,
     ExercisePickerSheet,
     WorkoutSummaryModal,
     RouterLink,
@@ -81,7 +83,7 @@ export default class FitnessPage {
       flameOutline,
       pulseOutline,
       repeatOutline,
-  playSkipForwardOutline,
+      playSkipForwardOutline,
       settingsOutline,
       sparklesOutline,
       statsChartOutline,
@@ -104,6 +106,11 @@ export default class FitnessPage {
    * grid + AI callout in the same card (no nav, Apple HIG: stay-in-place).
    */
   readonly switchPlanOpen = signal(false);
+  protected readonly planEditorSource = signal<ActiveTrainingPlan | null>(null);
+  protected readonly selectedPlanDayId = signal<string | null>(null);
+  protected readonly previewPlanDay = computed(() =>
+    this.fitness.activePlan()?.days.find((day) => day.id === this.selectedPlanDayId()),
+  );
 
   openPicker(): void {
     this.pickerOpen.set(true);
@@ -158,11 +165,10 @@ export default class FitnessPage {
     return `${Math.max(0, Math.min(100, Math.round((value / max) * 100)))}%`;
   }
 
-  /** Destructive: discard the in-progress workout entirely. */
   async confirmCancelSession(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Hủy buổi tập?',
-      message: 'Mọi set đã ghi trong buổi này sẽ bị xóa. Hành động không thể hoàn tác.',
+      message: 'Buổi này sẽ dừng. Bạn có thể hoàn tác ngay sau khi hủy.',
       buttons: [
         { text: 'Giữ lại', role: 'cancel' },
         {

@@ -33,7 +33,7 @@ Tài liệu này tập trung các invariant nghiệp vụ mà mọi tầng (UI, 
 ### RULE-DISH-TOTAL-04: Ingredient nutrition thay đổi → dish total auto-cập nhật
 
 - User sửa `ingredient.calories` → mọi dish dùng ingredient đó tự cập nhật total khi query VIEW. Không cần migration.
-- Trade-off: meal_log lịch sử cũng cập nhật theo. Phase 1 chấp nhận hiện tượng này (xem RULE-DISH-INGREDIENT-GRAM-04).
+- Món dự kiến cập nhật theo công thức mới. Món đã ăn giữ số dinh dưỡng đã ghi (xem RULE-DI-GRAM-04).
 
 ---
 
@@ -82,19 +82,19 @@ Tài liệu này tập trung các invariant nghiệp vụ mà mọi tầng (UI, 
 | `is_completed` | Mode | Nguồn nutrition | Khi user sửa recipe |
 |---|---|---|---|
 | `0` (kế hoạch chưa ăn) | **Realtime (RT)** | `dish_with_totals.total_* × servings` (JOIN VIEW) | Plan cập nhật ngay theo recipe mới |
-| `1` (đã ăn / đã log) | **Snapshot (SNAP)** | `planned_dish.calories/protein/carbs/fat` (4 cột frozen) | Nhật ký giữ nguyên, không ảnh hưởng |
+| `1` (đã ăn / đã log) | **Snapshot (SNAP)** | `planned_dish.calories/protein/carbs/fat/fiber` tại lúc ghi món đã ăn | Nhật ký giữ nguyên |
 
 ### Sub-rules
 
 | Rule | Mô tả |
 |------|-------|
-| RT-01 | Khi `is_completed=0`, 4 cột `calories/protein/carbs/fat` của `planned_dish` **phải là NULL** (DB CHECK constraint enforce). Mọi UI/repo query effective nutrition phải dùng pattern `CASE WHEN is_completed=1 THEN calories ELSE dwt.total_calories * servings END`. |
-| RT-02 | Khi user thêm dish vào meal_slot (insert plan), repo set `is_completed=0` + 4 cột nutrition = NULL. Không tính snapshot ngay. |
-| SNAP-01 | Khi user flip `is_completed` từ 0 → 1 (mark "Đã ăn"), repo **bắt buộc** snapshot 4 cột nutrition từ `dish_with_totals.total_* × servings` tại thời điểm flip. Set `completed_at = datetime('now')`. |
-| SNAP-02 | Khi `is_completed=1`, 4 cột nutrition **phải NOT NULL** (DB CHECK constraint enforce). UI hiển thị badge "🔒 Đã log" để user biết số liệu đã khoá. |
+| RT-01 | Khi `is_completed=0`, `calories/protein/carbs/fat/fiber` của `planned_dish` đều là NULL. Đọc dinh dưỡng theo `CASE WHEN is_completed=1 THEN calories ELSE dwt.total_calories * servings END`. |
+| RT-02 | Khi thêm món dự kiến, đặt `is_completed=0` và để các cột dinh dưỡng ở NULL. |
+| SNAP-01 | Khi ghi món đã ăn, lưu năm giá trị từ `dish_with_totals.total_* × servings`. Đặt `completed_at = datetime('now')`. |
+| SNAP-02 | Bữa đã ăn có calo, Protein, Carbs và Fat. Cho phép thiếu Fiber ở dữ liệu cũ. |
 | SNAP-03 | Khi user **edit recipe** (sửa `ingredient.calories` hoặc `dish_ingredient.gram_weight`), `planned_dish` với `is_completed=1` **không bị ảnh hưởng**. Báo cáo tuần/tháng vẫn đúng với bằng chứng đã ăn. |
 | SNAP-04 | Khi user **edit servings** trên `planned_dish` có `is_completed=1`, snapshot được **recompute** từ recipe HIỆN TẠI × servings mới. Trade-off: ưu tiên servings mới × recipe hiện tại, không cố giữ recipe cũ. UI nên warn nếu recipe đã đổi sau khi log. |
-| SNAP-05 | Khi user flip `is_completed` từ 1 → 0 (bỏ đánh dấu đã ăn / undo log), repo **phải clear** 4 cột nutrition về NULL + set `completed_at = NULL`. Quay về mode RT. |
+| SNAP-05 | Khi bỏ đánh dấu đã ăn, đặt các cột dinh dưỡng và `completed_at` về NULL. Món trở về trạng thái dự kiến. |
 | DEL-01 | Khi user xoá `planned_dish` (unplan / undo log), record bị xoá hẳn — không soft-delete. Cascade từ `meal_slot` (ON DELETE CASCADE). |
 | DEL-02 | Dish có `planned_dish` (bất kỳ mode) không xoá được — `ON DELETE RESTRICT` từ `planned_dish.dish_id → dish.id`. UI phải block + hiện thông báo "Món này có trong N bữa đã plan/ăn".  |
 
@@ -106,11 +106,28 @@ Tài liệu này tập trung các invariant nghiệp vụ mà mọi tầng (UI, 
 
 ### Trade-off đã chấp nhận
 
-- Schema có 4 cột nullable + 1 CHECK constraint phức tạp (so với A: 4 cột NOT NULL, hoặc B: 0 cột).
+- Schema có các cột dinh dưỡng nullable và một điều kiện CHECK theo `is_completed`.
 - Repo logic 3 path: insert plan, mark completed (SNAP-01), edit servings (SNAP-04 sub-case logged) — vs 1 path nếu chọn A hoặc B.
 - Test surface lớn: ~15-20 unit test repo (so với ~5-7 cho A/B) × 2 backend (sql.js + capacitor-community-sqlite).
 - UI complexity: mỗi `planned_dish` card có 2 visual state (planned vs logged) → mockup count ~10 file (so với ~6 nếu A/B).
 - Đổi lại: đáp ứng đúng user mental model "plan ≠ log" cho cả 2 mode.
+
+---
+
+## RULE-MEAL-PLAN-TRANSFER — Chuyển và sao chép món
+
+- Chuyển món sang bữa khác trong cùng ngày giữ nguyên trạng thái và số dinh dưỡng đã ghi.
+- Sao chép món tạo một món dự kiến ở ngày đích với khẩu phần của món nguồn.
+- Sao chép tuần cần xác nhận trước khi ghi. Hủy giữ nguyên lịch đích.
+- Với mỗi ngày có món nguồn, thay món dự kiến ở ngày đích tương ứng. Giữ món đã ăn và số dinh dưỡng đã ghi.
+
+---
+
+## RULE-WORKOUT-HISTORY — Giáo án và nhật ký tập
+
+- Lưu bản tùy chỉnh riêng với giáo án mẫu. Áp dụng thay đổi cho các buổi bắt đầu sau khi lưu.
+- Đổi giáo án giữ nguyên bài và hiệp của buổi đã ghi. Chỉ buổi đang diễn ra mới chặn đổi giáo án.
+- Buổi hoàn thành cần ít nhất một hiệp `logged`. Tổng khối lượng tính từ tạ và số lần lặp của các hiệp `logged`.
 
 ---
 
@@ -151,7 +168,7 @@ Tài liệu này tập trung các invariant nghiệp vụ mà mọi tầng (UI, 
 ## Tham chiếu
 
 - Schema chi tiết: `docs/3-design/data-model.md` §4.1–4.6 (ingredient · dish · dish_with_totals VIEW · dish_ingredient · day_plan · meal_slot · planned_dish).
-- Feature spec: `docs/2-requirements/prd.md` §F-01, §F-02 (gram-only revision).
+- Feature spec: `docs/2-requirements/prd.md` §F-01, §F-02, §F-03, §F-08 và §F-09.
 - AI integration: `docs/5-ai/ai-strategy.md` §3.1, §3.2.
 
 ---

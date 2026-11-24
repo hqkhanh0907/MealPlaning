@@ -26,7 +26,7 @@ AC-1 Date Picker (basic vi-VN ion-datetime + Today shortcut + ±365d boundary cl
 AC-2 Empty state copy-from-yesterday CTA wired (disabled if yesterday empty).
 AC-3 Long-press context menu: copy/move/delete.
 AC-4 Undo toast 8s with progress (Ionic toast standard duration; bespoke progress bar deferred → §Deferred).
-AC-5 Undo data preservation: full snapshot cached, restore re-inserts via `addToSlot` (+ `markCompleted` if was completed).
+AC-5 Undo data preservation: restore the deleted row with its original completion time and nutrition values.
 AC-6 Boundary clamp ±365d.
 AC-7 Manual QA → deferred (CI/automated only).
 

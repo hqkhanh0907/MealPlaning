@@ -1,0 +1,26 @@
+.editor-week,
+.editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.editor-week {
+  margin-block: 16px;
+}
+
+.editor-exercise {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-block: 8px;
+  border-bottom: 1px solid var(--border-color);
+
+  p {
+    margin: 4px 0 0;
+  }
+}
+
+.plan-error {
+  color: var(--ion-color-danger);
+}

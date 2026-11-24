@@ -182,6 +182,11 @@
 .week-day {
   min-width: 88px;
   padding: var(--space-sm);
+  text-align: start;
+
+  &[aria-pressed='true'] {
+    border-color: var(--primary-700);
+  }
 
   &--rest {
     background: var(--bg-elevated);

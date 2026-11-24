@@ -162,8 +162,7 @@ export class CalendarStore {
   }
 
   async deleteDish(plannedDishId: string): Promise<DeletedDishSnapshot | null> {
-    const snapshot = this.captureSnapshot(plannedDishId);
-    await this.plannedDishRepo.delete(plannedDishId);
+    const snapshot = await this.plannedDishRepo.delete(plannedDishId);
     this.invalidationTick.update((n) => n + 1);
     return snapshot;
   }
@@ -178,21 +177,8 @@ export class CalendarStore {
     this.invalidationTick.update((n) => n + 1);
   }
 
-  /**
-   * Restore a deleted dish from snapshot (Story 3.7 undo flow).
-   * Re-inserts as planned via `addToSlot`, then re-applies `markCompleted`
-   * if the snapshot was logged. The restored row gets a NEW uuid (cannot
-   * resurrect the original PK because schema CASCADE may have referenced it).
-   */
   async restoreDish(snapshot: DeletedDishSnapshot): Promise<PlannedDish> {
-    const created = await this.plannedDishRepo.addToSlot(
-      snapshot.meal_slot_id,
-      snapshot.dish_id,
-      snapshot.servings,
-    );
-    if (snapshot.is_completed === 1) {
-      await this.plannedDishRepo.markCompleted(created.id);
-    }
+    const created = await this.plannedDishRepo.restoreDeletedDish(snapshot);
     this.invalidationTick.update((n) => n + 1);
     return created;
   }
@@ -230,28 +216,6 @@ export class CalendarStore {
     }
     if (copiedCount > 0) this.invalidationTick.update((n) => n + 1);
     return { copiedCount };
-  }
-
-  /**
-   * Snapshot helper for undo. Looks up the dish in the currently loaded
-   * dayPlan; returns null if not found (caller decides whether to skip undo).
-   */
-  private captureSnapshot(plannedDishId: string): DeletedDishSnapshot | null {
-    const dp = this.dayPlan();
-    if (!dp) return null;
-    for (const slot of dp.meal_slots) {
-      const pd = slot.planned_dishes.find((d) => d.id === plannedDishId);
-      if (pd) {
-        return {
-          meal_slot_id: pd.meal_slot_id,
-          dish_id: pd.dish_id,
-          dish_name: pd.dish_name,
-          servings: pd.servings,
-          is_completed: pd.is_completed,
-        };
-      }
-    }
-    return null;
   }
 
   async copyToDate(

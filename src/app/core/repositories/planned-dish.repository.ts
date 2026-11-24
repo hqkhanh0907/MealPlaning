@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import type { DishListItem } from './dish.repository';
-import type { MealType, PlannedDish } from '../models/meal-plan.types';
+import type { DeletedDishSnapshot, MealType, PlannedDish } from '../models/meal-plan.types';
 import { Database } from '../services/database/database';
 import { DayPlanRepository } from './day-plan.repository';
 
@@ -34,35 +34,61 @@ export class PlannedDishRepository {
   private readonly db = inject(Database);
   private readonly dayPlanRepository = inject(DayPlanRepository);
 
-  /**
-   * Insert a planned (not-yet-completed) dish at the end of the slot.
-   * ALWAYS `is_completed=0`, nutrition snapshot cols + completed_at NULL — Hybrid
-   * policy demands snapshot only happens via `markCompleted` so the snapshot
-   * code-path is the single owner of the truth (Disaster D).
-   */
-  async addToSlot(slotId: string, dishId: string, servings: number): Promise<PlannedDish> {
+  addToSlot(slotId: string, dishId: string, servings: number): Promise<PlannedDish> {
+    return this.insertAtEndOfSlot({
+      meal_slot_id: slotId,
+      dish_id: dishId,
+      servings,
+      is_completed: 0,
+      completed_at: null,
+      calories: null,
+      protein: null,
+      carbs: null,
+      fat: null,
+      fiber: null,
+    });
+  }
+
+  restoreDeletedDish(snapshot: DeletedDishSnapshot): Promise<PlannedDish> {
+    return this.insertAtEndOfSlot(snapshot);
+  }
+
+  private async insertAtEndOfSlot(snapshot: DeletedDishSnapshot): Promise<PlannedDish> {
     const id = uuidv4();
-    await this.db.withTransaction(async () => {
+    return this.db.withTransaction(async () => {
       const next = await this.db.getOne<MaxSortRow>(
         'SELECT COALESCE(MAX(sort_order), -1) AS max_sort FROM planned_dish WHERE meal_slot_id = ?',
-        [slotId],
+        [snapshot.meal_slot_id],
       );
       const sortOrder = (next?.max_sort ?? -1) + 1;
       await this.db.execute(
         `INSERT INTO planned_dish
            (id, meal_slot_id, dish_id, servings, sort_order,
              is_completed, completed_at, calories, protein, carbs, fat, fiber)
-         VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL, NULL)`,
-        [id, slotId, dishId, servings, sortOrder],
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          id,
+          snapshot.meal_slot_id,
+          snapshot.dish_id,
+          snapshot.servings,
+          sortOrder,
+          snapshot.is_completed,
+          snapshot.completed_at,
+          snapshot.calories,
+          snapshot.protein,
+          snapshot.carbs,
+          snapshot.fat,
+          snapshot.fiber,
+        ],
       );
+      const created = await this.db.getOne<PlannedDish>('SELECT * FROM planned_dish WHERE id = ?', [
+        id,
+      ]);
+      if (!created) {
+        throw new Error(`planned_dish '${id}' missing after insert`);
+      }
+      return created;
     });
-    const created = await this.db.getOne<PlannedDish>('SELECT * FROM planned_dish WHERE id = ?', [
-      id,
-    ]);
-    if (!created) {
-      throw new Error(`planned_dish '${id}' missing after insert`);
-    }
-    return created;
   }
 
   /**
@@ -236,8 +262,18 @@ export class PlannedDishRepository {
    * memory). Repo does NOT soft-delete so logged-history queries stay
    * naturally consistent.
    */
-  async delete(plannedDishId: string): Promise<void> {
-    await this.db.execute('DELETE FROM planned_dish WHERE id = ?', [plannedDishId]);
+  async delete(plannedDishId: string): Promise<DeletedDishSnapshot | null> {
+    return this.db.withTransaction(async () => {
+      const snapshot = await this.db.getOne<DeletedDishSnapshot>(
+        `SELECT meal_slot_id, dish_id, servings, is_completed, completed_at,
+                calories, protein, carbs, fat, fiber
+         FROM planned_dish WHERE id = ?`,
+        [plannedDishId],
+      );
+      if (!snapshot) return null;
+      await this.db.execute('DELETE FROM planned_dish WHERE id = ?', [plannedDishId]);
+      return snapshot;
+    });
   }
 
   /**

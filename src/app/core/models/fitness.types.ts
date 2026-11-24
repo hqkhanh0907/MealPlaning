@@ -150,7 +150,7 @@ export interface FitnessProgressSummary {
   strength: StrengthPoint[];
 }
 
-export interface AiTrainingPlanExerciseDraft {
+export interface TrainingPlanExerciseDraft {
   readonly exerciseId: string;
   readonly sets: number;
   readonly repsMin: number;
@@ -159,17 +159,20 @@ export interface AiTrainingPlanExerciseDraft {
   readonly notes: string | null;
 }
 
-export interface AiTrainingPlanDayDraft {
+export interface TrainingPlanDayDraft {
   readonly dayOfWeek: number;
   readonly name: string;
   readonly isRestDay: boolean;
-  readonly exercises: readonly AiTrainingPlanExerciseDraft[];
+  readonly exercises: readonly TrainingPlanExerciseDraft[];
 }
 
-export interface AiTrainingPlanDraft {
+export interface PersonalTrainingPlanDraft {
   readonly name: string;
+  readonly days: readonly TrainingPlanDayDraft[];
+}
+
+export interface AiTrainingPlanDraft extends PersonalTrainingPlanDraft {
   readonly description: string;
   readonly frequency: number;
   readonly rationale: string;
-  readonly days: readonly AiTrainingPlanDayDraft[];
 }

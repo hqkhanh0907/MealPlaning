@@ -93,9 +93,9 @@ describe('PlannedDishRepository', () => {
         .find(([sql]) => (sql as string).includes('INSERT INTO planned_dish'))!;
       const sql = insertCall[0] as string;
       expect(sql).toContain('is_completed, completed_at, calories, protein, carbs, fat, fiber');
-      expect(sql).toContain('VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL, NULL)');
       const params = insertCall[1] as unknown[];
       expect(params[4]).toBe(3); // sort_order = max_sort + 1
+      expect(params.slice(5)).toEqual([0, null, null, null, null, null, null]);
     });
 
     it('starts sort_order at 0 when slot is empty', async () => {
@@ -322,10 +322,40 @@ describe('PlannedDishRepository', () => {
   });
 
   describe('delete', () => {
-    it('hard-deletes the row (no soft-delete)', async () => {
-      await repo.delete('pd-1');
+    it('returns the persisted eaten snapshot and deletes the row in one transaction', async () => {
+      db.getOne.and.resolveTo(logged);
 
-      expect(db.execute).toHaveBeenCalledWith('DELETE FROM planned_dish WHERE id = ?', ['pd-1']);
+      expect(await repo.delete(logged.id)).toBe(logged);
+      expect(db.withTransaction).toHaveBeenCalledTimes(1);
+      expect(db.execute).toHaveBeenCalledWith('DELETE FROM planned_dish WHERE id = ?', [logged.id]);
+    });
+
+    it('does not attempt to delete a missing dish', async () => {
+      db.getOne.and.resolveTo(null);
+
+      expect(await repo.delete('missing')).toBeNull();
+      expect(db.execute).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('restoreDeletedDish', () => {
+    it('inserts the original completion time and nutrition without querying the recipe', async () => {
+      const restored = { ...logged, id: 'new-id' };
+      db.getOne.and.returnValues(Promise.resolve({ max_sort: 2 }), Promise.resolve(restored));
+
+      expect(await repo.restoreDeletedDish(logged)).toBe(restored);
+
+      expect(db.withTransaction).toHaveBeenCalledTimes(1);
+      expect(db.getOne).toHaveBeenCalledTimes(2);
+      expect(db.execute.calls.first().args[1]?.slice(5)).toEqual([
+        logged.is_completed,
+        logged.completed_at,
+        logged.calories,
+        logged.protein,
+        logged.carbs,
+        logged.fat,
+        logged.fiber,
+      ]);
     });
   });
 
@@ -380,13 +410,10 @@ describe('PlannedDishRepository', () => {
 
       expect(dayPlanRepo.getOrCreateForDate).toHaveBeenCalledWith('2026-05-12');
       expect(result.id).toBe('pd-new');
-      // Verify the insert in addToSlot used is_completed=0.
       const insertCall = db.execute.calls
         .allArgs()
         .find(([sql]) => (sql as string).includes('INSERT INTO planned_dish'))!;
-      expect(insertCall[0]).toContain(
-        'VALUES (?, ?, ?, ?, ?, 0, NULL, NULL, NULL, NULL, NULL, NULL)',
-      );
+      expect(insertCall[1]?.slice(5)).toEqual([0, null, null, null, null, null, null]);
     });
 
     it('throws when source planned_dish is missing', async () => {

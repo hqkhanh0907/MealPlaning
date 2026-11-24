@@ -37,3 +37,38 @@ describe('RestTimer', () => {
     expect(component.isRunning()).toBeFalse();
   }));
 });
+
+describe('RestTimer input', () => {
+  it('starts once for the configured input and stays stopped after reset', fakeAsync(() => {
+    TestBed.configureTestingModule({ imports: [RestTimer] });
+    const fixture = TestBed.createComponent(RestTimer);
+    const timer = fixture.componentInstance;
+    const start = timer.start.bind(timer);
+    const startSpy = spyOn(timer, 'start').and.callFake(() => {
+      if (startSpy.calls.count() <= 2) start();
+    });
+
+    fixture.componentRef.setInput('seconds', 3);
+    fixture.detectChanges();
+    expect(startSpy).toHaveBeenCalledTimes(1);
+    expect(timer.label()).toBe('0:03');
+
+    tick(1000);
+    fixture.detectChanges();
+    expect(startSpy).toHaveBeenCalledTimes(1);
+    expect(timer.label()).toBe('0:02');
+
+    timer.reset();
+    fixture.detectChanges();
+    tick(1000);
+    expect(timer.label()).toBe('0:03');
+    expect(timer.isRunning()).toBeFalse();
+
+    fixture.componentRef.setInput('restartKey', 'next-set');
+    fixture.detectChanges();
+    expect(timer.isRunning()).toBeTrue();
+    tick(1000);
+    expect(timer.label()).toBe('0:02');
+    fixture.destroy();
+  }));
+});

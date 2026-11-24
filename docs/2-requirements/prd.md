@@ -16,7 +16,7 @@
 
 ### Mục tiêu PRD
 
-Tài liệu này mô tả chi tiết **13 features** của HealthMate AI V1, bao gồm yêu cầu chức năng, hành vi UI, và tiêu chí chấp nhận cho từng feature.
+Tài liệu này mô tả 13 tính năng của HealthMate AI. Phạm vi v1 cá nhân xác định các luồng cần hoàn thiện trước khi dùng hằng tuần.
 
 ### Phạm vi V1
 
@@ -26,7 +26,9 @@ Tài liệu này mô tả chi tiết **13 features** của HealthMate AI V1, bao
 - **AI:** Google Gemini API (paid tier)
 - **Ngôn ngữ:** Tiếng Việt only
 - **Giá:** Free 100%
-- **Release:** Build hết 13 features → release 1 lần
+- Dùng **lịch ăn và dinh dưỡng** để lên lịch tuần, chuyển hoặc sao chép món, ghi món đã ăn và xem lại dinh dưỡng.
+- Dùng **giáo án và nhật ký tập** để chỉnh lịch từ mẫu, lưu giáo án, ghi hiệp và xem lại buổi đã tập.
+- Mở rộng cardio, biểu đồ từng bài, tính năng AI và chuyển đổi giao diện toàn bộ sau v1 cá nhân.
 
 ### Tham chiếu
 
@@ -46,7 +48,7 @@ Tài liệu này mô tả chi tiết **13 features** của HealthMate AI V1, bao
 - **Mọi lượng đều là gram.** App không có đơn vị nào khác (không `quả`, `cup`, `tbsp`, `ml`, `pack`, `serving`). Mọi input và mọi output đều là gram.
 - **Mọi nutrition đều theo `100g`.** Không có `100ml`, không có per-piece, không có per-serving.
 - **Không modifier.** 1 ingredient = 1 bộ nutrition. Nếu user muốn track "Khoai tây chiên" khác với "Khoai tây luộc", tạo ingredient riêng.
-- **Không edible yield, không density, không snapshot.** User tự cân phần ăn được (gram). Tính realtime từ nutrition hiện tại của ingredient.
+- **Không edible yield, không density.** Người dùng tự cân phần ăn được theo gram. Công thức và món dự kiến dùng số dinh dưỡng hiện tại. Món đã ăn giữ số đã ghi.
 - **Không pantry/inventory.** Tab Quản lý chỉ là catalog (ingredient + recipe). Không track tồn kho, HSD, vị trí lưu.
 - **Lý do:** giảm friction, schema phẳng nhất, UI ít field nhất, tránh bài toán quy đổi đơn vị per-ingredient (impossible to maintain accurate). Trade-off chấp nhận: user tự đoán "1 quả ~?g" hoặc dùng cân điện tử.
 
@@ -57,7 +59,7 @@ Tài liệu này mô tả chi tiết **13 features** của HealthMate AI V1, bao
 | **Xem danh sách** | Hiển thị tất cả nguyên liệu, hỗ trợ tìm kiếm, sắp xếp theo tên/nhóm. Tap card mở màn chi tiết/read-only trước, không mở form sửa trực tiếp. |
 | **Thêm vào thư viện** | Form nhập: tên, category, calories/protein/carbs/fat/fiber per `100g`. Đây là advanced/supporting flow; user thường tạo nguyên liệu từ flow tạo món. |
 | **Tạo nhanh trong món** | Khi tạo/sửa món và search không có nguyên liệu, user có thể tạo nhanh nguyên liệu rồi `Lưu và thêm vào món`. Nguyên liệu mới vẫn được lưu vào thư viện để sửa lại sau. |
-| **Sửa** | Chỉnh sửa thông tin nguyên liệu đã thêm từ màn chi tiết bằng CTA `Sửa thông tin`. V1 là sửa global; nếu nguyên liệu đang được dùng trong món, UI phải cảnh báo tổng calories/macro của các món liên quan sẽ thay đổi (vì nutrition tính realtime, không snapshot). |
+| **Sửa** | Mở `Sửa thông tin` từ màn chi tiết. Khi nguyên liệu có trong món, giao diện cảnh báo rằng tổng dinh dưỡng của công thức và món dự kiến sẽ thay đổi. |
 | **Xóa** | Xóa nguyên liệu nếu chưa được dùng; nếu đang dùng trong món thì chặn xóa và hiển thị danh sách/đếm số món liên quan. |
 | **AI Lookup** | Nhập tên nguyên liệu → AI tra cứu kcal/P/C/F per 100g → user confirm. AI **không** trả về unit conversion, density, hay edible yield. |
 | **Vietnamese Core Seed** | App ship sẵn dataset nền cho **20 món Việt curated** (6 sáng / 7 trưa / 7 tối), không gồm snack. Mọi seed ingredient đã chuẩn hoá về kcal/100g. |
@@ -85,7 +87,7 @@ Ingredient {
 > `Ingredient.source` dùng để phân biệt provenance: seed mặc định = `db`, user tự tạo/sửa = `manual`, AI lookup tạo = `ai`. Khi user sửa seed/AI ingredient, record đổi sang `manual`.
 > **AI Lookup duplicate handling:** Trước khi insert, app kiểm tra tên trùng/gần giống. Nếu trùng → cảnh báo + cho chọn: cập nhật cũ hoặc tạo mới.
 > **Management UX principle:** Tab `Quản lý` mở `Món ăn` trước. Segment order: `Món ăn | Thư viện nguyên liệu`. `Thư viện nguyên liệu` là supporting master data.
-> **Ingredient library edit principle:** Tap nguyên liệu mở detail/read-only trước. Chỉ khi bấm `Sửa thông tin` mới vào form. V1 sửa global; vì không snapshot nên dish totals và meal log đã ghi sẽ tự cập nhật theo — UI cảnh báo trước khi save.
+> Mở màn chi tiết trước khi sửa nguyên liệu. Thay đổi áp dụng cho mọi công thức dùng nguyên liệu và món dự kiến từ các công thức đó. Món đã ăn giữ số dinh dưỡng đã ghi.
 
 **Tiêu chí chấp nhận:**
 - [ ] CRUD hoạt động đúng, data persist sau restart
@@ -236,6 +238,12 @@ DishIngredient {
 | **Week View** | 7 ngày, mỗi ngày hiện tổng calo + màu (xanh=đạt, vàng=gần, đỏ=thiếu/thừa) | Tap ngày → chuyển Day View. Nút "🤖 AI lên plan cả tuần" |
 | **Day View** | Chi tiết từng bữa (Sáng/Trưa/Tối/Phụ) + danh sách món + tổng nutrition | Thêm/xóa/sửa món. Nút "🤖 AI chọn món hôm nay" + "Thêm món thủ công" |
 
+**Chuyển và sao chép món**
+
+- Chuyển món sang bữa khác trong cùng ngày và giữ dữ liệu của món.
+- Sao chép món sang ngày khác thành món dự kiến mới.
+- Xác nhận trước khi sao chép tuần trước. Thay món dự kiến ở những ngày đích tương ứng có món nguồn. Giữ nguyên món đã ăn. Hủy xác nhận giữ nguyên lịch.
+
 **AI Meal Planning (tích hợp trong Calendar):**
 
 | Chế độ | Vị trí | Mô tả |
@@ -296,16 +304,21 @@ PlannedDish {
 > **Hybrid nutrition policy (revision 2026-05-09 — Phase 3 prep):** Mỗi `PlannedDish` có 2 trạng thái nutrition tuỳ `is_completed`:
 >
 > - **`is_completed=0` (kế hoạch chưa ăn)** → `MealSlot.total_calories` và `DayPlan.total_calories` derived **realtime** từ `dish_with_totals × PlannedDish.servings`. User sửa recipe → kế hoạch cập nhật ngay theo recipe mới.
-> - **`is_completed=1` (đã ăn / đã log)** → `PlannedDish.calories/protein/carbs/fat` là **snapshot bất biến**, chốt tại thời điểm flip flag. User sửa recipe sau đó **không** ảnh hưởng nhật ký quá khứ. Báo cáo tuần/tháng luôn đúng với bằng chứng đã ăn.
+> - **`is_completed=1` (đã ăn)** → Lưu số dinh dưỡng tại lúc ghi món đã ăn. Sửa công thức sau đó giữ nguyên số liệu nhật ký.
 >
-> Trade-off: schema có 4 cột `calories/protein/carbs/fat` nullable (NULL khi chưa ăn, NOT NULL khi đã ăn). Repo logic phức tạp hơn (3 path: insert plan / mark completed / edit servings) đổi lấy mental model đúng cho cả 2 mode user (planning ≠ logging). Xem `business-rules.md § RULE-PLANNED-DISH-HYBRID` để biết chi tiết SNAP/RT rules.
+> Xem [quy tắc dinh dưỡng cho món dự kiến và món đã ăn](../4-architecture/business-rules.md#rule-planned-dish-hybrid--hybrid-nutrition-realtime-khi-plan-snapshot-khi-log).
 
 **Tiêu chí chấp nhận:**
 - [ ] Week view hiện 7 ngày với color indicator
 - [ ] Day view hiện 4 bữa với danh sách món
 - [ ] Thêm món vào bữa từ danh sách món ăn
-- [ ] Mark "Đã ăn" cho từng bữa (confirm plan trong ≤ 3 giây)
+- [ ] Chuyển món đúng bữa và sao chép món đúng ngày
+- [ ] Hủy sao chép tuần giữ nguyên lịch. Sau xác nhận, chỉ thay món dự kiến và giữ món đã ăn
+- [ ] Ghi “Đã ăn” cho từng món trong bữa (≤ 3 giây)
 - [ ] Tổng calo/protein cập nhật real-time khi thêm/xóa món
+
+**Mục tiêu mở rộng sau v1 cá nhân**
+
 - [ ] AI plan 1 ngày: chọn món cho 3-4 bữa, tổng dinh dưỡng ±10% mục tiêu
 - [ ] AI plan cả tuần: 7 ngày hoàn chỉnh, đa dạng, protein ≥80% target
 - [ ] AI ưu tiên món từ thư viện user, bổ sung món mới nếu không đủ
@@ -442,7 +455,7 @@ PlannedDish {
 
 ### F-08: Training Plan System
 
-**Mô tả:** Hệ thống training plan dựa trên nghiên cứu khoa học. 3 preset programs + AI custom plan.
+Chọn giáo án mẫu hoặc dùng giáo án AI. Lưu bản cá nhân sau khi chỉnh ngày tập và bài tập.
 
 **Programs (Evidence-based):**
 
@@ -457,6 +470,12 @@ PlannedDish {
 - **Push Day:** Ngực + Vai + Triceps (Bench Press, Shoulder Press, Tricep Extension...)
 - **Pull Day:** Lưng + Biceps (Deadlift, Row, Bicep Curl...)
 - **Legs Day:** Chân + Mông (Squat, Leg Press, Lunge...)
+
+**Tùy chỉnh giáo án cá nhân**
+
+- Mở từng ngày trong lịch tuần để xem bài, số hiệp, số lần lặp và thời gian nghỉ.
+- Đổi ngày tập hoặc thay bài rồi lưu giáo án cá nhân. Lưu bản cá nhân riêng với mẫu gốc.
+- Áp dụng thay đổi cho những buổi bắt đầu sau khi lưu. Giữ số liệu của các buổi đã ghi.
 
 **Dữ liệu Training Plan:**
 
@@ -488,9 +507,9 @@ PlannedExercise {
 
 **Tiêu chí chấp nhận:**
 - [ ] 3 preset programs hoạt động đúng
-- [ ] AI custom plan tuân thủ nguyên lý khoa học
-- [ ] Hiển thị lịch tập trong tuần
-- [ ] Mỗi bài tập có set/rep/rest rõ ràng
+- [ ] Mở được từng ngày tập và xem bài, số hiệp, số lần lặp và thời gian nghỉ
+- [ ] Đổi ngày hoặc thay bài, lưu giáo án và mở lại đúng nội dung
+- [ ] Buổi tập mới dùng giáo án đã lưu. Buổi cũ giữ nguyên số liệu
 - [ ] Exercise database ≥ 50 bài tập phổ biến
 
 ---
@@ -535,7 +554,7 @@ WorkoutSession {
   mode: 'guided' | 'free'
   exercises: WorkoutExercise[]
   duration_minutes: number        // Auto-track
-  total_volume: number            // Auto-calculate (Σ weight × reps)
+  total_volume: number            // Tổng tạ × số lần lặp của hiệp đã ghi
   started_at: timestamp
   completed_at: timestamp
 }
@@ -549,6 +568,7 @@ WorkoutSet {
   set_number: number
   weight_kg: number
   reps: number
+  status: 'logged' | 'skipped'
   effort?: 'easy' | 'just_right' | 'hard' | 'maxed'
   rest_seconds: number
   notes?: string
@@ -560,14 +580,16 @@ WorkoutSet {
 - [ ] Free mode: chọn bài tập từ database
 - [ ] Rest timer tự động đếm ngược
 - [ ] Effort emoji optional (không bắt buộc)
-- [ ] Auto-calculate total volume sau buổi tập
+- [ ] Hoàn thành buổi tập khi có ít nhất một hiệp đã ghi. Tổng khối lượng chỉ tính hiệp đã ghi
+- [ ] Có thể chọn giáo án khác sau khi hủy buổi tập
+- [ ] Mở buổi đã tập để xem bài, tạ, số lần lặp và hiệp đã bỏ qua
 - [ ] Log nhanh ≤ 5 giây/set
 
 ---
 
 ### F-10: Progress Charts
 
-**Mô tả:** Biểu đồ theo dõi tiến trình tập luyện. 4 metrics chính.
+Trong **v1 cá nhân**, người dùng xem lại buổi đã tập và số liệu đã ghi. Biểu đồ chi tiết thuộc phạm vi mở rộng.
 
 **4 Progress Metrics:**
 
@@ -589,7 +611,9 @@ WorkoutSet {
 
 ### F-11: AI Training Plan
 
-**Mô tả:** AI tự lên lịch tập dựa trên mục tiêu, level, và data tập luyện thực tế. Tuân thủ nghiêm ngặt nguyên lý khoa học.
+Trong **v1 cá nhân**, AI hỗ trợ tạo giáo án khi có mạng. Giáo án mẫu và thao tác chỉnh tay đáp ứng luồng tập chính.
+
+Sau v1 cá nhân, AI đề xuất lịch dựa trên mục tiêu, trình độ và dữ liệu đã tập.
 
 **Nguyên lý khoa học AI phải tuân thủ:**
 
@@ -802,6 +826,7 @@ Bước 2: Thông tin cơ bản
 |-----------|---------|--------|
 | CRUD nguyên liệu/món | ✅ Hoạt động | ✅ Hoạt động |
 | Calendar & Meal Planning | ✅ Hoạt động | ✅ Hoạt động |
+| Giáo án mẫu và giáo án cá nhân | ✅ Hoạt động | ✅ Hoạt động |
 | Workout Logger | ✅ Hoạt động | ✅ Hoạt động |
 | Nutrition Tracking | ✅ Hoạt động | ✅ Hoạt động |
 | AI Image Analysis | ❌ Cần mạng | ✅ |
@@ -819,9 +844,9 @@ Bước 2: Thông tin cơ bản
 | AI Image response | ≤ 5 giây |
 | Dashboard scroll | ≥ 60fps |
 | APK size | ≤ 30MB |
-| DB size sau 1 năm sử dụng | ≤ 20MB (gram-only schema phẳng — không snapshot, không pantry, không measurement table) |
+| DB size sau 1 năm sử dụng | ≤ 20MB |
 
-> **Storage note (gram-only revision 2026-04-30):** Schema sau revision có 4 entity chính (ingredient · dish · dish_ingredient · meal_log). Mỗi `dish_ingredient` chỉ 2 trường định lượng (`gram_weight`); mỗi `meal_log_item` chỉ 1 trường (`gram_weight`). Không có cột JSON snapshot, không có conversion table. Storage cost giảm ~40-60% so với spec Phase 1.5A trước đó.
+> **Ước tính lưu trữ lịch sử (gram-only revision 2026-04-30):** Schema lúc đó có 4 entity chính (ingredient · dish · dish_ingredient · meal_log). Mỗi `dish_ingredient` chỉ 2 trường định lượng (`gram_weight`); mỗi `meal_log_item` chỉ 1 trường (`gram_weight`). Không có cột JSON snapshot, không có conversion table. Storage cost giảm ~40-60% so với spec Phase 1.5A trước đó.
 
 ### 7.3 Data Privacy
 

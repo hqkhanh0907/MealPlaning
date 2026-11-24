@@ -51,6 +51,7 @@ import { MenuSuggestionAi, type MenuSuggestion } from '../../core/services/ai/me
 import { GEMINI_ERROR_TOAST, GeminiError } from '../../core/services/ai/gemini-types';
 import { UndoToastQueue } from '../../core/services/undo-toast-queue';
 import { relativeDateLabel } from '../../core/utils/relative-date-label';
+import { ConfirmDialog } from '../../shared/components/confirm-dialog/confirm-dialog';
 import {
   ConfirmEatModal,
   type ConfirmEatMode,
@@ -82,9 +83,12 @@ interface ContextMenuState {
   plannedDishId: string;
   dishName: string;
   mealType: MealType;
+  date: string;
 }
 
-type SlotPickerMode = 'move' | null;
+interface PendingDishAction extends ContextMenuState {
+  action: 'move' | 'copy';
+}
 
 function todayIso(): string {
   const now = new Date();
@@ -122,6 +126,7 @@ function parseIsoLocal(iso: string): Date {
     IonButtons,
     IonButton,
     IonIcon,
+    ConfirmDialog,
     ConfirmEatModal,
     DatePickerModal,
     DishContextMenuModal,
@@ -199,18 +204,18 @@ export default class CalendarPage implements AfterViewInit {
   readonly contextMenuOpen = computed<boolean>(() => this.contextMenu() !== null);
   readonly contextMenuDishName = computed<string>(() => this.contextMenu()?.dishName ?? '');
 
-  /**
-   * When set, the meal-slot picker is open. `move` is the only consumer for
-   * now (copy uses date picker first, then implicit same-meal-type copy).
-   */
-  readonly slotPickerMode = signal<SlotPickerMode>(null);
-  readonly slotPickerOpen = computed<boolean>(() => this.slotPickerMode() !== null);
+  private readonly pendingDishAction = signal<PendingDishAction | null>(null);
+  readonly slotPickerOpen = computed<boolean>(() => this.pendingDishAction()?.action === 'move');
   readonly slotPickerCurrent = computed<MealType | null>(
-    () => this.contextMenu()?.mealType ?? null,
+    () => this.pendingDishAction()?.mealType ?? null,
+  );
+  readonly copyToDatePickerOpen = computed<boolean>(
+    () => this.pendingDishAction()?.action === 'copy',
   );
 
-  /** Date picker for "copy to date" flow. */
-  readonly copyToDatePickerOpen = signal(false);
+  private readonly pendingCopyWeekStart = signal<string | null>(null);
+  readonly copyWeekConfirmationOpen = computed(() => this.pendingCopyWeekStart() !== null);
+  readonly copyingPreviousWeek = signal(false);
 
   readonly loggingModalOpen = signal(false);
   readonly loggingMealType = signal<MealType>('breakfast');
@@ -299,14 +304,35 @@ export default class CalendarPage implements AfterViewInit {
     this.store.setView('day');
   }
 
-  async onCopyPreviousWeek(): Promise<void> {
-    const result = await this.store.copyPreviousWeek();
-    if (result.copiedCount === 0) {
-      void this.showToast('Tuần trước không có món để sao chép');
-    } else {
-      void this.showToast(
-        `Đã sao chép ${result.copiedCount} món từ tuần trước (${result.daysAffected} ngày)`,
-      );
+  onCopyPreviousWeek(): void {
+    if (!this.copyingPreviousWeek()) {
+      this.pendingCopyWeekStart.set(this.store.weekDays()[0]);
+    }
+  }
+
+  onCancelCopyPreviousWeek(): void {
+    this.pendingCopyWeekStart.set(null);
+  }
+
+  async onConfirmCopyPreviousWeek(): Promise<void> {
+    const weekStart = this.pendingCopyWeekStart();
+    this.onCancelCopyPreviousWeek();
+    if (!weekStart || this.store.weekDays()[0] !== weekStart) return;
+
+    this.copyingPreviousWeek.set(true);
+    try {
+      const result = await this.store.copyPreviousWeek();
+      if (result.copiedCount === 0) {
+        void this.showToast('Tuần trước không có món để sao chép');
+      } else {
+        void this.showToast(
+          `Đã sao chép ${result.copiedCount} món từ tuần trước (${result.daysAffected} ngày)`,
+        );
+      }
+    } catch {
+      void this.showToast('Không thể sao chép tuần trước. Vui lòng thử lại.');
+    } finally {
+      this.copyingPreviousWeek.set(false);
     }
   }
 
@@ -477,9 +503,16 @@ export default class CalendarPage implements AfterViewInit {
 
   // -- Long-press → context menu (AC-3) --------------------------------------
   onDishLongPress(plannedDishId: string, mealType: MealType): void {
+    const date = this.store.dayPlan()?.date;
+    if (this.pendingDishAction() || date !== this.store.currentDate()) return;
     const dish = this.findDish(plannedDishId);
     if (!dish) return;
-    this.contextMenu.set({ plannedDishId, dishName: dish.dish_name, mealType });
+    this.contextMenu.set({
+      plannedDishId,
+      dishName: dish.dish_name,
+      mealType,
+      date,
+    });
   }
 
   onContextMenuDismiss(): void {
@@ -492,55 +525,60 @@ export default class CalendarPage implements AfterViewInit {
     this.contextMenu.set(null);
     if (action === 'delete') {
       void this.handleDelete(ctx);
-    } else if (action === 'move') {
-      this.slotPickerMode.set('move');
-    } else if (action === 'copy') {
-      this.copyToDatePickerOpen.set(true);
+    } else {
+      this.pendingDishAction.set({ ...ctx, action });
     }
   }
 
   // -- Move flow -------------------------------------------------------------
   async onSlotPicked(target: MealType): Promise<void> {
-    const ctx = this.contextMenu();
-    const mode = this.slotPickerMode();
-    this.slotPickerMode.set(null);
-    if (!ctx || mode !== 'move') {
-      this.contextMenu.set(null);
+    const ctx = this.pendingDishAction();
+    if (ctx?.action !== 'move') return;
+    this.pendingDishAction.set(null);
+    if (
+      ctx.mealType === target ||
+      ctx.date !== this.store.currentDate() ||
+      ctx.date !== this.store.dayPlan()?.date
+    ) {
       return;
     }
-    if (target === ctx.mealType) {
-      // No-op: same slot. Just close.
-      this.contextMenu.set(null);
-      return;
-    }
+
     const targetSlot = this.slotsInOrder().find((s) => s.meal_type === target);
     if (!targetSlot) {
       void this.showToast('Bữa đích không tồn tại');
-      this.contextMenu.set(null);
       return;
     }
-    await this.store.moveDish(ctx.plannedDishId, targetSlot.id);
-    void this.showToast(`Đã chuyển "${ctx.dishName}" sang ${this.mealLabel(target)}`);
-    this.contextMenu.set(null);
+    try {
+      await this.store.moveDish(ctx.plannedDishId, targetSlot.id);
+      void this.showToast(`Đã chuyển "${ctx.dishName}" sang ${this.mealLabel(target)}`);
+    } catch {
+      void this.showToast('Không thể di chuyển món. Vui lòng thử lại.');
+    }
   }
 
   onSlotPickerDismiss(): void {
-    this.slotPickerMode.set(null);
+    if (this.slotPickerOpen()) this.pendingDishAction.set(null);
   }
 
   // -- Copy flow -------------------------------------------------------------
   async onCopyDatePicked(targetDate: string): Promise<void> {
-    const ctx = this.contextMenu();
-    this.copyToDatePickerOpen.set(false);
-    if (!ctx) return;
-    await this.store.copyToDate(ctx.plannedDishId, targetDate, ctx.mealType);
-    void this.showToast(`Đã sao chép "${ctx.dishName}" sang ${targetDate}`);
-    this.contextMenu.set(null);
+    const ctx = this.pendingDishAction();
+    if (ctx?.action !== 'copy') return;
+    if (ctx.date === targetDate) {
+      void this.showToast('Chọn một ngày khác để sao chép món.');
+      return;
+    }
+    this.pendingDishAction.set(null);
+    try {
+      await this.store.copyToDate(ctx.plannedDishId, targetDate, ctx.mealType);
+      void this.showToast(`Đã sao chép "${ctx.dishName}" sang ${targetDate}`);
+    } catch {
+      void this.showToast('Không thể sao chép món. Vui lòng thử lại.');
+    }
   }
 
   onCopyDatePickerDismiss(): void {
-    this.copyToDatePickerOpen.set(false);
-    this.contextMenu.set(null);
+    if (this.copyToDatePickerOpen()) this.pendingDishAction.set(null);
   }
 
   // -- Delete + undo (AC-4, AC-5) --------------------------------------------

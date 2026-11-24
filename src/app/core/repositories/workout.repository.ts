@@ -240,19 +240,27 @@ export class WorkoutRepository {
   }
 
   async completeSession(sessionId: string, now: Date = new Date()): Promise<void> {
-    const session = await this.db.getOne<{ started_at: string }>(
-      `SELECT started_at FROM workout_session WHERE id = ? AND status = 'active'`,
-      [sessionId],
-    );
-    if (!session) {
-      throw new Error(`WorkoutRepository: active session '${sessionId}' not found.`);
-    }
-
-    const durationMinutes = Math.max(
-      1,
-      Math.round((now.getTime() - new Date(session.started_at).getTime()) / 60_000),
-    );
     await this.db.withTransaction(async () => {
+      const session = await this.db.getOne<{ started_at: string }>(
+        `SELECT started_at FROM workout_session WHERE id = ? AND status = 'active'`,
+        [sessionId],
+      );
+      if (!session) {
+        throw new Error(`WorkoutRepository: active session '${sessionId}' not found.`);
+      }
+      const loggedSet = await this.db.getOne<{ id: string }>(
+        `SELECT ws.id FROM workout_set ws
+          INNER JOIN workout_exercise we ON we.id = ws.workout_exercise_id
+          WHERE we.workout_session_id = ? AND ws.status = 'logged' LIMIT 1`,
+        [sessionId],
+      );
+      if (!loggedSet) {
+        throw new Error('WorkoutRepository: at least one logged set is required.');
+      }
+      const durationMinutes = Math.max(
+        1,
+        Math.round((now.getTime() - new Date(session.started_at).getTime()) / 60_000),
+      );
       await this.syncTotals(sessionId);
       await this.db.execute(
         `UPDATE workout_session
@@ -353,12 +361,6 @@ export class WorkoutRepository {
   }
 
   /**
-   * Hard-cancel an in-progress session: deletes the session row and cascades to exercises + sets.
-   * Use when user wants to abort/discard a workout (e.g. started by mistake). Throws if session is
-   * already completed — that branch must use a separate "delete completed workout" path (not yet
-   * implemented; out of scope for cancel).
-   */
-  /**
    * Soft-cancel a session: flip status to 'cancelled' and record cancelled_at.
    *
    * Child rows (workout_exercise, workout_set) are preserved so {@link undoCancel}
@@ -411,9 +413,7 @@ export class WorkoutRepository {
       [sessionId],
     );
     if (existingActive) {
-      throw new Error(
-        'WorkoutRepository: cannot undo cancel — another active session exists.',
-      );
+      throw new Error('WorkoutRepository: cannot undo cancel — another active session exists.');
     }
 
     await this.db.execute(
@@ -630,6 +630,7 @@ export class WorkoutRepository {
          INNER JOIN workout_exercise we ON we.workout_session_id = session.id
          INNER JOIN workout_set ws ON ws.workout_exercise_id = we.id
         WHERE session.completed_at IS NOT NULL
+          AND ws.status = 'logged'
           AND session.date BETWEEN ? AND ?`,
       [start, end],
     );
@@ -644,6 +645,7 @@ export class WorkoutRepository {
          INNER JOIN workout_set ws ON ws.workout_exercise_id = we.id
          INNER JOIN exercise e ON e.id = we.exercise_id
         WHERE session.completed_at IS NOT NULL
+          AND ws.status = 'logged'
           AND session.date BETWEEN ? AND ?
         GROUP BY e.muscle_group
         ORDER BY volume DESC
@@ -669,6 +671,7 @@ export class WorkoutRepository {
        INNER JOIN workout_set ws ON ws.workout_exercise_id = we.id
        INNER JOIN exercise e ON e.id = we.exercise_id
        WHERE session.completed_at IS NOT NULL
+         AND ws.status = 'logged'
          AND session.date BETWEEN ? AND ?
          AND e.category = 'compound'
          AND ws.reps BETWEEN 1 AND 10
@@ -691,6 +694,11 @@ export class WorkoutRepository {
               COUNT(*) AS count
          FROM workout_session ws
         WHERE ws.completed_at IS NOT NULL
+          AND EXISTS (
+            SELECT 1 FROM workout_exercise we
+            INNER JOIN workout_set actual ON actual.workout_exercise_id = we.id
+            WHERE we.workout_session_id = ws.id AND actual.status = 'logged'
+          )
           AND date(ws.date, '-' || ((strftime('%w', ws.date) + 6) % 7) || ' days')
               IN (${placeholders})
         GROUP BY week_start`,

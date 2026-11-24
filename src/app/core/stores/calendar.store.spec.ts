@@ -61,6 +61,7 @@ describe('CalendarStore', () => {
       'unmarkCompleted',
       'editServings',
       'delete',
+      'restoreDeletedDish',
       'moveToSlot',
       'copyToDate',
       'listRecentLogged',
@@ -74,7 +75,8 @@ describe('CalendarStore', () => {
     plannedDishRepo.markCompleted.and.returnValue(Promise.resolve());
     plannedDishRepo.unmarkCompleted.and.returnValue(Promise.resolve());
     plannedDishRepo.editServings.and.returnValue(Promise.resolve());
-    plannedDishRepo.delete.and.returnValue(Promise.resolve());
+    plannedDishRepo.delete.and.resolveTo(null);
+    plannedDishRepo.restoreDeletedDish.and.resolveTo(samplePlanned);
     plannedDishRepo.copyToDate.and.returnValue(Promise.resolve(samplePlanned));
     plannedDishRepo.listRecentLogged.and.returnValue(Promise.resolve([]));
 
@@ -297,102 +299,55 @@ describe('CalendarStore', () => {
       expect(store.invalidationTick()).toBe(before + 1);
     });
 
-    it('deleteDish returns null snapshot when dish not in current dayPlan', async () => {
+    it('deleteDish returns null when no row was deleted', async () => {
       const snapshot = await store.deleteDish('pd-not-loaded');
       expect(snapshot).toBeNull();
       expect(plannedDishRepo.delete).toHaveBeenCalledWith('pd-not-loaded');
     });
 
-    it('deleteDish captures snapshot of currently-loaded dish (planned)', async () => {
-      const populated: DayPlanWithSlots = {
-        ...sampleDayPlan,
-        meal_slots: [
-          {
-            id: 's-1',
-            day_plan_id: 'dp-1',
-            meal_type: 'lunch',
-            position: 1,
-            created_at: 'x',
-            planned_dishes: [
-              {
-                ...samplePlanned,
-                id: 'pd-1',
-                meal_slot_id: 's-1',
-                dish_id: 'd-1',
-                servings: 1.5,
-                is_completed: 0,
-                dish_name: 'Phở bò',
-                effective_calories: 300,
-                effective_protein: 20,
-                effective_carbs: 30,
-                effective_fat: 10,
-                effective_fiber: 4,
-              },
-            ],
-          },
-        ],
-      };
-      dayPlanRepo.findByDate.and.returnValue(Promise.resolve(populated));
-      store.setDate(store.currentDate()); // re-trigger hydration
-      await flush();
+    it('deleteDish uses the persisted snapshot returned by the repository', async () => {
+      const persisted = { ...samplePlanned, servings: 1.5 };
+      plannedDishRepo.delete.and.resolveTo(persisted);
 
       const snapshot = await store.deleteDish('pd-1');
 
-      expect(snapshot).toEqual({
-        meal_slot_id: 's-1',
-        dish_id: 'd-1',
-        dish_name: 'Phở bò',
-        servings: 1.5,
-        is_completed: 0,
-      });
+      expect(snapshot).toBe(persisted);
     });
 
-    it('restoreDish replays addToSlot only for planned snapshot', async () => {
-      plannedDishRepo.addToSlot.and.returnValue(Promise.resolve(samplePlanned));
-      const snap = {
-        meal_slot_id: 's-1',
-        dish_id: 'd-1',
-        dish_name: 'Phở',
-        servings: 2,
-        is_completed: 0 as const,
-      };
+    it('restoreDish leaves a planned dish unlogged', async () => {
+      const snap = { ...samplePlanned, servings: 2 };
 
       await store.restoreDish(snap);
 
-      expect(plannedDishRepo.addToSlot).toHaveBeenCalledWith('s-1', 'd-1', 2);
+      expect(plannedDishRepo.restoreDeletedDish).toHaveBeenCalledWith(snap);
       expect(plannedDishRepo.markCompleted).not.toHaveBeenCalled();
     });
 
-    it('restoreDish chains markCompleted when snapshot was logged', async () => {
-      plannedDishRepo.addToSlot.and.returnValue(
-        Promise.resolve({ ...samplePlanned, id: 'pd-new' }),
-      );
-      plannedDishRepo.markCompleted.and.returnValue(Promise.resolve());
+    it('restores the original eaten snapshot without logging it again', async () => {
       const snap = {
-        meal_slot_id: 's-1',
-        dish_id: 'd-1',
-        dish_name: 'Phở',
-        servings: 1,
+        ...samplePlanned,
         is_completed: 1 as const,
+        completed_at: '2026-05-10T07:00:00Z',
+        calories: 420,
+        protein: 25,
+        carbs: 50,
+        fat: 12,
+        fiber: 7,
       };
+      plannedDishRepo.restoreDeletedDish.and.resolveTo({ ...snap, id: 'pd-new' });
 
       const created = await store.restoreDish(snap);
 
       expect(created.id).toBe('pd-new');
-      expect(plannedDishRepo.addToSlot).toHaveBeenCalledWith('s-1', 'd-1', 1);
-      expect(plannedDishRepo.markCompleted).toHaveBeenCalledWith('pd-new');
+      expect(created.completed_at).toBe(snap.completed_at);
+      expect(created.calories).toBe(snap.calories);
+      expect(plannedDishRepo.restoreDeletedDish).toHaveBeenCalledWith(snap);
+      expect(plannedDishRepo.markCompleted).not.toHaveBeenCalled();
     });
 
     it('restoreDish bumps tick once per restore', async () => {
-      plannedDishRepo.addToSlot.and.returnValue(Promise.resolve(samplePlanned));
       const before = store.invalidationTick();
-      await store.restoreDish({
-        meal_slot_id: 's-1',
-        dish_id: 'd-1',
-        dish_name: 'Phở',
-        servings: 1,
-        is_completed: 0,
-      });
+      await store.restoreDish(samplePlanned);
       expect(store.invalidationTick()).toBe(before + 1);
     });
   });

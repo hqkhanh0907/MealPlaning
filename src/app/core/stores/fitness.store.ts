@@ -3,9 +3,9 @@ import type {
   ActiveTrainingPlan,
   Exercise,
   FitnessProgressSummary,
+  PersonalTrainingPlanDraft,
   TrainingPlanDayWithExercises,
   TrainingPlanSummary,
-  TrainingPlanType,
   WorkoutEffort,
   WorkoutExerciseDetail,
   WorkoutSessionDetail,
@@ -76,36 +76,13 @@ export class FitnessStore {
     exerciseName: string;
   } | null>(null);
 
-  private restIntervalId: ReturnType<typeof setInterval> | null = null;
+  private startingWorkout = false;
   /** F-006 — pending autosave timer handle. */
   private draftSaveTimerId: ReturnType<typeof setTimeout> | null = null;
   /** F-006 — last exercise id whose draft we hydrated, to avoid re-hydrating on every keystroke. */
   private lastHydratedExerciseId: string | null = null;
 
   constructor() {
-    // Auto countdown rest timer when restSeconds > 0. Stops at 0.
-    effect(() => {
-      const seconds = this.restSeconds();
-      if (this.restIntervalId !== null) {
-        clearInterval(this.restIntervalId);
-        this.restIntervalId = null;
-      }
-      if (seconds > 0) {
-        this.restIntervalId = setInterval(() => {
-          const next = this.restSeconds() - 1;
-          if (next <= 0) {
-            this.restSeconds.set(0);
-            if (this.restIntervalId !== null) {
-              clearInterval(this.restIntervalId);
-              this.restIntervalId = null;
-            }
-          } else {
-            this.restSeconds.set(next);
-          }
-        }, 1000);
-      }
-    });
-
     // F-006 — autosave set draft to localStorage debounced 500ms per workout_exercise.id.
     // Avoids losing typed weight/reps/notes when OS kills the app before GHI SET.
     effect(() => {
@@ -157,10 +134,13 @@ export class FitnessStore {
       }
       const parsed = JSON.parse(raw) as Partial<WorkoutSetDraft>;
       return {
-        weightKg: typeof parsed.weightKg === 'string' ? parsed.weightKg : DEFAULT_SET_DRAFT.weightKg,
+        weightKg:
+          typeof parsed.weightKg === 'string' ? parsed.weightKg : DEFAULT_SET_DRAFT.weightKg,
         reps: typeof parsed.reps === 'string' ? parsed.reps : DEFAULT_SET_DRAFT.reps,
         restSeconds:
-          typeof parsed.restSeconds === 'string' ? parsed.restSeconds : DEFAULT_SET_DRAFT.restSeconds,
+          typeof parsed.restSeconds === 'string'
+            ? parsed.restSeconds
+            : DEFAULT_SET_DRAFT.restSeconds,
         effort: (parsed.effort ?? null) as WorkoutEffort | null,
         notes: typeof parsed.notes === 'string' ? parsed.notes : '',
       };
@@ -184,7 +164,10 @@ export class FitnessStore {
 
   readonly isRestDay = computed(() => this.todayDay()?.is_rest_day === 1);
   readonly canCompleteWorkout = computed(
-    () => this.activeSession()?.exercises.some((exercise) => exercise.sets.length > 0) ?? false,
+    () =>
+      this.activeSession()?.exercises.some((exercise) =>
+        exercise.sets.some((set) => set.status === 'logged'),
+      ) ?? false,
   );
 
   readonly selectedWorkoutExercise = computed<WorkoutExerciseDetail | null>(() => {
@@ -192,6 +175,13 @@ export class FitnessStore {
     if (!id) return this.activeSession()?.exercises[0] ?? null;
     return this.activeSession()?.exercises.find((exercise) => exercise.id === id) ?? null;
   });
+
+  readonly selectedExerciseLastLoggedSet = computed(() =>
+    this.selectedWorkoutExercise()
+      ?.sets.slice()
+      .reverse()
+      .find((set) => set.status === 'logged'),
+  );
 
   readonly filteredExercises = computed(() => {
     const query = normalize(this.exerciseSearch());
@@ -272,14 +262,27 @@ export class FitnessStore {
     }
   }
 
-  async activatePlan(type: TrainingPlanType): Promise<void> {
+  async activatePlan(planId: string): Promise<void> {
     this.errorMessage.set(null);
     try {
-      await this.planRepo.activatePlan(type);
+      await this.planRepo.activatePlanById(planId);
       await this.refresh();
       this.successMessage.set('Đã đổi giáo án tập luyện.');
     } catch (error) {
       this.errorMessage.set(toErrorMessage(error));
+    }
+  }
+
+  async savePersonalPlan(sourcePlanId: string, draft: PersonalTrainingPlanDraft): Promise<boolean> {
+    this.errorMessage.set(null);
+    try {
+      await this.planRepo.savePersonalPlan(sourcePlanId, draft);
+      await this.refresh();
+      this.successMessage.set('Đã lưu giáo án cá nhân.');
+      return true;
+    } catch (error) {
+      this.errorMessage.set(toErrorMessage(error));
+      return false;
     }
   }
 
@@ -308,24 +311,33 @@ export class FitnessStore {
   }
 
   async startTodayGuided(): Promise<void> {
-    const todayDay = this.todayDay();
-    if (!todayDay || todayDay.is_rest_day === 1) {
+    await this.startGuidedDay(this.todayDay());
+  }
+
+  async startGuidedDay(day: TrainingPlanDayWithExercises | null): Promise<void> {
+    if (this.startingWorkout) return;
+    if (!day || day.is_rest_day === 1) {
       this.errorMessage.set('Hôm nay là ngày nghỉ hoặc chưa có giáo án đang hoạt động.');
       return;
     }
 
+    this.startingWorkout = true;
     this.errorMessage.set(null);
     try {
-      const session = await this.workoutRepo.startGuidedSession(todayDay.id);
+      const session = await this.workoutRepo.startGuidedSession(day.id);
       this.activeSession.set(session);
       this.selectedWorkoutExerciseId.set(session.exercises[0]?.id ?? null);
       this.successMessage.set('Đã bắt đầu buổi tập theo giáo án.');
     } catch (error) {
       this.errorMessage.set(toErrorMessage(error));
+    } finally {
+      this.startingWorkout = false;
     }
   }
 
   async startFree(): Promise<void> {
+    if (this.startingWorkout) return;
+    this.startingWorkout = true;
     this.errorMessage.set(null);
     try {
       const session = await this.workoutRepo.startFreeSession();
@@ -334,6 +346,8 @@ export class FitnessStore {
       this.successMessage.set('Đã bắt đầu buổi tập tự do.');
     } catch (error) {
       this.errorMessage.set(toErrorMessage(error));
+    } finally {
+      this.startingWorkout = false;
     }
   }
 
@@ -463,7 +477,7 @@ export class FitnessStore {
   async completeWorkout(): Promise<void> {
     const session = this.activeSession();
     if (!session) return;
-    if (session.exercises.every((exercise) => exercise.sets.length === 0)) {
+    if (!this.canCompleteWorkout()) {
       this.errorMessage.set('Cần log ít nhất 1 set trước khi hoàn thành buổi tập.');
       return;
     }
@@ -477,6 +491,7 @@ export class FitnessStore {
       this.lastCompletedSession.set(finalized ?? session);
       this.activeSession.set(null);
       this.selectedWorkoutExerciseId.set(null);
+      this.restSeconds.set(0);
       await this.refresh();
       this.successMessage.set('Đã hoàn thành buổi tập.');
     } catch (error) {
@@ -589,14 +604,8 @@ export class FitnessStore {
     }
   }
 
-  /**
-   * Repeat the most-recent set in the selected exercise: prefills the draft with last set's
-   * weight/reps/rest/effort then calls logSet(). Apple Fitness-style "+1 same set" shortcut so user
-   * doesn't re-type the same values 4 times per exercise.
-   */
   async repeatLastSet(): Promise<void> {
-    const selected = this.selectedWorkoutExercise();
-    const lastSet = selected?.sets[selected.sets.length - 1];
+    const lastSet = this.selectedExerciseLastLoggedSet();
     if (!lastSet) {
       this.errorMessage.set('Chưa có set nào để lặp lại.');
       return;

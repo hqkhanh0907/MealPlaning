@@ -36,14 +36,14 @@ describe('FitnessStore', () => {
       'listPlans',
       'getActivePlan',
       'getTodayTrainingDay',
-      'activatePlan',
+      'activatePlanById',
       'createAiPlan',
     ]);
     planRepo.ensurePresetPlans.and.resolveTo([planSummary()]);
     planRepo.listPlans.and.resolveTo([planSummary()]);
     planRepo.getActivePlan.and.resolveTo(activePlan());
     planRepo.getTodayTrainingDay.and.resolveTo(trainingDay());
-    planRepo.activatePlan.and.resolveTo();
+    planRepo.activatePlanById.and.resolveTo();
     planRepo.createAiPlan.and.resolveTo(planSummary({ type: 'ai_custom', source: 'ai' }));
 
     workoutRepo = jasmine.createSpyObj<WorkoutRepository>('WorkoutRepository', [
@@ -209,10 +209,18 @@ describe('FitnessStore', () => {
 
   it('completeWorkout snapshots the finalized session into lastCompletedSession', async () => {
     const sessionWithSets = workoutSession({
-      exercises: [workoutExercise({ sets: [{ id: 'st-1', set_number: 1, weight_kg: 50, reps: 8 } as never] })],
+      exercises: [
+        workoutExercise({
+          sets: [{ id: 'st-1', set_number: 1, weight_kg: 50, reps: 8, status: 'logged' } as never],
+        }),
+      ],
     });
     store.activeSession.set(sessionWithSets);
-    const finalized = { ...sessionWithSets, completed_at: '2025-01-01T10:30:00.000Z', duration_minutes: 42 };
+    const finalized = {
+      ...sessionWithSets,
+      completed_at: '2025-01-01T10:30:00.000Z',
+      duration_minutes: 42,
+    };
     workoutRepo.getSession.and.resolveTo(finalized);
 
     await store.completeWorkout();
@@ -225,7 +233,11 @@ describe('FitnessStore', () => {
 
   it('completeWorkout falls back to in-memory session if repo returns null', async () => {
     const sessionWithSets = workoutSession({
-      exercises: [workoutExercise({ sets: [{ id: 'st-1', set_number: 1, weight_kg: 50, reps: 8 } as never] })],
+      exercises: [
+        workoutExercise({
+          sets: [{ id: 'st-1', set_number: 1, weight_kg: 50, reps: 8, status: 'logged' } as never],
+        }),
+      ],
     });
     store.activeSession.set(sessionWithSets);
     workoutRepo.getSession.and.resolveTo(null);
@@ -233,6 +245,31 @@ describe('FitnessStore', () => {
     await store.completeWorkout();
 
     expect(store.lastCompletedSession()).toEqual(sessionWithSets);
+  });
+
+  it('repeats the last logged set instead of a skipped set', async () => {
+    store.activeSession.set(
+      workoutSession({
+        exercises: [
+          workoutExercise({
+            sets: [
+              { weight_kg: 45, reps: 8, rest_seconds: 75, status: 'logged', effort: null } as never,
+              { weight_kg: 65, reps: 10, rest_seconds: 120, status: 'skipped' } as never,
+            ],
+          }),
+        ],
+      }),
+    );
+
+    await store.repeatLastSet();
+
+    expect(workoutRepo.addSet).toHaveBeenCalledOnceWith('we-1', {
+      weightKg: 45,
+      reps: 8,
+      restSeconds: 75,
+      effort: null,
+      notes: null,
+    });
   });
 
   it('dismissCompletedSummary clears the snapshot', () => {

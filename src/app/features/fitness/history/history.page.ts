@@ -10,7 +10,13 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { barbellOutline, calendarOutline, timerOutline, trophyOutline } from 'ionicons/icons';
+import {
+  barbellOutline,
+  calendarOutline,
+  chevronDownOutline,
+  timerOutline,
+  trophyOutline,
+} from 'ionicons/icons';
 import { WorkoutRepository } from '../../../core/repositories/workout.repository';
 import type { WorkoutSessionDetail } from '../../../core/models/fitness.types';
 
@@ -44,7 +50,7 @@ export class FitnessHistoryPage implements OnInit {
   readonly errorMessage = signal<string | null>(null);
 
   constructor() {
-    addIcons({ barbellOutline, calendarOutline, timerOutline, trophyOutline });
+    addIcons({ barbellOutline, calendarOutline, chevronDownOutline, timerOutline, trophyOutline });
   }
 
   async ngOnInit(): Promise<void> {
@@ -90,7 +96,10 @@ export class FitnessHistoryPage implements OnInit {
   }
 
   setCount(session: WorkoutSessionDetail): number {
-    return session.exercises.reduce((sum, ex) => sum + ex.sets.length, 0);
+    return session.exercises.reduce(
+      (sum, exercise) => sum + exercise.sets.filter((set) => set.status === 'logged').length,
+      0,
+    );
   }
 
   trackByGroup(_: number, group: HistoryWeekGroup): string {

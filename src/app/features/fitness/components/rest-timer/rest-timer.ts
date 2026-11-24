@@ -7,6 +7,7 @@ import {
   inject,
   input,
   signal,
+  untracked,
 } from '@angular/core';
 import { IonButton, IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -25,6 +26,7 @@ export class RestTimer {
   private intervalId: ReturnType<typeof setInterval> | null = null;
 
   readonly seconds = input(0);
+  readonly restartKey = input<string | null>(null);
   readonly remaining = signal(0);
   readonly isRunning = signal(false);
 
@@ -39,10 +41,14 @@ export class RestTimer {
     addIcons({ refreshOutline, timerOutline });
     effect(() => {
       const next = this.seconds();
-      this.reset(next);
-      if (next > 0) {
-        this.start();
-      }
+      // A new logged set can request the same duration.
+      this.restartKey();
+      untracked(() => {
+        this.reset(next);
+        if (next > 0) {
+          this.start();
+        }
+      });
     });
     this.destroyRef.onDestroy(() => this.clearInterval());
   }

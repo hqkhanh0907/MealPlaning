@@ -64,12 +64,6 @@ export class WorkoutSummaryModal {
 
   @Output() readonly closed = new EventEmitter<void>();
 
-  protected readonly totalSets = computed(() => {
-    const s = this._session();
-    if (!s) return 0;
-    return s.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
-  });
-
   protected readonly totalVolume = computed(() => {
     const s = this._session();
     if (!s) return 0;
@@ -88,16 +82,25 @@ export class WorkoutSummaryModal {
   protected readonly exerciseRows = computed(() => {
     const s = this._session();
     if (!s) return [];
-    return s.exercises
-      .filter((ex) => ex.sets.length > 0)
-      .map((ex) => ({
-        id: ex.id,
-        name: ex.exercise_name_vi || ex.exercise_name,
-        sets: ex.sets.length,
-        volume: Math.round(ex.total_volume),
-        topSet: bestSet(ex.sets),
-      }));
+    return s.exercises.flatMap((ex) => {
+      const logged = ex.sets.filter((set) => set.status === 'logged');
+      return logged.length === 0
+        ? []
+        : [
+            {
+              id: ex.id,
+              name: ex.exercise_name_vi || ex.exercise_name,
+              sets: logged.length,
+              volume: Math.round(ex.total_volume),
+              topSet: bestSet(logged),
+            },
+          ];
+    });
   });
+
+  protected readonly totalSets = computed(() =>
+    this.exerciseRows().reduce((sum, row) => sum + row.sets, 0),
+  );
 
   constructor() {
     addIcons({

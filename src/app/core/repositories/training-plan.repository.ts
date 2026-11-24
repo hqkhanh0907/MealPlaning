@@ -4,8 +4,10 @@ import { Database } from '../services/database/database';
 import type {
   ActiveTrainingPlan,
   AiTrainingPlanDraft,
+  PersonalTrainingPlanDraft,
   PlannedExerciseWithExercise,
   TrainingPlanDayWithExercises,
+  TrainingPlanExerciseDraft,
   TrainingPlanSummary,
   TrainingPlanType,
 } from '../models/fitness.types';
@@ -107,20 +109,13 @@ export class TrainingPlanRepository {
        FROM training_plan tp
        LEFT JOIN training_plan_day tpd ON tpd.training_plan_id = tp.id
        LEFT JOIN planned_exercise pe ON pe.training_plan_day_id = tpd.id
-       WHERE tp.source IN ('preset', 'ai')
        GROUP BY tp.id
-       ORDER BY CASE tp.source WHEN 'preset' THEN 0 ELSE 1 END, tp.frequency ASC`,
+       ORDER BY CASE tp.source WHEN 'preset' THEN 0 WHEN 'custom' THEN 1 ELSE 2 END,
+         tp.frequency ASC, tp.name ASC`,
     );
   }
 
   async activatePlan(type: TrainingPlanType): Promise<void> {
-    const activeSession = await this.db.getOne<{ id: string }>(
-      `SELECT id FROM workout_session WHERE completed_at IS NULL LIMIT 1`,
-    );
-    if (activeSession) {
-      throw new Error('TrainingPlanRepository: cannot switch plan while a workout is active.');
-    }
-
     const target = await this.db.getOne<{ id: string }>(
       `SELECT id FROM training_plan
         WHERE type = ?
@@ -133,6 +128,79 @@ export class TrainingPlanRepository {
     }
 
     await this.activatePlanById(target.id);
+  }
+
+  async savePersonalPlan(sourcePlanId: string, draft: PersonalTrainingPlanDraft): Promise<string> {
+    const name = draft.name.trim();
+    if (!name || name.length > 80) {
+      throw new Error('Nhập tên giáo án từ 1 đến 80 ký tự.');
+    }
+    const days = draft.days;
+    const weekdays = new Set(days.map((day) => day.dayOfWeek));
+    const trainingDays = days.filter((day) => !day.isRestDay);
+    if (
+      days.length !== 7 ||
+      weekdays.size !== 7 ||
+      days.some(
+        (day) => !Number.isInteger(day.dayOfWeek) || day.dayOfWeek < 0 || day.dayOfWeek > 6,
+      ) ||
+      trainingDays.length === 0 ||
+      trainingDays.some((day) => day.exercises.length === 0)
+    ) {
+      throw new Error('Giáo án cần đủ bảy ngày và ít nhất một buổi có bài tập.');
+    }
+    if (
+      trainingDays.some(
+        (day) =>
+          new Set(day.exercises.map((item) => item.exerciseId)).size !== day.exercises.length,
+      )
+    ) {
+      throw new Error('Mỗi bài chỉ xuất hiện một lần trong một buổi tập.');
+    }
+
+    return this.db.withTransaction(async () => {
+      await this.assertNoActiveWorkout();
+      const source = await this.db.getOne<Pick<TrainingPlanSummary, 'id' | 'type' | 'source'>>(
+        `SELECT id, type, source FROM training_plan WHERE id = ? AND is_active = 1`,
+        [sourcePlanId],
+      );
+      if (!source) {
+        throw new Error('Giáo án đã thay đổi. Mở lại giáo án đang dùng để chỉnh sửa.');
+      }
+
+      const planId = source.source === 'custom' ? source.id : uuidv4();
+      await this.db.execute(
+        `INSERT INTO training_plan (id, name, type, frequency, source, updated_at)
+         VALUES (?, ?, ?, ?, 'custom', datetime('now'))
+         ON CONFLICT(id) DO UPDATE SET name = excluded.name, frequency = excluded.frequency,
+           updated_at = excluded.updated_at`,
+        [planId, name, source.type, trainingDays.length],
+      );
+      const existingDays = await this.db.query<{ id: string; day_of_week: number }>(
+        `SELECT id, day_of_week FROM training_plan_day WHERE training_plan_id = ?`,
+        [planId],
+      );
+      const existingIds = new Map(existingDays.map((day) => [day.day_of_week, day.id]));
+      for (const [index, day] of days.entries()) {
+        const dayId = existingIds.get(day.dayOfWeek) ?? uuidv4();
+        await this.db.execute(
+          `INSERT INTO training_plan_day (id, training_plan_id, day_of_week, name, is_rest_day, sort_order)
+           VALUES (?, ?, ?, ?, ?, ?)
+           ON CONFLICT(training_plan_id, day_of_week) DO UPDATE SET name = excluded.name,
+             is_rest_day = excluded.is_rest_day, sort_order = excluded.sort_order`,
+          [dayId, planId, day.dayOfWeek, day.name, day.isRestDay ? 1 : 0, index],
+        );
+        await this.db.execute(`DELETE FROM planned_exercise WHERE training_plan_day_id = ?`, [
+          dayId,
+        ]);
+        if (day.isRestDay) continue;
+        for (const [exerciseIndex, exercise] of day.exercises.entries()) {
+          await this.insertPlanExercise(dayId, exercise, exerciseIndex);
+        }
+      }
+      await this.setActivePlan(planId);
+      return planId;
+    });
   }
 
   async createAiPlan(plan: AiTrainingPlanDraft): Promise<TrainingPlanSummary> {
@@ -151,6 +219,7 @@ export class TrainingPlanRepository {
     }
 
     await this.db.withTransaction(async () => {
+      await this.assertNoActiveWorkout();
       await this.db.execute(
         `INSERT INTO training_plan (
            id, name, type, frequency, is_active, description, source, updated_at
@@ -186,30 +255,10 @@ export class TrainingPlanRepository {
         if (day.isRestDay) continue;
         for (const [exerciseIndex, exercise] of day.exercises.entries()) {
           if (!validExerciseIds.has(exercise.exerciseId)) continue;
-          await this.db.execute(
-            `INSERT INTO planned_exercise (
-               id, training_plan_day_id, exercise_id, sets, reps_min, reps_max,
-               rest_seconds, notes, sort_order
-             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-              uuidv4(),
-              dayId,
-              exercise.exerciseId,
-              clampInt(exercise.sets, 1, 10),
-              clampInt(exercise.repsMin, 1, 50),
-              clampInt(Math.max(exercise.repsMin, exercise.repsMax), 1, 50),
-              clampInt(exercise.restSeconds, 30, 600),
-              exercise.notes,
-              exerciseIndex,
-            ],
-          );
+          await this.insertPlanExercise(dayId, exercise, exerciseIndex);
         }
       }
-      await this.db.execute(`UPDATE training_plan SET is_active = 0 WHERE is_active = 1`);
-      await this.db.execute(
-        `UPDATE training_plan SET is_active = 1, updated_at = datetime('now') WHERE id = ?`,
-        [AI_CUSTOM_PLAN_ID],
-      );
+      await this.setActivePlan(AI_CUSTOM_PLAN_ID);
     });
 
     const created = await this.db.getOne<TrainingPlanSummary>(
@@ -242,31 +291,58 @@ export class TrainingPlanRepository {
 
   private async assertNoActiveWorkout(): Promise<void> {
     const activeSession = await this.db.getOne<{ id: string }>(
-      `SELECT id FROM workout_session WHERE completed_at IS NULL LIMIT 1`,
+      `SELECT id FROM workout_session WHERE status = 'active' LIMIT 1`,
     );
     if (activeSession) {
       throw new Error('TrainingPlanRepository: cannot switch plan while a workout is active.');
     }
   }
 
-  private async activatePlanById(planId: string): Promise<void> {
-    await this.assertNoActiveWorkout();
-
-    const target = await this.db.getOne<{ id: string }>(
-      `SELECT id FROM training_plan WHERE id = ? LIMIT 1`,
-      [planId],
-    );
-    if (!target) {
-      throw new Error(`TrainingPlanRepository: plan '${planId}' not found.`);
-    }
-
+  async activatePlanById(planId: string): Promise<void> {
     await this.db.withTransaction(async () => {
-      await this.db.execute(`UPDATE training_plan SET is_active = 0 WHERE is_active = 1`);
-      await this.db.execute(
-        `UPDATE training_plan SET is_active = 1, updated_at = datetime('now') WHERE id = ?`,
+      await this.assertNoActiveWorkout();
+      const target = await this.db.getOne<{ id: string }>(
+        `SELECT id FROM training_plan WHERE id = ? LIMIT 1`,
         [planId],
       );
+      if (!target) {
+        throw new Error(`TrainingPlanRepository: plan '${planId}' not found.`);
+      }
+      await this.setActivePlan(planId);
     });
+  }
+
+  private async setActivePlan(planId: string): Promise<void> {
+    await this.db.execute(
+      `UPDATE training_plan
+          SET is_active = CASE WHEN id = ? THEN 1 ELSE 0 END,
+              updated_at = CASE WHEN id = ? THEN datetime('now') ELSE updated_at END
+        WHERE id = ? OR is_active = 1`,
+      [planId, planId, planId],
+    );
+  }
+
+  private async insertPlanExercise(
+    dayId: string,
+    exercise: TrainingPlanExerciseDraft,
+    index: number,
+  ): Promise<void> {
+    await this.db.execute(
+      `INSERT INTO planned_exercise (id, training_plan_day_id, exercise_id, sets, reps_min, reps_max,
+         rest_seconds, notes, sort_order)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        uuidv4(),
+        dayId,
+        exercise.exerciseId,
+        clampInt(exercise.sets, 1, 10),
+        clampInt(exercise.repsMin, 1, 50),
+        clampInt(Math.max(exercise.repsMin, exercise.repsMax), 1, 50),
+        clampInt(exercise.restSeconds, 30, 600),
+        exercise.notes,
+        index,
+      ],
+    );
   }
 
   async getActivePlan(): Promise<ActiveTrainingPlan | null> {

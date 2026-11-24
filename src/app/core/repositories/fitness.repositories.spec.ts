@@ -70,6 +70,29 @@ describe('Fitness repositories', () => {
     );
   });
 
+  it('allows switching plans after cancelling a workout', async () => {
+    await planRepo.ensurePresetPlans();
+    const session = await workoutRepo.startFreeSession();
+    await workoutRepo.cancelSession(session.id);
+
+    await planRepo.activatePlan('upper_lower');
+
+    expect((await planRepo.getActivePlan())?.type).toBe('upper_lower');
+    expect((await planRepo.createAiPlan(aiPlanDraft())).is_active).toBe(1);
+  });
+
+  it('does not complete a workout with only skipped sets', async () => {
+    await planRepo.ensurePresetPlans();
+    const today = await planRepo.getTodayTrainingDay('2026-05-11');
+    const session = await workoutRepo.startGuidedSession(today!.id);
+    await workoutRepo.skipSet(session.exercises[0].id, 40, 8);
+
+    await expectAsync(workoutRepo.completeSession(session.id)).toBeRejectedWithError(
+      'WorkoutRepository: at least one logged set is required.',
+    );
+    expect((await workoutRepo.getActiveSession())?.id).toBe(session.id);
+  });
+
   it('persists and activates an AI custom training plan atomically', async () => {
     await planRepo.ensurePresetPlans();
 
@@ -84,6 +107,59 @@ describe('Fitness repositories', () => {
     expect(active?.type).toBe('ai_custom');
     expect(active?.training_days).toBe(3);
     expect(active?.days.find((day) => day.day_of_week === 1)?.exercises.length).toBe(1);
+  });
+
+  it('saves a moved workout in a personal plan and keeps previous workout records', async () => {
+    await planRepo.ensurePresetPlans();
+    const preset = (await planRepo.getActivePlan())!;
+    const monday = preset.days.find((day) => day.day_of_week === 1)!;
+    const session = await workoutRepo.startGuidedSession(monday.id);
+    await workoutRepo.addSet(session.exercises[0].id, {
+      weightKg: 45,
+      reps: 7,
+      restSeconds: 90,
+      effort: null,
+      notes: null,
+    });
+    await workoutRepo.completeSession(session.id);
+    const before = await workoutRepo.getSession(session.id);
+    const replacement = (await exerciseRepo.list({ limit: 100 })).find(
+      (exercise) =>
+        exercise.category !== 'cardio' &&
+        !monday.exercises.some((planned) => planned.exercise_id === exercise.id),
+    )!;
+    const days = preset.days.map((day) => ({
+      dayOfWeek: day.day_of_week === 1 ? 2 : day.day_of_week === 2 ? 1 : day.day_of_week,
+      name: day.name,
+      isRestDay: day.is_rest_day === 1,
+      exercises: day.exercises.map((exercise, index) => ({
+        exerciseId: day.id === monday.id && index === 0 ? replacement.id : exercise.exercise_id,
+        sets: exercise.sets,
+        repsMin: exercise.reps_min,
+        repsMax: exercise.reps_max,
+        restSeconds: exercise.rest_seconds,
+        notes: exercise.notes,
+      })),
+    }));
+
+    const personalId = await planRepo.savePersonalPlan(preset.id, { name: 'My week', days });
+    const custom = (await planRepo.getActivePlan())!;
+    expect(custom.source).toBe('custom');
+    expect(custom.id).not.toBe(preset.id);
+    expect((await planRepo.getTodayTrainingDay('2026-05-11'))?.is_rest_day).toBe(1);
+    const tuesday = (await planRepo.getTodayTrainingDay('2026-05-12'))!;
+    expect(tuesday.exercises[0]?.exercise_id).toBe(replacement.id);
+    expect(await workoutRepo.getSession(session.id)).toEqual(before);
+
+    expect(await planRepo.savePersonalPlan(personalId, { name: 'Updated week', days })).toBe(
+      personalId,
+    );
+    expect((await planRepo.getTodayTrainingDay('2026-05-12'))?.id).toBe(tuesday.id);
+    await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById(preset.id);
+    expect((await planRepo.getTodayTrainingDay('2026-05-11'))?.id).toBe(monday.id);
+    await planRepo.activatePlanById(personalId);
+    expect((await planRepo.getActivePlan())?.name).toBe('Updated week');
   });
 
   it('logs guided sets, snapshots total volume and reports progress metrics', async () => {
@@ -272,6 +348,12 @@ describe('Fitness repositories', () => {
     // 2 logged sets at 40x5 = 400; skipped row contributes 0.
     expect(detail!.total_volume).toBe(400);
     expect(detail!.exercises[0].total_volume).toBe(400);
+
+    await workoutRepo.completeSession(session.id, new Date('2026-05-11T09:00:00'));
+    const progress = await workoutRepo.progressSummary(new Date('2026-05-11T10:00:00'));
+    expect(progress.currentWeekVolume).toBe(400);
+    expect(progress.volumeByMuscle.reduce((total, point) => total + point.volume, 0)).toBe(400);
+    expect(progress.strength[0]?.estimated_1rm).toBe(47);
   });
 
   it('removeExerciseFromSession cascades sets and updates session totals', async () => {

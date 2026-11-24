@@ -35,29 +35,65 @@
           <ul class="session-list">
             @for (session of group.sessions; track trackBySession($index, session)) {
               <li class="session-card">
-                <div class="session-card__date">
-                  <span class="session-card__date-text">{{ formatSessionDate(session.date) }}</span>
-                  <span class="session-card__day-name">
-                    {{
-                      session.training_day_name ??
-                        (session.mode === 'free' ? 'Tập tự do' : 'Buổi tập')
-                    }}
-                  </span>
-                </div>
-                <div class="session-card__stats">
-                  <span class="stat">
-                    <ion-icon name="barbell-outline" aria-hidden="true"></ion-icon>
-                    {{ setCount(session) }} set
-                  </span>
-                  <span class="stat">
-                    <ion-icon name="trophy-outline" aria-hidden="true"></ion-icon>
-                    {{ formatVolume(session.total_volume) }}
-                  </span>
-                  <span class="stat">
-                    <ion-icon name="timer-outline" aria-hidden="true"></ion-icon>
-                    {{ formatDuration(session.duration_minutes) }}
-                  </span>
-                </div>
+                <details>
+                  <summary class="session-card__summary">
+                    <span class="session-card__date">
+                      <span class="session-card__date-text">
+                        {{ formatSessionDate(session.date) }}
+                      </span>
+                      <span class="session-card__day-name">
+                        {{
+                          session.training_day_name ??
+                            (session.mode === 'free' ? 'Tập tự do' : 'Buổi tập')
+                        }}
+                      </span>
+                    </span>
+                    <span class="session-card__stats">
+                      <span class="stat">
+                        <ion-icon name="barbell-outline" aria-hidden="true"></ion-icon>
+                        {{ setCount(session) }} hiệp đã ghi
+                      </span>
+                      <span class="stat">
+                        <ion-icon name="trophy-outline" aria-hidden="true"></ion-icon>
+                        {{ formatVolume(session.total_volume) }}
+                      </span>
+                      <span class="stat">
+                        <ion-icon name="timer-outline" aria-hidden="true"></ion-icon>
+                        {{ formatDuration(session.duration_minutes) }}
+                      </span>
+                    </span>
+                    <ion-icon
+                      class="session-card__chevron"
+                      name="chevron-down-outline"
+                      aria-hidden="true"
+                    ></ion-icon>
+                  </summary>
+                  <div class="session-card__details">
+                    @for (exercise of session.exercises; track exercise.id) {
+                      <section class="session-exercise">
+                        <h4>{{ exercise.exercise_name_vi || exercise.exercise_name }}</h4>
+                        @if (exercise.sets.length) {
+                          <ul class="session-sets">
+                            @for (set of exercise.sets; track set.id) {
+                              <li>
+                                <span>Hiệp {{ set.set_number }}</span>
+                                @if (set.status === 'skipped') {
+                                  <span>Đã bỏ qua</span>
+                                } @else {
+                                  <span>{{ set.weight_kg }} kg × {{ set.reps }} lần</span>
+                                }
+                              </li>
+                            }
+                          </ul>
+                        } @else {
+                          <p>Chưa ghi hiệp nào.</p>
+                        }
+                      </section>
+                    } @empty {
+                      <p>Không có chi tiết bài tập.</p>
+                    }
+                  </div>
+                </details>
               </li>
             }
           </ul>
