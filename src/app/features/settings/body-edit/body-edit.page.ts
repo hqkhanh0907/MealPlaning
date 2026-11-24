@@ -25,9 +25,9 @@ import {
   bodyMeasurementError,
   isProfileGender,
 } from '../../../core/models/body-measurements';
-import { GENDER_LABELS, type Gender } from '../../../core/models/user-profile.types';
+import { type Gender } from '../../../core/models/user-profile.types';
 import { birthDateError } from '../../../core/services/profile/profile-birth-date';
-import { BirthDateField } from '../../../shared/forms/birth-date-field/birth-date-field';
+import { BodyFields } from '../../../shared/forms/body-fields/body-fields';
 import { AppFormField } from '../../../shared/forms/form-field/form-field';
 
 @Component({
@@ -45,7 +45,7 @@ import { AppFormField } from '../../../shared/forms/form-field/form-field';
     IonButton,
     IonFooter,
     AppFormField,
-    BirthDateField,
+    BodyFields,
   ],
 })
 export default class BodyEditPage implements OnInit {
@@ -62,7 +62,6 @@ export default class BodyEditPage implements OnInit {
   readonly gender = signal<Gender>('male');
   readonly birthDate = signal('');
   readonly limits = BODY_MEASUREMENT_LIMITS;
-  readonly genderLabels = GENDER_LABELS;
   private initial: UserProfile | null = null;
 
   ngOnInit(): void {

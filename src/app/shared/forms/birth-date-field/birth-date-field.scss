@@ -8,3 +8,16 @@ p {
   color: var(--text-secondary);
   font: 400 14px/1.45 var(--ion-font-family);
 }
+
+:host(.inline-age) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: var(--space-lg);
+  row-gap: var(--space-xs);
+}
+
+:host(.inline-age) app-form-field {
+  flex: 1 1 12rem;
+  min-width: 0;
+}

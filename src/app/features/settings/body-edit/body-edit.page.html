@@ -9,119 +9,108 @@
 
 <ion-content class="ion-padding">
   <div class="form-content">
-    <app-form-field
-      label="Chiều cao (cm)"
-      inputId="body-field-height"
-      errorId="err-body-height"
-      [invalid]="heightInvalid()"
-      [errorMessage]="heightError() || ''"
-    >
-      <input
-        id="body-field-height"
-        class="input-native"
-        type="number"
-        inputmode="decimal"
-        [min]="limits.heightCm.min"
-        [max]="limits.heightCm.max"
-        step="any"
-        [attr.aria-invalid]="heightInvalid() ? 'true' : null"
-        [attr.aria-describedby]="heightInvalid() ? 'err-body-height' : null"
-        [ngModel]="height()"
-        (ngModelChange)="height.set($event)"
-      />
-    </app-form-field>
-
-    <app-form-field
-      label="Cân nặng (kg)"
-      inputId="body-field-weight"
-      errorId="err-body-weight"
-      [invalid]="weightInvalid()"
-      [errorMessage]="weightError() || ''"
-    >
-      <input
-        id="body-field-weight"
-        class="input-native"
-        type="number"
-        inputmode="decimal"
-        [min]="limits.weightKg.min"
-        [max]="limits.weightKg.max"
-        step="any"
-        [attr.aria-invalid]="weightInvalid() ? 'true' : null"
-        [attr.aria-describedby]="weightInvalid() ? 'err-body-weight' : null"
-        [ngModel]="weight()"
-        (ngModelChange)="weight.set($event)"
-      />
-    </app-form-field>
-
-    <app-birth-date-field
-      idPrefix="body-field"
-      errorId="err-body-birth-date"
-      [birthDate]="birthDate()"
-      [errorMessage]="dateError()"
-      (edited)="birthDate.set($event)"
-    />
-
-    <h3 class="section-caption">Giới tính</h3>
-    <div
-      class="segment-control segment-control--inverse-sage"
-      role="radiogroup"
-      aria-label="Giới tính"
-    >
-      <button
-        type="button"
-        class="segment-button"
-        [class.selected]="gender() === 'male'"
-        role="radio"
-        [attr.aria-checked]="gender() === 'male'"
-        (click)="gender.set('male')"
+    <section aria-labelledby="body-measurements">
+      <h2 id="body-measurements">Số đo và thông tin cá nhân</h2>
+      <app-body-fields
+        idPrefix="body-field"
+        errorPrefix="err-body"
+        [birthDate]="birthDate()"
+        [dateError]="dateError()"
+        [gender]="gender()"
+        (birthDateChange)="birthDate.set($event)"
+        (genderChange)="gender.set($event)"
       >
-        {{ genderLabels.male }}
-      </button>
-      <button
-        type="button"
-        class="segment-button"
-        [class.selected]="gender() === 'female'"
-        role="radio"
-        [attr.aria-checked]="gender() === 'female'"
-        (click)="gender.set('female')"
-      >
-        {{ genderLabels.female }}
-      </button>
-    </div>
+        <app-form-field
+          label="Chiều cao (cm)"
+          inputId="body-field-height"
+          errorId="err-body-height"
+          [invalid]="heightInvalid()"
+          [errorMessage]="heightError() || ''"
+        >
+          <input
+            id="body-field-height"
+            class="input-native"
+            type="number"
+            inputmode="decimal"
+            [min]="limits.heightCm.min"
+            [max]="limits.heightCm.max"
+            step="any"
+            [attr.aria-invalid]="heightInvalid() ? 'true' : null"
+            [attr.aria-describedby]="heightInvalid() ? 'err-body-height' : null"
+            [ngModel]="height()"
+            (ngModelChange)="height.set($event)"
+          />
+        </app-form-field>
+
+        <app-form-field
+          label="Cân nặng (kg)"
+          inputId="body-field-weight"
+          errorId="err-body-weight"
+          [invalid]="weightInvalid()"
+          [errorMessage]="weightError() || ''"
+        >
+          <input
+            id="body-field-weight"
+            class="input-native"
+            type="number"
+            inputmode="decimal"
+            [min]="limits.weightKg.min"
+            [max]="limits.weightKg.max"
+            step="any"
+            [attr.aria-invalid]="weightInvalid() ? 'true' : null"
+            [attr.aria-describedby]="weightInvalid() ? 'err-body-weight' : null"
+            [ngModel]="weight()"
+            (ngModelChange)="weight.set($event)"
+          />
+        </app-form-field>
+      </app-body-fields>
+    </section>
 
     @if (preview(); as r) {
-      <h3 class="section-caption">Ước tính hằng ngày</h3>
-      <div class="preview-card">
-        @if (r.bmr > 0) {
-          <div class="preview-row">
-            <span class="preview-label">Năng lượng lúc nghỉ</span>
-            <span class="preview-value">{{ r.bmr }} kcal/ngày</span>
+      <section class="estimates" aria-labelledby="body-estimates">
+        <h2 id="body-estimates">Ước tính hằng ngày</h2>
+        <dl class="targets">
+          @if (!r.energyNote) {
+            <div>
+              <dt>Năng lượng đề xuất</dt>
+              <dd>
+                <strong>{{ r.target_calories }}</strong> kcal/ngày
+              </dd>
+            </div>
+          }
+          <div>
+            <dt>Đạm tham khảo</dt>
+            <dd>
+              @if (r.target_protein) {
+                <strong>{{ r.target_protein }}</strong> g/ngày
+              } @else {
+                Chưa có đề xuất
+              }
+            </dd>
           </div>
-          <div class="preview-row">
-            <span class="preview-label">Tổng năng lượng tiêu hao</span>
-            <span class="preview-value">{{ r.tdee }} kcal · {{ activityLabel() }}</span>
-          </div>
-        }
+        </dl>
         @if (r.energyNote; as note) {
-          <p class="preview-hint">{{ note }} Bạn vẫn có thể ghi bữa ăn.</p>
-        } @else {
-          <div class="preview-row preview-row--accent">
-            <span class="preview-label">Mục tiêu năng lượng đề xuất</span>
-            <span class="preview-value">{{ r.target_calories }} kcal/ngày</span>
-          </div>
+          <p class="estimate-note">{{ note }} Bạn vẫn có thể ghi bữa ăn.</p>
         }
-        <div class="preview-row">
-          <span class="preview-label">Mục tiêu đạm tham khảo</span>
-          <span class="preview-value">{{
-            r.target_protein ? r.target_protein + ' g/ngày' : 'Chưa có đề xuất'
-          }}</span>
-        </div>
-        <p class="preview-hint">Khi bạn đổi thông số, ứng dụng giữ mục tiêu bạn đã nhập tay.</p>
-      </div>
+        @if (r.bmr > 0) {
+          <dl class="expenditure">
+            <div>
+              <dt>Năng lượng lúc nghỉ</dt>
+              <dd>{{ r.bmr }} kcal/ngày</dd>
+            </div>
+            <div>
+              <dt>
+                Tổng tiêu hao <span>({{ activityLabel() }})</span>
+              </dt>
+              <dd>{{ r.tdee }} kcal/ngày</dd>
+            </div>
+          </dl>
+        }
+        <p class="estimate-note">Mục tiêu đã nhập tay vẫn giữ nguyên khi bạn đổi số đo.</p>
+      </section>
     }
   </div>
 </ion-content>
-
 <ion-footer class="ion-no-border">
   <div class="sticky-save-bar">
     @if (submission.error(); as error) {

@@ -172,3 +172,17 @@ textarea.input-native {
 
 /* Trong .form-content (modal flex-gap layout) — error vẫn bám sát input
    bên trên, không cần margin-top âm vì nó ở trong cùng .form-field wrapper. */
+
+app-body-fields .input-wrapper {
+  padding: 0;
+}
+app-body-fields .input-wrapper > .input-native {
+  display: block;
+  min-height: 54px;
+  box-sizing: border-box;
+  padding: 20px 16px 8px;
+  border-radius: inherit;
+}
+app-body-fields .input-label {
+  z-index: 1;
+}

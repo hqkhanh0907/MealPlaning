@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { App as CapacitorApp, type BackButtonListenerEvent } from '@capacitor/app';
 import {
   IonHeader,
+  IonFooter,
   IonToolbar,
   IonTitle,
   IonContent,
@@ -32,7 +33,6 @@ import {
 import { ProfileStore } from '../../core/stores/profile.store';
 import {
   ACTIVITY_LEVELS,
-  GENDER_LABELS,
   GOAL_LABELS,
   deriveFitnessLevel,
   type ActivityLevel,
@@ -41,7 +41,7 @@ import {
   type GymExperience,
 } from '../../core/models/user-profile.types';
 import { birthDateError } from '../../core/services/profile/profile-birth-date';
-import { BirthDateField } from '../../shared/forms/birth-date-field/birth-date-field';
+import { BodyFields } from '../../shared/forms/body-fields/body-fields';
 import { getActivityFactor } from '../../core/services/profile/energy-targets';
 import { profileCalculationInput, recalcTargets } from '../../core/services/profile/recalc-targets';
 import { EMPTY_2B, Step2bErrors, validateStep2b } from './onboarding-validation';
@@ -66,8 +66,9 @@ export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
   imports: [
     FormField,
     AppFormField,
-    BirthDateField,
+    BodyFields,
     IonHeader,
+    IonFooter,
     IonToolbar,
     IonTitle,
     IonContent,
@@ -121,7 +122,6 @@ export default class OnboardingPage {
     this.step2aFormSignal,
     onboardingStep2aSchema(this.day.date),
   );
-  readonly genderLabels = GENDER_LABELS;
   readonly goalLabels = GOAL_LABELS;
 
   onBirthDateEdit(birthDate: string): void {

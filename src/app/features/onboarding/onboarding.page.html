@@ -1,5 +1,5 @@
 <!-- ============================== HEADER ============================== -->
-<ion-header>
+<ion-header [class.body-step]="step() === 2">
   <ion-toolbar>
     @if (step() > 1) {
       <ion-buttons slot="start">
@@ -13,7 +13,7 @@
   <ion-progress-bar [value]="progressValue()" class="onboarding-progress" />
 </ion-header>
 
-<ion-content>
+<ion-content [class.body-step]="step() === 2">
   <div class="page-container">
     <!-- ======================== STEP 1: MỤC TIÊU ======================== -->
     @if (step() === 1) {
@@ -107,120 +107,62 @@
 
     <!-- ==================== STEP 2a: THÔNG TIN CƠ THỂ ==================== -->
     @if (step() === 2) {
-      <div class="step-content">
-        <h1 #step2aHeading class="step-title" tabindex="-1">Thông tin cơ thể</h1>
-        <p class="step-subtitle">Hoàn thành để tính mục tiêu dinh dưỡng</p>
-
-        <app-form-field
-          label="Chiều cao (cm)"
-          inputId="field-height"
-          errorId="err-height"
-          [invalid]="!!step2aFieldError('heightCm')"
-          [errorMessage]="step2aFieldError('heightCm')"
-        >
-          <input
-            #heightInput
-            id="field-height"
-            step="any"
-            data-testid="onb-height"
-            type="number"
-            inputmode="decimal"
-            class="input-native"
-            [formField]="step2aForm.heightCm"
-            [attr.aria-invalid]="step2aFieldError('heightCm') ? 'true' : null"
-            [attr.aria-describedby]="step2aFieldError('heightCm') ? 'err-height' : null"
-          />
-        </app-form-field>
-
-        <app-form-field
-          label="Cân nặng (kg)"
-          inputId="field-weight"
-          errorId="err-weight"
-          [invalid]="!!step2aFieldError('weightKg')"
-          [errorMessage]="step2aFieldError('weightKg')"
-        >
-          <input
-            #weightInput
-            id="field-weight"
-            step="any"
-            data-testid="onb-weight"
-            type="number"
-            inputmode="decimal"
-            class="input-native"
-            [formField]="step2aForm.weightKg"
-            [attr.aria-invalid]="step2aFieldError('weightKg') ? 'true' : null"
-            [attr.aria-describedby]="step2aFieldError('weightKg') ? 'err-weight' : null"
-          />
-        </app-form-field>
-
-        <app-birth-date-field
+      <div class="body-step-form">
+        <h1 #step2aHeading tabindex="-1">Số đo và thông tin cá nhân</h1>
+        <p>Dùng để ước tính mục tiêu dinh dưỡng của bạn.</p>
+        <app-body-fields
           idPrefix="field"
-          errorId="err-birth-date"
           [birthDate]="step2aFormSignal().birthDate"
-          [errorMessage]="step2aFieldError('birthDate')"
-          (edited)="onBirthDateEdit($event)"
-        />
-
-        <span class="section-label segment-label" [class.invalid]="step2aFieldError('gender')"
-          >Giới tính</span
+          [dateError]="step2aFieldError('birthDate')"
+          [gender]="step2aFormSignal().gender"
+          [genderError]="step2aFieldError('gender')"
+          (birthDateChange)="onBirthDateEdit($event)"
+          (genderChange)="onGenderChange($event)"
         >
-        <div
-          class="segment-control segment-control--inverse-sage"
-          [class.invalid]="step2aFieldError('gender')"
-          role="radiogroup"
-          aria-label="Giới tính"
-          [attr.aria-invalid]="step2aFieldError('gender') ? 'true' : null"
-          [attr.aria-describedby]="step2aFieldError('gender') ? 'err-gender' : null"
-        >
-          <button
-            type="button"
-            class="segment-button"
-            [class.selected]="step2aFormSignal().gender === 'male'"
-            role="radio"
-            [attr.aria-checked]="step2aFormSignal().gender === 'male'"
-            (click)="onGenderChange('male')"
+          <app-form-field
+            label="Chiều cao (cm)"
+            inputId="field-height"
+            errorId="err-height"
+            [invalid]="!!step2aFieldError('heightCm')"
+            [errorMessage]="step2aFieldError('heightCm')"
           >
-            {{ genderLabels.male }}
-          </button>
-          <button
-            type="button"
-            class="segment-button"
-            [class.selected]="step2aFormSignal().gender === 'female'"
-            role="radio"
-            [attr.aria-checked]="step2aFormSignal().gender === 'female'"
-            (click)="onGenderChange('female')"
-          >
-            {{ genderLabels.female }}
-          </button>
-        </div>
-        @if (step2aFieldError('gender')) {
-          <div id="err-gender" class="field-error" role="alert">
-            {{ step2aFieldError('gender') }}
-          </div>
-        }
+            <input
+              #heightInput
+              id="field-height"
+              step="any"
+              data-testid="onb-height"
+              type="number"
+              inputmode="decimal"
+              class="input-native"
+              [formField]="step2aForm.heightCm"
+              [attr.aria-invalid]="step2aFieldError('heightCm') ? 'true' : null"
+              [attr.aria-describedby]="step2aFieldError('heightCm') ? 'err-height' : null"
+            />
+          </app-form-field>
 
-        <div class="button-row">
-          <ion-button
-            data-testid="onb-step2-back"
-            fill="outline"
-            class="btn-row btn-row--secondary"
-            (click)="goBack()"
+          <app-form-field
+            label="Cân nặng (kg)"
+            inputId="field-weight"
+            errorId="err-weight"
+            [invalid]="!!step2aFieldError('weightKg')"
+            [errorMessage]="step2aFieldError('weightKg')"
           >
-            Quay lại
-          </ion-button>
-          <ion-button
-            data-testid="onb-step2-continue"
-            [color]="step2aValid() ? 'secondary' : 'medium'"
-            class="btn-row btn-row--primary"
-            [disabled]="!step2aValid()"
-            (click)="nextFromStep2a()"
-          >
-            Tiếp tục
-          </ion-button>
-        </div>
+            <input
+              #weightInput
+              id="field-weight"
+              step="any"
+              data-testid="onb-weight"
+              type="number"
+              inputmode="decimal"
+              class="input-native"
+              [formField]="step2aForm.weightKg"
+              [attr.aria-invalid]="step2aFieldError('weightKg') ? 'true' : null"
+              [attr.aria-describedby]="step2aFieldError('weightKg') ? 'err-weight' : null"
+            />
+          </app-form-field>
+        </app-body-fields>
       </div>
     }
-
     <!-- ==================== STEP 2b: MỨC HOẠT ĐỘNG ==================== -->
     @if (step() === 3) {
       <div class="step-content">
@@ -367,3 +309,27 @@
     }
   </div>
 </ion-content>
+
+@if (step() === 2) {
+  <ion-footer class="ion-no-border body-step-footer">
+    <div class="button-row">
+      <ion-button
+        data-testid="onb-step2-back"
+        fill="outline"
+        class="btn-row btn-row--secondary"
+        (click)="goBack()"
+      >
+        Quay lại
+      </ion-button>
+      <ion-button
+        data-testid="onb-step2-continue"
+        [color]="step2aValid() ? 'primary' : 'medium'"
+        class="btn-row btn-row--primary"
+        [disabled]="!step2aValid()"
+        (click)="nextFromStep2a()"
+      >
+        Tiếp tục
+      </ion-button>
+    </div>
+  </ion-footer>
+}

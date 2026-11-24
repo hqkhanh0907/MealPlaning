@@ -1,0 +1,44 @@
+:host {
+  display: block;
+}
+.measurements {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.gender {
+  margin: var(--space-lg) 0 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+legend {
+  padding: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-body);
+}
+.gender-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xl);
+}
+.gender-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 48px;
+  padding-inline-end: var(--space-md);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.gender-options input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  accent-color: var(--ion-color-primary);
+}
+.gender-options input:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 3px;
+}
