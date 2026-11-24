@@ -73,11 +73,22 @@ describe('BodyEditPage', () => {
   }
 
   it('ngOnInit populates signals from profile', async () => {
-    await setup(makeProfile());
+    await setup(makeProfile({ birth_date: '1999-06-15' }));
     expect(component.height()).toBe(170);
     expect(component.weight()).toBe(65);
-    expect(component.birthDate()).toBe(makeProfile().birth_date);
+    expect(component.birthDate()).toBe('1999-06-15');
     expect(component.gender()).toBe('male');
+  });
+
+  it('starts an upgraded profile with an empty date and accepts a real birthday', async () => {
+    await setup(makeProfile({ birth_date: null }));
+    expect(component.birthDate()).toBe('');
+    expect(component.formInvalid()).toBeTrue();
+    expect(component.preview()).toBeNull();
+    component.birthDate.set('1999-06-15');
+    await component.save();
+    expect(profileStore.updateProfile).toHaveBeenCalledOnceWith({ birth_date: '1999-06-15' });
+    expect(profileSignal()?.birth_date).toBe('1999-06-15');
   });
 
   it('does nothing in ngOnInit when profile is null', async () => {

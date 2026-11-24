@@ -60,7 +60,7 @@ describe('Personal profile persistence', () => {
       'PRAGMA table_info(user_profile)',
     );
     expect(columns.map((c) => c.name)).not.toContain('age');
-    expect(columns.find((c) => c.name === 'birth_date')?.notnull).toBe(1);
+    expect(columns.map((c) => c.name)).toContain('birth_date');
     await repository.insert(
       { ...personalProfile, birth_date: '1996-11-25', weight_kg: 70, activity_factor: 1.375 },
       eve,

@@ -65,6 +65,12 @@ describe('MigrationRunner', () => {
   });
 });
 
+async function removeBirthDateForOlderFixture(db: Database): Promise<void> {
+  await db.execute('DROP TRIGGER require_new_profile_birth_date');
+  await db.execute('DROP TRIGGER retain_profile_birth_date');
+  await db.execute('ALTER TABLE user_profile DROP COLUMN birth_date');
+}
+
 describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
   it('preserves ambiguous timed entries from v7 without counting seconds as lifted kilograms', async () => {
     const db = await createTestDatabase();
@@ -76,7 +82,7 @@ describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
       await db.execute('ALTER TABLE workout_set DROP COLUMN legacy_unit_unknown');
       await db.execute('ALTER TABLE user_profile DROP COLUMN protein_target_mode');
       await db.execute('PRAGMA user_version = 7');
-      await db.execute('ALTER TABLE user_profile DROP COLUMN birth_date');
+      await removeBirthDateForOlderFixture(db);
       await db.execute('ALTER TABLE user_profile ADD COLUMN age INTEGER');
       await db.execute(`INSERT INTO exercise (id,name,muscle_group,category,source) VALUES
         ('ex_farmer_carry','Carry','forearms','compound','db'),('ex_back_squat','Squat','quads','compound','db')`);
@@ -119,7 +125,7 @@ describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
   it('migrates old energy goals and preserves manual targets and previous day plans', async () => {
     const liveDb = await createTestDatabase();
     try {
-      await liveDb.execute('ALTER TABLE user_profile DROP COLUMN birth_date');
+      await removeBirthDateForOlderFixture(liveDb);
       await liveDb.execute('ALTER TABLE user_profile ADD COLUMN age INTEGER');
       await liveDb.execute('ALTER TABLE user_profile DROP COLUMN calorie_target_mode');
       await liveDb.execute('PRAGMA user_version = 6');
@@ -168,10 +174,10 @@ describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
     }
   });
 
-  it('requires a known birthday and preserves the original data if the profile copy fails', async () => {
+  it('keeps an age-only profile available until the user enters their birth date', async () => {
     const db = await createTestDatabase();
     try {
-      await db.execute('ALTER TABLE user_profile DROP COLUMN birth_date');
+      await removeBirthDateForOlderFixture(db);
       await db.execute('ALTER TABLE user_profile ADD COLUMN age INTEGER');
       await db.execute('ALTER TABLE user_profile ADD COLUMN birth_date TEXT');
       await db.execute('PRAGMA user_version = 10');
@@ -179,12 +185,20 @@ describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
         (id,height_cm,weight_kg,age,gender,goal,fitness_level,bmr,tdee,target_calories,target_protein)
         VALUES ('me',170,70,29,'male','maintain','beginner',1623,2232,2100,112)`);
       const runner = new MigrationRunner(db, MIGRATION_REGISTRY);
-      await expectAsync(runner.run()).toBeRejected();
-      expect(await db.getOne('PRAGMA user_version')).toEqual({ user_version: 10 });
-      expect(await db.getOne('SELECT age, birth_date FROM user_profile')).toEqual({
-        age: 29,
+      await runner.run();
+      expect(await db.getOne('PRAGMA user_version')).toEqual({ user_version: SCHEMA_VERSION });
+      expect(await db.getOne('SELECT birth_date, target_calories FROM user_profile')).toEqual({
         birth_date: null,
+        target_calories: 2100,
       });
+      expect(
+        (await db.query<{ name: string }>('PRAGMA table_info(user_profile)')).map((c) => c.name),
+      ).not.toContain('age');
+      await expectAsync(
+        db.execute(
+          "INSERT INTO user_profile SELECT 'other',height_cm,weight_kg,NULL,gender,goal,fitness_level,activity_factor,bmr,tdee,target_calories,target_protein,target_carbs,target_fat,theme,notif_morning,notif_lunch,notif_evening,notif_weekly,onboarding_completed,created_at,updated_at,calorie_target_mode,protein_target_mode FROM user_profile",
+        ),
+      ).toBeRejected();
       await db.execute("UPDATE user_profile SET birth_date = '1996-11-25'");
       await runner.run();
       expect(await db.getOne('SELECT birth_date,target_calories FROM user_profile')).toEqual({
@@ -258,7 +272,7 @@ describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
     try {
       await db.execute('ALTER TABLE user_profile DROP COLUMN protein_target_mode');
       await db.execute('PRAGMA user_version = 8');
-      await db.execute('ALTER TABLE user_profile DROP COLUMN birth_date');
+      await removeBirthDateForOlderFixture(db);
       await db.execute('ALTER TABLE user_profile ADD COLUMN age INTEGER');
       for (const grams of [104, 137]) {
         await db.execute(

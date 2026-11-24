@@ -4,7 +4,7 @@ export interface UserProfile {
   id: string;
   height_cm: number;
   weight_kg: number;
-  birth_date: string;
+  birth_date: string | null;
   gender: Gender;
   goal: Goal;
   fitness_level: FitnessLevel;

@@ -71,7 +71,7 @@ export default class BodyEditPage implements OnInit {
     this.height.set(p.height_cm);
     this.weight.set(p.weight_kg);
     this.initial = p;
-    this.birthDate.set(p.birth_date);
+    this.birthDate.set(p.birth_date ?? '');
     this.gender.set(p.gender);
   }
 

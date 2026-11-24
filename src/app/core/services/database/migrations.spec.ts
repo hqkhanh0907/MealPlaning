@@ -16,7 +16,7 @@ import { MIGRATION_REGISTRY } from './migrations';
 
 describe('MIGRATION_REGISTRY', () => {
   it('exposes each migration through the current schema', () => {
-    expect(SCHEMA_VERSION).toBe(11);
+    expect(SCHEMA_VERSION).toBe(12);
     expect(MIGRATION_REGISTRY.length).toBe(11);
     expect(MIGRATION_REGISTRY[0].version).toBe(1);
     expect(MIGRATION_REGISTRY[1].version).toBe(2);

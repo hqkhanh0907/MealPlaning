@@ -74,7 +74,9 @@ export default class SettingsPage {
   readonly bodySummary = computed(() => {
     const p = this.profile();
     if (!p) return '';
-    return `${p.height_cm}cm · ${p.weight_kg}kg · ${ageOnDate(p.birth_date, this.day.date())} tuổi · ${GENDER_LABELS[p.gender]}`;
+    const age = ageOnDate(p.birth_date, this.day.date());
+    const ageLabel = age === null ? 'Bổ sung ngày sinh' : `${age} tuổi`;
+    return `${p.height_cm}cm · ${p.weight_kg}kg · ${ageLabel} · ${GENDER_LABELS[p.gender]}`;
   });
 
   readonly goalSummary = computed(() => {

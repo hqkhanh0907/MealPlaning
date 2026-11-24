@@ -129,9 +129,18 @@
       />
     </app-form-field>
 
-    <ion-button fill="clear" size="small" class="reset-button reset-button--text" (click)="reset()">
-      Đặt lại về đề xuất
-    </ion-button>
+    @if (hasBirthDate()) {
+      <ion-button
+        fill="clear"
+        size="small"
+        class="reset-button reset-button--text"
+        (click)="reset()"
+      >
+        Đặt lại về đề xuất
+      </ion-button>
+    } @else {
+      <p>Thêm ngày sinh trong mục Cơ thể để nhận đề xuất.</p>
+    }
 
     <details class="goal-estimates">
       <summary>Cách ứng dụng ước tính mục tiêu</summary>

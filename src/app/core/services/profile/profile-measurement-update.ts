@@ -60,9 +60,13 @@ export function updateMeasurementTargets(
   today: Date,
 ): Partial<ProfileData> {
   const next = { ...current, ...patch };
+  if (!next.birth_date) return patch;
   const calculated = automaticTargetUpdate(
     {
-      ...profileCalculationInput(current, today),
+      ...profileCalculationInput(
+        { ...current, birth_date: current.birth_date ?? next.birth_date },
+        today,
+      ),
       target_calories: current.target_calories,
       target_protein: current.target_protein,
       calorie_target_mode: next.calorie_target_mode,
