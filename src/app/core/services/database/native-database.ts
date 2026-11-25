@@ -44,6 +44,7 @@ export class NativeDatabase extends Database {
 
   private async doInitialize(): Promise<void> {
     try {
+      await this.sqlite.checkConnectionsConsistency();
       const isConn = (await this.sqlite.isConnection(this.name, DB_READONLY)).result === true;
       this.db = isConn
         ? await this.sqlite.retrieveConnection(this.name, DB_READONLY)
