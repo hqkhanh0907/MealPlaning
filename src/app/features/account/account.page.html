@@ -1,0 +1,25 @@
+<ion-content>
+  <main class="account">
+    <h1>{{ register() ? 'Tạo tài khoản' : 'Đăng nhập' }}</h1>
+    <form (submit)="submit($event, username.value, password.value)">
+      <div class="input-wrapper">
+        <label for="username" class="input-label">Tên đăng nhập</label>
+        <input #username id="username" class="input-native" autocomplete="username"
+          autocapitalize="none" spellcheck="false" required [disabled]="busy()" />
+      </div>
+      <div class="input-wrapper">
+        <label for="password" class="input-label">Mật khẩu</label>
+        <input #password id="password" type="password" class="input-native"
+          [attr.autocomplete]="register() ? 'new-password' : 'current-password'"
+          required [disabled]="busy()" />
+      </div>
+      @if (error()) { <p role="alert" class="error">{{ error() }}</p> }
+      <button type="submit" class="primary" [disabled]="busy()">
+        {{ busy() ? 'Đang kết nối…' : register() ? 'Tạo tài khoản' : 'Đăng nhập' }}
+      </button>
+      <button type="button" class="secondary" [disabled]="busy()" (click)="toggleMode()">
+        {{ register() ? 'Đã có tài khoản? Đăng nhập' : 'Chưa có tài khoản? Tạo tài khoản' }}
+      </button>
+    </form>
+  </main>
+</ion-content>

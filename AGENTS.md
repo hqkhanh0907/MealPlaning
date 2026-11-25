@@ -2,6 +2,10 @@
 
 This file provides guidance to Codex (claude.ai/code) when working with code in this repository.
 
+## Release Status
+
+The app has no public release, real users, or real user data. Entity and schema changes may recreate test data without a legacy data migration. Khanh will update this status when real users join.
+
 ## Prerequisites
 - **Node.js:** 22 LTS (`node -v`)
 - **Java (JDK):** 21 LTS — required for Android build (`java -version`)

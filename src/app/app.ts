@@ -13,6 +13,8 @@ import { LocalNotifications } from './core/services/notifications/local-notifica
 import { notificationFlags } from './core/services/notifications/notification-preferences';
 import { cleanupOldAiLogs } from './core/services/ai/ai-log';
 import { localIsoDate } from './core/utils/local-date';
+import { AccountSession } from './core/account/account-session';
+import { AccountSync } from './core/account/account-sync';
 
 @Component({
   selector: 'app-root',
@@ -25,6 +27,8 @@ import { localIsoDate } from './core/utils/local-date';
   },
 })
 export class App {
+  private readonly account = inject(AccountSession);
+  private readonly sync = inject(AccountSync);
   private readonly db = inject(Database);
   private readonly network = inject(NetworkStore);
   private readonly profileStore = inject(ProfileStore);
@@ -33,9 +37,13 @@ export class App {
   private readonly zone = inject(NgZone);
   private readonly localDay = inject(LocalDay);
   private dateTimer?: number;
+  private syncTimer?: number;
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => window.clearTimeout(this.dateTimer));
+    inject(DestroyRef).onDestroy(() => {
+      window.clearTimeout(this.dateTimer);
+      window.clearInterval(this.syncTimer);
+    });
     // Profile is loaded by APP_INITIALIZER (xem database.provider.ts) before
     // the App component is instantiated, so the signal is already populated
     // (or null if onboarding hasn't been completed).
@@ -45,6 +53,7 @@ export class App {
     afterNextRender(() => {
       this.onVisibilityChange();
       SplashScreen.hide();
+      if (this.account.required && !this.account.current()) return;
       if (Capacitor.isNativePlatform()) {
         void this.syncNotificationsFromProfile().catch((err) =>
           console.warn('[App] notification sync failed:', err),
@@ -61,6 +70,15 @@ export class App {
 
       // Phase 1.5B infra hooks — fire-and-forget; failures must NOT block UI.
       void this.network.start();
+      if (this.account.required) {
+        this.zone.runOutsideAngular(() => {
+          this.syncTimer = window.setInterval(() => {
+            if (!document.hidden && this.network.online() && this.sync.status() !== 'conflict') {
+              void this.sync.sync();
+            }
+          }, 15_000);
+        });
+      }
       // 30-day retention for ai_chat_log (xem ai-strategy.md §4.4).
       void cleanupOldAiLogs(this.db, 30).catch((err) =>
         console.warn('[App] cleanupOldAiLogs failed:', err),
@@ -70,6 +88,7 @@ export class App {
 
   protected onVisibilityChange(): void {
     window.clearTimeout(this.dateTimer);
+    if (this.account.required && !this.account.current()) return;
     if (!document.hidden) this.watchLocalDay();
   }
 

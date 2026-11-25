@@ -10,6 +10,9 @@ import { WebDatabase } from './web-database';
 import { NativeDatabase } from './native-database';
 import { ProfileStore } from '../../stores/profile.store';
 import { SeedLoader } from '../seed/seed-loader';
+import { AccountSession } from '../../account/account-session';
+import { AccountSync } from '../../account/account-sync';
+import { environment } from '../../../../environments/environment';
 
 export const SEED_STARTUP_DELAY_MS = 3000;
 
@@ -32,7 +35,13 @@ export function provideDatabaseService(): EnvironmentProviders {
   return makeEnvironmentProviders([
     {
       provide: Database,
-      useClass: Capacitor.isNativePlatform() ? NativeDatabase : WebDatabase,
+      useFactory: () => {
+        const account = inject(AccountSession).current();
+        const name = environment.dbName.replace(/\.db$/, '');
+        return Capacitor.isNativePlatform()
+          ? new NativeDatabase(account ? `${name}_${account.id}` : name)
+          : new WebDatabase();
+      },
     },
     {
       provide: APP_INITIALIZER,
@@ -40,8 +49,12 @@ export function provideDatabaseService(): EnvironmentProviders {
         const db = inject(Database);
         const profileStore = inject(ProfileStore);
         const seedLoader = inject(SeedLoader);
+        const session = inject(AccountSession);
+        const sync = inject(AccountSync);
         return async () => {
+          if (session.required && !session.current()) return;
           await db.initialize();
+          await sync.initialize();
           await profileStore.loadProfile();
 
           setTimeout(() => {

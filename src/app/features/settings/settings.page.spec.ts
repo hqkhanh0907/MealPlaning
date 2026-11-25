@@ -3,6 +3,7 @@ import { signal } from '@angular/core';
 import { ToastController } from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
 import { ProfileStore } from '../../core/stores/profile.store';
+import { AccountSync } from '../../core/account/account-sync';
 import { LocalNotifications } from '../../core/services/notifications/local-notifications';
 import { UserProfile } from '../../core/models/user-profile.model';
 import SettingsPage from './settings.page';
@@ -68,6 +69,7 @@ describe('SettingsPage', () => {
       imports: [SettingsPage],
       providers: [
         provideRouter([]),
+        { provide: AccountSync, useValue: { status: signal('idle') } },
         { provide: ProfileStore, useValue: profileStore },
         { provide: LocalNotifications, useValue: notifications },
         { provide: ToastController, useValue: toastCtrl },

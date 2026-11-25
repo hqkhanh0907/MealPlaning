@@ -1,0 +1,467 @@
+{
+  "user_profile": {
+    "key": "id",
+    "required": [
+      "height_cm",
+      "weight_kg",
+      "gender",
+      "goal",
+      "fitness_level",
+      "activity_factor",
+      "bmr",
+      "tdee",
+      "target_calories",
+      "target_protein",
+      "theme",
+      "notif_morning",
+      "notif_lunch",
+      "notif_evening",
+      "notif_weekly",
+      "onboarding_completed",
+      "created_at",
+      "calorie_target_mode",
+      "protein_target_mode"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "height_cm": "REAL",
+      "weight_kg": "REAL",
+      "birth_date": "TEXT",
+      "gender": "TEXT",
+      "goal": "TEXT",
+      "fitness_level": "TEXT",
+      "activity_factor": "REAL",
+      "bmr": "REAL",
+      "tdee": "REAL",
+      "target_calories": "REAL",
+      "target_protein": "REAL",
+      "target_carbs": "REAL",
+      "target_fat": "REAL",
+      "theme": "TEXT",
+      "notif_morning": "INTEGER",
+      "notif_lunch": "INTEGER",
+      "notif_evening": "INTEGER",
+      "notif_weekly": "INTEGER",
+      "onboarding_completed": "INTEGER",
+      "created_at": "TEXT",
+      "updated_at": "TEXT",
+      "calorie_target_mode": "TEXT",
+      "protein_target_mode": "TEXT"
+    },
+    "refs": []
+  },
+  "weight_log": {
+    "key": "id",
+    "required": [
+      "weight_kg",
+      "date",
+      "created_at"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "weight_kg": "REAL",
+      "date": "TEXT",
+      "notes": "TEXT",
+      "created_at": "TEXT"
+    },
+    "refs": []
+  },
+  "ingredient": {
+    "key": "id",
+    "required": [
+      "name",
+      "category",
+      "calories",
+      "protein",
+      "carbs",
+      "fat",
+      "fiber",
+      "source",
+      "created_at"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "name": "TEXT",
+      "category": "TEXT",
+      "calories": "REAL",
+      "protein": "REAL",
+      "carbs": "REAL",
+      "fat": "REAL",
+      "fiber": "REAL",
+      "source": "TEXT",
+      "created_at": "TEXT",
+      "updated_at": "TEXT"
+    },
+    "refs": []
+  },
+  "dish": {
+    "key": "id",
+    "required": [
+      "name",
+      "type",
+      "source",
+      "servings",
+      "is_favorite",
+      "created_at"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "name": "TEXT",
+      "description": "TEXT",
+      "type": "TEXT",
+      "source": "TEXT",
+      "servings": "REAL",
+      "image_url": "TEXT",
+      "meal_tag": "TEXT",
+      "is_favorite": "INTEGER",
+      "created_at": "TEXT",
+      "updated_at": "TEXT"
+    },
+    "refs": []
+  },
+  "dish_ingredient": {
+    "key": "id",
+    "required": [
+      "dish_id",
+      "ingredient_id",
+      "gram_weight",
+      "sort_order"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "dish_id": "TEXT",
+      "ingredient_id": "TEXT",
+      "gram_weight": "REAL",
+      "sort_order": "INTEGER"
+    },
+    "refs": [
+      [
+        "ingredient_id",
+        "ingredient",
+        "id"
+      ],
+      [
+        "dish_id",
+        "dish",
+        "id"
+      ]
+    ]
+  },
+  "day_plan": {
+    "key": "id",
+    "required": [
+      "date",
+      "target_calories",
+      "target_protein",
+      "created_at"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "date": "TEXT",
+      "target_calories": "REAL",
+      "target_protein": "REAL",
+      "created_at": "TEXT",
+      "updated_at": "TEXT"
+    },
+    "refs": []
+  },
+  "meal_slot": {
+    "key": "id",
+    "required": [
+      "day_plan_id",
+      "meal_type",
+      "position",
+      "created_at"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "day_plan_id": "TEXT",
+      "meal_type": "TEXT",
+      "position": "INTEGER",
+      "created_at": "TEXT"
+    },
+    "refs": [
+      [
+        "day_plan_id",
+        "day_plan",
+        "id"
+      ]
+    ]
+  },
+  "planned_dish": {
+    "key": "id",
+    "required": [
+      "meal_slot_id",
+      "dish_id",
+      "servings",
+      "sort_order",
+      "is_completed",
+      "created_at"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "meal_slot_id": "TEXT",
+      "dish_id": "TEXT",
+      "servings": "REAL",
+      "sort_order": "INTEGER",
+      "is_completed": "INTEGER",
+      "completed_at": "TEXT",
+      "calories": "REAL",
+      "protein": "REAL",
+      "carbs": "REAL",
+      "fat": "REAL",
+      "fiber": "REAL",
+      "created_at": "TEXT"
+    },
+    "refs": [
+      [
+        "dish_id",
+        "dish",
+        "id"
+      ],
+      [
+        "meal_slot_id",
+        "meal_slot",
+        "id"
+      ]
+    ]
+  },
+  "exercise": {
+    "key": "id",
+    "required": [
+      "name",
+      "muscle_group",
+      "category",
+      "source",
+      "created_at"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "name": "TEXT",
+      "name_vi": "TEXT",
+      "muscle_group": "TEXT",
+      "category": "TEXT",
+      "equipment": "TEXT",
+      "instructions": "TEXT",
+      "source": "TEXT",
+      "created_at": "TEXT"
+    },
+    "refs": []
+  },
+  "training_plan": {
+    "key": "id",
+    "required": [
+      "name",
+      "type",
+      "frequency",
+      "is_active",
+      "source",
+      "created_at"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "name": "TEXT",
+      "type": "TEXT",
+      "frequency": "INTEGER",
+      "is_active": "INTEGER",
+      "description": "TEXT",
+      "source": "TEXT",
+      "created_at": "TEXT",
+      "updated_at": "TEXT"
+    },
+    "refs": []
+  },
+  "training_plan_day": {
+    "key": "id",
+    "required": [
+      "training_plan_id",
+      "day_of_week",
+      "name",
+      "is_rest_day",
+      "sort_order"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "training_plan_id": "TEXT",
+      "day_of_week": "INTEGER",
+      "name": "TEXT",
+      "is_rest_day": "INTEGER",
+      "sort_order": "INTEGER"
+    },
+    "refs": [
+      [
+        "training_plan_id",
+        "training_plan",
+        "id"
+      ]
+    ]
+  },
+  "planned_exercise": {
+    "key": "id",
+    "required": [
+      "training_plan_day_id",
+      "exercise_id",
+      "sets",
+      "reps_min",
+      "reps_max",
+      "rest_seconds",
+      "sort_order"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "training_plan_day_id": "TEXT",
+      "exercise_id": "TEXT",
+      "sets": "INTEGER",
+      "reps_min": "INTEGER",
+      "reps_max": "INTEGER",
+      "rest_seconds": "INTEGER",
+      "notes": "TEXT",
+      "sort_order": "INTEGER"
+    },
+    "refs": [
+      [
+        "exercise_id",
+        "exercise",
+        "id"
+      ],
+      [
+        "training_plan_day_id",
+        "training_plan_day",
+        "id"
+      ]
+    ]
+  },
+  "workout_session": {
+    "key": "id",
+    "required": [
+      "date",
+      "mode",
+      "total_volume",
+      "started_at",
+      "created_at",
+      "status"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "date": "TEXT",
+      "training_plan_day_id": "TEXT",
+      "training_day_name": "TEXT",
+      "mode": "TEXT",
+      "total_volume": "REAL",
+      "duration_minutes": "INTEGER",
+      "started_at": "TEXT",
+      "completed_at": "TEXT",
+      "created_at": "TEXT",
+      "status": "TEXT",
+      "cancelled_at": "TEXT"
+    },
+    "refs": [
+      [
+        "training_plan_day_id",
+        "training_plan_day",
+        "id"
+      ]
+    ]
+  },
+  "workout_exercise": {
+    "key": "id",
+    "required": [
+      "workout_session_id",
+      "exercise_id",
+      "sort_order",
+      "total_volume"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "workout_session_id": "TEXT",
+      "exercise_id": "TEXT",
+      "sort_order": "INTEGER",
+      "total_volume": "REAL",
+      "planned_sets": "INTEGER",
+      "planned_min": "INTEGER",
+      "planned_max": "INTEGER",
+      "planned_rest": "INTEGER"
+    },
+    "refs": [
+      [
+        "exercise_id",
+        "exercise",
+        "id"
+      ],
+      [
+        "workout_session_id",
+        "workout_session",
+        "id"
+      ]
+    ]
+  },
+  "workout_set": {
+    "key": "id",
+    "required": [
+      "workout_exercise_id",
+      "set_number",
+      "weight_kg",
+      "reps",
+      "created_at",
+      "status",
+      "legacy_unit_unknown"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "workout_exercise_id": "TEXT",
+      "set_number": "INTEGER",
+      "weight_kg": "REAL",
+      "reps": "INTEGER",
+      "rest_seconds": "INTEGER",
+      "effort": "TEXT",
+      "notes": "TEXT",
+      "created_at": "TEXT",
+      "updated_at": "TEXT",
+      "status": "TEXT",
+      "completed_at": "TEXT",
+      "duration_seconds": "INTEGER",
+      "legacy_unit_unknown": "INTEGER"
+    },
+    "refs": [
+      [
+        "workout_exercise_id",
+        "workout_exercise",
+        "id"
+      ]
+    ]
+  },
+  "streak_log": {
+    "key": "id",
+    "required": [
+      "date",
+      "nutrition_hit",
+      "workout_hit",
+      "created_at"
+    ],
+    "cols": {
+      "id": "TEXT",
+      "date": "TEXT",
+      "nutrition_hit": "INTEGER",
+      "workout_hit": "INTEGER",
+      "created_at": "TEXT"
+    },
+    "refs": []
+  },
+  "seed_artifact": {
+    "key": "artifact_id",
+    "required": [
+      "artifact_type",
+      "seed_version",
+      "inserted_at",
+      "fingerprint_hash"
+    ],
+    "cols": {
+      "artifact_id": "TEXT",
+      "artifact_type": "TEXT",
+      "seed_version": "TEXT",
+      "inserted_at": "TEXT",
+      "fingerprint_hash": "TEXT"
+    },
+    "refs": []
+  }
+}

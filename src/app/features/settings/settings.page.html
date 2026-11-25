@@ -8,6 +8,36 @@
 </ion-header>
 
 <ion-content class="settings-content">
+  @if (accountSession.current(); as account) {
+    <ion-list lines="full" class="settings-list">
+      <ion-list-header><ion-label><h2>Tài khoản</h2></ion-label></ion-list-header>
+      <ion-item>
+        <ion-label class="ion-text-wrap">{{ account.username }}</ion-label>
+        <ion-button slot="end" fill="clear" [disabled]="signOutBusy()" (click)="signOut()">
+          Đăng xuất
+        </ion-button>
+      </ion-item>
+      <ion-item>
+        <ion-label class="ion-text-wrap">
+          <h3>Đồng bộ</h3>
+          <p aria-live="polite">{{ syncLabel() }}</p>
+        </ion-label>
+      </ion-item>
+      @if (accountSync.status() === 'expired') {
+        <ion-item button routerLink="/account">Đăng nhập lại</ion-item>
+      } @else if (accountSync.status() === 'conflict') {
+        <ion-item>
+          <ion-label class="ion-text-wrap">Chọn phiên bản giữ lại cho tài khoản này.</ion-label>
+        </ion-item>
+        <ion-item button (click)="accountSync.resolveConflict(true)">Dùng bản máy chủ</ion-item>
+        <ion-item button (click)="accountSync.resolveConflict(false)">Giữ bản trên máy này</ion-item>
+      } @else {
+        <ion-item button [disabled]="accountSync.status() === 'working'" (click)="accountSync.sync()">
+          Đồng bộ ngay
+        </ion-item>
+      }
+    </ion-list>
+  }
   <ion-list lines="full" class="settings-list">
     <ion-list-header>
       <ion-label><h2>Hồ sơ</h2></ion-label>

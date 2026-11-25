@@ -1,0 +1,18 @@
+[Unit]
+Description=MealPlaning public API gateway
+After=network.target mealplan-db.service
+Requires=mealplan-db.service
+
+[Service]
+User=mealplan
+Group=mealplan
+ExecStart=/usr/bin/node /opt/mealplaning/current/server/public-proxy.mjs
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

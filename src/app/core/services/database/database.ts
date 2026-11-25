@@ -6,6 +6,11 @@
  *   - WebDatabaseService  — sql.js WASM (web / tests)
  *   - NativeDatabaseService — @capacitor-community/sqlite (Android)
  */
+export interface DatabaseStatement {
+  statement: string;
+  values: (string | number | null)[];
+}
+
 export abstract class Database {
   /**
    * Initialize the database: open connection, run schema DDL + migrations.
@@ -24,6 +29,12 @@ export abstract class Database {
    * Run multiple statements atomically when the underlying engine supports it.
    */
   abstract withTransaction<T>(callback: () => Promise<T>): Promise<T>;
+
+  executeAtomically(statements: DatabaseStatement[]): Promise<void> {
+    return this.withTransaction(async () => {
+      for (const { statement, values } of statements) await this.execute(statement, values);
+    });
+  }
 
   /**
    * Query rows and return them as an array of T.

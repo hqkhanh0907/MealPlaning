@@ -1,4 +1,5 @@
 import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { AccountSession } from '../account/account-session';
 import { isTimedExercise, workoutNumber } from '../models/fitness.types';
 import type {
   ActiveTrainingPlan,
@@ -36,6 +37,7 @@ const DRAFT_AUTOSAVE_DEBOUNCE_MS = 500;
 
 @Injectable({ providedIn: 'root' })
 export class FitnessStore {
+  private readonly account = inject(AccountSession);
   private readonly exerciseRepo = inject(ExerciseRepository);
   private readonly planRepo = inject(TrainingPlanRepository);
   private readonly workoutRepo = inject(WorkoutRepository);
@@ -127,7 +129,7 @@ export class FitnessStore {
   private persistDraft(exerciseId: string, draft: WorkoutSetDraft, timed: boolean): void {
     try {
       localStorage.setItem(
-        `${DRAFT_STORAGE_PREFIX}${exerciseId}`,
+        this.draftKey(exerciseId),
         JSON.stringify({ ...draft, unit: timed ? 'seconds' : 'reps' }),
       );
     } catch {
@@ -145,7 +147,7 @@ export class FitnessStore {
       restSeconds: String(exercise.planned_rest ?? 90),
     };
     try {
-      const raw = localStorage.getItem(`${DRAFT_STORAGE_PREFIX}${exercise.id}`);
+      const raw = localStorage.getItem(this.draftKey(exercise.id));
       if (!raw) {
         return defaults;
       }
@@ -167,10 +169,15 @@ export class FitnessStore {
   /** F-006 helper — drop persisted draft after a successful logSet so next session starts clean. */
   private clearPersistedDraft(exerciseId: string): void {
     try {
-      localStorage.removeItem(`${DRAFT_STORAGE_PREFIX}${exerciseId}`);
+      localStorage.removeItem(this.draftKey(exerciseId));
     } catch {
       // ignored
     }
+  }
+
+  private draftKey(exerciseId: string): string {
+    const accountId = this.account.current()?.id;
+    return DRAFT_STORAGE_PREFIX + (accountId ? accountId + ':' : '') + exerciseId;
   }
 
   skipRest(): void {

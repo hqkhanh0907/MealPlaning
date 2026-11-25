@@ -1,0 +1,21 @@
+[Unit]
+Description=MealPlaning database and API
+After=network.target
+
+[Service]
+User=mealplan
+Group=mealplan
+WorkingDirectory=/opt/mealplaning/current/server
+EnvironmentFile=/opt/mealplaning/current/release.env
+ExecStart=/opt/mealplaning/pocketbase serve --http=127.0.0.1:18089 --dir=/var/lib/mealplaning --hooksDir=pb_hooks --migrationsDir=pb_migrations --publicDir=pb_public --automigrate=false
+StateDirectory=mealplaning
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

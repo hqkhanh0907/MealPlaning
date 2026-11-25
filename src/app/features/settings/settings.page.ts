@@ -40,6 +40,8 @@ import {
 } from '../../core/services/notifications/notification-schedule';
 import { activitySummaryForFactor } from '../../core/services/profile/activity-label';
 import { environment } from '../../../environments/environment';
+import { AccountSession } from '../../core/account/account-session';
+import { AccountSync } from '../../core/account/account-sync';
 
 @Component({
   selector: 'app-settings',
@@ -64,6 +66,17 @@ import { environment } from '../../../environments/environment';
   ],
 })
 export default class SettingsPage {
+  protected readonly accountSession = inject(AccountSession);
+  protected readonly accountSync = inject(AccountSync);
+  protected readonly signOutBusy = signal(false);
+  protected readonly syncLabel = computed(() => ({
+    idle: 'Chưa đồng bộ',
+    working: 'Đang đồng bộ',
+    saved: 'Đã đồng bộ',
+    offline: 'Chưa kết nối được. Dữ liệu đã lưu trên máy.',
+    expired: 'Cần đăng nhập lại để đồng bộ.',
+    conflict: 'Dữ liệu đã đổi ở nơi khác.',
+  })[this.accountSync.status()]);
   private readonly day = inject(LocalDay);
   private readonly profileStore = inject(ProfileStore);
   private readonly notifications = inject(LocalNotifications);
@@ -109,6 +122,18 @@ export default class SettingsPage {
 
   async resumeNotifications(): Promise<void> {
     if (await this.allowNotifications()) await this.syncSelectedNotifications();
+  }
+
+  protected async signOut(): Promise<void> {
+    const account = this.accountSession.current();
+    if (!account || this.signOutBusy()) return;
+    this.signOutBusy.set(true);
+    this.accountSession.clear();
+    await this.notifications.sync(notificationFlags(null)).catch(() => undefined);
+    if (navigator.onLine) {
+      await this.accountSession.call('/api/mealplan/logout', {}, account.token).catch(() => undefined);
+    }
+    window.location.replace('/account');
   }
 
   readonly appVersion = environment.appVersion;

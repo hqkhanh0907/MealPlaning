@@ -8,9 +8,8 @@
  * Initialization is idempotent and safe against repeat-calls caused by
  * hot-reload, Angular zone reruns, or Capacitor app resume.
  */
-import { Injectable } from '@angular/core';
 import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection } from '@capacitor-community/sqlite';
-import { Database } from './database';
+import { Database, type DatabaseStatement } from './database';
 import { SCHEMA_DDL, SCHEMA_VERSION } from './schema';
 import {
   shouldResetLegacyManagementSchema,
@@ -28,12 +27,15 @@ const DB_READONLY = false;
 type Primitive = string | number | boolean | null;
 type SqlParam = Primitive | Uint8Array;
 
-@Injectable()
 export class NativeDatabase extends Database {
   private readonly sqlite = new SQLiteConnection(CapacitorSQLite);
   private db: SQLiteDBConnection | null = null;
   private initPromise: Promise<void> | null = null;
   private transactionDepth = 0;
+
+  constructor(private readonly name = DB_NAME) {
+    super();
+  }
 
   override initialize(): Promise<void> {
     this.initPromise ??= this.doInitialize();
@@ -42,11 +44,11 @@ export class NativeDatabase extends Database {
 
   private async doInitialize(): Promise<void> {
     try {
-      const isConn = (await this.sqlite.isConnection(DB_NAME, DB_READONLY)).result === true;
+      const isConn = (await this.sqlite.isConnection(this.name, DB_READONLY)).result === true;
       this.db = isConn
-        ? await this.sqlite.retrieveConnection(DB_NAME, DB_READONLY)
+        ? await this.sqlite.retrieveConnection(this.name, DB_READONLY)
         : await this.sqlite.createConnection(
-            DB_NAME,
+            this.name,
             DB_ENCRYPTED,
             DB_MODE,
             SCHEMA_VERSION,
@@ -145,6 +147,12 @@ export class NativeDatabase extends Database {
   override async execute(sql: string, params?: unknown[]): Promise<void> {
     this.ensureDb();
     await this.db!.run(sql, (params as SqlParam[]) ?? [], this.transactionDepth === 0);
+  }
+
+  override async executeAtomically(statements: DatabaseStatement[]): Promise<void> {
+    this.ensureDb();
+    if (this.transactionDepth !== 0) throw new Error('Database is busy.');
+    await this.db!.executeSet(statements, true);
   }
 
   override async withTransaction<T>(callback: () => Promise<T>): Promise<T> {

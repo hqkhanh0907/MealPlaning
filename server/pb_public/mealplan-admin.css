@@ -1,0 +1,17 @@
+:root {
+  color: #18233d;
+  background: #f5f7fb;
+  font-family: system-ui, sans-serif;
+}
+
+main { max-width: 76rem; margin: 2rem auto; padding: 0 1rem; }
+form, .filters { display: flex; gap: 1rem; align-items: end; flex-wrap: wrap; margin-block: 1rem; }
+label { display: grid; gap: .35rem; }
+input, select, button, textarea { font: inherit; padding: .55rem; }
+button { cursor: pointer; }
+.table-wrap { overflow: auto; max-height: 28rem; }
+table { border-collapse: collapse; width: 100%; background: white; }
+th, td { padding: .6rem; text-align: left; border-bottom: 1px solid #d9deea; }
+th { position: sticky; top: 0; background: white; }
+#edit label { flex: 1; }
+[hidden] { display: none; }
