@@ -44,10 +44,11 @@ export class NativeDatabase extends Database {
 
   private async doInitialize(): Promise<void> {
     try {
-      await this.sqlite.checkConnectionsConsistency();
-      const isConn = (await this.sqlite.isConnection(this.name, DB_READONLY)).result === true;
-      this.db = isConn
-        ? await this.sqlite.retrieveConnection(this.name, DB_READONLY)
+      const nativeConnection = new SQLiteDBConnection(this.name, DB_READONLY, CapacitorSQLite);
+      const nativeState = await nativeConnection.isDBOpen().catch(() => null);
+      // A WebView reload loses the JS connection map while Android keeps the open handle.
+      this.db = nativeState
+        ? nativeConnection
         : await this.sqlite.createConnection(
             this.name,
             DB_ENCRYPTED,
@@ -56,12 +57,14 @@ export class NativeDatabase extends Database {
             DB_READONLY,
           );
 
-      await this.db.open();
+      if (!nativeState?.result) await this.db.open();
       await this.db.execute('PRAGMA foreign_keys = ON;', false);
-      try {
-        await this.db.execute('PRAGMA journal_mode = WAL;', false);
-      } catch (err) {
-        console.warn('[NativeDatabaseService] WAL not enabled:', err);
+      if (!nativeState) {
+        try {
+          await this.db.query('PRAGMA journal_mode = WAL;');
+        } catch (err) {
+          console.warn('[NativeDatabaseService] WAL not enabled:', err);
+        }
       }
 
       const currentVersion = await this.readUserVersion();
