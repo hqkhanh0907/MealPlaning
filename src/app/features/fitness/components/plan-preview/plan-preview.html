@@ -17,7 +17,10 @@
             @for (exercise of day.exercises; track exercise.id) {
               <li>
                 <strong>{{ exercise.exercise_name_vi || exercise.exercise_name }}</strong
-                ><br />{{ purpose(exercise) }}
+                ><br />{{ purpose(exercise) }}<br />
+                <button type="button" class="guide-link" (click)="guideExercise.set(exercise)">
+                  Cách thực hiện
+                </button>
               </li>
             }
           </ul>
@@ -50,3 +53,10 @@
     }
   }
 </details>
+@if (guideExercise(); as shown) {
+  <app-exercise-guide-sheet
+    [exerciseId]="shown.exercise_id"
+    [exerciseName]="shown.exercise_name_vi || shown.exercise_name"
+    (closed)="guideExercise.set(null)"
+  />
+}

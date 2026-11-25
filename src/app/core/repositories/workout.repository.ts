@@ -575,7 +575,7 @@ export class WorkoutRepository {
        WHERE session.completed_at IS NOT NULL
          AND ${LOGGED_REPETITION_SET}
          AND session.date BETWEEN ? AND ?
-         AND e.id IN ('ex_barbell_bench_press', 'ex_back_squat', 'ex_deadlift')
+         AND e.id IN ('bench-press', 'squat', 'deadlift')
          AND ws.weight_kg > 0 AND ws.effort = 'maxed'
          AND ws.reps BETWEEN 1 AND 10
        GROUP BY e.id

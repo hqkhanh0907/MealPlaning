@@ -93,15 +93,7 @@ export interface ActiveTrainingPlan extends TrainingPlanSummary {
 
 export type WorkoutSetStatus = 'logged' | 'skipped';
 
-export function isTimedExercise(id: string): boolean {
-  return [
-    'ex_plank',
-    'ex_farmer_carry',
-    'ex_treadmill_run',
-    'ex_stationary_bike',
-    'ex_rowing_machine',
-  ].includes(id);
-}
+export { isTimedExercise } from './exercise-measures';
 
 export const workoutNumber = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 });
 

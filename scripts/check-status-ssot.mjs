@@ -57,6 +57,7 @@ const violations = [];
 
 function walk(dir) {
   for (const entry of readdirSync(dir)) {
+    if (dir === join(ROOT, '.agents', 'skills') && entry.startsWith('bmad-')) continue;
     if (entry === 'node_modules' || entry === '.git' || entry === 'dist' || entry === 'www' || entry === 'android' || entry === '.angular' || entry === '.claude' || entry === '_bmad') continue;
     // Skip the guard's own documentation in CLAUDE.md/AGENTS.md (which legitimately lists the placeholder strings).
     if (entry === 'CLAUDE.md' || entry === 'AGENTS.md' || entry === '.cursorrules') continue;

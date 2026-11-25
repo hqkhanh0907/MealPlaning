@@ -55,10 +55,10 @@ Người thử mới tập, chọn tập toàn thân và có sàn trống. Thi�
 
 | Bài trong mỗi buổi | Nhóm chính dùng để đếm | Khối lượng dự kiến | Dụng cụ thực tế | Tình trạng danh mục |
 |---|---|---|---|---|
-| Squat ôm một tạ đơn | Đùi trước | 2 hiệp × 8–12 lần | Một tạ đơn | Mẫu dùng `ex_dumbbell_goblet_squat`. |
-| Chống đẩy trên sàn | Ngực | 2 hiệp × 8–12 lần | Sàn | Có `ex_push_up`. Nếu biến thể này quá khó, cho đổi trước khi ghi. |
-| Kéo đồng thời hai tạ đơn, thân người gập, không tựa ghế | Lưng | 2 hiệp × 8–12 lần | Hai tạ đơn | Mẫu dùng `ex_dumbbell_bent_over_row`. |
-| Romanian deadlift với hai tạ đơn | Đùi sau | 2 hiệp × 8–12 lần | Hai tạ đơn | Mẫu dùng `ex_dumbbell_romanian_deadlift`. |
+| Squat ôm một tạ đơn | Đùi trước | 2 hiệp × 8–12 lần | Một tạ đơn | Mẫu dùng `goblet-squat`. |
+| Chống đẩy | Ngực | 2 hiệp × 8–12 lần | Sàn | Mẫu dùng `push-up`. Nếu biến thể này quá khó, cho đổi trước khi ghi. |
+| Kéo tạ đơn chống đẩy luân phiên | Lưng | 2 hiệp × 8–12 lần | Hai tạ đơn và sàn | Mẫu dùng `renegade-row`. Danh mục gốc không có bài kéo hai tạ khi đứng gập hông. |
+| Deadlift Romania hai tạ đơn | Đùi sau | 2 hiệp × 8–12 lần | Hai tạ đơn | Mẫu dùng `dumbbell-romanian-deadlift`. |
 
 Đây là bốn kiểu động tác trong ví dụ tập toàn thân: gập gối, đẩy, kéo và gập hông. Bộ kiểm xét chúng trên cả tuần. Các bài phối hợp còn huy động cơ phụ. Bảng chỉ cộng hiệp cho nhóm chính trong danh mục. [Danh mục bài và dụng cụ](../../src/app/core/repositories/fitness-seed.ts)
 
@@ -75,13 +75,13 @@ Người thử mới tập, chọn tập toàn thân và có sàn trống. Thi�
 
 Ở mức 35 phút, bản hai hiệp còn 7 phút ngoài phần dự phòng đã tính. Nếu chỉ có 20 phút, bản một hiệp là lựa chọn để người dùng xem trước. Nếu ngay cả bản rút gọn vượt thời lượng, giải thích và cho người dùng sửa. Không âm thầm cắt thời gian nghỉ.
 
-**Mẫu Hai tạ đơn và sàn.** Người dùng có thể xem từng buổi trước khi chọn mẫu. Mỗi bài có hướng dẫn tiếng Việt đọc ngoại tuyến. Màn ghi hiệp dùng tổng kg của hai tạ cho bài kéo lưng và Romanian deadlift trong mẫu. Các nhật ký hiện hữu tiếp tục dùng mã bài gốc.
+**Mẫu Hai tạ đơn và sàn.** Người dùng có thể xem từng buổi trước khi chọn mẫu. Mỗi bài có hướng dẫn tiếng Việt và hình đọc ngoại tuyến. Màn ghi hiệp dùng tổng kg của hai tạ cho các bài cầm hai tạ rời.
 
 Phần hướng dẫn tham khảo cách trình bày của openGym tại `e4a68a94c42a3c17cbd560d66ce2e46a7048ab99`. Màn chi tiết gọi `instrFor(ex)` để hiển thị từng bước. Dữ liệu tiếng Anh của bài kéo lưng nằm trong trường `instructions` của bài 0293. [Màn chi tiết](https://github.com/DuarteSantos8/openGym/blob/e4a68a94c42a3c17cbd560d66ce2e46a7048ab99/frontend/src/sheets.jsx#L1613) · [Bản ghi bài kéo lưng](https://github.com/DuarteSantos8/openGym/blob/e4a68a94c42a3c17cbd560d66ce2e46a7048ab99/catalogue/exercises/0293.json)
 
 Các bước tiếng Anh của bài 0293 đến từ ExerciseDB v1 qua exercises-dataset, theo MIT. Mã openGym, mô tả riêng và bản dịch của họ dùng AGPL-3.0. Gym visual cấp riêng quyền dùng ảnh và hoạt ảnh cho openGym. [Thông báo giấy phép](https://github.com/DuarteSantos8/openGym/blob/e4a68a94c42a3c17cbd560d66ce2e46a7048ab99/NOTICE.md#L47)
 
-MealPlaning dùng lời hướng dẫn tiếng Việt viết riêng. Hình kéo lưng hai giai đoạn do AI tạo mới từ mô tả động tác. Hình B trang 21 là nguồn đối chiếu cho biến thể kéo đồng thời hai tay. Ba bài còn lại chỉ có hướng dẫn chữ. [CrossFit, trang 4 và 21](https://assets.crossfit.com/pdfs/seminars/Dumbbell_Training_Guide.pdf) · [ACE, chống đẩy](https://www.acefitness.org/resources/everyone/exercise-library/41/push-up/) · [NASM, Romanian deadlift hai tạ đơn](https://www.nasm.org/resource-center/exercise-library/dumbbell-romanian-deadlift)
+MealPlaning dùng lời hướng dẫn tiếng Việt viết riêng theo từng mã của danh mục gốc. Hình lấy nguyên từ Open Exercise Illustrations, xem mục "Danh mục gốc" bên dưới. openGym chỉ là tham khảo về cách trình bày. Không tệp hình nào của Gym visual nằm trong ứng dụng.
 
 Hai hiệp và khoảng 8–12 lần là lựa chọn cho ví dụ người lớn khỏe mạnh mới tập. Mốc nghỉ 90 giây là giả định của mẫu. Mức tạ bắt đầu do người dùng xác lập. [ACSM, mô hình tăng tiến 2009](https://pubmed.ncbi.nlm.nih.gov/19204579/) · [ACSM, tổng quan 2026](https://pmc.ncbi.nlm.nih.gov/articles/PMC12965823/)
 
@@ -112,17 +112,46 @@ Mỗi hàng bắt đầu từ hồ sơ chuẩn ở trên. Chỉ thay đổi yế
 
 Bộ đối chiếu kiểm phép tính của ví dụ, cặp hồ sơ, danh mục và các biến thể trong mẫu. Chạy từ gốc dự án bằng `node --import tsx --test scripts/audit/initial-training-plan.cjs`.
 
-### Nghiệm thu hướng dẫn ngoại tuyến, ngày 24/11/2026
+## Danh mục gốc và hướng dẫn ngoại tuyến, ngày 24/11/2026
 
-Môi trường dùng APK debug, giả lập Android 16 API 36, chế độ máy bay, Wi-Fi và dữ liệu di động tắt.
+Danh mục bài tập của ứng dụng là nguyên bộ Open Exercise Illustrations tại phiên bản `2786aefa4b36a08faeca8114e0d1eb0af3ef6732`, giấy phép CC0. Ứng dụng dùng mã gốc của nguồn làm mã bài. Ứng dụng chưa phát hành, nên seed cũ được thay hẳn và không có lớp chuyển đổi. [Kho nguồn](https://github.com/hitmanrepo/open-exercise-illustrations/tree/2786aefa4b36a08faeca8114e0d1eb0af3ef6732) · [Giấy phép](https://github.com/hitmanrepo/open-exercise-illustrations/blob/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/LICENSE)
+
+| Hạng mục | Giá trị |
+|---|---|
+| Mã bài trong nguồn | 415 |
+| Mã bài trong ứng dụng | 415, khớp hai chiều, không thiếu, không thừa, không trùng |
+| Tệp hình đóng gói | 796, trùng từng byte với nguồn |
+| Bí danh và tên biến thể của nguồn | Dùng để tìm đúng bài. 44 tên biến thể không thành bài riêng. |
+| Mã còn vướng giữa chữ và hình | 69, liệt kê trong `scripts/audit/exercise-guides.open.json` |
+| Mã có nguồn kỹ thuật chưa đạt mức chuyên môn | 250, cùng tệp trên |
+
+Tác giả bộ hình ghi rõ hình do AI tạo và chưa có huấn luyện viên thẩm định. Vì vậy chữ kỹ thuật dựa trên nguồn chuyên môn của từng bài. Mỗi bài qua một lượt viết và một lượt phản biện độc lập, cả hai đều mở từng khung hình. Bài nào hình mâu thuẫn với nguồn vẫn nằm trong danh mục và được ghi vào danh sách còn vướng.
+
+Nhập lại danh mục bằng `node scripts/fitness/import-open-exercise-illustrations.mjs`. Thêm `--check` để chỉ kiểm. Chạy lần hai không đổi tệp nào. Bản ghim của `exercises.json` nằm trong `scripts/fitness/open-exercise-illustrations/`. Bộ kiểm `scripts/audit/exercise-guides.cjs` đọc danh sách kỳ vọng từ bản ghim đó.
+
+Hướng dẫn hiện các khung hình theo đúng thứ tự nguồn khai báo: Bắt đầu rồi Kết thúc, có thêm khung Giữa ở bài ba khung, và một khung Tư thế giữ ở bài giữ tĩnh. Màn xem trước giáo án và màn đang tập dùng chung một bảng hướng dẫn. Giao diện giữ nền sáng. Nền tối chỉ nằm trong hình.
+
+Đơn vị ghi theo từng mã: bài giữ tĩnh, giãn cơ giữ, mang vác và máy cardio ghi giây. Bài một bên của nguồn ghi "Số lần mỗi bên". Bài cầm hai tạ rời ghi "Tổng hai tạ (kg)".
+
+Giáo án mẫu dùng mã gốc. Mẫu Hai tạ đơn và sàn chỉ gồm bài mà nguồn khai báo dụng cụ là tạ đơn hoặc không dụng cụ. Bài kéo của mẫu đổi sang `renegade-row`, khó hơn bài kéo khi đứng gập hông.
+
+### Nghiệm thu trên Android, ngày 24/11/2026
+
+Môi trường: APK debug `com.healthmate.ai`, giả lập Android 16 API 36, 1080×2400, mật độ 420, cỡ chữ 1.0, hồ sơ thử mới, chế độ máy bay, Wi-Fi và dữ liệu di động tắt.
 
 | Thao tác | Kết quả trên Android |
 |---|---|
-| Mở Đổi giáo án, xem trước Hai tạ đơn và sàn. | Hiện vai trò từng bài trước khi chọn. Full Body 3 buổi vẫn là lịch đang hoạt động. |
-| Chọn mẫu, mở thứ Ba, bắt đầu và chọn bài kéo hai tạ. | Nhãn nhập tải ghi tổng hai tạ. Bảng hướng dẫn có ba bước và hình hai tư thế. |
-| Ghi tổng 12 kg × 10 lần. Mở hướng dẫn rồi đóng. | Vẫn có đúng một hiệp với cùng số liệu. Đồng hồ giảm từ 90 xuống 86 giây. |
-| Lần lượt mở chống đẩy, squat ôm một tạ và Romanian deadlift hai tạ. | Mỗi bài hiện đúng nội dung, nguồn kỹ thuật và trạng thái thiếu hình. |
-| Hoàn thành buổi. Trong Chỉnh giáo án, thay bài kéo hai tạ bằng kéo tạ đòn. | Buổi mới hiện tên bài tạ đòn và thông báo thiếu hướng dẫn cho biến thể này. |
-| Đóng hẳn ứng dụng, mở lại khi ngoại tuyến và vào Lịch sử. | Lịch cá nhân giữ bài thay thế. Nhật ký cũ giữ bài kéo hai tạ, một hiệp 12 kg × 10 lần và tổng 120 kg. |
+| Mở hướng dẫn từng bài qua bộ chọn bài của buổi tự do. | 415 trên 415 bài mở đúng tên, chữ, nguồn, thứ tự khung và tải đủ hình. 0 bài lỗi. |
+| Xem trước mẫu Hai tạ đơn và sàn, rồi Full Body 3 buổi. | Bài kéo hai tạ trên sàn hiện hai khung. Plank hiện một khung Tư thế giữ. |
+| Buổi Full Body A: nhập 50 kg × 8, mở rồi đóng hướng dẫn, ghi hiệp. | Số đang nhập giữ nguyên. Hiệp ghi 50 kg × 8 lần, khối lượng 400 kg. |
+| Mở hướng dẫn khi đang nghỉ. | Hiệp đã lưu giữ nguyên. Đồng hồ đi từ 1:58 xuống 1:52 sau 6.1 giây thực. |
+| Đổi sang đẩy ngực rồi quay lại squat. | Tên, dụng cụ, chữ và hình đổi theo bài. Hiệp cũ vẫn thuộc squat. |
+| Ghi plank 30. | Màn ghi dùng nhãn Tập (giây). Lịch sử lưu 30 giây. |
+| Buổi tự do: hai tạ đơn 20 kg × 8, split squat 16 kg × 8 mỗi bên. | Nhãn Tổng hai tạ (kg) và Số lần mỗi bên. Khối lượng 160 kg và 128 kg, không nhân đôi. |
+| Tìm "Barbell Rollout" trong bộ chọn bài. | Ra đúng bài của mã `ab-wheel-rollout`. Mã seed cũ không còn. |
+| Mở hướng dẫn khi bàn phím đang mở. | Tạ và số lần đang nhập giữ nguyên. |
+| Hoàn thành hai buổi, đóng hẳn app, mở lại khi ngoại tuyến. | Lịch sử khớp cả 9 hiệp đã ghi. |
+| Đổi sang màn 720×1280 và cỡ chữ 1.3 giữa buổi. | Buổi đang tập và hiệp đã ghi còn nguyên. Không tràn ngang, ảnh giữ tỷ lệ. |
+| Mở một bài tự tạo ngoài danh mục. | Hiện "Chưa có hướng dẫn và hình minh họa cho bài này." |
 
-Ảnh chụp và kết quả từng ca nằm trong [thư mục bàn giao Android](../../e2e/artifacts/exercise-guides/).
+Kết quả từng ca, ảnh chụp và APK nằm trong [thư mục bàn giao Android](../../e2e/artifacts/exercise-guides/catalog/). Kịch bản chạy lại nằm trong `e2e/exercise-guides/`.

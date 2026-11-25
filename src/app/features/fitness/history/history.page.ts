@@ -25,6 +25,7 @@ import {
   timerOutline,
   listOutline,
 } from 'ionicons/icons';
+import { exerciseUnitNote } from '../../../core/models/exercise-guides';
 import { WorkoutRepository } from '../../../core/repositories/workout.repository';
 import {
   setValueLabel,
@@ -57,6 +58,7 @@ interface HistoryWeekGroup {
 })
 export class FitnessHistoryPage implements OnInit {
   protected readonly setValue = setValueLabel;
+  protected readonly unitNote = exerciseUnitNote;
   private readonly workoutRepo = inject(WorkoutRepository);
 
   readonly loading = signal(true);

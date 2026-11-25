@@ -195,6 +195,12 @@ details[open] .session-card__summary {
   display: grid;
   gap: var(--space-xs);
 
+  .session-exercise__unit {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-caption);
+  }
+
   h3 {
     margin: 0;
     color: var(--text-primary);

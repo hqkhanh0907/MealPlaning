@@ -73,6 +73,9 @@
                     @for (exercise of session.exercises; track exercise.id) {
                       <section class="session-exercise">
                         <h3>{{ exercise.exercise_name_vi || exercise.exercise_name }}</h3>
+                        @if (unitNote(exercise.exercise_id); as unit) {
+                          <p class="session-exercise__unit">Đơn vị ghi: {{ unit }}</p>
+                        }
                         @if (exercise.sets.length) {
                           <ul class="session-sets">
                             @for (set of exercise.sets; track set.id) {

@@ -1,32 +1,60 @@
 <ion-modal [isOpen]="open()" (ionModalDidDismiss)="closed.emit()" aria-label="Cách thực hiện">
   <ng-template>
-    <ion-header
-      ><ion-toolbar>
+    <ion-header>
+      <ion-toolbar>
         <ion-title>Cách thực hiện</ion-title>
-        <ion-buttons slot="end"
-          ><ion-button (click)="open.set(false)">Đóng</ion-button></ion-buttons
-        >
-      </ion-toolbar></ion-header
-    >
+        <ion-buttons slot="end">
+          <ion-button (click)="open.set(false)">Đóng</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
     <ion-content>
-      <article class="guide">
+      <article class="guide" [attr.data-guide-id]="exerciseId()">
         <h2>{{ exerciseName() }}</h2>
         @if (guide(); as movement) {
-          <p class="equipment">{{ movement.equipment }}</p>
-          @if (movement.illustration; as figure) {
-            @if (failedImage() !== figure.path) {
-              <img [src]="figure.path" [alt]="figure.alt" (error)="failedImage.set(figure.path)" />
-            } @else {
-              <p>Chưa có hình cho biến thể này.</p>
-            }
-          } @else {
-            <p>Chưa có hình cho biến thể này.</p>
+          <p class="purpose">{{ movement.purpose }}</p>
+          <p class="equipment"><strong>Dụng cụ</strong> {{ movement.equipment }}</p>
+          @let figure = movement.illustration;
+          @if (failedFrames().length < figure.frames.length) {
+            <figure
+              class="frames"
+              [class.frames--single]="figure.frames.length === 1"
+              [class.frames--stacked]="figure.stacked"
+              [class.frames--wrapped]="!figure.stacked && figure.frames.length > 2"
+              role="img"
+              [attr.aria-label]="figure.alt"
+            >
+              @for (frame of figure.frames; track frame.path) {
+                @if (!failedFrames().includes(frame.path)) {
+                  <div class="frame" [class]="'frame frame--' + frame.phase">
+                    <img
+                      [src]="frame.path"
+                      alt=""
+                      (error)="failedFrames.update((failed) => [...failed, frame.path])"
+                    />
+                    <figcaption>{{ frame.label }}</figcaption>
+                  </div>
+                }
+              }
+            </figure>
           }
+          @if (failedFrames().length) {
+            <p role="status">Chưa tải được đủ hình cho bài này.</p>
+          }
+          <h3>Tư thế bắt đầu</h3>
+          <p class="start">{{ movement.startPosition }}</p>
+          <h3>Thực hiện</h3>
           <ol>
             @for (step of movement.steps; track step) {
               <li>{{ step }}</li>
             }
           </ol>
+          @if (movement.perSide) {
+            <p class="note">
+              Tập xong một bên rồi đổi bên. Ghi {{ movement.timed ? 'số giây' : 'số lần' }} của mỗi
+              bên.
+            </p>
+          }
           <p class="source">
             Nguồn kỹ thuật<br /><a
               [href]="movement.sourceUrl"
@@ -36,7 +64,7 @@
             >
           </p>
         } @else {
-          <p>Chưa có hướng dẫn và hình minh họa cho đúng biến thể này.</p>
+          <p role="status">Chưa có hướng dẫn và hình minh họa cho bài này.</p>
         }
       </article>
     </ion-content>

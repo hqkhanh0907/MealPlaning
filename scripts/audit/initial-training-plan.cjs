@@ -5,15 +5,15 @@ const { exerciseGuide } = require('../../src/app/core/models/exercise-guides.ts'
 
 const catalogIds = new Set(SEED_EXERCISES.map((exercise) => exercise.id));
 const movements = ['gập gối', 'đẩy', 'kéo', 'gập hông'];
-const rowId = 'ex_dumbbell_bent_over_row';
+const rowId = 'renegade-row';
 const variants = {
-  ex_dumbbell_goblet_squat: { movement: 'gập gối', muscle: 'quads', needs: ['tạ đơn'] },
-  ex_push_up: { movement: 'đẩy', muscle: 'chest', needs: ['sàn'] },
-  [rowId]: { movement: 'kéo', muscle: 'back', needs: ['tạ đơn'] },
-  ex_dumbbell_romanian_deadlift: { movement: 'gập hông', muscle: 'hamstrings', needs: ['tạ đơn'] },
-  ex_incline_dumbbell_press: { movement: 'đẩy', muscle: 'chest', needs: ['tạ đơn', 'ghế dốc'] },
+  'goblet-squat': { movement: 'gập gối', muscle: 'quads', needs: ['tạ đơn'] },
+  'push-up': { movement: 'đẩy', muscle: 'chest', needs: ['sàn'] },
+  [rowId]: { movement: 'kéo', muscle: 'back', needs: ['tạ đơn', 'sàn'] },
+  'dumbbell-romanian-deadlift': { movement: 'gập hông', muscle: 'hamstrings', needs: ['tạ đơn'] },
+  'incline-dumbbell-press': { movement: 'đẩy', muscle: 'chest', needs: ['tạ đơn', 'ghế dốc'] },
 };
-const exampleIds = ['ex_dumbbell_goblet_squat', 'ex_push_up', rowId, 'ex_dumbbell_romanian_deadlift'];
+const exampleIds = ['goblet-squat', 'push-up', rowId, 'dumbbell-romanian-deadlift'];
 const referenceCatalog = new Set([...catalogIds, rowId]);
 const profile = { days: [2, 5], minutes: 35, equipment: ['tạ đơn', 'sàn'], excluded: [] };
 
@@ -33,16 +33,18 @@ test('mẫu ngoại tuyến dùng đúng bốn biến thể và giữ lịch m�
   assert.equal(SEED_TRAINING_PLANS.find((plan) => plan.id === 'plan_full_body_3x').frequency, 3);
 });
 
-test('hình kéo hai tạ chỉ đi cùng bài không tựa ghế', () => {
-  const fs = require('node:fs');
-  const path = require('node:path');
-  const guide = exerciseGuide(rowId);
-  assert.match(guide.equipment, /không tựa ghế/);
-  assert.match(guide.steps.join(' '), /đồng thời/);
-  assert.ok(fs.existsSync(path.join(__dirname, '../../src', guide.illustration.path)));
-  assert.equal(exerciseGuide('ex_push_up').illustration, undefined);
-  for (const different of ['ex_barbell_row', 'ex_romanian_deadlift', 'ex_goblet_squat', 'custom']) {
-    assert.equal(exerciseGuide(different), undefined);
+test('bài kéo của mẫu dùng hai tạ đơn trên sàn, khác bài kéo một tạ tựa ghế', () => {
+  const pinned = require('../fitness/open-exercise-illustrations/exercises.json');
+  const source = Object.fromEntries(pinned.exercises.map((exercise) => [exercise.id, exercise]));
+  assert.deepEqual(source[rowId].equipment, ['dumbbell']);
+  assert.ok(source['dumbbell-row'].equipment.includes('bench') && source['dumbbell-row'].unilateral);
+  const rowFrames = exerciseGuide(rowId).illustration.frames.map((frame) => frame.path);
+  assert.deepEqual(rowFrames, ['start', 'end'].map((frame) => 'assets/fitness/exercises/' + rowId + '/' + frame + '.webp'));
+  for (const different of ['dumbbell-row', 'bent-over-row', 'push-up']) {
+    for (const frame of exerciseGuide(different).illustration.frames) assert.ok(!rowFrames.includes(frame.path));
+  }
+  for (const unknown of ['ex_dumbbell_bent_over_row', 'ex_goblet_squat', 'custom']) {
+    assert.equal(exerciseGuide(unknown), undefined);
   }
 });
 
@@ -83,7 +85,7 @@ function inspectWeek(person, sessions, catalog) {
         problems.add('bài đã loại');
         continue;
       }
-      const bodyweightOnly = id === 'ex_push_up' && externalKg === 0;
+      const bodyweightOnly = id === 'push-up' && externalKg === 0;
       if (externalKg !== null && !bodyweightOnly) problems.add('tự điền tải khi chưa có lịch sử');
       movementsSeen.add(variant.movement);
       const tally = muscles.get(variant.muscle) ?? { days: new Set(), sets: 0 };
@@ -140,17 +142,17 @@ test('20 phút một buổi vừa bản 19 phút và loại bản 28 phút', () 
 });
 
 test('đẩy ngực dốc cần ghế, còn bài người dùng đã loại không được dùng để đủ nhóm', () => {
-  const week = exampleWeek(profile.days, 2, exampleIds.map((id) => id === 'ex_push_up' ? 'ex_incline_dumbbell_press' : id));
+  const week = exampleWeek(profile.days, 2, exampleIds.map((id) => id === 'push-up' ? 'incline-dumbbell-press' : id));
   assert.ok(inspectWeek(profile, week, referenceCatalog).problems.has('dụng cụ'));
   const withBench = { ...profile, equipment: [...profile.equipment, 'ghế dốc'] };
   assert.deepEqual([...inspectWeek(withBench, week, referenceCatalog).problems], []);
-  const excluded = { ...profile, excluded: ['ex_push_up'] };
+  const excluded = { ...profile, excluded: ['push-up'] };
   const result = inspectWeek(excluded, exampleWeek(profile.days, 2), referenceCatalog);
   assert.deepEqual([...result.problems], ['bài đã loại', 'thiếu động tác: đẩy']);
 });
 
 test('hai ngày toàn ngực vẫn thiếu ba động tác của giáo án toàn thân', () => {
-  const onlyChest = exampleWeek(profile.days, 3, ['ex_push_up']);
+  const onlyChest = exampleWeek(profile.days, 3, ['push-up']);
   const result = inspectWeek(profile, onlyChest, referenceCatalog);
   assert.deepEqual([...result.problems], movements.filter((m) => m !== 'đẩy').map((m) => 'thiếu động tác: ' + m));
 });
@@ -159,7 +161,7 @@ test('đổi riêng cân nặng không cho phép tự điền kg tạ khi chưa 
   for (const weightKg of [55, 90]) {
     const person = { ...profile, weightKg };
     const week = exampleWeek(profile.days, 2);
-    week[0].exercises.find((exercise) => exercise.id === 'ex_push_up').externalKg = 0;
+    week[0].exercises.find((exercise) => exercise.id === 'push-up').externalKg = 0;
     assert.deepEqual([...inspectWeek(person, week, referenceCatalog).problems], []);
     week[0].exercises[0].externalKg = weightKg / 10;
     assert.ok(inspectWeek(person, week, referenceCatalog).problems.has('tự điền tải khi chưa có lịch sử'));
@@ -183,7 +185,7 @@ test('lịch sử cùng biến thể và đơn vị đổi đúng từ 6 sang 10
     const set = { id: rowId, kg, reps: 10, status: 'logged', unit: 'kg/hand' };
     const logs = [
       { date: '2026-11-16', completed: true, sets: [set, { ...set, reps: 0, status: 'skipped' }] },
-      { date: '2026-11-17', completed: true, sets: [{ ...set, id: 'ex_dumbbell_curl', kg: 15 }] },
+      { date: '2026-11-17', completed: true, sets: [{ ...set, id: 'biceps-curl', kg: 15 }] },
       { date: '2026-11-19', completed: true, sets: [{ ...set, kg: 20, unit: 'kg/pair' }] },
       { date: '2026-11-20', completed: false, sets: [{ ...set, kg: 12 }] },
     ];

@@ -79,7 +79,7 @@ export class ExerciseRepository {
       params.push(pattern, pattern, pattern);
     }
 
-    const limit = Math.max(1, Math.min(filter.limit ?? 100, 200));
+    const limit = Math.max(1, Math.min(filter.limit ?? 100, 1000));
     const where = clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '';
 
     return this.db.query<Exercise>(

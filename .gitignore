@@ -75,6 +75,7 @@ Thumbs.db
 src/environments/environment.local.ts
 
 # AI/Tools
+/.codex/config.toml
 .claude/*
 # BMAD Method bridge skills live under .claude/skills/bmad-* — keep them tracked.
 !.claude/skills/

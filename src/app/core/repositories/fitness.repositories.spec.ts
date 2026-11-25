@@ -217,8 +217,8 @@ describe('Fitness repositories', () => {
     await planRepo.ensurePresetPlans();
     const start = new Date('2026-11-24T08:00:00');
     const session = await workoutRepo.startFreeSession(start);
-    const squat = await workoutRepo.addExerciseToSession(session.id, 'ex_back_squat');
-    const carry = await workoutRepo.addExerciseToSession(session.id, 'ex_farmer_carry');
+    const squat = await workoutRepo.addExerciseToSession(session.id, 'squat');
+    const carry = await workoutRepo.addExerciseToSession(session.id, 'farmers-walk');
     const set = { weightKg: 32.5, reps: 7, restSeconds: 90, effort: 'easy' as const, notes: null };
     await workoutRepo.addSet(squat.id, set);
     await workoutRepo.skipSet(squat.id, 99, 8);
@@ -263,7 +263,7 @@ describe('Fitness repositories', () => {
     await planRepo.ensurePresetPlans();
     const date = new Date('2026-11-24T08:00:00');
     const session = await workoutRepo.startFreeSession(date);
-    const carry = await workoutRepo.addExerciseToSession(session.id, 'ex_farmer_carry');
+    const carry = await workoutRepo.addExerciseToSession(session.id, 'farmers-walk');
     await db.execute(
       `INSERT INTO workout_set
          (id, workout_exercise_id, set_number, weight_kg, reps, status, legacy_unit_unknown)
@@ -289,8 +289,8 @@ describe('Fitness repositories', () => {
     const day = (await planRepo.getTodayTrainingDay('2026-11-23'))!;
     const start = new Date('2026-11-23T08:00:00');
     const session = await workoutRepo.startGuidedSession(day.id, start);
-    const squat = session.exercises.find((ex) => ex.exercise_id === 'ex_back_squat')!;
-    const plank = session.exercises.find((ex) => ex.exercise_id === 'ex_plank')!;
+    const squat = session.exercises.find((ex) => ex.exercise_id === 'squat')!;
+    const plank = session.exercises.find((ex) => ex.exercise_id === 'plank')!;
     expect(squat).toEqual(
       jasmine.objectContaining({
         planned_sets: 3,
@@ -306,12 +306,12 @@ describe('Fitness repositories', () => {
     await workoutRepo.addSet(squat.id, set);
     await workoutRepo.addSet(squat.id, { ...set, weightKg: 90, effort: 'easy' });
     await workoutRepo.addSet(squat.id, { ...set, weightKg: 150, reps: 11 });
-    const assisted = await workoutRepo.addExerciseToSession(session.id, 'ex_assisted_pull_up');
+    const assisted = await workoutRepo.addExerciseToSession(session.id, 'assisted-pull-up');
     await workoutRepo.addSet(assisted.id, { ...set, weightKg: 100 });
     await workoutRepo.completeSession(session.id, start);
     const progress = await workoutRepo.progressSummary(start);
     expect(progress.strength.map((row) => [row.exercise_id, row.estimated_1rm])).toEqual([
-      ['ex_back_squat', 70],
+      ['squat', 70],
     ]);
   });
 
@@ -588,7 +588,7 @@ describe('Fitness repositories', () => {
           isRestDay: false,
           exercises: [
             {
-              exerciseId: 'ex_back_squat',
+              exerciseId: 'squat',
               sets: 3,
               repsMin: 8,
               repsMax: 10,
@@ -604,7 +604,7 @@ describe('Fitness repositories', () => {
           isRestDay: false,
           exercises: [
             {
-              exerciseId: 'ex_barbell_bench_press',
+              exerciseId: 'bench-press',
               sets: 3,
               repsMin: 8,
               repsMax: 10,
@@ -620,7 +620,7 @@ describe('Fitness repositories', () => {
           isRestDay: false,
           exercises: [
             {
-              exerciseId: 'ex_seated_cable_row',
+              exerciseId: 'seated-cable-row',
               sets: 3,
               repsMin: 10,
               repsMax: 12,

@@ -69,6 +69,7 @@ const SCAN_EXTS = ['.md', '.scss', '.css', '.ts', '.html'];
 
 function walk(dir) {
   for (const entry of readdirSync(dir)) {
+    if (dir === join(ROOT, '.agents', 'skills') && entry.startsWith('bmad-')) continue;
     if (
       entry === 'node_modules' || entry === '.git' || entry === 'dist' ||
       entry === 'www' || entry === 'android' || entry === '.angular' ||

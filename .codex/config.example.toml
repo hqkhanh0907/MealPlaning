@@ -1,0 +1,39 @@
+[mcp_servers.chrome-devtools]
+command = "npx"
+args = [
+    "-y",
+    "chrome-devtools-mcp@0.18.1",
+]
+
+[mcp_servers.context7]
+command = "npx"
+args = [
+    "-y",
+    "@upstash/context7-mcp@latest",
+]
+
+[mcp_servers.magic]
+command = "npx"
+args = [
+    "-y",
+    "@21st-dev/magic@latest",
+]
+
+[mcp_servers.magic.env]
+API_KEY = "YOUR_MAGIC_API_KEY"
+
+[mcp_servers.memory]
+command = "/Users/khanhhuynh/.local/bin/memory"
+args = ["server"]
+
+[mcp_servers.memory.env]
+MCP_MEMORY_STORAGE_BACKEND = "sqlite_vec"
+MCP_MEMORY_SQLITE_PATH = "/Users/khanhhuynh/.copilot/memory/memory.db"
+MCP_MEMORY_BACKUPS_PATH = "/Users/khanhhuynh/.copilot/memory/backups"
+
+[mcp_servers.postman]
+command = "npx"
+args = [
+    "-y",
+    "@postman/postman-mcp-server@2.7.1",
+]

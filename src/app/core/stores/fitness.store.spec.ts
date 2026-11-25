@@ -116,7 +116,7 @@ describe('FitnessStore', () => {
     await store.initialize();
 
     expect(planRepo.ensurePresetPlans).toHaveBeenCalled();
-    expect(exerciseRepo.list).toHaveBeenCalledOnceWith({ limit: 200 });
+    expect(exerciseRepo.list).toHaveBeenCalledOnceWith({ limit: 1000 });
     expect(store.plans().length).toBe(1);
     expect(store.activePlan()?.id).toBe('plan-1');
     expect(store.todayDay()?.id).toBe('day-1');

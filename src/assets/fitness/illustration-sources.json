@@ -1,0 +1,12 @@
+{
+  "origin": "Open Exercise Illustrations",
+  "repository": "https://github.com/hitmanrepo/open-exercise-illustrations",
+  "commit": "2786aefa4b36a08faeca8114e0d1eb0af3ef6732",
+  "sourceUrl": "https://github.com/hitmanrepo/open-exercise-illustrations/tree/2786aefa4b36a08faeca8114e0d1eb0af3ef6732",
+  "license": "CC0 1.0 Universal",
+  "licenseUrl": "https://github.com/hitmanrepo/open-exercise-illustrations/blob/2786aefa4b36a08faeca8114e0d1eb0af3ef6732/LICENSE",
+  "changes": "Không chỉnh sửa. Tệp images/<mã>/<khung>.webp của nguồn nằm tại assets/fitness/exercises/<mã>/<khung>.webp.",
+  "note": "Hình do AI tạo. Tác giả ghi chưa có huấn luyện viên thẩm định. Kỹ thuật trong ứng dụng đối chiếu theo nguồn kỹ thuật riêng của từng bài.",
+  "exercises": 415,
+  "files": 796
+}

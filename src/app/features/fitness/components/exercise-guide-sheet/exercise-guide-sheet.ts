@@ -22,6 +22,6 @@ export class ExerciseGuideSheet {
   readonly exerciseName = input.required<string>();
   readonly closed = output<void>();
   protected readonly guide = computed(() => exerciseGuide(this.exerciseId()));
-  protected readonly failedImage = signal<string | null>(null);
+  protected readonly failedFrames = signal<readonly string[]>([]);
   protected readonly open = signal(true);
 }

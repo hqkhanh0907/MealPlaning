@@ -45,7 +45,11 @@ import { FitnessStore } from '../../core/stores/fitness.store';
 import { RestTimer } from './components/rest-timer/rest-timer';
 import { ExerciseGuideSheet } from './components/exercise-guide-sheet/exercise-guide-sheet';
 import { PlanPreview } from './components/plan-preview/plan-preview';
-import { exerciseGuide, exercisePurpose } from '../../core/models/exercise-guides';
+import {
+  exerciseAmountLabel,
+  exerciseGuide,
+  exercisePurpose,
+} from '../../core/models/exercise-guides';
 import { PlanEditor } from './components/plan-editor/plan-editor';
 import { ExercisePickerSheet } from '../../shared/components/exercise-picker-sheet/exercise-picker-sheet';
 import { WorkoutSummaryModal } from '../../shared/components/workout-summary-modal/workout-summary-modal';
@@ -100,6 +104,7 @@ export default class FitnessPage {
   protected readonly guideOpen = signal(false);
   protected readonly purpose = exercisePurpose;
   protected readonly guideFor = exerciseGuide;
+  protected readonly amountLabel = exerciseAmountLabel;
   protected readonly ai = inject(AiAvailability);
   protected readonly setLimits = workoutSetLimits;
   protected readonly timed = isTimedExercise;
