@@ -175,7 +175,7 @@ try {
   await waitFor("location.pathname.includes('history')", 10000, 'history');
   await sleep(1500);
   await ev("document.querySelectorAll('details').forEach(x=>x.open=true)"); await sleep(800);
-  const history = await ev("[...document.querySelectorAll('details')].map(c=>({title:c.querySelector('.session-card__day-name')?.textContent.trim(),stats:[...c.querySelectorAll('.stat')].map(x=>x.textContent.replace(/\\s+/g,' ').trim()),exercises:[...c.querySelectorAll('.session-exercise')].map(x=>({name:x.querySelector('h3').textContent.trim(),unit:x.querySelector('.session-exercise__unit')?.textContent.trim()??null,sets:[...x.querySelectorAll('.session-sets li > span:last-child')].map(l=>l.textContent.replace(/\\s+/g,' ').trim())}))}))");
+  const history = await ev("[...document.querySelectorAll('details')].map(c=>({title:c.querySelector('.session-card__day-name')?.textContent.trim(),stats:[...c.querySelectorAll('.stat')].map(x=>x.textContent.replace(/\\s+/g,' ').trim()),exercises:[...c.querySelectorAll('.session-exercise')].map(x=>({name:x.querySelector('h3').textContent.trim(),unit:x.querySelector('.session-exercise__unit')?.textContent.trim()??null,sets:[...x.querySelectorAll('.session-sets li > span:nth-of-type(2)')].map(l=>l.textContent.replace(/\\s+/g,' ').trim())}))}))");
   data.history = history;
   const all = history.flatMap((h) => h.exercises);
   for (const logged of data.logged) {
