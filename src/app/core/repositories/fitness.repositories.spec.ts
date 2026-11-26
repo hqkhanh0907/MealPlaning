@@ -451,6 +451,65 @@ describe('Fitness repositories', () => {
     expect(after!.exercises[0].total_volume).toBe(540);
   });
 
+  it('edits timed workout sets without changing their unit or adding lifting volume', async () => {
+    await exerciseRepo.ensureSeedExercises();
+    const session = await workoutRepo.startFreeSession();
+    const exercise = await workoutRepo.addExerciseToSession(session.id, 'plank');
+    const { set } = await workoutRepo.addSet(exercise.id, {
+      weightKg: 0,
+      reps: 0,
+      durationSeconds: 45,
+      restSeconds: 30,
+      effort: 'hard',
+      notes: 'Keep the rest and notes.',
+    });
+    await workoutRepo.completeSession(session.id);
+
+    await expectAsync(
+      workoutRepo.reviseCompletedSet(session.id, set.id, { weightKg: 0, reps: 60 }),
+    ).toBeRejected();
+    const revised = await workoutRepo.reviseCompletedSet(session.id, set.id, {
+      weightKg: 0,
+      reps: 0,
+      durationSeconds: 60,
+    });
+
+    expect(revised.exercises[0].sets[0]).toEqual({ ...set, duration_seconds: 60 });
+    expect(revised.exercises[0].total_volume).toBe(0);
+    expect(revised.total_volume).toBe(0);
+  });
+
+  it('limits history changes to the chosen finished workout and its recorded sets', async () => {
+    await exerciseRepo.ensureSeedExercises();
+    const session = await workoutRepo.startFreeSession();
+    const exercise = await workoutRepo.addExerciseToSession(session.id, 'bench-press');
+    const { set } = await workoutRepo.addSet(exercise.id, {
+      weightKg: 40,
+      reps: 6,
+      restSeconds: 90,
+      effort: null,
+      notes: null,
+    });
+    const { set: skipped } = await workoutRepo.skipSet(exercise.id, 40, 5);
+    const measurement = { weightKg: 40, reps: 7 };
+    await expectAsync(workoutRepo.deleteCompletedSession(session.id)).toBeRejected();
+    await expectAsync(
+      workoutRepo.reviseCompletedSet(session.id, set.id, measurement),
+    ).toBeRejected();
+    await workoutRepo.completeSession(session.id);
+    const other = await workoutRepo.startFreeSession();
+
+    await expectAsync(workoutRepo.reviseCompletedSet(other.id, set.id, measurement)).toBeRejected();
+    await expectAsync(
+      workoutRepo.reviseCompletedSet(session.id, skipped.id, measurement),
+    ).toBeRejected();
+
+    const saved = (await workoutRepo.getSession(session.id))!;
+    expect(saved.exercises[0].sets).toEqual([set, skipped]);
+    expect(saved.total_volume).toBe(240);
+    expect((await workoutRepo.getActiveSession())?.id).toBe(other.id);
+  });
+
   it('deleteSet removes a single set, re-numbers remaining sets contiguously, and re-syncs totals', async () => {
     await planRepo.ensurePresetPlans();
     const today = await planRepo.getTodayTrainingDay('2026-05-11');

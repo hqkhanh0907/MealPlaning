@@ -45,6 +45,8 @@ import { activitySummaryForFactor } from '../../core/services/profile/activity-l
 import { environment } from '../../../environments/environment';
 import { AccountSession } from '../../core/account/account-session';
 import { AccountSync } from '../../core/account/account-sync';
+import { DeviceSessionsPanel } from './device-sessions/device-sessions-panel';
+import { WorkoutConflict } from './workout-conflict/workout-conflict';
 
 type ReminderKey = SlotKey | 'workout';
 
@@ -68,6 +70,8 @@ type ReminderKey = SlotKey | 'workout';
     IonIcon,
     IonToggle,
     RouterLink,
+    DeviceSessionsPanel,
+    WorkoutConflict,
   ],
 })
 export default class SettingsPage {

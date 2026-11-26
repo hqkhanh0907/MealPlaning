@@ -24,13 +24,26 @@ routerAdd("GET", "/health", (event) => {
 
 routerAdd("GET", "/api/mealplan/workspace", (event) => {
   const api = require(__hooks + "/workspace.js");
+  const operations = require(__hooks + "/operations.js");
   const metadata = event.request.url.query().get("metadata") === "1";
-  return event.json(200, api.read(event.app, event.auth.id, metadata));
+  const result = operations.observe(event.app, () => api.read(event.app, event.auth.id, metadata));
+  if (!metadata) operations.record(event.app, "download");
+  return event.json(200, result);
 }, workspaceAccess);
 
 routerAdd("POST", "/api/mealplan/workspace", (event) => {
   const api = require(__hooks + "/workspace.js");
-  return event.json(200, api.write(event.app, event.auth.id, event.requestInfo().body));
+  const operations = require(__hooks + "/operations.js");
+  const result = operations.observe(event.app, () => api.write(event.app, event.auth.id, event.requestInfo().body));
+  if (result.conflict) {
+    operations.record(event.app, "conflict");
+    return event.json(409, {
+      message: "Data changed on another device.",
+      data: { code: "workout_conflict", conflict: result.conflict },
+    });
+  }
+  operations.record(event.app, "upload");
+  return event.json(200, result);
 }, workspaceAccess);
 
 routerAdd("POST", "/api/mealplan/session", (event) => {
@@ -58,25 +71,9 @@ routerAdd("POST", "/api/mealplan/logout", (event) => {
   return event.next();
 });
 
-routerAdd("GET", "/api/mealplan-admin/workspaces", (event) => {
-  const entries = arrayOf(new DynamicModel({ id: "", username: "", name: "", revision: 0 }));
-  event.app.db().newQuery(`
-    SELECT users.id, users.username, users.name, COALESCE(workspaces.revision, 0) AS revision
-    FROM users
-    LEFT JOIN mealplan_workspaces AS workspaces ON workspaces.owner = users.id
-    ORDER BY users.name, users.username, users.id
-  `).all(entries);
-  return event.json(200, entries.map((entry) => ({
-    id: entry.id, ownerId: entry.id, username: entry.username, name: entry.name, revision: entry.revision,
-  })));
-}, $apis.requireSuperuserAuth());
-
-routerAdd("GET", "/api/mealplan-admin/workspaces/{owner}", (event) => {
-  const api = require(__hooks + "/workspace.js");
-  return event.json(200, api.read($app, event.request.pathValue("owner")));
-}, $apis.requireSuperuserAuth());
-
-routerAdd("POST", "/api/mealplan-admin/workspaces/{owner}", (event) => {
-  const api = require(__hooks + "/workspace.js");
-  return event.json(200, api.write($app, event.request.pathValue("owner"), event.requestInfo().body));
-}, $apis.requireSuperuserAuth());
+routerAdd("GET", "/api/mealplan-ops/status", (event) => {
+  if (event.auth.collection().name !== "mealplan_operators") throw new ForbiddenError();
+  const operations = require(__hooks + "/operations.js");
+  event.response.header().set("Cache-Control", "no-store");
+  return event.json(200, operations.status(event.app, $os.getenv("MEALPLAN_RELEASE")));
+}, $apis.requireAuth("mealplan_operators"));

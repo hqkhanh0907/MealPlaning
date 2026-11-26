@@ -25,22 +25,18 @@ describe('AccountPage', () => {
   }
 
   it('reports missing sync permission after successful password verification', async () => {
-    spyOn(window, 'fetch').and.returnValues(
-      Promise.resolve(
-        Response.json({
-          token: 'sample-token',
-          record: { id: 'aaaaaaaaaaaaaaa', username: 'qa_account', name: 'QA' },
-        }),
-      ),
-      Promise.resolve(
-        Response.json(
-          { message: 'The account cannot use MealPlaning.', data: { code: 'account_forbidden' } },
-          { status: 403 },
-        ),
+    const fetchSession = spyOn(window, 'fetch').and.resolveTo(
+      Response.json(
+        { message: 'The account cannot use MealPlaning.', data: { code: 'account_forbidden' } },
+        { status: 403 },
       ),
     );
 
     expect(await submitSignIn()).toContain('thiếu quyền đồng bộ');
+    expect(fetchSession).toHaveBeenCalledOnceWith(
+      jasmine.stringMatching(/\/api\/mealplan\/session$/),
+      jasmine.objectContaining({ method: 'POST' }),
+    );
   });
 
   it('reports incorrect credentials when password verification fails', async () => {

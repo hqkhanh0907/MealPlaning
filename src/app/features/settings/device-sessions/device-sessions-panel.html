@@ -1,0 +1,53 @@
+<section aria-label="Phiên đăng nhập">
+  <h2>Phiên đăng nhập</h2>
+  @if (panel(); as active) {
+    @if (active.busy) {
+      <p class="device-note" role="status">Đang cập nhật danh sách thiết bị…</p>
+    }
+    @if (active.error) {
+      <p class="device-note" role="alert">{{ active.error }}</p>
+    }
+    @if (active.requiresLogin) {
+      <ion-button fill="outline" routerLink="/account">Đăng nhập lại</ion-button>
+    } @else {
+      <ul class="device-list">
+        @for (device of active.devices; track device.id) {
+          <li class="device-row">
+            <div>
+              <h3>{{ deviceName(device) }}</h3>
+              <p class="device-note">{{ signedInAt(device) }} · {{ device.id.slice(-6) }}</p>
+            </div>
+            @if (device.current) {
+              <span class="device-current">Thiết bị này</span>
+            } @else {
+              <ion-button
+                fill="clear"
+                color="danger"
+                [disabled]="active.busy"
+                [attr.aria-label]="
+                  'Thu hồi phiên ' + deviceName(device) + ' ' + device.id.slice(-6)
+                "
+                (click)="choose(device)"
+              >
+                Thu hồi
+              </ion-button>
+            }
+          </li>
+        }
+      </ul>
+      <ion-button fill="outline" [disabled]="active.busy" (click)="load()">Tải lại</ion-button>
+    }
+  } @else {
+    <ion-button fill="outline" (click)="load()">Xem thiết bị đăng nhập</ion-button>
+  }
+</section>
+
+<app-confirm-dialog
+  [isOpen]="selected() !== null"
+  title="Thu hồi phiên?"
+  message="Thiết bị này sẽ cần đăng nhập lại để tiếp tục đồng bộ."
+  cancelLabel="Hủy"
+  confirmLabel="Thu hồi"
+  (cancelled)="cancel()"
+  (confirmed)="revoke()"
+/>

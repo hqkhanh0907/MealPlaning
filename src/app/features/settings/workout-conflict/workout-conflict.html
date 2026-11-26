@@ -1,0 +1,27 @@
+<section class="workout-conflict" aria-labelledby="workout-conflict-title">
+  <h3 id="workout-conflict-title">Chọn thay đổi cần giữ</h3>
+  @for (item of conflict().items; track item.key) {
+    <div class="workout-conflict__choice" role="group" [attr.aria-label]="label(item)">
+      <p>{{ label(item) }}</p>
+      <div class="workout-conflict__options">
+        <ion-button
+          [fill]="choices()[item.key] === 'local' ? 'solid' : 'outline'"
+          [attr.aria-pressed]="choices()[item.key] === 'local'"
+          (click)="choose(item, 'local')"
+        >
+          Máy này · {{ value(item, 'local') }}
+        </ion-button>
+        <ion-button
+          [fill]="choices()[item.key] === 'server' ? 'solid' : 'outline'"
+          [attr.aria-pressed]="choices()[item.key] === 'server'"
+          (click)="choose(item, 'server')"
+        >
+          Máy khác · {{ value(item, 'server') }}
+        </ion-button>
+      </div>
+    </div>
+  }
+  <ion-button expand="block" [disabled]="!complete()" (click)="apply()"
+    >Áp dụng lựa chọn</ion-button
+  >
+</section>

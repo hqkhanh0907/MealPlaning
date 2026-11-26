@@ -32,13 +32,17 @@
       @if (accountSync.status() === 'expired' || accountSync.status() === 'forbidden') {
         <ion-item button routerLink="/account">Đăng nhập lại</ion-item>
       } @else if (accountSync.status() === 'conflict') {
-        <ion-item>
-          <ion-label class="ion-text-wrap">Chọn phiên bản giữ lại cho tài khoản này.</ion-label>
-        </ion-item>
-        <ion-item button (click)="accountSync.resolveConflict(true)">Dùng bản máy chủ</ion-item>
-        <ion-item button (click)="accountSync.resolveConflict(false)"
-          >Giữ bản trên máy này</ion-item
-        >
+        @if (accountSync.workoutConflict(); as conflict) {
+          <app-workout-conflict [conflict]="conflict" />
+        } @else {
+          <ion-item>
+            <ion-label class="ion-text-wrap">Chọn phiên bản giữ lại cho tài khoản này.</ion-label>
+          </ion-item>
+          <ion-item button (click)="accountSync.resolveConflict(true)">Dùng bản máy chủ</ion-item>
+          <ion-item button (click)="accountSync.resolveConflict(false)"
+            >Giữ bản trên máy này</ion-item
+          >
+        }
       } @else {
         <ion-item
           button
@@ -66,6 +70,9 @@
         >
       }
     </ion-list>
+    @if (accountSession.required) {
+      <app-device-sessions-panel />
+    }
   }
   <ion-list lines="none" class="settings-list">
     <ion-list-header>

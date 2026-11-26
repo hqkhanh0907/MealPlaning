@@ -1,7 +1,13 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import type { WorkoutSessionDetail, WorkoutSet } from '../../../core/models/fitness.types';
+import { ExerciseRepository } from '../../../core/repositories/exercise.repository';
 import { WorkoutRepository } from '../../../core/repositories/workout.repository';
+import {
+  createTestDatabase,
+  teardownTestDatabase,
+} from '../../../core/services/database/__test__/create-test-database';
+import { Database } from '../../../core/services/database/database';
 import FitnessHistoryPage from './history.page';
 
 describe('FitnessHistoryPage._isoWeekStart (F-016)', () => {
@@ -151,5 +157,127 @@ describe('FitnessHistoryPage session details', () => {
     const host = await showHistory([{ ...completedWorkout, total_volume: 1254.25 }]);
 
     expect(host.querySelector('summary')?.textContent).toContain('1.254,25 kg');
+  });
+});
+
+describe('FitnessHistoryPage changes to a finished workout', () => {
+  let db: Database;
+  let repository: WorkoutRepository;
+  let fixture: ComponentFixture<FitnessHistoryPage>;
+  let host: HTMLElement;
+  let sessionId: string;
+  let first: WorkoutSet;
+  let second: WorkoutSet;
+  let revise: jasmine.Spy<WorkoutRepository['reviseCompletedSet']>;
+  let deleteWorkout: jasmine.Spy<WorkoutRepository['deleteCompletedSession']>;
+
+  beforeEach(async () => {
+    db = await createTestDatabase();
+    await TestBed.configureTestingModule({
+      imports: [FitnessHistoryPage],
+      providers: [provideRouter([]), { provide: Database, useValue: db }],
+    }).compileComponents();
+    repository = TestBed.inject(WorkoutRepository);
+    await TestBed.inject(ExerciseRepository).ensureSeedExercises();
+    const session = await repository.startFreeSession(new Date('2026-05-17T07:30:00Z'));
+    sessionId = session.id;
+    const exercise = await repository.addExerciseToSession(sessionId, 'bench-press');
+    const measurement = {
+      weightKg: 40,
+      restSeconds: 90,
+      effort: 'hard',
+      notes: 'Hiệp thử',
+    } as const;
+    first = (await repository.addSet(exercise.id, { ...measurement, reps: 6 })).set;
+    second = (await repository.addSet(exercise.id, { ...measurement, reps: 5 })).set;
+    await repository.completeSession(sessionId, new Date('2026-05-17T08:00:00Z'));
+    revise = spyOn(repository, 'reviseCompletedSet').and.callThrough();
+    deleteWorkout = spyOn(repository, 'deleteCompletedSession').and.callThrough();
+    fixture = TestBed.createComponent(FitnessHistoryPage);
+    host = fixture.nativeElement as HTMLElement;
+    fixture.detectChanges();
+    await fixture.componentInstance.refresh();
+    await updateView();
+    const detailsToggle = host.querySelector('summary');
+    if (!detailsToggle) throw new Error(host.textContent?.trim());
+    detailsToggle.click();
+  });
+
+  afterEach(teardownTestDatabase);
+
+  async function updateView(): Promise<void> {
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  function click(action: string): void {
+    const selector = `[aria-label="${action}"]`;
+    const button = Array.from(host.querySelectorAll<HTMLElement>('ion-button')).find(
+      (element) => element.matches(selector) || element.shadowRoot?.querySelector(selector),
+    );
+    if (!button) {
+      throw new Error(
+        `Missing history action: ${action}. Visible history: ${host.textContent?.trim()}`,
+      );
+    }
+    fixture.ngZone!.run(() => button.click());
+    fixture.detectChanges();
+  }
+
+  function editRepetitions(value: string): Promise<WorkoutSessionDetail> {
+    click('Sửa hiệp 2');
+    const field = host.querySelector<HTMLInputElement>('#history-set-amount')!;
+    expect(field.value).toBe('5');
+    field.value = value;
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+    const save = host.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    fixture.ngZone!.run(() => save.click());
+    fixture.detectChanges();
+    return revise.calls.mostRecent().returnValue;
+  }
+
+  it('changes one recorded set to 7 reps and preserves IDs, the other set, and the set notes', async () => {
+    expect(host.querySelector('summary')?.textContent).toContain('440 kg');
+    await editRepetitions('7');
+    await updateView();
+
+    const saved = (await repository.getSession(sessionId))!;
+    expect(saved.id).toBe(sessionId);
+    expect(saved.total_volume).toBe(520);
+    expect(saved.exercises[0].total_volume).toBe(520);
+    expect(saved.exercises[0].sets).toEqual([first, { ...second, reps: 7 }]);
+    expect(host.querySelector('summary')?.textContent).toContain('520 kg');
+    expect(host.querySelector('details')?.open).toBeTrue();
+    expect(host.querySelector('form')).toBeNull();
+  });
+
+  it('keeps the draft and rolls back the set when recalculating the workout fails', async () => {
+    await db.execute(`CREATE TRIGGER abort_history_update BEFORE UPDATE ON workout_session
+      BEGIN SELECT RAISE(ABORT, 'test workout save failure'); END`);
+    await expectAsync(editRepetitions('7')).toBeRejected();
+    await updateView();
+
+    const saved = (await repository.getSession(sessionId))!;
+    expect(saved.total_volume).toBe(440);
+    expect(saved.exercises[0].sets[1]).toEqual(second);
+    expect(host.querySelector<HTMLInputElement>('#history-set-amount')?.value).toBe('7');
+    expect(host.querySelector('form [role="alert"]')?.textContent?.trim()).toBeTruthy();
+  });
+
+  it('keeps the session when canceling and deletes only that finished session after confirmation', async () => {
+    const active = await repository.startFreeSession(new Date('2026-05-18T07:30:00Z'));
+    click('Xóa buổi tập');
+    click('Hủy xóa buổi tập');
+    expect((await repository.getSession(sessionId))?.id).toBe(sessionId);
+
+    click('Xóa buổi tập');
+    click('Xác nhận xóa buổi tập');
+    await deleteWorkout.calls.mostRecent().returnValue;
+    await updateView();
+
+    expect(await repository.getSession(sessionId)).toBeNull();
+    expect(await db.getOne('SELECT id FROM workout_set WHERE id = ?', [first.id])).toBeNull();
+    expect((await repository.getActiveSession())?.id).toBe(active.id);
+    expect(host.querySelector('summary')).toBeNull();
   });
 });

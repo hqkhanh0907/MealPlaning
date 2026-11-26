@@ -8,6 +8,8 @@ const paths = new Map([
   ['/api/mealplan/workspace?metadata=1', ['GET']],
   ['/api/mealplan/session', ['POST']],
   ['/api/mealplan/session/refresh', ['POST']],
+  ['/api/mealplan/sessions', ['GET']],
+  ['/api/mealplan/sessions/revoke', ['POST']],
   ['/api/mealplan/profile', ['POST']],
   ['/api/mealplan/logout', ['POST']],
 ]);
@@ -22,7 +24,7 @@ function reject(response, status, message) {
 }
 
 function limitAuth(path) {
-  const limit = path.startsWith('/api/collections/users/') ? 36
+  const limit = path.startsWith('/api/collections/users/') || path === '/api/mealplan/session' ? 36
     : path.startsWith('/api/mealplan/session') ? 120 : 0;
   if (!limit) return true;
   const now = Math.floor(Date.now() / 60_000);

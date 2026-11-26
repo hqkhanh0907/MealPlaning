@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Database } from '../services/database/database';
 import { workoutSetIssue, type WorkoutSetInput } from '../models/fitness-workout-set';
 import { localIsoDate, mondayOfWeek, shiftIsoDate } from '../utils/local-date';
-import { muscleLabels } from '../models/fitness.types';
+import { isTimedExercise, muscleLabels } from '../models/fitness.types';
 import type {
   FitnessProgressSummary,
   MuscleGroup,
@@ -32,6 +32,7 @@ const EXERCISE_PROJECTION = `
     INNER JOIN exercise e ON e.id = we.exercise_id`;
 
 type SessionRow = Omit<WorkoutSessionDetail, 'exercises'>;
+type SetMeasurements = Pick<WorkoutSetInput, 'weightKg' | 'reps' | 'durationSeconds'>;
 
 type SetToAppend =
   | ({ status: 'logged' } & WorkoutSetInput)
@@ -324,6 +325,70 @@ export class WorkoutRepository {
     });
   }
 
+  async reviseCompletedSet(
+    sessionId: string,
+    setId: string,
+    input: SetMeasurements,
+  ): Promise<WorkoutSessionDetail> {
+    return this.db.withTransaction(async () => {
+      const row = await this.db.getOne<
+        Pick<WorkoutSet, 'weight_kg' | 'reps' | 'duration_seconds'> & { exercise_id: string }
+      >(
+        `SELECT ws.weight_kg, ws.reps, ws.duration_seconds, we.exercise_id
+           FROM workout_set ws
+           JOIN workout_exercise we ON we.id = ws.workout_exercise_id
+           JOIN workout_session session ON session.id = we.workout_session_id
+          WHERE ws.id = ? AND session.id = ? AND session.status = 'completed'
+            AND ws.status = 'logged' AND ws.legacy_unit_unknown = 0`,
+        [setId, sessionId],
+      );
+      if (!row || isTimedExercise(row.exercise_id) !== (row.duration_seconds != null)) {
+        throw new Error('WorkoutRepository: set is not editable in this finished workout.');
+      }
+      validateSetInput({ ...input, restSeconds: 0, effort: null, notes: null }, row.exercise_id);
+      const duration = input.durationSeconds ?? null;
+      if (
+        row.weight_kg !== input.weightKg ||
+        row.reps !== input.reps ||
+        row.duration_seconds !== duration
+      ) {
+        await this.db.execute(
+          `UPDATE workout_set
+              SET weight_kg = ?, reps = ?, duration_seconds = ?, updated_at = ?
+            WHERE id = ?`,
+          [input.weightKg, input.reps, duration, new Date().toISOString(), setId],
+        );
+        await this.syncTotals(sessionId);
+      }
+      const session = await this.getSession(sessionId);
+      if (!session) throw new Error('WorkoutRepository: finished workout no longer exists.');
+      return session;
+    });
+  }
+
+  async deleteCompletedSession(sessionId: string): Promise<void> {
+    await this.db.withTransaction(async () => {
+      const session = await this.db.getOne<{ status: string }>(
+        'SELECT status FROM workout_session WHERE id = ?',
+        [sessionId],
+      );
+      if (!session) return;
+      if (session.status !== 'completed') {
+        throw new Error('WorkoutRepository: only a finished workout can be deleted here.');
+      }
+      await this.db.execute(
+        `DELETE FROM workout_set WHERE workout_exercise_id IN (
+          SELECT id FROM workout_exercise WHERE workout_session_id = ?
+        )`,
+        [sessionId],
+      );
+      await this.db.execute('DELETE FROM workout_exercise WHERE workout_session_id = ?', [
+        sessionId,
+      ]);
+      await this.db.execute('DELETE FROM workout_session WHERE id = ?', [sessionId]);
+    });
+  }
+
   /**
    * Remove an exercise (and all its logged sets, via FK ON DELETE CASCADE) from an active session.
    * Re-syncs session totals. Idempotent on missing exercise id.
@@ -348,11 +413,9 @@ export class WorkoutRepository {
    * Soft-cancel a session: flip status to 'cancelled' and record cancelled_at.
    *
    * Child rows (workout_exercise, workout_set) are preserved so {@link undoCancel}
-   * can restore the session 1:1. Hard delete is reserved for explicit user
-   * "Xóa buổi tập" actions (not implemented yet).
+   * can restore the session 1:1.
    *
-   * Errors out for already-completed sessions — those need a separate
-   * delete-completed-workout path (out of scope for cancel).
+   * Errors out for already-completed sessions.
    */
   async cancelSession(sessionId: string, now: Date = new Date()): Promise<void> {
     const session = await this.db.getOne<{ status: string }>(

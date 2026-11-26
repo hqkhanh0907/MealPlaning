@@ -63,6 +63,25 @@ final class WorkspaceStore implements AutoCloseable {
         });
     }
 
+    void prepareResolution(String operationId, long revision, JSONObject choices) throws Exception {
+        transaction(() -> {
+            State current = state();
+            Pending pending = current.pending();
+            if (pending == null || !operationId.equals(pending.id())) return null;
+            JSONObject request = new JSONObject(pending.request().toString());
+            request.put("operationId", UUID.randomUUID().toString());
+            request.remove("resolution");
+            if (pending.version() == current.change()) {
+                request.put("resolution", new JSONObject().put("revision", revision).put("choices", choices));
+            } else {
+                request.put("snapshot", snapshot());
+            }
+            database.execSQL("UPDATE sync_workspace SET pending = ?, pending_version = ? WHERE id = 1",
+                new Object[]{request.toString(), current.change()});
+            return null;
+        });
+    }
+
     void acknowledge(Pending pending, long revision, JSONObject remote) throws Exception {
         transaction(() -> {
             State current = state();

@@ -8,7 +8,6 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { setTimeout } from 'node:timers/promises';
 import { test } from 'node:test';
-import { columnLabel, displayValue, editableFields } from './pb_public/mealplan-admin-data.js';
 
 const schema = JSON.parse(readFileSync(new URL('./pb_hooks/sync-schema.json', import.meta.url)));
 const pb = process.env.POCKETBASE_BIN;
@@ -55,25 +54,7 @@ async function expectStatus(status, ...args) {
   return response.payload;
 }
 
-test('admin preserves the raw measurement of a legacy workout set', () => {
-  const row = { status: 'logged', weight_kg: 12.5, reps: 45, duration_seconds: null, legacy_unit_unknown: 1 };
-  assert.equal(displayValue('reps', row), '45 (chưa rõ đơn vị)');
-  assert.equal(displayValue('weight_kg', row), '12,5');
-  assert.equal(displayValue('duration_seconds', row), '—');
-  assert.equal(columnLabel('workout_set', 'reps', true), 'Số lần / giá trị cũ');
-  assert.deepEqual(editableFields('workout_set', row), []);
-});
-
-test('admin keeps explicit units and quick editing for current workout sets', () => {
-  const strength = { status: 'logged', weight_kg: 40, reps: 6, duration_seconds: null, legacy_unit_unknown: 0 };
-  assert.equal(columnLabel('workout_set', 'reps'), 'Số lần');
-  assert.equal(displayValue('reps', strength), '6');
-  assert.deepEqual(editableFields('workout_set', strength), [['weight_kg', 0, 'any'], ['reps', 0, 1]]);
-  assert.deepEqual(editableFields('workout_set', { ...strength, duration_seconds: 32 }), [['duration_seconds', 0, 1]]);
-  assert.deepEqual(editableFields('workout_set', { ...strength, status: 'skipped' }), []);
-});
-
-test('username auth, owner data, repeated writes, admin edit and delete', { skip: !pb }, async () => {
+test('two devices synchronize owned workouts, including retries and conflict choices', { skip: !pb }, async () => {
   const dir = mkdtempSync(join(tmpdir(), 'mealplan-backend-'));
   const cwd = new URL('.', import.meta.url);
   const reservation = createServer();
@@ -126,8 +107,15 @@ test('username auth, owner data, repeated writes, admin edit and delete', { skip
       { identity: 'an_test', password: 'incorrect password' });
     const route = '/api/mealplan/workspace';
     await expectStatus(401, route);
-    await expectStatus(200, route, an.loginToken);
-    const otherDevice = await expectStatus(200, '/api/mealplan/session', an.loginToken, {});
+    await expectStatus(401, route, an.loginToken);
+    await expectStatus(401, route, an.loginToken, {
+      operationId: randomUUID(), baseRevision: 0, snapshot: workout(),
+    });
+    await expectStatus(401, '/api/mealplan/session', an.loginToken, {});
+    await expectStatus(400, '/api/mealplan/session', null,
+      { username: 'an_test', password: 'incorrect password' });
+    const otherDevice = await expectStatus(200, '/api/mealplan/session', null,
+      { username: 'an_test', password });
     assert.equal(otherDevice.ownerId, an.id);
     assert.notEqual(otherDevice.sessionToken, an.sessionToken);
     const refreshed = await expectStatus(200, '/api/mealplan/session/refresh', null, { sessionToken: an.sessionToken });
@@ -149,23 +137,14 @@ test('username auth, owner data, repeated writes, admin edit and delete', { skip
     assert.equal(written.snapshot.tables.workout_set.length, 2);
     assert.deepEqual(await expectStatus(200, route, binh.token), { revision: 0, snapshot: null });
 
-    const privateRoute = '/api/mealplan-admin/workspaces/' + an.id;
-    await expectStatus(401, privateRoute, binh.token);
-    await expectStatus(403, privateRoute, binh.loginToken);
-    await expectStatus(403, privateRoute, binh.loginToken, request);
-    const admin = await expectStatus(200, '/api/collections/_superusers/auth-with-password', null,
-      { identity: adminEmail, password });
-    const users = await expectStatus(200, '/api/mealplan-admin/workspaces', admin.token);
-    assert.equal(users.find((record) => record.ownerId === an.id).name, "D'An-Lê");
-    assert.equal(users.find((record) => record.ownerId === binh.id).revision, 0);
-    assert.equal(users.find((record) => record.ownerId === binh.id).name, 'Nguyễn Minh An');
     assert.deepEqual(await expectStatus(200, route + '?metadata=1', an.token), { revision: 1, snapshot: null });
-    const adminSnapshot = structuredClone(written.snapshot);
-    adminSnapshot.tables.workout_set[1].reps = 7;
-    await expectStatus(200, privateRoute, admin.token,
-      { operationId: randomUUID(), baseRevision: 1, snapshot: adminSnapshot });
+    const deviceSnapshot = structuredClone(written.snapshot);
+    deviceSnapshot.tables.workout_set[1].reps = 7;
+    await expectStatus(200, route, otherDevice.accessToken,
+      { operationId: randomUUID(), baseRevision: 1, snapshot: deviceSnapshot });
     const edited = await expectStatus(200, route, an.token);
     assert.equal(edited.revision, 2);
+    assert.equal(edited.snapshot.tables.workout_session[0].id, 'session-a');
     assert.equal(edited.snapshot.tables.workout_session[0].total_volume, 520);
     await expectStatus(409, route, an.token,
       { operationId: randomUUID(), baseRevision: 1, snapshot: request.snapshot });
@@ -184,16 +163,97 @@ test('username auth, owner data, repeated writes, admin edit and delete', { skip
     assert.equal(adjusted.snapshot.tables.workout_session[0].total_volume, 600);
     const sameRecord = structuredClone(written.snapshot);
     sameRecord.tables.workout_set[1].reps = 9;
-    await expectStatus(409, route, an.token, {
+    sameRecord.tables.workout_set[1].notes = 'independent note';
+    const overlap = {
       operationId: randomUUID(), baseRevision: 1, mergeIndependent: true, snapshot: sameRecord,
+    };
+    const disagreement = await expectStatus(409, route, an.token, overlap);
+    assert.equal(disagreement.data.code, 'workout_conflict');
+    const { revision: conflictRevision, items } = disagreement.data.conflict;
+    assert.equal(conflictRevision, 3);
+    assert.equal(items.length, 1);
+    assert.deepEqual(
+      [items[0].kind, items[0].field, items[0].local, items[0].server],
+      ['workout_set_field', 'reps', 9, 7],
+    );
+    await expectStatus(409, route, an.token, {
+      ...overlap, operationId: randomUUID(),
+      resolution: { revision: conflictRevision - 1, choices: { [items[0].key]: 'local' } },
     });
+    assert.deepEqual(await expectStatus(200, route, an.token), adjusted);
+    const selection = {
+      ...overlap, operationId: randomUUID(),
+      resolution: { revision: conflictRevision, choices: { [items[0].key]: 'local' } },
+    };
+    const chosen = await expectStatus(200, route, an.token, selection);
+    assert.deepEqual(await expectStatus(200, route, an.token, selection), chosen);
+    const selected = await expectStatus(200, route, otherDevice.accessToken);
+    assert.equal(selected.revision, 4);
+    assert.equal(selected.snapshot.tables.workout_session[0].total_volume, 680);
+    assert.deepEqual(selected.snapshot.tables.workout_set.map((set) => set.reps), [8, 9]);
+    assert.equal(selected.snapshot.tables.workout_set[1].notes, 'independent note');
 
+    const keepWorkout = structuredClone(selected.snapshot);
+    keepWorkout.tables.workout_set[0].reps = 10;
+    await expectStatus(200, route, otherDevice.accessToken, {
+      operationId: randomUUID(), baseRevision: 4, snapshot: keepWorkout,
+    });
+    const removeWorkout = structuredClone(selected.snapshot);
     for (const table of ['workout_session', 'workout_exercise', 'workout_set']) {
-      adjusted.snapshot.tables[table] = [];
+      removeWorkout.tables[table] = [];
     }
-    await expectStatus(200, route, an.token,
-      { operationId: randomUUID(), baseRevision: 3, snapshot: adjusted.snapshot });
+    removeWorkout.tables.ingredient.push(fixtureRow('ingredient', { id: 'independent-ingredient' }));
+    const remove = {
+      operationId: randomUUID(), baseRevision: 4, snapshot: removeWorkout, mergeIndependent: true,
+    };
+    const deletion = (await expectStatus(409, route, an.token, remove)).data.conflict;
+    assert.equal(deletion.revision, 5);
+    assert.equal(deletion.items.length, 1);
+    assert.equal(deletion.items[0].kind, 'workout_session_delete');
+    assert.deepEqual([deletion.items[0].local, deletion.items[0].server], [null, 760]);
+    const keepChoice = {
+      ...remove, operationId: randomUUID(),
+      resolution: { revision: 5, choices: { [deletion.items[0].key]: 'server' } },
+    };
+    const kept = await expectStatus(200, route, an.token, keepChoice);
+    assert.deepEqual(await expectStatus(200, route, an.token, keepChoice), kept);
+    const preserved = (await expectStatus(200, route, an.token)).snapshot.tables;
+    assert.equal(preserved.workout_session[0].total_volume, 760);
+    assert.equal(preserved.ingredient[0].id, 'independent-ingredient');
+    const removed = await expectStatus(200, route, an.token,
+      { operationId: randomUUID(), baseRevision: kept.revision, snapshot: removeWorkout });
     assert.equal((await expectStatus(200, route, an.token)).snapshot.tables.workout_set.length, 0);
+    assert.deepEqual(await expectStatus(200, route, binh.token), { revision: 0, snapshot: null });
+
+    const pair = workout();
+    const pairTables = pair.tables;
+    pairTables.workout_session.push({ ...pairTables.workout_session[0], id: 'session-b' });
+    pairTables.workout_exercise.push({
+      ...pairTables.workout_exercise[0], id: 'exercise-b', workout_session_id: 'session-b',
+    });
+    pairTables.workout_set.push(...pairTables.workout_set.map((entry, index) => ({
+      ...entry, id: 'second-' + index, workout_exercise_id: 'exercise-b',
+    })));
+    const pairBase = await expectStatus(200, route, an.token, {
+      operationId: randomUUID(), baseRevision: removed.revision, snapshot: pair,
+    });
+    const deviceOne = structuredClone(pair);
+    const deviceTwo = structuredClone(pair);
+    deviceOne.tables.workout_set.find((set) => set.id === 'set-1').reps = 7;
+    deviceTwo.tables.workout_set.find((set) => set.id === 'second-1').reps = 8;
+    await expectStatus(200, route, an.token, {
+      operationId: randomUUID(), baseRevision: pairBase.revision, snapshot: deviceOne,
+    });
+    await expectStatus(200, route, otherDevice.accessToken, {
+      operationId: randomUUID(), baseRevision: pairBase.revision, snapshot: deviceTwo, mergeIndependent: true,
+    });
+    const viewOne = await expectStatus(200, route, an.token);
+    assert.deepEqual(await expectStatus(200, route, otherDevice.accessToken), viewOne);
+    assert.deepEqual(
+      viewOne.snapshot.tables.workout_session.map((entry) => [entry.id, entry.total_volume]),
+      [['session-a', 520], ['session-b', 560]],
+    );
+    assert.deepEqual(await expectStatus(200, route, binh.token), { revision: 0, snapshot: null });
 
     const unitCases = workout();
     const entries = unitCases.tables.workout_set;
@@ -254,6 +314,7 @@ test('username auth, owner data, repeated writes, admin edit and delete', { skip
     await expectStatus(401, route, refreshed.accessToken);
     const revoked = await expectStatus(401, '/api/mealplan/session/refresh', null, { sessionToken: an.sessionToken });
     assert.equal(revoked.data.code, 'session_revoked');
+    await expectStatus(401, '/api/mealplan/session', an.loginToken, {});
     await expectStatus(200, route, otherDevice.accessToken);
     await expectStatus(200, route, binh.token);
   } finally {

@@ -4,7 +4,11 @@ import {
   mondayOfWeek,
   parseLocalDate,
 } from '../../../core/utils/local-date';
-import { isLoggedSet } from '../../../core/models/fitness-workout-set';
+import {
+  isLoggedSet,
+  workoutSetIssue,
+  workoutSetLimits,
+} from '../../../core/models/fitness-workout-set';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import {
   IonBackButton,
@@ -25,18 +29,33 @@ import {
   timerOutline,
   listOutline,
 } from 'ionicons/icons';
-import { exerciseUnitNote } from '../../../core/models/exercise-guides';
+import {
+  exerciseAmountLabel,
+  exerciseGuide,
+  exerciseUnitNote,
+} from '../../../core/models/exercise-guides';
 import { WorkoutRepository } from '../../../core/repositories/workout.repository';
 import {
+  isTimedExercise,
   setValueLabel,
   workoutNumber,
   type WorkoutSessionDetail,
+  type WorkoutSet,
 } from '../../../core/models/fitness.types';
 
 interface HistoryWeekGroup {
   weekLabel: string;
   weekStartIso: string;
   sessions: WorkoutSessionDetail[];
+}
+
+interface SetEditor {
+  sessionId: string;
+  setId: string;
+  exerciseId: string;
+  timed: boolean;
+  weight: string;
+  amount: string;
 }
 
 @Component({
@@ -59,6 +78,13 @@ interface HistoryWeekGroup {
 export class FitnessHistoryPage implements OnInit {
   protected readonly setValue = setValueLabel;
   protected readonly unitNote = exerciseUnitNote;
+  protected readonly amountLabel = exerciseAmountLabel;
+  protected readonly limits = workoutSetLimits;
+  protected readonly guideFor = exerciseGuide;
+  protected readonly editor = signal<SetEditor | null>(null);
+  protected readonly deleting = signal<string | null>(null);
+  protected readonly saving = signal(false);
+  protected readonly actionError = signal<string | null>(null);
   private readonly workoutRepo = inject(WorkoutRepository);
 
   readonly loading = signal(true);
@@ -73,6 +99,14 @@ export class FitnessHistoryPage implements OnInit {
     await this.refresh();
   }
 
+  ionViewWillEnter(): void {
+    if (!this.loading() && !this.saving()) void this.refresh();
+  }
+
+  ionViewWillLeave(): void {
+    this.clearAction();
+  }
+
   async refresh(): Promise<void> {
     this.loading.set(true);
     this.errorMessage.set(null);
@@ -84,6 +118,120 @@ export class FitnessHistoryPage implements OnInit {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  protected canEditSet(exerciseId: string, set: WorkoutSet): boolean {
+    return (
+      isLoggedSet(set) &&
+      !set.legacy_unit_unknown &&
+      isTimedExercise(exerciseId) === (set.duration_seconds != null)
+    );
+  }
+
+  protected editSet(sessionId: string, exerciseId: string, set: WorkoutSet): void {
+    if (this.saving() || !this.canEditSet(exerciseId, set)) return;
+    this.clearAction();
+    this.editor.set({
+      sessionId,
+      setId: set.id,
+      exerciseId,
+      timed: isTimedExercise(exerciseId),
+      weight: String(set.weight_kg),
+      amount: String(set.duration_seconds ?? set.reps),
+    });
+  }
+
+  protected updateEditor(field: 'weight' | 'amount', event: Event): void {
+    if (!(event.target instanceof HTMLInputElement)) return;
+    const value = event.target.value;
+    this.editor.update((current) => (current ? { ...current, [field]: value } : current));
+    this.actionError.set(null);
+  }
+
+  protected async saveSet(event: Event): Promise<void> {
+    event.preventDefault();
+    const edit = this.editor();
+    if (!edit || this.saving()) return;
+    const amount = Number(edit.amount);
+    const measurement = {
+      weightKg: edit.weight.trim() === '' ? NaN : Number(edit.weight),
+      reps: edit.timed ? 0 : amount,
+      durationSeconds: edit.timed ? amount : undefined,
+    };
+    const issue = workoutSetIssue(edit.exerciseId, {
+      ...measurement,
+      restSeconds: 0,
+      effort: null,
+      notes: null,
+    });
+    if (issue) {
+      const messages = {
+        weight: 'Nhập khối lượng từ 0 đến 500 kg.',
+        reps: 'Nhập số lần nguyên từ 1 đến 100.',
+        duration: 'Nhập số giây nguyên từ 1 đến 86.400.',
+        rest: 'Dữ liệu nghỉ không hợp lệ.',
+      };
+      this.actionError.set(messages[issue]);
+      return;
+    }
+    this.saving.set(true);
+    this.actionError.set(null);
+    try {
+      const session = await this.workoutRepo.reviseCompletedSet(
+        edit.sessionId,
+        edit.setId,
+        measurement,
+      );
+      this.groups.update((groups) =>
+        groups.map((group) => ({
+          ...group,
+          sessions: group.sessions.map((previous) =>
+            previous.id === session.id ? session : previous,
+          ),
+        })),
+      );
+      this.editor.set(null);
+    } catch {
+      this.actionError.set('Không lưu được thay đổi. Thử lại.');
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  protected requestDelete(sessionId: string): void {
+    if (this.saving()) return;
+    this.clearAction();
+    this.deleting.set(sessionId);
+  }
+
+  protected async confirmDelete(): Promise<void> {
+    const sessionId = this.deleting();
+    if (!sessionId || this.saving()) return;
+    this.saving.set(true);
+    this.actionError.set(null);
+    try {
+      await this.workoutRepo.deleteCompletedSession(sessionId);
+      this.groups.update((groups) =>
+        groups
+          .map((group) => ({
+            ...group,
+            sessions: group.sessions.filter((session) => session.id !== sessionId),
+          }))
+          .filter((group) => group.sessions.length > 0),
+      );
+      this.deleting.set(null);
+    } catch {
+      this.actionError.set('Không xóa được buổi tập. Thử lại.');
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  protected clearAction(): void {
+    if (this.saving()) return;
+    this.editor.set(null);
+    this.deleting.set(null);
+    this.actionError.set(null);
   }
 
   formatSessionDate(iso: string): string {

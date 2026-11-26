@@ -69,6 +69,14 @@ function checkLegacy(app, token, now) {
   if (rows.length) throw new SessionFailure(401, "session_revoked", "The session has been revoked.");
 }
 
+function retireLoginToken(app, token, now, expires) {
+  app.db().newQuery("DELETE FROM mealplan_revoked WHERE expires <= {:now}").bind({ now }).execute();
+  app.db().newQuery(`
+    INSERT INTO mealplan_revoked (digest, expires) VALUES ({:digest}, {:expires})
+    ON CONFLICT(digest) DO NOTHING
+  `).bind({ digest: $security.sha256(token), expires }).execute();
+}
+
 function findSession(app, token) {
   if (!/^mps_[a-zA-Z0-9]{64}$/.test(token)) requireAccess();
   const rows = arrayOf(new DynamicModel({ digest: "", owner: "", session_expires: 0, revoked_at: 0 }));
@@ -79,9 +87,9 @@ function findSession(app, token) {
 
 function findAccess(app, token) {
   if (!/^mpa_[a-zA-Z0-9]{64}$/.test(token)) requireAccess();
-  const rows = arrayOf(new DynamicModel({ owner: "", session_expires: 0, revoked_at: 0, access_expires: 0 }));
+  const rows = arrayOf(new DynamicModel({ digest: "", owner: "", session_expires: 0, revoked_at: 0, access_expires: 0 }));
   app.db().newQuery(`
-    SELECT user_session.owner, user_session.expires AS session_expires, user_session.revoked_at,
+    SELECT user_session.digest, user_session.owner, user_session.expires AS session_expires, user_session.revoked_at,
            access.expires AS access_expires
     FROM mealplan_access AS access
     JOIN mealplan_sessions AS user_session ON user_session.digest = access.session
@@ -90,22 +98,25 @@ function findAccess(app, token) {
   return rows[0];
 }
 
+function requireModernAccess(app, token, now) {
+  const access = findAccess(app, token);
+  if (!access) requireAccess();
+  requireSession(access, now);
+  if (access.access_expires <= now) {
+    throw new SessionFailure(401, "access_expired", "The access token has expired.");
+  }
+  return access;
+}
+
 function authorize(event) {
   const token = bearer(event);
   const now = timestamp();
-  if (token.startsWith("mpa_")) {
-    const access = findAccess(event.app, token);
-    if (!access) requireAccess();
-    requireSession(access, now);
-    if (access.access_expires <= now) {
-      throw new SessionFailure(401, "access_expired", "The access token has expired.");
-    }
-    event.auth = requireUser(event.app.findRecordById("users", access.owner));
-  } else {
-    if (!event.auth || !token) requireAccess();
-    requireUser(event.auth);
-    checkLegacy(event.app, token, now);
+  if (!token.startsWith("mpa_")) {
+    if (event.auth) requireUser(event.auth);
+    requireAccess();
   }
+  const access = requireModernAccess(event.app, token, now);
+  event.auth = requireUser(event.app.findRecordById("users", access.owner));
   return event.next();
 }
 
@@ -116,23 +127,103 @@ function issueAccess(app, digest, user, expires) {
   return { accessToken, ...userFields(user), accessExpiresAt: new Date(expires * 1000).toISOString() };
 }
 
+function cleanDeviceLabel(value) {
+  return typeof value === "string"
+    ? Array.from(value.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim()).slice(0, 60).join("")
+    : "";
+}
+
+function authenticatePassword(app, username, password) {
+  if (typeof username === "string" && typeof password === "string" &&
+      username.length <= 128 && password.length <= 256) {
+    const [user] = app.findRecordsByFilter("users", "username = {:username}", "", 1, 0,
+      { username: username.trim().toLowerCase() });
+    if (user && user.validatePassword(password)) return requireUser(user);
+  }
+  throw new SessionFailure(400, "invalid_credentials", "The username or password is incorrect.");
+}
+
 function exchange(event) {
   const token = bearer(event);
   const now = timestamp();
-  if (!event.auth || !token) requireAccess();
-  const user = requireUser(event.auth);
+  const body = event.requestInfo().body;
+  const passwordSignIn = body.username !== undefined || body.password !== undefined;
+  if (!passwordSignIn && (!event.auth || !token)) requireAccess();
+  const user = passwordSignIn
+    ? authenticatePassword(event.app, body.username, body.password)
+    : requireUser(event.auth);
   const sessionToken = "mps_" + $security.randomString(64);
   const digest = $security.sha256(sessionToken);
+  const deviceLabel = cleanDeviceLabel(body.deviceLabel);
   let access;
   event.app.runInTransaction((tx) => {
-    checkLegacy(tx, token, now);
+    if (!passwordSignIn) {
+      checkLegacy(tx, token, now);
+      retireLoginToken(tx, token, now, now + user.collection().authToken.duration);
+    }
     tx.db().newQuery("DELETE FROM mealplan_sessions WHERE expires <= {:end}")
       .bind({ end: now - SESSION_GRACE_SECONDS }).execute();
     tx.db().newQuery("INSERT INTO mealplan_sessions (digest, owner, expires) VALUES ({:digest}, {:owner}, {:expires})")
       .bind({ digest, owner: user.id, expires: now + SESSION_SECONDS }).execute();
+    tx.db().newQuery("INSERT INTO mealplan_session_metadata (session, created_at, device_label) VALUES ({:digest}, {:now}, {:deviceLabel})")
+      .bind({ digest, now, deviceLabel }).execute();
     access = issueAccess(tx, digest, user, now + ACCESS_SECONDS);
   });
   return event.json(200, { ...access, sessionToken });
+}
+
+function listDevices(event) {
+  const now = timestamp();
+  const token = bearer(event);
+  let devices;
+  event.app.runInTransaction((tx) => {
+    const caller = requireModernAccess(tx, token, now);
+    requireUser(tx.findRecordById("users", caller.owner));
+    const rows = arrayOf(new DynamicModel({ id: "", label: "", created_at: 0, expires: 0, current_session: 0 }));
+    tx.db().newQuery(`
+      SELECT metadata.public_id AS id, metadata.device_label AS label, metadata.created_at,
+             session.expires, session.digest = {:current} AS current_session
+      FROM mealplan_sessions AS session
+      JOIN mealplan_session_metadata AS metadata ON metadata.session = session.digest
+      WHERE session.owner = {:owner} AND session.revoked_at = 0 AND session.expires > {:now}
+      ORDER BY current_session DESC, metadata.created_at DESC, metadata.public_id
+    `).bind({ current: caller.digest, owner: caller.owner, now }).all(rows);
+    devices = rows.map((row) => ({
+      id: row.id, label: row.label,
+      createdAt: new Date(row.created_at * 1000).toISOString(),
+      expiresAt: new Date(row.expires * 1000).toISOString(),
+      current: row.current_session === 1,
+    }));
+  });
+  return event.json(200, { devices });
+}
+
+function revokeDevice(event) {
+  const now = timestamp();
+  const token = bearer(event);
+  const id = event.requestInfo().body.id;
+  event.app.runInTransaction((tx) => {
+    const caller = requireModernAccess(tx, token, now);
+    requireUser(tx.findRecordById("users", caller.owner));
+    const rows = arrayOf(new DynamicModel({ digest: "" }));
+    if (typeof id === "string") {
+      tx.db().newQuery(`
+        SELECT session.digest
+        FROM mealplan_sessions AS session
+        JOIN mealplan_session_metadata AS metadata ON metadata.session = session.digest
+        WHERE metadata.public_id = {:id} AND session.owner = {:owner}
+      `).bind({ id, owner: caller.owner }).all(rows);
+    }
+    if (!rows.length) throw new SessionFailure(404, "session_not_found", "The device session was not found.");
+    if (rows[0].digest === caller.digest) {
+      throw new SessionFailure(409, "current_session", "Use sign out to close this session.");
+    }
+    tx.db().newQuery(`
+      UPDATE mealplan_sessions SET revoked_at = {:now}
+      WHERE digest = {:digest} AND owner = {:owner} AND revoked_at = 0
+    `).bind({ now, digest: rows[0].digest, owner: caller.owner }).execute();
+  });
+  return event.noContent(204);
 }
 
 function refresh(event) {
@@ -157,14 +248,9 @@ function logout(event) {
   } else {
     const accessToken = bearer(event);
     if (!event.auth || !accessToken) requireAccess();
-    requireUser(event.auth);
-    event.app.runInTransaction((tx) => {
-      tx.db().newQuery("DELETE FROM mealplan_revoked WHERE expires <= {:now}").bind({ now }).execute();
-      tx.db().newQuery(`
-        INSERT INTO mealplan_revoked (digest, expires) VALUES ({:digest}, {:expires})
-        ON CONFLICT(digest) DO NOTHING
-      `).bind({ digest: $security.sha256(accessToken), expires: now + ACCESS_SECONDS }).execute();
-    });
+    const user = requireUser(event.auth);
+    event.app.runInTransaction((tx) =>
+      retireLoginToken(tx, accessToken, now, now + user.collection().authToken.duration));
   }
   return event.noContent(204);
 }
@@ -177,4 +263,4 @@ function updateName(event) {
   return event.json(200, userFields(user));
 }
 
-module.exports = { authorize, exchange, logout, nameOf, refresh, respond, updateName, userFields };
+module.exports = { authorize, exchange, listDevices, logout, nameOf, refresh, respond, revokeDevice, updateName, userFields };

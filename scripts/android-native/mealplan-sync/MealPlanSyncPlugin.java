@@ -43,6 +43,7 @@ public final class MealPlanSyncPlugin extends Plugin {
                 .put("accessExpiresAt", call.getString("accessExpiresAt", ""))
                 .put("username", call.getString("username", "")).put("fullName", call.getString("fullName", ""));
             SessionVault.Session account = vault.replace(input);
+            new SyncProgress(context).cancel();
             SyncSchedule schedule = new SyncSchedule(context);
             if (previous != null) schedule.cancel(previous);
             schedule.periodic(account);
@@ -80,6 +81,21 @@ public final class MealPlanSyncPlugin extends Plugin {
         });
     }
 
+    @PluginMethod public void deviceLabel(PluginCall call) {
+        call.resolve(new JSObject().put("label", android.os.Build.MODEL));
+    }
+
+    @PluginMethod public void listDeviceSessions(PluginCall call) {
+        String owner = call.getString("ownerId", "");
+        run(call, NETWORK, () -> DeviceSessions.list(vault, owner));
+    }
+
+    @PluginMethod public void revokeDeviceSession(PluginCall call) {
+        String owner = call.getString("ownerId", "");
+        String id = call.getString("id", "");
+        run(call, NETWORK, () -> DeviceSessions.revoke(vault, owner, id));
+    }
+
     @PluginMethod public void enqueue(PluginCall call) {
         run(call, CONTROL, () -> {
             SessionVault.Session account = vault.read();
@@ -105,6 +121,15 @@ public final class MealPlanSyncPlugin extends Plugin {
         else transfer(call, useServer);
     }
 
+    @PluginMethod public void resolveWorkoutConflict(PluginCall call) {
+        JSONObject choice = call.getObject("resolution");
+        if (choice == null || choice.optJSONObject("choices") == null) {
+            call.reject("Missing conflict choices", "native_sync_choice_required");
+        } else {
+            transfer(call, null, choice);
+        }
+    }
+
     @PluginMethod public void clear(PluginCall call) {
         run(call, CONTROL, () -> {
             SessionVault.Session account = null;
@@ -121,6 +146,10 @@ public final class MealPlanSyncPlugin extends Plugin {
     }
 
     private void transfer(PluginCall call, Boolean choice) {
+        transfer(call, choice, null);
+    }
+
+    private void transfer(PluginCall call, Boolean choice, JSONObject workoutChoice) {
         String owner = call.getString("ownerId", "");
         if (owner.isEmpty()) {
             call.reject("Missing sync owner", "native_sync_owner_required");
@@ -134,7 +163,7 @@ public final class MealPlanSyncPlugin extends Plugin {
                     return;
                 }
                 run(call, NETWORK, () -> new SyncEngine(context).run(
-                    account, "manual", UUID.randomUUID().toString(), choice, () -> false));
+                    account, "manual", UUID.randomUUID().toString(), choice, workoutChoice, () -> false));
             } catch (Exception error) {
                 reject(call, error);
             }

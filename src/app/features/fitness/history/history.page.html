@@ -85,6 +85,92 @@
                                   <span class="session-set--skipped">Đã bỏ qua</span>
                                 } @else {
                                   <span>{{ setValue(set) }}</span>
+                                  @if (
+                                    canEditSet(exercise.exercise_id, set) &&
+                                    editor()?.setId !== set.id
+                                  ) {
+                                    <ion-button
+                                      fill="clear"
+                                      size="small"
+                                      [attr.aria-label]="'Sửa hiệp ' + set.set_number"
+                                      [disabled]="saving()"
+                                      (click)="editSet(session.id, exercise.exercise_id, set)"
+                                    >
+                                      Sửa
+                                    </ion-button>
+                                  }
+                                  @if (editor(); as edit) {
+                                    @if (edit.setId === set.id) {
+                                      <form
+                                        class="session-set-editor"
+                                        [attr.aria-label]="'Sửa thông số hiệp ' + set.set_number"
+                                        novalidate
+                                        (submit)="saveSet($event)"
+                                      >
+                                        <div class="session-set-editor__fields">
+                                          <div class="input-wrapper">
+                                            <label class="input-label" for="history-set-weight">{{
+                                              guideFor(exercise.exercise_id)?.loadLabel ?? 'Tạ (kg)'
+                                            }}</label>
+                                            <input
+                                              id="history-set-weight"
+                                              class="input-native"
+                                              type="number"
+                                              inputmode="decimal"
+                                              min="0"
+                                              step="any"
+                                              [max]="limits.maxWeightKg"
+                                              [value]="edit.weight"
+                                              [disabled]="saving()"
+                                              (input)="updateEditor('weight', $event)"
+                                            />
+                                          </div>
+                                          <div class="input-wrapper">
+                                            <label class="input-label" for="history-set-amount">{{
+                                              amountLabel(exercise.exercise_id)
+                                            }}</label>
+                                            <input
+                                              id="history-set-amount"
+                                              class="input-native"
+                                              type="number"
+                                              inputmode="numeric"
+                                              min="1"
+                                              step="1"
+                                              [max]="
+                                                edit.timed
+                                                  ? limits.maxDurationSeconds
+                                                  : limits.maxReps
+                                              "
+                                              [value]="edit.amount"
+                                              [disabled]="saving()"
+                                              (input)="updateEditor('amount', $event)"
+                                            />
+                                          </div>
+                                        </div>
+                                        @if (actionError(); as message) {
+                                          <p class="session-action__error" role="alert">
+                                            {{ message }}
+                                          </p>
+                                        }
+                                        <div class="session-action__buttons">
+                                          <ion-button
+                                            fill="clear"
+                                            [disabled]="saving()"
+                                            (click)="clearAction()"
+                                          >
+                                            Hủy
+                                          </ion-button>
+                                          <button
+                                            type="submit"
+                                            class="session-set-editor__save"
+                                            [disabled]="saving()"
+                                          >
+                                            {{ saving() ? 'Đang lưu…' : 'Lưu thay đổi' }}
+                                          </button>
+                                        </div>
+                                      </form>
+                                    }
+                                  }
                                 }
                               </li>
                             }
@@ -95,6 +181,43 @@
                       </section>
                     } @empty {
                       <p>Không có chi tiết bài tập.</p>
+                    }
+                    @if (deleting() === session.id) {
+                      <div class="session-delete" role="group" aria-label="Xóa buổi tập">
+                        <p>Xóa buổi tập và các hiệp của buổi này khỏi lịch sử?</p>
+                        @if (actionError(); as message) {
+                          <p class="session-action__error" role="alert">{{ message }}</p>
+                        }
+                        <div class="session-action__buttons">
+                          <ion-button
+                            fill="clear"
+                            aria-label="Hủy xóa buổi tập"
+                            [disabled]="saving()"
+                            (click)="clearAction()"
+                          >
+                            Hủy
+                          </ion-button>
+                          <ion-button
+                            color="danger"
+                            aria-label="Xác nhận xóa buổi tập"
+                            [disabled]="saving()"
+                            (click)="confirmDelete()"
+                          >
+                            {{ saving() ? 'Đang xóa…' : 'Xóa buổi tập' }}
+                          </ion-button>
+                        </div>
+                      </div>
+                    } @else {
+                      <ion-button
+                        class="session-card__delete"
+                        fill="clear"
+                        color="danger"
+                        aria-label="Xóa buổi tập"
+                        [disabled]="saving()"
+                        (click)="requestDelete(session.id)"
+                      >
+                        Xóa buổi tập
+                      </ion-button>
                     }
                   </div>
                 </details>

@@ -221,6 +221,7 @@ details[open] .session-card__summary {
 
   li {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--space-sm);
@@ -233,4 +234,61 @@ details[open] .session-card__summary {
 .session-set--skipped {
   color: var(--text-secondary);
   font-style: italic;
+}
+
+.session-card__details ion-button,
+.session-set-editor__save {
+  min-height: 44px;
+  margin: 0;
+}
+
+.session-set-editor,
+.session-delete {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.session-set-editor {
+  flex: 1 0 100%;
+  padding-block: var(--space-xs);
+}
+
+.session-set-editor__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: var(--space-sm);
+}
+
+.session-set-editor__save {
+  padding: 0 var(--space-lg);
+  border: 0;
+  border-radius: var(--radius-md);
+  color: var(--ion-color-primary-contrast);
+  background: var(--ion-color-primary);
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-700);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.session-action__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+}
+
+.session-card__delete {
+  justify-self: start;
+}
+
+.session-card__details .session-action__error {
+  color: var(--ion-color-danger-shade);
 }

@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { environment } from '../../../environments/environment';
 import { accountNameError } from './account-name';
-import { nativeAccount } from './native-account';
+import { nativeAccount, type DeviceSessionSummary } from './native-account';
 
 const LEGACY_KEY = 'mealplan.session.v1';
 const STORAGE_KEY = 'mealplan.account.v2';
@@ -76,10 +76,9 @@ export class AccountSession {
         name: name.trim(),
       });
     }
-    const response = await this.call<{ token: string; record: AccountIdentity }>(
-      '/api/collections/users/auth-with-password',
-      { identity, password },
-    );
+    const { label: deviceLabel } = this.required
+      ? await nativeAccount.deviceLabel().catch(() => ({ label: 'Android' }))
+      : { label: 'Trình duyệt' };
     const grant = await this.call<{
       ownerId: string;
       username: string;
@@ -87,8 +86,8 @@ export class AccountSession {
       accessToken: string;
       sessionToken: string;
       accessExpiresAt: string;
-    }>('/api/mealplan/session', {}, response.token);
-    if (grant.ownerId !== response.record.id || !/^[a-z0-9]{15}$/.test(grant.ownerId)) {
+    }>('/api/mealplan/session', { username: identity, password, deviceLabel });
+    if (grant.username !== identity || !/^[a-z0-9]{15}$/.test(grant.ownerId)) {
       throw new Error('Tài khoản không hợp lệ.');
     }
     const account = { id: grant.ownerId, username: grant.username, name: grant.name };
@@ -117,6 +116,24 @@ export class AccountSession {
     if (this.current()?.id !== account.id || updated.ownerId !== account.id) return;
     await nativeAccount.updateProfile({ fullName: updated.name });
     this.remember({ ...account, name: updated.name });
+  }
+
+  async listDeviceSessions(): Promise<DeviceSessionSummary[] | null> {
+    const account = this.current();
+    if (!this.required || !account) return null;
+    const reply = await nativeAccount.listDeviceSessions({ ownerId: account.id });
+    if (this.current() !== account || reply.reason === 'account_changed') return null;
+    if (reply.reason) throw new AccountRequestError(0, 'Chưa thể tải thiết bị.', reply.reason);
+    return reply.devices ?? [];
+  }
+
+  async revokeDeviceSession(id: string): Promise<boolean> {
+    const account = this.current();
+    if (!this.required || !account) return false;
+    const reply = await nativeAccount.revokeDeviceSession({ ownerId: account.id, id });
+    if (this.current() !== account || reply.reason === 'account_changed') return false;
+    if (reply.reason) throw new AccountRequestError(0, 'Chưa thể thu hồi phiên.', reply.reason);
+    return true;
   }
 
   private async rememberDevice(

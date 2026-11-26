@@ -3,6 +3,8 @@ package com.healthmate.ai.sync;
 import android.content.Context;
 import android.content.SharedPreferences;
 import com.getcapacitor.JSObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 final class SyncStatus {
     private final SharedPreferences prefs;
@@ -16,13 +18,22 @@ final class SyncStatus {
             .putString("source", source).putString("lastStarted", SyncTime.now()).apply();
     }
 
-    void finish(String state, String reason, long remoteVersion) {
+    void finish(String state, String reason, long remoteVersion, JSONObject conflict) {
         String now = SyncTime.now();
         SharedPreferences.Editor editor = prefs.edit().putString("status", state).putString("reason", reason)
             .putString("lastFinished", now);
         if (state.equals("saved")) editor.putString("lastSync", now);
         if (remoteVersion > 0) editor.putLong("remoteRevision", remoteVersion);
+        if (conflict == null) editor.remove("workoutConflict");
+        else editor.putString("workoutConflict", conflict.toString());
         editor.apply();
+    }
+
+    JSONObject workoutConflict() {
+        String value = prefs.getString("workoutConflict", null);
+        if (value == null) return null;
+        try { return new JSONObject(value); }
+        catch (JSONException invalid) { return null; }
     }
 
     JSObject details(boolean remoteApplied) {
@@ -35,6 +46,8 @@ final class SyncStatus {
         result.put("lastFinished", prefs.getString("lastFinished", ""));
         result.put("remoteApplied", remoteApplied);
         result.put("remoteRevision", prefs.getLong("remoteRevision", 0));
+        JSONObject conflict = workoutConflict();
+        if (conflict != null && result.getString("status", "").equals("conflict")) result.put("workoutConflict", conflict);
         return result;
     }
 }

@@ -40,11 +40,15 @@ final class MealPlanApi {
             String content = read(success ? connection.getInputStream() : connection.getErrorStream());
             if (success) return content.isEmpty() ? new JSONObject() : new JSONObject(content);
             String code = "";
+            JSONObject conflict = null;
             try {
                 JSONObject fields = new JSONObject(content).optJSONObject("data");
-                if (fields != null) code = fields.optString("code");
+                if (fields != null) {
+                    code = fields.optString("code");
+                    if (status == 409 && code.equals("workout_conflict")) conflict = fields.optJSONObject("conflict");
+                }
             } catch (Exception malformed) { /* HTTP status remains authoritative. */ }
-            throw new ResponseError(status, code);
+            throw new ResponseError(status, code, conflict);
         } finally { connection.disconnect(); }
     }
 
@@ -65,11 +69,13 @@ final class MealPlanApi {
     static final class ResponseError extends IOException {
         final int status;
         final String code;
+        final JSONObject conflict;
 
-        ResponseError(int status, String code) {
+        ResponseError(int status, String code, JSONObject conflict) {
             super("Workspace request failed with status " + status);
             this.status = status;
             this.code = code;
+            this.conflict = conflict;
         }
     }
 }

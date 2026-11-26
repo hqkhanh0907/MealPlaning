@@ -30,14 +30,14 @@ The server identifies the workspace from authentication and performs revision ch
 
 The app uses whole-workspace revisions for v1. A conflicting device can use the server workspace or intentionally replace it with the local workspace. The application retains existing meal and workout rules. The server verifies parent references and derives workout totals.
 
-AI logs, device settings and unsaved input drafts stay on the device. The public proxy accepts only named app endpoints. The private admin uses the same validation and revision checks when editing records.
+AI logs, device settings and unsaved input drafts stay on the device. The public proxy accepts only named app endpoints. Workspace access uses the app user's authenticated session.
 
 ## Local verification
 
 Install the pinned PocketBase binary for your OS. Run these commands from the repo root.
 
 ```sh
-POCKETBASE_BIN=/absolute/path/to/pocketbase node --test server/workspace.test.mjs
+POCKETBASE_BIN=/absolute/path/to/pocketbase node --test server/*.test.mjs
 npm run check:guards
 npm run lint
 npm test -- --watch=false --browsers=ChromeHeadless
@@ -46,7 +46,7 @@ npm run build
 
 On Android, use test accounts. An should record 40 kg × 6 and 40 kg × 5 offline. Confirm 440 kg before sync. After a lost response and retry, the server should store one session and two sets.
 
-Binh should see an empty history and no draft from An. In the private admin, sort by reps and edit An's second set to seven reps. Sync An and confirm 520 kg. Check a meal snapshot after editing its recipe.
+Binh should see an empty history and no draft from An. Sign in as An on a second device. Edit the second set to seven reps in An's workout history. Sync both devices and confirm 520 kg. Check a meal snapshot after editing its recipe.
 
 ## CachyOS operations
 
@@ -54,13 +54,17 @@ Install the pinned Linux binary at `/opt/mealplaning/pocketbase`. Store each rel
 
 Point `/opt/mealplaning/current` at the release. Start both units from `server/deploy/` as the dedicated user `mealplan`. The service state lives in `/var/lib/mealplaning`.
 
-Create the first PocketBase superuser over SSH before starting the service. Store the credentials outside Git with root-only access. Use an SSH tunnel for the private admin.
+Create the first PocketBase superuser over SSH before starting the service. Store its credentials outside Git with root-only access. Open the operations page through an SSH tunnel.
 
 ```sh
 ssh -o BatchMode=yes -N -L 18091:127.0.0.1:18089 cachyos-root
 ```
 
-Open `http://127.0.0.1:18091/mealplan-admin.html`. The source database and admin listener stay on loopback. Funnel forwards public HTTPS to the allowlisted gateway on port 18090.
+Apply all migrations before switching the release. Use the PocketBase console at `http://127.0.0.1:18091/_/` to create a record in `mealplan_operators`. Assign a unique email and password. Use that account at `http://127.0.0.1:18091/mealplan-admin.html`.
+
+The operations account can only read service health, the release SHA, latest successful sync requests, and filtered error counts. Counts cover the period since the operations migration. The database stores aggregate event codes and timestamps.
+
+The database listener stays on loopback. Funnel forwards public HTTPS to the allowlisted gateway on port 18090. The operations page, operator sign-in, and status endpoint require the private listener.
 
 Save the current Funnel JSON before changing routes. For rollback, restore the previous release symlink and restart the services. Restore the saved Funnel routes if the public change needs reversal. Keep a copy of the database before changing versions.
 

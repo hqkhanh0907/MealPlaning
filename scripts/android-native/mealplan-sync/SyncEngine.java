@@ -25,13 +25,18 @@ final class SyncEngine {
 
     JSObject run(SessionVault.Session account, String source, String runId, Boolean useServer,
                  BooleanSupplier stopped) throws Exception {
+        return run(account, source, runId, useServer, null, stopped);
+    }
+
+    JSObject run(SessionVault.Session account, String source, String runId, Boolean useServer,
+                 JSONObject choice, BooleanSupplier stopped) throws Exception {
         SyncStatus status = new SyncStatus(context, account.ownerId);
         TRANSFER.lockInterruptibly();
         try {
             check(account, stopped);
             vault.whileCurrent(account, () -> { status.begin(source); return null; });
             Log.i(TAG, "start source=" + source + " work=" + runId);
-            return new Transfer(account, source, runId, stopped, status).perform(useServer);
+            return new Transfer(account, source, runId, stopped, status).perform(useServer, choice);
         } catch (SessionVault.SessionChanged changed) {
             return idle();
         } finally { TRANSFER.unlock(); }
@@ -57,6 +62,7 @@ final class SyncEngine {
         private final SyncProgress progress = new SyncProgress(context);
         private long appliedRevision;
         private long serverRevision;
+        private JSONObject workoutConflict;
 
         Transfer(SessionVault.Session account, String source, String runId, BooleanSupplier stopped, SyncStatus status) {
             this.account = account;
@@ -66,10 +72,19 @@ final class SyncEngine {
             this.status = status;
         }
 
-        JSObject perform(Boolean useServer) throws Exception {
+        JSObject perform(Boolean useServer, JSONObject choice) throws Exception {
             try (WorkspaceStore store = new WorkspaceStore(context, account)) {
                 if (!account.reason.isEmpty()) return reauthenticate(account.reason);
-                if (useServer != null) resolve(store, useServer);
+                JSONObject savedConflict = status.workoutConflict();
+                if (choice != null) {
+                    applyChoice(store, savedConflict, choice);
+                } else if (useServer != null) {
+                    if (savedConflict != null) {
+                        workoutConflict = savedConflict;
+                        return finish("conflict", "workout_conflict");
+                    }
+                    resolve(store, useServer);
+                }
                 for (int attempt = 0; attempt < 4; attempt++) {
                     if (synchronize(store)) return finish("saved", "");
                 }
@@ -77,7 +92,9 @@ final class SyncEngine {
             } catch (SessionAuthorizer.Reauthentication rejected) {
                 return reauthenticate(rejected.reason);
             } catch (MealPlanApi.ResponseError response) {
-                if (response.status == 409) return finish("conflict", "workspace_conflict");
+                if (response.status == 409) {
+                    return finish("conflict", workoutConflict == null ? "workspace_conflict" : "workout_conflict");
+                }
                 if (response.status == 429 || response.status >= 500) return finish("offline", "server_unavailable");
                 return finish("error", "server_rejected_sync");
             } catch (SnapshotMerge.Conflict conflict) {
@@ -123,17 +140,37 @@ final class SyncEngine {
             }
         }
 
+        private void applyChoice(WorkspaceStore store, JSONObject previous, JSONObject choice) throws Exception {
+            if (previous == null ||
+                !previous.getString("operationId").equals(choice.optString("operationId")) ||
+                previous.getLong("revision") != choice.optLong("revision", -1)) return;
+            JSONObject choices = choice.getJSONObject("choices");
+            vault.whileCurrent(account, () -> {
+                store.prepareResolution(previous.getString("operationId"), previous.getLong("revision"), choices);
+                return null;
+            });
+        }
+
         private void send(WorkspaceStore store, WorkspaceStore.Pending pending) throws Exception {
             ensureActive();
-            progress.sending();
+            vault.whileCurrent(account, () -> { progress.sending(); return null; });
             Log.i(TAG, "send source=" + source + " work=" + runId + " operation=" + pending.id());
-            JSONObject response = request(MealPlanApi.WORKSPACE, pending.request());
+            JSONObject response;
+            try {
+                response = request(MealPlanApi.WORKSPACE, pending.request());
+            } catch (MealPlanApi.ResponseError error) {
+                if (error.conflict != null && error.conflict.optJSONArray("items") != null &&
+                    error.conflict.optLong("revision", -1) >= 0) {
+                    workoutConflict = error.conflict.put("operationId", pending.id());
+                }
+                throw error;
+            }
             if (!pending.id().equals(response.getString("operationId"))) throw new IOException("Unexpected sync receipt");
             long receiptRevision = response.getLong("revision");
             long latest = request(METADATA, null).getLong("revision");
             if (latest < receiptRevision) throw new IOException("Workspace revision changed");
             if (response.optBoolean("merged") || latest > receiptRevision) {
-                progress.receiving();
+                vault.whileCurrent(account, () -> { progress.receiving(); return null; });
                 JSONObject remote = request(MealPlanApi.WORKSPACE, null);
                 long revision = remote.getLong("revision");
                 if (revision < latest) throw new IOException("Workspace revision changed");
@@ -149,7 +186,7 @@ final class SyncEngine {
 
         private void receive(WorkspaceStore store, WorkspaceStore.State local, boolean overwrite, long minimum) throws Exception {
             ensureActive();
-            progress.receiving();
+            vault.whileCurrent(account, () -> { progress.receiving(); return null; });
             JSONObject remote = request(MealPlanApi.WORKSPACE, null);
             long revision = remote.getLong("revision");
             if (revision < minimum) throw new IOException("Workspace revision changed");
@@ -176,7 +213,7 @@ final class SyncEngine {
             return vault.whileCurrent(account, () -> {
                 if (state.equals("saved")) progress.complete();
                 else progress.cancel();
-                status.finish(state, reason, appliedRevision);
+                status.finish(state, reason, appliedRevision, workoutConflict);
                 Log.i(TAG, "finish source=" + source + " work=" + runId + " status=" + state +
                     " reason=" + reason + " revision=" + serverRevision);
                 return status.details(appliedRevision > 0);

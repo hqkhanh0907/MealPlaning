@@ -33,6 +33,22 @@ function reply(revision, operationId, merged) {
   return merged ? { revision, operationId, merged: true } : { revision, operationId };
 }
 
+function conflictResolution(value, mergeIndependent) {
+  if (value === undefined) return null;
+  if (!mergeIndependent || !value || !Number.isSafeInteger(value.revision) || value.revision < 0 ||
+      !value.choices || typeof value.choices !== "object" || Array.isArray(value.choices)) {
+    throw new BadRequestError("Invalid conflict resolution.");
+  }
+  const choices = Object.create(null);
+  for (const key of Object.keys(value.choices).sort()) {
+    const side = value.choices[key];
+    if (side !== "local" && side !== "server") throw new BadRequestError("Invalid conflict choice.");
+    choices[key] = side;
+  }
+  if (Object.keys(choices).length === 0) throw new BadRequestError("Missing conflict choices.");
+  return { revision: value.revision, choices };
+}
+
 function write(app, ownerId, body) {
   const { operationId, baseRevision } = body;
   const mergeIndependent = body.mergeIndependent === true;
@@ -47,7 +63,9 @@ function write(app, ownerId, body) {
   } catch (error) {
     throw new BadRequestError(error.message);
   }
+  const resolution = conflictResolution(body.resolution, mergeIndependent);
   const hashInput = mergeIndependent ? [baseRevision, snapshot, true] : [baseRevision, snapshot];
+  if (resolution) hashInput.push(resolution);
   const requestHash = $security.sha256(JSON.stringify(hashInput));
   const receipts = arrayOf(new DynamicModel({ request_hash: "", revision: 0, merged: 0 }));
   let response;
@@ -68,13 +86,20 @@ function write(app, ownerId, body) {
     const [existing] = tx.findRecordsByFilter("mealplan_workspaces", "owner = {:owner}", "", 1, 0, { owner: ownerId });
     const revision = existing ? existing.getInt("revision") : 0;
     const merged = revision !== baseRevision;
+    if (resolution && !merged) throw new ApiError(409, "Data changed on another device.");
     const current = existing ? storedSnapshot(tx, ownerId) : null;
     if (merged) {
       if (!mergeIndependent || baseRevision > revision) throw new ApiError(409, "Data changed on another device.");
       const base = baseRevision === 0 ? null : storedSnapshot(tx, ownerId, baseRevision);
       if (baseRevision > 0 && !base) throw new ApiError(409, "Data changed on another device.");
       try {
-        snapshot = mergeSnapshots(base ? JSON.parse(base) : null, snapshot, JSON.parse(current));
+        const choices = resolution?.revision === revision ? resolution.choices : null;
+        const result = mergeSnapshots(base ? JSON.parse(base) : null, snapshot, JSON.parse(current), choices);
+        if (result.items) {
+          response = { conflict: { revision, items: result.items } };
+          return;
+        }
+        snapshot = result.snapshot;
       } catch {
         throw new ApiError(409, "Data changed on another device.");
       }
@@ -90,7 +115,9 @@ function write(app, ownerId, body) {
     ).bind({ owner: ownerId, operation: operationId, request_hash: requestHash, revision: revision + 1, merged: merged ? 1 : 0 }).execute();
     response = reply(revision + 1, operationId, merged);
   });
-  $app.logger().info("mealplan sync", "owner", ownerId, "requestId", operationId, "revision", response.revision);
+  if (!response.conflict) {
+    $app.logger().info("mealplan sync", "owner", ownerId, "requestId", operationId, "revision", response.revision);
+  }
   return response;
 }
 
