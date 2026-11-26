@@ -66,7 +66,7 @@ describe('Fitness repositories', () => {
     await planRepo.ensurePresetPlans();
     await planRepo.activatePlan('upper_lower');
 
-    const readSnapshot = () =>
+    const readSnapshot = (): Promise<unknown[]> =>
       Promise.all([
         db.query('SELECT * FROM training_plan ORDER BY id'),
         db.query('SELECT * FROM training_plan_day ORDER BY id'),
@@ -96,7 +96,7 @@ describe('Fitness repositories', () => {
       "UPDATE planned_exercise SET sets = sets + 1, notes = 'Old note' WHERE id = ?",
       [exercise.id],
     );
-    const version = async () =>
+    const version = async (): Promise<number> =>
       (await db.getOne<{ change_version: number }>(
         'SELECT change_version FROM sync_workspace WHERE id = 1',
       ))!.change_version;
