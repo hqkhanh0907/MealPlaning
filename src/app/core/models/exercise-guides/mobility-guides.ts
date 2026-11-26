@@ -283,36 +283,34 @@ export const mobilityGuides: ExerciseGuideTextSet = {
   },
   'neck-extension': {
     nameVi: 'Ngửa cổ nằm sấp trên ghế',
-    equipment: 'Ghế phẳng · nằm sấp, đầu thò ra mép ghế, tay nắm chân ghế',
+    equipment: 'Ghế phẳng chắc chắn · nằm sấp, đầu vừa qua mép ghế',
     purpose:
       'Động tác tập cơ duỗi cổ không tạ, nằm sấp trên ghế phẳng và nâng đầu từ thấp lên ngang thân.',
     startPosition:
-      'Nằm sấp trên ghế phẳng, ngực và bụng tựa ghế, đầu thò khỏi mép ghế và cúi xuống. Một tay buông xuống nắm chân ghế để giữ thân.',
+      'Nằm sấp, để ngực và bụng tựa ghế. Đặt đầu vừa qua mép ghế, thả lỏng vai và đặt tay dọc thân hoặc trên ghế.',
     steps: [
-      'Nằm sấp, tựa ngực lên ghế và để đầu cúi xuống thoải mái trong biên độ không đau.',
-      'Ngửa cổ nâng đầu lên đến khi mặt hướng về phía trước và cổ cùng hàng với thân, không ngửa quá mức.',
-      'Hạ đầu chậm về vị trí đầu, giữ vai thả lỏng và dừng nếu thấy đau hoặc tê tay.',
+      'Giữ cổ gần trung tính và bắt đầu với đầu hơi hướng xuống.',
+      'Nâng đầu chậm tới ngang thân. Giữ ngực tựa ghế và tránh ngửa cổ quá mức.',
+      'Hạ đầu từ từ trong tầm kiểm soát. Dừng nếu đau nhói, chóng mặt hoặc có triệu chứng lan xuống tay.',
     ],
-    source: 'ACE · Neck Flexion and Extension',
-    sourceUrl:
-      'https://www.acefitness.org/resources/everyone/exercise-library/204/neck-flexion-and-extension/',
-    alt: 'Khung bắt đầu: nhìn ngang, nằm sấp trên ghế phẳng, đầu thò ra mép và cúi xuống, một tay nắm chân ghế. Khung kết thúc: đầu nâng lên ngang thân, mặt hướng về phía trước, thân vẫn nằm yên trên ghế.',
+    source: 'Fysio Fitaal · Extension Neck Head Over Bench',
+    sourceUrl: 'https://fysiofitaal.nl/en/exercise/extension-neck-head-over-bench/',
+    alt: 'Khung bắt đầu: người nằm sấp trên ghế phẳng, đầu cúi ngoài mép ghế và một tay nắm chân ghế. Khung kết thúc: đầu nâng cao, mặt hướng ra trước và thân vẫn tựa ghế.',
     measure: 'reps',
   },
   'neck-flexion': {
     nameVi: 'Gập cổ nằm ngửa trên ghế',
-    equipment: 'Ghế phẳng · nằm ngửa, đầu thò ra mép ghế, bàn chân đặt trên sàn',
+    equipment: 'Ghế phẳng chắc chắn · nằm ngửa, đầu vừa qua mép ghế',
     purpose: 'Động tác tập cơ gập cổ không tạ, nằm ngửa trên ghế phẳng và nâng đầu về phía ngực.',
     startPosition:
-      'Nằm ngửa trên ghế phẳng, đầu thò ra mép ghế và ngả ra sau. Hai tay đặt trên đùi, hai chân gập gối và đặt bàn chân xuống sàn.',
+      'Nằm ngửa vững trên ghế với lưng trên và vai tựa ghế. Để đầu vừa qua mép và giữ cổ gần trung tính.',
     steps: [
-      'Nằm ngửa, giữ vai và lưng tựa chặt vào ghế, chỉ để đầu ngả ra sau trong tầm thoải mái.',
-      'Gập cổ, đưa cằm về phía ngực như tạo cằm đôi và nâng đầu lên chậm.',
-      'Hạ đầu về lại có kiểm soát, không để đầu rơi ra sau và dừng nếu thấy đau, chóng mặt hoặc tê tay.',
+      'Thả lỏng vai và đặt tay dọc thân hoặc trên ghế.',
+      'Thu nhẹ cằm và nâng đầu chậm tới khi cổ hơi gập. Giữ vai tựa ghế.',
+      'Hạ đầu chậm về gần trung tính, giữ đầu có kiểm soát. Dừng nếu thấy đau, chóng mặt hoặc tê tay.',
     ],
-    source: 'ACE · Neck Flexion and Extension',
-    sourceUrl:
-      'https://www.acefitness.org/resources/everyone/exercise-library/204/neck-flexion-and-extension/',
+    source: 'Fysio Fitaal · Flexion Neck Head Over Bench',
+    sourceUrl: 'https://fysiofitaal.nl/en/exercise/flexion-neck-head-over-sofa/',
     alt: 'Khung bắt đầu: nhìn ngang, nằm ngửa trên ghế phẳng, đầu thò khỏi mép ghế và ngả ra sau, hai tay đặt trên đùi, bàn chân đặt trên sàn. Khung kết thúc: đầu nâng lên với cằm thu vào, thân vẫn nằm yên.',
     measure: 'reps',
   },

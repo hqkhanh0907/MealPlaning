@@ -45,7 +45,8 @@
     "leg-raises": "Hai khung bị cắt khung hình: khung bắt đầu có một bàn chân lạ lọt ở mép dưới, khung kết thúc cắt mất bàn chân ở mép trên. Người xem không thấy rõ độ cao thật của chân.",
     "machine-pullover": "Khung kết thúc vẽ hai đệm khuỷu vẫn ở cao gần vai trong khi thanh nắm đã hạ xuống đùi, nên khuỷu rời khỏi đệm. Trên máy thật đệm khuỷu đi cùng cánh tay và khuỷu phải luôn tựa đệm.",
     "meadows-row": "Hình vẽ người đứng thẳng hàng với thanh và hai chân song song. Kỹ thuật Meadows chuẩn đứng vuông góc với thanh, chân so le và tay kia chống trên gối.",
-    "neck-flexion": "Khung đầu cho đầu ngả ra sau khỏi mép ghế mà không có điểm đỡ, còn nguồn bắt đầu từ cổ trung tính và cằm thu vào. Người tập có thể bắt chước tư thế cổ ngửa không kiểm soát, nên bắt đầu từ vị trí trung tính.",
+    "neck-extension": "Khung cuối vẽ đầu nâng cao và mặt hướng ra trước. Chỉ nâng đầu đến ngang thân, giữ ngực tựa ghế và tránh ngửa cổ quá mức.",
+    "neck-flexion": "Khung đầu vẽ đầu ngả khỏi mép ghế. Nguồn hướng dẫn bắt đầu với cổ gần trung tính và kiểm soát đầu trong suốt động tác.",
     "negative-pull-up": "Khung kết thúc vẽ thêm một thanh xà thứ hai nằm cao hơn tay, và người chưa hạ hết vì khuỷu còn gập, trong khi khung bắt đầu chỉ có một xà. Tư thế cuối đúng của bài là treo thẳng tay.",
     "ninety-ninety-hip-stretch": "Chân sau trong hình mở rộng và duỗi gần ra ngang, gối gập mở hơn góc vuông, nên không đúng tư thế hai gối vuông góc. Người tập có thể bắt chước thành tư thế xoạc mở chân.",
     "push-jerk": "Khung bắt đầu vẽ người đã hạ gối gập thay vì tư thế đứng thẳng ban đầu của bài. Người tập nên bắt đầu đứng thẳng rồi mới hạ nhẹ gối.",
@@ -77,15 +78,6 @@
     "zottman-curl": "Khung đầu là vị trí đã nâng tạ ngang vai chứ không phải tư thế bắt đầu thông thường, và hai khung không cho thấy bước xoay cổ tay ngửa sang úp là nét đặc trưng của bài. Người tập có thể nhầm thành bài cuộn tạ thường."
   },
   "weakSources": {
-    "cable-shrug": "secondary · https://www.acefitness.org/resources/everyone/exercise-library/75/standing-shrug/",
-    "cable-y-raise": "secondary · https://weighttraining.guide/exercises/cable-y-raise/",
-    "dumbbell-deadlift": "secondary · https://www.acefitness.org/resources/everyone/exercise-library/6/deadlift/",
-    "machine-glute-kickback": "secondary · https://www.acefitness.org/resources/everyone/exercise-library/293/glute-press/",
-    "neck-extension": "secondary · https://www.acefitness.org/resources/everyone/exercise-library/204/neck-flexion-and-extension/",
-    "neck-flexion": "secondary · https://www.acefitness.org/resources/everyone/exercise-library/204/neck-flexion-and-extension/",
-    "overhead-lat-side-bend": "secondary · https://www.acefitness.org/resources/everyone/exercise-library/212/seated-side-straddle-stretch/",
-    "reverse-nordic": "secondary · https://www.strongerbyscience.com/reverse-nordic-curls/",
-    "side-lunge-adductor-stretch": "chưa tải được · https://www.mayoclinic.org/healthy-lifestyle/fitness/in-depth/stretching/art-20047931",
-    "squat-thrust": "secondary · https://health.clevelandclinic.org/how-to-do-burpee"
+    "cable-y-raise": "secondary · https://weighttraining.guide/exercises/cable-y-raise/"
   }
 }

@@ -51,17 +51,18 @@ export const pullVGuides: ExerciseGuideTextSet = {
   },
   'cable-shrug': {
     nameVi: 'Nhún vai với cáp thanh thẳng',
-    equipment: 'Cáp · thanh thẳng nối hai ròng rọc thấp ở hai bên',
+    equipment: 'Máy cáp · thanh thẳng có hai móc, mỗi đầu nối một ròng rọc thấp',
     purpose: 'Động tác nhún vai giúp tập cơ cầu vai với cáp và thanh thẳng.',
     startPosition:
-      'Đứng thẳng, hai chân rộng bằng hông. Hai tay duỗi thẳng nắm thanh thẳng trước đùi, cáp căng.',
+      'Đứng thẳng giữa hai cáp. Nắm sấp thanh trước đùi với hai tay duỗi, giữ cáp căng.',
     steps: [
       'Giữ hai khuỷu duỗi thẳng rồi nhún vai thẳng lên phía tai. Không xoay vai và không gập khuỷu.',
       'Dừng ngắn ở điểm cao, giữ cổ tay thẳng.',
       'Hạ vai xuống chậm về vị trí đầu. Giữ lưng thẳng, không ngả người.',
     ],
-    source: 'American Council on Exercise · Standing Shrug',
-    sourceUrl: 'https://www.acefitness.org/resources/everyone/exercise-library/75/standing-shrug/',
+    source: 'HOIST Fitness · V-6 Shoulder Shrug',
+    sourceUrl:
+      'https://cdn.shopify.com/s/files/1/0057/5599/4225/files/V-6-Workout-Manual.pdf#page=13',
     alt: 'Khung bắt đầu: người đứng nhìn thẳng trước, hai tay duỗi nắm thanh thẳng ở trước đùi, hai sợi cáp chéo ra hai bên xuống ròng rọc thấp. Khung kết thúc: vai nhún cao hơn, tay vẫn duỗi. Trụ máy hiện ở bên trái trong khung đầu và bên phải trong khung cuối.',
     measure: 'reps',
   },

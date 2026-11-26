@@ -206,17 +206,17 @@ export const isometricGuides: ExerciseGuideTextSet = {
   },
   'reverse-nordic': {
     nameVi: 'Nordic ngược quỳ',
-    equipment: 'Sàn hoặc thảm · quỳ gối, cổ chân móc dưới thanh đệm giữ',
+    equipment: 'Thảm hoặc đệm kê gối · thanh đệm cố định giữ cổ chân',
     purpose: 'Động tác ngả người ra sau giúp tập cơ đùi trước bằng trọng lượng cơ thể.',
     startPosition:
-      'Quỳ thẳng người trên thảm, hai tay khoanh trước ngực. Cổ chân đặt dưới thanh đệm giữ.',
+      'Quỳ trên thảm, hai gối rộng bằng hông và cổ chân dưới thanh đệm cố định. Giữ hông duỗi và khoanh tay trước ngực.',
     steps: [
       'Siết bụng và mông, giữ hông thẳng với thân. Từ từ ngả người ra sau bằng cách gập gối.',
       'Hạ đến mức còn kiểm soát được, không gập ở hông và không ưỡn mạnh lưng dưới.',
       'Duỗi gối để kéo người trở lại tư thế quỳ thẳng.',
     ],
-    source: 'Stronger By Science · Reverse Nordic Curls',
-    sourceUrl: 'https://www.strongerbyscience.com/reverse-nordic-curls/',
+    source: 'Trainera · Reverse Nordic Curl',
+    sourceUrl: 'https://trainera.fit/blogs/reverse-nordic-curl-how-to-benefits',
     alt: 'Khung bắt đầu: người quỳ thẳng nhìn nghiêng, tay khoanh trước ngực, thanh đệm đè lên cổ chân. Khung giữa: thân ngả ra sau, hông và thân cùng một đường. Khung kết thúc: ngả sâu hơn, gối vẫn tựa sàn, lưng dưới hơi ưỡn và cằm hơi gập.',
     measure: 'reps',
   },

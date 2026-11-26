@@ -49,6 +49,8 @@ export const exerciseGuideIllustrationNotes: Readonly<Record<string, string>> = 
   'leg-raises': 'Mép ảnh cắt mất bàn chân ở khung cuối nên khó thấy độ cao của chân.',
   'machine-pullover': 'Khung cuối vẽ khuỷu rời đệm. Giữ khuỷu tựa đệm trong suốt động tác.',
   'meadows-row': 'Hình vẽ người tập đứng dọc theo thanh với hai chân song song.',
+  'neck-extension':
+    'Khung cuối vẽ đầu nâng cao và mặt hướng ra trước. Khi tập, giữ ngực tựa ghế và chỉ nâng đầu tới ngang thân.',
   'neck-flexion': 'Khung đầu vẽ đầu ngả khỏi mép ghế. Bắt đầu với cổ trung tính và cằm thu vào.',
   'negative-pull-up': 'Khung cuối vẽ thừa một thanh xà và khuỷu còn gập khi hạ người.',
   'ninety-ninety-hip-stretch': 'Hình vẽ chân sau mở gần duỗi thẳng. Giữ cả hai gối gập vuông góc.',

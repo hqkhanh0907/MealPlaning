@@ -205,19 +205,18 @@ export const stretchGuides: ExerciseGuideTextSet = {
   },
   'overhead-lat-side-bend': {
     nameVi: 'Giãn lưng xô nghiêng người hai tay trên đầu',
-    equipment: 'Đứng · hai tay đan nhau trên đầu',
+    equipment: 'Không cần dụng cụ · đứng, một tay nắm cổ tay kia trên đầu',
     purpose:
       'Động tác giãn tĩnh giúp kéo giãn cơ lưng xô và cơ bên thân bằng cách nghiêng người sang một bên.',
     startPosition:
-      'Đứng thẳng, hai chân rộng bằng hông. Hai tay giơ thẳng trên đầu, một tay nắm cổ tay tay kia.',
+      'Đứng thẳng, đặt hai chân rộng bằng hông. Giơ hai tay qua đầu và dùng một tay nắm cổ tay kia.',
     steps: [
-      'Đứng thẳng, giơ hai tay lên cao và nắm cổ tay tay kia, vai hạ xa khỏi tai.',
-      'Nghiêng thân sang một bên, giữ hông ổn định và không xoay thân về phía trước hoặc sau.',
-      'Giữ yên rồi từ từ về thẳng và đổi bên.',
+      'Nghiêng chậm về phía tay đang nắm cổ tay. Giữ cả hai bàn chân trên sàn và hướng ngực về trước.',
+      'Giữ tư thế và thở đều.',
+      'Trở về tư thế đứng thẳng, thả tay rồi đổi bên.',
     ],
-    source: 'ACE · Seated Side-Straddle Stretch (biến thể nghiêng thân)',
-    sourceUrl:
-      'https://www.acefitness.org/resources/everyone/exercise-library/212/seated-side-straddle-stretch/',
+    source: 'San Francisco Health Service System · Side Stretch',
+    sourceUrl: 'https://sfhss.org/resource/recharge-ir-activities-deck/download#page=10',
     alt: 'Nhìn từ phía trước, người đứng thẳng chân, hai tay giơ trên đầu với một tay nắm cổ tay tay kia. Thân nghiêng sang bên phải ảnh, đầu nằm giữa hai cánh tay.',
     measure: 'seconds',
   },
@@ -301,9 +300,8 @@ export const stretchGuides: ExerciseGuideTextSet = {
       'Giữ chân kia duỗi thẳng, gót chạm sàn và mũi chân hướng lên, lưng thẳng và ngực mở.',
       'Giữ tư thế đến khi thấy căng mặt trong đùi, không nhún nảy, rồi đẩy người về giữa và đổi bên.',
     ],
-    source: 'Mayo Clinic · Stretching: Focus on flexibility',
-    sourceUrl:
-      'https://www.mayoclinic.org/healthy-lifestyle/fitness/in-depth/stretching/art-20047931',
+    source: 'Elite Hockey Drills · Cossack Squat Hold',
+    sourceUrl: 'https://elitehockeydrills.com/exercises/cossack-squat-hold.html',
     alt: 'Khung giữ nhìn chính diện: người chùng sâu về một bên với gối gập và cả bàn chân đặt phẳng trên sàn. Chân kia duỗi thẳng sang bên, gót chạm sàn và mũi chân hướng lên, hai bàn tay chắp trước ngực.',
     measure: 'seconds',
   },

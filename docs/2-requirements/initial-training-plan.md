@@ -173,4 +173,10 @@ Luồng tập đạt 80 trên 80 kiểm tra. Lịch sử khớp cả 10 hiệp. 
 
 10 mục giữ mở vì nguồn chưa xác nhận đúng biến thể. Bốn bài cần thêm lưu ý để giải thích khung hình. Danh mục hiện có 75 lưu ý trước hình. [Danh sách còn mở](../../scripts/audit/exercise-guides.open.json)
 
+### Rà lại 10 mục còn mở, ngày 26/11/2026
+
+Nguồn xác nhận đúng biến thể cho 9 mục. Bài nâng cáp chữ Y vẫn cần nguồn xác nhận mỗi tay giữ cáp cùng bên. [Bằng chứng theo mã](../../scripts/audit/exercise-guides.verified-sources.json) · [Mục còn mở](../../scripts/audit/exercise-guides.open.json)
+
+Ứng dụng thêm lưu ý cho khung cuối bài ngửa cổ nằm sấp. Hai hướng dẫn tập cổ dùng chuyển động có kiểm soát và bắt đầu với cổ gần trung tính. Danh mục hiện có 76 lưu ý trước hình.
+
 APK mới, hai tệp kết quả và 26 ảnh chụp nằm trong [thư mục kiểm lại ngày 25/11](../../e2e/artifacts/exercise-guides/catalog/2026-11-25/).
