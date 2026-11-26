@@ -20,6 +20,8 @@ import org.json.JSONObject;
 
 final class SessionVault {
     private static final String KEY_ALIAS = "mealplan.session.v2";
+    private static final String GROQ_KEY = "groqKey";
+    private static final String GROQ_REVISION = "groqRevision";
     private static final int NONCE_BYTES = 12;
     private static final Object LOCK = new Object();
     private final AtomicFile file;
@@ -38,6 +40,8 @@ final class SessionVault {
         final String sessionToken;
         final String accessExpiresAt;
         final String reason;
+        final String groqKey;
+        final String groqRevision;
 
         Session(JSONObject data) {
             this.data = data;
@@ -49,6 +53,8 @@ final class SessionVault {
             sessionToken = data.optString("sessionToken");
             accessExpiresAt = data.optString("accessExpiresAt");
             reason = data.optString("reason");
+            groqKey = data.optString(GROQ_KEY);
+            groqRevision = data.optString(GROQ_REVISION);
         }
 
         JSObject publicData() {
@@ -70,12 +76,26 @@ final class SessionVault {
 
     Session replace(JSONObject input) throws Exception {
         synchronized (LOCK) {
-            JSONObject data = new JSONObject(input.toString());
-            data.remove("reason");
-            data.put("generation", UUID.randomUUID().toString());
+            Session previous;
+            try { previous = readLocked(); }
+            catch (Exception unreadable) { previous = null; }
+            JSONObject data = replacementData(input, previous);
             writeLocked(data);
             return new Session(data);
         }
+    }
+
+    static JSONObject replacementData(JSONObject input, Session previous) throws Exception {
+        JSONObject data = new JSONObject(input.toString());
+        data.remove("reason");
+        data.remove(GROQ_KEY);
+        data.remove(GROQ_REVISION);
+        if (previous != null && previous.ownerId.equals(data.optString("ownerId")) && !previous.groqKey.isEmpty()) {
+            data.put(GROQ_KEY, previous.groqKey);
+            data.put(GROQ_REVISION, previous.groqRevision);
+        }
+        data.put("generation", UUID.randomUUID().toString());
+        return data;
     }
 
     Session update(Session expected, JSONObject fields) throws Exception {
@@ -111,11 +131,41 @@ final class SessionVault {
         }
     }
 
+    Session requireCurrentGroq(Session expected) throws Exception {
+        synchronized (LOCK) {
+            Session current = readLocked();
+            if (!sameGroq(expected, current)) throw new SessionChanged();
+            return current;
+        }
+    }
+
+    <T> T whileCurrentGroq(Session expected, Checked<T> action) throws Exception {
+        synchronized (LOCK) {
+            requireCurrentGroq(expected);
+            return action.run();
+        }
+    }
+
+    Session updateGroqKey(Session expected, String key) throws Exception {
+        synchronized (LOCK) {
+            Session current = requireCurrentGroq(expected);
+            if (key == null) current.data.remove(GROQ_KEY);
+            else current.data.put(GROQ_KEY, key);
+            current.data.put(GROQ_REVISION, UUID.randomUUID().toString());
+            writeLocked(current.data);
+            return new Session(current.data);
+        }
+    }
+
     interface Checked<T> { T run() throws Exception; }
 
     static final class SessionChanged extends Exception {}
 
-    private boolean same(Session expected, Session current) {
+    static boolean sameGroq(Session expected, Session current) {
+        return same(expected, current) && expected.groqRevision.equals(current.groqRevision);
+    }
+
+    private static boolean same(Session expected, Session current) {
         return current != null && expected.ownerId.equals(current.ownerId) && expected.generation.equals(current.generation);
     }
 

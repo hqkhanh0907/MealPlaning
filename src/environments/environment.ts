@@ -1,12 +1,7 @@
 /**
  * Dev environment.
  *
- * `geminiApiKeyObf` chứa key đã được obfuscate (XOR + base64) bằng
- * `scripts/obfuscate-gemini-key.mjs` từ file `.env` (gitignored).
- * Trong dev mode, dev có thể paste plain key tạm vào đây để test —
- * `decodeApiKey` sẽ thử decode trước, fallback về plain string nếu fail.
- *
- * Production: `environment.prod.ts` được generate bởi script, gitignored.
+ * Production uses a generated environment without provider credentials.
  */
 export const environment = {
   production: false,

@@ -3,6 +3,7 @@ import { signal } from '@angular/core';
 import { ToastController } from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
 import { ProfileStore } from '../../core/stores/profile.store';
+import { GroqCredentials } from '../../core/services/ai/groq-credentials';
 import { AccountSession, type AccountIdentity } from '../../core/account/account-session';
 import { AccountSync } from '../../core/account/account-sync';
 import { LocalNotifications } from '../../core/services/notifications/local-notifications';
@@ -46,6 +47,8 @@ describe('SettingsPage', () => {
   let notifications: jasmine.SpyObj<LocalNotifications>;
   let reminders: jasmine.SpyObj<ReminderCoordinator>;
   let workoutEnabled: ReturnType<typeof signal<boolean>>;
+  let groqEnabled: ReturnType<typeof signal<boolean>>;
+  let groq: jasmine.SpyObj<GroqCredentials>;
   let account: ReturnType<typeof signal<AccountIdentity | null>>;
   let toastCtrl: jasmine.SpyObj<ToastController>;
   let toastEl: { present: jasmine.Spy };
@@ -66,6 +69,16 @@ describe('SettingsPage', () => {
     ]);
     workoutEnabled = signal(false);
     account = signal<AccountIdentity | null>(null);
+    groqEnabled = signal(false);
+    groq = jasmine.createSpyObj<GroqCredentials>('GroqCredentials', ['configure', 'remove'], {
+      supported: true,
+      configured: groqEnabled,
+    });
+    groq.configure.and.callFake(async () => {
+      groqEnabled.set(true);
+      return true;
+    });
+    groq.remove.and.callFake(async () => groqEnabled.set(false));
     reminders = jasmine.createSpyObj<ReminderCoordinator>(
       'ReminderCoordinator',
       ['setWorkoutEnabled', 'refresh', 'clear'],
@@ -94,6 +107,7 @@ describe('SettingsPage', () => {
         },
         { provide: ProfileStore, useValue: profileStore },
         { provide: LocalNotifications, useValue: notifications },
+        { provide: GroqCredentials, useValue: groq },
         { provide: ReminderCoordinator, useValue: reminders },
         { provide: ToastController, useValue: toastCtrl },
       ],
@@ -107,6 +121,38 @@ describe('SettingsPage', () => {
 
   it('bodySummary formats profile fields correctly', () => {
     expect(component.bodySummary()).toBe('170 cm, 65 kg, 28 tuổi, Nam');
+  });
+
+  it('offers separate key setup and removal actions to the device account', async () => {
+    const screen = fixture.nativeElement as HTMLElement;
+    expect(screen.textContent).not.toContain('Nhập khóa');
+
+    account.set({ id: 'member-a', username: 'an', name: 'An' });
+    fixture.detectChanges();
+    expect(screen.textContent).toContain('Nhập khóa');
+
+    await component.configureGroqKey();
+    fixture.detectChanges();
+    expect(screen.textContent).toContain('Đổi khóa');
+    expect(screen.textContent).toContain('Đã lưu khóa Groq.');
+
+    await component.removeGroqKey();
+    fixture.detectChanges();
+    expect(screen.textContent).toContain('Chưa nhập khóa');
+    expect(screen.textContent).toContain('Đã gỡ khóa Groq.');
+  });
+
+  it('does not show success when the native Groq dialog is canceled', async () => {
+    account.set({ id: 'member-a', username: 'an', name: 'An' });
+    groqEnabled.set(true);
+    groq.configure.and.resolveTo(false);
+
+    await component.configureGroqKey();
+    fixture.detectChanges();
+
+    const screen = fixture.nativeElement as HTMLElement;
+    expect(screen.textContent).toContain('Đổi khóa');
+    expect(screen.textContent).not.toContain('Đã lưu khóa Groq.');
   });
 
   it('offers a separate workout reminder with the active-plan rule', () => {

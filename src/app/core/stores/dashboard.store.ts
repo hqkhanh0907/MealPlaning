@@ -88,7 +88,9 @@ export class DashboardStore {
   private readonly foodImageAi = inject(FoodImageAi);
   private readonly photoMeals = inject(PhotoMealRepository);
   private readonly insightAi = inject(InsightAi);
-  readonly insightProvider = this.insightAi.providerName;
+  get insightProvider(): InsightAi['providerName'] {
+    return this.insightAi.providerName;
+  }
 
   private refreshSeq = 0;
 

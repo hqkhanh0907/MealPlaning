@@ -23,6 +23,7 @@ import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { chevronForwardOutline, logOutOutline, syncOutline } from 'ionicons/icons';
 import { ProfileStore } from '../../core/stores/profile.store';
+import { GroqCredentials } from '../../core/services/ai/groq-credentials';
 import { LocalNotifications } from '../../core/services/notifications/local-notifications';
 import { ReminderCoordinator } from '../../core/services/notifications/reminder-coordinator';
 import {
@@ -72,6 +73,9 @@ type ReminderKey = SlotKey | 'workout';
 export default class SettingsPage {
   protected readonly accountSession = inject(AccountSession);
   protected readonly accountSync = inject(AccountSync);
+  protected readonly groq = inject(GroqCredentials);
+  protected readonly groqBusy = signal(false);
+  protected readonly groqFeedback = signal<{ message: string; error: boolean } | null>(null);
   protected readonly signOutBusy = signal(false);
   protected readonly signOutError = signal('');
   protected readonly lastSyncLabel = computed(() => {
@@ -147,6 +151,39 @@ export default class SettingsPage {
 
   async resumeNotifications(): Promise<void> {
     if (await this.allowNotifications()) await this.reminders.refresh(true);
+  }
+
+  async configureGroqKey(): Promise<void> {
+    await this.runGroqAction(() => this.groq.configure(), 'Đã lưu khóa Groq.');
+  }
+
+  async removeGroqKey(): Promise<void> {
+    await this.runGroqAction(() => this.groq.remove(), 'Đã gỡ khóa Groq.');
+  }
+
+  private async runGroqAction(
+    action: () => Promise<boolean | void>,
+    message: string,
+  ): Promise<void> {
+    const owner = this.accountSession.current();
+    if (!owner || !this.groq.supported || this.groqBusy()) return;
+    this.groqBusy.set(true);
+    this.groqFeedback.set(null);
+    try {
+      const changed = await action();
+      if (changed !== false && owner === this.accountSession.current()) {
+        this.groqFeedback.set({ message, error: false });
+      }
+    } catch {
+      if (owner === this.accountSession.current()) {
+        this.groqFeedback.set({
+          message: 'Chưa cập nhật được khóa Groq. Hãy thử lại.',
+          error: true,
+        });
+      }
+    } finally {
+      this.groqBusy.set(false);
+    }
   }
 
   protected async signOut(): Promise<void> {

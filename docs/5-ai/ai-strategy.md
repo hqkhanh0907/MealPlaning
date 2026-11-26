@@ -515,26 +515,17 @@ Rules:
 
 ### 4.3 Rate Limiting
 
-**V1 strategy (revision 2026-04-30 — Phase 1.5B chốt KHÔNG quota):**
-- **Không áp dụng per-call throttling** — user không bị chặn khi click AI
-- **Không áp dụng quota limit** — Gemini paid tier, dev tự chịu cost (phù hợp `product-vision.md` §248). Nếu V2+ cần hạn chế → cho user paste key riêng trong Settings.
-- Vẫn áp dụng exponential backoff retry (§5.2) để tránh hammer Gemini khi server lỗi.
+Groq áp hạn mức theo tài khoản gắn với khóa. Khi Groq trả `429`, app báo để người dùng thử lại sau.
 
 > **Changelog:** Spec gốc 1.1/1.2 đặt 50 requests/day/install. Phase 1.5B (2026-04-30) bỏ quota limit theo discussion với product owner. Xem `docs/5-development/phase-1.5b-ai-foundation.md` §2 quyết định #4.
 
-### 4.4 API Key Management (theo Decision D3)
+### 4.4 Khóa Groq trên Android
 
-**Strategy V1: Developer key ship trong APK**
-- Dev key bundle trong app, **obfuscation = XOR + base64** (xem `phase-1.5b-ai-foundation.md` §3.7 implementation)
-- Build-time script `scripts/obfuscate-gemini-key.mjs` đọc `process.env.GEMINI_API_KEY` → ghi `environment.prod.ts` với obfuscated string
-- Runtime decode trong `src/app/core/services/ai/gemini-key.ts`
-- User KHÔNG cần nhập API key (không có Settings UI cho API key trong V1)
-- Trade-off: key có thể bị extract khỏi APK → vì không có quota (§4.3) nên risk là dev burn cost. Acceptable cho V1 alpha/internal. V2+ migrate sang user-provided key.
+Đăng nhập rồi mở **Cài đặt → AI → Nhập khóa**. Hộp thoại Android che giá trị đang nhập. Cài đặt chỉ hiện trạng thái của khóa và cho đổi hoặc gỡ khóa.
 
-**Rules:**
-- Không commit plain key vào git (dùng env var tại build time + obfuscation)
-- Không gửi key lên bất kỳ server nào ngoài Gemini API endpoint
-- Storage: key không lưu trong DB — read từ bundle config tại runtime
+Android mã hóa khóa trong vùng lưu trữ phiên bằng khóa từ Keystore. Khóa đi trực tiếp từ Android tới Groq cho cả văn bản và ảnh. Đăng xuất xóa bản khóa trên thiết bị.
+
+Build sản xuất dùng cấu hình rỗng cho khóa của cả hai nhà cung cấp. Biến `GROQ_API_KEY` trong `.env` dành cho phát triển trên trình duyệt.
 
 ---
 

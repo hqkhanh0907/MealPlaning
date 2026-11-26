@@ -15,7 +15,9 @@ export { AiRequestError as DailyInsightError } from './ai-generation';
 @Injectable({ providedIn: 'root' })
 export class InsightAi {
   private readonly ai = inject(AiGeneration);
-  readonly providerName = this.ai.providerFor('text');
+  get providerName(): ReturnType<AiGeneration['providerFor']> {
+    return this.ai.providerFor('text');
+  }
 
   async generateDailyInsight(input: DailyInsightAiInput): Promise<DailyInsight> {
     const response = await this.ai.generateText(buildDailyInsightPrompt(input), {

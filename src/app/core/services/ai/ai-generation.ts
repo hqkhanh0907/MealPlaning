@@ -8,6 +8,7 @@ import { GEMINI_API_KEY } from './gemini-key';
 import { geminiResponseSchema } from './gemini-response-schema';
 import { GEMINI_ERROR_TOAST, GeminiError, type AiFeature } from './gemini-types';
 import { GROQ_API_KEY, GroqClient } from './groq-client';
+import { GroqCredentials, NativeGroqError } from './groq-credentials';
 
 type Provider = 'Groq' | 'Gemini';
 type Capability = 'text' | 'photo';
@@ -47,22 +48,30 @@ const missingConfiguration: Record<Capability, string> = {
 @Injectable({ providedIn: 'root' })
 export class AiGeneration {
   private readonly injector = inject(Injector);
-  private readonly hasGroq = Boolean(inject(GROQ_API_KEY).trim());
-  private readonly hasGemini = Boolean(inject(GEMINI_API_KEY).trim());
+  private readonly groq = inject(GroqCredentials);
+  private readonly hasGroq = !this.groq.supported && Boolean(inject(GROQ_API_KEY).trim());
+  private readonly hasGemini = !this.groq.supported && Boolean(inject(GEMINI_API_KEY).trim());
 
   providerFor(capability: Capability): Provider | null {
+    if (this.groq.supported) return this.groq.configured() ? 'Groq' : null;
     if (this.hasGroq) return 'Groq';
     return capability === 'text' && this.hasGemini ? 'Gemini' : null;
   }
 
   configurationIssue(capability: Capability): string | null {
-    return this.providerFor(capability) ? null : missingConfiguration[capability];
+    return this.providerFor(capability) ? null : this.missingConfiguration(capability);
   }
 
   private requireProvider(capability: Capability): Provider {
     const provider = this.providerFor(capability);
-    if (!provider) throw new AiRequestError(missingConfiguration[capability]);
+    if (!provider) throw new AiRequestError(this.missingConfiguration(capability));
     return provider;
+  }
+
+  private missingConfiguration(capability: Capability): string {
+    return this.groq.supported
+      ? 'Thêm khóa Groq trong Cài đặt, mục AI.'
+      : missingConfiguration[capability];
   }
 
   async generateText<T>(prompt: string, options: GenerationOptions<T>): Promise<T> {
@@ -124,6 +133,7 @@ export class AiGeneration {
 }
 
 function mapRequestError(provider: Provider, error: unknown): Error {
+  if (error instanceof NativeGroqError) return new AiRequestError(error.message);
   const status =
     error instanceof HttpErrorResponse
       ? error.status

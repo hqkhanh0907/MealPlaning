@@ -178,6 +178,35 @@
     </ion-item>
   </ion-list>
 
+  @if (groq.supported && accountSession.current()) {
+    <ion-list lines="none" class="settings-list">
+      <ion-list-header>
+        <ion-label><h2>AI</h2></ion-label>
+      </ion-list-header>
+      <ion-item>
+        <ion-label class="ion-text-wrap">
+          <h3>Groq</h3>
+          <p>{{ groq.configured() ? 'Đã lưu khóa trên thiết bị' : 'Chưa nhập khóa' }}</p>
+        </ion-label>
+        <ion-button slot="end" fill="outline" [disabled]="groqBusy()" (click)="configureGroqKey()">
+          {{ groq.configured() ? 'Đổi khóa' : 'Nhập khóa' }}
+        </ion-button>
+      </ion-item>
+      @if (groq.configured()) {
+        <ion-item button [disabled]="groqBusy()" (click)="removeGroqKey()">
+          <ion-label color="danger">Gỡ khóa Groq</ion-label>
+        </ion-item>
+      }
+      @if (groqFeedback(); as feedback) {
+        <ion-item>
+          <ion-label class="ion-text-wrap" [color]="feedback.error ? 'danger' : undefined">
+            <p [attr.role]="feedback.error ? 'alert' : 'status'">{{ feedback.message }}</p>
+          </ion-label>
+        </ion-item>
+      }
+    </ion-list>
+  }
+
   <ion-list lines="none" class="settings-list">
     <ion-list-header>
       <ion-label><h2>Giới thiệu</h2></ion-label>

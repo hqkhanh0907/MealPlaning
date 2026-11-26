@@ -35,7 +35,9 @@ export function installMealPlanSync(root) {
   const testResources = join(app, 'src/test/resources');
   mkdirSync(tests, { recursive: true });
   mkdirSync(testResources, { recursive: true });
-  copyFileSync(join(root, 'scripts/android-native/SnapshotMergeTest.java'), join(tests, 'SnapshotMergeTest.java'));
+  for (const filename of ['SnapshotMergeTest.java', 'GroqTransportTest.java', 'GroqVaultPolicyTest.java']) {
+    copyFileSync(join(root, 'scripts/android-native', filename), join(tests, filename));
+  }
   writeFileSync(join(testResources, 'mealplan-sync-schema.json'), schema);
 
   const activity = join(java, 'MainActivity.java');
@@ -50,6 +52,9 @@ public class MainActivity extends BridgeActivity {
         super.onCreate(savedInstanceState);
     }
 `);
+  replaceOnce(activity, 'registerPlugin(MealPlanGroqPlugin.class)',
+    /import com\.healthmate\.ai\.sync\.MealPlanSyncPlugin;([\s\S]*?)^([ \t]*)registerPlugin\(MealPlanSyncPlugin\.class\);/m,
+    'import com.healthmate.ai.sync.MealPlanSyncPlugin;\nimport com.healthmate.ai.sync.MealPlanGroqPlugin;$1$2registerPlugin(MealPlanSyncPlugin.class);\n$2registerPlugin(MealPlanGroqPlugin.class);');
 
   const gradle = join(app, 'build.gradle');
   const pluginGradle = readFileSync(join(root, 'node_modules/@capacitor-community/sqlite/android/build.gradle'), 'utf8');

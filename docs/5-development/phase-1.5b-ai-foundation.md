@@ -247,6 +247,8 @@ UI usage (Angular 21 default control-flow `@if`/`@for`/`@switch` — `*ngIf` c�
 
 ### 3.7 API key obfuscation
 
+Mục này lưu cách đóng gói cũ. Bản Android hiện dùng khóa Groq nhập trong Cài đặt. Xem [quản lý khóa](../5-ai/ai-strategy.md#44-khóa-groq-trên-android).
+
 ```typescript
 // scripts/obfuscate-key.mjs (build-time)
 // Input:  process.env.GEMINI_API_KEY (plain)
