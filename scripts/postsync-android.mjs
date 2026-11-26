@@ -31,12 +31,7 @@ const ANDROID_GITIGNORE = resolve(ROOT, 'android/.gitignore');
 // Read canonical version once from package.json so guard + gradle stay in sync.
 const pkg = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8'));
 const VERSION_NAME = pkg.version;
-// versionCode bumps manually per release-versioning.md — read from existing
-// gradle and preserve it (postsync should never silently revert it).
-function currentVersionCode(gradle) {
-  const m = gradle.match(/versionCode\s+(\d+)/);
-  return m ? Number(m[1]) : 1;
-}
+const VERSION_CODE = pkg.androidVersionCode;
 
 const MANIFEST_PATCHES = [
   {
@@ -123,19 +118,23 @@ function patchBuildGradle() {
   let g = readFileSync(BUILD_GRADLE, 'utf8');
   let changed = false;
 
-  // 1. Sync versionName from package.json (AC-4). Preserve versionCode.
-  const code = currentVersionCode(g);
+  if (!Number.isSafeInteger(VERSION_CODE) || VERSION_CODE < 1) {
+    throw new Error('Set a positive Android version code in package.json.');
+  }
+  const existingCode = Number(g.match(/\bversionCode\s+(\d+)/)?.[1]);
+  if (existingCode > VERSION_CODE) {
+    throw new Error('The generated Android version code exceeds the value in package.json.');
+  }
   const versionRe = /(\n)\s{8}versionCode\s+\d+\s*\n\s{8}versionName\s+"[^"]+"/;
-  const replacement = `$1        versionCode ${code}\n        versionName "${VERSION_NAME}"`;
-  if (versionRe.test(g)) {
-    const next = g.replace(versionRe, replacement);
-    if (next !== g) {
-      g = next;
-      changed = true;
-      console.log(`[postsync] + synced versionName="${VERSION_NAME}" (code=${code})`);
-    } else {
-      console.log(`[postsync] ✓ version already in sync (${VERSION_NAME}/${code})`);
-    }
+  if (!versionRe.test(g)) throw new Error('Could not find the Android version fields.');
+  const replacement = `$1        versionCode ${VERSION_CODE}\n        versionName "${VERSION_NAME}"`;
+  const versioned = g.replace(versionRe, replacement);
+  if (versioned !== g) {
+    g = versioned;
+    changed = true;
+    console.log(`[postsync] + synced Android version ${VERSION_NAME}/${VERSION_CODE}`);
+  } else {
+    console.log(`[postsync] ✓ version already in sync (${VERSION_NAME}/${VERSION_CODE})`);
   }
 
   // 2. Inject keystore loader block before `android {`.

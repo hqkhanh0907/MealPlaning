@@ -1,6 +1,7 @@
 {
   "name": "HealthMateAI",
   "version": "0.2.2",
+  "androidVersionCode": 5,
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
   "scripts": {

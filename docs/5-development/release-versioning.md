@@ -12,27 +12,29 @@
 | `MINOR` (Phase) | Each Phase milestone (Phase 2 = 0.2.0) | 0.1.x → 0.2.0 |
 | `PATCH` | Bugfix/polish that doesn't add features | 0.2.0 → 0.2.1 |
 
-## Sources of truth (kept in sync — guarded)
+## Sources of truth
 
-1. `package.json` → `version` (canonical, JS-side build metadata).
-2. `android/app/build.gradle` → `versionName` (must equal `package.json#version`).
-3. `android/app/build.gradle` → `versionCode` (monotonic integer; **+1 every build that ships off-device**, regardless of versionName change).
+`package.json#version` sets the Android version name.
+`package.json#androidVersionCode` sets the Android version code.
+Increase the code by one before distributing a new APK, even if the version name stays the same.
 
-CI guard `scripts/check-version-sync.mjs` (wired into `npm run check:guards`) fails the build if (1) ≠ (2).
+Capacitor sync copies both values to `android/app/build.gradle`.
+`npm run check:version-sync` compares the generated Gradle values with `package.json`.
 
 ## Bump procedure
 
-1. Decide segment to bump (MAJOR/MINOR/PATCH).
-2. Edit `package.json#version` first.
-3. Mirror into `android/app/build.gradle#versionName`.
-4. Increment `versionCode` by exactly **1**.
-5. `npm run check:guards` → must PASS (`✓ Version sync guard`).
-6. Build signed APK (see `release-signing.md`).
-7. Tag git: `vX.Y.Z` (annotated).
+Run these steps before distribution:
+
+1. Update `package.json#version` if the release name changes.
+2. Increment `package.json#androidVersionCode` by one.
+3. Run `npm run cap:sync -- android`.
+4. Run `npm run check:guards`.
+5. Build the signed APK as described in `release-signing.md`.
+6. Add an annotated `vX.Y.Z` tag when the release name changes.
 
 ## Current
 
-- `0.2.2` — patch line after Phase 2 exit. Current Android `versionCode` is `4`.
+The `0.2.2` candidate uses Android version code `5`. The previous signed APK uses code `4`.
 
 ## History
 

@@ -1,15 +1,6 @@
 #!/usr/bin/env node
 /**
- * Story 2.5 (AC-4) — keep package.json `version` and android `versionName` in sync.
- *
- * Policy (docs/5-development/release-versioning.md):
- *   - SemVer 0.MAJOR.MINOR until 1.0 release.
- *   - Bump `package.json` version FIRST, then mirror into
- *     android/app/build.gradle `versionName`. `versionCode` increments by 1
- *     on every release build (manual, monotonically increasing).
- *
- * Fails if the two strings drift, so a forgotten bump can't slip into a
- * signed APK.
+ * Check both Android version fields against package.json before building.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,6 +8,12 @@ import url from 'node:url';
 
 const ROOT = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), '..');
 const androidDir = path.join(ROOT, 'android');
+const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+
+if (!Number.isSafeInteger(pkg.androidVersionCode) || pkg.androidVersionCode < 1) {
+  console.error('✗ Version sync guard: package.json needs a positive androidVersionCode.');
+  process.exit(1);
+}
 
 if (
   process.argv.includes('--if-android-present') &&
@@ -26,22 +23,17 @@ if (
   process.exit(0);
 }
 
-const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 const gradle = fs.readFileSync(path.join(androidDir, 'app/build.gradle'), 'utf8');
 
-const versionNameMatch = gradle.match(/versionName\s+"([^"]+)"/);
-if (!versionNameMatch) {
-  console.error('✗ Version sync guard: cannot locate versionName in android/app/build.gradle');
-  process.exit(1);
-}
-const versionName = versionNameMatch[1];
+const versionName = gradle.match(/\bversionName\s+"([^"]+)"/)?.[1];
+const versionCode = Number(gradle.match(/\bversionCode\s+(\d+)/)?.[1]);
 
-if (pkg.version !== versionName) {
+if (pkg.version !== versionName || pkg.androidVersionCode !== versionCode) {
   console.error(
-    `✗ Version sync guard: package.json (${pkg.version}) ≠ android versionName (${versionName}).`,
+    `✗ Version sync guard: package.json (${pkg.version}/${pkg.androidVersionCode}) does not match Gradle (${versionName}/${versionCode}).`,
   );
-  console.error('  Update both atomically per docs/5-development/release-versioning.md.');
+  console.error('  Run npm run cap:sync -- android before building.');
   process.exit(1);
 }
 
-console.log(`✓ Version sync guard: package.json + android both at ${pkg.version}.`);
+console.log(`✓ Version sync guard: package.json and Android both use ${pkg.version}/${versionCode}.`);
