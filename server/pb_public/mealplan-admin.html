@@ -2,32 +2,136 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tra cứu và chỉnh sửa dữ liệu MealPlaning theo tài khoản.">
+  <meta name="robots" content="noindex, nofollow">
   <title>Quản trị MealPlaning</title>
   <link rel="stylesheet" href="mealplan-admin.css">
   <script type="module" src="mealplan-admin.js"></script>
 </head>
 <body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <span class="wordmark">MealPlaning</span>
+      <span class="site-section">Quản trị</span>
+      <button id="logout" class="quiet" type="button" hidden>Đăng xuất</button>
+    </div>
+  </header>
+
   <main>
-    <h1>Quản trị MealPlaning</h1>
-    <form id="login">
-      <label>Email quản trị <input name="email" type="email" autocomplete="username" required></label>
-      <label>Mật khẩu <input name="password" type="password" autocomplete="current-password" required></label>
-      <button>Đăng nhập</button>
-    </form>
-    <p id="status" role="status"></p>
-    <section id="data" hidden>
-      <div class="filters">
-        <label>Tài khoản <select id="accounts"></select></label>
-        <label>Bảng <select id="tables"></select></label>
-        <button id="logout">Đăng xuất</button>
+    <section id="sign-in" class="sign-in" aria-labelledby="sign-in-title">
+      <div>
+        <h1 id="sign-in-title">Đăng nhập quản trị</h1>
+        <p>Tra cứu và chỉnh sửa lịch ăn, buổi tập theo tài khoản.</p>
       </div>
-      <div class="table-wrap"><table><thead id="head"></thead><tbody id="rows"></tbody></table></div>
-      <form id="edit" hidden>
-        <label>Bản ghi <textarea id="record" rows="13" spellcheck="false" required></textarea></label>
-        <button>Lưu bản ghi</button>
+      <form id="login" class="sign-in-form">
+        <div class="input-wrapper">
+          <label class="input-label" for="admin-email">Email quản trị</label>
+          <input id="admin-email" class="input-native" name="email" type="email" autocomplete="username" required>
+        </div>
+        <div class="input-wrapper">
+          <label class="input-label" for="admin-password">Mật khẩu</label>
+          <input id="admin-password" class="input-native" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <p id="login-status" class="feedback" role="status"></p>
+        <button id="sign-in-submit">Đăng nhập</button>
       </form>
     </section>
+
+    <div id="data" class="workspace" hidden>
+      <aside class="owners" aria-labelledby="accounts-title">
+        <h2 id="accounts-title">Tài khoản</h2>
+        <div class="input-wrapper">
+          <label class="input-label" for="owner-search">Tìm họ tên, tên đăng nhập</label>
+          <input id="owner-search" class="input-native" type="search" autocomplete="off">
+        </div>
+        <div class="input-wrapper">
+          <label class="input-label" for="owner-sort">Sắp xếp tài khoản</label>
+          <select id="owner-sort" class="input-native">
+            <option value="name">Họ tên ↑</option>
+            <option value="username">Đăng nhập ↑</option>
+            <option value="username:desc">Đăng nhập ↓</option>
+          </select>
+        </div>
+        <div class="input-wrapper">
+          <label class="input-label" for="accounts">Tài khoản đang xem</label>
+          <select id="accounts" class="input-native"></select>
+        </div>
+        <p id="owner-count" class="small" role="status"></p>
+      </aside>
+
+      <section class="records" aria-labelledby="owner-name">
+        <div class="owner-header">
+          <h1 id="owner-name">Dữ liệu tài khoản</h1>
+          <p id="owner-username" class="small"></p>
+        </div>
+        <p id="status" class="feedback" role="status"></p>
+        <button id="reload" class="quiet" type="button" hidden>Thử tải lại</button>
+
+        <div id="records-view" hidden>
+          <div class="filters">
+            <div class="input-wrapper">
+              <label class="input-label" for="tables">Loại dữ liệu</label>
+              <select id="tables" class="input-native"></select>
+            </div>
+            <div class="input-wrapper">
+              <label class="input-label" for="record-search">Tìm tên hoặc mã bản ghi</label>
+              <input id="record-search" class="input-native" type="search" autocomplete="off">
+            </div>
+            <div id="date-filter" class="input-wrapper">
+              <label class="input-label" for="record-date">Ngày</label>
+              <input id="record-date" class="input-native" type="date">
+            </div>
+            <div id="mobile-sort" class="input-wrapper">
+              <label class="input-label" for="record-sort">Sắp xếp bản ghi</label>
+              <select id="record-sort" class="input-native"></select>
+            </div>
+          </div>
+          <div id="scope-region" class="scope" hidden>
+            <span id="scope-label"></span>
+            <button id="clear-scope" type="button" class="quiet">Bỏ bộ lọc</button>
+          </div>
+          <div class="table-toolbar">
+            <p id="record-count" class="small" role="status"></p>
+            <label class="checkbox"><input id="all-columns" type="checkbox"> Hiện tất cả cột</label>
+          </div>
+          <div id="table-wrap" class="table-wrap" tabindex="0" role="region" aria-label="Bảng bản ghi">
+            <table>
+              <thead id="head"></thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+          <p id="empty-records" class="empty" hidden></p>
+          <button id="more" class="quiet" type="button" hidden>Xem thêm bản ghi</button>
+        </div>
+      </section>
+    </div>
   </main>
+
+  <dialog id="edit-dialog" aria-labelledby="edit-title" aria-describedby="edit-owner">
+    <form id="edit">
+      <div class="edit-header">
+        <h2 id="edit-title">Sửa bản ghi</h2>
+        <p id="edit-owner" class="small"></p>
+        <p id="edit-context" class="small"></p>
+      </div>
+      <div class="edit-content">
+        <div id="quick-fields" class="quick-fields"></div>
+        <details id="advanced">
+          <summary>Dữ liệu gốc (JSON)</summary>
+          <div class="input-wrapper json-field">
+            <label class="input-label" for="record">Nội dung bản ghi</label>
+            <textarea id="record" class="input-native" rows="10" spellcheck="false"></textarea>
+          </div>
+        </details>
+        <p id="edit-status" class="feedback" role="status"></p>
+        <button id="edit-reload" class="quiet" type="button" hidden>Tải bản mới</button>
+      </div>
+      <div class="edit-actions">
+        <button id="cancel" class="quiet" type="button">Hủy</button>
+        <button id="save">Lưu bản ghi</button>
+      </div>
+    </form>
+  </dialog>
 </body>
 </html>
