@@ -220,27 +220,36 @@ describe('SettingsPage', () => {
 
   it('onToggleChange ignores unchanged notification state', async () => {
     profileSignal.set(makeProfile({ notif_morning: 1 }));
-    const event = new CustomEvent<{ checked: boolean }>('ionChange', {
-      detail: { checked: true },
-    });
-
-    await component.onToggleChange('morning', event);
+    await component.onToggleChange('morning', true, { checked: true });
 
     expect(notifications.requestPermission).not.toHaveBeenCalled();
     expect(profileStore.updateProfile).not.toHaveBeenCalled();
   });
 
-  it('onToggleChange reverts target checked value when permission is denied', async () => {
+  it('keeps an inactive reminder off when notification permission is denied', async () => {
     notifications.requestPermission.and.resolveTo(false);
-    const target = { checked: true } as HTMLIonToggleElement;
-    const event = new CustomEvent<{ checked: boolean }>('ionChange', {
-      detail: { checked: true },
-    });
-    Object.defineProperty(event, 'target', { value: target });
+    const toggle = { checked: true };
+    await component.onToggleChange('morning', true, toggle);
 
-    await component.onToggleChange('morning', event);
+    expect(toggle.checked).toBeFalse();
+    expect(profileStore.updateProfile).not.toHaveBeenCalled();
+  });
 
-    expect(target.checked).toBeFalse();
+  it('keeps an inactive reminder off while the notification permission prompt is open', async () => {
+    let finishPermission!: (granted: boolean) => void;
+    notifications.requestPermission.and.returnValue(
+      new Promise<boolean>((resolve) => {
+        finishPermission = resolve;
+      }),
+    );
+    const toggle = { checked: true };
+
+    const change = component.onToggleChange('morning', true, toggle);
+    const displayedBeforeAnswer = toggle.checked;
+    finishPermission(false);
+    await change;
+
+    expect(displayedBeforeAnswer).toBeFalse();
     expect(profileStore.updateProfile).not.toHaveBeenCalled();
   });
 });

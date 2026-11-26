@@ -153,8 +153,9 @@
     @for (slot of reminderSlots; track slot.key) {
       <ion-item>
         <ion-toggle
+          #reminderToggle
           [checked]="selectedNotifications()[slot.key]"
-          (ionChange)="onToggleChange(slot.key, $event)"
+          (ionChange)="onToggleChange(slot.key, $event.detail.checked, reminderToggle)"
         >
           <ion-label>
             <h3>{{ slot.title }}</h3>

@@ -162,18 +162,15 @@ export default class SettingsPage {
     addIcons({ chevronForwardOutline, logOutOutline, syncOutline });
   }
 
-  async onToggleChange(key: SlotKey, event: CustomEvent<{ checked: boolean }>): Promise<void> {
-    const enabled = event.detail.checked;
+  async onToggleChange(
+    key: SlotKey,
+    enabled: boolean,
+    toggle: Pick<IonToggle, 'checked'>,
+  ): Promise<void> {
     const current = this.selectedNotifications()[key];
     if (enabled === current) return;
-    const ok = await this.toggleNotif(key, enabled);
-    if (!ok) {
-      // Revert UI: signal-driven [checked] will re-read from profile() which
-      // was not mutated, so on next change detection the toggle re-aligns.
-      // Force an immediate visual revert by patching the toggle target.
-      const target = event.target as HTMLIonToggleElement | null;
-      if (target) target.checked = current;
-    }
+    toggle.checked = current;
+    await this.toggleNotif(key, enabled);
   }
 
   async toggleNotif(key: SlotKey, enabled: boolean): Promise<boolean> {
