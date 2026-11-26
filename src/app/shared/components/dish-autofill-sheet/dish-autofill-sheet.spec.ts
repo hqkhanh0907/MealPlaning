@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideIonicAngular } from '@ionic/angular/standalone';
 
 import { DishAutofillSheet, type DishAutofillAppliedPayload } from './dish-autofill-sheet';
 import type { DishAutofillResult, DishAutofillRow } from '../../../core/services/ai/nutrition-ai';
@@ -74,7 +75,10 @@ describe('DishAutofillSheet', () => {
   let component: DishAutofillSheet;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [DishAutofillSheet] }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [DishAutofillSheet],
+      providers: [provideIonicAngular()],
+    }).compileComponents();
     fixture = TestBed.createComponent(DishAutofillSheet);
     component = fixture.componentInstance;
   });
@@ -84,6 +88,35 @@ describe('DishAutofillSheet', () => {
     fixture.detectChanges();
     expect(ts(component).counts()).toEqual({ existing: 1, created: 1, needsConfirm: 1 });
     expect(ts(component).rows().length).toBe(3);
+  });
+
+  it('hiện trọn nút Hủy và Áp dụng phía trên vùng an toàn', async () => {
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    const modal = host.querySelector('ion-modal')!;
+    const presented = new Promise<void>((resolve) => {
+      modal.addEventListener('ionModalDidPresent', () => resolve(), { once: true });
+    });
+    component.result = sampleResult;
+    component.isOpen = true;
+    fixture.detectChanges();
+
+    await presented;
+    try {
+      const safeBottom = 24;
+      modal.style.setProperty('--ion-safe-area-bottom', `${safeBottom}px`);
+      const buttons = Array.from(modal.querySelectorAll<HTMLButtonElement>('.dasf-actions button'));
+      const viewportBottom = (window.visualViewport?.height ?? window.innerHeight) - safeBottom;
+      expect(buttons.map((button) => button.textContent?.trim())).toEqual(['Hủy', 'Áp dụng']);
+      for (const button of buttons) {
+        const box = button.getBoundingClientRect();
+        expect(box.height).toBeGreaterThanOrEqual(44);
+        expect(box.top).toBeGreaterThanOrEqual(0);
+        expect(box.bottom).toBeLessThanOrEqual(viewportBottom + 1);
+      }
+    } finally {
+      await modal.dismiss();
+    }
   });
 
   it('badgeLabel + badgeClass map đúng theo kind', () => {

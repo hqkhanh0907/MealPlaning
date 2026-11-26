@@ -1,6 +1,10 @@
 // DishAutofillSheet — DNA Sage palette via design-system tokens.
 // Phase-1.5b §4.2 — bottom sheet dạng all-in-one (PA1).
 
+.dasf-modal {
+  --height: 95%;
+}
+
 .dasf-header {
   --background: var(--bg-card);
   box-shadow: none;
@@ -178,11 +182,10 @@
 
 // ---------- Footer ----------
 .dasf-footer {
-  position: sticky;
-  bottom: 0;
+  flex-shrink: 0;
   background: var(--bg-card);
   border-top: 1px solid var(--border-color);
-  padding: 10px 20px 16px;
+  padding: 10px 20px calc(16px + var(--ion-safe-area-bottom, env(safe-area-inset-bottom, 0px)));
 }
 
 .dasf-footer__hint {
