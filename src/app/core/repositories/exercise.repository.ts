@@ -34,7 +34,14 @@ export class ExerciseRepository {
              category = excluded.category,
              equipment = excluded.equipment,
              instructions = excluded.instructions
-           WHERE exercise.source = 'db'`,
+           WHERE exercise.source = 'db' AND (
+             exercise.name IS NOT excluded.name OR
+             exercise.name_vi IS NOT excluded.name_vi OR
+             exercise.muscle_group IS NOT excluded.muscle_group OR
+             exercise.category IS NOT excluded.category OR
+             exercise.equipment IS NOT excluded.equipment OR
+             exercise.instructions IS NOT excluded.instructions
+           )`,
           [
             exercise.id,
             exercise.name,

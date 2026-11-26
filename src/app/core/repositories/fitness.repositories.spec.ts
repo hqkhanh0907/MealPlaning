@@ -49,6 +49,37 @@ describe('Fitness repositories', () => {
     expect(legs.length).toBeGreaterThanOrEqual(5);
   });
 
+  it('preserves the sync version when exercises were restored without local seed metadata', async () => {
+    await prepareWorkspace(db);
+    await exerciseRepo.ensureSeedExercises();
+    const version = async (): Promise<number> =>
+      (await db.getOne<{ change_version: number }>(
+        'SELECT change_version FROM sync_workspace WHERE id = 1',
+      ))!.change_version;
+    const clearSeedVersion = (): Promise<void> =>
+      db.execute("DELETE FROM app_config WHERE key = 'fitness_seed_version'");
+    const [exercise] = await exerciseRepo.list({ limit: 1 });
+
+    await clearSeedVersion();
+    const before = await version();
+    await exerciseRepo.ensureSeedExercises();
+
+    expect(await version()).toBe(before);
+
+    await db.execute('UPDATE exercise SET instructions = ? WHERE id = ?', [
+      'Previous seed instructions',
+      exercise.id,
+    ]);
+    await clearSeedVersion();
+    const beforeUpdate = await version();
+    await exerciseRepo.ensureSeedExercises();
+
+    expect(await version()).toBe(beforeUpdate + 1);
+    expect(
+      await db.getOne('SELECT instructions FROM exercise WHERE id = ?', [exercise.id]),
+    ).toEqual({ instructions: exercise.instructions });
+  });
+
   it('offers the dumbbell template while keeping the three-day default', async () => {
     const plans = await planRepo.ensurePresetPlans();
     const active = await planRepo.getActivePlan();
