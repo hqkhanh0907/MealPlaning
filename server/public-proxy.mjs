@@ -5,6 +5,10 @@ const paths = new Map([
   ['/api/collections/users/records', ['POST']],
   ['/api/collections/users/auth-with-password', ['POST']],
   ['/api/mealplan/workspace', ['GET', 'POST']],
+  ['/api/mealplan/workspace?metadata=1', ['GET']],
+  ['/api/mealplan/session', ['POST']],
+  ['/api/mealplan/session/refresh', ['POST']],
+  ['/api/mealplan/profile', ['POST']],
   ['/api/mealplan/logout', ['POST']],
 ]);
 const maxBody = 4_500_000;
@@ -18,12 +22,14 @@ function reject(response, status, message) {
 }
 
 function limitAuth(path) {
-  if (!path.startsWith('/api/collections/users/')) return true;
+  const limit = path.startsWith('/api/collections/users/') ? 36
+    : path.startsWith('/api/mealplan/session') ? 120 : 0;
+  if (!limit) return true;
   const now = Math.floor(Date.now() / 60_000);
   const previous = authHits.get(path);
   const count = previous?.minute === now ? previous.count + 1 : 1;
   authHits.set(path, { minute: now, count });
-  return count <= 36;
+  return count <= limit;
 }
 
 const server = createServer(async (input, response) => {

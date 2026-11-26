@@ -59,7 +59,7 @@ function rowsWithKeys(input) {
   return { schemaVersion, tables };
 }
 
-function normalize(input) {
+function normalize(input, legacyWorkoutTotals = false) {
   const snapshot = rowsWithKeys(input);
   const { tables } = snapshot;
   const exerciseVolumes = new Map();
@@ -88,7 +88,8 @@ function normalize(input) {
     if (set.weight_kg < 0 || set.reps < 0 || (set.status !== "logged" && set.status !== "skipped")) {
       invalid("Invalid workout set.");
     }
-    if (set.status === "logged") {
+    if (set.status === "logged" &&
+        (legacyWorkoutTotals || (set.duration_seconds === null && set.legacy_unit_unknown === 0))) {
       const id = set.workout_exercise_id;
       exerciseVolumes.set(id, (exerciseVolumes.get(id) || 0) + set.weight_kg * set.reps);
     }
@@ -104,4 +105,35 @@ function normalize(input) {
   return snapshot;
 }
 
-module.exports = { normalize, schemaVersion };
+function sameRecord(table, left, right) {
+  if (!left || !right) return left === right;
+  return Object.keys(left).every((column) =>
+    left[column] === right[column] ||
+    (column === "total_volume" && (table === "workout_exercise" || table === "workout_session")));
+}
+
+function mergeSnapshots(base, incoming, current) {
+  const tables = {};
+  for (const [table, { key }] of Object.entries(schema)) {
+    const index = (snapshot) => new Map((snapshot?.tables[table] || []).map((row) => [row[key], row]));
+    const before = index(base);
+    const local = index(incoming);
+    const remote = index(current);
+    tables[table] = [];
+    for (const id of new Set([...before.keys(), ...local.keys(), ...remote.keys()])) {
+      const original = before.get(id);
+      const own = local.get(id);
+      const other = remote.get(id);
+      const localChanged = !sameRecord(table, original, own);
+      const remoteChanged = !sameRecord(table, original, other);
+      if (localChanged && remoteChanged && !sameRecord(table, own, other)) {
+        invalid("Overlapping record changes.");
+      }
+      const selected = localChanged ? own : other;
+      if (selected) tables[table].push(selected);
+    }
+  }
+  return normalize({ schemaVersion, tables });
+}
+
+module.exports = { mergeSnapshots, normalize, schemaVersion };
