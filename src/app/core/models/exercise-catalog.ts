@@ -1,5 +1,10 @@
 import { sourceCatalogEntries } from './exercise-catalog.generated';
-import type { SourceCatalogEntry } from './exercise-catalog.types';
+import {
+  equipmentLabels,
+  equipmentReviews,
+  exerciseCatalogCorrection,
+} from './exercise-catalog-review.data';
+import type { CatalogDiscoveryMuscle, SourceCatalogEntry } from './exercise-catalog.types';
 import type { ExerciseCategory, MuscleGroup } from './fitness.types';
 
 const entriesById = new Map(sourceCatalogEntries.map((entry) => [entry.id, entry]));
@@ -40,8 +45,41 @@ export function catalogMuscleGroup(entry: SourceCatalogEntry): MuscleGroup {
   return muscleGroups[entry.primaryMuscles[0]] ?? 'full_body';
 }
 
+function discoveryMuscles(tags: readonly string[]): CatalogDiscoveryMuscle[] {
+  return [...new Set(tags.map((tag) => muscleGroups[tag]).filter(Boolean))];
+}
+
+export function catalogReviewedFacts(entry: SourceCatalogEntry): {
+  primary: readonly CatalogDiscoveryMuscle[];
+  secondary: readonly CatalogDiscoveryMuscle[];
+  required: readonly string[] | null;
+  movementPattern: string;
+  perSide: boolean;
+} {
+  const review = exerciseCatalogCorrection(entry.id);
+  const gear = equipmentReviews[entry.id];
+  const originalGear = entry.equipment;
+  const primary = review?.primary?.after ?? discoveryMuscles(entry.primaryMuscles);
+  const secondary = review?.secondary?.after ?? discoveryMuscles(entry.secondaryMuscles);
+  const required = review?.required
+    ? review.required.after
+    : gear
+      ? gear.required
+      : originalGear.every((key) => Object.hasOwn(equipmentLabels, key)) &&
+          (originalGear.length || entry.equipmentLabel === 'Bodyweight')
+        ? originalGear
+        : null;
+  return {
+    primary,
+    secondary: secondary.filter((group) => !primary.includes(group)),
+    required,
+    movementPattern: review?.movementPattern?.after ?? entry.movementPattern,
+    perSide: review?.perSide?.after ?? entry.unilateral,
+  };
+}
+
 export function catalogCategory(entry: SourceCatalogEntry): ExerciseCategory {
-  if (entry.movementPattern === 'cardio') return 'cardio';
+  if (catalogReviewedFacts(entry).movementPattern === 'cardio') return 'cardio';
   return categories[entry.category] ?? 'isolation';
 }
 

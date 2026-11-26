@@ -7,7 +7,9 @@ const test = require('node:test');
 const { FITNESS_SEED_VERSION, SEED_EXERCISES, SEED_TRAINING_PLANS } = require('../../src/app/core/repositories/fitness-seed.ts');
 const { exerciseAmountLabel, exerciseGuide, exerciseUnitNote } = require('../../src/app/core/models/exercise-guides.ts');
 const { catalogSearchNames } = require('../../src/app/core/models/exercise-catalog.ts');
+const { exerciseCatalogCorrections } = require('../../src/app/core/models/exercise-catalog-review.data.ts');
 const { exerciseGuideText, guidedExerciseIds } = require('../../src/app/core/models/exercise-guide-texts.ts');
+const { vietnameseGuideTexts } = require('../../src/app/core/models/exercise-guides/index.ts');
 const { isTimedExercise } = require('../../src/app/core/models/fitness.types.ts');
 const openItems = require('./exercise-guides.open.json');
 const verifiedSources = require('./exercise-guides.verified-sources.json');
@@ -94,7 +96,8 @@ test('mỗi mã giữ đúng tên, dụng cụ, nhóm cơ, số bên và thứ t
     if (app.muscle_group !== muscleGroups[source.muscles.primary[0]]) failures.push(source.id + ': nhóm cơ');
     const category = source.movementPattern === 'cardio' ? 'cardio' : categories[source.category];
     if (app.category !== category) failures.push(source.id + ': loại bài');
-    if (Boolean(guide.perSide) !== source.unilateral) failures.push(source.id + ': số bên');
+    const perSide = exerciseCatalogCorrections[source.id]?.perSide?.after ?? source.unilateral;
+    if (Boolean(guide.perSide) !== perSide) failures.push(source.id + ': số bên');
     const frames = guide.illustration.frames;
     if (frames.map((frame) => frame.phase).join() !== source.frames.join()) failures.push(source.id + ': thứ tự khung');
     if (frames.some((frame) => frame.path !== 'assets/fitness/exercises/' + source.images[frame.phase].replace(/^images\//, ''))) {
@@ -160,11 +163,12 @@ test('đơn vị ghi: bài giữ tĩnh tính giây, bài một bên ghi từng b
     const unit = exerciseUnitNote(source.id) ?? '';
     const sideLabel = isTimedExercise(source.id) ? 'Số giây mỗi bên' : 'Số lần mỗi bên';
     const otherLabel = isTimedExercise(source.id) ? 'Số lần mỗi bên' : 'Số giây mỗi bên';
-    if (unit.includes(sideLabel) !== source.unilateral || unit.includes(otherLabel)) failures.push(source.id + ': nhãn từng bên');
+    const perSide = exerciseCatalogCorrections[source.id]?.perSide?.after ?? source.unilateral;
+    if (unit.includes(sideLabel) !== perSide || unit.includes(otherLabel)) failures.push(source.id + ': nhãn từng bên');
     const amount = exerciseAmountLabel(source.id);
     const wantAmount = isTimedExercise(source.id)
-      ? source.unilateral ? 'Tập mỗi bên (giây)' : 'Tập (giây)'
-      : source.unilateral ? 'Số lần mỗi bên' : 'Số lần';
+      ? perSide ? 'Tập mỗi bên (giây)' : 'Tập (giây)'
+      : perSide ? 'Số lần mỗi bên' : 'Số lần';
     if (amount !== wantAmount) failures.push(source.id + ': nhãn ô nhập');
   }
   assert.deepEqual(failures, []);
@@ -217,12 +221,17 @@ test('mã còn vướng giữa chữ và hình được ghi rõ, vẫn nằm tro
     assert.ok(issue.trim().length > 15, id);
   }
   const withNote = SEED_EXERCISES.filter(({ id }) => exerciseGuide(id)?.illustration.note?.trim());
-  assert.deepEqual(withNote.map(({ id }) => id).sort(), Object.keys(openItems.flagged).sort());
+  const expectedNotes = new Set(Object.keys(openItems.flagged));
+  for (const [id, { illustrationNote }] of Object.entries(exerciseCatalogCorrections)) {
+    if (illustrationNote?.after) expectedNotes.add(id);
+    if (illustrationNote?.after === null) expectedNotes.delete(id);
+  }
+  assert.deepEqual(withNote.map(({ id }) => id).sort(), [...expectedNotes].sort());
   for (const [id, source] of Object.entries(openItems.weakSources)) {
     assert.ok(sourceById.has(id), id);
     const match = /^(secondary|chưa tải được|unverified) · (https:\/\/\S+)$/.exec(source);
     assert.ok(match, id + ': trạng thái nguồn');
-    assert.equal(match[2], exerciseGuide(id)?.sourceUrl, id + ': URL nguồn trong hướng dẫn');
+    assert.equal(match[2], vietnameseGuideTexts[id]?.sourceUrl, id + ': URL nguồn trong hồ sơ gốc');
   }
   t.diagnostic('Mã còn vướng chữ và hình: ' + Object.keys(openItems.flagged).length);
   t.diagnostic('Mã có nguồn kỹ thuật chưa đạt mức chuyên môn: ' + Object.keys(openItems.weakSources).length);
@@ -233,13 +242,13 @@ test('nguồn đã đối chiếu khớp liên kết trong ứng dụng và có 
     assert.ok(sourceById.has(id) && appById.has(id), id);
     assert.equal(Object.hasOwn(openItems.weakSources, id), false, id);
     assert.match(evidence.url, /^https:\/\/\S+$/, id);
-    assert.equal(evidence.url, exerciseGuide(id)?.sourceUrl, id);
+    assert.equal(evidence.url, vietnameseGuideTexts[id]?.sourceUrl, id);
     assert.ok(evidence.match.trim().length > 20, id);
   }
   t.diagnostic('Mã đã đối chiếu nguồn và ghi bằng chứng: ' + Object.keys(verifiedSources).length);
 });
 
-test('APK chứa mọi hình hướng dẫn', { skip: !process.env.EXERCISE_GUIDE_APK }, () => {
+test('APK chứa đủ hình hướng dẫn khớp SHA-256 với nguồn đã ghim', { skip: !process.env.EXERCISE_GUIDE_APK }, () => {
   const entries = new Set(
     execFileSync('unzip', ['-Z1', process.env.EXERCISE_GUIDE_APK], { encoding: 'utf8', maxBuffer: 64e6 }).split('\n'),
   );
@@ -249,4 +258,9 @@ test('APK chứa mọi hình hướng dẫn', { skip: !process.env.EXERCISE_GUID
   assert.equal(expected.length, 796);
   assert.deepEqual(expected.filter((entry) => !entries.has(entry)), []);
   assert.ok(entries.has('assets/public/assets/fitness/illustration-sources.json'));
+  for (const [source, hash] of Object.entries(pin.images)) {
+    const entry = 'assets/public/assets/fitness/exercises/' + source.replace(/^images\//, '');
+    const bytes = execFileSync('unzip', ['-p', process.env.EXERCISE_GUIDE_APK, entry]);
+    assert.equal(createHash('sha256').update(bytes).digest('hex'), hash, entry);
+  }
 });

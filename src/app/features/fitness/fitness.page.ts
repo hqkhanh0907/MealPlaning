@@ -188,11 +188,6 @@ export default class FitnessPage {
     if (offset) await content.scrollByPoint(0, offset, 0);
   }
 
-  /**
-   * Bottom-sheet picker open state. Replaces the inline `.free-mode` block — chips
-   * + search now live in `<app-exercise-picker-sheet>` so the hub stays focused
-   * on planned-day overview + active session controls (Apple HIG: one screen, one job).
-   */
   readonly pickerOpen = signal(false);
 
   /**

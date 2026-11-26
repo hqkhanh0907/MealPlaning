@@ -13,7 +13,6 @@ import type {
   WorkoutSessionDetail,
   WorkoutSetDraft,
 } from '../models/fitness.types';
-import { catalogSearchNames } from '../models/exercise-catalog';
 import { ExerciseRepository } from '../repositories/exercise.repository';
 import { TrainingPlanRepository } from '../repositories/training-plan.repository';
 import { isLoggedSet, workoutSetIssue, type WorkoutSetInput } from '../models/fitness-workout-set';
@@ -67,7 +66,6 @@ export class FitnessStore {
   readonly selectedWorkoutExerciseId = signal<string | null>(null);
   readonly setDraft = signal<WorkoutSetDraft>({ ...DEFAULT_SET_DRAFT });
   readonly progress = signal<FitnessProgressSummary | null>(null);
-  readonly exerciseSearch = signal('');
   readonly restSeconds = signal(0);
   readonly loading = signal(false);
   readonly savingSet = signal(false);
@@ -204,28 +202,6 @@ export class FitnessStore {
       .reverse()
       .find((set) => isLoggedSet(set) && !set.legacy_unit_unknown),
   );
-
-  private readonly exerciseSearchIndex = computed(() =>
-    this.exercises().map((exercise) => ({
-      exercise,
-      text: normalize(
-        [
-          exercise.name,
-          exercise.name_vi ?? '',
-          exercise.equipment ?? '',
-          ...catalogSearchNames(exercise.id),
-        ].join('\n'),
-      ),
-    })),
-  );
-
-  readonly filteredExercises = computed(() => {
-    const query = normalize(this.exerciseSearch());
-    if (!query) return this.exercises();
-    return this.exerciseSearchIndex()
-      .filter((entry) => entry.text.includes(query))
-      .map((entry) => entry.exercise);
-  });
 
   readonly currentWeekVolumeLabel = computed(() => {
     const value = this.progress()?.currentWeekVolume ?? 0;
@@ -426,10 +402,6 @@ export class FitnessStore {
 
   updateNotes(notes: string): void {
     this.setDraft.update((draft) => ({ ...draft, notes }));
-  }
-
-  updateExerciseSearch(query: string): void {
-    this.exerciseSearch.set(query);
   }
 
   async logSet(): Promise<void> {
@@ -698,11 +670,4 @@ function parseDraft(
 
 function toErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'FitnessStore: thao tác thất bại.';
-}
-
-function normalize(value: string): string {
-  return value
-    .toLocaleLowerCase('vi-VN')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
 }

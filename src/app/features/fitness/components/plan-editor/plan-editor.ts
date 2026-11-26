@@ -8,7 +8,6 @@ import {
   output,
   signal,
 } from '@angular/core';
-import { NgTemplateOutlet } from '@angular/common';
 import {
   IonButton,
   IonButtons,
@@ -26,6 +25,7 @@ import type {
 import { defaultTrainingRange } from '../../../../core/models/fitness-prescription';
 import { FitnessStore } from '../../../../core/stores/fitness.store';
 import { isTimedExercise } from '../../../../core/models/fitness.types';
+import { ExercisePickerSheet } from '../../../../shared/components/exercise-picker-sheet/exercise-picker-sheet';
 
 const WEEK_DAYS = [1, 2, 3, 4, 5, 6, 0];
 
@@ -35,7 +35,7 @@ const WEEK_DAYS = [1, 2, 3, 4, 5, 6, 0];
   styleUrl: './plan-editor.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    NgTemplateOutlet,
+    ExercisePickerSheet,
     IonButton,
     IonButtons,
     IonContent,
@@ -67,6 +67,8 @@ export class PlanEditor implements OnInit {
       .filter((exercise) => exercise.category !== 'cardio' && !selectedIds.has(exercise.id));
   });
   protected readonly exerciseToReplace = signal<string | null>(null);
+  protected readonly exercisePickerOpen = signal(false);
+  private pickerOpener?: { button: HTMLElement; editor: HTMLElement | null };
   protected readonly open = signal(true);
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -123,6 +125,28 @@ export class PlanEditor implements OnInit {
       }),
     );
     this.useDay(targetDay.dayOfWeek);
+  }
+
+  protected showExercisePicker(event: Event, originalId: string | null = null): void {
+    if (this.saving()) return;
+    this.exerciseToReplace.set(originalId);
+    const button = event.currentTarget as HTMLElement;
+    this.pickerOpener = { button, editor: button.closest('ion-modal') };
+    this.exercisePickerOpen.set(true);
+  }
+
+  protected onExercisePickerClosed(): void {
+    this.exercisePickerOpen.set(false);
+    this.exerciseToReplace.set(null);
+    const opener = this.pickerOpener;
+    this.pickerOpener = undefined;
+    if (!opener) return;
+    requestAnimationFrame(() => {
+      const target = opener.button.isConnected
+        ? opener.button
+        : opener.editor?.querySelector<HTMLElement>('h2[tabindex]');
+      target?.focus({ preventScroll: true });
+    });
   }
 
   protected changeExercise(id: string, originalId: string | null): void {

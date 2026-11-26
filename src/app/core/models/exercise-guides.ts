@@ -1,4 +1,5 @@
-import { catalogEntry } from './exercise-catalog';
+import { catalogEntry, catalogReviewedFacts } from './exercise-catalog';
+import { exerciseCatalogCorrection } from './exercise-catalog-review.data';
 import { exerciseGuideIllustrationNotes } from './exercise-guide-illustration-notes';
 import {
   framePhaseLabels,
@@ -16,7 +17,9 @@ export function exerciseGuide(exerciseId: string): ExerciseGuide | undefined {
   const entry = catalogEntry(exerciseId);
   const text = exerciseGuideText(exerciseId);
   if (!entry || !text) return undefined;
-  const illustrationNote = exerciseGuideIllustrationNotes[entry.id];
+  const reviewed = catalogReviewedFacts(entry);
+  const noteReview = exerciseCatalogCorrection(entry.id)?.illustrationNote;
+  const illustrationNote = noteReview ? noteReview.after : exerciseGuideIllustrationNotes[entry.id];
   return {
     timed: text.measure === 'seconds',
     equipment: text.equipment,
@@ -31,7 +34,7 @@ export function exerciseGuide(exerciseId: string): ExerciseGuide | undefined {
         path: 'assets/fitness/exercises/' + entry.id + '/' + phase + '.webp',
         phase,
         label:
-          phase === 'hold' && entry.movementPattern === 'cardio'
+          phase === 'hold' && reviewed.movementPattern === 'cardio'
             ? movingSingleFrameLabel
             : framePhaseLabels[phase],
       })),
@@ -39,7 +42,7 @@ export function exerciseGuide(exerciseId: string): ExerciseGuide | undefined {
       ...(illustrationNote ? { note: illustrationNote } : {}),
     },
     ...(text.loadTotalOfTwo ? { loadLabel: 'Tổng hai tạ (kg)' } : {}),
-    ...(entry.unilateral ? { perSide: true as const } : {}),
+    ...(reviewed.perSide ? { perSide: true as const } : {}),
   };
 }
 

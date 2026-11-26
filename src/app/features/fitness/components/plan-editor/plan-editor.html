@@ -41,7 +41,7 @@
         </div>
 
         @if (selectedDay(); as day) {
-          <h2>{{ dayLabel(day.dayOfWeek) }} · {{ day.name }}</h2>
+          <h2 tabindex="-1">{{ dayLabel(day.dayOfWeek) }} · {{ day.name }}</h2>
           @if (!day.isRestDay) {
             <div class="input-wrapper">
               <label class="input-label" for="personal-plan-move">Chuyển buổi sang</label>
@@ -76,13 +76,12 @@
                   size="small"
                   fill="clear"
                   [attr.aria-label]="'Thay ' + exerciseName(exercise.exerciseId)"
-                  [attr.aria-expanded]="exerciseToReplace() === exercise.exerciseId"
-                  [disabled]="availableExercises().length === 0"
-                  (click)="
-                    exerciseToReplace.set(
-                      exerciseToReplace() === exercise.exerciseId ? null : exercise.exerciseId
-                    )
+                  [attr.aria-expanded]="
+                    exercisePickerOpen() && exerciseToReplace() === exercise.exerciseId
                   "
+                  aria-haspopup="dialog"
+                  [disabled]="saving() || availableExercises().length === 0"
+                  (click)="showExercisePicker($event, exercise.exerciseId)"
                   >Thay bài</ion-button
                 >
                 <ion-button
@@ -94,36 +93,25 @@
                 >
               </div>
             </div>
-            @if (exerciseToReplace() === exercise.exerciseId) {
-              <ng-container [ngTemplateOutlet]="exerciseChoices" />
-            }
           }
 
-          @if (availableExercises().length > 0 && !exerciseToReplace()) {
-            <ng-container [ngTemplateOutlet]="exerciseChoices" />
+          @if (availableExercises().length > 0) {
+            <div class="input-wrapper">
+              <label class="input-label" for="personal-plan-exercise">Thêm bài tập</label>
+              <button
+                id="personal-plan-exercise"
+                type="button"
+                class="picker-trigger--floating"
+                aria-haspopup="dialog"
+                [disabled]="saving()"
+                [attr.aria-expanded]="exercisePickerOpen() && !exerciseToReplace()"
+                (click)="showExercisePicker($event)"
+              >
+                Chọn bài tập
+              </button>
+            </div>
           }
         }
-
-        <ng-template #exerciseChoices>
-          <div class="input-wrapper">
-            <label class="input-label" for="personal-plan-exercise">
-              {{ exerciseToReplace() ? 'Chọn bài thay thế' : 'Thêm bài tập' }}
-            </label>
-            <select
-              #exerciseSelect
-              id="personal-plan-exercise"
-              class="input-native"
-              (change)="
-                changeExercise(exerciseSelect.value, exerciseToReplace()); exerciseSelect.value = ''
-              "
-            >
-              <option value="" disabled selected>Chọn bài tập</option>
-              @for (exercise of availableExercises(); track exercise.id) {
-                <option [value]="exercise.id">{{ exercise.name_vi || exercise.name }}</option>
-              }
-            </select>
-          </div>
-        </ng-template>
       </div>
     </ion-content>
 
@@ -136,3 +124,10 @@
     </ion-footer>
   </ng-template>
 </ion-modal>
+
+<app-exercise-picker-sheet
+  [isOpen]="exercisePickerOpen()"
+  [exercises]="availableExercises()"
+  (exerciseSelected)="changeExercise($event, exerciseToReplace())"
+  (closed)="onExercisePickerClosed()"
+/>

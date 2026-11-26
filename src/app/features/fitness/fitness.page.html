@@ -418,7 +418,12 @@
     </section>
   }
 
-  <app-exercise-picker-sheet [isOpen]="pickerOpen()" (closed)="pickerOpen.set(false)" />
+  <app-exercise-picker-sheet
+    [isOpen]="pickerOpen()"
+    [exercises]="fitness.exercises()"
+    (exerciseSelected)="fitness.addExerciseToActive($event)"
+    (closed)="pickerOpen.set(false)"
+  />
   <app-workout-summary-modal
     [isOpen]="fitness.lastCompletedSession() !== null"
     [session]="fitness.lastCompletedSession()"
