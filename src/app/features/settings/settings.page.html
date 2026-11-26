@@ -13,16 +13,23 @@
       <ion-list-header
         ><ion-label><h2>Tài khoản</h2></ion-label></ion-list-header
       >
-      <ion-item class="account-identity">
-        <ion-label class="ion-text-wrap">{{ account.username }}</ion-label>
+      <ion-item button detail="false" class="account-identity" routerLink="name">
+        <ion-label class="ion-text-wrap">
+          <h3>{{ account.name || 'Bổ sung họ và tên' }}</h3>
+          <p>Tên đăng nhập: {{ account.username }}</p>
+        </ion-label>
+        <ion-icon slot="end" name="chevron-forward-outline" aria-hidden="true" />
       </ion-item>
       <ion-item>
         <ion-label class="ion-text-wrap">
           <h3>Đồng bộ</h3>
           <p aria-live="polite">{{ syncLabel() }}</p>
+          @if (lastSyncLabel(); as last) {
+            <p>Lần thành công gần nhất: {{ last }}</p>
+          }
         </ion-label>
       </ion-item>
-      @if (accountSync.status() === 'expired') {
+      @if (accountSync.status() === 'expired' || accountSync.status() === 'forbidden') {
         <ion-item button routerLink="/account">Đăng nhập lại</ion-item>
       } @else if (accountSync.status() === 'conflict') {
         <ion-item>
@@ -53,6 +60,11 @@
         <ion-icon slot="start" name="log-out-outline" aria-hidden="true" />
         Đăng xuất
       </ion-item>
+      @if (signOutError()) {
+        <ion-item
+          ><ion-label class="ion-text-wrap" role="alert">{{ signOutError() }}</ion-label></ion-item
+        >
+      }
     </ion-list>
   }
   <ion-list lines="none" class="settings-list">

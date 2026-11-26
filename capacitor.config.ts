@@ -4,6 +4,7 @@ const config: CapacitorConfig = {
   appId: 'com.healthmate.ai',
   appName: 'HealthMate AI',
   webDir: 'www',
+  loggingBehavior: 'none',
   android: {
     buildOptions: {
       signingType: 'apksigner',

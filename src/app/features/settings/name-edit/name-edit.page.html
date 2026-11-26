@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/settings" text="" aria-label="Quay lại" />
+    </ion-buttons>
+    <ion-title>Họ và tên</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form class="name-form" novalidate (submit)="save($event)">
+    <div class="input-wrapper" [class.invalid]="error()">
+      <label class="input-label" for="settings-full-name">Họ và tên</label>
+      <input
+        #nameField
+        id="settings-full-name"
+        class="input-native"
+        autocomplete="name"
+        autocapitalize="words"
+        required
+        [value]="name()"
+        [disabled]="saving()"
+        [attr.aria-invalid]="error() ? 'true' : null"
+        [attr.aria-describedby]="error() ? 'name-edit-error' : null"
+        (input)="name.set(nameField.value)"
+        (keydown.enter)="save($event)"
+      />
+    </div>
+    @if (error()) {
+      <p id="name-edit-error" class="field-error" role="alert">{{ error() }}</p>
+    }
+  </form>
+</ion-content>
+<ion-footer class="name-footer">
+  <ion-button expand="block" [disabled]="saving()" (click)="save()">
+    {{ saving() ? 'Đang lưu…' : 'Lưu' }}
+  </ion-button>
+</ion-footer>

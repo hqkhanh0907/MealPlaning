@@ -73,10 +73,8 @@ export class App {
       if (this.account.required) {
         this.zone.runOutsideAngular(() => {
           this.syncTimer = window.setInterval(() => {
-            if (!document.hidden && this.network.online() && this.sync.status() !== 'conflict') {
-              void this.sync.sync();
-            }
-          }, 15_000);
+            if (!document.hidden) void this.sync.refreshStatus();
+          }, 5_000);
         });
       }
       // 30-day retention for ai_chat_log (xem ai-strategy.md §4.4).
@@ -89,7 +87,10 @@ export class App {
   protected onVisibilityChange(): void {
     window.clearTimeout(this.dateTimer);
     if (this.account.required && !this.account.current()) return;
-    if (!document.hidden) this.watchLocalDay();
+    if (!document.hidden) {
+      this.watchLocalDay();
+      if (this.account.required) void this.sync.refreshStatus();
+    }
   }
 
   private watchLocalDay(previousDay?: string, quickChecks = 5): void {

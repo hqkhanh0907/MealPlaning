@@ -69,6 +69,13 @@ export default class SettingsPage {
   protected readonly accountSession = inject(AccountSession);
   protected readonly accountSync = inject(AccountSync);
   protected readonly signOutBusy = signal(false);
+  protected readonly signOutError = signal('');
+  protected readonly lastSyncLabel = computed(() => {
+    const value = this.accountSync.lastSync();
+    return value
+      ? new Date(value).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })
+      : '';
+  });
   protected readonly syncLabel = computed(
     () =>
       ({
@@ -76,8 +83,13 @@ export default class SettingsPage {
         working: 'Đang đồng bộ',
         saved: 'Đã đồng bộ',
         offline: 'Chưa kết nối được. Dữ liệu đã lưu trên máy.',
-        expired: 'Cần đăng nhập lại để đồng bộ.',
+        expired:
+          this.accountSync.reason() === 'session_revoked'
+            ? 'Phiên đã bị thu hồi. Đăng nhập lại để đồng bộ.'
+            : 'Phiên đã hết hạn. Đăng nhập lại để đồng bộ.',
+        forbidden: 'Tài khoản thiếu quyền đồng bộ. Dữ liệu vẫn lưu trên máy.',
         conflict: 'Dữ liệu đã đổi ở nơi khác.',
+        error: 'Đồng bộ gặp lỗi. Dữ liệu vẫn lưu trên máy.',
       })[this.accountSync.status()],
   );
   private readonly day = inject(LocalDay);
@@ -119,6 +131,7 @@ export default class SettingsPage {
   );
 
   async ionViewWillEnter(): Promise<void> {
+    void this.accountSync.refreshStatus();
     if (Capacitor.isNativePlatform())
       this.permissionMissing.set(!(await this.notifications.hasPermission()));
   }
@@ -131,13 +144,15 @@ export default class SettingsPage {
     const account = this.accountSession.current();
     if (!account || this.signOutBusy()) return;
     this.signOutBusy.set(true);
-    this.accountSession.clear();
-    await this.notifications.sync(notificationFlags(null)).catch(() => undefined);
-    if (navigator.onLine) {
-      await this.accountSession
-        .call('/api/mealplan/logout', {}, account.token)
-        .catch(() => undefined);
+    this.signOutError.set('');
+    try {
+      await this.accountSession.clear();
+    } catch {
+      this.signOutError.set('Chưa thể đăng xuất. Hãy thử lại.');
+      this.signOutBusy.set(false);
+      return;
     }
+    await this.notifications.sync(notificationFlags(null)).catch(() => undefined);
     window.location.replace('/account');
   }
 

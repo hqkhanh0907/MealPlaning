@@ -18,6 +18,8 @@ import {
 import { environment } from '../../../../environments/environment';
 import { MigrationRunner } from './migration-runner';
 import { MIGRATION_REGISTRY } from './migrations';
+import { nativeAccount } from '../../account/native-account';
+import { isWorkspaceWrite } from '../../account/workspace-snapshot';
 
 const DB_NAME = environment.dbName.replace(/\.db$/, '');
 const DB_ENCRYPTED = false;
@@ -32,8 +34,12 @@ export class NativeDatabase extends Database {
   private db: SQLiteDBConnection | null = null;
   private initPromise: Promise<void> | null = null;
   private transactionDepth = 0;
+  private workspaceTransaction = false;
 
-  constructor(private readonly name = DB_NAME) {
+  constructor(
+    private readonly name = DB_NAME,
+    private readonly ownerId?: string,
+  ) {
     super();
   }
 
@@ -150,13 +156,24 @@ export class NativeDatabase extends Database {
 
   override async execute(sql: string, params?: unknown[]): Promise<void> {
     this.ensureDb();
+    const changesWorkspace = !!this.ownerId && isWorkspaceWrite(sql);
+    const outsideTransaction = this.transactionDepth === 0;
+    if (changesWorkspace && (outsideTransaction || !this.workspaceTransaction)) {
+      if (!outsideTransaction) this.workspaceTransaction = true;
+      await this.scheduleWorkspace(true);
+    }
     await this.db!.run(sql, (params as SqlParam[]) ?? [], this.transactionDepth === 0);
+    if (changesWorkspace && outsideTransaction) await this.scheduleWorkspace(false);
   }
 
   override async executeAtomically(statements: DatabaseStatement[]): Promise<void> {
     this.ensureDb();
     if (this.transactionDepth !== 0) throw new Error('Database is busy.');
+    const changesWorkspace =
+      !!this.ownerId && statements.some(({ statement }) => isWorkspaceWrite(statement));
+    if (changesWorkspace) await this.scheduleWorkspace(true);
     await this.db!.executeSet(statements, true);
+    if (changesWorkspace) await this.scheduleWorkspace(false);
   }
 
   override async withTransaction<T>(callback: () => Promise<T>): Promise<T> {
@@ -177,6 +194,10 @@ export class NativeDatabase extends Database {
         await this.db!.execute('COMMIT;', false);
       }
       this.transactionDepth -= 1;
+      if (isOuterTransaction && this.workspaceTransaction) {
+        this.workspaceTransaction = false;
+        await this.scheduleWorkspace(false);
+      }
       return result;
     } catch (error) {
       if (isOuterTransaction) {
@@ -188,6 +209,7 @@ export class NativeDatabase extends Database {
         }
       }
       this.transactionDepth = Math.max(0, this.transactionDepth - 1);
+      if (isOuterTransaction) this.workspaceTransaction = false;
       throw error;
     }
   }
@@ -196,6 +218,13 @@ export class NativeDatabase extends Database {
     this.ensureDb();
     const res = await this.db!.query(sql, (params as SqlParam[]) ?? []);
     return (res.values ?? []) as T[];
+  }
+
+  private async scheduleWorkspace(guard: boolean): Promise<void> {
+    if (!this.ownerId) return;
+    await nativeAccount.enqueue({ guard, ownerId: this.ownerId }).catch(() => {
+      console.warn('[Sync] Could not schedule work. The periodic task will retry.');
+    });
   }
 
   private ensureDb(): void {

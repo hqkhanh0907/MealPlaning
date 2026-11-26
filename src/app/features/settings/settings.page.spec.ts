@@ -69,7 +69,15 @@ describe('SettingsPage', () => {
       imports: [SettingsPage],
       providers: [
         provideRouter([]),
-        { provide: AccountSync, useValue: { status: signal('idle') } },
+        {
+          provide: AccountSync,
+          useValue: {
+            status: signal('idle'),
+            reason: signal(''),
+            lastSync: signal(null),
+            refreshStatus: async () => undefined,
+          },
+        },
         { provide: ProfileStore, useValue: profileStore },
         { provide: LocalNotifications, useValue: notifications },
         { provide: ToastController, useValue: toastCtrl },

@@ -6,8 +6,9 @@
   "scripts": {
     "ng": "ng",
     "qa:tap": "node scripts/qa-tap.mjs",
-    "cap:sync": "npx cap sync && node scripts/postsync-android.mjs",
+    "cap:sync": "npx cap sync",
     "capacitor:sync:before": "node scripts/patch-capacitor-android-bridge.mjs",
+    "capacitor:sync:after": "node scripts/postsync-android.mjs",
     "postsync:android": "node scripts/postsync-android.mjs",
     "prestart": "node scripts/prepare-groq-config.mjs",
     "start": "ng serve",

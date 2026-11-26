@@ -1,0 +1,16 @@
+.name-form,
+.name-footer {
+  max-inline-size: 36rem;
+  margin-inline: auto;
+  padding: var(--space-lg);
+}
+
+.name-footer {
+  inline-size: 100%;
+  padding-block-end: calc(var(--space-lg) + env(safe-area-inset-bottom));
+  background: var(--bg-card);
+
+  ion-button {
+    min-block-size: 48px;
+  }
+}

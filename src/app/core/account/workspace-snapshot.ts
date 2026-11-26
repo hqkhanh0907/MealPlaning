@@ -1,23 +1,13 @@
-import type { Database, DatabaseStatement } from '../services/database/database';
-import { SCHEMA_VERSION } from '../services/database/schema';
+import type { Database } from '../services/database/database';
 import tableSchema from '../../../../server/pb_hooks/sync-schema.json';
 
-type Value = number | string | null;
-type Row = Record<string, Value>;
-type Table = keyof typeof tableSchema;
-const TABLES = Object.keys(tableSchema) as Table[];
+const TABLES = Object.keys(tableSchema);
+const mutationTable =
+  /^\s*(?:INSERT(?:\s+OR\s+\w+)?\s+INTO|REPLACE\s+INTO|UPDATE(?:\s+OR\s+\w+)?|DELETE\s+FROM)\s+["`[]?([a-z_][a-z_0-9]*)/i;
 
-export interface WorkspaceSnapshot {
-  schemaVersion: number;
-  tables: Record<Table, Row[]>;
-}
-
-export interface OutboxRow {
-  revision: number;
-  change_version: number;
-  clean_version: number;
-  pending: string | null;
-  pending_version: number | null;
+export function isWorkspaceWrite(sql: string): boolean {
+  const table = mutationTable.exec(sql)?.[1].toLowerCase();
+  return !!table && Object.hasOwn(tableSchema, table);
 }
 
 export async function prepareWorkspace(db: Database): Promise<void> {
@@ -31,7 +21,6 @@ export async function prepareWorkspace(db: Database): Promise<void> {
       pending_version INTEGER
     )`);
   await db.execute('INSERT OR IGNORE INTO sync_workspace (id) VALUES (1)');
-  await db.execute('CREATE TABLE IF NOT EXISTS sync_import_guard (valid INTEGER CHECK (valid = 1))');
   for (const table of TABLES) {
     for (const action of ['INSERT', 'UPDATE', 'DELETE']) {
       await db.execute(`
@@ -41,52 +30,4 @@ export async function prepareWorkspace(db: Database): Promise<void> {
         END`);
     }
   }
-}
-
-export async function outbox(db: Database): Promise<OutboxRow> {
-  const value = await db.getOne<OutboxRow>('SELECT * FROM sync_workspace WHERE id = 1');
-  if (!value) throw new Error('Chưa khởi tạo đồng bộ.');
-  return value;
-}
-
-export async function exportWorkspace(db: Database): Promise<WorkspaceSnapshot> {
-  const tables = {} as WorkspaceSnapshot['tables'];
-  for (const table of TABLES) {
-    const { key } = tableSchema[table];
-    tables[table] = await db.query<Row>(`SELECT * FROM "${table}" ORDER BY "${key}"`);
-  }
-  return { schemaVersion: SCHEMA_VERSION, tables };
-}
-
-export async function importWorkspace(
-  db: Database,
-  snapshot: WorkspaceSnapshot,
-  revision: number,
-  expectedChange: number,
-): Promise<void> {
-  if (snapshot.schemaVersion !== SCHEMA_VERSION) throw new Error('Cần cập nhật ứng dụng.');
-  const statements: DatabaseStatement[] = [{
-    statement: 'INSERT INTO sync_import_guard (valid) SELECT change_version = ? FROM sync_workspace WHERE id = 1',
-    values: [expectedChange],
-  }];
-  for (const table of [...TABLES].reverse()) {
-    statements.push({ statement: `DELETE FROM "${table}"`, values: [] });
-  }
-  for (const table of TABLES) {
-    const columns = Object.keys(tableSchema[table].cols);
-    const identifiers = columns.map((column) => `"${column}"`).join(', ');
-    const placeholders = columns.map(() => '?').join(', ');
-    for (const row of snapshot.tables[table]) {
-      statements.push({
-        statement: `INSERT INTO "${table}" (${identifiers}) VALUES (${placeholders})`,
-        values: columns.map((column) => row[column]),
-      });
-    }
-  }
-  statements.push({
-    statement: `UPDATE sync_workspace SET revision = ?, clean_version = change_version,
-                  pending = NULL, pending_version = NULL WHERE id = 1`,
-    values: [revision],
-  }, { statement: 'DELETE FROM sync_import_guard', values: [] });
-  await db.executeAtomically(statements);
 }

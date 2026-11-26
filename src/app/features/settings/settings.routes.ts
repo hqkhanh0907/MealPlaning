@@ -10,6 +10,10 @@ export default [
     loadComponent: () => import('./body-edit/body-edit.page'),
   },
   {
+    path: 'name',
+    loadComponent: () => import('./name-edit/name-edit.page'),
+  },
+  {
     path: 'goals',
     loadComponent: () => import('./goals-edit/goals-edit.page'),
   },

@@ -1,6 +1,7 @@
 import {
   APP_INITIALIZER,
   EnvironmentProviders,
+  Injector,
   inject,
   makeEnvironmentProviders,
 } from '@angular/core';
@@ -10,7 +11,7 @@ import { WebDatabase } from './web-database';
 import { NativeDatabase } from './native-database';
 import { ProfileStore } from '../../stores/profile.store';
 import { SeedLoader } from '../seed/seed-loader';
-import { AccountSession } from '../../account/account-session';
+import { AccountSession, accountDatabaseName } from '../../account/account-session';
 import { AccountSync } from '../../account/account-sync';
 import { environment } from '../../../../environments/environment';
 
@@ -39,23 +40,29 @@ export function provideDatabaseService(): EnvironmentProviders {
         const account = inject(AccountSession).current();
         const name = environment.dbName.replace(/\.db$/, '');
         return Capacitor.isNativePlatform()
-          ? new NativeDatabase(account ? `${name}_${account.id}` : name)
+          ? new NativeDatabase(account ? accountDatabaseName(account.id) : name, account?.id)
           : new WebDatabase();
       },
     },
     {
       provide: APP_INITIALIZER,
       useFactory: () => {
-        const db = inject(Database);
-        const profileStore = inject(ProfileStore);
-        const seedLoader = inject(SeedLoader);
+        const injector = inject(Injector);
         const session = inject(AccountSession);
-        const sync = inject(AccountSync);
         return async () => {
+          await session
+            .restore()
+            .catch(() => console.warn('[Account] Could not restore the device session.'));
           if (session.required && !session.current()) return;
+          const db = injector.get(Database);
+          const profileStore = injector.get(ProfileStore);
+          const seedLoader = injector.get(SeedLoader);
+          const sync = injector.get(AccountSync);
           await db.initialize();
-          await sync.initialize();
           await profileStore.loadProfile();
+          const needsProfile = session.required && !profileStore.profile();
+          await sync.initialize(needsProfile);
+          if (needsProfile) await profileStore.loadProfile();
 
           setTimeout(() => {
             void seedLoader

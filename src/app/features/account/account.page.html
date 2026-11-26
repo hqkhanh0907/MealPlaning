@@ -11,8 +11,33 @@
         }}
       </p>
     </header>
-    <form aria-labelledby="account-title" (submit)="submit($event, username.value, password.value)">
-      <div class="input-wrapper">
+    <form
+      aria-labelledby="account-title"
+      novalidate
+      (submit)="submit($event, username.value, password.value)"
+    >
+      @if (register()) {
+        <div class="input-wrapper" [class.invalid]="fieldErrors().name">
+          <label for="full-name" class="input-label">Họ và tên</label>
+          <input
+            #nameField
+            id="full-name"
+            class="input-native"
+            autocomplete="name"
+            autocapitalize="words"
+            required
+            [value]="fullName()"
+            [disabled]="busy()"
+            [attr.aria-invalid]="fieldErrors().name ? 'true' : null"
+            [attr.aria-describedby]="fieldErrors().name ? 'name-error' : null"
+            (input)="fullName.set(nameField.value)"
+          />
+        </div>
+        @if (fieldErrors().name; as message) {
+          <p id="name-error" class="error" role="alert">{{ message }}</p>
+        }
+      }
+      <div class="input-wrapper" [class.invalid]="fieldErrors().username">
         <label for="username" class="input-label">Tên đăng nhập</label>
         <input
           #username
@@ -23,9 +48,14 @@
           spellcheck="false"
           required
           [disabled]="busy()"
+          [attr.aria-invalid]="fieldErrors().username ? 'true' : null"
+          [attr.aria-describedby]="fieldErrors().username ? 'username-error' : null"
         />
       </div>
-      <div class="input-wrapper">
+      @if (fieldErrors().username; as message) {
+        <p id="username-error" class="error" role="alert">{{ message }}</p>
+      }
+      <div class="input-wrapper" [class.invalid]="fieldErrors().password">
         <label for="password" class="input-label">Mật khẩu</label>
         <input
           #password
@@ -33,12 +63,17 @@
           type="password"
           class="input-native"
           [attr.autocomplete]="register() ? 'new-password' : 'current-password'"
-          [attr.aria-describedby]="register() ? 'password-hint' : null"
+          [attr.aria-invalid]="fieldErrors().password ? 'true' : null"
+          [attr.aria-describedby]="
+            fieldErrors().password ? 'password-error' : register() ? 'password-hint' : null
+          "
           required
           [disabled]="busy()"
         />
       </div>
-      @if (register()) {
+      @if (fieldErrors().password; as message) {
+        <p id="password-error" class="error" role="alert">{{ message }}</p>
+      } @else if (register()) {
         <p id="password-hint" class="password-hint">Dùng từ 8 đến 72 ký tự.</p>
       }
       @if (error()) {
