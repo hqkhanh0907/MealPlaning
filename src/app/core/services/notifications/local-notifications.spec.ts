@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { LocalNotifications, capLocalNotifications } from './local-notifications';
+import { notificationFlags } from './notification-preferences';
 
 describe('LocalNotifications', () => {
   let svc: LocalNotifications;
@@ -20,10 +21,12 @@ describe('LocalNotifications', () => {
   });
 
   describe('sync()', () => {
-    it('cancels all 4 known IDs and does not schedule when all flags are false', async () => {
+    it('cancels managed meal and workout IDs when no reminders are enabled', async () => {
       await svc.sync({ morning: false, lunch: false, evening: false, weekly: false });
       expect(cancelSpy).toHaveBeenCalledWith({
-        notifications: [{ id: 101 }, { id: 102 }, { id: 103 }, { id: 104 }],
+        notifications: [101, 102, 103, 104, 151, 152, 153, 154, 155, 156, 157].map((id) => ({
+          id,
+        })),
       });
       expect(scheduleSpy).not.toHaveBeenCalled();
     });
@@ -60,6 +63,66 @@ describe('LocalNotifications', () => {
       const arg = scheduleSpy.calls.mostRecent().args[0];
       expect(arg.notifications.length).toBe(4);
       expect(arg.notifications.map((x: { id: number }) => x.id)).toEqual([101, 102, 103, 104]);
+    });
+
+    it('preserves weekly recap and schedules Sunday and Saturday workout reminders once', async () => {
+      const flags = notificationFlags({
+        notif_morning: 0,
+        notif_lunch: 0,
+        notif_evening: 0,
+        notif_weekly: 1,
+      });
+      await svc.sync(flags, [0, 6, 0, -1, 7, 1.5]);
+
+      const request = scheduleSpy.calls.mostRecent().args[0];
+      expect(request.notifications.map(({ id }: { id: number }) => id)).toEqual([104, 151, 157]);
+      expect(
+        request.notifications.slice(1).map(({ schedule }: { schedule: object }) => schedule),
+      ).toEqual([
+        { on: { hour: 17, minute: 30, weekday: 1 }, repeats: true },
+        { on: { hour: 17, minute: 30, weekday: 7 }, repeats: true },
+      ]);
+    });
+
+    it('waits for cancellation and skips obsolete reconciliation before canceling or scheduling', async () => {
+      const flags = notificationFlags(null);
+      let finishCancellation!: () => void;
+      const cancellation = new Promise<void>((resolve) => {
+        finishCancellation = resolve;
+      });
+      cancelSpy.and.returnValues(cancellation, Promise.resolve());
+      let current = true;
+      const first = svc.sync(flags, [1], () => current);
+      await Promise.resolve();
+
+      current = false;
+      const obsolete = svc.sync(flags, [3], () => false);
+      const latest = svc.sync(flags, [6]);
+      expect(cancelSpy).toHaveBeenCalledTimes(1);
+      expect(scheduleSpy).not.toHaveBeenCalled();
+
+      finishCancellation();
+      await Promise.all([first, obsolete, latest]);
+      expect(cancelSpy).toHaveBeenCalledTimes(2);
+      expect(scheduleSpy).toHaveBeenCalledTimes(1);
+      expect(scheduleSpy.calls.mostRecent().args[0].notifications[0].id).toBe(157);
+    });
+
+    it('continues reconciling after a failed operation', async () => {
+      const error = new Error('Android cancellation failed');
+      const flags = notificationFlags({
+        notif_morning: 1,
+        notif_lunch: 0,
+        notif_evening: 0,
+        notif_weekly: 0,
+      });
+      cancelSpy.and.returnValues(Promise.reject(error), Promise.resolve());
+      await expectAsync(svc.sync(flags)).toBeRejectedWith(error);
+
+      await svc.sync(flags);
+
+      expect(cancelSpy).toHaveBeenCalledTimes(2);
+      expect(scheduleSpy).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -46,9 +46,11 @@ export const REMINDER_SLOTS: readonly Slot[] = [
   },
 ];
 
+export const WORKOUT_REMINDER = { title: 'Nhắc buổi tập', hour: 17, minute: 30 } as const;
+
 const weekdays = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
 
-export function reminderTimeLabel(slot: Slot): string {
+export function reminderTimeLabel(slot: Pick<Slot, 'hour' | 'minute' | 'weekday'>): string {
   const hour = String(slot.hour).padStart(2, '0');
   const minute = String(slot.minute).padStart(2, '0');
   const prefix = slot.weekday ? weekdays[slot.weekday - 1] + ', khoảng' : 'Khoảng';

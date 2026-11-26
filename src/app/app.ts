@@ -9,8 +9,7 @@ import { Database } from './core/services/database/database';
 import { NetworkStore } from './core/stores/network.store';
 import { ProfileStore } from './core/stores/profile.store';
 import { Theme } from './core/services/theme/theme-service';
-import { LocalNotifications } from './core/services/notifications/local-notifications';
-import { notificationFlags } from './core/services/notifications/notification-preferences';
+import { ReminderCoordinator } from './core/services/notifications/reminder-coordinator';
 import { cleanupOldAiLogs } from './core/services/ai/ai-log';
 import { localIsoDate } from './core/utils/local-date';
 import { AccountSession } from './core/account/account-session';
@@ -33,7 +32,7 @@ export class App {
   private readonly network = inject(NetworkStore);
   private readonly profileStore = inject(ProfileStore);
   private readonly themeService = inject(Theme);
-  private readonly notifications = inject(LocalNotifications);
+  private readonly reminders = inject(ReminderCoordinator);
   private readonly zone = inject(NgZone);
   private readonly localDay = inject(LocalDay);
   private dateTimer?: number;
@@ -54,12 +53,6 @@ export class App {
       this.onVisibilityChange();
       SplashScreen.hide();
       if (this.account.required && !this.account.current()) return;
-      if (Capacitor.isNativePlatform()) {
-        void this.syncNotificationsFromProfile().catch((err) =>
-          console.warn('[App] notification sync failed:', err),
-        );
-      }
-
       if (Capacitor.isNativePlatform()) {
         const color = getComputedStyle(document.documentElement)
           .getPropertyValue('--ion-toolbar-background')
@@ -86,11 +79,15 @@ export class App {
 
   protected onVisibilityChange(): void {
     window.clearTimeout(this.dateTimer);
-    if (this.account.required && !this.account.current()) return;
-    if (!document.hidden) {
-      this.watchLocalDay();
-      if (this.account.required) void this.sync.refreshStatus();
+    if (document.hidden) return;
+    if (Capacitor.isNativePlatform()) {
+      void this.reminders
+        .refresh()
+        .catch((err) => console.warn('[App] notification sync failed:', err));
     }
+    if (this.account.required && !this.account.current()) return;
+    this.watchLocalDay();
+    if (this.account.required) void this.sync.refreshStatus();
   }
 
   private watchLocalDay(previousDay?: string, quickChecks = 5): void {
@@ -112,15 +109,5 @@ export class App {
         delay,
       );
     });
-  }
-
-  private async syncNotificationsFromProfile(): Promise<void> {
-    const p = this.profileStore.profile();
-    if (!p) {
-      return;
-    }
-
-    const granted = await this.notifications.hasPermission();
-    await this.notifications.sync(notificationFlags(p, granted));
   }
 }

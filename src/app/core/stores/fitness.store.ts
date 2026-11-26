@@ -19,6 +19,7 @@ import { isLoggedSet, workoutSetIssue, type WorkoutSetInput } from '../models/fi
 import { localIsoDate } from '../utils/local-date';
 import { WorkoutRepository } from '../repositories/workout.repository';
 import { FitnessAi } from '../services/ai/fitness-ai';
+import { ReminderCoordinator } from '../services/notifications/reminder-coordinator';
 import { NetworkStore } from './network.store';
 import { ProfileStore } from './profile.store';
 
@@ -43,6 +44,7 @@ export class FitnessStore {
   private readonly fitnessAi = inject(FitnessAi);
   private readonly network = inject(NetworkStore);
   private readonly profileStore = inject(ProfileStore);
+  private readonly reminders = inject(ReminderCoordinator);
 
   readonly plans = signal<TrainingPlanSummary[]>([]);
   readonly activePlan = signal<ActiveTrainingPlan | null>(null);
@@ -234,6 +236,7 @@ export class FitnessStore {
     this.errorMessage.set(null);
     try {
       const plans = await this.planRepo.ensurePresetPlans();
+      this.refreshWorkoutReminders();
       const exercises = await this.exerciseRepo.list({ limit: 1000 });
       this.plans.set(plans);
       this.exercises.set(exercises);
@@ -273,6 +276,7 @@ export class FitnessStore {
     this.errorMessage.set(null);
     try {
       await this.planRepo.activatePlanById(planId);
+      this.refreshWorkoutReminders();
       await this.refresh();
       this.successMessage.set('Đã đổi giáo án tập luyện.');
     } catch (error) {
@@ -284,6 +288,7 @@ export class FitnessStore {
     this.errorMessage.set(null);
     try {
       await this.planRepo.savePersonalPlan(sourcePlanId, draft);
+      this.refreshWorkoutReminders();
       await this.refresh();
       this.successMessage.set('Đã lưu giáo án cá nhân.');
       return true;
@@ -307,6 +312,7 @@ export class FitnessStore {
         progress: this.progress(),
       });
       await this.planRepo.createAiPlan(draft);
+      this.refreshWorkoutReminders();
       this.aiPlanRationale.set(draft.rationale);
       await this.refresh();
       this.successMessage.set('Đã tạo và kích hoạt giáo án AI custom.');
@@ -314,6 +320,14 @@ export class FitnessStore {
       this.errorMessage.set(toErrorMessage(error));
     } finally {
       this.aiPlanLoading.set(false);
+    }
+  }
+
+  private refreshWorkoutReminders(): void {
+    if (this.account.required && this.reminders.workoutEnabled()) {
+      void this.reminders
+        .refresh()
+        .catch((error) => console.warn('[Fitness] notification sync failed:', error));
     }
   }
 

@@ -24,6 +24,7 @@ import { addIcons } from 'ionicons';
 import { chevronForwardOutline, logOutOutline, syncOutline } from 'ionicons/icons';
 import { ProfileStore } from '../../core/stores/profile.store';
 import { LocalNotifications } from '../../core/services/notifications/local-notifications';
+import { ReminderCoordinator } from '../../core/services/notifications/reminder-coordinator';
 import {
   notificationFlags,
   notificationPatch,
@@ -37,11 +38,14 @@ import {
 import {
   REMINDER_SLOTS,
   reminderTimeLabel,
+  WORKOUT_REMINDER,
 } from '../../core/services/notifications/notification-schedule';
 import { activitySummaryForFactor } from '../../core/services/profile/activity-label';
 import { environment } from '../../../environments/environment';
 import { AccountSession } from '../../core/account/account-session';
 import { AccountSync } from '../../core/account/account-sync';
+
+type ReminderKey = SlotKey | 'workout';
 
 @Component({
   selector: 'app-settings',
@@ -95,6 +99,7 @@ export default class SettingsPage {
   private readonly day = inject(LocalDay);
   private readonly profileStore = inject(ProfileStore);
   private readonly notifications = inject(LocalNotifications);
+  private readonly reminders = inject(ReminderCoordinator);
   private readonly toastCtrl = inject(ToastController);
 
   readonly profile = this.profileStore.profile;
@@ -124,10 +129,14 @@ export default class SettingsPage {
 
   readonly reminderSlots = REMINDER_SLOTS;
   readonly reminderTimeLabel = reminderTimeLabel;
+  readonly workoutReminder = WORKOUT_REMINDER;
+  readonly workoutReminderEnabled = this.reminders.workoutEnabled;
   readonly selectedNotifications = computed(() => notificationFlags(this.profile()));
   private readonly permissionMissing = signal(false);
   readonly notificationsPaused = computed(
-    () => this.permissionMissing() && Object.values(this.selectedNotifications()).some(Boolean),
+    () =>
+      this.permissionMissing() &&
+      (this.workoutReminderEnabled() || Object.values(this.selectedNotifications()).some(Boolean)),
   );
 
   async ionViewWillEnter(): Promise<void> {
@@ -137,7 +146,7 @@ export default class SettingsPage {
   }
 
   async resumeNotifications(): Promise<void> {
-    if (await this.allowNotifications()) await this.syncSelectedNotifications();
+    if (await this.allowNotifications()) await this.reminders.refresh(true);
   }
 
   protected async signOut(): Promise<void> {
@@ -152,7 +161,7 @@ export default class SettingsPage {
       this.signOutBusy.set(false);
       return;
     }
-    await this.notifications.sync(notificationFlags(null)).catch(() => undefined);
+    await this.reminders.clear().catch(() => undefined);
     window.location.replace('/account');
   }
 
@@ -163,20 +172,27 @@ export default class SettingsPage {
   }
 
   async onToggleChange(
-    key: SlotKey,
+    key: ReminderKey,
     enabled: boolean,
     toggle: Pick<IonToggle, 'checked'>,
   ): Promise<void> {
-    const current = this.selectedNotifications()[key];
+    const current =
+      key === 'workout' ? this.workoutReminderEnabled() : this.selectedNotifications()[key];
     if (enabled === current) return;
     toggle.checked = current;
     await this.toggleNotif(key, enabled);
   }
 
-  async toggleNotif(key: SlotKey, enabled: boolean): Promise<boolean> {
+  async toggleNotif(key: ReminderKey, enabled: boolean): Promise<boolean> {
+    const owner = this.accountSession.current();
     if (enabled && !(await this.allowNotifications())) return false;
-    await this.profileStore.updateProfile(notificationPatch(key, enabled));
-    await this.syncSelectedNotifications();
+    if (this.accountSession.current() !== owner) return false;
+    if (key === 'workout') {
+      this.reminders.setWorkoutEnabled(enabled);
+    } else {
+      await this.profileStore.updateProfile(notificationPatch(key, enabled));
+    }
+    await this.reminders.refresh(enabled ? true : undefined);
     return true;
   }
 
@@ -192,11 +208,5 @@ export default class SettingsPage {
       await toast.present();
     }
     return granted;
-  }
-
-  private async syncSelectedNotifications(): Promise<void> {
-    const profile = this.profile();
-    if (profile)
-      await this.notifications.sync(notificationFlags(profile, !this.permissionMissing()));
   }
 }

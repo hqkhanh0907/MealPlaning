@@ -3,8 +3,10 @@ import { signal } from '@angular/core';
 import { ToastController } from '@ionic/angular/standalone';
 import { provideRouter } from '@angular/router';
 import { ProfileStore } from '../../core/stores/profile.store';
+import { AccountSession, type AccountIdentity } from '../../core/account/account-session';
 import { AccountSync } from '../../core/account/account-sync';
 import { LocalNotifications } from '../../core/services/notifications/local-notifications';
+import { ReminderCoordinator } from '../../core/services/notifications/reminder-coordinator';
 import { UserProfile } from '../../core/models/user-profile.model';
 import SettingsPage from './settings.page';
 
@@ -42,6 +44,9 @@ describe('SettingsPage', () => {
   let profileSignal: ReturnType<typeof signal<UserProfile | null>>;
   let profileStore: { profile: typeof profileSignal; updateProfile: jasmine.Spy };
   let notifications: jasmine.SpyObj<LocalNotifications>;
+  let reminders: jasmine.SpyObj<ReminderCoordinator>;
+  let workoutEnabled: ReturnType<typeof signal<boolean>>;
+  let account: ReturnType<typeof signal<AccountIdentity | null>>;
   let toastCtrl: jasmine.SpyObj<ToastController>;
   let toastEl: { present: jasmine.Spy };
 
@@ -58,9 +63,17 @@ describe('SettingsPage', () => {
     };
     notifications = jasmine.createSpyObj<LocalNotifications>('LocalNotifications', [
       'requestPermission',
-      'sync',
     ]);
-    notifications.sync.and.resolveTo();
+    workoutEnabled = signal(false);
+    account = signal<AccountIdentity | null>(null);
+    reminders = jasmine.createSpyObj<ReminderCoordinator>(
+      'ReminderCoordinator',
+      ['setWorkoutEnabled', 'refresh', 'clear'],
+      { workoutEnabled },
+    );
+    reminders.setWorkoutEnabled.and.callFake((enabled) => workoutEnabled.set(enabled));
+    reminders.refresh.and.resolveTo();
+    reminders.clear.and.resolveTo();
     toastEl = { present: jasmine.createSpy('present').and.resolveTo() };
     toastCtrl = jasmine.createSpyObj<ToastController>('ToastController', ['create']);
     toastCtrl.create.and.resolveTo(toastEl as unknown as HTMLIonToastElement);
@@ -69,6 +82,7 @@ describe('SettingsPage', () => {
       imports: [SettingsPage],
       providers: [
         provideRouter([]),
+        { provide: AccountSession, useValue: { required: false, current: account } },
         {
           provide: AccountSync,
           useValue: {
@@ -80,6 +94,7 @@ describe('SettingsPage', () => {
         },
         { provide: ProfileStore, useValue: profileStore },
         { provide: LocalNotifications, useValue: notifications },
+        { provide: ReminderCoordinator, useValue: reminders },
         { provide: ToastController, useValue: toastCtrl },
       ],
     }).compileComponents();
@@ -94,6 +109,16 @@ describe('SettingsPage', () => {
     expect(component.bodySummary()).toBe('170 cm, 65 kg, 28 tuổi, Nam');
   });
 
+  it('offers a separate workout reminder with the active-plan rule', () => {
+    const screen = fixture.nativeElement as HTMLElement;
+    const reminder = Array.from(screen.querySelectorAll('ion-toggle')).find((toggle) =>
+      toggle.textContent?.includes('Nhắc buổi tập'),
+    );
+
+    expect(reminder?.textContent).toContain('ngày tập trong giáo án đang dùng');
+    expect(reminder?.textContent).toContain('17:30');
+  });
+
   it('labels an unknown legacy activity factor as an estimate', () => {
     profileSignal.set(makeProfile({ activity_factor: 1.31 }));
     expect(component.activitySummary()).toBe('Chưa xác định · tạm tính vận động vừa');
@@ -105,12 +130,7 @@ describe('SettingsPage', () => {
     await component.resumeNotifications();
     await component.toggleNotif('morning', false);
     expect(profileSignal()?.notif_weekly).toBe(1);
-    expect(notifications.sync).toHaveBeenCalledOnceWith({
-      morning: false,
-      lunch: false,
-      evening: false,
-      weekly: false,
-    });
+    expect(reminders.refresh).toHaveBeenCalledOnceWith(undefined);
   });
 
   it('keeps saved reminders visible as paused after denial and resumes them when permission returns', async () => {
@@ -118,16 +138,11 @@ describe('SettingsPage', () => {
     notifications.requestPermission.and.resolveTo(false);
     await component.resumeNotifications();
     expect(component.notificationsPaused()).toBeTrue();
-    expect(notifications.sync).not.toHaveBeenCalled();
+    expect(reminders.refresh).not.toHaveBeenCalled();
     notifications.requestPermission.and.resolveTo(true);
     await component.resumeNotifications();
     expect(component.notificationsPaused()).toBeFalse();
-    expect(notifications.sync).toHaveBeenCalledWith({
-      morning: true,
-      lunch: false,
-      evening: false,
-      weekly: true,
-    });
+    expect(reminders.refresh).toHaveBeenCalledOnceWith(true);
     expect(profileStore.updateProfile).not.toHaveBeenCalled();
   });
 
@@ -183,6 +198,7 @@ describe('SettingsPage', () => {
       'Khoảng 12:00',
       'Khoảng 18:30',
       'Chủ nhật, khoảng 20:00',
+      'Khoảng 17:30 vào ngày tập trong giáo án đang dùng.',
     ]);
   });
 
@@ -191,7 +207,7 @@ describe('SettingsPage', () => {
     const ok = await component.toggleNotif('morning', true);
     expect(ok).toBe(false);
     expect(profileStore.updateProfile).not.toHaveBeenCalled();
-    expect(notifications.sync).not.toHaveBeenCalled();
+    expect(reminders.refresh).not.toHaveBeenCalled();
     expect(toastCtrl.create).toHaveBeenCalled();
     expect(toastEl.present).toHaveBeenCalled();
   });
@@ -201,12 +217,7 @@ describe('SettingsPage', () => {
     const ok = await component.toggleNotif('lunch', true);
     expect(ok).toBe(true);
     expect(profileStore.updateProfile).toHaveBeenCalledWith({ notif_lunch: 1 });
-    expect(notifications.sync).toHaveBeenCalledWith({
-      morning: false,
-      lunch: true,
-      evening: false,
-      weekly: false,
-    });
+    expect(reminders.refresh).toHaveBeenCalledOnceWith(true);
   });
 
   it('toggleNotif disabling does not request permission', async () => {
@@ -215,7 +226,45 @@ describe('SettingsPage', () => {
     expect(ok).toBe(true);
     expect(notifications.requestPermission).not.toHaveBeenCalled();
     expect(profileStore.updateProfile).toHaveBeenCalledWith({ notif_evening: 0 });
-    expect(notifications.sync).toHaveBeenCalled();
+    expect(reminders.refresh).toHaveBeenCalledOnceWith(undefined);
+  });
+
+  it('persists a workout selection on the device after permission is granted', async () => {
+    notifications.requestPermission.and.resolveTo(true);
+
+    await component.onToggleChange('workout', true, { checked: true });
+
+    expect(workoutEnabled()).toBeTrue();
+    expect(reminders.refresh).toHaveBeenCalledOnceWith(true);
+    expect(profileStore.updateProfile).not.toHaveBeenCalled();
+  });
+
+  it('keeps a saved workout reminder visibly paused without permission', async () => {
+    workoutEnabled.set(true);
+    notifications.requestPermission.and.resolveTo(false);
+
+    await component.resumeNotifications();
+
+    expect(component.notificationsPaused()).toBeTrue();
+    expect(reminders.setWorkoutEnabled).not.toHaveBeenCalled();
+  });
+
+  it('drops a workout opt-in if the active session changes during the permission request', async () => {
+    let allow!: (granted: boolean) => void;
+    const firstLogin = { id: 'member-a', username: 'an', name: 'An' };
+    account.set(firstLogin);
+    notifications.requestPermission.and.returnValue(
+      new Promise<boolean>((resolve) => {
+        allow = resolve;
+      }),
+    );
+    const pending = component.toggleNotif('workout', true);
+    account.set({ ...firstLogin });
+    allow(true);
+
+    expect(await pending).toBeFalse();
+    expect(reminders.setWorkoutEnabled).not.toHaveBeenCalled();
+    expect(reminders.refresh).not.toHaveBeenCalled();
   });
 
   it('onToggleChange ignores unchanged notification state', async () => {

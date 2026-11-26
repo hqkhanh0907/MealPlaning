@@ -164,6 +164,18 @@
         </ion-toggle>
       </ion-item>
     }
+    <ion-item>
+      <ion-toggle
+        #workoutToggle
+        [checked]="workoutReminderEnabled()"
+        (ionChange)="onToggleChange('workout', $event.detail.checked, workoutToggle)"
+      >
+        <ion-label class="ion-text-wrap">
+          <h3>{{ workoutReminder.title }}</h3>
+          <p>{{ reminderTimeLabel(workoutReminder) }} vào ngày tập trong giáo án đang dùng.</p>
+        </ion-label>
+      </ion-toggle>
+    </ion-item>
   </ion-list>
 
   <ion-list lines="none" class="settings-list">

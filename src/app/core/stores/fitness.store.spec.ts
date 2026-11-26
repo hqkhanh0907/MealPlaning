@@ -16,6 +16,8 @@ import { TrainingPlanRepository } from '../repositories/training-plan.repository
 import { WorkoutRepository } from '../repositories/workout.repository';
 import type { AiTrainingPlanDraft } from '../models/fitness.types';
 import { FitnessAi } from '../services/ai/fitness-ai';
+import { AccountSession } from '../account/account-session';
+import { ReminderCoordinator } from '../services/notifications/reminder-coordinator';
 import { NetworkStore } from './network.store';
 import { ProfileStore } from './profile.store';
 
@@ -25,6 +27,9 @@ describe('FitnessStore', () => {
   let planRepo: jasmine.SpyObj<TrainingPlanRepository>;
   let workoutRepo: jasmine.SpyObj<WorkoutRepository>;
   let fitnessAi: jasmine.SpyObj<FitnessAi>;
+  let account: { required: boolean; current: () => null };
+  let reminders: jasmine.SpyObj<ReminderCoordinator>;
+  let workoutEnabled: ReturnType<typeof signal<boolean>>;
   let online = signal(true);
 
   beforeEach(() => {
@@ -93,10 +98,18 @@ describe('FitnessStore', () => {
     fitnessAi = jasmine.createSpyObj<FitnessAi>('FitnessAi', ['generateTrainingPlan']);
     fitnessAi.generateTrainingPlan.and.resolveTo(aiPlanDraft());
     online = signal(true);
+    account = { required: false, current: () => null };
+    workoutEnabled = signal(false);
+    reminders = jasmine.createSpyObj<ReminderCoordinator>('ReminderCoordinator', ['refresh'], {
+      workoutEnabled,
+    });
+    reminders.refresh.and.resolveTo();
 
     TestBed.configureTestingModule({
       providers: [
         FitnessStore,
+        { provide: AccountSession, useValue: account },
+        { provide: ReminderCoordinator, useValue: reminders },
         { provide: ExerciseRepository, useValue: exerciseRepo },
         { provide: TrainingPlanRepository, useValue: planRepo },
         { provide: WorkoutRepository, useValue: workoutRepo },
@@ -122,6 +135,26 @@ describe('FitnessStore', () => {
     expect(store.todayDay()?.id).toBe('day-1');
     expect(store.currentWeekVolumeLabel()).toBe('5.000 kg');
     expect(store.loading()).toBeFalse();
+  });
+
+  it('updates workout reminders after changing the active plan when opted in', async () => {
+    account.required = true;
+    workoutEnabled.set(true);
+
+    await store.activatePlan('plan-2');
+
+    expect(planRepo.activatePlanById).toHaveBeenCalledOnceWith('plan-2');
+    expect(reminders.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves workout reminders alone if activating a plan fails', async () => {
+    account.required = true;
+    workoutEnabled.set(true);
+    planRepo.activatePlanById.and.rejectWith(new Error('Plan unavailable'));
+
+    await store.activatePlan('plan-2');
+
+    expect(reminders.refresh).not.toHaveBeenCalled();
   });
 
   it('blocks guided start on rest days with an explicit message', async () => {

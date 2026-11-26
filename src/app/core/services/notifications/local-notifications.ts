@@ -1,8 +1,15 @@
 import { Injectable } from '@angular/core';
 import { LocalNotifications as Cap } from '@capacitor/local-notifications';
-import { REMINDER_SLOTS } from './notification-schedule';
+import { REMINDER_SLOTS, WORKOUT_REMINDER } from './notification-schedule';
 import type { SlotFlags } from './notification-preferences';
 export type { SlotFlags, SlotKey } from './notification-preferences';
+
+const WORKOUT_DAYS = [0, 1, 2, 3, 4, 5, 6];
+const WORKOUT_REMINDER_START_ID = 151;
+const MANAGED_IDS = [
+  ...REMINDER_SLOTS.map(({ id }) => id),
+  ...WORKOUT_DAYS.map((day) => WORKOUT_REMINDER_START_ID + day),
+];
 
 /**
  * Indirection layer around the Capacitor plugin proxy. Tests can spy on
@@ -19,6 +26,8 @@ export const capLocalNotifications = {
 
 @Injectable({ providedIn: 'root' })
 export class LocalNotifications {
+  private pending: Promise<void> = Promise.resolve();
+
   async hasPermission(): Promise<boolean> {
     return (await capLocalNotifications.checkPermissions()).display === 'granted';
   }
@@ -29,31 +38,37 @@ export class LocalNotifications {
     return r.display === 'granted';
   }
 
-  /**
-   * Reconcile scheduled notifications with the given flag set.
-   * Always cancels all known slot IDs first, then schedules only enabled ones.
-   * Idempotent and safe to call repeatedly.
-   */
-  async sync(flags: SlotFlags): Promise<void> {
-    await capLocalNotifications.cancel({
-      notifications: REMINDER_SLOTS.map((s) => ({ id: s.id })),
-    });
-    const enabled = REMINDER_SLOTS.filter((s) => flags[s.key]);
-    if (enabled.length === 0) return;
-    await capLocalNotifications.schedule({
-      notifications: enabled.map((s) => ({
-        id: s.id,
-        title: s.title,
-        body: s.body,
-        schedule: {
-          on: {
-            hour: s.hour,
-            minute: s.minute,
-            ...(s.weekday !== undefined ? { weekday: s.weekday } : {}),
+  sync(
+    flags: SlotFlags,
+    workoutWeekdays: readonly number[] = [],
+    isCurrent: () => boolean = () => true,
+  ): Promise<void> {
+    const result = this.pending.then(async () => {
+      if (!isCurrent()) return;
+      await capLocalNotifications.cancel({ notifications: MANAGED_IDS.map((id) => ({ id })) });
+      if (!isCurrent()) return;
+
+      const workouts = WORKOUT_DAYS.filter((day) => workoutWeekdays.includes(day)).map((day) => ({
+        ...WORKOUT_REMINDER,
+        id: WORKOUT_REMINDER_START_ID + day,
+        body: 'Mở ứng dụng để xem lịch hôm nay.',
+        weekday: day + 1,
+      }));
+      const enabled = [...REMINDER_SLOTS.filter((slot) => flags[slot.key]), ...workouts];
+      if (!enabled.length) return;
+      await capLocalNotifications.schedule({
+        notifications: enabled.map(({ id, title, body, hour, minute, weekday }) => ({
+          id,
+          title,
+          body,
+          schedule: {
+            on: { hour, minute, ...(weekday !== undefined ? { weekday } : {}) },
+            repeats: true,
           },
-          repeats: true,
-        },
-      })),
+        })),
+      });
     });
+    this.pending = result.catch(() => undefined);
+    return result;
   }
 }
