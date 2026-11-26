@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { prepareWorkspace } from '../account/workspace-snapshot';
 import { Database } from '../services/database/database';
 import {
   createTestDatabase,
@@ -58,6 +59,58 @@ describe('Fitness repositories', () => {
     expect(active?.type).toBe('full_body');
     expect(active?.training_days).toBe(3);
     expect(active?.days.length).toBe(7);
+  });
+
+  it('leaves the preset snapshot and sync version unchanged when reopened', async () => {
+    await prepareWorkspace(db);
+    await planRepo.ensurePresetPlans();
+    await planRepo.activatePlan('upper_lower');
+
+    const readSnapshot = () =>
+      Promise.all([
+        db.query('SELECT * FROM training_plan ORDER BY id'),
+        db.query('SELECT * FROM training_plan_day ORDER BY id'),
+        db.query('SELECT * FROM planned_exercise ORDER BY id'),
+        db.getOne('SELECT * FROM sync_workspace WHERE id = 1'),
+      ]);
+    const before = await readSnapshot();
+
+    await planRepo.ensurePresetPlans();
+
+    expect(await readSnapshot()).toEqual(before);
+    expect((await planRepo.getActivePlan())?.type).toBe('upper_lower');
+  });
+
+  it('updates only preset rows that differ from their seed', async () => {
+    await prepareWorkspace(db);
+    await planRepo.ensurePresetPlans();
+    const preset = (await planRepo.getActivePlan())!;
+    const day = preset.days.find((item) => item.exercises.length > 0)!;
+    const exercise = day.exercises[0];
+    await db.execute(
+      "UPDATE training_plan SET name = 'Old preset', description = NULL, updated_at = '2000-01-01' WHERE id = ?",
+      [preset.id],
+    );
+    await db.execute("UPDATE training_plan_day SET name = 'Old day' WHERE id = ?", [day.id]);
+    await db.execute(
+      "UPDATE planned_exercise SET sets = sets + 1, notes = 'Old note' WHERE id = ?",
+      [exercise.id],
+    );
+    const version = async () =>
+      (await db.getOne<{ change_version: number }>(
+        'SELECT change_version FROM sync_workspace WHERE id = 1',
+      ))!.change_version;
+    const before = await version();
+
+    await planRepo.ensurePresetPlans();
+
+    const restored = await planRepo.getActivePlan();
+    expect(restored?.name).toBe(preset.name);
+    expect(restored?.description).toBe(preset.description);
+    expect(restored?.days).toEqual(preset.days);
+    expect(restored?.updated_at).not.toBe('2000-01-01');
+    expect(restored?.is_active).toBe(1);
+    expect(await version()).toBe(before + 3);
   });
 
   it('rejects switching plans while a workout session is active', async () => {

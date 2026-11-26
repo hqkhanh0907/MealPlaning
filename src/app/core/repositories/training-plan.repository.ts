@@ -47,7 +47,13 @@ export class TrainingPlanRepository {
              frequency = excluded.frequency,
              description = excluded.description,
              updated_at = datetime('now')
-           WHERE training_plan.source = 'preset'`,
+           WHERE training_plan.source = 'preset'
+             AND (
+               training_plan.name IS NOT excluded.name
+               OR training_plan.type IS NOT excluded.type
+               OR training_plan.frequency IS NOT excluded.frequency
+               OR training_plan.description IS NOT excluded.description
+             )`,
           [plan.id, plan.name, plan.type, plan.frequency, plan.description],
         );
 
@@ -60,7 +66,10 @@ export class TrainingPlanRepository {
              ON CONFLICT(training_plan_id, day_of_week) DO UPDATE SET
                name = excluded.name,
                is_rest_day = excluded.is_rest_day,
-               sort_order = excluded.sort_order`,
+               sort_order = excluded.sort_order
+             WHERE training_plan_day.name IS NOT excluded.name
+               OR training_plan_day.is_rest_day IS NOT excluded.is_rest_day
+               OR training_plan_day.sort_order IS NOT excluded.sort_order`,
             [dayId, plan.id, day.dayOfWeek, day.name, day.isRestDay ? 1 : 0, index],
           );
 
@@ -76,7 +85,13 @@ export class TrainingPlanRepository {
                  reps_max = excluded.reps_max,
                  rest_seconds = excluded.rest_seconds,
                  notes = excluded.notes,
-                 sort_order = excluded.sort_order`,
+                 sort_order = excluded.sort_order
+               WHERE planned_exercise.sets IS NOT excluded.sets
+                 OR planned_exercise.reps_min IS NOT excluded.reps_min
+                 OR planned_exercise.reps_max IS NOT excluded.reps_max
+                 OR planned_exercise.rest_seconds IS NOT excluded.rest_seconds
+                 OR planned_exercise.notes IS NOT excluded.notes
+                 OR planned_exercise.sort_order IS NOT excluded.sort_order`,
               [
                 `${dayId}_${exercise.exerciseId}`,
                 dayId,
