@@ -30,7 +30,7 @@
             [disabled]="busy()"
             [attr.aria-invalid]="fieldErrors().name ? 'true' : null"
             [attr.aria-describedby]="fieldErrors().name ? 'name-error' : null"
-            (input)="fullName.set(nameField.value)"
+            (input)="updateFullName(nameField.value)"
           />
         </div>
         @if (fieldErrors().name; as message) {

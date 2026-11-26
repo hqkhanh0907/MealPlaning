@@ -25,6 +25,13 @@ export default class AccountPage {
     this.fieldErrors.set({});
   }
 
+  protected updateFullName(name: string): void {
+    this.fullName.set(name);
+    if (this.fieldErrors().name) {
+      this.fieldErrors.update((errors) => ({ ...errors, name: accountNameError(name) ?? undefined }));
+    }
+  }
+
   protected async submit(event: Event, username: string, password: string): Promise<void> {
     event.preventDefault();
     if (this.busy()) return;

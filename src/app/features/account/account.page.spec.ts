@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AccountSession } from '../../core/account/account-session';
 import AccountPage from './account.page';
 
-describe('AccountPage sign-in errors', () => {
+describe('AccountPage', () => {
   let fixture: ComponentFixture<AccountPage>;
   let root: HTMLElement;
 
@@ -55,5 +55,28 @@ describe('AccountPage sign-in errors', () => {
     spyOn(window, 'fetch').and.rejectWith(new TypeError('Failed to fetch'));
 
     expect(await submitSignIn()).toContain('Chưa kết nối được');
+  });
+
+  it('clears the name limit error as soon as the name is valid', () => {
+    root.querySelector<HTMLButtonElement>('.account-switch button')!.click();
+    fixture.detectChanges();
+    const field = root.querySelector<HTMLInputElement>('#full-name')!;
+    const updateName = (length: number): void => {
+      field.value = 'Á'.repeat(length);
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+      fixture.detectChanges();
+    };
+
+    updateName(102);
+    root.querySelector('form')!.requestSubmit();
+    fixture.detectChanges();
+    expect(root.querySelector('#name-error')?.textContent).toContain('tối đa 100 ký tự');
+
+    updateName(101);
+    expect(field.getAttribute('aria-invalid')).toBe('true');
+
+    updateName(100);
+    expect(field.getAttribute('aria-invalid')).toBeNull();
+    expect(root.querySelector('#name-error')).toBeNull();
   });
 });
