@@ -1,44 +1,48 @@
+/* Hallmark · scope: app · redesign: polish · theme: HealthMate AI · v2.0.0 */
+/* Section headings and spacing guide scanning without boxed groups. */
+
 .settings-content {
-  --background: var(--bg-page);
+  --background: var(--bg-card);
   --padding-top: var(--space-md);
   --padding-bottom: var(--space-2xl);
 }
 
-/* iOS-style inset-grouped list. Each ion-list section becomes a rounded card
-   inset from the screen edges; rows show hairline separators only between
-   items, never as outer borders. */
 .settings-list {
-  margin: 0 var(--space-md) var(--space-lg);
-  padding: 0;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  max-inline-size: 36rem;
+  margin: 0 auto var(--space-xl);
+  padding: 0 var(--space-lg);
+  background: transparent;
 }
 
-// P1-1 — Section caption tier on hub.
+.settings-list + .settings-list {
+  padding-block-start: var(--space-md);
+}
+
 .settings-list ion-list-header {
   --background: transparent;
-  --color: var(--text-tertiary);
-  min-height: auto;
-  padding-block: var(--space-md) var(--space-xs);
+  --color: var(--text-primary);
+  min-height: 0;
+  padding: 0;
 
   ion-label h2 {
-    margin: 0;
-    font: 600 var(--font-size-caption) / 1.4 var(--ion-font-family) !important;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
+    margin: 0 0 var(--space-xs);
+    color: var(--text-primary);
+    font-size: var(--font-size-title);
+    font-weight: 700;
+    line-height: 1.35;
   }
 }
 
 .settings-list ion-item {
   --background: transparent;
-  --padding-start: var(--space-md);
-  --inner-padding-end: var(--space-md);
-  --border-color: var(--border-color);
+  --padding-start: 0;
+  --inner-padding-end: 0;
   --min-height: 52px;
+
+  &::part(native):focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: -2px;
+  }
 
   ion-label {
     white-space: normal;
@@ -51,18 +55,38 @@
   }
 
   ion-label p,
-  ion-note {
+  ion-note,
+  ion-icon {
     color: var(--text-tertiary);
+  }
+
+  ion-label p {
+    white-space: normal;
+  }
+
+  ion-icon[slot='start'] {
+    margin-inline-end: var(--space-sm);
+    font-size: var(--font-size-icon-md);
+  }
+
+  &.account-identity {
+    font-weight: 600;
+  }
+
+  &.sign-out-row {
+    --color: var(--ion-color-danger);
+
+    ion-icon {
+      color: var(--ion-color-danger);
+    }
   }
 }
 
-.settings-list ion-item:last-of-type {
-  --inner-border-width: 0;
-  --border-width: 0;
+.settings-list ion-item + ion-item {
+  border-block-start: 1px solid var(--border-color);
 }
 
 .settings-hint {
-  margin: 0 var(--space-md) var(--space-md);
   color: var(--text-tertiary);
   font-size: var(--font-size-body-sm);
 }

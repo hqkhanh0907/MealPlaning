@@ -1,49 +1,119 @@
+/* Hallmark · scope: app · redesign: polish · theme: HealthMate AI · v2.0.0 */
+/* The brand anchors the sign-in screen above one primary action. */
+
+.account-content {
+  --background: var(--bg-card);
+}
+
 .account {
   max-inline-size: 28rem;
   margin-inline: auto;
-  padding: var(--space-xl) var(--space-md);
+  padding: var(--space-3xl) var(--space-xl);
 }
 
-h1 {
-  margin-block: 0 var(--space-lg);
-  color: var(--ion-text-color);
-  font-size: var(--font-size-display);
-  overflow-wrap: break-word;
+.account-brand {
+  margin-block-end: var(--space-3xl);
+  color: var(--ion-color-primary);
+  font-size: var(--font-size-subtitle);
+  font-weight: 700;
+}
+
+.account-intro {
+  margin-block-end: var(--space-xl);
+
+  h1 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-display);
+    font-weight: 700;
+    overflow-wrap: break-word;
+  }
+
+  p {
+    margin: var(--space-sm) 0 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-body);
+    line-height: 1.5;
+  }
 }
 
 form {
   display: grid;
-  gap: var(--space-sm);
+  gap: var(--space-md);
+}
+
+.input-wrapper {
+  padding: 0;
+}
+
+.input-native {
+  display: block;
+  box-sizing: border-box;
+  min-block-size: 52px;
+  padding: var(--space-xl) var(--space-lg) var(--space-sm);
+  border-radius: inherit;
 }
 
 button {
   min-block-size: 48px;
-  white-space: normal;
   padding: var(--space-sm);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-body);
-}
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-subtitle);
+  font-weight: 600;
+  line-height: 1.3;
 
-button:focus-visible {
-  outline: 2px solid var(--ion-color-primary);
-  outline-offset: 2px;
-}
+  &:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+  }
 
-button:disabled {
-  opacity: 0.65;
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+  }
 }
 
 .primary {
   background: var(--ion-color-primary);
   color: var(--ion-color-primary-contrast);
+
+  &:active:not(:disabled) {
+    background: var(--ion-color-primary-shade);
+  }
+}
+
+.account-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  column-gap: var(--space-sm);
+  color: var(--text-secondary);
+  font-size: var(--font-size-body);
 }
 
 .secondary {
+  padding-inline: var(--space-xs);
   background: transparent;
   color: var(--ion-color-primary);
+  font-size: var(--font-size-body);
+
+  &:active:not(:disabled) {
+    background: var(--primary-100);
+  }
+}
+
+.password-hint,
+.error {
+  margin: 0;
+  font-size: var(--font-size-body);
+  line-height: 1.45;
+}
+
+.password-hint {
+  color: var(--text-secondary);
 }
 
 .error {
-  margin: 0;
   color: var(--ion-color-danger);
 }

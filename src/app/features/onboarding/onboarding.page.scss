@@ -1,3 +1,5 @@
+/* Hallmark · scope: app · redesign: polish · theme: HealthMate AI · v2.0.0 */
+/* The last step keeps its action visible while the choices scroll. */
 /* ====================================================================
    PAGE CONTAINER — DS §4 spacing: 12px top, 16px horizontal
    ==================================================================== */
@@ -156,6 +158,18 @@
   margin-top: 24px;
 }
 
+.activity-step {
+  gap: var(--space-md);
+}
+
+.activity-step .step-subtitle {
+  margin-block-end: 0;
+}
+
+.activity-step .section-label:not(.segment-label) {
+  margin: var(--space-sm) 0 0;
+}
+
 /* ====================================================================
    FIELD ERROR — sống ở src/theme/form-field.scss (canonical, dùng chung
    cho onboarding + modals). Trước đây redefined inline gây drift.
@@ -238,7 +252,8 @@ ion-content.body-step {
   --input-bg: var(--bg-card);
 }
 .body-step-form,
-.body-step-footer .button-row {
+.onboarding-footer .button-row,
+.onboarding-footer .error-toast {
   max-width: 36rem;
   margin-inline: auto;
 }
@@ -255,15 +270,18 @@ ion-content.body-step {
   font-size: var(--font-size-body);
   line-height: 1.45;
 }
-.body-step-footer {
+.onboarding-footer {
   background: var(--bg-card);
   border-top: 1px solid var(--border-color);
   padding: var(--space-md) var(--space-lg) calc(var(--space-md) + env(safe-area-inset-bottom));
 }
-.body-step-footer .button-row {
+.onboarding-footer .button-row {
   margin-block: 0;
 }
-.body-step-footer ion-button {
+.onboarding-footer .error-toast {
+  margin-block: 0 var(--space-sm);
+}
+.onboarding-footer ion-button {
   min-height: 48px;
   --box-shadow: none;
 }

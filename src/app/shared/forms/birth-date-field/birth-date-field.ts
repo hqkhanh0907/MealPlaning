@@ -11,7 +11,14 @@ import { IonIcon } from '@ionic/angular/standalone';
 import { chevronDownOutline } from 'ionicons/icons';
 import { LocalDay } from '../../../core/stores/local-day';
 import { ageOnDate } from '../../../core/services/profile/profile-birth-date';
+import { parseLocalDate } from '../../../core/utils/local-date';
 import { AppFormField } from '../form-field/form-field';
+
+const birthDateFormat = new Intl.DateTimeFormat('vi-VN', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+});
 
 @Component({
   selector: 'app-birth-date-field',
@@ -35,4 +42,8 @@ export class BirthDateField {
   );
   protected readonly day = inject(LocalDay);
   protected readonly age = computed(() => ageOnDate(this.birthDate(), this.day.date()));
+  protected readonly displayDate = computed(() => {
+    const date = parseLocalDate(this.birthDate());
+    return Number.isNaN(date.getTime()) ? '' : birthDateFormat.format(date);
+  });
 }

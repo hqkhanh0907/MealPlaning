@@ -83,7 +83,7 @@ describe('SettingsPage', () => {
   });
 
   it('bodySummary formats profile fields correctly', () => {
-    expect(component.bodySummary()).toBe('170cm · 65kg · 28 tuổi · Nam');
+    expect(component.bodySummary()).toBe('170 cm, 65 kg, 28 tuổi, Nam');
   });
 
   it('labels an unknown legacy activity factor as an estimate', () => {
@@ -143,13 +143,17 @@ describe('SettingsPage', () => {
     expect(html).toContain('70 g');
   });
 
-  it('renders em-dash for Carbs/Fat when null', () => {
+  it('shows Carbs and Fat as unset when their targets are null', () => {
     profileSignal.set(makeProfile({ target_carbs: null, target_fat: null }));
     fixture.detectChanges();
-    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    // Both rows should show — (em-dash). Match at least 2 occurrences.
-    const matches = text.match(/—/g) ?? [];
-    expect(matches.length).toBeGreaterThanOrEqual(2);
+    const screen = fixture.nativeElement as HTMLElement;
+    const targets = Array.from(screen.querySelectorAll('ion-item')).filter((item) =>
+      ['Carbs', 'Fat'].includes(item.querySelector('ion-label')?.textContent?.trim() ?? ''),
+    );
+    expect(targets.map((item) => item.querySelector('ion-note')?.textContent?.trim())).toEqual([
+      'Chưa đặt',
+      'Chưa đặt',
+    ]);
   });
 
   it('activitySummary maps activity_factor 1.55 to "Vận động vừa"', () => {
@@ -161,7 +165,7 @@ describe('SettingsPage', () => {
     fixture.detectChanges();
     const screen = fixture.nativeElement as HTMLElement;
     expect(screen.querySelector('ion-item[routerLink="activity"]')?.textContent).toContain(
-      'Vận động nhẹ · Nâng cao',
+      'Vận động nhẹ, Nâng cao',
     );
     const reminders = Array.from(screen.querySelectorAll('ion-toggle p'), (p) =>
       p.textContent?.trim(),

@@ -8,7 +8,9 @@
   <input
     #field
     class="input-native"
+    [class.has-display]="!!displayDate()"
     type="date"
+    lang="vi-VN"
     required
     [id]="idPrefix() + '-birth-date'"
     [max]="day.iso()"
@@ -20,6 +22,9 @@
       visibleError() ? errorId() : age() !== null ? idPrefix() + '-age-hint' : null
     "
   />
+  @if (displayDate(); as formatted) {
+    <span class="date-display" aria-hidden="true">{{ formatted }}</span>
+  }
   <ion-icon class="date-chevron" [icon]="calendarChevron" aria-hidden="true" />
 </app-form-field>
 @if (!visibleError() && age() !== null) {

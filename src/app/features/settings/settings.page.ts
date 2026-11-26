@@ -21,7 +21,7 @@ import {
 } from '@ionic/angular/standalone';
 import { RouterLink } from '@angular/router';
 import { addIcons } from 'ionicons';
-import { chevronForwardOutline } from 'ionicons/icons';
+import { chevronForwardOutline, logOutOutline, syncOutline } from 'ionicons/icons';
 import { ProfileStore } from '../../core/stores/profile.store';
 import { LocalNotifications } from '../../core/services/notifications/local-notifications';
 import {
@@ -69,14 +69,17 @@ export default class SettingsPage {
   protected readonly accountSession = inject(AccountSession);
   protected readonly accountSync = inject(AccountSync);
   protected readonly signOutBusy = signal(false);
-  protected readonly syncLabel = computed(() => ({
-    idle: 'Chưa đồng bộ',
-    working: 'Đang đồng bộ',
-    saved: 'Đã đồng bộ',
-    offline: 'Chưa kết nối được. Dữ liệu đã lưu trên máy.',
-    expired: 'Cần đăng nhập lại để đồng bộ.',
-    conflict: 'Dữ liệu đã đổi ở nơi khác.',
-  })[this.accountSync.status()]);
+  protected readonly syncLabel = computed(
+    () =>
+      ({
+        idle: 'Chưa đồng bộ',
+        working: 'Đang đồng bộ',
+        saved: 'Đã đồng bộ',
+        offline: 'Chưa kết nối được. Dữ liệu đã lưu trên máy.',
+        expired: 'Cần đăng nhập lại để đồng bộ.',
+        conflict: 'Dữ liệu đã đổi ở nơi khác.',
+      })[this.accountSync.status()],
+  );
   private readonly day = inject(LocalDay);
   private readonly profileStore = inject(ProfileStore);
   private readonly notifications = inject(LocalNotifications);
@@ -89,7 +92,7 @@ export default class SettingsPage {
     if (!p) return '';
     const age = ageOnDate(p.birth_date, this.day.date());
     const ageLabel = age === null ? 'Bổ sung ngày sinh' : `${age} tuổi`;
-    return `${p.height_cm}cm · ${p.weight_kg}kg · ${ageLabel} · ${GENDER_LABELS[p.gender]}`;
+    return `${p.height_cm} cm, ${p.weight_kg} kg, ${ageLabel}, ${GENDER_LABELS[p.gender]}`;
   });
 
   readonly goalSummary = computed(() => {
@@ -131,7 +134,9 @@ export default class SettingsPage {
     this.accountSession.clear();
     await this.notifications.sync(notificationFlags(null)).catch(() => undefined);
     if (navigator.onLine) {
-      await this.accountSession.call('/api/mealplan/logout', {}, account.token).catch(() => undefined);
+      await this.accountSession
+        .call('/api/mealplan/logout', {}, account.token)
+        .catch(() => undefined);
     }
     window.location.replace('/account');
   }
@@ -139,7 +144,7 @@ export default class SettingsPage {
   readonly appVersion = environment.appVersion;
 
   constructor() {
-    addIcons({ chevronForwardOutline });
+    addIcons({ chevronForwardOutline, logOutOutline, syncOutline });
   }
 
   async onToggleChange(key: SlotKey, event: CustomEvent<{ checked: boolean }>): Promise<void> {

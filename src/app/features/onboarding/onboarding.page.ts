@@ -92,20 +92,6 @@ export default class OnboardingPage {
   readonly step = signal(1);
   readonly saving = signal(false);
 
-  /** Computed toolbar title per step (mockup spec) */
-  readonly toolbarTitle = computed(() => {
-    switch (this.step()) {
-      case 1:
-        return 'Mục tiêu';
-      case 2:
-        return 'Thông tin cơ thể';
-      case 3:
-        return 'Mức hoạt động';
-      default:
-        return '';
-    }
-  });
-
   /** Computed progress: 33%, 67%, 100% */
   readonly progressValue = computed(() => this.step() / 3);
 

@@ -9,13 +9,12 @@
 
 <ion-content class="settings-content">
   @if (accountSession.current(); as account) {
-    <ion-list lines="full" class="settings-list">
-      <ion-list-header><ion-label><h2>Tài khoản</h2></ion-label></ion-list-header>
-      <ion-item>
+    <ion-list lines="none" class="settings-list">
+      <ion-list-header
+        ><ion-label><h2>Tài khoản</h2></ion-label></ion-list-header
+      >
+      <ion-item class="account-identity">
         <ion-label class="ion-text-wrap">{{ account.username }}</ion-label>
-        <ion-button slot="end" fill="clear" [disabled]="signOutBusy()" (click)="signOut()">
-          Đăng xuất
-        </ion-button>
       </ion-item>
       <ion-item>
         <ion-label class="ion-text-wrap">
@@ -30,15 +29,33 @@
           <ion-label class="ion-text-wrap">Chọn phiên bản giữ lại cho tài khoản này.</ion-label>
         </ion-item>
         <ion-item button (click)="accountSync.resolveConflict(true)">Dùng bản máy chủ</ion-item>
-        <ion-item button (click)="accountSync.resolveConflict(false)">Giữ bản trên máy này</ion-item>
+        <ion-item button (click)="accountSync.resolveConflict(false)"
+          >Giữ bản trên máy này</ion-item
+        >
       } @else {
-        <ion-item button [disabled]="accountSync.status() === 'working'" (click)="accountSync.sync()">
+        <ion-item
+          button
+          detail="false"
+          [disabled]="accountSync.status() === 'working'"
+          (click)="accountSync.sync()"
+        >
+          <ion-icon slot="start" name="sync-outline" aria-hidden="true" />
           Đồng bộ ngay
         </ion-item>
       }
+      <ion-item
+        button
+        detail="false"
+        class="sign-out-row"
+        [disabled]="signOutBusy()"
+        (click)="signOut()"
+      >
+        <ion-icon slot="start" name="log-out-outline" aria-hidden="true" />
+        Đăng xuất
+      </ion-item>
     </ion-list>
   }
-  <ion-list lines="full" class="settings-list">
+  <ion-list lines="none" class="settings-list">
     <ion-list-header>
       <ion-label><h2>Hồ sơ</h2></ion-label>
     </ion-list-header>
@@ -62,13 +79,13 @@
     <ion-item button detail="false" routerLink="activity">
       <ion-label>
         <h3>Vận động và trình độ tập</h3>
-        <p>{{ activitySummary() }} · {{ trainingLevelLabel() }}</p>
+        <p>{{ activitySummary() }}, {{ trainingLevelLabel() }}</p>
       </ion-label>
       <ion-icon slot="end" name="chevron-forward-outline" aria-hidden="true" />
     </ion-item>
   </ion-list>
 
-  <ion-list lines="full" class="settings-list">
+  <ion-list lines="none" class="settings-list">
     <ion-list-header>
       <ion-label><h2>Mục tiêu hằng ngày</h2></ion-label>
     </ion-list-header>
@@ -90,14 +107,14 @@
     <ion-item>
       <ion-label>Carbs</ion-label>
       <ion-note slot="end">{{
-        (profile()?.target_carbs ?? null) !== null ? profile()!.target_carbs + ' g' : '—'
+        (profile()?.target_carbs ?? null) !== null ? profile()!.target_carbs + ' g' : 'Chưa đặt'
       }}</ion-note>
     </ion-item>
 
     <ion-item>
       <ion-label>Fat</ion-label>
       <ion-note slot="end">{{
-        (profile()?.target_fat ?? null) !== null ? profile()!.target_fat + ' g' : '—'
+        (profile()?.target_fat ?? null) !== null ? profile()!.target_fat + ' g' : 'Chưa đặt'
       }}</ion-note>
     </ion-item>
 
@@ -106,7 +123,7 @@
     </ion-item>
   </ion-list>
 
-  <ion-list lines="full" class="settings-list">
+  <ion-list lines="none" class="settings-list">
     <ion-list-header>
       <ion-label><h2>Nhắc nhở</h2></ion-label>
     </ion-list-header>
@@ -136,7 +153,7 @@
     }
   </ion-list>
 
-  <ion-list lines="full" class="settings-list">
+  <ion-list lines="none" class="settings-list">
     <ion-list-header>
       <ion-label><h2>Giới thiệu</h2></ion-label>
     </ion-list-header>

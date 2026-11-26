@@ -8,7 +8,7 @@
         </ion-button>
       </ion-buttons>
     }
-    <ion-title>{{ toolbarTitle() }}</ion-title>
+    <ion-title>Thiết lập hồ sơ</ion-title>
   </ion-toolbar>
   <ion-progress-bar [value]="progressValue()" class="onboarding-progress" />
 </ion-header>
@@ -18,8 +18,8 @@
     <!-- ======================== STEP 1: MỤC TIÊU ======================== -->
     @if (step() === 1) {
       <div class="step-content">
-        <h1 #step1Heading class="step-title" tabindex="-1">Mục tiêu của bạn?</h1>
-        <p class="step-subtitle">Chọn 1 mục tiêu chính</p>
+        <h1 #step1Heading class="step-title" tabindex="-1">Chọn mục tiêu</h1>
+        <p class="step-subtitle">Chọn mục tiêu chính để tính chỉ tiêu dinh dưỡng.</p>
 
         <div role="radiogroup" aria-label="Chọn mục tiêu">
           <div
@@ -165,7 +165,7 @@
     }
     <!-- ==================== STEP 2b: MỨC HOẠT ĐỘNG ==================== -->
     @if (step() === 3) {
-      <div class="step-content">
+      <div class="step-content activity-step">
         <h1 #step2bHeading class="step-title" tabindex="-1">Mức hoạt động</h1>
         <p class="step-subtitle">Chọn mức vận động thường ngày và kinh nghiệm tập.</p>
 
@@ -246,7 +246,7 @@
             (keydown.space)="onGymExperienceChange('6m_2y'); $event.preventDefault()"
           >
             <span class="radio-circle" aria-hidden="true"></span>
-            <span class="radio-label">6 tháng — 2 năm</span>
+            <span class="radio-label">Từ 6 tháng đến 2 năm</span>
             @if (gymExperience() === '6m_2y') {
               <ion-icon name="checkmark" class="check-icon" />
             }
@@ -279,39 +279,13 @@
             {{ note }} Bạn vẫn có thể lên lịch và ghi bữa ăn.
           </p>
         }
-        @if (saveError()) {
-          <div class="error-toast" role="alert" aria-live="assertive">
-            <ion-text color="danger">{{ saveError() }}</ion-text>
-          </div>
-        }
-
-        <div class="button-row">
-          <ion-button
-            data-testid="onb-step3-back"
-            fill="outline"
-            class="btn-row btn-row--secondary"
-            [disabled]="saving()"
-            (click)="goBack()"
-          >
-            Quay lại
-          </ion-button>
-          <ion-button
-            data-testid="onb-step3-finish"
-            [color]="step2bValid() && !saving() ? 'secondary' : 'medium'"
-            class="btn-row btn-row--primary"
-            [disabled]="saving() || !step2bValid()"
-            (click)="complete()"
-          >
-            {{ saving() ? 'Đang lưu...' : 'Hoàn tất' }}
-          </ion-button>
-        </div>
       </div>
     }
   </div>
 </ion-content>
 
 @if (step() === 2) {
-  <ion-footer class="ion-no-border body-step-footer">
+  <ion-footer class="ion-no-border onboarding-footer">
     <div class="button-row">
       <ion-button
         data-testid="onb-step2-back"
@@ -329,6 +303,34 @@
         (click)="nextFromStep2a()"
       >
         Tiếp tục
+      </ion-button>
+    </div>
+  </ion-footer>
+} @else if (step() === 3) {
+  <ion-footer class="ion-no-border onboarding-footer">
+    @if (saveError()) {
+      <div class="error-toast" role="alert" aria-live="assertive">
+        <ion-text color="danger">{{ saveError() }}</ion-text>
+      </div>
+    }
+    <div class="button-row">
+      <ion-button
+        data-testid="onb-step3-back"
+        fill="outline"
+        class="btn-row btn-row--secondary"
+        [disabled]="saving()"
+        (click)="goBack()"
+      >
+        Quay lại
+      </ion-button>
+      <ion-button
+        data-testid="onb-step3-finish"
+        [color]="step2bValid() && !saving() ? 'primary' : 'medium'"
+        class="btn-row btn-row--primary"
+        [disabled]="saving() || !step2bValid()"
+        (click)="complete()"
+      >
+        {{ saving() ? 'Đang lưu…' : 'Hoàn tất' }}
       </ion-button>
     </div>
   </ion-footer>

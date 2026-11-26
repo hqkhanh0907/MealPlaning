@@ -29,6 +29,27 @@ input[type='date'] {
 input[type='date']::-webkit-calendar-picker-indicator {
   opacity: 0;
 }
+
+.input-native.has-display:not(:focus) {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.input-native:focus + .date-display {
+  visibility: hidden;
+}
+
+.date-display {
+  position: absolute;
+  inset-block-start: var(--space-xl);
+  inset-inline-start: var(--space-lg);
+  color: var(--text-primary);
+  font-size: var(--font-size-subtitle);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  pointer-events: none;
+}
+
 .date-chevron {
   position: absolute;
   inset-inline-end: var(--space-lg);
