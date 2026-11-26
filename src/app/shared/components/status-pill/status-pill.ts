@@ -33,7 +33,10 @@ export class StatusPill {
 
   private formatTime(iso: string | null): string | null {
     if (!iso) return null;
-    const d = new Date(iso);
+    const timestamp = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?:\.\d+)?$/.test(iso)
+      ? `${iso.replace(' ', 'T')}Z`
+      : iso;
+    const d = new Date(timestamp);
     if (Number.isNaN(d.getTime())) return null;
     return new Intl.DateTimeFormat('vi-VN', {
       hour: '2-digit',

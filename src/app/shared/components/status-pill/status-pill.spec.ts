@@ -47,6 +47,42 @@ describe('StatusPill', () => {
       expect(component.label()).toMatch(/^Đã ăn lúc \d{2}:\d{2}$/);
     });
 
+    it('renders SQLite UTC and zoned ISO timestamps in the device time zone', () => {
+      const sqliteTime = '2026-11-26 04:03:14';
+      const sqliteFraction = `${sqliteTime}.569`;
+      const formatter = new Intl.DateTimeFormat('vi-VN', {
+        timeZone: 'Asia/Ho_Chi_Minh',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+      spyOn(Intl, 'DateTimeFormat').and.returnValue(formatter);
+
+      const realDate = globalThis.Date;
+      globalThis.Date = new Proxy(realDate, {
+        construct(target, args) {
+          const timestamp: unknown = args[0];
+          if (args.length === 1 && (timestamp === sqliteTime || timestamp === sqliteFraction)) {
+            return new target(`${timestamp.replace(' ', 'T')}+07:00`);
+          }
+          return Reflect.construct(target, args);
+        },
+      });
+      try {
+        for (const timestamp of [
+          sqliteTime,
+          sqliteFraction,
+          '2026-11-26T04:03:14Z',
+          '2026-11-25T23:03:14-05:00',
+        ]) {
+          setInputs('logged', timestamp);
+          expect(component.label()).withContext(timestamp).toBe('Đã ăn lúc 11:03');
+        }
+      } finally {
+        globalThis.Date = realDate;
+      }
+    });
+
     it('falls back to "Đã ăn" when completedAt is null', () => {
       setInputs('logged', null);
       expect(component.label()).toBe('Đã ăn');
