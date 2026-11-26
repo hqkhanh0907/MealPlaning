@@ -15,6 +15,13 @@
           <p class="purpose">{{ movement.purpose }}</p>
           <p class="equipment"><strong>Dụng cụ</strong> {{ movement.equipment }}</p>
           @let figure = movement.illustration;
+          @if (figure.note) {
+            <p class="illustration-note" id="exercise-illustration-note">
+              <strong>Lưu ý về hình</strong>
+              <span class="illustration-note__text">{{ figure.note }}</span>
+              <span>Xem phần hướng dẫn bên dưới để biết cách tập.</span>
+            </p>
+          }
           @if (failedFrames().length < figure.frames.length) {
             <figure
               class="frames"
@@ -23,6 +30,7 @@
               [class.frames--wrapped]="!figure.stacked && figure.frames.length > 2"
               role="img"
               [attr.aria-label]="figure.alt"
+              [attr.aria-describedby]="figure.note ? 'exercise-illustration-note' : null"
             >
               @for (frame of figure.frames; track frame.path) {
                 @if (!failedFrames().includes(frame.path)) {

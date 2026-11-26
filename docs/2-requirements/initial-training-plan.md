@@ -122,16 +122,20 @@ Danh mục bài tập của ứng dụng là nguyên bộ Open Exercise Illustra
 | Mã bài trong ứng dụng | 415, khớp hai chiều, không thiếu, không thừa, không trùng |
 | Tệp hình đóng gói | 796, trùng từng byte với nguồn |
 | Bí danh và tên biến thể của nguồn | Dùng để tìm đúng bài. 44 tên biến thể không thành bài riêng. |
-| Mã còn vướng giữa chữ và hình | 69, liệt kê trong `scripts/audit/exercise-guides.open.json` |
-| Mã có nguồn kỹ thuật chưa đạt mức chuyên môn | 250, cùng tệp trên |
+| Mã còn vướng giữa chữ và hình | 75. Ứng dụng hiện lưu ý riêng trước hình của từng bài. |
+| Mã có nguồn kỹ thuật còn cần đối chiếu | 10. Lượt rà ngày 26/11 đã xác nhận nguồn cho 206 mã. |
 
-Tác giả bộ hình ghi rõ hình do AI tạo và chưa có huấn luyện viên thẩm định. Vì vậy chữ kỹ thuật dựa trên nguồn chuyên môn của từng bài. Mỗi bài qua một lượt viết và một lượt phản biện độc lập, cả hai đều mở từng khung hình. Bài nào hình mâu thuẫn với nguồn vẫn nằm trong danh mục và được ghi vào danh sách còn vướng.
+Tác giả bộ hình ghi rõ hình do AI tạo và chưa có huấn luyện viên thẩm định. Hướng dẫn kỹ thuật dẫn nguồn của từng bài. Mỗi bài qua một lượt viết và một lượt phản biện độc lập, cả hai đều mở từng khung hình. Tệp `scripts/audit/exercise-guides.open.json` ghi các điểm còn vướng giữa chữ và hình, cùng những nguồn cần đối chiếu thêm.
+
+Lượt đối chiếu ngày 25/11/2026 ghi thêm một điểm ở bài đưa dây kháng lực qua đầu. Khung cuối dừng khi dây vừa qua đầu, nên chỉ minh họa một phần động tác.
 
 Nhập lại danh mục bằng `node scripts/fitness/import-open-exercise-illustrations.mjs`. Thêm `--check` để chỉ kiểm. Chạy lần hai không đổi tệp nào. Bản ghim của `exercises.json` nằm trong `scripts/fitness/open-exercise-illustrations/`. Bộ kiểm `scripts/audit/exercise-guides.cjs` đọc danh sách kỳ vọng từ bản ghim đó.
 
 Hướng dẫn hiện các khung hình theo đúng thứ tự nguồn khai báo: Bắt đầu rồi Kết thúc, có thêm khung Giữa ở bài ba khung, và một khung Tư thế giữ ở bài giữ tĩnh. Màn xem trước giáo án và màn đang tập dùng chung một bảng hướng dẫn. Giao diện giữ nền sáng. Nền tối chỉ nằm trong hình.
 
-Đơn vị ghi theo từng mã: bài giữ tĩnh, giãn cơ giữ, mang vác và máy cardio ghi giây. Bài một bên của nguồn ghi "Số lần mỗi bên". Bài cầm hai tạ rời ghi "Tổng hai tạ (kg)".
+Đơn vị ghi theo từng mã: bài giữ tĩnh, giãn cơ giữ, mang vác và máy cardio ghi giây. Bài một bên của nguồn ghi "Số lần mỗi bên", hoặc "Số giây mỗi bên" khi bài tính giây. Bài cầm hai tạ rời ghi "Tổng hai tạ (kg)".
+
+Khung hình ảnh dọc xếp cạnh nhau. Khung hình ảnh ngang xếp dọc để mỗi khung rộng hết màn hình. Bài ba khung ảnh dọc xếp hai cột.
 
 Giáo án mẫu dùng mã gốc. Mẫu Hai tạ đơn và sàn chỉ gồm bài mà nguồn khai báo dụng cụ là tạ đơn hoặc không dụng cụ. Bài kéo của mẫu đổi sang `renegade-row`, khó hơn bài kéo khi đứng gập hông.
 
@@ -144,14 +148,29 @@ Môi trường: APK debug `com.healthmate.ai`, giả lập Android 16 API 36, 10
 | Mở hướng dẫn từng bài qua bộ chọn bài của buổi tự do. | 415 trên 415 bài mở đúng tên, chữ, nguồn, thứ tự khung và tải đủ hình. 0 bài lỗi. |
 | Xem trước mẫu Hai tạ đơn và sàn, rồi Full Body 3 buổi. | Bài kéo hai tạ trên sàn hiện hai khung. Plank hiện một khung Tư thế giữ. |
 | Buổi Full Body A: nhập 50 kg × 8, mở rồi đóng hướng dẫn, ghi hiệp. | Số đang nhập giữ nguyên. Hiệp ghi 50 kg × 8 lần, khối lượng 400 kg. |
-| Mở hướng dẫn khi đang nghỉ. | Hiệp đã lưu giữ nguyên. Đồng hồ đi từ 1:58 xuống 1:52 sau 6.1 giây thực. |
+| Mở hướng dẫn khi đang nghỉ. | Hiệp đã lưu giữ nguyên. Đồng hồ đi từ 1:58 xuống 1:54 sau 4.5 giây thực. |
 | Đổi sang đẩy ngực rồi quay lại squat. | Tên, dụng cụ, chữ và hình đổi theo bài. Hiệp cũ vẫn thuộc squat. |
 | Ghi plank 30. | Màn ghi dùng nhãn Tập (giây). Lịch sử lưu 30 giây. |
 | Buổi tự do: hai tạ đơn 20 kg × 8, split squat 16 kg × 8 mỗi bên. | Nhãn Tổng hai tạ (kg) và Số lần mỗi bên. Khối lượng 160 kg và 128 kg, không nhân đôi. |
 | Tìm "Barbell Rollout" trong bộ chọn bài. | Ra đúng bài của mã `ab-wheel-rollout`. Mã seed cũ không còn. |
 | Mở hướng dẫn khi bàn phím đang mở. | Tạ và số lần đang nhập giữ nguyên. |
-| Hoàn thành hai buổi, đóng hẳn app, mở lại khi ngoại tuyến. | Lịch sử khớp cả 9 hiệp đã ghi. |
+| Hoàn thành hai buổi, đóng hẳn app, mở lại khi ngoại tuyến. | Lịch sử khớp cả 10 hiệp đã ghi. |
 | Đổi sang màn 720×1280 và cỡ chữ 1.3 giữa buổi. | Buổi đang tập và hiệp đã ghi còn nguyên. Không tràn ngang, ảnh giữ tỷ lệ. |
+| Ghi plank nghiêng 20 giây, bài vừa tính giây vừa tập từng bên. | Nhãn Tập mỗi bên (giây). Lịch sử lưu 20 giây và ghi Số giây mỗi bên. |
 | Mở một bài tự tạo ngoài danh mục. | Hiện "Chưa có hướng dẫn và hình minh họa cho bài này." |
 
 Kết quả từng ca, ảnh chụp và APK nằm trong [thư mục bàn giao Android](../../e2e/artifacts/exercise-guides/catalog/). Kịch bản chạy lại nằm trong `e2e/exercise-guides/`.
+
+### Kiểm lại trên Android, ngày 25/11/2026
+
+Ba giả lập Android 16 chạy cùng APK ở chế độ máy bay. Lượt quét mở đủ 415 bài, tải đủ 796 khung hình và thấy 71 lưu ý trước hình tương ứng. Ca ôm gối vào ngực đạt khi chạy lại.
+
+Luồng tập đạt 80 trên 80 kiểm tra. Lịch sử khớp cả 10 hiệp. Trên màn 720×1280 với cỡ chữ 1.3, lưu ý của plank nghiêng vẫn nằm trước hình và nội dung không tràn ngang.
+
+### Đối chiếu nguồn kỹ thuật, ngày 26/11/2026
+
+Đã rà 216 mục và xác nhận đúng dụng cụ, tư thế bắt đầu và chuyển động cho 206 mục. Mỗi mã đã đóng có URL và chi tiết đối chiếu. [Bằng chứng theo mã](../../scripts/audit/exercise-guides.verified-sources.json)
+
+10 mục giữ mở vì nguồn chưa xác nhận đúng biến thể. Bốn bài cần thêm lưu ý để giải thích khung hình. Danh mục hiện có 75 lưu ý trước hình. [Danh sách còn mở](../../scripts/audit/exercise-guides.open.json)
+
+APK mới, hai tệp kết quả và 26 ảnh chụp nằm trong [thư mục kiểm lại ngày 25/11](../../e2e/artifacts/exercise-guides/catalog/2026-11-25/).

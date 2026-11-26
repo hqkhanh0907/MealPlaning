@@ -10,6 +10,7 @@ const { catalogSearchNames } = require('../../src/app/core/models/exercise-catal
 const { exerciseGuideText, guidedExerciseIds } = require('../../src/app/core/models/exercise-guide-texts.ts');
 const { isTimedExercise } = require('../../src/app/core/models/fitness.types.ts');
 const openItems = require('./exercise-guides.open.json');
+const verifiedSources = require('./exercise-guides.verified-sources.json');
 
 const root = path.join(__dirname, '../..');
 const pinnedDir = path.join(root, 'scripts/fitness/open-exercise-illustrations');
@@ -215,9 +216,27 @@ test('mã còn vướng giữa chữ và hình được ghi rõ, vẫn nằm tro
     assert.ok(sourceById.has(id) && appById.has(id), id);
     assert.ok(issue.trim().length > 15, id);
   }
-  for (const id of Object.keys(openItems.weakSources)) assert.ok(sourceById.has(id), id);
+  const withNote = SEED_EXERCISES.filter(({ id }) => exerciseGuide(id)?.illustration.note?.trim());
+  assert.deepEqual(withNote.map(({ id }) => id).sort(), Object.keys(openItems.flagged).sort());
+  for (const [id, source] of Object.entries(openItems.weakSources)) {
+    assert.ok(sourceById.has(id), id);
+    const match = /^(secondary|chưa tải được|unverified) · (https:\/\/\S+)$/.exec(source);
+    assert.ok(match, id + ': trạng thái nguồn');
+    assert.equal(match[2], exerciseGuide(id)?.sourceUrl, id + ': URL nguồn trong hướng dẫn');
+  }
   t.diagnostic('Mã còn vướng chữ và hình: ' + Object.keys(openItems.flagged).length);
   t.diagnostic('Mã có nguồn kỹ thuật chưa đạt mức chuyên môn: ' + Object.keys(openItems.weakSources).length);
+});
+
+test('nguồn đã đối chiếu khớp liên kết trong ứng dụng và có bằng chứng theo mã', (t) => {
+  for (const [id, evidence] of Object.entries(verifiedSources)) {
+    assert.ok(sourceById.has(id) && appById.has(id), id);
+    assert.equal(Object.hasOwn(openItems.weakSources, id), false, id);
+    assert.match(evidence.url, /^https:\/\/\S+$/, id);
+    assert.equal(evidence.url, exerciseGuide(id)?.sourceUrl, id);
+    assert.ok(evidence.match.trim().length > 20, id);
+  }
+  t.diagnostic('Mã đã đối chiếu nguồn và ghi bằng chứng: ' + Object.keys(verifiedSources).length);
 });
 
 test('APK chứa mọi hình hướng dẫn', { skip: !process.env.EXERCISE_GUIDE_APK }, () => {

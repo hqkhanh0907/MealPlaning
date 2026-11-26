@@ -1,0 +1,826 @@
+{
+  "ab-wheel-rollout": {
+    "url": "https://www.puregym.com/exercises/abs/ab-wheel-rollouts/",
+    "match": "Quỳ trên sàn, hai tay nắm con lăn dưới vai. Lăn ra trước với lưng trung tính và kéo con lăn về có kiểm soát."
+  },
+  "air-bike": {
+    "url": "https://assaultfitness.de/gb/blog/blog/airbike-training-fuer-einsteiger-richtig-starten-und-effektiv-trainieren",
+    "match": "Chỉnh yên để gối gần duỗi ở điểm thấp. Đạp chân và chủ động đẩy kéo tay cầm, giữ thân ổn định."
+  },
+  "alternating-dumbbell-curl": {
+    "url": "https://legionathletics.com/dumbbell-curl/",
+    "match": "Đứng với hai tạ đơn. Cuốn từng tay, xoay lòng bàn tay lên khi nâng, hạ tạ rồi đổi tay."
+  },
+  "ankle-circles": {
+    "url": "https://www.sportireland.ie/sites/default/files/media/document/2020-09/older-adults-home-excercise-plan-english-version_0.pdf",
+    "match": "Tài liệu cho phép đứng hoặc ngồi. Nhấc một chân để xoay cổ chân hai chiều, rồi đổi chân; có thể vịn khi đứng."
+  },
+  "arnold-press": {
+    "url": "https://www.mvfit.com.au/exercise-library/db-seated-arnold-press/",
+    "match": "Ngồi trên ghế, giữ hai tạ trước vai với lòng bàn tay quay vào. Đẩy tạ qua đầu đồng thời xoay lòng bàn tay ra trước."
+  },
+  "assisted-dip-machine": {
+    "url": "https://www.intenzafitness.com/wp-content/uploads/2025/11/Intenza-DL12-Assisted-Chin-Dip-Owners-Manual.pdf",
+    "match": "Quỳ trên đệm trợ lực và nắm hai tay cầm. Hạ đến khuỷu gập vuông góc rồi đẩy lên mà không khóa khuỷu."
+  },
+  "assisted-pull-up": {
+    "url": "https://www.intenzafitness.com/wp-content/uploads/2025/11/Intenza-DL12-Assisted-Chin-Dip-Owners-Manual.pdf",
+    "match": "Quỳ trên đệm đối trọng, nắm tay cầm phía trên. Kéo cằm qua thanh rồi hạ người có kiểm soát."
+  },
+  "back-extensions": {
+    "url": "https://www.muscleandstrength.com/exercises/hyperextension.html",
+    "match": "Cố định bàn chân trên ghế, khoanh tay và bắt đầu ở tư thế gập hông. Duỗi hông tới khi thân và chân thẳng hàng."
+  },
+  "backpack-biceps-curl": {
+    "url": "https://bucovinaequipment.com/train/at-home-plan/",
+    "match": "Đứng với tay buông cạnh đùi, cầm quai trên của ba lô bằng một tay. Giữ khuỷu sát thân, cuốn lên với ngón cái hướng lên rồi hạ chậm."
+  },
+  "backpack-row": {
+    "url": "https://www.mountaineers.org/blog/mountaineer-magazine/magazine-files/2021-winter-magazine.pdf",
+    "match": "Nguồn cho phép dùng ba lô nhỏ. Đứng chân so le, tay đối diện chống đùi trước, tay còn lại kéo quai túi về sườn."
+  },
+  "band-chest-press": {
+    "url": "https://robertsontrainingsystems.com/downloads/ExpressBand.pdf",
+    "match": "Hai tay nắm dây cố định phía sau, đứng chân so le. Đẩy hai tay ngang ngực thẳng ra trước."
+  },
+  "band-deadlift": {
+    "url": "https://www.sasp.co.uk/content/uploads/documents/5bf81cbde785479b8a7104ec75d0df35.pdf",
+    "match": "Giẫm hai chân trên dây và giữ hai đầu dây cạnh chân. Bắt đầu gập hông, gối chùng nhẹ rồi đứng lên."
+  },
+  "band-lat-pulldown": {
+    "url": "https://bodylastics.com/exercises/resistance-bands/back/wide-grip-lat-pulldown",
+    "match": "Dây móc cao, quỳ một gối và nắm hai tay cầm. Kéo xuống hai bên đến ngang cằm rồi đưa tay lên có kiểm soát."
+  },
+  "band-lateral-raise": {
+    "url": "https://thelymphclinic.ie/wp-content/uploads/2022/09/thera-band_instruction_manual_v5-1.pdf",
+    "match": "Đứng hai chân trên dây, cầm hai đầu dây dọc thân. Nâng đồng thời hai tay sang ngang đến vai rồi hạ chậm."
+  },
+  "band-lateral-walk": {
+    "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12372021/",
+    "match": "Tài liệu chuyên môn mô tả dây vòng trên gối, gối hạ nhẹ, bước ngang bằng chân dẫn rồi chân kia theo. Duy trì lực căng dây."
+  },
+  "band-leg-extension": {
+    "url": "https://www.racgp.org.au/FSDEDEV/media/documents/Clinical%20Resources/HANDI/Knee-Strengthening-exercises.pdf",
+    "match": "Ngồi ghế, buộc dây vào chân ghế và vòng qua ngay trên cổ chân. Duỗi một gối rồi hạ xuống có kiểm soát."
+  },
+  "band-lying-leg-curl": {
+    "url": "https://www.bodi.com/blog/hamstring-curls",
+    "match": "Nằm sấp, trán tựa lên hai tay. Vòng dây qua sau hai cổ chân, neo thấp phía chân, rồi gập hai gối để đưa gót về mông."
+  },
+  "band-overhead-press": {
+    "url": "https://www.uwindsor.ca/kinesiology/sites/uwindsor.ca.kinesiology/files/apex_manual_oct_2020_-_edition_1.0.pdf",
+    "match": "Hai chân giẫm lên dây, hai đầu dây ở ngang vai. Đẩy hai tay lên trên đầu rồi hạ lại ngang vai."
+  },
+  "band-pull-apart": {
+    "url": "https://www.catalystathletics.com/exercise/762/Band-Pull-Apart/",
+    "match": "Cầm dây ngang ngực với tay thẳng. Kéo hai tay sang ngang bằng cách khép bả vai và giữ vai thấp."
+  },
+  "band-row": {
+    "url": "https://us.physitrack.com/home-exercise-video/long-sitting-resisted-row",
+    "match": "Ngồi duỗi chân, vòng dây qua bàn chân. Kéo hai khuỷu ra sau sát thân rồi đưa tay thẳng về phía bàn chân."
+  },
+  "band-squat": {
+    "url": "https://www.dps.texas.gov/sites/default/files/documents/etr/docs/exercisetubingworkout.pdf",
+    "match": "Đứng trên dây, hai tay giữ tay cầm ngang vai. Hạ hông ra sau xuống tư thế squat rồi đứng lên."
+  },
+  "band-tricep-pushdown": {
+    "url": "https://bodylastics.com/exercises/resistance-bands/triceps/tricep-pushdown",
+    "match": "Dây móc cao trước người, hai tay ngang ngực và khuỷu sát sườn. Duỗi khuỷu để kéo dây xuống rồi đưa tay về chậm."
+  },
+  "banded-glute-bridge": {
+    "url": "https://sandbox.performbetter.com/CMS/Site-2/Published/Images/MiniBandExerciseSheet.pdf",
+    "match": "Nằm ngửa, gối gập, dây trên gối. Nâng hông đến khi gối, hông và vai thẳng hàng, giữ dây căng."
+  },
+  "barbell-split-squat": {
+    "url": "https://www.catalystathletics.com/exercise/174/Split-Squat/",
+    "match": "Tạ đòn đặt sau cổ trên lưng, chân trước sau cố định. Giữ thân thẳng và gập hai gối để hạ rồi đứng lên."
+  },
+  "barbell-step-up": {
+    "url": "https://www.catalystathletics.com/exercise/560/Step-up/",
+    "match": "Nguồn nêu biến thể đặt tạ đòn trên lưng. Một chân đạp cả bàn chân trên bục để nâng cơ thể, chân dưới chỉ hỗ trợ tối thiểu."
+  },
+  "bear-plank": {
+    "url": "https://sport.port.ac.uk/news-events-and-blogs/6-plank-variations-to-strengthen-your-core",
+    "match": "Bàn tay dưới vai và gối dưới hông. Nhấc nhẹ gối khỏi sàn, giữ thân yên."
+  },
+  "bodyweight-good-mornings": {
+    "url": "https://slainte.usli.com/wp-content/uploads/2021/08/Dynamic-Warm-Up-1.pdf",
+    "match": "Đứng tay sau đầu, gối chùng nhẹ. Đẩy hông ra sau để hạ thân với lưng thẳng, rồi đứng lên."
+  },
+  "bodyweight-hip-thrust": {
+    "url": "https://www.365physique.com/bodyweight-hip-thrust",
+    "match": "Sát mép ghế ở dưới bả vai và đặt chân trên sàn. Đạp gót để nâng hông, siết mông, rồi hạ về vị trí đầu."
+  },
+  "box-squat": {
+    "url": "https://www.notbroken.io/videos/box-squat-for-beginners/",
+    "match": "Đặt ghế hoặc bục sau người. Hạ hông ra sau, ngồi chạm bục có kiểm soát và giữ thân siết trước khi đứng."
+  },
+  "butt-kicks": {
+    "url": "https://www.healthline.com/health/exercise-fitness/butt-kicks",
+    "match": "Hướng dẫn có nhóm biên tập chuyên môn và hình minh họa gốc. Đứng trên sàn, thay phiên gập gối để đưa gót về mông, đánh tay như khi chạy."
+  },
+  "cable-crunch": {
+    "url": "https://www.menshealth.com/fitness/a26532111/cable-crunches/",
+    "match": "Chuyên viên CSCS thị phạm quỳ trước cáp, giữ đùi gần thẳng đứng và co bụng để đưa khuỷu về gối. Gập cột sống có kiểm soát."
+  },
+  "cable-curl": {
+    "url": "https://www.catalystathletics.com/exercise/809/Cable-Curl/",
+    "match": "Nắm ngửa thanh thẳng của ròng rọc thấp. Gập khuỷu để cuốn thanh lên rồi hạ có kiểm soát."
+  },
+  "cable-front-raise": {
+    "url": "https://www.liveleantv.com/how-to-do-a-standing-cable-front-raise/",
+    "match": "Quay lưng về ròng rọc thấp, nắm thanh thẳng phía trước đùi. Nâng thanh ra trước khi thân đứng yên, rồi hạ chậm."
+  },
+  "cable-kickback": {
+    "url": "https://goldsgymbc.ca/wp-content/uploads/2021/08/GGBC-4-Day-Split-Upper-and-Lower.pdf",
+    "match": "Quay mặt về máy, gắn dây cổ chân vào cáp thấp. Đưa chân ra sau, siết mông và hạ về."
+  },
+  "cable-overhead-triceps-extension": {
+    "url": "https://inspirefitnesssolutions.co.uk/wp-content/uploads/2015/10/Inspire-FT2-Exercise-Manual.pdf",
+    "match": "Ròng rọc trên cao, quay lưng về máy, nắm dây thừng bằng hai tay. Giữ khuỷu gần tai khi duỗi tay rồi đưa dây về chậm."
+  },
+  "cable-pull-through": {
+    "url": "https://www.strengthlog.com/cable-pull-through/",
+    "match": "Quay lưng về ròng rọc thấp và nắm dây thừng giữa hai chân. Gập hông để dây lùi rồi duỗi hông đứng lên."
+  },
+  "cable-triceps-kickback": {
+    "url": "https://www.muscleandfitness.com/exercise/workouts/arm-exercises/cable-kickback/",
+    "match": "Dùng một tay cầm ở cáp thấp, thân cúi, cánh tay trên song song sàn. Giữ khuỷu yên và duỗi tay ra sau."
+  },
+  "cable-upright-row": {
+    "url": "https://www.muscleandstrength.com/node/4060",
+    "match": "Nắm úp tay cầm cáp ở dưới, đứng thẳng với tay duỗi. Kéo sát phía trước thân bằng cách nâng khuỷu và hạ tay có kiểm soát."
+  },
+  "cable-woodchopper": {
+    "url": "https://www.acefitness.org/resources/everyone/exercise-library/349/standing-rotational-chop/",
+    "match": "Nguồn hiện tại dùng tay cầm đơn và xoay từ trên vai về hông đối diện. Nguồn đặt ròng rọc ngang vai và dẫn hai tay từ trên vai."
+  },
+  "calf-raises": {
+    "url": "https://healthsciences.unimelb.edu.au/departments/physiotherapy/chesm/video-library/exercise/knee-oa/calf-strengthening",
+    "match": "Đặt hai mũi chân trên mép bục, nâng gót rồi hạ dưới mặt bục. Hướng dẫn dùng ghế làm điểm vịn khi cần."
+  },
+  "chest-supported-dumbbell-row": {
+    "url": "https://www.catalystathletics.com/exercise/824/Dumbbell-Incline-Bench-Row/",
+    "match": "Tựa ngực lên ghế dốc và buông một tạ đơn mỗi tay. Kéo khuỷu ra sau rồi hạ tạ có kiểm soát."
+  },
+  "chest-supported-t-bar-row": {
+    "url": "https://archive.t-nation.com/workouts/neanderthal-no-more-part-4/",
+    "match": "Tựa ngực khi kéo thanh chữ T và bắt đầu bằng khép bả vai. Giữ cằm gọn và không dùng lực duỗi hông."
+  },
+  "close-grip-lat-pulldown": {
+    "url": "https://www.menshealth.com/fitness/a20695579/close-grip-lat-pulldown/",
+    "match": "Chuyên viên CSCS dùng thanh chữ V nắm trung tính, ngồi và kéo khuỷu hướng xuống gần thân rồi đưa thanh lên."
+  },
+  "concentration-curl": {
+    "url": "https://www.puregym.com/exercises/arms-and-shoulders/bicep-curl/concentration-curls/",
+    "match": "Ngồi ghế với khuỷu tì lên mặt trong đùi cùng bên. Cuốn một tạ về vai, giữ khuỷu yên và hạ chậm."
+  },
+  "copenhagen-plank": {
+    "url": "https://25970650.fs1.hubspotusercontent-eu1.net/hubfs/25970650/ebooks/Sports%20Physio%20%26%20Rehab%20Ebook%20%282023%29.pdf",
+    "match": "Nằm nghiêng chống cẳng tay và giữ tư thế tĩnh nhờ một chân trên ghế. Nguồn mô tả biến thể chân trên duỗi thẳng."
+  },
+  "cossack-squat": {
+    "url": "https://www.monash.edu/__data/assets/pdf_file/0020/2534141/Cossack-Squat.pdf",
+    "match": "Dang chân rộng, giữ chân chịu lực áp sàn và gập gối. Duỗi chân kia, nâng mũi chân rồi trở lại đứng."
+  },
+  "cross-body-hammer-curl": {
+    "url": "https://www.muscleandfitness.com/exercise/workouts/cross-body-hammer-curl/",
+    "match": "Mỗi tay giữ một tạ bằng tay nắm trung tính. Cuốn một tạ chéo sang vai đối diện rồi hạ có kiểm soát."
+  },
+  "curtsy-lunge": {
+    "url": "https://www.muscleandstrength.com/exercises/curtsy-lunge",
+    "match": "Đứng không tạ, bước chân chéo ra sau chân trụ, hạ gối rồi đạp chân trước để trở về đứng."
+  },
+  "dead-hang": {
+    "url": "https://theprehabguys.com/vimeo-video/active-hang/",
+    "match": "Treo trên xà với tay duỗi và bả vai hạ nhẹ. Đây là biến thể treo chủ động phù hợp lời hướng dẫn hiện tại."
+  },
+  "decline-bench-press": {
+    "url": "https://cdn.muscleandstrength.com/exercises/decline-bench-press.html",
+    "match": "Nằm trên ghế dốc xuống, móc chân dưới đệm và ghim bả vai. Hạ tạ đòn về ngực và đẩy trở lại."
+  },
+  "decline-crunch": {
+    "url": "https://weighttraining.guide/exercises/decline-crunch/",
+    "match": "Móc chân dưới đệm ghế dốc, hai tay có thể đặt sau đầu. Gập bụng để nhấc đầu và vai, giữ lưng dưới áp ghế."
+  },
+  "decline-push-up": {
+    "url": "https://www.nasm.org/resource-center/exercise-library/decline-push-up",
+    "match": "Đặt chân lên ghế và tay trên sàn. Giữ thân thẳng, hạ ngực gần sàn rồi đẩy lên."
+  },
+  "decline-sit-up": {
+    "url": "https://www.puregym.com/exercises/abs/decline-sit-ups/",
+    "match": "Ghế dốc xuống, gối gập và chân móc dưới đệm. Gập thân lên ngồi rồi hạ có kiểm soát. Xem các dòng 244–248."
+  },
+  "deficit-push-up": {
+    "url": "https://www.menshealth.com/fitness/a43575620/deficit-push-ups/",
+    "match": "Huấn luyện viên Ebenezer Samuel, CSCS, xác nhận hai tay trên khối, ngực hạ thấp hơn mặt khối rồi đẩy lên. Xem các dòng 478–501."
+  },
+  "diamond-push-up": {
+    "url": "https://www.puregym.com/exercises/chest/press-up/diamond-press-ups/",
+    "match": "Ngón trỏ và ngón cái tạo hình kim cương. Hạ ngực về hai tay, khuỷu sát thân, rồi đẩy lên. Xem các dòng 220–245."
+  },
+  "doorway-chest-stretch": {
+    "url": "https://sunderlandims.co.uk/exercises/pectoral-stretch-in-doorway/",
+    "match": "Nguồn hướng dẫn một khuỷu gập, cẳng tay tựa khung cửa và bước nhẹ ra trước đến khi căng ngực. Khung giữ gốc cũng vẽ khuỷu gập. Xem dòng 106."
+  },
+  "doorway-row": {
+    "url": "https://www.eatthis.com/standing-exercises-firm-body-after-50/",
+    "match": "Nắm khung cửa chắc bằng hai tay ở ngang ngực. Ngả người ra sau với thân thẳng, kéo ngực về khung rồi hạ có kiểm soát."
+  },
+  "dumbbell-calf-raise": {
+    "url": "https://www.sleekgeek.co.za/wp-content/uploads/2021/02/01-Sleekgeek-Training-Guide-Overview-v1.0.pdf",
+    "match": "Mục dùng tạ đơn minh họa nhón gót hai chân trên sàn. Một tay vịn trụ và tay còn lại có thể cầm tạ."
+  },
+  "dumbbell-decline-press": {
+    "url": "https://www.puregym.com/exercises/chest/bench-press/decline-dumbbell-bench-press/",
+    "match": "Ghế dốc xuống, chân móc dưới đệm, hai tạ. Hạ hai tạ hai bên giữa ngực rồi đẩy lên. Xem các dòng 240–249."
+  },
+  "dumbbell-floor-press": {
+    "url": "https://support.runna.com/en/articles/6413209-floor-dumbbell-bench-press-exercise-tutorial",
+    "match": "Nằm sàn, gối gập và chân đặt sàn. Đẩy hai tạ lên rồi hạ cánh tay trên chạm sàn. Xem các dòng 36–45."
+  },
+  "dumbbell-front-rack-carry": {
+    "url": "https://www.nsca.com/globalassets/education/nsca-coach/nsca-coach-7.3.pdf#page=52",
+    "match": "NSCA mô tả đi bộ có kiểm soát và biến thể hai tạ đơn tựa trước hai vai, sát ngực trên. Xem hình Rack Carry và các dòng 2800–2812."
+  },
+  "dumbbell-hip-thrust": {
+    "url": "https://www.puregym.com/exercises/glutes/hip-thrusts/dumbbell-hip-thrust/",
+    "match": "Nguồn nêu biến thể một tạ giữ sát hông. Lưng trên tựa ghế, chân trên sàn, nâng hông đến khi vai tới gối thẳng hàng. Xem các dòng 245–251."
+  },
+  "dumbbell-kickback": {
+    "url": "https://www.muscleandfitness.com/exercise/workouts/arm-exercises/dumbbell-kickback/",
+    "match": "Một tay và một gối tựa ghế, tay kia nắm tạ. Duỗi khuỷu về sau và giữ cánh tay trên song song sàn. Xem các dòng 308–311."
+  },
+  "dumbbell-preacher-curl": {
+    "url": "https://www.catalystathletics.com/exercise/889/Single-Arm-Dumbbell-Preacher-Curl/",
+    "match": "Một tạ đơn, cánh tay trên tựa đệm ghế, lòng bàn tay ngửa hoặc ngửa dần khi cuốn. Duy trì điểm tựa khi hạ. Xem các dòng 25–34."
+  },
+  "dumbbell-pullover": {
+    "url": "https://www.majorfitness.com/blogs/training-tips/dumbbell-pullover",
+    "match": "Một tạ đơn nắm bằng hai tay. Nằm dọc ghế rồi hạ tạ qua đầu và kéo vòng về ngực, giữ khuỷu hơi gập. Xem các dòng 201–207."
+  },
+  "dumbbell-push-press": {
+    "url": "https://s3.amazonaws.com/crossfitpubliccontent/6-21-3-Scorecards-Adap-LE-sjnhey653bdge523da.pdf",
+    "match": "Hai tạ ở vai với gối và hông duỗi lúc đầu. Nhún nông, đạp và đẩy tạ tới vị trí khóa phía trên. Xem các dòng 133–158."
+  },
+  "dumbbell-reverse-lunge": {
+    "url": "https://yogiathletics.com/library/dumbbell-reverse-lunge",
+    "match": "Cầm một tạ mỗi tay, bước chân thẳng ra sau và hạ gối sau. Đẩy bằng chân trước và đưa chân sau về. Xem các dòng 30–34."
+  },
+  "dumbbell-reverse-wrist-curl": {
+    "url": "https://www.muscleandfitness.com/exercise/workouts/arm-exercises/dumbbell-reverse-wrist-curl/",
+    "match": "Ngồi trên ghế, cầm hai tạ với lòng bàn tay úp và tựa khuỷu lên đùi. Giữ tay trên yên, nâng và hạ bằng cổ tay."
+  },
+  "dumbbell-scaption": {
+    "url": "https://www.drcoyner.com/pdf/scapular-dynkinesis-protocol.pdf",
+    "match": "Hình cho thấy đứng cầm hai tạ buông hai bên, ngón cái hướng lên. Nâng hai tay theo đường chéo đến ngang vai. Xem các dòng 55–67."
+  },
+  "dumbbell-skull-crusher": {
+    "url": "https://www.puregym.com/exercises/arms-and-shoulders/tricep-extension/skull-crushers/",
+    "match": "Nằm ngửa trên ghế, mỗi tay giữ một tạ. Giữ cánh tay trên yên và gập khuỷu để hạ tạ sau đầu rồi duỗi. Xem các dòng 243–248."
+  },
+  "dumbbell-squat": {
+    "url": "https://www.strengthlog.com/dumbbell-squat/",
+    "match": "Nguồn nêu riêng biến thể hai tạ buông ở hai bên, chân rộng bằng vai, hạ người và đứng lên. Xem các dòng 187–191."
+  },
+  "dumbbell-squeeze-press": {
+    "url": "https://www.onnit.com/blogs/the-edge/3-dumbbell-chest-workouts-and-top-6-exercises-to-get-ripped",
+    "match": "Nằm trên ghế phẳng, lòng bàn tay hướng vào nhau, ép hai tạ ở giữa ngực rồi đẩy lên và hạ với lực ép giữ nguyên. Xem các dòng 131–143."
+  },
+  "dumbbell-thruster": {
+    "url": "https://games-assets.crossfit.com/dofigj0349.pdf",
+    "match": "Giữ hai tạ ở vai trước trong nhịp squat, đứng dậy rồi đẩy qua đầu đến khi tay, hông và gối duỗi. Xem các dòng 12–20."
+  },
+  "dumbbell-upright-row": {
+    "url": "https://www.puregym.com/exercises/arms-and-shoulders/upright-rows/dumbbell-upright-row/",
+    "match": "Hai tạ đơn treo trước thân. Khuỷu dẫn đường nâng tạ, dừng khuỷu ở khoảng ngang vai và hạ có kiểm soát. Xem các dòng 219–245."
+  },
+  "dumbbell-wrist-curl": {
+    "url": "https://www.ifafitness.com/wttrain/wristcurl.htm",
+    "match": "Ngồi ghế, hai cẳng tay tựa đùi và lòng bàn tay ngửa. Gập hai cổ tay để nâng tạ rồi hạ chậm. Xem các dòng 12–27."
+  },
+  "elliptical": {
+    "url": "https://spiritfitness.ca/wp-content/uploads/2025/06/16611401000-CE1000ENT-EN.pdf",
+    "match": "Sổ tay và hình mô tả tư thế đứng thẳng trên bàn đạp, giữ tay cầm di động và đạp với nhịp mượt. Xem các dòng 759–777."
+  },
+  "ez-bar-curl": {
+    "url": "https://theprehabguys.com/vimeo-video/bicep-curl-narrow-ez-bar-2/",
+    "match": "Đứng và nắm ngửa thanh EZ trước đùi. Giữ khuỷu cạnh thân, cuốn thanh lên rồi hạ chậm. Xem mục How."
+  },
+  "face-pulls": {
+    "url": "https://www.nsca.com/education/articles/kinetic-select/face-pull-machine/",
+    "match": "Đứng đối diện ròng rọc cao, tay úp nắm dây thừng. Kéo dây về mặt và xoay cánh tay ra ngoài, rồi trả lại. Xem các dòng 207–221."
+  },
+  "feet-elevated-inverted-row": {
+    "url": "https://www.muscleandfitness.com/exercise/workouts/back-exercises/elevated-feet-inverted-row/",
+    "match": "Thanh ngang cố định trên giá, hai gót gác lên ghế phẳng. Giữ thân thẳng, kéo lên thanh rồi duỗi tay có kiểm soát. Xem các dòng 299–316."
+  },
+  "flutter-kicks": {
+    "url": "https://www.bodi.com/blog/?p=165387",
+    "match": "Nằm ngửa, tay có thể để dọc thân, đầu và lưng dưới áp sàn, hai chân duỗi đá luân phiên. Xem các dòng 199–209."
+  },
+  "frog-pumps": {
+    "url": "https://bretcontreras.com/frog-pumps-a-highly-effective-bodyweight-glute-activation-drill/",
+    "match": "Tác giả hướng dẫn cầu mông nằm ngửa, áp hai lòng bàn chân, mở gối, kéo gót lại gần, nâng hông bằng cơ mông. Xem các dòng 38–52."
+  },
+  "glute-squeeze": {
+    "url": "https://www.ahrq.gov/sites/default/files/wysiwyg/evidencenow/mui/pelvic-floor-therapy-handout.pdf",
+    "match": "Đứng hai bàn chân hướng thẳng. Siết rồi thả cơ mông tại chỗ. Xem các dòng 42–55."
+  },
+  "hamstring-walkout": {
+    "url": "https://myofascialpain.com/en/learn/exercises/bridge-with-hamstring-walkouts/",
+    "match": "Từ cầu mông, luân phiên bước hai chân ra từ từ khi hông còn nâng. Khi hai gối gần thẳng, bước về và hạ hông. Xem các dòng 36–47."
+  },
+  "heel-taps": {
+    "url": "https://www.nsca.com/contentassets/de9aebfe7a7340b69217b99bb13862a7/basics_of_strength_and_conditioning_manual.pdf#page=57",
+    "match": "Nằm ngửa gập gối, ép thắt lưng xuống và nhấc vai. Với tay cùng bên chạm gót, sau đó đổi bên. Xem các dòng 2528–2548."
+  },
+  "hindu-push-up": {
+    "url": "https://sunrider-dev-assets.s3-us-west-2.amazonaws.com/Stage/USA/Training/Eng/Selling-System/SunFit321/Present-Support-Tools/SunFit321-FitnessBrigade-Workout.pdf",
+    "match": "Từ thế mông cao, gập khuỷu và lướt ngực qua tay. Duỗi khuỷu khi hông thấp rồi nâng hông về vị trí đầu. Xem các dòng 850–875."
+  },
+  "hindu-squat": {
+    "url": "https://www.mattfurey.com/hindu-squats-gone-wild/",
+    "match": "Huấn luyện viên dạy biến thể nhấc gót, hạ có kiểm soát, đưa tay ra sau thân khi hạ rồi vung tay lên trước khi đứng. Xem các dòng 26–30."
+  },
+  "hip-thrust-machine": {
+    "url": "https://cdn-live.powerhouse-fitness.co.uk/files/taurus/single_station/SESS7009/PH_Manual_Taurus_SESS7009_ENG-2.pdf",
+    "match": "Hãng hướng dẫn tựa lưng trên đệm, đặt hai chân lên bàn đạp, giữ khung đệm ngang hông, nâng hông đến khi đùi và thân thẳng hàng. Xem các dòng 307–314."
+  },
+  "hollow-body-hold": {
+    "url": "https://gmb.io/hollow-body/",
+    "match": "Nằm ngửa và ép thắt lưng xuống sàn. Tiến đến tay qua đầu và chân duỗi trước trong tư thế giữ tĩnh. Xem các dòng 24–29 và 41–55."
+  },
+  "incline-bench-press": {
+    "url": "https://www.nsca.com/contentassets/de9aebfe7a7340b69217b99bb13862a7/basics_of_strength_and_conditioning_manual.pdf#page=55",
+    "match": "Tạ đòn và ghế dốc, thân và chân tì vững. Hạ đòn xuống ngực trên rồi đẩy về trên ngực. Xem các dòng 2426–2455."
+  },
+  "incline-dumbbell-curl": {
+    "url": "https://powerliftingtechnique.com/incline-dumbbell-curls/",
+    "match": "Huấn luyện viên hướng dẫn tựa lưng ghế dốc, hai chân chạm sàn và lòng bàn tay hướng trước. Chỉ gập khuỷu để cuốn tạ rồi hạ. Xem các dòng 104–110."
+  },
+  "incline-push-up": {
+    "url": "https://www.nasm.org/resource-center/exercise-library/incline-push-up",
+    "match": "Hai tay đặt trên ghế, chân trên sàn và thân thẳng. Hạ ngực gần ghế rồi duỗi khuỷu đẩy lên. Xem các dòng 33–44."
+  },
+  "inverted-row": {
+    "url": "https://www.puregym.com/exercises/back/rows/inverted-row/",
+    "match": "Bản dùng thanh tạ đặt cố định trên giá, gót chạm sàn. Giữ thân thẳng, kéo về thanh rồi duỗi khuỷu để hạ. Xem các dòng 219–221 và mục hướng dẫn."
+  },
+  "jump-rope": {
+    "url": "https://static1.squarespace.com/static/5d65a950acf56e0001591e8e/t/6ad501761a489f3bd3d3c508/1792344439557/Jump%2BRope%2BManual_compressed.pdf",
+    "match": "Hướng dẫn của huấn luyện viên chuyên nhảy dây nêu hai chân sát nhau, dây sau bắp chân, xoay cổ tay và bật thấp bằng hai chân. Xem các dòng 680–689."
+  },
+  "kettlebell-clean": {
+    "url": "https://www.strongfirst.com/an-olympic-weightlifting-approach-to-coaching-the-kettlebell-clean/",
+    "match": "Bản một tay đu tạ rồi kéo lên vị trí đỡ gần vai, dẫn lực từ chân và hướng khuỷu về sườn. Xem các dòng 21–43."
+  },
+  "kettlebell-goblet-lunge": {
+    "url": "https://www.functionalmovement.com/exercises/450/lunge_forward_goblet_with_one_kb",
+    "match": "Giữ một tạ chuông trước ngực bằng hai tay. Bước ra trước, hạ gối sau rồi đạp chân trước để đứng. Tập xong một bên mới đổi. Xem mục Start và Action."
+  },
+  "kettlebell-romanian-deadlift": {
+    "url": "https://health.clevelandclinic.org/is-kettlebell-training-right-for-you",
+    "match": "Bản đứng với một tạ chuông phía trước, hai tay buông thẳng, gập hông để hạ tạ gần chân rồi đứng lên. Xem dòng 45."
+  },
+  "kettlebell-row": {
+    "url": "https://fitnessbond.nl/wp-content/uploads/2025/09/NLFB-Movement-Standards-2025.pdf",
+    "match": "Tiêu chuẩn xác nhận một gối và một tay tựa ghế, chân kia trên sàn, tay rảnh kéo tạ chuông về sườn. Xem các dòng 371–380."
+  },
+  "kettlebell-sumo-deadlift": {
+    "url": "https://theprehabguys.com/vimeo-video/sumo-deadlift-kettlebell/",
+    "match": "Đặt một tạ chuông giữa hai chân dang rộng, mũi chân hướng ra ngoài. Đạp sàn để đứng thẳng và hạ tạ chậm. Xem các dòng 12–15."
+  },
+  "knee-plank": {
+    "url": "https://www.acefitness.org/resources/everyone/blog/6327/plank-variations-5-plank-variations-to-strengthen-your-core/",
+    "match": "Hướng dẫn cẳng tay và khuỷu dưới vai, giữ lưng thẳng và hạ gối xuống sàn khi dùng biến thể nhẹ hơn. Xem các dòng 128–130."
+  },
+  "knees-to-chest": {
+    "url": "https://www.arthritis-uk.org/information-and-support/living-with-arthritis/health-and-wellbeing/exercising-with-arthritis/exercises-for-healthy-joints/back-pain-exercises/double-knees-to-chest/",
+    "match": "Nằm ngửa, gập gối và lần lượt nhấc từng chân. Kéo cả hai gối về ngực, giữ ngắn rồi nới tay. Xem dòng 153."
+  },
+  "l-sit": {
+    "url": "https://gmb.io/l-sit/",
+    "match": "Biến thể dùng hai thanh thấp để ấn xuống và giữ vai hạ. Giữ gối duỗi, chân nâng trước thân. Xem mục Equipment và các dòng 162–185."
+  },
+  "landmine-romanian-deadlift": {
+    "url": "https://www.combatfitness.co/post/landmine-rdl",
+    "match": "Quay mặt về chốt, nắm hai tay quanh đầu thanh có đĩa. Gập hông với gối chùng, hạ đầu thanh về gần ống chân rồi đứng lên."
+  },
+  "landmine-squat": {
+    "url": "https://spannfitness.com/blog/landmine-squat-how-to",
+    "match": "Quay mặt về chốt, giữ đầu thanh bằng hai tay sát ngực, gập gối hông theo cung của thanh rồi đứng lên. Xem các dòng 9–22 và 29–44."
+  },
+  "lateral-neck-raise": {
+    "url": "https://fysiofitaal.nl/en/exercise/lateroflexion-neck-across-sofa/",
+    "match": "Chuyên gia vật lý trị liệu hướng dẫn nằm nghiêng, đầu qua mép ghế, nâng từ hơi nghiêng xuống tới trung tính hoặc hơi quá trung tính rồi hạ chậm. Xem các dòng 182–224."
+  },
+  "lateral-step-up": {
+    "url": "https://www.catalystathletics.com/exercise/561/Lateral-Step-up/",
+    "match": "Một chân trên bục, chân kia ở sàn bên cạnh. Đạp cả bàn chân trên bục để đứng lên rồi hạ có kiểm soát. Xem các dòng 25–35."
+  },
+  "leg-swings": {
+    "url": "https://www.inclusivesport.gov.sg/learning-opportunities/resources/warm-up-cool-down-exercises/",
+    "match": "Đứng cạnh điểm tựa với một chân trụ. Vung chân kia ra trước rồi ra sau có kiểm soát và đổi bên."
+  },
+  "lying-spinal-twist": {
+    "url": "https://www.tummee.com/yoga-poses/supine-spinal-twist-yoga-pose-i/how-to-do/2",
+    "match": "Nằm ngửa, một chân duỗi và hai tay dang ngang. Đổ gối co qua chân duỗi và giữ hai vai trên sàn."
+  },
+  "machine-lateral-raise": {
+    "url": "https://www.kraftwerk-fitness.ch/en/academy/lateral-raise-machine",
+    "match": "Ngồi tựa lưng, chân đặt sàn và đệm tì ngoài cánh tay trên. Dẫn khuỷu ra hai bên lên ngang vai rồi hạ chậm."
+  },
+  "machine-pullover": {
+    "url": "https://fitnessinstitute.com.au/pullover-hammer-strength/",
+    "match": "Ngồi máy, đặt khuỷu lên đệm và nắm thanh phía trên đầu. Kéo thanh về đùi rồi đưa lại lên cao chậm."
+  },
+  "medicine-ball-chest-pass": {
+    "url": "https://vimeo.com/1059363034",
+    "match": "Đứng chân trước sau hướng về tường. Kéo bóng về ngực, ném ra trước bằng hai tay rồi đón bóng nảy về."
+  },
+  "muscle-up": {
+    "url": "https://wodprep.com/blog/strict-bar-muscle-up-strength-no-kip/",
+    "match": "Treo tay thẳng và nắm úp xà đơn. Kéo ngực lên, chuyển thân qua xà và duỗi tay chống trên xà."
+  },
+  "negative-pull-up": {
+    "url": "https://crossfitaerial.com/resources/how-to-get-better-at-pull-ups",
+    "match": "Dùng bục lên vị trí cằm cao hơn xà. Bắt đầu mỗi lần ở trên và hạ người xuống có kiểm soát."
+  },
+  "neutral-grip-pull-up": {
+    "url": "https://www.nowfitness.eu/en/exercises/neutral-grip-pull-up",
+    "match": "Nắm hai tay nắm song song với lòng bàn tay hướng vào nhau. Từ tư thế treo, kéo khuỷu xuống để nâng cằm rồi hạ chậm."
+  },
+  "ninety-ninety-hip-stretch": {
+    "url": "https://barbend.com/90-90-stretch/",
+    "match": "Ngồi sàn với một chân trước và một chân bên. Gập mỗi gối 90 độ rồi gập hông nhẹ về chân trước."
+  },
+  "oblique-crunch": {
+    "url": "https://www.muscleandstrength.com/exercises/side-crunch.html",
+    "match": "Nằm ngửa, gập hai gối rồi để chồng sang một bên. Siết bụng nâng vai lên rồi hạ chậm."
+  },
+  "overhead-carry": {
+    "url": "https://www.acefitness.org/continuing-education/certified/september-2025/8951/a-pro-s-guide-to-muscle-mechanics-the-shoulders/",
+    "match": "Giơ một tạ đơn lên bằng tay duỗi, lòng bàn tay hướng về giữa thân. Đi thẳng rồi đổi tay."
+  },
+  "pec-deck": {
+    "url": "https://www.puregym.com/exercises/chest/chest-fly/machine-fly/",
+    "match": "Ngồi tựa lưng, nắm hai tay cầm ngang ngực. Khép tay theo vòng cung với khuỷu hơi gập rồi mở chậm."
+  },
+  "pendlay-row": {
+    "url": "https://www.catalystathletics.com/exercise/867/Pendlay-Row/",
+    "match": "Gập hông với thân gần ngang sàn, thanh đòn chạm sàn. Kéo thanh về bụng rồi đặt xuống sàn giữa mỗi lần kéo."
+  },
+  "pigeon-stretch": {
+    "url": "https://www.yogajournal.com/practice/beginners/pigeon-pose/?scope=anon",
+    "match": "Từ chống bốn điểm, đưa một gối sau cổ tay, đặt cẳng chân chéo, duỗi chân kia ra sau và giữ hông cân."
+  },
+  "pike-push-up": {
+    "url": "https://www.nasm.org/resource-center/exercise-library/pike-push-up",
+    "match": "Chống tay và chân thành chữ V ngược. Gập khuỷu để hạ đầu rồi đẩy trở lại khi hông vẫn cao."
+  },
+  "pistol-squat": {
+    "url": "https://library.crossfit.com/premium/pdf/56_07_Crane_Dip_Pistol.pdf?e=1667910488&h=5509b516ab8d7cb0141faaf7760a8ab8",
+    "match": "Đứng trên một chân, duỗi chân kia ra trước. Gập hông và gối để hạ người rồi dùng chân trụ đứng lên."
+  },
+  "plank-jack": {
+    "url": "https://blog.joinfightcamp.com/training/how-to-do-plank-jacks-proper-technique/",
+    "match": "Chống cao, hai tay dưới vai và thân thẳng. Nhảy hai chân dang rồi khép trong khi tay giữ nguyên."
+  },
+  "plank-shoulder-tap": {
+    "url": "https://sportsrehab.ucsf.edu/sites/g/files/tkssra10961/files/doc/Core_Strengthening_Intermediate_Protocol_Nov2025.pdf",
+    "match": "Chống cao, tay dưới vai và hai chân mở. Chạm vai đối diện bằng một tay, đổi tay và giữ hông ổn định."
+  },
+  "plate-front-raise": {
+    "url": "https://www.puregym.com/exercises/arms-and-shoulders/front-raises/plate-front-raise/",
+    "match": "Đứng nắm hai mép đĩa bằng hai tay. Nâng đĩa từ trước đùi đến ngang vai rồi hạ chậm."
+  },
+  "plate-loaded-incline-chest-press": {
+    "url": "https://fitnessinstitute.com.au/iso-lateral-incline-chest-press/",
+    "match": "Ngồi trên ghế máy dốc, đặt hai chân xuống sàn và nắm tay cầm ngang ngực. Đẩy lên rồi hạ về ngực."
+  },
+  "plate-pinch-hold": {
+    "url": "https://www.puregym.com/exercises/arms-and-shoulders/forearm-and-grip-exercises/plate-pinch/",
+    "match": "Kẹp mép đĩa giữa ngón cái và các ngón còn lại, để đĩa treo bên hông. Giữ yên rồi hạ xuống sàn."
+  },
+  "preacher-curl": {
+    "url": "https://www.muscleandstrength.com/exercises/ez-bar-preacher-curl.html",
+    "match": "Ngồi trên ghế cuốn tạ và tựa cánh tay trên vào đệm. Nắm ngửa thanh EZ, gập khuỷu rồi hạ có kiểm soát."
+  },
+  "rack-pull": {
+    "url": "https://barbell-logic.com/the-rack-pull-field-guide/",
+    "match": "Đặt thanh đòn trên chốt ngay dưới gối. Giữ thanh sát người, đứng thẳng rồi hạ lại chốt."
+  },
+  "rear-delt-fly": {
+    "url": "https://www.puregym.com/exercises/arms-and-shoulders/rear-delt-exercises/rear-delt-flyes/",
+    "match": "Đứng gập hông với một tạ đơn mỗi tay. Dang tay sang hai bên tới ngang thân rồi hạ chậm."
+  },
+  "renegade-row": {
+    "url": "https://www.puregym.com/exercises/back/rows/renegade-row/",
+    "match": "Chống thẳng tay trên hai tạ đơn ở tư thế plank cao. Giữ hông yên, kéo một tạ lên sát sườn rồi đổi bên."
+  },
+  "reverse-grip-barbell-row": {
+    "url": "https://www.catalystathletics.com/exercise/875/Reverse-Grip-Bent-Row/",
+    "match": "Đứng gập hông, gối hơi gập và nắm ngửa thanh đòn. Kéo thanh về bụng rồi hạ đến khi tay duỗi."
+  },
+  "reverse-hyperextension": {
+    "url": "https://theprehabguys.com/vimeo-video/reverse-hyperextension-2/",
+    "match": "Nằm sấp, hông sát mép ghế và tay giữ thân. Chụm chân, siết mông để nâng rồi hạ chậm."
+  },
+  "reverse-lunge": {
+    "url": "https://www.harvardhealth.org/bones-and-joints/are-lunges-safe-for-older-adults",
+    "match": "Đứng hai chân gần nhau. Bước một chân ra sau, gập gối hạ thân rồi đẩy qua bàn chân trước để trở lại."
+  },
+  "reverse-plank": {
+    "url": "https://www.verywellfit.com/reverse-plank-exercise-3120740",
+    "match": "Ngồi duỗi chân, chống hai lòng bàn tay phía sau. Nâng hông để thân thẳng đến gót rồi hạ về sàn."
+  },
+  "reverse-snow-angels": {
+    "url": "https://theprehabguys.com/vimeo-video/reverse-snow-angel/",
+    "match": "Nằm sấp, giữ hai tay khỏi sàn và quét từ gần hông qua đầu rồi trở lại. Siết bụng và mông để giữ thân ổn định."
+  },
+  "reverse-wrist-curl": {
+    "url": "https://www.gettfit.com/exercise-database/arms/dumbbell-wrist-extension/",
+    "match": "Ngồi, cẳng tay tựa đùi và mỗi tay nắm úp một tạ đơn. Duỗi cổ tay lên rồi hạ chậm mà không nhấc cẳng tay."
+  },
+  "rope-hammer-curl": {
+    "url": "https://russhowepti.com/exercises/rope-hammer-curl/",
+    "match": "Đứng cầm hai đầu dây thừng nối puli thấp, lòng bàn tay hướng vào nhau. Gập khuỷu kéo dây lên rồi hạ chậm."
+  },
+  "scap-pulls": {
+    "url": "https://theprehabguys.com/vimeo-video/hanging-shoulder-shrug/",
+    "match": "Treo người trên tay nắm rộng của xà. Kéo vai xuống để thân nhích lên mà không gập khuỷu."
+  },
+  "scap-push-ups": {
+    "url": "https://ca.physitrack.com/home-exercise-video/scapula-push-up---straight-body",
+    "match": "Chống bàn tay và mũi chân, tay duỗi thẳng. Đẩy sàn để di chuyển bả vai rồi để ngực hạ trở lại."
+  },
+  "seal-row": {
+    "url": "https://hortonbarbell.com/seal-row-how-to-benefits-common-mistakes/",
+    "match": "Nằm sấp tựa ngực trên ghế phẳng kê cao, tay duỗi xuống. Kéo tạ sát ghế rồi hạ về dưới vai."
+  },
+  "seated-calf-raise": {
+    "url": "https://www.puregym.com/exercises/legs/calf-exercises/seated-calf-raises/",
+    "match": "Ngồi mép ghế, mỗi tạ đơn đặt trên một đùi sát gối. Dùng mép bậc để hạ gót rồi nhón lên."
+  },
+  "seated-knee-extension": {
+    "url": "https://www.opalreturntowork.nhs.uk/exercises/seated-knee-extension/",
+    "match": "Ngồi thẳng trên ghế chắc, hai chân đặt sàn. Duỗi một gối bằng cơ đùi trước rồi hạ có kiểm soát."
+  },
+  "seated-knee-tuck": {
+    "url": "https://westendphysio.com/weekly-exercises/seated-knee-tuck/",
+    "match": "Ngồi trên sàn, hai tay chống sau hông và thân hơi ngả. Kéo hai gối về ngực rồi duỗi chân mà không đặt chân xuống sàn."
+  },
+  "seated-leg-press": {
+    "url": "https://workit.fitness/seated-leg-press/",
+    "match": "Tựa lưng và đặt đủ hai bàn chân trên bệ cố định. Duỗi gối đẩy ghế trượt ra xa, rồi về chậm."
+  },
+  "seated-spinal-twist": {
+    "url": "https://eat-move-save.extension.illinois.edu/move/exercise/seated-spinal-twist",
+    "match": "Ngồi sàn với một chân duỗi. Bắt chéo chân co, đặt khuỷu đối diện phía ngoài gối và xoay người về gối co."
+  },
+  "side-plank-hip-dip": {
+    "url": "https://redefiningstrength.com/side-plank-hip-dips/",
+    "match": "Chống cẳng tay với khuỷu dưới vai và hai bàn chân chồng nhau. Hạ hông về gần sàn rồi nâng lại mà không xoay ngực."
+  },
+  "single-arm-cable-curl": {
+    "url": "https://www.muscleandstrength.com/exercises/one-arm-cable-curl.html",
+    "match": "Đứng quay mặt về ròng rọc thấp, một tay nắm ngửa tay cầm. Gập khuỷu cuốn cáp rồi hạ chậm."
+  },
+  "single-arm-overhead-press": {
+    "url": "https://ie.physitrack.com/home-exercise-video/overhead-press---standing-single-arm-with-dumbbell",
+    "match": "Đứng cầm một tạ đơn ngang vai. Đẩy tạ lên trên đầu rồi hạ lại ngang vai."
+  },
+  "single-leg-calf-raise": {
+    "url": "https://www.nowfitness.eu/en/exercises/dumbbell-single-leg-calf-raise",
+    "match": "Đứng bằng phần trước một bàn chân trên bậc, cầm một tạ đơn. Hạ gót dưới bậc rồi nhón lên và hạ chậm."
+  },
+  "sissy-squat": {
+    "url": "https://barbend.com/sissy-squat/",
+    "match": "Đứng tập bằng trọng lượng cơ thể. Đưa gối ra trước, nhấc gót và ngả thân rồi dùng đùi trước đứng lên."
+  },
+  "sit-up": {
+    "url": "https://www.weber.edu/wsuimages/employeewellness/WOW/Workout%20of%20the%20Week%207.pdf",
+    "match": "Nằm ngửa, gập gối, đặt bàn chân phẳng và bắt chéo tay trước ngực. Nâng thân tới khi ngồi rồi hạ xuống."
+  },
+  "skater-jump": {
+    "url": "https://us.physitrack.com/home-exercise-video/skater-jumps",
+    "match": "Từ một chân trụ, bật ngang và tiếp đất nhẹ bằng chân kia. Ổn định rồi bật ngược lại."
+  },
+  "skull-crushers": {
+    "url": "https://www.blkboxgym.com/exercise-library/ez-bar-skull-crusher",
+    "match": "Nằm ngửa trên ghế phẳng, hai chân đặt sàn. Gập khuỷu hạ thanh EZ về trán rồi duỗi tay."
+  },
+  "sliding-hamstring-curl": {
+    "url": "https://sportsrehab.ucsf.edu/sites/g/files/tkssra10961/files/doc/Hamstring_Injury_Protocol_Nov2025.pdf",
+    "match": "Nằm ngửa với hai gối gập và nâng hông. Kê khăn dưới chân, trượt chân ra để duỗi gối rồi kéo chân trở lại."
+  },
+  "smith-machine-bench-press": {
+    "url": "https://repfitness.com/blogs/training/smith-machine-bench-press",
+    "match": "Ghế phẳng trong máy Smith và chân đặt sàn. Chỉnh chốt, mở khóa rồi hạ thanh về giữa ngực trước khi đẩy lên."
+  },
+  "smith-machine-bent-over-row": {
+    "url": "https://www.strengthlog.com/smith-machine-exercises/",
+    "match": "Đứng trước thanh máy Smith, nắm úp và gập hông. Kéo thanh về bụng trên với khuỷu sát thân rồi hạ chậm."
+  },
+  "smith-machine-calf-raise": {
+    "url": "https://www.strengthlog.com/smith-machine-exercises/",
+    "match": "Phần trước bàn chân tựa bục dưới thanh máy Smith đặt trên lưng trên. Hạ rồi nâng gót bằng chuyển động cổ chân."
+  },
+  "smith-machine-hip-thrust": {
+    "url": "https://www.majorfitness.com/blogs/wiki/how-to-do-hip-thrusts-on-smith-machine-a-complete-guide",
+    "match": "Lưng trên tựa ghế và thanh có đệm nằm ngang hông. Chân đạp sàn để nâng hông đến khi vai, hông và gối thẳng hàng."
+  },
+  "smith-machine-overhead-press": {
+    "url": "https://keystonefitness.ca/wp-content/uploads/2023/05/Life-Fitness-pro-pro1-Series-Strength-Equipment-Owners-Manual.pdf",
+    "match": "Tài liệu nêu biến thể đẩy vai đứng trên máy Smith. Nắm thanh khi tay gần duỗi, mở khóa rồi hạ về trước thân và đẩy lên."
+  },
+  "smith-machine-romanian-deadlift": {
+    "url": "https://www.strengthlog.com/smith-machine-exercises/",
+    "match": "Đứng trước thanh máy Smith với tay nắm úp và gối hơi gập. Đẩy hông ra sau để thanh đi sát mặt trước chân rồi đứng lên."
+  },
+  "smith-machine-shrug": {
+    "url": "https://www.strengthlog.com/smith-machine-exercises/",
+    "match": "Đứng trước thanh máy Smith, nắm úp rộng ngang vai và duỗi tay. Nâng vai về phía tai rồi hạ chậm."
+  },
+  "smith-machine-squat": {
+    "url": "https://www.strengthlog.com/smith-machine-exercises/",
+    "match": "Đặt thanh trên lưng trên và chọn thế chân trước khi nhả móc. Hạ hông bằng cách gập gối và hông rồi đứng lên theo ray."
+  },
+  "sphinx-push-up": {
+    "url": "https://www.strengthresurgence.com/sphinx-push-up/",
+    "match": "Bản chống mũi chân, hai cẳng tay tựa sàn và lòng bàn tay áp sàn. Ấn hai tay để duỗi cả hai khuỷu rồi hạ. Xem các dòng 73–86."
+  },
+  "spider-curl": {
+    "url": "https://hortonbarbell.com/barbell-spider-curls-how-to-muscles-worked-benefits/",
+    "match": "Huấn luyện viên Ryan Horton, CSCS, hướng dẫn ngực tựa ghế dốc, tay nắm ngửa thanh tạ, cuốn lên rồi hạ chậm. Xem các dòng 20–33."
+  },
+  "squat-to-stand": {
+    "url": "https://cdn.muscleandstrength.com/exercises/squat-to-stand",
+    "match": "Gập hông nắm ngón chân, hạ vào squat sâu và nâng ngực. Nâng hông và duỗi chân khi tay còn nắm ngón chân. Xem các dòng 222–230."
+  },
+  "stability-ball-knee-tuck": {
+    "url": "https://russhowepti.com/exercises/swiss-ball-knee-tucks/",
+    "match": "Chống hai tay dưới vai và đặt bàn chân lên bóng. Kéo hai gối về ngực để lăn bóng vào, sau đó trở lại plank."
+  },
+  "stability-ball-rollout": {
+    "url": "https://theprehabguys.com/vimeo-video/ab-roll-out-2/",
+    "match": "Quỳ trước bóng và đặt cẳng tay lên bóng. Đẩy bóng ra với lưng ổn định rồi kéo bóng trở lại."
+  },
+  "stair-climber": {
+    "url": "https://www.puregym.com/us/blog/master-the-art-of-the-stair-climber",
+    "match": "Đặt tốc độ thấp rồi bước lên từng bậc chuyển động. Tài liệu phân biệt đi thẳng với biến thể bước ngang."
+  },
+  "standing-cable-chest-press": {
+    "url": "https://regroovefitness.com/wp-content/uploads/2020/11/WLS_Manual_CH10.pdf",
+    "match": "Hình 10.12 trong tài liệu NASM. Hai tay cầm cáp ngang ngực, đứng chân so le và đẩy cả hai tay ra trước ngực."
+  },
+  "standing-cable-hip-abduction": {
+    "url": "https://www.puregym.com/exercises/legs/inner-outer-thigh/cable-hip-abduction/",
+    "match": "Neo cáp thấp và đeo đai ở cổ chân xa máy. Đứng cạnh trụ, nâng chân thẳng sang bên rồi hạ có kiểm soát."
+  },
+  "standing-calf-raise-machine": {
+    "url": "https://www.strengthlog.com/standing-calf-raise/",
+    "match": "Đứng với vai dưới đệm và phần trước bàn chân trên bệ. Hạ gót có kiểm soát rồi nâng gót bằng cổ chân."
+  },
+  "standing-hamstring-curl": {
+    "url": "https://www.ulh.nhs.uk/wp-content/uploads/2026/01/Total-Knee-Replacement-Exercises.pdf",
+    "match": "Đứng một chân và gập gối chân kia để đưa gót về mông. Điểm vịn chỉ giúp giữ thăng bằng và không tạo tải."
+  },
+  "standing-hamstring-stretch": {
+    "url": "https://leedscommunityhealthcare.nhs.uk/our-services-a-z/physiotherapy-ican/physiotherapy-exercises-ican-physio/",
+    "match": "Đứng duỗi một chân ra trước, nâng mũi chân và nghiêng thân về trước từ hông để căng mặt sau đùi."
+  },
+  "standing-hip-abduction": {
+    "url": "https://www.oncolink.org/support/exercise-cancer/strength-exercises/standing-hip-abduction-gluteus-medius",
+    "match": "Biến thể không tạ bắt đầu đứng một chân cạnh điểm tựa. Giữ gối chân làm việc thẳng, nâng chân sang ngang và hạ chậm."
+  },
+  "standing-knee-drive": {
+    "url": "https://www.womenshealthmag.com/uk/fitness/strength-training/a64563996/standing-ab-exercises/",
+    "match": "Huấn luyện viên Kunal Makwana hướng dẫn đứng, tay sau đầu và đưa khuỷu về gối cùng bên. Xem các dòng 59–63."
+  },
+  "standing-leg-curl-machine": {
+    "url": "https://www.gympart.com/TSB/Body%20Master/Strength/Body_Master/D/instruction_manual.pdf",
+    "match": "Máy đứng có đệm tựa đùi và con lăn trên cổ chân. Tựa vào đệm rồi gập gối đưa gót về mông."
+  },
+  "standing-quad-stretch": {
+    "url": "https://www.mayoclinic.org/healthy-lifestyle/fitness/in-depth/stretching/art-20546848",
+    "match": "Đứng cạnh điểm tựa, gập một gối và nắm cổ chân phía sau. Kéo gót về mông và giữ hai gối gần nhau."
+  },
+  "standing-twister": {
+    "url": "https://www.mortisportandplay.co.uk/equipment/robinia-outdoor-gym-waist-twister",
+    "match": "Đứng trên đĩa xoay và nắm tay vịn. Xoay hông qua hai bên trong khi vai vẫn hướng về tay vịn."
+  },
+  "stationary-bike": {
+    "url": "https://www.jhta.com.au/wp-content/uploads/2021/03/Upright-Cycle-Frame-Owners-Guide.pdf",
+    "match": "Ngồi trên xe thẳng, đặt phần trước bàn chân giữa bàn đạp và chỉnh quai. Gối còn hơi gập ở điểm bàn đạp xa nhất."
+  },
+  "step-down": {
+    "url": "https://theprehabguys.com/vimeo-video/anterior-to-posterior-step-down/",
+    "match": "Phần bước xuống trước bắt đầu trên một chân ở mép bục. Gập gối và hông để chân kia chạm nhẹ sàn rồi đứng lên."
+  },
+  "step-jack": {
+    "url": "https://www.puregym.com/exercises/cardio/jumping-jack/step-jacks/",
+    "match": "Bước một chân sang bên trong lúc đưa hai tay lên đầu. Hạ tay khi khép chân rồi đổi bên. Xem các dòng 219–222 và mục hướng dẫn."
+  },
+  "step-ups": {
+    "url": "https://www.catalystathletics.com/exercise/560/Step-up/",
+    "match": "Hướng dẫn động tác bước bục nêu cả biến thể không tạ. Đặt bàn chân lên bục và dùng chân đó để đứng lên."
+  },
+  "sumo-deadlift": {
+    "url": "https://www.strengthlog.com/sumo-deadlift/",
+    "match": "Đặt hai chân rộng với thanh đòn ở giữa bàn chân. Nắm thanh trong hai chân, kéo sát thân tới khi đứng thẳng và hạ thanh xuống."
+  },
+  "sumo-squat": {
+    "url": "https://www.womenshealthmag.com/fitness/a20701570/sumo-squat/",
+    "match": "Huấn luyện viên Alena Luciani nêu đúng biến thể. Dang chân rộng và hạ người trong khi một tạ đơn treo thấp giữa hai chân."
+  },
+  "superman-pulldown": {
+    "url": "https://umanitoba.ca/sites/default/files/2021-04/warrior-workout-core-circuit.pdf",
+    "match": "Hình hướng dẫn nằm sấp, tay duỗi trước và chân nhấc nhẹ. Co khuỷu về gần thân, giữ ngực và chân nâng. Xem các dòng 67–72."
+  },
+  "t-bar-row": {
+    "url": "https://www.puregym.com/exercises/back/rows/landmine-row/",
+    "match": "Gập hông khi đứng hai bên thanh landmine và nắm tay cầm gắn dưới đĩa. Kéo về quanh rốn rồi hạ có kiểm soát."
+  },
+  "table-inverted-row": {
+    "url": "https://www.jimstoppani.com/training/at-home-equipment-free-back-workout",
+    "match": "Stoppani hướng dẫn biến thể nằm dưới mặt bàn và trực tiếp minh họa. Hướng dẫn Kysero xác nhận hai gót chạm sàn, nắm mép bàn, kéo ngực về bàn và hạ chậm."
+  },
+  "thoracic-extensions": {
+    "url": "https://www.peak-physio.com.au/exercise/thoracic-extension/",
+    "match": "Ngồi co gối với bàn chân đặt sàn, con lăn ngang dưới bả vai. Hai tay đỡ đầu, khuỷu mở. Ưỡn lưng trên qua con lăn rồi siết nhẹ bụng để trở về."
+  },
+  "tibialis-raise-machine": {
+    "url": "https://fitnessvolt.com/tibialis-raise-guide-muscles-worked-how-to-benefits-and-alternatives/",
+    "match": "Ngồi trên máy, đặt cả hai mu bàn chân dưới đệm và gót trên bệ. Gập cổ chân để nâng đệm, sau đó hạ xuống."
+  },
+  "towel-row": {
+    "url": "https://www.welshathletics.org/image/Documents/COVID-19/Throws%20week%201%20SC%20and%20Description%20updated%20.pdf",
+    "match": "Đứng quay mặt về cột, quấn khăn chắc quanh cột, nắm hai đầu và ngả người khi khăn căng. Kéo người về cột có kiểm soát. Xem các dòng 41–43."
+  },
+  "towel-wring": {
+    "url": "https://www.rehabhero.ca/exercise/towel-twist",
+    "match": "Hai tay nắm hai đầu khăn. Xoắn hai đầu ngược chiều để vắt khăn rồi đổi chiều xoắn."
+  },
+  "trap-bar-deadlift": {
+    "url": "https://www.strengthlog.com/trap-bar-deadlift-with-high-handles/",
+    "match": "Đứng giữa thanh lục giác, nắm hai tay cầm cao ngang giữa bàn chân. Nâng lên với lưng thẳng rồi hạ trở lại sàn."
+  },
+  "treadmill-incline-walk": {
+    "url": "https://www.nordictrack.com/blog/walking-treadmill-workout",
+    "match": "Đi bộ chậm trên băng chuyền để làm nóng. Sau đó tăng độ dốc ở nhịp đi bộ và giảm cường độ khi kết thúc."
+  },
+  "treadmill-run": {
+    "url": "https://resources.t-fitness.com/pdf/lifefitness/Bedienungsanleitung/Laufbaender/T3/Manual-Lifefitness-T3-ENG-v1.pdf",
+    "match": "Tài liệu xác nhận chế độ đi bộ và chạy, điều chỉnh tốc độ theo bước nhỏ và kẹp dây dừng khẩn cấp vào áo."
+  },
+  "v-squat": {
+    "url": "https://fitnesssuperstore.info/pdfs/Hammer%20Strength%20Plate-Loaded%20Owners%20Manual.pdf#page=27",
+    "match": "Chân đặt chắc trên bệ, lưng và vai tựa đệm. Nhả chốt sau khi đỡ tải rồi hạ và đứng lên theo quỹ đạo máy."
+  },
+  "v-up": {
+    "url": "https://www.crossfit.com/wp-content/uploads/2023/01/17095034/2023_CFGames_IQF_ClassPlan_Test4.pdf",
+    "match": "Bắt đầu nằm với chân chụm, hai tay qua đầu. Nâng chân và thân để đồng thời đưa hai tay chạm bàn chân rồi hạ xuống."
+  },
+  "wall-handstand-hold": {
+    "url": "https://crossfitroseville.com/how-to-become-a-handstand-beast/",
+    "match": "Chống hai tay trên sàn, hướng ngực ra khỏi tường, gót chạm tường. Giữ khuỷu thẳng và thân chắc trong lúc giữ."
+  },
+  "wall-slides": {
+    "url": "https://theprehabguys.com/vimeo-video/wall-angel/",
+    "match": "Đứng áp lưng vào tường, giữ khuỷu và bàn tay sát tường trong tầm với. Trượt tay lên và giữ bụng chắc để tránh ưỡn lưng."
+  },
+  "wall-tibialis-raise": {
+    "url": "https://www.strengthlog.com/tibialis-raise/",
+    "match": "Tựa lưng vào tường, giữ chân thẳng và gót trên sàn. Ngửa mũi chân lên rồi hạ xuống có kiểm soát."
+  },
+  "wide-grip-bench-press": {
+    "url": "https://powerliftingtechnique.com/wide-grip-bench-press/",
+    "match": "Bài viết mô tả ghế phẳng và tay nắm thanh rộng hơn vai. Kéo bả vai xuống, mở khóa, hạ thanh về ngực rồi đẩy trở lại."
+  },
+  "wide-grip-pull-up": {
+    "url": "https://www.muscleandstrength.com/exercises/wide-grip-pull-up.html",
+    "match": "Nắm úp trên xà với hai tay rộng hơn vai. Hạ bả vai, kéo cằm về gần xà rồi thả xuống có kiểm soát."
+  },
+  "wide-push-up": {
+    "url": "https://www.puregym.com/exercises/chest/press-up/wide-grip-push-ups/",
+    "match": "Tay chống sàn rộng hơn vai và chân trụ trên mũi chân. Hạ ngực rồi đẩy lên trong khi giữ thân thẳng."
+  },
+  "windshield-wipers": {
+    "url": "https://www.vaco.org/AchievementAwards/Entries2016/HenricoFireFitIntensiveFocus/HenricoFireFitIntensiveFocus.pdf",
+    "match": "Nằm ngửa, giữ vai trên sàn, đưa hai chân thẳng sát nhau lên rồi hạ cả hai chân sang mỗi bên. Xem các dòng 5217–5237."
+  },
+  "wrist-curl": {
+    "url": "https://www.strengthlog.com/barbell-wrist-curl/",
+    "match": "Nắm ngửa tạ đòn và tựa hai cẳng tay lên đùi. Hạ hai bàn tay rồi gập cổ tay lên để nâng thanh."
+  },
+  "wrist-roller": {
+    "url": "https://www.strengthlog.com/wrist-roller/",
+    "match": "Đứng và giữ thanh cuốn bằng hai tay duỗi ra trước. Xoay cổ tay để cuốn dây nâng tải rồi thả dây chậm."
+  },
+  "zottman-curl": {
+    "url": "https://www.catalystathletics.com/exercise/915/Zottman-Curl/",
+    "match": "Đứng cầm hai tạ đơn buông cạnh thân. Cuốn lên bằng tay nắm ngửa rồi xoay sang nắm úp để hạ."
+  }
+}

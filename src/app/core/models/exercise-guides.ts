@@ -1,4 +1,5 @@
 import { catalogEntry } from './exercise-catalog';
+import { exerciseGuideIllustrationNotes } from './exercise-guide-illustration-notes';
 import {
   framePhaseLabels,
   movingSingleFrameLabel,
@@ -15,6 +16,7 @@ export function exerciseGuide(exerciseId: string): ExerciseGuide | undefined {
   const entry = catalogEntry(exerciseId);
   const text = exerciseGuideText(exerciseId);
   if (!entry || !text) return undefined;
+  const illustrationNote = exerciseGuideIllustrationNotes[entry.id];
   return {
     timed: text.measure === 'seconds',
     equipment: text.equipment,
@@ -34,6 +36,7 @@ export function exerciseGuide(exerciseId: string): ExerciseGuide | undefined {
             : framePhaseLabels[phase],
       })),
       stacked: entry.frames.length > 1 && entry.width > entry.height,
+      ...(illustrationNote ? { note: illustrationNote } : {}),
     },
     ...(text.loadTotalOfTwo ? { loadLabel: 'Tổng hai tạ (kg)' } : {}),
     ...(entry.unilateral ? { perSide: true as const } : {}),

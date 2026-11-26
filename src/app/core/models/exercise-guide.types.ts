@@ -10,6 +10,7 @@ export interface ExerciseIllustration {
   alt: string;
   frames: readonly ExerciseFrame[];
   stacked: boolean;
+  note?: string;
 }
 
 export interface ExerciseGuideText {

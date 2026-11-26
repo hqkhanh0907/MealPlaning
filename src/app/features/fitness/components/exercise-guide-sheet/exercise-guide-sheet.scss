@@ -19,6 +19,14 @@ h3 {
 .note {
   color: var(--text-secondary);
 }
+.illustration-note {
+  border-inline-start: 3px solid var(--apple-semantic-warning);
+  padding-inline-start: var(--space-sm);
+}
+.illustration-note strong,
+.illustration-note span {
+  display: block;
+}
 .frames {
   display: grid;
   grid-auto-columns: minmax(0, 1fr);

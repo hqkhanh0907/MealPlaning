@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { session, sleep, d } from './lib.mjs';
+import { session, illustrationNoteMatches, sleep, d } from './lib.mjs';
 import { freshOffline, networkState, onboard } from './setup.mjs';
 const shots = new URL('./shots/', import.meta.url).pathname; fs.mkdirSync(shots, { recursive: true });
 const exp = Object.fromEntries(JSON.parse(fs.readFileSync(new URL('./expected.json', import.meta.url))).map((e) => [e.id, e]));
@@ -71,6 +71,7 @@ try {
   check('bản xem trước mẫu Hai tạ đơn và sàn mở đúng bài kéo hai tạ trên sàn', pvRow.id === 'renegade-row' && sameFrames(pvRow, 'renegade-row') && pvRow.frames.map((f) => f.caption).join() === 'Bắt đầu,Kết thúc', pvRow.frames);
   const pvPlank = await previewGuide(1, 'plank', 'preview-plank.png');
   check('bản xem trước Full Body mở plank với một hình tư thế giữ', pvPlank.id === 'plank' && sameFrames(pvPlank, 'plank') && pvPlank.frames.length === 1 && pvPlank.frames[0].caption === 'Tư thế giữ', pvPlank.frames);
+  check('bản xem trước plank không hiện chú thích hình', pvPlank.illustrationNote === null, pvPlank.illustrationNote);
   await tapText('Đóng', 0).catch(() => {});
 
   // --- Buổi theo giáo án Full Body A: tạ đòn, cáp, bài tính giây
@@ -100,8 +101,7 @@ try {
   await completeWorkout('guided');
 
   // --- Buổi tự do: tạ đơn tổng hai tạ, từng bên, máy, trọng lượng cơ thể, tạ chuông
-  await s.clickLabel('Bắt đầu buổi tự do').catch(() => tapText('Tập tự do'));
-  await waitFor("document.body.innerText.toUpperCase().includes('BUỔI TẬP ĐANG DIỄN RA')", 10000, 'free session');
+  await s.ensureFreeEntry();
   const totalId = ['dumbbell-romanian-deadlift', 'renegade-row', 'dumbbell-lunge', 'farmers-walk'].find((id) => exp[id].guide.loadLabel && !exp[id].timed && !exp[id].guide.perSide);
   const sideId = ['bulgarian-split-squat', 'dumbbell-row', 'single-leg-romanian-deadlift'].find((id) => exp[id].guide.perSide && !exp[id].timed);
   data.unitCases = { totalId, sideId };
@@ -111,11 +111,16 @@ try {
     { id: 'leg-press', weight: '80', amount: '10', row: '80 kg × 10 lần', labels: ['Tạ (kg)', 'Số lần'] },
     { id: 'push-up', amount: '12', row: '0 kg × 12 lần', labels: ['Tạ (kg)', 'Số lần'] },
     { id: 'kettlebell-goblet-squat', weight: '16', amount: '10', row: '16 kg × 10 lần', labels: ['Tạ (kg)', 'Số lần'] },
+    { id: 'side-plank', amount: '20', row: '20 giây', labels: ['Tập mỗi bên (giây)'] },
   ].filter(Boolean);
   check('danh mục có bài ghi tổng hai tạ và bài ghi từng bên để thử', Boolean(totalId && sideId), data.unitCases);
   for (const f of free) {
     await s.pickExercise(exp[f.id]);
-    await logSet({ id: f.id, weight: f.weight, amount: f.amount, expectRow: f.row, labels: f.labels, volume: f.volume });
+    const { guide } = await logSet({ id: f.id, weight: f.weight, amount: f.amount, expectRow: f.row, labels: f.labels, volume: f.volume });
+    if (f.id === 'side-plank') {
+      const note = exp[f.id].guide.illustration.note;
+      check('plank nghiêng hiện đúng chú thích phía trên hình', Boolean(note) && illustrationNoteMatches(guide.illustrationNote, note), guide.illustrationNote);
+    }
     if (f.id === 'kettlebell-goblet-squat') s.shot(shots + 'logger-kettlebell-goblet-squat.png');
   }
 
@@ -170,16 +175,18 @@ try {
   await waitFor("location.pathname.includes('history')", 10000, 'history');
   await sleep(1500);
   await ev("document.querySelectorAll('details').forEach(x=>x.open=true)"); await sleep(800);
-  const history = await ev("[...document.querySelectorAll('details')].map(c=>({title:c.querySelector('.session-card__day-name')?.textContent.trim(),stats:[...c.querySelectorAll('.stat')].map(x=>x.textContent.replace(/\\s+/g,' ').trim()),exercises:[...c.querySelectorAll('.session-exercise')].map(x=>({name:x.querySelector('h3').textContent.trim(),unit:x.querySelector('.session-exercise__unit')?.textContent.trim()??null,sets:[...x.querySelectorAll('.session-sets li')].map(l=>l.textContent.replace(/\\s+/g,' ').trim())}))}))");
+  const history = await ev("[...document.querySelectorAll('details')].map(c=>({title:c.querySelector('.session-card__day-name')?.textContent.trim(),stats:[...c.querySelectorAll('.stat')].map(x=>x.textContent.replace(/\\s+/g,' ').trim()),exercises:[...c.querySelectorAll('.session-exercise')].map(x=>({name:x.querySelector('h3').textContent.trim(),unit:x.querySelector('.session-exercise__unit')?.textContent.trim()??null,sets:[...x.querySelectorAll('.session-sets li > span:last-child')].map(l=>l.textContent.replace(/\\s+/g,' ').trim())}))}))");
   data.history = history;
   const all = history.flatMap((h) => h.exercises);
   for (const logged of data.logged) {
     const row = all.find((x) => x.name === logged.exercise);
-    check('lịch sử sau khi mở lại khớp hiệp đã ghi · ' + logged.exercise, row?.sets.length === 1 && row.sets[0].includes(logged.row), row);
+    check('lịch sử sau khi mở lại khớp hiệp đã ghi · ' + logged.exercise, row?.sets.length === 1 && row.sets[0] === logged.row, row ?? null);
   }
   const plankRow = all.find((x) => x.name === nameOf('plank'));
-  check('plank lưu đúng 30 giây, không thành số lần', plankRow?.sets[0].includes('30 giây') && !plankRow.sets[0].includes('lần'), plankRow);
+  check('plank lưu đúng 30 giây', plankRow?.sets[0] === '30 giây', plankRow ?? null);
   if (totalId) check('lịch sử ghi đơn vị tổng hai tạ', all.find((x) => x.name === nameOf(totalId))?.unit?.includes('Tổng hai tạ (kg)'), all.find((x) => x.name === nameOf(totalId)));
+  const sidePlankRow = all.find((x) => x.name === nameOf('side-plank'));
+  check('bài tính giây từng bên lưu giây và ghi đơn vị giây mỗi bên', sidePlankRow?.unit === 'Đơn vị ghi: Số giây mỗi bên' && sidePlankRow.sets[0] === '20 giây', sidePlankRow ?? null);
   if (sideId) check('lịch sử ghi đơn vị từng bên', all.find((x) => x.name === nameOf(sideId))?.unit?.includes('Số lần mỗi bên'), all.find((x) => x.name === nameOf(sideId)));
   check('lịch sử có đủ hai buổi vừa tập', history.length === 2 && history.some((h) => h.title === 'Full Body A') && history.some((h) => h.title === 'Tập tự do'), history.map((h) => [h.title, h.stats]));
   s.shot(shots + 'history.png');
@@ -187,8 +194,7 @@ try {
   await click('[data-testid=tab-fitness]').catch(() => {}); await sleep(1500);
 
   // --- Buổi đang tập sống sót khi hệ thống dựng lại màn hình (đổi cỡ chữ, màn hình nhỏ)
-  await s.clickLabel('Bắt đầu buổi tự do').catch(() => tapText('Tập tự do'));
-  await waitFor("document.body.innerText.toUpperCase().includes('BUỔI TẬP ĐANG DIỄN RA')", 10000, 'free session 2');
+  await s.ensureFreeEntry();
   await s.pickExercise(exp['kettlebell-goblet-squat']);
   await type('#weight-kg', '12'); await type('#reps', '9');
   await tapText('Ghi hiệp');
@@ -206,12 +212,12 @@ try {
   const restored = await s.logger();
   check('đổi cỡ chữ và cỡ màn hình giữa buổi: buổi đang tập và hiệp đã ghi còn nguyên', restored.sets.join().includes('12 kg × 9 lần') && restored.tabs.length === 2, restored);
   data.smallScreen = [];
-  for (const id of [longest.id, 'kettlebell-goblet-squat', 'plank']) {
-    if (id === 'plank') await s.pickExercise(exp.plank); else await s.selectTab(nameOf(id));
+  for (const id of [longest.id, 'kettlebell-goblet-squat', 'plank', 'side-plank']) {
+    if (id === 'plank' || id === 'side-plank') await s.pickExercise(exp[id]); else await s.selectTab(nameOf(id));
     await s.openGuide();
     const small = await s.readGuide();
     const chrome = await ev('(()=>{const m=' + s.GUIDE + ";const b=[...m.querySelectorAll('ion-button')].find(x=>x.textContent.trim()==='Đóng').getBoundingClientRect();const a=m.querySelector('.source a');a.scrollIntoView({block:'end'});const r=a.getBoundingClientRect();return{close:b.left>=0&&b.right<=innerWidth&&b.top>=0&&b.width>=40&&b.height>=40,sourceReachable:r.bottom<=innerHeight+1&&r.top>=0,vw:innerWidth,vh:innerHeight,font:getComputedStyle(m.querySelector('ol li')).fontSize,title:m.querySelector('h2').getBoundingClientRect().right<=innerWidth}})()");
-    check('màn hình nhỏ, cỡ chữ 1.3: không tràn ngang, ảnh giữ tỷ lệ, tên dài không bị cắt, nút Đóng và nguồn bấm được · ' + nameOf(id), sameFrames(small, id) && small.overflow <= 1 && small.right <= small.vw + 1 && chrome.close && chrome.title && chrome.sourceReachable && small.frames.every((f) => f.right <= small.vw && f.left >= 0 && Math.abs(f.w / f.h - f.nw / f.nh) < 0.02), { chrome, frames: small.frames.map((f) => f.w + 'x' + f.h), overflow: small.overflow });
+    check('màn hình nhỏ, cỡ chữ 1.3: không tràn ngang, ảnh giữ tỷ lệ, tên dài không bị cắt, nút Đóng và nguồn bấm được · ' + nameOf(id), sameFrames(small, id) && illustrationNoteMatches(small.illustrationNote, exp[id].guide.illustration.note) && small.overflow <= 1 && small.right <= small.vw + 1 && chrome.close && chrome.title && chrome.sourceReachable && small.frames.every((f) => f.right <= small.vw && f.left >= 0 && Math.abs(f.w / f.h - f.nw / f.nh) < 0.02), { chrome, note: small.illustrationNote, frames: small.frames.map((f) => f.w + 'x' + f.h), overflow: small.overflow });
     await ev('(' + s.GUIDE + ").querySelector('ion-content').scrollToTop?.(0)").catch(() => {}); await sleep(400);
     s.shot(shots + 'small-large-font-' + id + '.png');
     data.smallScreen.push({ id, ...chrome });
@@ -223,7 +229,7 @@ try {
   s = await session({ settleMs: 6000 }); ({ ev, waitFor, click, type, tapText } = bind());
   await waitFor("location.pathname.includes('tabs')", 30000, 'after display reset');
   await click('[data-testid=tab-fitness]').catch(() => {});
-  await waitFor("document.querySelectorAll('.workout-tab').length===3", 30000, 'session restored again');
+  await waitFor("document.querySelectorAll('.workout-tab').length===4", 30000, 'session restored again');
 
   // --- Mở lại hình khi vẫn ngoại tuyến, và ca âm
   await s.selectTab(nameOf('kettlebell-goblet-squat'));
@@ -242,6 +248,7 @@ try {
   try { d.adb('shell', 'wm', 'size', 'reset'); d.adb('shell', 'wm', 'density', 'reset'); d.adb('shell', 'settings', 'put', 'system', 'font_scale', '1.0'); } catch {}
   const out = { ...data, passed: checks.filter((c) => c.ok).length, failed: checks.filter((c) => !c.ok).length, checks };
   fs.writeFileSync(new URL('./flows-results.json', import.meta.url), JSON.stringify(out, null, 2));
+  if (out.failed) process.exitCode = 1;
   console.log('SUMMARY passed', out.passed, 'failed', out.failed);
   s.close();
 }

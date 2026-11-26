@@ -70,7 +70,7 @@ export const rotationGuides: ExerciseGuideTextSet = {
   },
   'cable-woodchopper': {
     nameVi: 'Chặt củi cáp từ cao xuống thấp',
-    equipment: 'Cáp ròng rọc cao · tay cầm đơn · đứng nghiêng một bên cạnh máy, chân rộng',
+    equipment: 'Máy cáp · ròng rọc ngang vai · một tay cầm · đứng nghiêng cạnh máy.',
     purpose:
       'Động tác xoay thân chéo từ cao xuống thấp giúp tập cơ bụng chéo với cáp và tay cầm đơn.',
     startPosition:
@@ -97,8 +97,8 @@ export const rotationGuides: ExerciseGuideTextSet = {
       'Dừng ngắn rồi siết cơ bụng bên đối diện để kéo thân về thẳng đứng.',
       'Giữ tay sau đầu nhẹ nhàng, không kéo cổ.',
     ],
-    source: 'American Council on Exercise · Exercise Library',
-    sourceUrl: 'https://www.acefitness.org/resources/everyone/exercise-library/',
+    source: 'StrengthLog · Dumbbell Side Bend',
+    sourceUrl: 'https://www.strengthlog.com/dumbbell-side-bend/',
     alt: 'Một khung giữ: người đứng thẳng nhìn từ phía trước, tay phải buông cầm một tạ đơn bên hông, tay trái đặt sau đầu. Thân và đầu nghiêng sang phía tay đặt sau đầu, xa phía tạ đơn. Chỉ thấy một tạ đơn.',
     measure: 'reps',
   },
@@ -124,15 +124,13 @@ export const rotationGuides: ExerciseGuideTextSet = {
     equipment: 'Tạ đòn gắn đế landmine · hai tay cầm đầu thanh có đĩa · đứng chân rộng',
     purpose: 'Động tác xoay thân theo vòng cung giúp tập cơ bụng chéo với tạ đòn gắn đế landmine.',
     startPosition:
-      'Đứng chân rộng hơn vai, hai tay nắm đầu thanh có đĩa. Tay gần thẳng, giơ đầu thanh lên cao ngang mặt về phía đế.',
+      'Đứng đối diện đế, hai chân rộng ngang vai. Nắm đầu thanh bằng hai tay và giữ trước ngực, tay gần duỗi thẳng.',
     steps: [
-      'Xoay thân và hông, hạ đầu thanh theo vòng cung xuống cạnh hông phía bên kia. Hai tay gần thẳng và gối hơi gập.',
-      'Giữ ngực cao, lưng thẳng, để hông cùng chân xoay theo thân.',
-      'Đưa đầu thanh trở lên theo vòng cung có kiểm soát, không vung bằng tay.',
+      'Xoay thân và hông, hạ đầu thanh theo vòng cung tới ngang hông một bên. Xoay bàn chân theo hông.',
+      'Đưa đầu thanh lên qua giữa rồi hạ tới ngang hông bên kia. Giữ tay gần thẳng và chuyển động chậm.',
     ],
-    source: 'American Council on Exercise · The ACE Workout Builder for Landmine Training',
-    sourceUrl:
-      'https://www.acefitness.org/continuing-education/certified/september-2025/8948/the-ace-workout-builder-for-landmine-training/',
+    source: 'O-SEA CrossFit · Landmine Rotation',
+    sourceUrl: 'https://oseacrossfit.com/movements/landmine-press/',
     alt: 'Khung bắt đầu: người đứng chân rộng nhìn từ phía trước, hai tay giơ đầu thanh có đĩa lên cao ngang đầu, đế landmine nằm sát sàn bên phải hình, gần ngang hàng với người. Khung kết thúc: hai tay hạ đầu thanh xuống thấp trước hông, gần giữa thân, gối gập.',
     measure: 'reps',
   },
@@ -163,8 +161,8 @@ export const rotationGuides: ExerciseGuideTextSet = {
       'Dừng ngắn ở cuối tầm thoải mái, gối hơi gập.',
       'Xoay hông về phía bên kia chậm rãi, không vung đà.',
     ],
-    source: 'American Council on Exercise · Exercise Library',
-    sourceUrl: 'https://www.acefitness.org/resources/everyone/exercise-library/',
+    source: 'Morti · Robinia Waist Twister',
+    sourceUrl: 'https://www.mortisportandplay.co.uk/equipment/robinia-outdoor-gym-waist-twister',
     alt: 'Khung bắt đầu: người đứng trên đĩa xoay nhìn từ phía trước, hai tay nắm thanh ngang trước ngực, gối và hông xoay sang một bên. Khung kết thúc: gối và hông xoay sang bên đối diện, vai và tay vẫn hướng thẳng phía trước.',
     measure: 'reps',
   },
@@ -173,14 +171,15 @@ export const rotationGuides: ExerciseGuideTextSet = {
     equipment: 'Sàn · nằm ngửa, hai tay dang ngang sát sàn, hai chân giơ thẳng lên',
     purpose: 'Động tác xoay thân dưới khi nằm giúp tập cơ bụng chéo bằng trọng lượng cơ thể.',
     startPosition:
-      'Nằm ngửa, hai tay dang ngang sát sàn. Hai chân khép, duỗi thẳng và giơ lên trên hông.',
+      'Nằm ngửa, đặt hai tay xuống sàn. Khép hai chân, duỗi gối và đưa bàn chân lên trên hông.',
     steps: [
-      'Siết bụng, giữ vai và hai tay sát sàn rồi hạ hai chân khép sang một bên. Dừng trước khi lưng dưới bị kéo khỏi sàn.',
-      'Dừng ngắn ở cuối tầm có kiểm soát, không để chân rơi.',
-      'Dùng cơ bụng đưa hai chân về thẳng lên rồi hạ sang bên kia.',
+      'Siết bụng và giữ hai vai trên sàn. Hạ chậm hai chân đang khép sang một bên.',
+      'Dừng trong tầm kiểm soát rồi nâng hai chân về vị trí thẳng đứng.',
+      'Tiếp tục hạ chân sang bên kia. Giữ hai chân đi cùng nhau.',
     ],
-    source: 'American Council on Exercise · Exercise Library',
-    sourceUrl: 'https://www.acefitness.org/resources/everyone/exercise-library/',
+    source: 'Henrico County Division of Fire · Windshield Wipers',
+    sourceUrl:
+      'https://www.vaco.org/AchievementAwards/Entries2016/HenricoFireFitIntensiveFocus/HenricoFireFitIntensiveFocus.pdf',
     alt: 'Khung bắt đầu: người nằm ngửa, hai tay duỗi sát sàn, hai chân khép giơ thẳng lên. Khung kết thúc: hai chân khép hạ chếch xuống gần sàn theo hướng dọc thân, giống động tác hạ chân thẳng, thân và hai tay vẫn sát sàn.',
     measure: 'reps',
   },

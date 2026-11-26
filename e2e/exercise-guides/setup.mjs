@@ -19,6 +19,13 @@ export function networkState() {
 export async function onboard(s) {
   const { ev, waitFor, tapText, click, type } = s;
   await waitFor("location.pathname.length>1", 30000, 'route');
+  if ((await ev('location.pathname')) === '/account') {
+    const account = { id: 'exerciseguideqa', username: 'exercise_guide_qa', token: 'offline-test-fixture' };
+    const session = JSON.stringify(account);
+    await ev(`localStorage.setItem('mealplan.session.v1', ${JSON.stringify(session)})`);
+    await ev("location.replace('/')");
+    await waitFor("location.pathname === '/onboarding' || location.pathname.startsWith('/tabs')", 30000, 'offline test account');
+  }
   if ((await ev('location.pathname')).includes('onboarding')) {
     await waitFor("!!document.querySelector('[data-testid=onb-step1-continue]')", 20000, 'step1');
     await tapText('Tăng cơ'); await click('[data-testid=onb-step1-continue]'); await sleep(900);
