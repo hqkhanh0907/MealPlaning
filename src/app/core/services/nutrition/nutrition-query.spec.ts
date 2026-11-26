@@ -170,7 +170,7 @@ describe('NutritionQuery (aggregate service)', () => {
       const dinnerId = await insertPlannedDish(source.slots['dinner'], dish, { servings: 2 });
       await db.execute('UPDATE planned_dish SET sort_order = 1 WHERE id = ?', [dinnerId]);
       store = TestBed.inject(CalendarStore);
-      store.currentDate.set(target);
+      store.setDate(target);
     });
 
     it('keeps exactly two fresh plans after simultaneous taps and a retry', async () => {
@@ -224,7 +224,9 @@ describe('NutritionQuery (aggregate service)', () => {
         db
           .query<{
             id: string;
-          }>('SELECT id FROM planned_dish WHERE meal_slot_id = ? ORDER BY sort_order, created_at', [slot])
+          }>('SELECT id FROM planned_dish WHERE meal_slot_id = ? ORDER BY sort_order, created_at', [
+            slot,
+          ])
           .then((rows) => rows.map((row) => row.id));
       expect(await ids()).toEqual([a.id, b.id, c.id, d.id]);
       const tail = (await repo.delete(d.id))!;

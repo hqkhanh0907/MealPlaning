@@ -1,5 +1,6 @@
 import { ApplicationRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { LocalDay } from '../../../core/stores/local-day';
 import { DatePickerModal } from './date-picker-modal';
 
 const DAY_MS = 86_400_000;
@@ -98,5 +99,25 @@ describe('DatePickerModal', () => {
     flushEffects();
     expect(component.minIso()).toBe(isoLocal(new Date(Date.now() - 7 * DAY_MS)));
     expect(component.maxIso()).toBe(isoLocal(new Date(Date.now() + 7 * DAY_MS)));
+  });
+
+  it('updates the date window without replacing a selection in an open picker', () => {
+    const localDay = TestBed.inject(LocalDay);
+    localDay.iso.set('2026-11-26');
+    fixture.componentRef.setInput('clampDays', 7);
+    fixture.componentRef.setInput('initialDate', '2026-11-26');
+    fixture.componentRef.setInput('isOpen', true);
+    flushEffects();
+    component.onIonChange(new CustomEvent('ionChange', { detail: { value: '2026-11-30' } }));
+
+    localDay.iso.set('2026-11-27');
+    fixture.componentRef.setInput('initialDate', '2026-11-27');
+    flushEffects();
+
+    expect(component.minIso()).toBe('2026-11-20');
+    expect(component.maxIso()).toBe('2026-12-04');
+    expect(component.selection()).toBe('2026-11-30');
+    component.jumpToday();
+    expect(component.selection()).toBe('2026-11-27');
   });
 });

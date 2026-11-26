@@ -5,6 +5,7 @@ import { NutritionQuery } from '../services/nutrition/nutrition-query';
 import { CalendarStore } from './calendar.store';
 import { ProfileStore } from './profile.store';
 import type { UserProfile } from '../models/user-profile.model';
+import { ZERO_TOTALS, type NutritionTotals } from '../models/nutrition';
 
 describe('NutritionStore', () => {
   let currentDate: ReturnType<typeof signal<string>>;
@@ -118,6 +119,28 @@ describe('NutritionStore', () => {
     await Promise.resolve();
     await Promise.resolve();
     expect(dailyTotalsSpy).toHaveBeenCalledWith('2026-05-11');
+  });
+
+  it('keeps the selected day totals when the old day finishes loading last', async () => {
+    let finishOldDay!: (totals: NutritionTotals) => void;
+    const oldDay = new Promise<NutritionTotals>((resolve) => {
+      finishOldDay = resolve;
+    });
+    dailyTotalsSpy.and.callFake((date: string) =>
+      date === '2026-05-10' ? oldDay : Promise.resolve({ ...ZERO_TOTALS, calories: 180 }),
+    );
+    const store = TestBed.inject(NutritionStore);
+    TestBed.flushEffects();
+
+    currentDate.set('2026-05-11');
+    TestBed.flushEffects();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(store.today().calories).toBe(180);
+
+    finishOldDay({ ...ZERO_TOTALS, calories: 350 });
+    await oldDay;
+    expect(store.today().calories).toBe(180);
   });
 
   // ─── derived targets / keyMetric ──────────────────────────────────────

@@ -44,6 +44,7 @@ export class NutritionStore {
   private readonly calendarStore = inject(CalendarStore);
   private readonly profileStore = inject(ProfileStore);
   private readonly query = inject(NutritionQuery);
+  private refreshSeq = 0;
 
   // ─── live state ───────────────────────────────────────────────────────
   readonly today = signal<NutritionTotals>({ ...ZERO_TOTALS });
@@ -104,12 +105,13 @@ export class NutritionStore {
 
   async refreshToday(date?: string): Promise<void> {
     const target = date ?? this.calendarStore.currentDate();
+    const seq = ++this.refreshSeq;
     this.loading.set(true);
     try {
       const totals = await this.query.dailyTotals(target);
-      this.today.set(totals);
+      if (seq === this.refreshSeq) this.today.set(totals);
     } finally {
-      this.loading.set(false);
+      if (seq === this.refreshSeq) this.loading.set(false);
     }
   }
 

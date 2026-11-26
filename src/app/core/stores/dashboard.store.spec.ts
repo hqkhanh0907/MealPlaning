@@ -27,6 +27,7 @@ import { InsightAi } from '../services/ai/insight-ai';
 import { CameraCapture } from '../services/camera/camera-capture';
 import type { KeyMetric } from '../utils/key-metric-router';
 import { NetworkStore } from './network.store';
+import { LocalDay } from './local-day';
 
 const ZERO_TOTALS: NutritionTotals = {
   calories: 0,
@@ -347,6 +348,35 @@ describe('DashboardStore', () => {
     await settle();
 
     expect(query.dailyTotals).toHaveBeenCalled();
+  });
+
+  it('loads the next day when the dashboard stays open across midnight', async () => {
+    const clock = jasmine.clock();
+    clock.install();
+    try {
+      const localDay = TestBed.inject(LocalDay);
+      clock.mockDate(new Date(2026, 10, 26, 23, 59));
+      localDay.iso.set('2026-11-26');
+      TestBed.flushEffects();
+      await settle();
+      query.dailyTotals.and.resolveTo({ ...ZERO_TOTALS, calories: 350 });
+      await store.refresh();
+      expect(store.todayIso()).toBe('2026-11-26');
+      expect(store.totals().calories).toBe(350);
+
+      query.dailyTotals.and.resolveTo({ ...ZERO_TOTALS, calories: 180 });
+      const refresh = spyOn(store, 'refresh').and.callThrough();
+      clock.mockDate(new Date(2026, 10, 27, 0, 1));
+      localDay.iso.set('2026-11-27');
+      TestBed.flushEffects();
+      await settle();
+      if (refresh.calls.any()) await refresh.calls.mostRecent().returnValue;
+
+      expect(store.todayIso()).toBe('2026-11-27');
+      expect(store.totals().calories).toBe(180);
+    } finally {
+      clock.uninstall();
+    }
   });
 
   it('shows an actionable warning insight when forecast calories exceed target', async () => {

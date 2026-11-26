@@ -8,6 +8,7 @@ import { MealPlanAi } from '../../core/services/ai/meal-plan-ai';
 import { MenuSuggestionAi } from '../../core/services/ai/menu-suggestion-ai';
 import { CalendarStore } from '../../core/stores/calendar.store';
 import { DishStore } from '../../core/stores/dish.store';
+import { LocalDay } from '../../core/stores/local-day';
 import { NetworkStore } from '../../core/stores/network.store';
 import { NutritionStore } from '../../core/stores/nutrition.store';
 import CalendarPage from './calendar.page';
@@ -65,6 +66,8 @@ const PLAN: DayPlanWithSlots = {
 describe('CalendarPage', () => {
   let fixture: ComponentFixture<CalendarPage>;
   let page: CalendarPage;
+  let localDay: LocalDay;
+  let currentDate: ReturnType<typeof signal<string>>;
   let store: jasmine.SpyObj<CalendarStore>;
   let alertCtrl: jasmine.SpyObj<AlertController>;
 
@@ -76,6 +79,7 @@ describe('CalendarPage', () => {
   }
 
   beforeEach(async () => {
+    currentDate = signal(DATE);
     store = jasmine.createSpyObj<CalendarStore>(
       'CalendarStore',
       [
@@ -88,7 +92,7 @@ describe('CalendarPage', () => {
         'setView',
       ],
       {
-        currentDate: signal(DATE),
+        currentDate,
         currentView: signal('week'),
         dayPlan: signal(PLAN),
         addMealForDate: signal(null),
@@ -111,7 +115,7 @@ describe('CalendarPage', () => {
     store.moveDish.and.resolveTo();
     store.copyToDate.and.resolveTo(DISH);
     store.editServings.and.resolveTo();
-    store.setDate.and.callFake((date) => store.currentDate.set(date));
+    store.setDate.and.callFake((date) => currentDate.set(date));
     store.setView.and.callFake((view) => store.currentView.set(view));
     alertCtrl = jasmine.createSpyObj<AlertController>('AlertController', ['create']);
     alertCtrl.create.and.resolveTo({ present: async () => undefined } as HTMLIonAlertElement);
@@ -148,14 +152,27 @@ describe('CalendarPage', () => {
       ],
     }).compileComponents();
 
+    localDay = TestBed.inject(LocalDay);
+    localDay.iso.set(DATE);
     fixture = TestBed.createComponent(CalendarPage);
     page = fixture.componentInstance;
     fixture.detectChanges();
   });
 
+  it('relabels the selected date when the local day changes', () => {
+    const chip = fixture.nativeElement.querySelector('.calendar-date-chip span') as HTMLElement;
+    expect(chip.textContent?.trim()).toBe('Hôm nay');
+
+    localDay.iso.set('2026-05-12');
+    fixture.detectChanges();
+
+    expect(chip.textContent?.trim()).toBe('Hôm qua');
+    expect(store.currentDate()).toBe(DATE);
+  });
+
   it('reveals the requested dish after the reused calendar opens the requested day', () => {
     const staleDate = '2026-05-12';
-    store.currentDate.set(staleDate);
+    currentDate.set(staleDate);
     store.dayPlan.set({ ...PLAN, date: staleDate });
     const scroll = spyOn(HTMLElement.prototype, 'scrollIntoView');
     const focus = spyOn(HTMLElement.prototype, 'focus');
@@ -209,7 +226,7 @@ describe('CalendarPage', () => {
     };
     const pending = page.onAiCta();
     await started;
-    store.currentDate.set('2026-05-12');
+    currentDate.set('2026-05-12');
     answer([{ mealType: 'lunch', dishId: 'dish', servings: 1, reason: 'Món thử' }]);
     await pending;
     expect(store.replaceCurrentDatePlan).not.toHaveBeenCalled();

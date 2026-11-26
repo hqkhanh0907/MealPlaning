@@ -36,7 +36,7 @@ import {
   settingsOutline,
   sparklesOutline,
 } from 'ionicons/icons';
-import { localIsoDate, parseLocalDate, shiftIsoDate } from '../../core/utils/local-date';
+import { parseLocalDate, shiftIsoDate } from '../../core/utils/local-date';
 import {
   MAX_PLANNED_SERVINGS,
   MEAL_LABELS,
@@ -53,6 +53,7 @@ import type { DishListItem } from '../../core/repositories/dish.repository';
 import { CalendarStore, type PendingMealTarget } from '../../core/stores/calendar.store';
 import { DayPlanRepository } from '../../core/repositories/day-plan.repository';
 import { DishStore } from '../../core/stores/dish.store';
+import { LocalDay } from '../../core/stores/local-day';
 import { NetworkStore } from '../../core/stores/network.store';
 import { NutritionStore } from '../../core/stores/nutrition.store';
 import {
@@ -143,7 +144,7 @@ export default class CalendarPage implements AfterViewInit {
   protected readonly ai = inject(AiAvailability);
   protected readonly store = inject(CalendarStore);
 
-  private readonly today = localIsoDate();
+  private readonly localDay = inject(LocalDay);
   private gesture: Gesture | undefined;
   private lastToast: HTMLIonToastElement | undefined;
   private readonly swipeTarget = viewChild<ElementRef<HTMLElement>>('swipeArea');
@@ -151,7 +152,7 @@ export default class CalendarPage implements AfterViewInit {
   private readonly viewEntered = signal(false);
 
   readonly headerLabel = computed<string>(() =>
-    relativeDateLabel(this.store.currentDate(), this.today),
+    relativeDateLabel(this.store.currentDate(), this.localDay.iso()),
   );
 
   /** Inclusive range of the active week (Mon → Sun), e.g. "11 – 17 tháng 5". */

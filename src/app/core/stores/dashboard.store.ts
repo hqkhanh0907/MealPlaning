@@ -9,6 +9,7 @@ import { CalendarStore, type PendingMealTarget } from './calendar.store';
 import { NutritionStore } from './nutrition.store';
 import { ProfileStore } from './profile.store';
 import { NetworkStore } from './network.store';
+import { LocalDay } from './local-day';
 import { UserProfileRepository } from '../repositories/user-profile.repository';
 import { DayPlanRepository } from '../repositories/day-plan.repository';
 import { WorkoutRepository } from '../repositories/workout.repository';
@@ -77,6 +78,7 @@ const MACRO_LABELS: Record<MacroMetric, string> = {
 @Injectable({ providedIn: 'root' })
 export class DashboardStore {
   private readonly calendarStore = inject(CalendarStore);
+  private readonly localDay = inject(LocalDay);
   private readonly nutritionStore = inject(NutritionStore);
   private readonly profileStore = inject(ProfileStore);
   private readonly networkStore = inject(NetworkStore);
@@ -276,6 +278,7 @@ export class DashboardStore {
   constructor() {
     effect(() => {
       this.calendarStore.invalidationTick();
+      this.localDay.iso();
       this.profileStore.profile();
       untracked(() => {
         queueMicrotask(() => {

@@ -3,13 +3,16 @@ import { ApplicationRef, signal } from '@angular/core';
 import type { DayPlanWithSlots, PlannedDish } from '../models/meal-plan.types';
 import { DayPlanRepository } from '../repositories/day-plan.repository';
 import { PlannedDishRepository } from '../repositories/planned-dish.repository';
+import { shiftIsoDate } from '../utils/local-date';
 import { CalendarStore } from './calendar.store';
 import { DishStore } from './dish.store';
 import { IngredientStore } from './ingredient.store';
+import { LocalDay } from './local-day';
 import { ProfileStore } from './profile.store';
 
 describe('CalendarStore', () => {
   let store: CalendarStore;
+  let localDay: LocalDay;
   let dayPlanRepo: jasmine.SpyObj<DayPlanRepository>;
   let plannedDishRepo: jasmine.SpyObj<PlannedDishRepository>;
   let dishChangedSignal: ReturnType<typeof signal<number>>;
@@ -96,6 +99,7 @@ describe('CalendarStore', () => {
         { provide: ProfileStore, useValue: { profile } },
       ],
     });
+    localDay = TestBed.inject(LocalDay);
     store = TestBed.inject(CalendarStore);
   });
 
@@ -132,6 +136,82 @@ describe('CalendarStore', () => {
       const min = new Date(today.getTime() - 365 * 86_400_000);
       const expected = `${min.getFullYear()}-${String(min.getMonth() + 1).padStart(2, '0')}-${String(min.getDate()).padStart(2, '0')}`;
       expect(store.currentDate()).toBe(expected);
+    });
+  });
+
+  describe('local day changes', () => {
+    it('loads the new local day while following Today', async () => {
+      dayPlanRepo.findByDate.and.callFake(async (date) => ({ ...sampleDayPlan, date }));
+      const previous = localDay.iso();
+      await flush();
+      expect(store.dayPlan()?.date).toBe(previous);
+
+      const next = shiftIsoDate(previous, 1);
+      localDay.iso.set(next);
+      await flush();
+
+      expect(store.currentDate()).toBe(next);
+      expect(store.dayPlan()?.date).toBe(next);
+    });
+
+    it('keeps a pinned date until the user chooses Today again', () => {
+      const previous = localDay.iso();
+      const pinned = shiftIsoDate(previous, 1);
+      store.setDate(pinned);
+
+      localDay.iso.set(pinned);
+      expect(store.currentDate()).toBe(pinned);
+      const next = shiftIsoDate(pinned, 1);
+      localDay.iso.set(next);
+      expect(store.currentDate()).toBe(pinned);
+
+      store.setDate(next);
+      const following = shiftIsoDate(next, 1);
+      localDay.iso.set(following);
+      expect(store.currentDate()).toBe(following);
+    });
+
+    it('clamps navigation using the new day', () => {
+      localDay.iso.set('2026-11-30');
+
+      store.setDate('2099-01-01');
+      expect(store.currentDate()).toBe('2027-11-30');
+      store.setDate('1990-01-01');
+      expect(store.currentDate()).toBe('2025-11-30');
+      store.setDate('2026-02-30');
+      expect(store.currentDate()).toBe('2026-11-30');
+    });
+
+    it('updates past and Today markers in the same pinned week', async () => {
+      localDay.iso.set('2026-11-25');
+      store.setDate('2026-11-23');
+      dayPlanRepo.findByDateRange.and.resolveTo([]);
+      store.setView('week');
+      await flush();
+      expect(store.weekData()?.find((day) => day.isToday)?.date).toBe('2026-11-25');
+
+      localDay.iso.set('2026-11-26');
+      await flush();
+
+      expect(store.currentDate()).toBe('2026-11-23');
+      expect(store.weekData()?.find((day) => day.isToday)?.date).toBe('2026-11-26');
+      expect(store.weekData()?.find((day) => day.date === '2026-11-25')?.isPast).toBeTrue();
+    });
+
+    it('loads the new week when Sunday rolls into Monday in Today mode', async () => {
+      localDay.iso.set('2026-11-29');
+      dayPlanRepo.findByDateRange.and.resolveTo([]);
+      store.setView('week');
+      await flush();
+      expect(store.weekData()?.[0].date).toBe('2026-11-23');
+
+      localDay.iso.set('2026-11-30');
+      await flush();
+
+      expect(store.weekData()?.[0]).toEqual(
+        jasmine.objectContaining({ date: '2026-11-30', isToday: true }),
+      );
+      expect(store.weekData()?.[6].date).toBe('2026-12-06');
     });
   });
 
@@ -269,6 +349,48 @@ describe('CalendarStore', () => {
   });
 
   describe('hydration effect (AC-7)', () => {
+    it('discards an old day after its delayed second read', async () => {
+      const oldDate = '2026-05-12';
+      const newDate = '2026-05-13';
+      let finishOldDay!: (day: DayPlanWithSlots) => void;
+      const pendingOldDay = new Promise<DayPlanWithSlots>((resolve) => (finishOldDay = resolve));
+      dayPlanRepo.findByDate.and.returnValues(
+        Promise.resolve(null),
+        pendingOldDay,
+        Promise.resolve({ ...sampleDayPlan, date: newDate }),
+      );
+      dayPlanRepo.getOrCreateForDate.and.resolveTo({ ...sampleDayPlan, date: oldDate });
+
+      store.setDate(oldDate);
+      await flush();
+      expect(dayPlanRepo.findByDate).toHaveBeenCalledTimes(2);
+      store.setDate(newDate);
+      await flush();
+      expect(store.dayPlan()?.date).toBe(newDate);
+
+      finishOldDay({ ...sampleDayPlan, date: oldDate });
+      await flush();
+      expect(store.dayPlan()?.date).toBe(newDate);
+    });
+
+    it('discards old totals after refreshing the same week', async () => {
+      let finishOldWeek!: (week: DayPlanWithSlots[]) => void;
+      const pendingOldWeek = new Promise<DayPlanWithSlots[]>(
+        (resolve) => (finishOldWeek = resolve),
+      );
+      dayPlanRepo.findByDateRange.and.returnValues(pendingOldWeek, Promise.resolve([]));
+      store.setView('week');
+      await flush();
+
+      await store.addDish('s-1', 'd-1', 1);
+      await flush();
+      expect(store.weekData()?.[0].targetCal).toBe(0);
+
+      finishOldWeek([{ ...sampleDayPlan, date: store.weekDays()[0], target_calories: 1900 }]);
+      await flush();
+      expect(store.weekData()?.[0].targetCal).toBe(0);
+    });
+
     it('reads the day again when ingredient nutrition changes', async () => {
       await flush();
       dayPlanRepo.findByDate.calls.reset();
@@ -388,7 +510,7 @@ describe('CalendarStore', () => {
     });
 
     it('copies the previous local date into the selected day and refreshes once', async () => {
-      store.currentDate.set('2026-03-01');
+      store.setDate('2026-03-01');
       plannedDishRepo.copyDayIntoEmpty.and.resolveTo(2);
       const revision = store.invalidationTick();
       expect((await store.copyFromYesterday()).copiedCount).toBe(2);

@@ -23,6 +23,7 @@ import {
 } from '../repositories/planned-dish.repository';
 import { DishStore } from './dish.store';
 import { IngredientStore } from './ingredient.store';
+import { LocalDay } from './local-day';
 import { ProfileStore } from './profile.store';
 
 const VN_DAY_LABELS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'] as const;
@@ -32,6 +33,8 @@ export interface PendingMealTarget {
   mealType: MealType;
   plannedDishId: string;
 }
+
+type WeekTotals = Omit<WeekDayTotal, 'isToday' | 'isPast'>;
 
 /** Inclusive [today-365, today+365] window per F-03 §2.D2. */
 function clampDate(target: string, today: Date): string {
@@ -53,40 +56,40 @@ export class CalendarStore {
   private readonly plannedDishRepo = inject(PlannedDishRepository);
   private readonly dishStore = inject(DishStore);
   private readonly profileStore = inject(ProfileStore);
+  private readonly localDay = inject(LocalDay);
+  private readonly pinnedDate = signal<string | null>(null);
+  private readonly weekTotals = signal<WeekTotals[] | null>(null);
 
-  /** Captured at construction so clamp behaviour stays test-deterministic. */
-  private readonly today = new Date();
-
-  readonly currentDate = signal(localIsoDate(this.today));
+  readonly currentDate = computed(() => this.pinnedDate() ?? this.localDay.iso());
   readonly currentView = signal<'day' | 'week'>('day');
   readonly invalidationTick = signal(0);
   readonly dayPlan = signal<DayPlanWithSlots | null>(null);
-  readonly weekData = signal<WeekDayTotal[] | null>(null);
 
-  readonly weekDays = computed(() =>
-    weekDates(localIsoDate(mondayOfWeek(parseLocalDate(this.currentDate())))),
+  private readonly weekStart = computed(() =>
+    localIsoDate(mondayOfWeek(parseLocalDate(this.currentDate()))),
   );
-
-  /** ISO of "today" snapshotted at construction (used by week view). */
-  private readonly todayIso = localIsoDate(this.today);
+  readonly weekDays = computed(() => weekDates(this.weekStart()));
+  readonly weekData = computed<WeekDayTotal[] | null>(() => {
+    const totals = this.weekTotals();
+    if (!totals || totals[0]?.date !== this.weekStart()) return null;
+    const today = this.localDay.iso();
+    return totals.map((day) => ({ ...day, isToday: day.date === today, isPast: day.date < today }));
+  });
 
   constructor() {
     // Auto-hydrate dayPlan when currentDate or invalidationTick changes.
     effect(() => {
       const date = this.currentDate();
-      // Touch tick so the effect re-runs on bump.
-      this.invalidationTick();
-      void this.hydrateDayPlan(date);
+      void this.hydrateDayPlan(date, this.invalidationTick());
     });
 
     // Auto-hydrate weekData when currentView=week + week changes or invalidation.
     effect(() => {
       const view = this.currentView();
       const days = this.weekDays();
-      this.invalidationTick();
       if (view !== 'week') return;
       const target = this.profileStore.profile()?.target_calories ?? 0;
-      void this.hydrateWeek(days, target);
+      void this.hydrateWeek(days, target, this.invalidationTick());
     });
 
     // Cross-store wiring: any DishStore mutation invalidates Calendar.
@@ -102,7 +105,8 @@ export class CalendarStore {
   // -- pure signal mutations --------------------------------------------------
 
   setDate(date: string): void {
-    this.currentDate.set(clampDate(date, this.today));
+    const clamped = clampDate(date, this.localDay.date());
+    this.pinnedDate.set(clamped === this.localDay.iso() ? null : clamped);
   }
 
   setView(view: 'day' | 'week'): void {
@@ -234,15 +238,17 @@ export class CalendarStore {
 
   // -- internal ---------------------------------------------------------------
 
-  private async hydrateDayPlan(date: string): Promise<void> {
+  private async hydrateDayPlan(date: string, tick: number): Promise<void> {
+    const isCurrent = (): boolean =>
+      this.currentDate() === date && this.invalidationTick() === tick;
     let result = await this.dayPlanRepo.findByDate(date);
-    // Stale-result guard: if currentDate changed mid-fetch, drop this update.
-    if (this.currentDate() !== date) return;
+    if (!isCurrent()) return;
 
     if (!result) {
       await this.dayPlanRepo.getOrCreateForDate(date);
-      if (this.currentDate() !== date) return;
+      if (!isCurrent()) return;
       result = await this.dayPlanRepo.findByDate(date);
+      if (!isCurrent()) return;
       if (!result) {
         throw new Error(`CalendarStore: failed to hydrate day plan for '${date}'`);
       }
@@ -251,15 +257,14 @@ export class CalendarStore {
     this.dayPlan.set(result);
   }
 
-  private async hydrateWeek(days: string[], profileTarget: number): Promise<void> {
+  private async hydrateWeek(days: string[], profileTarget: number, tick: number): Promise<void> {
     const start = days[0];
     const end = days[6];
     const dayPlans = await this.dayPlanRepo.findByDateRange(start, end);
-    // Stale-result guard
-    const current = this.weekDays();
     if (
-      current[0] !== start ||
-      current[6] !== end ||
+      this.currentView() !== 'week' ||
+      this.weekStart() !== start ||
+      this.invalidationTick() !== tick ||
       profileTarget !== (this.profileStore.profile()?.target_calories ?? 0)
     )
       return;
@@ -267,8 +272,7 @@ export class CalendarStore {
     const byDate = new Map<string, DayPlanWithSlots>();
     for (const dp of dayPlans) byDate.set(dp.date, dp);
 
-    const todayIso = this.todayIso;
-    const totals: WeekDayTotal[] = days.map((date, i) => {
+    const totals: WeekTotals[] = days.map((date, i) => {
       const dp = byDate.get(date);
       let logged = 0;
       let planned = 0;
@@ -294,11 +298,9 @@ export class CalendarStore {
         loggedCal: logged,
         plannedCal: planned,
         targetCal,
-        isToday: date === todayIso,
-        isPast: date < todayIso,
         hasPlan: dotCount > 0,
       };
     });
-    this.weekData.set(totals);
+    this.weekTotals.set(totals);
   }
 }
