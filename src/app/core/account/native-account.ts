@@ -41,9 +41,9 @@ interface NativeAccount {
   updateProfile(options: { fullName: string }): Promise<void>;
   clear(): Promise<void>;
   enqueue(options: { guard?: boolean; ownerId: string }): Promise<void>;
-  syncNow(): Promise<NativeSyncState>;
+  syncNow(options: { ownerId: string }): Promise<NativeSyncState>;
   status(): Promise<NativeSyncState>;
-  resolveConflict(options: { useServer: boolean }): Promise<NativeSyncState>;
+  resolveConflict(options: { ownerId: string; useServer: boolean }): Promise<NativeSyncState>;
 }
 
 export const nativeAccount = registerPlugin<NativeAccount>('MealPlanSync');

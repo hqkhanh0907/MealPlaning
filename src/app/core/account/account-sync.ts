@@ -34,19 +34,22 @@ export class AccountSync {
   }
 
   sync(restore = false): Promise<void> {
-    return this.run(() => nativeAccount.syncNow(), !restore);
+    return this.run((ownerId) => nativeAccount.syncNow({ ownerId }), !restore);
   }
 
   resolveConflict(useServer: boolean): Promise<void> {
-    return this.run(() => nativeAccount.resolveConflict({ useServer }), true);
+    return this.run((ownerId) => nativeAccount.resolveConflict({ ownerId, useServer }), true);
   }
 
-  private run(action: () => Promise<NativeSyncState>, reload: boolean): Promise<void> {
+  private run(
+    action: (ownerId: string) => Promise<NativeSyncState>,
+    reload: boolean,
+  ): Promise<void> {
     const owner = this.session.current()?.id;
     if (!this.ready || !owner) return Promise.resolve();
     if (this.running) return this.running;
     this.status.set('working');
-    this.running = action()
+    this.running = action(owner)
       .then((state) => this.applyState(state, owner, reload))
       .catch(() => {
         if (this.session.current()?.id === owner) this.status.set('offline');

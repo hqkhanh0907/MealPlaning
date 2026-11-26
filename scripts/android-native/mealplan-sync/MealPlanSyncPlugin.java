@@ -121,10 +121,23 @@ public final class MealPlanSyncPlugin extends Plugin {
     }
 
     private void transfer(PluginCall call, Boolean choice) {
-        run(call, NETWORK, () -> {
-            SessionVault.Session account = vault.read();
-            if (account == null) return SyncEngine.idle();
-            return new SyncEngine(context).run(account, "manual", UUID.randomUUID().toString(), choice, () -> false);
+        String owner = call.getString("ownerId", "");
+        if (owner.isEmpty()) {
+            call.reject("Missing sync owner", "native_sync_owner_required");
+            return;
+        }
+        CONTROL.execute(() -> {
+            try {
+                SessionVault.Session account = vault.read();
+                if (account == null || !owner.equals(account.ownerId)) {
+                    call.resolve(SyncEngine.idle());
+                    return;
+                }
+                run(call, NETWORK, () -> new SyncEngine(context).run(
+                    account, "manual", UUID.randomUUID().toString(), choice, () -> false));
+            } catch (Exception error) {
+                reject(call, error);
+            }
         });
     }
 
@@ -145,10 +158,14 @@ public final class MealPlanSyncPlugin extends Plugin {
                 if (data == null) call.resolve();
                 else call.resolve(data);
             } catch (Exception error) {
-                if (error instanceof InterruptedException) Thread.currentThread().interrupt();
-                Log.w("MealPlanSync", "bridge failed type=" + error.getClass().getSimpleName());
-                call.reject("Native synchronization could not finish", "native_sync_failed");
+                reject(call, error);
             }
         });
+    }
+
+    private void reject(PluginCall call, Exception error) {
+        if (error instanceof InterruptedException) Thread.currentThread().interrupt();
+        Log.w("MealPlanSync", "bridge failed type=" + error.getClass().getSimpleName());
+        call.reject("Native synchronization could not finish", "native_sync_failed");
     }
 }
