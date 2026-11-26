@@ -50,6 +50,12 @@ export default class AccountPage {
         this.fieldErrors.set({ name: 'Kiểm tra lại họ và tên.' });
       } else if (error instanceof AccountRequestError && error.field === 'username') {
         this.fieldErrors.set({ username: 'Tên đăng nhập này không dùng được. Hãy thử tên khác.' });
+      } else if (
+        error instanceof AccountRequestError &&
+        error.status === 403 &&
+        error.code === 'account_forbidden'
+      ) {
+        this.error.set('Tài khoản thiếu quyền đồng bộ.');
       } else {
         const invalid = error instanceof AccountRequestError && [400, 401].includes(error.status);
         this.error.set(
