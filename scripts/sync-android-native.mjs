@@ -26,9 +26,17 @@ export function installMealPlanSync(root) {
   )?.[1]);
   if (!Number.isSafeInteger(schemaVersion) || schemaVersion < 1) throw new Error('Missing SQLite schema version');
   const tables = JSON.parse(readFileSync(join(root, 'server/pb_hooks/sync-schema.json'), 'utf8'));
+  const schema = JSON.stringify({ schemaVersion, tables });
   const assets = join(app, 'src/main/assets');
   mkdirSync(assets, { recursive: true });
-  writeFileSync(join(assets, 'mealplan-sync-schema.json'), JSON.stringify({ schemaVersion, tables }));
+  writeFileSync(join(assets, 'mealplan-sync-schema.json'), schema);
+
+  const tests = join(app, 'src/test/java/com/healthmate/ai/sync');
+  const testResources = join(app, 'src/test/resources');
+  mkdirSync(tests, { recursive: true });
+  mkdirSync(testResources, { recursive: true });
+  copyFileSync(join(root, 'scripts/android-native/SnapshotMergeTest.java'), join(tests, 'SnapshotMergeTest.java'));
+  writeFileSync(join(testResources, 'mealplan-sync-schema.json'), schema);
 
   const activity = join(java, 'MainActivity.java');
   replaceOnce(activity, 'registerPlugin(MealPlanSyncPlugin.class)',
@@ -51,4 +59,7 @@ public class MainActivity extends BridgeActivity {
   for (const dependency of ['androidx.work:work-runtime:2.11.2', sqlCipher, sqlite]) {
     replaceOnce(gradle, dependency, /(^dependencies\s*\{)/m, `$1\n    implementation '${dependency}'`);
   }
+
+  const jsonForTests = 'com.vaadin.external.google:android-json:0.0.20131108.vaadin1';
+  replaceOnce(gradle, jsonForTests, /(^dependencies\s*\{)/m, `$1\n    testImplementation '${jsonForTests}'`);
 }

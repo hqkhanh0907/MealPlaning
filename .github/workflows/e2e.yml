@@ -77,7 +77,7 @@ jobs:
           npm run build:prod
           npx cap add android
           npx cap sync android
-          android/gradlew -p android assembleDebug
+          android/gradlew -p android testDebugUnitTest assembleDebug
 
       - name: Enable KVM
         run: |
