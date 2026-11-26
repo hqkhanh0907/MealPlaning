@@ -74,26 +74,77 @@ describe('DayPlanRepository', () => {
       expect(db.execute).not.toHaveBeenCalled();
     });
 
-    it('creates day_plan + 4 meal_slots in a single transaction when missing', async () => {
+    it('creates four meal slots for the authoritative date row', async () => {
       let lookupCount = 0;
       db.getOne.and.callFake(async () => {
         lookupCount += 1;
-        // first call: existence probe → null. second call: post-insert fetch → fixed row.
         return lookupCount === 1 ? null : (fixedDayPlan as never);
       });
       db.execute.and.returnValue(Promise.resolve());
 
-      await repo.getOrCreateForDate('2026-05-10');
+      const created = await repo.getOrCreateForDate(fixedDayPlan.date);
 
+      expect(created).toEqual(fixedDayPlan);
       expect(db.withTransaction).toHaveBeenCalledTimes(1);
-      // 1 day_plan insert + 4 meal_slot inserts.
       expect(db.execute).toHaveBeenCalledTimes(5);
+      expect(db.execute.calls.first().args[0]).toContain('ON CONFLICT(date) DO NOTHING');
+      expect(db.getOne.calls.mostRecent().args).toEqual([
+        'SELECT * FROM day_plan WHERE date = ?',
+        [fixedDayPlan.date],
+      ]);
+      const slotWrites = db.execute.calls.allArgs().slice(1);
+      expect(
+        slotWrites.every(
+          ([sql, params]) =>
+            sql.includes('ON CONFLICT(day_plan_id, meal_type) DO NOTHING') &&
+            params?.[1] === fixedDayPlan.id,
+        ),
+      ).toBeTrue();
+      expect(slotWrites.map(([, params]) => params?.[2])).toEqual([
+        'breakfast',
+        'lunch',
+        'dinner',
+        'snack',
+      ]);
+    });
 
-      const insertedSlotMealTypes = db.execute.calls
-        .allArgs()
-        .filter(([sql]) => (sql as string).includes('INSERT INTO meal_slot'))
-        .map(([, params]) => (params as unknown[])[2]);
-      expect(insertedSlotMealTypes).toEqual(['breakfast', 'lunch', 'dinner', 'snack']);
+    it('shares concurrent creation and waits before assembling the date', async () => {
+      let releaseWrite!: () => void;
+      let markWriteStarted!: () => void;
+      const writePaused = new Promise<void>((resolve) => {
+        releaseWrite = resolve;
+      });
+      const writeStarted = new Promise<void>((resolve) => {
+        markWriteStarted = resolve;
+      });
+      db.getOne.and.returnValues(
+        Promise.resolve(null),
+        Promise.resolve(fixedDayPlan),
+        Promise.resolve(fixedDayPlan),
+      );
+      db.execute.and.callFake(async (sql) => {
+        if (!sql.includes('INSERT INTO day_plan')) return;
+        markWriteStarted();
+        await writePaused;
+      });
+      db.query.and.callFake(async (sql) =>
+        sql.includes('FROM meal_slot') ? (fourSlots as never) : [],
+      );
+
+      const first = repo.getOrCreateForDate(fixedDayPlan.date);
+      const second = repo.getOrCreateForDate(fixedDayPlan.date);
+      await writeStarted;
+      const reading = repo.findByDate(fixedDayPlan.date);
+      await Promise.resolve();
+      expect(db.query).not.toHaveBeenCalled();
+      releaseWrite();
+
+      expect(await Promise.all([first, second])).toEqual([fixedDayPlan, fixedDayPlan]);
+      expect((await reading)?.meal_slots.map((slot) => slot.id)).toEqual(
+        fourSlots.map((slot) => slot.id),
+      );
+      expect(db.withTransaction).toHaveBeenCalledTimes(1);
+      expect(db.execute).toHaveBeenCalledTimes(5);
     });
 
     it('throws if day_plan disappears immediately after insert (defensive)', async () => {

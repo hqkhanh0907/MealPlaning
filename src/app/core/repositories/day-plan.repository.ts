@@ -52,40 +52,42 @@ interface PlannedDishWithEffectiveAndSlot extends PlannedDishWithEffective {
 @Injectable({ providedIn: 'root' })
 export class DayPlanRepository {
   private readonly db = inject(Database);
+  private readonly pendingByDate = new Map<string, Promise<DayPlan>>();
 
-  /**
-   * Idempotent: returns the existing day_plan for `date` if any, otherwise
-   * creates one + the canonical 4 meal_slot rows in a single transaction.
-   */
-  async getOrCreateForDate(date: string): Promise<DayPlan> {
+  getOrCreateForDate(date: string): Promise<DayPlan> {
+    const pending = this.pendingByDate.get(date);
+    if (pending) return pending;
+    const result = this.createIfMissing(date).finally(() => this.pendingByDate.delete(date));
+    this.pendingByDate.set(date, result);
+    return result;
+  }
+
+  private async createIfMissing(date: string): Promise<DayPlan> {
     const existing = await this.db.getOne<DayPlan>('SELECT * FROM day_plan WHERE date = ?', [date]);
-    if (existing) {
-      return existing;
-    }
+    if (existing) return existing;
 
-    const dayPlanId = uuidv4();
-    await this.db.withTransaction(async () => {
+    return this.db.withTransaction(async () => {
       await this.db.execute(
         `INSERT INTO day_plan (id, date, target_calories, target_protein)
-         VALUES (?, ?, ?, ?)`,
-        [dayPlanId, date, DEFAULT_TARGET_CALORIES, DEFAULT_TARGET_PROTEIN],
+         VALUES (?, ?, ?, ?)
+         ON CONFLICT(date) DO NOTHING`,
+        [uuidv4(), date, DEFAULT_TARGET_CALORIES, DEFAULT_TARGET_PROTEIN],
       );
+      const dayPlan = await this.db.getOne<DayPlan>('SELECT * FROM day_plan WHERE date = ?', [
+        date,
+      ]);
+      if (!dayPlan) throw new Error(`day_plan for '${date}' missing after insert`);
+
       for (let i = 0; i < MEAL_TYPES.length; i += 1) {
         await this.db.execute(
           `INSERT INTO meal_slot (id, day_plan_id, meal_type, position)
-           VALUES (?, ?, ?, ?)`,
-          [uuidv4(), dayPlanId, MEAL_TYPES[i], i],
+           VALUES (?, ?, ?, ?)
+           ON CONFLICT(day_plan_id, meal_type) DO NOTHING`,
+          [uuidv4(), dayPlan.id, MEAL_TYPES[i], i],
         );
       }
+      return dayPlan;
     });
-
-    const created = await this.db.getOne<DayPlan>('SELECT * FROM day_plan WHERE id = ?', [
-      dayPlanId,
-    ]);
-    if (!created) {
-      throw new Error(`day_plan '${dayPlanId}' missing after insert`);
-    }
-    return created;
   }
 
   /**
@@ -93,7 +95,9 @@ export class DayPlanRepository {
    * day has not been created yet (UI shows empty state — Story 3.7).
    */
   async findByDate(date: string): Promise<DayPlanWithSlots | null> {
-    const dayPlan = await this.db.getOne<DayPlan>('SELECT * FROM day_plan WHERE date = ?', [date]);
+    const existing = await this.db.getOne<DayPlan>('SELECT * FROM day_plan WHERE date = ?', [date]);
+    const pending = this.pendingByDate.get(date);
+    const dayPlan = pending ? await pending : existing;
     if (!dayPlan) {
       return null;
     }
