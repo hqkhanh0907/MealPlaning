@@ -95,4 +95,9 @@ src/environments/environment.prod.ts
 # E2E test artifacts (screenshots, page-source dumps)
 /e2e/artifacts/
 tmp-qa/
+/.hallmark/
+/.qa-evidence/**/*.png
+/docs/audit-screenshots/**/*.png
+/docs/6-testing/screenshots/
+/docs/qa-annotated/
 src/environments/groq.local.ts

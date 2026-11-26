@@ -112,7 +112,7 @@ Một lượt kiểm thử tự động dùng dữ liệu mẫu chưa chứng mi
 
 ## Nghiệm thu hồ sơ trên Android ngày 24/11/2026
 
-Giả lập Android API 36 nâng tại chỗ từ SQLite phiên bản 9 lên 10. Hồ sơ thử giữ tuổi nhập tay 30 và hai mục tiêu 2100 kcal, 130 g protein. Qua Cài đặt, người thử khai ngày sinh, đổi sang 72,5 kg và chọn trình độ nâng cao. Tổng quan hiện 72,5 kg, cao hơn lần cân trước 4,5 kg. Mở lại ứng dụng vẫn giữ các giá trị đã lưu. [Ảnh Cài đặt](../../.qa-evidence/2026-11-24-profile/settings.png) · [Kết quả SQLite](../../.qa-evidence/2026-11-24-profile/results.json)
+Giả lập Android API 36 nâng tại chỗ từ SQLite phiên bản 9 lên 10. Hồ sơ thử giữ tuổi nhập tay 30 và hai mục tiêu 2100 kcal, 130 g protein. Qua Cài đặt, người thử khai ngày sinh, đổi sang 72,5 kg và chọn trình độ nâng cao. Tổng quan hiện 72,5 kg, cao hơn lần cân trước 4,5 kg. Mở lại ứng dụng vẫn giữ các giá trị đã lưu. [Kết quả SQLite](../../.qa-evidence/2026-11-24-profile/results.json)
 
 Thu quyền thông báo trên Android giữ lựa chọn nhắc bữa sáng trong hồ sơ. Cài đặt báo tạm dừng và cho xin lại quyền. Sau khi chấp nhận qua hộp thoại Android, bộ lập lịch có đúng một lịch bữa sáng.
 

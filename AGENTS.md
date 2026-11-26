@@ -6,6 +6,12 @@ This file provides guidance to Codex (claude.ai/code) when working with code in 
 
 The app has no public release, real users, or real user data. Entity and schema changes may recreate test data without a legacy data migration. Khanh will update this status when real users join.
 
+## Visual QA Evidence
+
+Build the current source and install that APK on Android before every UI audit. Capture new screenshots in the same run. Record the source revision, local changes, APK SHA-256, emulator, and capture time.
+
+Use only that run's screenshots to assess the current UI. Keep screenshots outside the repository. If a fresh capture fails, mark the screen unverified.
+
 ## Prerequisites
 - **Node.js:** 22 LTS (`node -v`)
 - **Java (JDK):** 21 LTS — required for Android build (`java -version`)

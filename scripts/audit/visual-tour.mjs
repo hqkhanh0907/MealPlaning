@@ -24,7 +24,7 @@
  *
  * Usage:
  *   node scripts/audit/visual-tour.mjs <outdir>
- *   # example: node scripts/audit/visual-tour.mjs docs/audit-screenshots/2026-05-16-loop2
+ *   # example: node scripts/audit/visual-tour.mjs /tmp/mealplan-visual-qa/run-01
  *
  * Exit codes:
  *   0  all 6 captures distinct and routes match expectation
@@ -152,7 +152,7 @@ async function main() {
   if (!outdir) {
     console.error(
       "Usage: visual-tour.mjs <outdir>\n" +
-        "  example: visual-tour.mjs docs/audit-screenshots/2026-05-16-loop2"
+        "  example: visual-tour.mjs /tmp/mealplan-visual-qa/run-01"
     );
     process.exit(2);
   }

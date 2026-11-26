@@ -168,9 +168,6 @@ Selected option (`Giảm cân`) dùng background `--ion-color-secondary` (cam te
 
 ---
 
-## Annotated screenshots
+## Historical screenshots
 
-- ![Settings Hub](../qa-annotated/settings-uiux-audit/01-settings-hub-annotated.png)
-- ![Body Edit](../qa-annotated/settings-uiux-audit/02-body-edit-annotated.png)
-- ![Goals Edit](../qa-annotated/settings-uiux-audit/03-goals-edit-annotated.png)
-- ![Activity Edit](../qa-annotated/settings-uiux-audit/04-activity-edit-annotated.png)
+The screenshots from this run have been removed. Capture the current Android build for a new audit.
