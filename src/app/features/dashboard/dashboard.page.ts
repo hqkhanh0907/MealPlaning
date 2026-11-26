@@ -12,6 +12,7 @@ import {
 import {
   IonButton,
   IonButtons,
+  IonCheckbox,
   IonContent,
   IonFooter,
   IonHeader,
@@ -35,10 +36,17 @@ import {
 import { DashboardStore } from '../../core/stores/dashboard.store';
 import { CalendarStore, type PendingMealTarget } from '../../core/stores/calendar.store';
 import { MEAL_LABELS, MEAL_TYPES, type MealType } from '../../core/models/meal-plan.types';
-import { MAX_PHOTO_GRAMS, portionNutrition, validPhotoGrams } from '../../core/models/photo-meal';
+import {
+  MAX_PHOTO_GRAMS,
+  MAX_PHOTO_NAME_LENGTH,
+  portionNutrition,
+  validPhotoGrams,
+  validPhotoName,
+} from '../../core/models/photo-meal';
 import { aiErrorMessage } from '../../core/services/ai/ai-generation';
 import { AiAvailability } from '../../shared/ai-availability';
 import { AiOfflineBanner } from '../../shared/components/ai-offline-banner/ai-offline-banner';
+import { AppFormField } from '../../shared/forms/form-field/form-field';
 
 @Component({
   selector: 'app-dashboard',
@@ -50,6 +58,7 @@ import { AiOfflineBanner } from '../../shared/components/ai-offline-banner/ai-of
     DatePipe,
     RouterLink,
     AiOfflineBanner,
+    AppFormField,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -57,6 +66,7 @@ import { AiOfflineBanner } from '../../shared/components/ai-offline-banner/ai-of
     IonFooter,
     IonButtons,
     IonButton,
+    IonCheckbox,
     IonIcon,
   ],
 })
@@ -67,9 +77,11 @@ export default class DashboardPage {
   protected readonly dashboard = inject(DashboardStore);
   protected readonly ai = inject(AiAvailability);
   protected readonly maxPhotoGrams = MAX_PHOTO_GRAMS;
+  protected readonly maxPhotoNameLength = MAX_PHOTO_NAME_LENGTH;
   protected readonly portionNutrition = portionNutrition;
   protected readonly isFinite = Number.isFinite;
   protected readonly validPhotoGrams = validPhotoGrams;
+  protected readonly validPhotoName = validPhotoName;
   protected readonly photoError = signal('');
   protected readonly insightError = signal('');
   private readonly insightTitle = viewChild<ElementRef<HTMLElement>>('insightTitle');
@@ -100,8 +112,7 @@ export default class DashboardPage {
   }
 
   async addMeal(): Promise<void> {
-    this.calendar.addMealForDate.set(this.dashboard.todayIso());
-    if (!(await this.router.navigate(['/tabs/calendar']))) this.calendar.addMealForDate.set(null);
+    await this.openMealPicker(this.dashboard.todayIso());
   }
 
   async openPendingMeal(event: MouseEvent, target: PendingMealTarget): Promise<void> {
@@ -126,17 +137,6 @@ export default class DashboardPage {
       if (!reachedCalendar && this.calendar.pendingMealNavigation() === target) {
         this.calendar.pendingMealNavigation.set(null);
       }
-    }
-  }
-
-  confidenceLabel(value: 'high' | 'medium' | 'low'): string {
-    switch (value) {
-      case 'high':
-        return 'cao';
-      case 'medium':
-        return 'vừa';
-      case 'low':
-        return 'thấp';
     }
   }
 
@@ -170,12 +170,37 @@ export default class DashboardPage {
     this.photoError.set('');
   }
 
+  async enterPhotoMealManually(): Promise<void> {
+    if (this.dashboard.photoSaving()) return;
+    const draft = this.dashboard.photoDraft();
+    this.photoError.set('');
+    const opened = await this.openMealPicker(draft?.date ?? this.dashboard.todayIso()).catch(
+      () => false,
+    );
+    if (opened) this.cancelPhoto();
+    else this.photoError.set('Chưa mở được màn ghi tay. Vui lòng thử lại.');
+  }
+
   async savePhoto(): Promise<void> {
     this.photoError.set('');
     try {
       if (await this.dashboard.savePhoto()) void this.showToast('Đã lưu bữa ăn vào nhật ký.');
     } catch {
       this.photoError.set('Chưa lưu được bữa ăn. Khẩu phần vừa sửa vẫn còn để thử lại.');
+    }
+  }
+
+  private async openMealPicker(date: string): Promise<boolean> {
+    this.calendar.addMealForDate.set(date);
+    let opened = false;
+    try {
+      opened =
+        (await this.router.navigate(['/tabs/calendar'])) && this.router.url === '/tabs/calendar';
+      return opened;
+    } finally {
+      if (!opened && this.calendar.addMealForDate() === date) {
+        this.calendar.addMealForDate.set(null);
+      }
     }
   }
 

@@ -8,10 +8,20 @@ export interface FoodImageAnalysisItem extends Readonly<NutritionTotals> {
 }
 
 export const MAX_PHOTO_GRAMS = 2000;
+export const MAX_PHOTO_NAME_LENGTH = 80;
 
 export interface PhotoMealPortion {
   readonly item: FoodImageAnalysisItem;
   readonly grams: number;
+}
+
+export interface PhotoMealReviewPortion extends PhotoMealPortion {
+  readonly included: boolean;
+}
+
+export function validPhotoName(name: string): boolean {
+  const length = name.trim().length;
+  return length > 0 && length <= MAX_PHOTO_NAME_LENGTH;
 }
 
 export function validPhotoGrams(grams: number): boolean {

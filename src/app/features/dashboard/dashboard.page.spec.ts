@@ -15,17 +15,28 @@ describe('DashboardPage pending meal link', () => {
   };
   let router: jasmine.SpyObj<Router>;
   let pendingMealNavigation: CalendarStore['pendingMealNavigation'];
+  let addMealForDate: CalendarStore['addMealForDate'];
+  let discardPhoto: jasmine.Spy;
   let page: DashboardPage;
 
   beforeEach(() => {
     router = jasmine.createSpyObj<Router>('Router', ['navigate'], { url: '/tabs/calendar' });
     router.navigate.and.resolveTo(true);
     pendingMealNavigation = signal(null);
+    addMealForDate = signal(null);
+    discardPhoto = jasmine.createSpy('discardPhoto');
     TestBed.configureTestingModule({
       providers: [
         { provide: Router, useValue: router },
-        { provide: CalendarStore, useValue: { pendingMealNavigation } },
-        { provide: DashboardStore, useValue: {} },
+        { provide: CalendarStore, useValue: { pendingMealNavigation, addMealForDate } },
+        {
+          provide: DashboardStore,
+          useValue: {
+            photoDraft: signal({ date: '2026-11-23' }),
+            photoSaving: signal(false),
+            discardPhoto,
+          },
+        },
         { provide: NetworkStore, useValue: {} },
         { provide: ToastController, useValue: {} },
       ],
@@ -53,5 +64,22 @@ describe('DashboardPage pending meal link', () => {
 
     expect(pendingMealNavigation()).toBeNull();
     expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('hands off a photo review to manual logging for the captured date', async () => {
+    await page.enterPhotoMealManually();
+
+    expect(addMealForDate()).toBe('2026-11-23');
+    expect(router.navigate).toHaveBeenCalledOnceWith(['/tabs/calendar']);
+    expect(discardPhoto).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the photo review when the manual picker cannot open', async () => {
+    router.navigate.and.rejectWith(new Error('Navigation failed'));
+
+    await page.enterPhotoMealManually();
+
+    expect(addMealForDate()).toBeNull();
+    expect(discardPhoto).not.toHaveBeenCalled();
   });
 });

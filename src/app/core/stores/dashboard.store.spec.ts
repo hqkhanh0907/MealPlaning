@@ -11,6 +11,7 @@ import {
 import { WorkoutRepository } from '../repositories/workout.repository';
 import { DayPlanRepository } from '../repositories/day-plan.repository';
 import { PhotoMealRepository } from '../repositories/photo-meal.repository';
+import { portionNutrition, type FoodImageAnalysisItem } from '../models/photo-meal';
 import type { MealSlotWithDishes, PlannedDishWithEffective } from '../models/meal-plan.types';
 import { buildDailyInsightPrompt } from '../services/ai/prompts/daily-insight.prompt';
 import { buildTrainingPlanPrompt } from '../services/ai/prompts/training-plan.prompt';
@@ -493,6 +494,88 @@ describe('DashboardStore', () => {
     expect(invalidationTick()).toBe(0);
   });
 
+  it('saves renamed and resized portions while excluding false detections and preserving analysis', async () => {
+    const chicken: FoodImageAnalysisItem = Object.freeze({
+      name: 'Gà quay',
+      estimatedGrams: 200,
+      calories: 400,
+      protein: 24,
+      carbs: 40,
+      fat: 12,
+      fiber: 4,
+      confidence: 'medium',
+      warning: null,
+    });
+    const noise: FoodImageAnalysisItem = Object.freeze({
+      ...chicken,
+      name: 'Muỗng',
+      calories: 300,
+    });
+    const noodles: FoodImageAnalysisItem = Object.freeze({
+      ...chicken,
+      name: 'Bún',
+      estimatedGrams: 100,
+      calories: 120,
+      protein: 2,
+      carbs: 20,
+      fat: 4,
+      fiber: 3,
+    });
+    const items = Object.freeze([chicken, noise, noodles]);
+    foodImageAi.analyzeMealPhoto.and.resolveTo({
+      overallConfidence: 'medium',
+      imageQualityWarning: null,
+      items,
+    });
+    const analysis = await store.analyzeMealPhoto();
+    const draft = store.photoDraft()!;
+    expect(draft.portions.map(({ included }) => included)).toEqual([true, true, true]);
+    store.setPhotoName(0, '  Gà luộc  ');
+    store.setPhotoGrams(0, 100);
+    store.setPhotoIncluded(1, false);
+    store.setPhotoName(1, ' ');
+    store.setPhotoGrams(1, NaN);
+    store.setPhotoGrams(2, 150);
+
+    expect(store.photoDraft()?.analysis.items).toBe(analysis.items);
+    expect(analysis.items.map(({ name }) => name)).toEqual(['Gà quay', 'Muỗng', 'Bún']);
+    expect(store.photoDraft()?.portions[0].item.name).toBe('  Gà luộc  ');
+    expect(store.canSavePhoto()).toBeTrue();
+    expect(await store.savePhoto()).toBeTrue();
+
+    const saved = photoMeals.save.calls.allArgs()[0]?.[2] ?? [];
+    expect(saved).toEqual([
+      { item: { ...chicken, name: 'Gà luộc' }, grams: 100 },
+      { item: noodles, grams: 150 },
+    ]);
+    expect(saved.map(portionNutrition)).toEqual([
+      { calories: 200, protein: 12, carbs: 20, fat: 6, fiber: 2 },
+      { calories: 180, protein: 3, carbs: 30, fat: 6, fiber: 4.5 },
+    ]);
+  });
+
+  it('blocks invalid names and an empty selection without dropping edits', async () => {
+    await store.analyzeMealPhoto();
+    store.setPhotoName(0, ' \t ');
+    expect(store.canSavePhoto()).toBeFalse();
+    store.setPhotoName(0, 'A'.repeat(81));
+    expect(store.canSavePhoto()).toBeFalse();
+    expect(await store.savePhoto()).toBeFalse();
+    const name = ' ' + 'B'.repeat(80) + ' ';
+    store.setPhotoName(0, name);
+    store.setPhotoGrams(0, 100);
+    expect(store.canSavePhoto()).toBeTrue();
+
+    store.setPhotoIncluded(0, false);
+    expect(store.canSavePhoto()).toBeFalse();
+    expect(await store.savePhoto()).toBeFalse();
+    expect(photoMeals.save).not.toHaveBeenCalled();
+    store.setPhotoIncluded(0, true);
+    expect(store.photoDraft()?.portions[0].item.name).toBe(name);
+    expect(store.photoDraft()?.portions[0].grams).toBe(100);
+    expect(store.canSavePhoto()).toBeTrue();
+  });
+
   it('retains edits on failure, allows offline saving and ignores a repeated save', async () => {
     await store.analyzeMealPhoto();
     const captureId = store.photoDraft()!.captureId;
@@ -500,16 +583,28 @@ describe('DashboardStore', () => {
     store.setPhotoGrams(0, NaN);
     expect(await store.savePhoto()).toBeFalse();
     store.setPhotoGrams(0, 100);
+    store.setPhotoName(0, '  Gà luộc  ');
     store.setPhotoMealType('snack');
     photoMeals.save.and.rejectWith(new Error('disk full'));
     await expectAsync(store.savePhoto()).toBeRejected();
     expect(store.photoDraft()?.portions[0].grams).toBe(100);
+    expect(store.photoDraft()?.portions[0].item.name).toBe('  Gà luộc  ');
     photoMeals.save.and.resolveTo();
     const saving = store.savePhoto();
+    store.setPhotoName(0, 'Tên trong lúc lưu');
+    store.setPhotoIncluded(0, false);
+    expect(store.photoDraft()?.portions[0].item.name).toBe('  Gà luộc  ');
+    expect(store.photoDraft()?.portions[0].included).toBeTrue();
     expect(await store.savePhoto()).toBeFalse();
     expect(await saving).toBeTrue();
     const [, mealType, portions, savedId] = photoMeals.save.calls.mostRecent().args;
-    expect([mealType, portions[0].grams, savedId]).toEqual(['snack', 100, captureId]);
+    expect([mealType, portions[0].item.name, portions[0].grams, savedId]).toEqual([
+      'snack',
+      'Gà luộc',
+      100,
+      captureId,
+    ]);
+    expect(photoMeals.save.calls.allArgs().map((args) => args[3])).toEqual([captureId, captureId]);
     expect(photoMeals.save).toHaveBeenCalledTimes(2);
     expect(invalidationTick()).toBe(1);
     expect(store.photoDraft()).toBeNull();

@@ -203,14 +203,21 @@
       @if (dashboard.photoDraft(); as draft) {
         <section class="dashboard-card photo-card" aria-labelledby="photo-analysis-title">
           <header>
-            <h2 id="photo-analysis-title" #reviewTitle tabindex="-1">Kiểm tra khẩu phần</h2>
+            <h2 id="photo-analysis-title" #reviewTitle tabindex="-1">Kiểm tra món và khẩu phần</h2>
             <p>
-              Độ tin cậy {{ confidenceLabel(draft.analysis.overallConfidence) }}. Sửa số gram theo
-              lượng thực tế đã ăn.
+              Dinh dưỡng là ước tính từ ảnh. Đổi tên chỉ sửa nhãn. Nếu AI nhận sai món, bỏ mục đó
+              rồi ghi tay.
             </p>
             @if (draft.analysis.imageQualityWarning) {
-              <p>{{ draft.analysis.imageQualityWarning }}</p>
+              <p>AI báo: {{ draft.analysis.imageQualityWarning }}</p>
             }
+            <ion-button
+              class="photo-card__manual"
+              fill="clear"
+              [disabled]="dashboard.photoSaving()"
+              (click)="enterPhotoMealManually()"
+              >Bỏ kết quả và ghi tay</ion-button
+            >
           </header>
           <div class="apple-field">
             <label class="apple-field__label" for="photo-meal-type"
@@ -232,45 +239,81 @@
           <ul class="photo-card__list">
             @for (portion of draft.portions; track $index; let i = $index) {
               <li>
-                <strong>{{ portion.item.name }}</strong>
-                <div class="apple-field">
-                  <label class="apple-field__label" [for]="'photo-grams-' + i"
-                    >Khối lượng (g)</label
+                @let itemName = portion.item.name.trim() || 'Món chưa đặt tên';
+                <ion-checkbox
+                  justify="space-between"
+                  labelPlacement="start"
+                  [checked]="portion.included"
+                  [disabled]="dashboard.photoSaving()"
+                  [attr.aria-label]="'Giữ ' + itemName + ' khi lưu'"
+                  (ionChange)="dashboard.setPhotoIncluded(i, $event.detail.checked)"
+                  >Giữ mục này</ion-checkbox
+                >
+                @if (portion.included) {
+                  @let invalidName = !validPhotoName(portion.item.name);
+                  <app-form-field
+                    label="Tên món"
+                    [inputId]="'photo-name-' + i"
+                    [errorId]="'photo-name-error-' + i"
+                    [invalid]="invalidName"
+                    errorMessage="Nhập tên món từ 1 đến 80 ký tự."
                   >
-                  <input
-                    class="apple-field__input"
-                    type="number"
-                    inputmode="decimal"
-                    min="0"
-                    [max]="maxPhotoGrams"
-                    step="any"
-                    [id]="'photo-grams-' + i"
-                    #weight
-                    [attr.aria-label]="'Khối lượng ' + portion.item.name + ' (g)'"
-                    [value]="isFinite(portion.grams) ? portion.grams : ''"
-                    [disabled]="dashboard.photoSaving()"
-                    [attr.aria-invalid]="!validPhotoGrams(portion.grams)"
-                    [attr.aria-describedby]="'photo-hint-' + i"
-                    (input)="dashboard.setPhotoGrams(i, weight.valueAsNumber)"
-                  />
-                </div>
-                @if (validPhotoGrams(portion.grams)) {
-                  @let n = portionNutrition(portion);
-                  <span [id]="'photo-hint-' + i">
-                    {{ n.calories | number: '1.0-0' }} kcal · Protein
-                    {{ n.protein | number: '1.0-1' }} g · Carbs {{ n.carbs | number: '1.0-1' }} g ·
-                    Fat {{ n.fat | number: '1.0-1' }} g
-                  </span>
+                    <input
+                      #name
+                      class="input-native"
+                      type="text"
+                      enterkeyhint="next"
+                      [id]="'photo-name-' + i"
+                      [attr.maxlength]="maxPhotoNameLength"
+                      [value]="portion.item.name"
+                      [disabled]="dashboard.photoSaving()"
+                      [attr.aria-invalid]="invalidName"
+                      [attr.aria-describedby]="invalidName ? 'photo-name-error-' + i : null"
+                      (input)="dashboard.setPhotoName(i, name.value)"
+                    />
+                  </app-form-field>
+                  <div class="apple-field">
+                    <label class="apple-field__label" [for]="'photo-grams-' + i"
+                      >Khối lượng (g)</label
+                    >
+                    <input
+                      class="apple-field__input"
+                      type="number"
+                      inputmode="decimal"
+                      min="0"
+                      [max]="maxPhotoGrams"
+                      step="any"
+                      [id]="'photo-grams-' + i"
+                      #weight
+                      [attr.aria-label]="'Khối lượng ' + itemName + ' (g)'"
+                      [value]="isFinite(portion.grams) ? portion.grams : ''"
+                      [disabled]="dashboard.photoSaving()"
+                      [attr.aria-invalid]="!validPhotoGrams(portion.grams)"
+                      [attr.aria-describedby]="'photo-hint-' + i"
+                      (input)="dashboard.setPhotoGrams(i, weight.valueAsNumber)"
+                    />
+                  </div>
+                  @if (validPhotoGrams(portion.grams)) {
+                    @let n = portionNutrition(portion);
+                    <span [id]="'photo-hint-' + i">
+                      {{ n.calories | number: '1.0-0' }} kcal · Protein
+                      {{ n.protein | number: '1.0-1' }} g · Carbs {{ n.carbs | number: '1.0-1' }} g
+                      · Fat {{ n.fat | number: '1.0-1' }} g
+                    </span>
+                  } @else {
+                    <span class="photo-card__error" [id]="'photo-hint-' + i"
+                      >Nhập khối lượng lớn hơn 0 và tối đa 2.000 g.</span
+                    >
+                  }
+                  @if (portion.item.warning) {
+                    <span>AI báo: {{ portion.item.warning }}</span>
+                  }
+                  @if (portion.item.confidence === 'low') {
+                    <span>AI chưa chắc về mục này. Hãy đối chiếu trước khi lưu.</span>
+                  }
                 } @else {
-                  <span class="photo-card__error" [id]="'photo-hint-' + i"
-                    >Nhập khối lượng lớn hơn 0 và tối đa 2.000 g.</span
-                  >
-                }
-                @if (portion.item.warning) {
-                  <span>{{ portion.item.warning }}</span>
-                }
-                @if (portion.item.confidence === 'low') {
-                  <span>Ước tính có độ tin cậy thấp. Hãy đối chiếu với ảnh trước khi lưu.</span>
+                  <strong>{{ itemName }}</strong>
+                  <span>Bỏ qua khi lưu</span>
                 }
               </li>
             }
@@ -301,6 +344,9 @@
       }
       @if (photoError()) {
         <p class="photo-card__error" role="alert">{{ photoError() }}</p>
+        @if (!dashboard.photoDraft()) {
+          <ion-button fill="clear" (click)="enterPhotoMealManually()">Ghi món thủ công</ion-button>
+        }
       }
     </section>
   }

@@ -204,6 +204,11 @@
     line-height: 1.4;
   }
 
+  &__manual {
+    min-height: 48px;
+    margin-inline-start: 0;
+  }
+
   &__actions {
     display: flex;
     justify-content: flex-end;
@@ -232,6 +237,11 @@
       padding: var(--apple-space-sm);
       border-radius: var(--apple-radius-sm);
       background: var(--apple-divider-soft);
+    }
+
+    ion-checkbox {
+      width: 100%;
+      min-height: 48px;
     }
 
     strong {

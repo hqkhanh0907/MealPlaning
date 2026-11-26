@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { MAX_PHOTO_GRAMS } from '../../../models/photo-meal';
+import { MAX_PHOTO_GRAMS, MAX_PHOTO_NAME_LENGTH } from '../../../models/photo-meal';
 
 const CONFIDENCE = ['high', 'medium', 'low'] as const;
 
 export const foodImageItemSchema = z
   .object({
-    name: z.string().trim().min(1).max(80),
+    name: z.string().trim().min(1).max(MAX_PHOTO_NAME_LENGTH),
     estimated_grams: z.number().min(1).max(MAX_PHOTO_GRAMS),
     calories: z.number().min(0).max(3000),
     protein: z.number().min(0).max(300),

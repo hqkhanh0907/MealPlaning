@@ -3,7 +3,7 @@ import { addCalendarDays, localIsoDate, parseLocalDate } from '../utils/local-da
 import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { v4 as uuid } from 'uuid';
 import type { MealType } from '../models/meal-plan.types';
-import { validPhotoGrams, type PhotoMealPortion } from '../models/photo-meal';
+import { validPhotoGrams, validPhotoName, type PhotoMealReviewPortion } from '../models/photo-meal';
 import { PhotoMealRepository } from '../repositories/photo-meal.repository';
 import { CalendarStore, type PendingMealTarget } from './calendar.store';
 import { NutritionStore } from './nutrition.store';
@@ -64,7 +64,7 @@ interface MealPhotoDraft {
   date: string;
   mealType: MealType;
   analysis: FoodImageAnalysisResult;
-  portions: readonly PhotoMealPortion[];
+  portions: readonly PhotoMealReviewPortion[];
 }
 
 const MACRO_LABELS: Record<MacroMetric, string> = {
@@ -118,12 +118,15 @@ export class DashboardStore {
   readonly photoDraft = signal<MealPhotoDraft | null>(null);
   readonly foodImageLoading = signal(false);
   readonly photoSaving = signal(false);
+  private readonly includedPhotoPortions = computed(
+    () => this.photoDraft()?.portions.filter(({ included }) => included) ?? [],
+  );
   readonly canSavePhoto = computed(() => {
-    const draft = this.photoDraft();
+    const portions = this.includedPhotoPortions();
     return (
-      !!draft?.portions.length &&
-      draft.portions.every(({ grams }) => validPhotoGrams(grams)) &&
-      !this.photoSaving()
+      !this.photoSaving() &&
+      portions.length > 0 &&
+      portions.every(({ item, grams }) => validPhotoGrams(grams) && validPhotoName(item.name))
     );
   });
 
@@ -358,7 +361,11 @@ export class DashboardStore {
         date: localIsoDate(now),
         mealType: hour < 10 ? 'breakfast' : hour < 15 ? 'lunch' : 'dinner',
         analysis,
-        portions: analysis.items.map((item) => ({ item, grams: item.estimatedGrams })),
+        portions: analysis.items.map((item) => ({
+          item,
+          grams: item.estimatedGrams,
+          included: true,
+        })),
       });
       return analysis;
     } finally {
@@ -367,15 +374,29 @@ export class DashboardStore {
   }
 
   setPhotoGrams(index: number, grams: number): void {
+    this.editPhotoPortion(index, (portion) => ({ ...portion, grams }));
+  }
+
+  setPhotoName(index: number, name: string): void {
+    this.editPhotoPortion(index, (portion) => ({ ...portion, item: { ...portion.item, name } }));
+  }
+
+  setPhotoIncluded(index: number, included: boolean): void {
+    this.editPhotoPortion(index, (portion) => ({ ...portion, included }));
+  }
+
+  private editPhotoPortion(
+    index: number,
+    edit: (portion: PhotoMealReviewPortion) => PhotoMealReviewPortion,
+  ): void {
     if (this.photoSaving()) return;
-    this.photoDraft.update(
-      (draft) =>
-        draft && {
-          ...draft,
-          portions: draft.portions.map((portion, i) =>
-            i === index ? { ...portion, grams } : portion,
-          ),
-        },
+    this.photoDraft.update((draft) =>
+      draft?.portions[index]
+        ? {
+            ...draft,
+            portions: draft.portions.map((portion, i) => (i === index ? edit(portion) : portion)),
+          }
+        : draft,
     );
   }
 
@@ -392,7 +413,11 @@ export class DashboardStore {
     if (!draft || !this.canSavePhoto()) return false;
     this.photoSaving.set(true);
     try {
-      await this.photoMeals.save(draft.date, draft.mealType, draft.portions, draft.captureId);
+      const portions = this.includedPhotoPortions().map(({ item, grams }) => ({
+        item: { ...item, name: item.name.trim() },
+        grams,
+      }));
+      await this.photoMeals.save(draft.date, draft.mealType, portions, draft.captureId);
       this.photoDraft.set(null);
       this.calendarStore.invalidationTick.update((n) => n + 1);
       return true;
