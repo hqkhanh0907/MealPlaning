@@ -128,12 +128,14 @@ function renderRecords(restoreSortFocus = false) {
     return !query || [row._title, row.name, row._ingredient, row._date, rowKey(table, record)]
       .some((value) => searchText(value).includes(query));
   });
+  const hasLegacySet = table === 'workout_set' && result.some(({ record }) => record.legacy_unit_unknown);
+  const labelFor = (key) => columnLabel(table, key, hasLegacySet);
   const sortKey = sort.key || (preferred.includes('set_number') ? 'set_number' : hasDate ? '_date' : preferred[0]);
   const order = sort.key ? sort.descending : sortKey === '_date';
   const recordSort = get('record-sort');
   recordSort.replaceChildren(...columns.flatMap((key) => [
-    option(key + ':asc', columnLabel(table, key) + ' ↑'),
-    option(key + ':desc', columnLabel(table, key) + ' ↓'),
+    option(key + ':asc', labelFor(key) + ' ↑'),
+    option(key + ':desc', labelFor(key) + ' ↓'),
   ]));
   recordSort.value = sortKey + (order ? ':desc' : ':asc');
   result.sort(({ row: a }, { row: b }) => {
@@ -153,7 +155,7 @@ function renderRecords(restoreSortFocus = false) {
   for (const key of columns) {
     const cell = document.createElement('th');
     cell.scope = 'col';
-    const control = button(columnLabel(table, key), () => {
+    const control = button(labelFor(key), () => {
       sort = { key, descending: sortKey === key && !order };
       renderRecords(true);
     }, '');
@@ -172,7 +174,7 @@ function renderRecords(restoreSortFocus = false) {
     item.append(rowAction(table, record, row));
     for (const key of columns) {
       const cell = document.createElement('td');
-      cell.dataset.label = columnLabel(table, key);
+      cell.dataset.label = labelFor(key);
       cell.textContent = displayValue(key, row);
       item.append(cell);
     }

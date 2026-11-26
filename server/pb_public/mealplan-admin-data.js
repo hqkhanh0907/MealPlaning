@@ -36,7 +36,7 @@ const labels = {
   workout_hit: 'Đạt mục tiêu tập', duration_seconds: 'Thời gian (giây)',
   started_at: 'Bắt đầu', completed_at: 'Hoàn thành', created_at: 'Thời điểm tạo',
   updated_at: 'Lần sửa gần nhất', cancelled_at: 'Thời điểm hủy', duration_minutes: 'Thời gian (phút)',
-  legacy_unit_unknown: 'Chưa rõ đơn vị tạ',
+  legacy_unit_unknown: 'Chưa rõ đơn vị giá trị cũ',
 };
 const statuses = {
   completed: 'Hoàn thành', logged: 'Đã ghi', skipped: 'Bỏ qua', pending: 'Chưa tập',
@@ -56,8 +56,9 @@ export function tableLabel(table) {
   return tables[table]?.[0] ?? table;
 }
 
-export function columnLabel(table, key) {
+export function columnLabel(table, key, hasLegacySet = false) {
   if (key === 'weight_kg' && table !== 'workout_set') return 'Cân nặng (kg)';
+  if (key === 'reps' && table === 'workout_set' && hasLegacySet) return 'Số lần / giá trị cũ';
   return labels[key] ?? key;
 }
 
@@ -107,7 +108,7 @@ export function displayValue(key, row) {
   if (booleanColumns.has(key)) return value ? 'Có' : 'Không';
   if (typeof value === 'number') {
     const number = localNumber.format(value);
-    return key === 'weight_kg' && row.legacy_unit_unknown ? number + ' (chưa rõ đơn vị)' : number;
+    return key === 'reps' && row.legacy_unit_unknown ? number + ' (chưa rõ đơn vị)' : number;
   }
   if (datePattern.test(value) && (key === '_date' || key === 'date')) {
     const [year, month, day] = value.slice(0, 10).split('-');
@@ -118,9 +119,7 @@ export function displayValue(key, row) {
 
 export function editableFields(table, row) {
   if (table === 'planned_dish' && !row.is_completed) return [['servings', 0.1, 'any', 20]];
-  if (table !== 'workout_set' || row.status === 'skipped') return [];
+  if (table !== 'workout_set' || row.status === 'skipped' || row.legacy_unit_unknown) return [];
   if (row.duration_seconds != null) return [['duration_seconds', 0, 1]];
-  const fields = [['reps', 0, 1]];
-  if (!row.legacy_unit_unknown) fields.unshift(['weight_kg', 0, 'any']);
-  return fields;
+  return [['weight_kg', 0, 'any'], ['reps', 0, 1]];
 }

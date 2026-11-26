@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { setTimeout } from 'node:timers/promises';
 import { test } from 'node:test';
+import { columnLabel, displayValue, editableFields } from './pb_public/mealplan-admin-data.js';
 
 const schema = JSON.parse(readFileSync(new URL('./pb_hooks/sync-schema.json', import.meta.url)));
 const pb = process.env.POCKETBASE_BIN;
@@ -53,6 +54,24 @@ async function expectStatus(status, ...args) {
   assert.equal(response.status, status, args[0] + ': ' + (response.payload?.message ?? ''));
   return response.payload;
 }
+
+test('admin preserves the raw measurement of a legacy workout set', () => {
+  const row = { status: 'logged', weight_kg: 12.5, reps: 45, duration_seconds: null, legacy_unit_unknown: 1 };
+  assert.equal(displayValue('reps', row), '45 (chưa rõ đơn vị)');
+  assert.equal(displayValue('weight_kg', row), '12,5');
+  assert.equal(displayValue('duration_seconds', row), '—');
+  assert.equal(columnLabel('workout_set', 'reps', true), 'Số lần / giá trị cũ');
+  assert.deepEqual(editableFields('workout_set', row), []);
+});
+
+test('admin keeps explicit units and quick editing for current workout sets', () => {
+  const strength = { status: 'logged', weight_kg: 40, reps: 6, duration_seconds: null, legacy_unit_unknown: 0 };
+  assert.equal(columnLabel('workout_set', 'reps'), 'Số lần');
+  assert.equal(displayValue('reps', strength), '6');
+  assert.deepEqual(editableFields('workout_set', strength), [['weight_kg', 0, 'any'], ['reps', 0, 1]]);
+  assert.deepEqual(editableFields('workout_set', { ...strength, duration_seconds: 32 }), [['duration_seconds', 0, 1]]);
+  assert.deepEqual(editableFields('workout_set', { ...strength, status: 'skipped' }), []);
+});
 
 test('username auth, owner data, repeated writes, admin edit and delete', { skip: !pb }, async () => {
   const dir = mkdtempSync(join(tmpdir(), 'mealplan-backend-'));
