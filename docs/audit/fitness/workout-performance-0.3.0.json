@@ -1,0 +1,85 @@
+{
+  "releaseSha": "81fa007a2513fd073c5b7541a26220fa84bda446",
+  "apkSha256": "d2f00a5cfddf6f86643af7959079f0b0dd43f8cf65972ec24ec9caa587ef40d1",
+  "startedAt": "2026-11-27T15:44:15.660Z",
+  "finishedAt": "2026-11-27T15:44:31.132Z",
+  "device": {
+    "model": "sdk_gphone64_arm64",
+    "sdk": "36",
+    "serial": "emulator-5584",
+    "screen": "Physical size: 1080x2400",
+    "density": "Physical density: 420",
+    "refreshHz": 60
+  },
+  "scroll": {
+    "n": 5,
+    "warmup": 1,
+    "rangeCssPx": {
+      "min": 142.48,
+      "median": 143.24,
+      "max": 144.76
+    },
+    "effectiveSurfaceFlingerFps": {
+      "min": 59.95,
+      "median": 60.14,
+      "max": 60.22
+    },
+    "pooledFps": 60.11,
+    "presentedFrameIntervals": 241,
+    "intervalsExceeding25ms": 0,
+    "method": "Vuốt thật bằng adb input trong 780 ms. Đọc thời điểm trình bày từng buffer của lớp MainActivity từ SurfaceFlinger --latency (cột 2). Dùng sự kiện scroll đầu và cuối trên Dashboard, cộng một chu kỳ hiển thị ở cuối để lấy đúng khung đang cuộn. Mốc NavigationStart của CDP chuyển performance.now() sang đồng hồ monotonic Android. Tính số khoảng khung chia cho thời gian từ khung đầu tới khung cuối. Bỏ lượt đầu làm nóng.",
+    "interpretation": "Gần mốc 60 FPS trên giả lập 60 Hz. Có lượt dưới 60 FPS. Mẫu ngắn và đồng hồ hiển thị dao động. Chưa xác nhận mức tối thiểu 60 FPS liên tục trên điện thoại thật. Phép đo không phân loại nội dung hình trùng nhau trong hai buffer."
+  },
+  "navigation": {
+    "sample": "Năm vòng với phiên ứng dụng đã mở. Chạm qua DOM của WebView. Từ khi bấm đến đúng route có nội dung và một nhịp requestAnimationFrame kế tiếp. Đây là thời gian sẵn sàng của giao diện, chưa đo thời gian màn hình vật lý phát sáng.",
+    "readySelectors": {
+      "today": "[data-testid=resume-workout]",
+      "plans": "#finder-minutes hoặc [data-finder-start]",
+      "exercises": ".eps-row",
+      "history": ".session-card__summary"
+    },
+    "milliseconds": {
+      "dashboardToTodayMs": {
+        "min": 22.6,
+        "median": 27.4,
+        "max": 53.1
+      },
+      "todayToPlansMs": {
+        "min": 29.9,
+        "median": 34.4,
+        "max": 118.3
+      },
+      "plansToExercisesMs": {
+        "min": 30.4,
+        "median": 45.4,
+        "max": 83.5
+      },
+      "exercisesToHistoryMs": {
+        "min": 167.2,
+        "median": 194.2,
+        "max": 246
+      }
+    }
+  },
+  "history": {
+    "cardCount": 2,
+    "viewportWidthCssPx": 411,
+    "cardWidthsCssPx": [
+      379.43,
+      379.43
+    ],
+    "sameStatIconTextGapCssPx": {
+      "min": 4,
+      "median": 4,
+      "max": 4
+    },
+    "neighborStatGapCssPx": {
+      "min": 12,
+      "median": 12,
+      "max": 12
+    },
+    "iconTextRectangleOverlaps": 0,
+    "horizontalFragmentsOutsideCard": 0,
+    "method": "Đo getBoundingClientRect của card, nhóm, ba span và ion-icon. Tạo Range cho nội dung từng text node, bỏ khoảng trắng đầu cuối. Kiểm diện tích giao giữa các hình chữ nhật và biên ngang của card. Kết quả thuộc hai thẻ và cỡ chữ hiện tại."
+  }
+}

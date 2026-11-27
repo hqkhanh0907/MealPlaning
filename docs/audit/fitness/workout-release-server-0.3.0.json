@@ -1,0 +1,18 @@
+{
+  "release": "81fa007a2513fd073c5b7541a26220fa84bda446",
+  "previous": "05753adb7f7533a9b9c7689a98ac8dafecc37f20",
+  "serverFilesMatchCommit": true,
+  "healthDatabase": true,
+  "units": {
+    "mealplan-db": "active",
+    "mealplan-public": "active"
+  },
+  "backupsRestoredAndChecked": [
+    "auxiliary.db",
+    "data.db"
+  ],
+  "releaseTag": "v0.3.0",
+  "ciPush": "https://github.com/hqkhanh0907/MealPlaning/actions/runs/46026881968",
+  "ciDispatch": "https://github.com/hqkhanh0907/MealPlaning/actions/runs/46026882693",
+  "androidArtifact": "https://github.com/hqkhanh0907/MealPlaning/actions/runs/46026882693/artifacts/15213121664"
+}

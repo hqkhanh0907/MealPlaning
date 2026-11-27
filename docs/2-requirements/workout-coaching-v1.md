@@ -111,3 +111,5 @@ Các ca trên kiểm logic chọn, chưa xác minh mức phù hợp sau nhiều 
 | Thao tác có thuận tiện không? | Quan sát người tập tìm bài, ghi một hiệp lúc nghỉ và tiếp tục sau khi xem kỹ thuật. | Tách thời gian nhập của người thật khỏi phép đo tự động. |
 
 Dùng dữ liệu đã lưu và phản hồi tự nguyện. V1 không thêm sự kiện phân tích hành vi. Giữ riêng tiêu chí kỹ thuật đã kiểm và tác động với người dùng thật chưa xác minh.
+
+[Bảng nghiệm thu và số đo của bản phát hành](../audit/fitness/workout-release-0.3.0.md)

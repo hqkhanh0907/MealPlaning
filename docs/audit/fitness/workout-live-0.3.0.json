@@ -1,0 +1,167 @@
+{
+  "startedAt": "2026-11-27T15:40:31.072Z",
+  "sha": "81fa007a2513fd073c5b7541a26220fa84bda446",
+  "changes": "",
+  "apkSha256": "d2f00a5cfddf6f86643af7959079f0b0dd43f8cf65972ec24ec9caa587ef40d1",
+  "apkBytes": 55914593,
+  "android": {
+    "serial": "emulator-5584",
+    "model": "sdk_gphone64_arm64",
+    "sdk": "36",
+    "screen": "Physical size: 1080x2400"
+  },
+  "syncMode": "release server, new QA account",
+  "checks": [
+    {
+      "name": "Installed APK matches supplied artifact",
+      "pass": true
+    },
+    {
+      "name": "App opened before sign-in on a clean install",
+      "pass": true
+    },
+    {
+      "name": "Android disabled its default network",
+      "pass": true
+    },
+    {
+      "name": "Leaving Workout returns to the previous main tab",
+      "pass": true
+    },
+    {
+      "name": "Library opens the selected technique offline",
+      "pass": true
+    },
+    {
+      "name": "Consulting a technique leaves the session list empty",
+      "pass": true
+    },
+    {
+      "name": "A preview does not start a session",
+      "pass": true
+    },
+    {
+      "name": "Training view has its own route without a visible module bar",
+      "pass": true
+    },
+    {
+      "name": "First set leaves load and reps blank without any history",
+      "pass": true
+    },
+    {
+      "name": "The guide preserves the exact exercise, weight and reps",
+      "pass": true
+    },
+    {
+      "name": "Force stop and resume preserve unsaved input",
+      "pass": true
+    },
+    {
+      "name": "Double tap writes exactly one SQLite row with the entered values",
+      "pass": true
+    },
+    {
+      "name": "Next set prefills last weight and clears reps",
+      "pass": true
+    },
+    {
+      "name": "Trend shows the logged volume in the current week",
+      "pass": true
+    },
+    {
+      "name": "Replay starts a second session while preserving the original results",
+      "pass": true
+    },
+    {
+      "name": "The summary explains two working sets and leaves an unknown next load blank",
+      "pass": true
+    },
+    {
+      "name": "Next session shows the confirmed load per hand with blank reps",
+      "pass": true
+    },
+    {
+      "name": "Clearing the next load leaves logged sets untouched",
+      "pass": true
+    },
+    {
+      "name": "Local account saved the selected venue, equipment and schedule",
+      "pass": true
+    },
+    {
+      "name": "Server has exactly the saved offline sets and their quantities",
+      "pass": true
+    },
+    {
+      "name": "Server projected the stored venue, equipment and schedule into this account",
+      "pass": true
+    },
+    {
+      "name": "Synced session retains the composed origin and selected venue",
+      "pass": true
+    },
+    {
+      "name": "Server preserves the accepted 10 kg per hand as a 20 kg total target",
+      "pass": true
+    }
+  ],
+  "captures": [
+    {
+      "file": "today-empty.png",
+      "at": "2026-11-27T15:40:54.441Z"
+    },
+    {
+      "file": "exercise-library.png",
+      "at": "2026-11-27T15:40:56.261Z"
+    },
+    {
+      "file": "one-off-preview.png",
+      "at": "2026-11-27T15:41:01.080Z"
+    },
+    {
+      "file": "exercise-technique.png",
+      "at": "2026-11-27T15:41:03.325Z"
+    },
+    {
+      "file": "saved-set.png",
+      "at": "2026-11-27T15:41:09.409Z"
+    },
+    {
+      "file": "completed-workout.png",
+      "at": "2026-11-27T15:41:10.307Z"
+    },
+    {
+      "file": "eight-week-progress.png",
+      "at": "2026-11-27T15:41:11.896Z"
+    },
+    {
+      "file": "workout-history.png",
+      "at": "2026-11-27T15:41:13.098Z"
+    },
+    {
+      "file": "confirmed-next-load.png",
+      "at": "2026-11-27T15:41:17.340Z"
+    }
+  ],
+  "measurements": {
+    "coldStartToDashboardUpperBoundMs": 2605,
+    "androidActivityTotalMs": 1947,
+    "editFieldsToSavedRowMs": 671
+  },
+  "installedSha256": "d2f00a5cfddf6f86643af7959079f0b0dd43f8cf65972ec24ec9caa587ef40d1",
+  "offline": {
+    "airplane": "1",
+    "wifi": "0",
+    "mobileData": "0",
+    "sdk": "36",
+    "webviewOnline": false,
+    "defaultNetwork": "none"
+  },
+  "remote": {
+    "revision": 1,
+    "schema": 13,
+    "setCount": 3,
+    "preferenceCount": 3
+  },
+  "finishedAt": "2026-11-27T15:41:26.245Z"
+}

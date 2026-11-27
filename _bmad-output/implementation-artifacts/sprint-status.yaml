@@ -209,10 +209,12 @@ development_status:
 
 workout_delivery:
   scope: docs/2-requirements/workout-coaching-v1.md
-  next: Verify Android, CI, server backup and release sync
-  plan_selection: verification
-  session_logging: verification
-  history_and_release: verification
+  release: v0.3.0
+  release_sha: 81fa007a2513fd073c5b7541a26220fa84bda446
+  acceptance: docs/audit/fitness/workout-release-0.3.0.md
+  plan_selection: done
+  session_logging: done
+  history_and_release: done
 
 # Epic-2 closure metadata
 epic_2_closure:
