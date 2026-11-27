@@ -1,3 +1,5 @@
+import { displayWorkoutSet } from '../../../core/models/exercise-guides';
+import { loadFactor, loadLabel, progressionLoad } from '../../../core/models/workout-coaching';
 import { isLoggedSet } from '../../../core/models/fitness-workout-set';
 import {
   ChangeDetectionStrategy,
@@ -26,9 +28,9 @@ import {
 } from 'ionicons/icons';
 import {
   isTimedExercise,
-  setValueLabel,
   workoutNumber,
   type WorkoutSessionDetail,
+  type WorkoutExerciseDetail,
   type WorkoutSet,
 } from '../../../core/models/fitness.types';
 
@@ -54,6 +56,12 @@ import {
 })
 export class WorkoutSummaryModal {
   @Input() set session(value: WorkoutSessionDetail | null) {
+    if (this._session()?.id !== value?.id) {
+      this.choices.set({});
+      this.notes.set({});
+      this.hidden.set(new Set());
+      this.kept.set(new Set());
+    }
     this._session.set(value);
   }
   get session(): WorkoutSessionDetail | null {
@@ -70,6 +78,75 @@ export class WorkoutSummaryModal {
   private readonly _isOpen = signal(false);
 
   @Output() readonly closed = new EventEmitter<void>();
+
+  @Output() readonly nextLoadChosen = new EventEmitter<{
+    exercise: WorkoutExerciseDetail;
+    kg: number | null;
+  }>();
+  protected readonly choices = signal<Record<string, string>>({});
+  protected readonly kept = signal<ReadonlySet<string>>(new Set());
+  @Output() readonly completionNoteChosen = new EventEmitter<{
+    exercise: WorkoutExerciseDetail;
+    note: string;
+  }>();
+  protected readonly notes = signal<Record<string, string>>({});
+  protected readonly hidden = signal<ReadonlySet<string>>(new Set());
+  protected readonly incompleteRows = computed(
+    () =>
+      this._session()?.exercises.filter(
+        (ex) =>
+          !this.hidden().has(ex.id) &&
+          !!ex.planned_sets &&
+          ex.sets.some(isLoggedSet) &&
+          ex.sets.filter(isLoggedSet).length < ex.planned_sets,
+      ) ?? [],
+  );
+  protected readonly loggedCount = (exercise: WorkoutExerciseDetail): number =>
+    exercise.sets.filter(isLoggedSet).length;
+
+  protected setNote(id: string, note: string): void {
+    this.notes.update((before) => ({ ...before, [id]: note }));
+  }
+  protected skipNote(id: string): void {
+    this.hidden.update((before) => new Set(before).add(id));
+  }
+  protected record(exercise: WorkoutExerciseDetail, note: string): void {
+    if (note.trim()) this.completionNoteChosen.emit({ exercise, note });
+  }
+
+  protected readonly loadLabel = loadLabel;
+  protected readonly progressionRows = computed(
+    () => this._session()?.exercises.filter((ex) => progressionLoad(ex) !== null) ?? [],
+  );
+  protected nextValue(ex: WorkoutExerciseDetail): string {
+    const known = ex.next_weight_kg ?? ex.known_heavier_kg;
+    return (
+      this.choices()[ex.id] ?? (known == null ? '' : String(known / loadFactor(ex.exercise_id)))
+    );
+  }
+
+  protected enterLoad(ex: WorkoutExerciseDetail, raw: string): void {
+    this.choices.update((values) => ({ ...values, [ex.id]: raw }));
+  }
+
+  protected nextKg(ex: WorkoutExerciseDetail): number | null {
+    const raw = this.nextValue(ex);
+    const kg = Number(raw) * loadFactor(ex.exercise_id);
+    const current = progressionLoad(ex);
+    return raw.trim() && current != null && Number.isFinite(kg) && kg > current && kg <= 500
+      ? kg
+      : null;
+  }
+
+  protected confirm(ex: WorkoutExerciseDetail): void {
+    const kg = this.nextKg(ex);
+    if (kg !== null) this.nextLoadChosen.emit({ exercise: ex, kg });
+  }
+
+  protected keep(ex: WorkoutExerciseDetail): void {
+    this.kept.update((previous) => new Set(previous).add(ex.id));
+    this.nextLoadChosen.emit({ exercise: ex, kg: null });
+  }
 
   protected readonly totalVolume = computed(() => {
     return workoutNumber.format(this._session()?.total_volume ?? 0);
@@ -102,7 +179,7 @@ export class WorkoutSummaryModal {
                   ? seconds + ' giây'
                   : 'Chưa rõ thời gian'
                 : workoutNumber.format(ex.total_volume) + ' kg',
-              topSet: bestSet(logged),
+              topSet: bestSet(ex.exercise_id, logged),
             },
           ];
     });
@@ -134,7 +211,7 @@ export class WorkoutSummaryModal {
   }
 }
 
-function bestSet(sets: WorkoutSet[]): string {
+function bestSet(exerciseId: string, sets: WorkoutSet[]): string {
   let top: WorkoutSet | undefined;
   for (const s of sets) {
     if (s.legacy_unit_unknown || s.duration_seconds != null) continue;
@@ -146,5 +223,5 @@ function bestSet(sets: WorkoutSet[]): string {
       top = s;
     }
   }
-  return top ? setValueLabel(top) : '';
+  return top ? displayWorkoutSet(exerciseId, top) : '';
 }

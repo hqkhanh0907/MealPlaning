@@ -5,6 +5,7 @@ const paths = new Map([
   ['/api/collections/users/records', ['POST']],
   ['/api/collections/users/auth-with-password', ['POST']],
   ['/api/mealplan/workspace', ['GET', 'POST']],
+  ['/api/mealplan/workspace?schema=13', ['GET']],
   ['/api/mealplan/workspace?metadata=1', ['GET']],
   ['/api/mealplan/session', ['POST']],
   ['/api/mealplan/session/refresh', ['POST']],

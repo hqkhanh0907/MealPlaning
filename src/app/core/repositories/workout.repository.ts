@@ -1,11 +1,23 @@
 import { inject, Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
+import { catalogEntry, catalogReviewedFacts } from '../models/exercise-catalog';
+import { expandEquipment } from '../models/exercise-discovery';
+import { ExercisePlaceRepository } from './exercise-place.repository';
 import { Database } from '../services/database/database';
 import { workoutSetIssue, type WorkoutSetInput } from '../models/fitness-workout-set';
+import {
+  progressionLoad,
+  venueMovements,
+  sameVenuePreview,
+  type WorkoutVenuePreview,
+  type WorkoutMovementSource,
+  type LastWorkoutSet,
+} from '../models/workout-coaching';
 import { localIsoDate, mondayOfWeek, shiftIsoDate } from '../utils/local-date';
 import { isTimedExercise, muscleLabels } from '../models/fitness.types';
 import type {
   FitnessProgressSummary,
+  TrainingPlanExerciseDraft,
   MuscleGroup,
   StrengthPoint,
   WeeklyVolumePoint,
@@ -22,11 +34,12 @@ const TOTAL_REPETITION_VOLUME = 'COALESCE(SUM(ws.weight_kg * ws.reps), 0)';
 
 const SESSION_PROJECTION = `
   SELECT id, date, training_plan_day_id, training_day_name, mode, total_volume,
-         duration_minutes, started_at, completed_at, created_at
+         duration_minutes, started_at, completed_at, created_at, origin, place_id, source_session_id
     FROM workout_session`;
 const EXERCISE_PROJECTION = `
   SELECT we.id, we.workout_session_id, we.exercise_id,
          e.name AS exercise_name, e.name_vi AS exercise_name_vi, e.muscle_group, e.category, e.equipment,
+         we.original_exercise_id, we.use_at_place, we.next_weight_kg, we.planned_notes, we.completion_note,
          we.planned_sets, we.planned_min, we.planned_max, we.planned_rest, we.sort_order, we.total_volume
     FROM workout_exercise we
     INNER JOIN exercise e ON e.id = we.exercise_id`;
@@ -41,6 +54,17 @@ type SetToAppend =
 @Injectable({ providedIn: 'root' })
 export class WorkoutRepository {
   private readonly db = inject(Database);
+  private readonly places = inject(ExercisePlaceRepository);
+  private pendingWrite: Promise<void> = Promise.resolve();
+
+  private writeTransaction<T>(work: () => Promise<T>): Promise<T> {
+    const next = this.pendingWrite.then(() => this.db.withTransaction(work));
+    this.pendingWrite = next.then(
+      () => undefined,
+      () => undefined,
+    );
+    return next;
+  }
 
   async getActiveSession(): Promise<WorkoutSessionDetail | null> {
     const row = await this.db.getOne<SessionRow>(
@@ -53,62 +77,375 @@ export class WorkoutRepository {
   }
 
   async startGuidedSession(
-    trainingPlanDayId: string,
-    now: Date = new Date(),
+    dayId: string,
+    now = new Date(),
+    placeId: string | null = null,
   ): Promise<WorkoutSessionDetail> {
-    const active = await this.getActiveSession();
-    if (active) return active;
-
-    const day = await this.db.getOne<{ id: string; name: string }>(
-      `SELECT id, name FROM training_plan_day WHERE id = ? AND is_rest_day = 0 LIMIT 1`,
-      [trainingPlanDayId],
-    );
-    if (!day) {
-      throw new Error('WorkoutRepository: guided session requires a non-rest training day.');
-    }
-
-    const sessionId = uuidv4();
-    await this.db.withTransaction(async () => {
-      await this.db.execute(
-        `INSERT INTO workout_session (
-         id, date, training_plan_day_id, training_day_name, mode, started_at
-       ) VALUES (?, ?, ?, ?, 'guided', ?)`,
-        [sessionId, localIsoDate(now), trainingPlanDayId, day.name, now.toISOString()],
+    return this.startSession(placeId, async (id) => {
+      const day = await this.db.getOne<{ name: string }>(
+        'SELECT name FROM training_plan_day WHERE id = ? AND is_rest_day = 0',
+        [dayId],
       );
-
+      if (!day) throw new Error('Chọn một ngày có bài tập trong giáo án.');
+      await this.db.execute(
+        `INSERT INTO workout_session
+        (id, date, training_plan_day_id, training_day_name, mode, origin, place_id, started_at)
+        VALUES (?, ?, ?, ?, 'guided', 'plan_day', ?, ?)`,
+        [id, localIsoDate(now), dayId, day.name, placeId, now.toISOString()],
+      );
       await this.db.execute(
         `INSERT INTO workout_exercise
-          (id, workout_session_id, exercise_id, sort_order, planned_sets, planned_min, planned_max, planned_rest)
-          SELECT ? || ':' || id, ?, exercise_id, sort_order, sets, reps_min, reps_max, rest_seconds
-          FROM planned_exercise WHERE training_plan_day_id = ?`,
-        [sessionId, sessionId, trainingPlanDayId],
+        (id, workout_session_id, exercise_id, sort_order, planned_sets, planned_min, planned_max, planned_rest, planned_notes)
+        SELECT ? || ':' || id, ?, exercise_id, sort_order, sets, reps_min, reps_max, rest_seconds, notes
+        FROM planned_exercise WHERE training_plan_day_id = ?`,
+        [id, id, dayId],
       );
     });
-
-    const created = await this.getSession(sessionId);
-    if (!created) {
-      throw new Error('WorkoutRepository: failed to create guided session.');
-    }
-    return created;
   }
 
-  async startFreeSession(now: Date = new Date()): Promise<WorkoutSessionDetail> {
-    const active = await this.getActiveSession();
-    if (active) return active;
-
-    const sessionId = uuidv4();
-    await this.db.execute(
-      `INSERT INTO workout_session (
-         id, date, training_plan_day_id, training_day_name, mode, started_at
-       ) VALUES (?, ?, NULL, 'Tập tự do', 'free', ?)`,
-      [sessionId, localIsoDate(now), now.toISOString()],
+  async startFreeSession(
+    now = new Date(),
+    placeId: string | null = null,
+  ): Promise<WorkoutSessionDetail> {
+    return this.startSession(placeId, (id) =>
+      this.insertIndependent(id, now, placeId, 'free', 'Tập tự do', null),
     );
+  }
 
-    const created = await this.getSession(sessionId);
-    if (!created) {
-      throw new Error('WorkoutRepository: failed to create free session.');
+  async startComposedSession(
+    exercises: readonly (TrainingPlanExerciseDraft | string)[],
+    placeId: string | null,
+    now = new Date(),
+    preview?: WorkoutVenuePreview,
+  ): Promise<WorkoutSessionDetail> {
+    if (!exercises.length) throw new Error('Buổi gợi ý cần có ít nhất một bài.');
+    return this.startSession(
+      placeId,
+      async (id) => {
+        await this.insertIndependent(id, now, placeId, 'composed', 'Buổi gợi ý', null);
+        for (const [index, exercise] of exercises.entries()) {
+          const draft = typeof exercise === 'string' ? null : exercise;
+          await this.db.execute(
+            `INSERT INTO workout_exercise
+          (id, workout_session_id, exercise_id, sort_order, planned_sets, planned_min, planned_max, planned_rest, planned_notes)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              uuidv4(),
+              id,
+              typeof exercise === 'string' ? exercise : exercise.exerciseId,
+              index,
+              draft?.sets ?? null,
+              draft?.repsMin ?? null,
+              draft?.repsMax ?? null,
+              draft?.restSeconds ?? null,
+              draft?.notes ?? null,
+            ],
+          );
+        }
+      },
+      preview,
+    );
+  }
+
+  async replaySession(
+    sourceId: string,
+    placeId: string | null,
+    now = new Date(),
+    preview?: WorkoutVenuePreview,
+  ): Promise<WorkoutSessionDetail> {
+    return this.startSession(
+      placeId,
+      async (id) => {
+        const source = await this.db.getOne<{
+          origin: 'free' | 'composed' | null;
+          training_day_name: string | null;
+        }>(
+          `SELECT origin, training_day_name FROM workout_session WHERE id = ? AND mode = 'free' AND status = 'completed'`,
+          [sourceId],
+        );
+        if (!source) throw new Error('Chọn buổi tự do hoặc buổi gợi ý đã hoàn thành để tập lại.');
+        await this.insertIndependent(
+          id,
+          now,
+          placeId,
+          source.origin ?? 'free',
+          source.training_day_name ?? 'Tập tự do',
+          sourceId,
+        );
+        const rows = await this.db.query<{ id: string }>(
+          'SELECT id FROM workout_exercise WHERE workout_session_id = ? ORDER BY sort_order, id',
+          [sourceId],
+        );
+        for (const [index, row] of rows.entries()) {
+          await this.db.execute(
+            `INSERT INTO workout_exercise
+          (id, workout_session_id, exercise_id, sort_order, planned_sets, planned_min, planned_max, planned_rest, planned_notes, original_exercise_id)
+          SELECT ?, ?, exercise_id, ?, planned_sets, planned_min, planned_max, planned_rest, planned_notes, original_exercise_id
+          FROM workout_exercise WHERE id = ?`,
+            [uuidv4(), id, index, row.id],
+          );
+        }
+      },
+      preview,
+    );
+  }
+
+  private async insertIndependent(
+    id: string,
+    now: Date,
+    place: string | null,
+    origin: 'free' | 'composed',
+    name: string,
+    sourceId: string | null,
+  ): Promise<void> {
+    await this.db.execute(
+      `INSERT INTO workout_session
+      (id, date, training_day_name, mode, origin, place_id, source_session_id, started_at)
+      VALUES (?, ?, ?, 'free', ?, ?, ?, ?)`,
+      [id, localIsoDate(now), name, origin, place, sourceId, now.toISOString()],
+    );
+  }
+
+  private async startSession(
+    placeId: string | null,
+    create: (id: string) => Promise<void>,
+    preview?: WorkoutVenuePreview,
+  ): Promise<WorkoutSessionDetail> {
+    const sessionId = await this.writeTransaction(async () => {
+      const active = await this.db.getOne<{ id: string }>(
+        "SELECT id FROM workout_session WHERE status = 'active' ORDER BY started_at DESC LIMIT 1",
+      );
+      if (active) {
+        if (preview) throw new Error('Bạn đang có buổi tập khác. Hãy tiếp tục buổi đang tập.');
+        return active.id;
+      }
+      const id = uuidv4();
+      await create(id);
+      if (placeId || preview) await this.applyPlaceReplacements(id, placeId, preview);
+      return id;
+    });
+    const session = await this.getSession(sessionId);
+    if (!session) throw new Error('Không đọc được buổi tập vừa mở.');
+    return session;
+  }
+
+  async previewMovements(
+    sources: readonly WorkoutMovementSource[],
+    placeId: string | null,
+  ): Promise<WorkoutVenuePreview> {
+    const place = placeId ? (await this.places.list()).find((item) => item.id === placeId) : null;
+    const equipment = place?.equipment ? [...new Set(place.equipment)].sort() : null;
+    const available = equipment && expandEquipment(equipment);
+    const rules = new Map<string, string>();
+    const ids = [
+      ...new Set(
+        sources.flatMap((source) =>
+          source.originalExerciseId
+            ? [source.originalExerciseId, source.exerciseId]
+            : [source.exerciseId],
+        ),
+      ),
+    ];
+    if (placeId && ids.length) {
+      const rows = await this.db.query<{ original: string; replacement: string }>(
+        `
+        WITH rules AS (
+          SELECT prior.original_exercise_id AS original, prior.exercise_id AS replacement,
+            ROW_NUMBER() OVER (PARTITION BY prior.original_exercise_id ORDER BY s.started_at DESC, s.id DESC, prior.sort_order DESC, prior.id DESC) AS position
+            FROM workout_exercise prior JOIN workout_session s ON s.id = prior.workout_session_id
+           WHERE prior.use_at_place = 1 AND s.place_id = ? AND s.status = 'completed'
+             AND prior.original_exercise_id IN (${ids.map(() => '?').join(',')})
+        ) SELECT original,replacement FROM rules WHERE position = 1`,
+        [placeId, ...ids],
+      );
+      for (const row of rows) {
+        const entry = catalogEntry(row.replacement);
+        const required = entry && catalogReviewedFacts(entry).required;
+        if (!available || required?.every((key) => available.has(key)))
+          rules.set(row.original, row.replacement);
+      }
     }
-    return created;
+    return {
+      placeId,
+      placeName: place?.name ?? null,
+      equipment,
+      prescriptionSnapshot: sources.some((source) => source.sets !== undefined)
+        ? JSON.stringify(
+            sources.map((source) => [
+              source.sets,
+              source.repsMin,
+              source.repsMax,
+              source.restSeconds,
+              source.notes,
+            ]),
+          )
+        : undefined,
+      movements: venueMovements(sources, rules),
+    };
+  }
+
+  private async applyPlaceReplacements(
+    sessionId: string,
+    placeId: string | null,
+    expected?: WorkoutVenuePreview,
+  ): Promise<void> {
+    const rows = await this.db.query<{
+      id: string;
+      exerciseId: string;
+      originalExerciseId: string | null;
+    }>(
+      `SELECT id, exercise_id AS exerciseId, original_exercise_id AS originalExerciseId,
+           planned_sets AS sets, planned_min AS repsMin, planned_max AS repsMax, planned_rest AS restSeconds, planned_notes AS notes
+        FROM workout_exercise WHERE workout_session_id = ? ORDER BY sort_order, id`,
+      [sessionId],
+    );
+    const actual = await this.previewMovements(rows, placeId);
+    if (expected && !sameVenuePreview(expected, actual))
+      throw new Error('Nơi tập hoặc bài thay thế đã đổi. Hãy xem lại buổi tập.');
+    for (const [i, movement] of actual.movements.entries()) {
+      if (
+        rows[i].exerciseId !== movement.exerciseId ||
+        rows[i].originalExerciseId !== movement.originalExerciseId
+      ) {
+        await this.db.execute(
+          'UPDATE workout_exercise SET exercise_id = ?,original_exercise_id = ? WHERE id = ?',
+          [movement.exerciseId, movement.originalExerciseId ?? null, rows[i].id],
+        );
+      }
+    }
+  }
+
+  async replaceMovement(
+    id: string,
+    replacement: string,
+    atPlace: boolean,
+  ): Promise<WorkoutSessionDetail> {
+    const sessionId = await this.writeTransaction(async () => {
+      const row = await this.db.getOne<{
+        workout_session_id: string;
+        exercise_id: string;
+        original_exercise_id: string | null;
+        place_id: string | null;
+      }>(
+        `
+        SELECT we.workout_session_id, we.exercise_id, we.original_exercise_id, s.place_id FROM workout_exercise we
+        JOIN workout_session s ON s.id = we.workout_session_id WHERE we.id = ? AND s.status = 'active'`,
+        [id],
+      );
+      if (!row || replacement === row.exercise_id || (atPlace && !row.place_id))
+        throw new Error('Kiểm tra bài và nơi tập trước khi đổi.');
+      const duplicate = await this.db.getOne<{ id: string }>(
+        'SELECT id FROM workout_exercise WHERE workout_session_id = ? AND exercise_id = ?',
+        [row.workout_session_id, replacement],
+      );
+      if (duplicate) throw new Error('Buổi này đã có bài thay thế.');
+      const count = await this.db.getOne<{ n: number }>(
+        'SELECT COUNT(*) AS n FROM workout_set WHERE workout_exercise_id = ?',
+        [id],
+      );
+      const original = row.original_exercise_id ?? row.exercise_id;
+      if (count?.n) {
+        await this.db.execute(
+          `INSERT INTO workout_exercise (id,workout_session_id,exercise_id,sort_order,original_exercise_id,use_at_place,planned_sets,planned_min,planned_max,planned_rest)
+          SELECT ?,workout_session_id,?,(SELECT MAX(sort_order)+1 FROM workout_exercise WHERE workout_session_id = ?),?,?,MAX(0, planned_sets - ?),planned_min,planned_max,planned_rest
+          FROM workout_exercise WHERE id = ?`,
+          [
+            uuidv4(),
+            replacement,
+            row.workout_session_id,
+            original,
+            atPlace ? 1 : null,
+            count.n,
+            id,
+          ],
+        );
+      } else {
+        await this.db.execute(
+          'UPDATE workout_exercise SET exercise_id = ?, original_exercise_id = ?, use_at_place = ? WHERE id = ?',
+          [replacement, original, atPlace ? 1 : null, id],
+        );
+      }
+      return row.workout_session_id;
+    });
+    const session = await this.getSession(sessionId);
+    if (!session) throw new Error('Không đọc được buổi tập sau khi đổi bài.');
+    return session;
+  }
+
+  async lastSets(placeId: string | null = null): Promise<LastWorkoutSet[]> {
+    return this.db.query<LastWorkoutSet>(
+      `
+      WITH entries AS (
+        SELECT we.exercise_id, s.place_id, s.date, ws.weight_kg, ws.reps, ws.duration_seconds, we.next_weight_kg,
+          ROW_NUMBER() OVER (PARTITION BY we.exercise_id ORDER BY s.completed_at DESC, ws.set_number DESC, ws.id DESC) AS position
+        FROM workout_set ws JOIN workout_exercise we ON we.id = ws.workout_exercise_id
+        JOIN workout_session s ON s.id = we.workout_session_id JOIN exercise e ON e.id = we.exercise_id
+        WHERE s.status = 'completed' AND ws.status = 'logged' AND ws.legacy_unit_unknown = 0
+          AND (lower(coalesce(e.equipment,'')) NOT LIKE '%machine%' AND lower(coalesce(e.equipment,'')) NOT LIKE '%cable%' OR s.place_id = ?)
+      ) SELECT exercise_id, place_id, date, weight_kg, reps, duration_seconds, next_weight_kg FROM entries WHERE position = 1`,
+      [placeId],
+    );
+  }
+
+  async recordCompletionNote(id: string, note: string): Promise<void> {
+    const value = note.trim();
+    if (!value || value.length > 300) throw new Error('Ghi lý do trong 300 ký tự.');
+    await this.db.execute(
+      `UPDATE workout_exercise SET completion_note = ? WHERE id = ?
+      AND workout_session_id IN (SELECT id FROM workout_session WHERE status = 'completed')`,
+      [value, id],
+    );
+  }
+
+  async completionSummary(id: string): Promise<WorkoutSessionDetail | null> {
+    const session = await this.getSession(id);
+    if (!session?.place_id) return session;
+    const eligible = session.exercises.filter((ex) => progressionLoad(ex) !== null);
+    for (const ex of eligible) {
+      const known = await this.db.getOne<{ kg: number | null }>(
+        `
+        SELECT MIN(ws.weight_kg) AS kg FROM workout_set ws JOIN workout_exercise we ON we.id = ws.workout_exercise_id
+        JOIN workout_session s ON s.id = we.workout_session_id
+        WHERE s.id <> ? AND s.status = 'completed' AND s.place_id = ? AND we.exercise_id = ?
+          AND ws.status = 'logged' AND ws.legacy_unit_unknown = 0 AND ws.duration_seconds IS NULL AND ws.weight_kg > ?`,
+        [id, session.place_id, ex.exercise_id, progressionLoad(ex)],
+      );
+      ex.known_heavier_kg = known?.kg ?? null;
+    }
+    return session;
+  }
+
+  async confirmNextLoad(id: string, kg: number | null): Promise<void> {
+    await this.writeTransaction(async () => {
+      const exercise = await this.getWorkoutExercise(id);
+      const session =
+        exercise &&
+        (await this.db.getOne<{ status: string }>(
+          'SELECT status FROM workout_session WHERE id = ?',
+          [exercise.workout_session_id],
+        ));
+      const last = exercise && progressionLoad(exercise);
+      if (
+        session?.status !== 'completed' ||
+        last == null ||
+        (kg !== null && (!Number.isFinite(kg) || kg <= last || kg > 500))
+      ) {
+        throw new Error('Kiểm tra mức tăng và các hiệp đã ghi.');
+      }
+      await this.db.execute('UPDATE workout_exercise SET next_weight_kg = ? WHERE id = ?', [
+        kg,
+        id,
+      ]);
+    });
+  }
+
+  weeklyVolumes(since: string, through: string): Promise<{ week_start: string; volume: number }[]> {
+    return this.db.query(
+      `SELECT date(date, '-' || ((strftime('%w', date) + 6) % 7) || ' days') AS week_start,
+      SUM(total_volume) AS volume FROM workout_session WHERE status = 'completed' AND date BETWEEN ? AND ?
+      GROUP BY week_start ORDER BY week_start`,
+      [since, through],
+    );
   }
 
   async addExerciseToSession(
@@ -116,39 +453,26 @@ export class WorkoutRepository {
     exerciseId: string,
     sortOrder?: number,
   ): Promise<WorkoutExerciseDetail> {
-    const existing = await this.db.getOne<{ id: string }>(
-      `SELECT id FROM workout_exercise
-        WHERE workout_session_id = ? AND exercise_id = ?
-        LIMIT 1`,
-      [sessionId, exerciseId],
-    );
-    if (existing) {
-      const hydrated = await this.getWorkoutExercise(existing.id);
-      if (!hydrated) {
-        throw new Error('WorkoutRepository: failed to hydrate existing workout exercise.');
-      }
-      return hydrated;
-    }
-
-    const nextSort =
-      sortOrder ??
-      (
-        await this.db.getOne<{ next_sort: number }>(
-          `SELECT COALESCE(MAX(sort_order), -1) + 1 AS next_sort
-             FROM workout_exercise
-            WHERE workout_session_id = ?`,
-          [sessionId],
-        )
-      )?.next_sort ??
-      0;
-    const id = uuidv4();
-    await this.db.execute(
-      `INSERT INTO workout_exercise (
-         id, workout_session_id, exercise_id, sort_order
-       ) VALUES (?, ?, ?, ?)`,
-      [id, sessionId, exerciseId, nextSort],
-    );
-
+    const id = await this.writeTransaction(async () => {
+      const active = await this.db.getOne<{ id: string }>(
+        "SELECT id FROM workout_session WHERE id = ? AND status = 'active'",
+        [sessionId],
+      );
+      if (!active) throw new Error('Buổi tập này đã kết thúc.');
+      const existing = await this.db.getOne<{ id: string }>(
+        `SELECT id FROM workout_exercise
+        WHERE workout_session_id = ? AND exercise_id = ? LIMIT 1`,
+        [sessionId, exerciseId],
+      );
+      if (existing) return existing.id;
+      const newId = uuidv4();
+      await this.db.execute(
+        `INSERT INTO workout_exercise (id, workout_session_id, exercise_id, sort_order)
+        SELECT ?, ?, ?, COALESCE(?, MAX(sort_order) + 1, 0) FROM workout_exercise WHERE workout_session_id = ?`,
+        [newId, sessionId, exerciseId, sortOrder ?? null, sessionId],
+      );
+      return newId;
+    });
     const created = await this.getWorkoutExercise(id);
     if (!created) {
       throw new Error('WorkoutRepository: failed to add exercise to workout.');
@@ -159,34 +483,58 @@ export class WorkoutRepository {
   async addSet(
     workoutExerciseId: string,
     input: WorkoutSetInput,
+    id = uuidv4(),
   ): Promise<{ set: WorkoutSet; session: WorkoutSessionDetail }> {
-    return this.appendSet(workoutExerciseId, { ...input, status: 'logged' });
+    return this.appendSet(workoutExerciseId, { ...input, status: 'logged' }, id);
   }
 
   async skipSet(
     workoutExerciseId: string,
     plannedWeightKg = 0,
     plannedReps = 0,
+    id = uuidv4(),
   ): Promise<{ set: WorkoutSet; session: WorkoutSessionDetail }> {
-    return this.appendSet(workoutExerciseId, {
-      status: 'skipped',
-      weightKg: plannedWeightKg,
-      reps: plannedReps,
-    });
+    return this.appendSet(
+      workoutExerciseId,
+      {
+        status: 'skipped',
+        weightKg:
+          Number.isFinite(plannedWeightKg) && plannedWeightKg >= 0 && plannedWeightKg <= 500
+            ? plannedWeightKg
+            : 0,
+        reps:
+          Number.isInteger(plannedReps) && plannedReps >= 0 && plannedReps <= 100 ? plannedReps : 0,
+      },
+      id,
+    );
   }
 
   private async appendSet(
     workoutExerciseId: string,
     entry: SetToAppend,
+    id: string,
   ): Promise<{ set: WorkoutSet; session: WorkoutSessionDetail }> {
-    const id = uuidv4();
-    const sessionId = await this.db.withTransaction(async () => {
+    const sessionId = await this.writeTransaction(async () => {
       const exercise = await this.db.getOne<{ workout_session_id: string; exercise_id: string }>(
         `SELECT workout_session_id, exercise_id FROM workout_exercise WHERE id = ?`,
         [workoutExerciseId],
       );
       if (!exercise)
         throw new Error(`WorkoutRepository: workout exercise '${workoutExerciseId}' not found.`);
+      const saved = await this.db.getOne<{ workout_exercise_id: string }>(
+        'SELECT workout_exercise_id FROM workout_set WHERE id = ?',
+        [id],
+      );
+      if (saved) {
+        if (saved.workout_exercise_id !== workoutExerciseId)
+          throw new Error('Hiệp đã thuộc bài tập khác.');
+        return exercise.workout_session_id;
+      }
+      const active = await this.db.getOne<{ id: string }>(
+        "SELECT id FROM workout_session WHERE id = ? AND status = 'active'",
+        [exercise.workout_session_id],
+      );
+      if (!active) throw new Error('Buổi tập này đã kết thúc.');
       const logged = entry.status === 'logged' ? entry : null;
       if (logged) validateSetInput(logged, exercise.exercise_id);
       await this.db.execute(
@@ -223,7 +571,7 @@ export class WorkoutRepository {
   }
 
   async completeSession(sessionId: string, now: Date = new Date()): Promise<void> {
-    await this.db.withTransaction(async () => {
+    await this.writeTransaction(async () => {
       const session = await this.db.getOne<{ started_at: string }>(
         `SELECT started_at FROM workout_session WHERE id = ? AND status = 'active'`,
         [sessionId],
@@ -268,7 +616,11 @@ export class WorkoutRepository {
     );
     if (!row) return;
 
-    await this.db.withTransaction(async () => {
+    await this.writeTransaction(async () => {
+      await this.db.execute(
+        'UPDATE workout_exercise SET next_weight_kg = NULL WHERE id = ? AND next_weight_kg IS NOT NULL',
+        [row.workout_exercise_id],
+      );
       await this.db.execute(`DELETE FROM workout_set WHERE id = ?`, [setId]);
       // Re-number remaining sets to keep set_number contiguous (1..N).
       const remaining = await this.db.query<{ id: string }>(
@@ -304,7 +656,7 @@ export class WorkoutRepository {
       throw new Error(`WorkoutRepository: set '${setId}' not found.`);
     }
     validateSetInput(input, row.exercise_id);
-    await this.db.withTransaction(async () => {
+    await this.writeTransaction(async () => {
       await this.db.execute(
         `UPDATE workout_set
             SET weight_kg = ?, reps = ?, rest_seconds = ?, effort = ?, notes = ?, updated_at = ?,
@@ -321,6 +673,11 @@ export class WorkoutRepository {
           setId,
         ],
       );
+      await this.db.execute(
+        `UPDATE workout_exercise SET next_weight_kg = NULL WHERE id =
+        (SELECT workout_exercise_id FROM workout_set WHERE id = ?) AND next_weight_kg IS NOT NULL`,
+        [setId],
+      );
       await this.syncTotals(row.workout_session_id);
     });
   }
@@ -330,7 +687,7 @@ export class WorkoutRepository {
     setId: string,
     input: SetMeasurements,
   ): Promise<WorkoutSessionDetail> {
-    return this.db.withTransaction(async () => {
+    return this.writeTransaction(async () => {
       const row = await this.db.getOne<
         Pick<WorkoutSet, 'weight_kg' | 'reps' | 'duration_seconds'> & { exercise_id: string }
       >(
@@ -358,6 +715,11 @@ export class WorkoutRepository {
             WHERE id = ?`,
           [input.weightKg, input.reps, duration, new Date().toISOString(), setId],
         );
+        await this.db.execute(
+          `UPDATE workout_exercise SET next_weight_kg = NULL WHERE id =
+          (SELECT workout_exercise_id FROM workout_set WHERE id = ?) AND next_weight_kg IS NOT NULL`,
+          [setId],
+        );
         await this.syncTotals(sessionId);
       }
       const session = await this.getSession(sessionId);
@@ -367,7 +729,7 @@ export class WorkoutRepository {
   }
 
   async deleteCompletedSession(sessionId: string): Promise<void> {
-    await this.db.withTransaction(async () => {
+    await this.writeTransaction(async () => {
       const session = await this.db.getOne<{ status: string }>(
         'SELECT status FROM workout_session WHERE id = ?',
         [sessionId],
@@ -400,7 +762,7 @@ export class WorkoutRepository {
     );
     if (!row) return;
 
-    await this.db.withTransaction(async () => {
+    await this.writeTransaction(async () => {
       await this.db.execute(`DELETE FROM workout_set WHERE workout_exercise_id = ?`, [
         workoutExerciseId,
       ]);
@@ -529,15 +891,28 @@ export class WorkoutRepository {
     const exercises = await this.db.query<Omit<WorkoutExerciseDetail, 'sets'>>(
       `${EXERCISE_PROJECTION}
        WHERE we.workout_session_id = ?
-       ORDER BY we.sort_order ASC`,
+       ORDER BY we.sort_order ASC, we.id ASC`,
       [row.id],
     );
 
-    const hydrated: WorkoutExerciseDetail[] = [];
-    for (const exercise of exercises) {
-      hydrated.push({ ...exercise, sets: await this.getSets(exercise.id) });
+    const sets = await this.db.query<WorkoutSet>(
+      `
+      SELECT ws.id, ws.workout_exercise_id, ws.set_number, ws.weight_kg, ws.reps, ws.rest_seconds,
+             ws.duration_seconds, ws.legacy_unit_unknown, ws.effort, ws.notes, ws.status, ws.completed_at, ws.created_at
+      FROM workout_set ws JOIN workout_exercise we ON we.id = ws.workout_exercise_id
+      WHERE we.workout_session_id = ? ORDER BY we.sort_order, ws.set_number`,
+      [row.id],
+    );
+    const byExercise = new Map<string, WorkoutSet[]>();
+    for (const set of sets) {
+      const list = byExercise.get(set.workout_exercise_id) ?? [];
+      list.push(set);
+      byExercise.set(set.workout_exercise_id, list);
     }
-    return { ...row, exercises: hydrated };
+    return {
+      ...row,
+      exercises: exercises.map((ex) => ({ ...ex, sets: byExercise.get(ex.id) ?? [] })),
+    };
   }
 
   private async getWorkoutExercise(id: string): Promise<WorkoutExerciseDetail | null> {

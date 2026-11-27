@@ -3,7 +3,6 @@ import {
   Component,
   ElementRef,
   afterRenderEffect,
-  computed,
   inject,
   signal,
   viewChild,
@@ -19,45 +18,29 @@ import {
   IonTitle,
   AlertController,
 } from '@ionic/angular/standalone';
-import { Router, RouterLink } from '@angular/router';
-import { NgTemplateOutlet } from '@angular/common';
-import { AiAvailability } from '../../shared/ai-availability';
 import { addIcons } from 'ionicons';
 import {
   addOutline,
+  arrowBackOutline,
   barbellOutline,
-  bodyOutline,
-  calendarOutline,
   checkmarkCircleOutline,
   closeCircleOutline,
-  flashOutline,
-  flameOutline,
-  pulseOutline,
-  settingsOutline,
-  sparklesOutline,
-  statsChartOutline,
-  timeOutline,
   timerOutline,
   trashOutline,
 } from 'ionicons/icons';
+import { loadFactor } from '../../core/models/workout-coaching';
 import { isLoggedSet, workoutSetLimits } from '../../core/models/fitness-workout-set';
 import { FitnessStore } from '../../core/stores/fitness.store';
+import { WorkoutNavigation } from './workout-navigation';
+import { WorkoutSubstitution } from './components/workout-substitution/workout-substitution';
 import { RestTimer } from './components/rest-timer/rest-timer';
 import { ExerciseGuideSheet } from './components/exercise-guide-sheet/exercise-guide-sheet';
-import { PlanPreview } from './components/plan-preview/plan-preview';
-import {
-  exerciseAmountLabel,
-  exerciseGuide,
-  exercisePurpose,
-} from '../../core/models/exercise-guides';
-import { PlanEditor } from './components/plan-editor/plan-editor';
+import { displayWorkoutSet, exerciseAmountLabel } from '../../core/models/exercise-guides';
 import { ExercisePickerSheet } from '../../shared/components/exercise-picker-sheet/exercise-picker-sheet';
 import { WorkoutSummaryModal } from '../../shared/components/workout-summary-modal/workout-summary-modal';
 import {
   isTimedExercise,
-  setValueLabel,
   workoutNumber,
-  type ActiveTrainingPlan,
   type WorkoutEffort,
   type WorkoutExerciseDetail,
 } from '../../core/models/fitness.types';
@@ -82,14 +65,11 @@ type SetAction = 'logSet' | 'skipSet' | 'repeatLastSet';
     '(window:ionKeyboardDidHide)': 'keyboardOpen.set(false)',
   },
   imports: [
-    NgTemplateOutlet,
     RestTimer,
     ExerciseGuideSheet,
-    PlanPreview,
-    PlanEditor,
+    WorkoutSubstitution,
     ExercisePickerSheet,
     WorkoutSummaryModal,
-    RouterLink,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -102,20 +82,18 @@ type SetAction = 'logSet' | 'skipSet' | 'repeatLastSet';
 })
 export default class FitnessPage {
   protected readonly guideOpen = signal(false);
-  protected readonly purpose = exercisePurpose;
-  protected readonly guideFor = exerciseGuide;
   protected readonly amountLabel = exerciseAmountLabel;
-  protected readonly ai = inject(AiAvailability);
   protected readonly setLimits = workoutSetLimits;
+  protected readonly loadFactor = loadFactor;
   protected readonly timed = isTimedExercise;
-  protected readonly setValue = setValueLabel;
+  protected readonly setValue = displayWorkoutSet;
   protected readonly number = workoutNumber;
   protected setCount(exercise: WorkoutExerciseDetail): string {
     const logged = exercise.sets.filter(isLoggedSet).length;
     const skipped = exercise.sets.length - logged;
     return logged + ' hiệp đã ghi' + (skipped ? ' · ' + skipped + ' bỏ qua' : '');
   }
-  private readonly router = inject(Router);
+  protected readonly nav = inject(WorkoutNavigation);
   private readonly alertCtrl = inject(AlertController);
   private readonly content = viewChild(IonContent);
   private readonly setEntry = viewChild<ElementRef<HTMLElement>>('setEntry');
@@ -127,18 +105,12 @@ export default class FitnessPage {
   constructor() {
     addIcons({
       addOutline,
+      arrowBackOutline,
       barbellOutline,
-      bodyOutline,
-      calendarOutline,
+
       checkmarkCircleOutline,
       closeCircleOutline,
-      flashOutline,
-      flameOutline,
-      pulseOutline,
-      settingsOutline,
-      sparklesOutline,
-      statsChartOutline,
-      timeOutline,
+
       timerOutline,
       trashOutline,
     });
@@ -190,36 +162,17 @@ export default class FitnessPage {
 
   readonly pickerOpen = signal(false);
 
-  /**
-   * Active plan card progressive-disclosure: collapsed by default to keep the
-   * hub focused on today's workout. User taps "Đổi giáo án" to expand the full plan
-   * grid + AI callout in the same card (no nav, Apple HIG: stay-in-place).
-   */
-  readonly switchPlanOpen = signal(false);
-  protected readonly planEditorSource = signal<ActiveTrainingPlan | null>(null);
-  protected readonly selectedPlanDayId = signal<string | null>(null);
-  protected readonly previewPlanDay = computed(() =>
-    this.fitness.activePlan()?.days.find((day) => day.id === this.selectedPlanDayId()),
-  );
-
   openPicker(): void {
     this.pickerOpen.set(true);
-  }
-
-  toggleSwitchPlan(): void {
-    this.switchPlanOpen.update((v) => !v);
-  }
-
-  protected dayLabel(dayOfWeek: number): string {
-    return dayOfWeek === 0 ? 'Chủ nhật' : `Thứ ${dayOfWeek + 1}`;
   }
 
   ionViewWillEnter(): void {
     void this.fitness.initialize();
   }
 
-  openSettings(): void {
-    void this.router.navigate(['/settings']);
+  protected dismissSummary(): void {
+    this.fitness.dismissCompletedSummary();
+    void this.nav.today();
   }
 
   onWeightInput(event: Event): void {
@@ -246,11 +199,6 @@ export default class FitnessPage {
     return EFFORT_LABELS[effort];
   }
 
-  barWidth(value: number, max: number): string {
-    if (!Number.isFinite(value) || !Number.isFinite(max) || max <= 0) return '0%';
-    return `${Math.max(0, Math.min(100, Math.round((value / max) * 100)))}%`;
-  }
-
   async confirmCancelSession(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Hủy buổi tập?',
@@ -261,7 +209,9 @@ export default class FitnessPage {
           text: 'Hủy buổi',
           role: 'destructive',
           handler: () => {
-            void this.fitness.cancelWorkout();
+            void this.fitness.cancelWorkout().then(() => {
+              if (!this.fitness.activeSession()) void this.nav.today();
+            });
           },
         },
       ],
@@ -269,7 +219,6 @@ export default class FitnessPage {
     await alert.present();
   }
 
-  /** Destructive: remove a single exercise (and its sets) from the active session. */
   async confirmRemoveExercise(workoutExerciseId: string): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Xóa bài khỏi buổi tập?',
@@ -288,7 +237,6 @@ export default class FitnessPage {
     await alert.present();
   }
 
-  /** Destructive: delete a single logged set. Re-numbers remaining sets server-side. */
   async confirmDeleteSet(setId: string, setNumber: number): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: `Xóa hiệp ${setNumber}?`,

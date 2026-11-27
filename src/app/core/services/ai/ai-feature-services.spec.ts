@@ -198,6 +198,55 @@ describe('AI feature services', () => {
     });
   });
 
+  it('validates a constrained draft against the same local equipment and weekdays as the finder', async () => {
+    const service = TestBed.inject(FitnessAi);
+    const response = trainingPlanResponse();
+    const draft = {
+      ...response,
+      days: response.days.map((day) => ({
+        ...day,
+        exercises: day.exercises.slice(0, 1).map((item) => ({ ...item, exercise_id: 'push-up' })),
+      })),
+    };
+    const input = {
+      profile: profile(),
+      progress: progressSummary(),
+      exercises: exercises(2).map((exercise, index) => ({
+        ...exercise,
+        id: index ? 'bench-press' : 'push-up',
+      })),
+      preferences: {
+        age: 30,
+        weekdays: [1, 3, 5],
+        minutes: 35,
+        equipment: [],
+        avoid: [],
+        frequency: 3,
+        familiarVolume: false,
+      },
+    };
+    gemini.generateContent.and.resolveTo(draft);
+    expect((await service.generateTrainingPlan(input)).frequency).toBe(3);
+    const prompt = gemini.generateContent.calls.mostRecent().args[0];
+    expect(prompt).toContain('id=push-up');
+    expect(prompt).not.toContain('id=bench-press');
+    await expectAsync(
+      service.generateTrainingPlan({
+        ...input,
+        preferences: { ...input.preferences, weekdays: [1, 2, 3] },
+      }),
+    ).toBeRejected();
+    const wrong = {
+      ...draft,
+      days: draft.days.map((day) => ({
+        ...day,
+        exercises: day.exercises.map((item) => ({ ...item, exercise_id: 'bench-press' })),
+      })),
+    };
+    gemini.generateContent.and.resolveTo(wrong);
+    await expectAsync(service.generateTrainingPlan(input)).toBeRejected();
+  });
+
   it('filters unknown AI training exercises and rejects unusable plans', async () => {
     gemini.generateContent.and.resolveTo(trainingPlanResponse());
     const service = TestBed.inject(FitnessAi);
@@ -210,6 +259,7 @@ describe('AI feature services', () => {
 
     expect(gemini.generateContent.calls.mostRecent().args[1].feature).toBe('training_plan');
     expect(result.frequency).toBe(3);
+    expect(gemini.generateContent.calls.mostRecent().args[0]).not.toContain('Goal: maintain');
     expect(result.days[0].exercises.map((exercise) => exercise.exerciseId)).toEqual(['ex-1']);
 
     gemini.generateContent.and.resolveTo({

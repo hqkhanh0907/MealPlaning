@@ -80,16 +80,54 @@ describe('Fitness repositories', () => {
     ).toEqual({ instructions: exercise.instructions });
   });
 
-  it('offers the dumbbell template while keeping the three-day default', async () => {
+  it('seeds all presets without activating any until explicitly chosen', async () => {
     const plans = await planRepo.ensurePresetPlans();
     const active = await planRepo.getActivePlan();
 
     expect(plans.map((plan) => plan.frequency)).toEqual([2, 3, 4, 6]);
-    expect(active?.id).toBe('plan_full_body_3x');
+    expect(active).toBeNull();
     expect(plans.find((plan) => plan.type === 'ppl')?.frequency).toBe(6);
-    expect(active?.type).toBe('full_body');
-    expect(active?.training_days).toBe(3);
-    expect(active?.days.length).toBe(7);
+    expect(await planRepo.getTodayTrainingDay('2026-05-11')).toBeNull();
+  });
+
+  it('retains the finder schedule in the synced workspace and leaves an equal save untouched', async () => {
+    await planRepo.saveFinderSchedule([3, 6], 25);
+    const key = 'fitness_finder_schedule';
+    await db.execute("UPDATE workout_preference SET updated_at='2000-01-01' WHERE key=?", [key]);
+    await planRepo.saveFinderSchedule([3, 6], 25);
+    expect(await db.getOne('SELECT updated_at FROM workout_preference WHERE key=?', [key])).toEqual(
+      { updated_at: '2000-01-01' },
+    );
+    expect(await planRepo.getFinderSchedule()).toEqual({ weekdays: [3, 6], minutes: 25 });
+    await db.execute('DELETE FROM workout_preference WHERE key=?', [key]);
+    expect(await planRepo.getFinderSchedule()).toBeNull();
+  });
+
+  it('activates an adjusted preview atomically and rejects a stale second confirmation', async () => {
+    await planRepo.ensurePresetPlans();
+    const id = 'plan_two_dumbbells_floor';
+    const source = await planRepo.getPlanDays(id);
+    const draft = {
+      name: 'Lịch ở nhà',
+      days: source.map((day) => ({
+        dayOfWeek: (day.day_of_week + 1) % 7,
+        name: day.name,
+        isRestDay: !!day.is_rest_day,
+        exercises: day.exercises.map((ex) => ({
+          exerciseId: ex.exercise_id,
+          sets: 1,
+          repsMin: ex.reps_min,
+          repsMax: ex.reps_max,
+          restSeconds: ex.rest_seconds,
+          notes: ex.notes,
+        })),
+      })),
+    };
+    const personal = await planRepo.savePresetPreview(id, draft, null);
+    expect((await planRepo.getActivePlan())?.id).toBe(personal);
+    expect(await planRepo.getPlanDays(id)).toEqual(source);
+    await expectAsync(planRepo.savePresetPreview(id, draft, null)).toBeRejected();
+    expect((await planRepo.listPlans()).filter((plan) => plan.source === 'custom').length).toBe(1);
   });
 
   it('leaves the preset snapshot and sync version unchanged when reopened', async () => {
@@ -115,6 +153,7 @@ describe('Fitness repositories', () => {
   it('updates only preset rows that differ from their seed', async () => {
     await prepareWorkspace(db);
     await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById('plan_full_body_3x');
     const preset = (await planRepo.getActivePlan())!;
     const day = preset.days.find((item) => item.exercises.length > 0)!;
     const exercise = day.exercises[0];
@@ -146,6 +185,7 @@ describe('Fitness repositories', () => {
 
   it('rejects switching plans while a workout session is active', async () => {
     await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById('plan_full_body_3x');
     const today = await planRepo.getTodayTrainingDay('2026-05-11');
     expect(today?.is_rest_day).toBe(0);
     await workoutRepo.startGuidedSession(today!.id, new Date('2026-05-11T07:00:00'));
@@ -168,6 +208,7 @@ describe('Fitness repositories', () => {
 
   it('does not complete a workout with only skipped sets', async () => {
     await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById('plan_full_body_3x');
     const today = await planRepo.getTodayTrainingDay('2026-05-11');
     const session = await workoutRepo.startGuidedSession(today!.id);
     await workoutRepo.skipSet(session.exercises[0].id, 40, 8);
@@ -194,8 +235,35 @@ describe('Fitness repositories', () => {
     expect(active?.days.find((day) => day.day_of_week === 1)?.exercises.length).toBe(1);
   });
 
+  it('retains the previous AI plan and its recorded day when accepting another draft', async () => {
+    const first = await planRepo.createAiPlan(aiPlanDraft());
+    const day = (await planRepo.getPlanDays(first.id))[0];
+    const session = await workoutRepo.startGuidedSession(day.id);
+    await workoutRepo.addSet(session.exercises[0].id, {
+      weightKg: 5,
+      reps: 8,
+      restSeconds: 90,
+      effort: 'easy',
+      notes: null,
+    });
+    await workoutRepo.completeSession(session.id);
+    const second = await planRepo.createAiPlan({ ...aiPlanDraft(), name: 'Second' });
+    expect(second.id).not.toBe(first.id);
+    expect((await planRepo.getPlanDays(first.id))[0].id).toBe(day.id);
+    expect((await planRepo.listPlans()).filter((item) => item.source === 'ai').length).toBe(2);
+    expect(
+      (
+        await db.getOne<{ training_plan_day_id: string }>(
+          'SELECT training_plan_day_id FROM workout_session WHERE id = ?',
+          [session.id],
+        )
+      )?.training_plan_day_id,
+    ).toBe(day.id);
+  });
+
   it('saves a moved workout in a personal plan and keeps previous workout records', async () => {
     await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById('plan_full_body_3x');
     const preset = (await planRepo.getActivePlan())!;
     const monday = preset.days.find((day) => day.day_of_week === 1)!;
     const session = await workoutRepo.startGuidedSession(monday.id);
@@ -249,6 +317,7 @@ describe('Fitness repositories', () => {
 
   it('logs guided sets, snapshots total volume and reports progress metrics', async () => {
     await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById('plan_full_body_3x');
     await seedProfile();
     const today = await planRepo.getTodayTrainingDay('2026-05-11');
     const session = await workoutRepo.startGuidedSession(
@@ -280,6 +349,7 @@ describe('Fitness repositories', () => {
 
   it('validates set input bounds', async () => {
     await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById('plan_full_body_3x');
     const today = await planRepo.getTodayTrainingDay('2026-05-11');
     const session = await workoutRepo.startGuidedSession(
       today!.id,
@@ -370,6 +440,7 @@ describe('Fitness repositories', () => {
 
   it('captures guided targets and limits strength estimates to supported maximal-effort lifts', async () => {
     await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById('plan_full_body_3x');
     const day = (await planRepo.getTodayTrainingDay('2026-11-23'))!;
     const start = new Date('2026-11-23T08:00:00');
     const session = await workoutRepo.startGuidedSession(day.id, start);
@@ -401,6 +472,7 @@ describe('Fitness repositories', () => {
 
   it('updateSet round-trips weight, reps, rest, effort, notes, and writes updated_at ISO', async () => {
     await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById('plan_full_body_3x');
     const today = await planRepo.getTodayTrainingDay('2026-05-11');
     const session = await workoutRepo.startGuidedSession(
       today!.id,
@@ -512,6 +584,7 @@ describe('Fitness repositories', () => {
 
   it('deleteSet removes a single set, re-numbers remaining sets contiguously, and re-syncs totals', async () => {
     await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById('plan_full_body_3x');
     const today = await planRepo.getTodayTrainingDay('2026-05-11');
     const session = await workoutRepo.startGuidedSession(
       today!.id,
@@ -558,6 +631,7 @@ describe('Fitness repositories', () => {
 
   it('skipSet persists a skipped placeholder row that does not count toward volume', async () => {
     await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById('plan_full_body_3x');
     await seedProfile();
     const today = await planRepo.getTodayTrainingDay('2026-05-11');
     const session = await workoutRepo.startGuidedSession(
@@ -604,6 +678,7 @@ describe('Fitness repositories', () => {
 
   it('removeExerciseFromSession cascades sets and updates session totals', async () => {
     await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById('plan_full_body_3x');
     const today = await planRepo.getTodayTrainingDay('2026-05-11');
     const session = await workoutRepo.startGuidedSession(
       today!.id,
@@ -628,6 +703,7 @@ describe('Fitness repositories', () => {
 
   it('cancelSession soft-cancels in-progress session (preserves row + child sets), refuses completed, supports undo', async () => {
     await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById('plan_full_body_3x');
     const today = await planRepo.getTodayTrainingDay('2026-05-11');
     const live = await workoutRepo.startGuidedSession(today!.id, new Date('2026-05-11T07:00:00'));
     await workoutRepo.addSet(live.exercises[0].id, {
@@ -677,6 +753,7 @@ describe('Fitness repositories', () => {
 
   it('undoCancel refuses when another active session exists', async () => {
     await planRepo.ensurePresetPlans();
+    await planRepo.activatePlanById('plan_full_body_3x');
     const today = await planRepo.getTodayTrainingDay('2026-05-11');
     const first = await workoutRepo.startGuidedSession(today!.id, new Date('2026-05-11T07:00:00'));
     await workoutRepo.cancelSession(first.id);

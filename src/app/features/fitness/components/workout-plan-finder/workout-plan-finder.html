@@ -1,0 +1,336 @@
+<section aria-labelledby="finder-heading" class="finder">
+  <h2 id="finder-heading">Tìm giáo án phù hợp</h2>
+  @if (error(); as message) {
+    <p role="alert" class="error">{{ message }}</p>
+  }
+  @if (loading()) {
+    <p role="status">Đang tải lịch và nơi tập…</p>
+  } @else if (!places().length) {
+    <ion-button fill="outline" (click)="load()">Thử lại</ion-button>
+  } @else if (!open()) {
+    <ion-button data-finder-start (click)="open.set(true)">Tìm giáo án phù hợp</ion-button>
+  } @else {
+    @if (saved().length) {
+      <section class="saved">
+        <h3>Giáo án đã lưu</h3>
+        @for (item of saved(); track item.id) {
+          <article>
+            <strong>{{ item.name }}</strong>
+            <small>{{ item.frequency }} buổi/tuần{{ item.is_active ? ' · Đang dùng' : '' }}</small>
+            <app-plan-preview [planId]="item.id" />
+            @if (!item.is_active) {
+              <ion-button size="small" fill="outline" [disabled]="busy()" (click)="apply(item)"
+                >Dùng giáo án đã lưu</ion-button
+              >
+            }
+          </article>
+        }
+      </section>
+    }
+    @if (!adult()) {
+      <p>{{ result().explanation }}</p>
+    } @else if (!reviewing()) {
+      <fieldset>
+        <legend>Bạn rảnh ngày nào?</legend>
+        <div class="chips weekdays">
+          @for (day of dayOptions; track day.day) {
+            <button
+              type="button"
+              [attr.aria-label]="day.label"
+              [attr.aria-pressed]="weekdays().includes(day.day)"
+              [attr.data-finder-day]="day.day"
+              (click)="toggleDay(day.day)"
+            >
+              {{ day.short }}
+            </button>
+          }
+        </div>
+      </fieldset>
+      <div class="input-wrapper">
+        <label class="input-label" for="finder-minutes">Số phút mỗi buổi</label>
+        <input
+          #minutesInput
+          class="input-native"
+          id="finder-minutes"
+          type="number"
+          inputmode="numeric"
+          min="1"
+          step="1"
+          placeholder="Ví dụ 30"
+          [value]="minutes()"
+          (input)="minutes.set(minutesInput.value)"
+        />
+      </div>
+      <fieldset>
+        <legend>Nơi tập mặc định</legend>
+        <div class="chips">
+          @for (location of places(); track location.id) {
+            <button
+              type="button"
+              [attr.aria-pressed]="placeId() === location.id"
+              [attr.data-finder-place]="location.name"
+              (click)="selectPlace(location.id)"
+            >
+              {{ location.name }}
+            </button>
+          }
+        </div>
+      </fieldset>
+      @if (place(); as selected) {
+        <fieldset>
+          <legend>Dụng cụ tại {{ selected.name }}</legend>
+          <div class="chips">
+            <button
+              type="button"
+              [attr.aria-pressed]="equipment()?.length === 0"
+              data-finder-gear="none"
+              (click)="equipment.set([])"
+            >
+              Không có dụng cụ
+            </button>
+            @for (item of quickGear; track item[0]) {
+              <button
+                type="button"
+                [attr.aria-pressed]="equipment()?.includes(item[0]) === true"
+                [attr.data-finder-gear]="item[0]"
+                (click)="toggleGear(item[0])"
+              >
+                {{ item[1] }}
+              </button>
+            }
+          </div>
+          <details #moreGear (toggle)="moreGearOpen.set(moreGear.open)">
+            <summary>Dụng cụ khác</summary>
+            @if (moreGearOpen()) {
+              <div class="chips">
+                @for (item of otherGear; track item[0]) {
+                  <button
+                    type="button"
+                    [attr.aria-pressed]="equipment()?.includes(item[0]) === true"
+                    [attr.data-finder-gear]="item[0]"
+                    (click)="toggleGear(item[0])"
+                  >
+                    {{ item[1] }}
+                  </button>
+                }
+              </div>
+            }
+          </details>
+        </fieldset>
+      }
+      <fieldset>
+        <legend>Bạn cần tránh động tác nào?</legend>
+        <div class="chips">
+          <button
+            type="button"
+            data-finder-avoid="none"
+            [attr.aria-pressed]="avoid()?.length === 0"
+            (click)="setAvoid('none')"
+          >
+            Không có
+          </button>
+          <button
+            type="button"
+            data-finder-avoid="select"
+            [attr.aria-pressed]="editingAvoid()"
+            (click)="setAvoid('select')"
+          >
+            Chọn động tác
+          </button>
+          <button
+            type="button"
+            data-finder-avoid="unclear"
+            [attr.aria-pressed]="avoid() === 'unclear'"
+            (click)="setAvoid('unclear')"
+          >
+            Chưa xác định
+          </button>
+        </div>
+        @if (editingAvoid()) {
+          <div class="chips secondary">
+            @for (move of moves; track move[0]) {
+              <button
+                type="button"
+                [attr.aria-pressed]="avoids(move[0])"
+                (click)="toggleAvoid(move[0])"
+              >
+                {{ move[1] }}
+              </button>
+            }
+            <button type="button" (click)="setAvoid('unclear')">
+              Động tác khác hoặc cần hướng dẫn riêng
+            </button>
+          </div>
+        }
+      </fieldset>
+      @if (weekdays().length >= 4) {
+        <fieldset>
+          <legend>Lượng tập gần đây</legend>
+          <div class="chips">
+            <button type="button" [attr.aria-pressed]="!familiar()" (click)="familiar.set(false)">
+              Mới tập hoặc vừa quay lại
+            </button>
+            <button type="button" [attr.aria-pressed]="familiar()" (click)="familiar.set(true)">
+              Đã quen tập 4–6 buổi mỗi tuần
+            </button>
+          </div>
+        </fieldset>
+      }
+      <ion-button expand="block" data-finder-submit [disabled]="busy()" (click)="preview()"
+        >Xem đề xuất</ion-button
+      >
+    } @else {
+      <p role="status">{{ result().explanation }}</p>
+      @if (result().status === 'ready') {
+        @if (frequencies().length > 1) {
+          <fieldset>
+            <legend>Bạn muốn tập mấy buổi mỗi tuần?</legend>
+            <div class="chips">
+              @for (count of frequencies(); track count) {
+                <button
+                  type="button"
+                  [attr.aria-pressed]="frequency() === count"
+                  (click)="setFrequency(count)"
+                >
+                  {{ count }} buổi
+                </button>
+              }
+              <button
+                type="button"
+                [attr.aria-pressed]="answeredFrequency() && frequency() === null"
+                (click)="setFrequency(null)"
+              >
+                Xem tất cả
+              </button>
+            </div>
+          </fieldset>
+        }
+        @if (frequencies().length <= 1 || answeredFrequency()) {
+          @let preview = composedPreview();
+          @if (result().plans[0]; as first) {
+            <h3>Giáo án gợi ý</h3>
+            <ng-container
+              [ngTemplateOutlet]="optionCard"
+              [ngTemplateOutletContext]="{ $implicit: first }"
+            />
+          } @else if (effectiveSession().length && preview) {
+            <section class="preview">
+              <h3>Buổi gợi ý hôm nay</h3>
+              <p>
+                Một buổi riêng cho {{ preview.placeName }} · khoảng {{ sessionMinutes() }} phút.
+              </p>
+              <ul>
+                @for (item of effectiveSession(); track item.exerciseId) {
+                  <li>
+                    <strong>{{ exerciseName(item.exerciseId) }}</strong
+                    ><small
+                      >{{ item.sets }} hiệp × {{ item.repsMin }}–{{ item.repsMax }} lần · nghỉ
+                      {{ item.restSeconds }} giây</small
+                    >
+                  </li>
+                }
+              </ul>
+              <ion-button
+                data-finder-start-composed
+                [disabled]="busy()"
+                (click)="composedRequested.emit(preview)"
+                >Bắt đầu buổi này</ion-button
+              >
+            </section>
+          } @else {
+            <p>
+              Chưa có buổi phù hợp với thời gian, dụng cụ và động tác đã chọn. Bạn có thể chỉnh điều
+              kiện hoặc tập tự do.
+            </p>
+          }
+          @if (result().plans.length > 1) {
+            <h3>Mẫu khác để so sánh</h3>
+            @for (option of result().plans.slice(1); track option.sourceId) {
+              <ng-container
+                [ngTemplateOutlet]="optionCard"
+                [ngTemplateOutletContext]="{ $implicit: option }"
+              />
+            }
+          }
+          @if (result().shortPlans.length) {
+            <h3>Lựa chọn giảm số hiệp</h3>
+            @for (option of result().shortPlans; track option.sourceId) {
+              <ng-container
+                [ngTemplateOutlet]="optionCard"
+                [ngTemplateOutletContext]="{ $implicit: option }"
+              />
+            }
+          }
+        }
+      }
+      <ion-button fill="outline" [disabled]="busy()" (click)="reviewing.set(false)"
+        >Chỉnh điều kiện tập</ion-button
+      >
+    }
+    <ion-button
+      expand="block"
+      fill="clear"
+      data-finder-free
+      [disabled]="busy()"
+      (click)="freeRequested.emit()"
+      >Bắt đầu tập tự do</ion-button
+    >
+  }
+</section>
+<ng-template #optionCard let-option>
+  <article class="preview">
+    <h4>{{ option.name }}</h4>
+    <p>
+      {{ option.frequency }} buổi/tuần · {{ option.setsPerWeek }} hiệp/tuần · buổi dài nhất khoảng
+      {{ option.maxMinutes }} phút.
+    </p>
+    <p>Dụng cụ tại {{ place()?.name }} đủ cho các bài trong mẫu.</p>
+    @if (option.shifted) {
+      <p>Đã dời lịch theo ngày rảnh. Danh sách bài và khoảng cách giữa các buổi giữ nguyên.</p>
+    }
+    @if (option.shortened) {
+      <p>Giảm số hiệp để vừa {{ minutes() }} phút. Giữ nguyên các bài và thời gian nghỉ.</p>
+    }
+    @for (day of option.days; track day.dayOfWeek) {
+      @if (!day.isRestDay) {
+        <details>
+          <summary>{{ dayName(day.dayOfWeek) }} · {{ day.name }}</summary>
+          <ul>
+            @for (item of day.exercises; track item.exerciseId) {
+              <li>
+                <strong>{{ exerciseName(item.exerciseId) }}</strong
+                ><small
+                  >{{ item.sets }} hiệp × {{ item.repsMin }}–{{ item.repsMax }}
+                  {{ timed(item.exerciseId) ? 'giây' : 'lần' }} · nghỉ
+                  {{ item.restSeconds }} giây</small
+                >
+              </li>
+            }
+          </ul>
+        </details>
+      }
+    }
+    @if (active(); as current) {
+      <small>Giáo án hiện tại: {{ current.name }}</small>
+    }
+    <label class="confirm-option"
+      ><input
+        type="checkbox"
+        [checked]="confirmedOptions().includes(option.sourceId)"
+        (change)="confirmOption(option.sourceId)"
+      />
+      Tôi có thể thực hiện các bài và chọn mức tạ phù hợp cho mẫu này.</label
+    >
+    @if (option.frequency >= 4) {
+      <small
+        >So sánh {{ option.setsPerWeek }} hiệp với lượng tập gần đây của bạn trước khi chọn.</small
+      >
+    }
+    <ion-button
+      size="small"
+      [disabled]="busy() || !confirmedOptions().includes(option.sourceId)"
+      (click)="apply(option)"
+      >{{ option.adjusted ? 'Áp dụng bản điều chỉnh' : 'Dùng giáo án này' }}</ion-button
+    >
+  </article>
+</ng-template>

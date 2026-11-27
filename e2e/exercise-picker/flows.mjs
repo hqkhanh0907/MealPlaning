@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { d, session, sleep } from '../exercise-guides/lib.mjs';
-import { freshOffline, networkState, onboard } from '../exercise-guides/setup.mjs';
+import { freshOffline, networkState, onboard, openTrainingScreen, useFullBodyPreset } from '../exercise-guides/setup.mjs';
 
 const repo = realpathSync(fileURLToPath(new URL('../../', import.meta.url)));
 const output = process.env.OUTPUT_DIR;
@@ -365,6 +365,7 @@ async function largeText() {
 }
 
 async function activeWorkout() {
+  await useFullBodyPreset(s);
   await s.click('[aria-label="Thứ 2: Full Body A"]');
   await s.tapText('Tập buổi này');
   await s.waitFor("document.querySelectorAll('.workout-tab').length >= 4", 12000, 'active workout tabs');
@@ -471,6 +472,7 @@ async function activeWorkout() {
 }
 
 const editPlan = async () => {
+  await openTrainingScreen(s, 'plans');
   await s.clickText('Chỉnh giáo án', 'ion-button,button', 0);
   await wait('#personal-plan-name');
 };

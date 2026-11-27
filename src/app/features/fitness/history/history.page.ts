@@ -9,9 +9,16 @@ import {
   workoutSetIssue,
   workoutSetLimits,
 } from '../../../core/models/fitness-workout-set';
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import {
-  IonBackButton,
+  ChangeDetectionStrategy,
+  Component,
+  Injector,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import {
   IonButton,
   IonButtons,
   IonContent,
@@ -23,6 +30,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
+  arrowBackOutline,
   barbellOutline,
   calendarOutline,
   chevronDownOutline,
@@ -30,17 +38,24 @@ import {
   listOutline,
 } from 'ionicons/icons';
 import {
+  displayWorkoutSet,
   exerciseAmountLabel,
   exerciseGuide,
   exerciseUnitNote,
 } from '../../../core/models/exercise-guides';
+import { loadFactor, type WorkoutVenuePreview } from '../../../core/models/workout-coaching';
+import { exerciseGuideText } from '../../../core/models/exercise-guide-texts';
+import { WorkoutNavigation } from '../workout-navigation';
+import { FitnessStore } from '../../../core/stores/fitness.store';
+import { catalogEntry, catalogReviewedFacts } from '../../../core/models/exercise-catalog';
+import { exerciseEquipmentLabel, expandEquipment } from '../../../core/models/exercise-discovery';
 import { WorkoutRepository } from '../../../core/repositories/workout.repository';
 import {
   isTimedExercise,
-  setValueLabel,
   workoutNumber,
   type WorkoutSessionDetail,
   type WorkoutSet,
+  type FitnessProgressSummary,
 } from '../../../core/models/fitness.types';
 
 interface HistoryWeekGroup {
@@ -64,7 +79,6 @@ interface SetEditor {
   styleUrl: './history.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    IonBackButton,
     IonButton,
     IonButtons,
     IonContent,
@@ -76,10 +90,11 @@ interface SetEditor {
   ],
 })
 export class FitnessHistoryPage implements OnInit {
-  protected readonly setValue = setValueLabel;
+  protected readonly setValue = displayWorkoutSet;
   protected readonly unitNote = exerciseUnitNote;
   protected readonly amountLabel = exerciseAmountLabel;
   protected readonly limits = workoutSetLimits;
+  protected readonly loadFactor = loadFactor;
   protected readonly guideFor = exerciseGuide;
   protected readonly editor = signal<SetEditor | null>(null);
   protected readonly deleting = signal<string | null>(null);
@@ -87,12 +102,39 @@ export class FitnessHistoryPage implements OnInit {
   protected readonly actionError = signal<string | null>(null);
   private readonly workoutRepo = inject(WorkoutRepository);
 
+  protected readonly nav = inject(WorkoutNavigation);
+  private readonly injector = inject(Injector);
+  protected readonly trendOpen = signal(false);
+  protected readonly progress = signal<FitnessProgressSummary | null>(null);
+  protected readonly weeks = signal<{ date: string; volume: number }[]>([]);
+  protected readonly trendError = signal(false);
+  protected readonly maxVolume = computed(() =>
+    Math.max(1, ...this.weeks().map((week) => week.volume)),
+  );
+  protected readonly replayPreview = signal<{
+    id: string;
+    venue: WorkoutVenuePreview;
+    place: string;
+    exercises: { name: string; note: string }[];
+  } | null>(null);
+  protected readonly activeWorkout = signal(false);
+  protected readonly replayError = signal<string | null>(null);
+  protected readonly replayBusy = signal(false);
+  private replayAction = 0;
+
   readonly loading = signal(true);
   readonly groups = signal<HistoryWeekGroup[]>([]);
   readonly errorMessage = signal<string | null>(null);
 
   constructor() {
-    addIcons({ barbellOutline, calendarOutline, chevronDownOutline, timerOutline, listOutline });
+    addIcons({
+      arrowBackOutline,
+      barbellOutline,
+      calendarOutline,
+      chevronDownOutline,
+      timerOutline,
+      listOutline,
+    });
   }
 
   async ngOnInit(): Promise<void> {
@@ -111,12 +153,105 @@ export class FitnessHistoryPage implements OnInit {
     this.loading.set(true);
     this.errorMessage.set(null);
     try {
-      const sessions = await this.workoutRepo.recentSessions(20);
+      const [sessions] = await Promise.all([
+        this.workoutRepo.recentSessions(20),
+        this.refreshTrend(),
+      ]);
       this.groups.set(this.groupByIsoWeek(sessions));
     } catch {
       this.errorMessage.set('Không tải được lịch sử buổi tập.');
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  protected async refreshTrend(): Promise<void> {
+    const monday = mondayOfWeek(new Date());
+    const first = addCalendarDays(monday, -49);
+    try {
+      const [progress, results] = await Promise.all([
+        this.workoutRepo.progressSummary(),
+        this.workoutRepo.weeklyVolumes(
+          localIsoDate(first),
+          localIsoDate(addCalendarDays(monday, 6)),
+        ),
+      ]);
+      const byDate = new Map(results.map((point) => [point.week_start, point.volume]));
+      this.weeks.set(
+        Array.from({ length: 8 }, (_, index) => {
+          const date = localIsoDate(addCalendarDays(first, 7 * index));
+          return { date, volume: byDate.get(date) ?? 0 };
+        }),
+      );
+      this.progress.set(progress);
+      this.trendError.set(false);
+    } catch {
+      this.trendError.set(true);
+    }
+  }
+
+  protected async prepareReplay(session: WorkoutSessionDetail): Promise<void> {
+    if (session.mode !== 'free' || !session.exercises.length || this.replayBusy()) return;
+    this.clearAction();
+    const action = this.replayAction;
+    this.replayBusy.set(true);
+    try {
+      const [active, venue] = await Promise.all([
+        this.workoutRepo.getActiveSession(),
+        this.injector.get(FitnessStore).previewReplay(session),
+      ]);
+      if (action !== this.replayAction) return;
+      this.activeWorkout.set(!!active);
+      const available = venue.equipment ? expandEquipment(venue.equipment) : null;
+      const exercises = venue.movements.map(({ exerciseId }) => {
+        const entry = catalogEntry(exerciseId);
+        const original = session.exercises.find((item) => item.exercise_id === exerciseId);
+        const name =
+          original?.exercise_name_vi ||
+          original?.exercise_name ||
+          exerciseGuideText(exerciseId)?.nameVi ||
+          entry?.name ||
+          exerciseId;
+        const required = entry && catalogReviewedFacts(entry).required;
+        const missing = required?.filter((key) => !available?.has(key)) ?? [];
+        const note =
+          !available || !required
+            ? 'Chưa đối chiếu dụng cụ'
+            : missing.length
+              ? 'Cần ' + missing.map(exerciseEquipmentLabel).join(', ')
+              : '';
+        return { name, note };
+      });
+      this.replayPreview.set({
+        id: session.id,
+        venue,
+        place: venue.placeName ?? 'Chưa chọn nơi mặc định',
+        exercises,
+      });
+    } catch {
+      if (action === this.replayAction)
+        this.replayError.set('Không mở được bản xem trước. Hãy thử lại.');
+    } finally {
+      if (action === this.replayAction) this.replayBusy.set(false);
+    }
+  }
+
+  protected async startReplay(): Promise<void> {
+    const preview = this.replayPreview();
+    if (!preview || this.replayBusy()) return;
+    const action = ++this.replayAction;
+    this.replayBusy.set(true);
+    try {
+      const fitness = this.injector.get(FitnessStore);
+      await fitness.replay(preview.id, preview.venue);
+      if (action !== this.replayAction) return;
+      if (fitness.errorMessage()) this.replayError.set(fitness.errorMessage());
+      else if (fitness.activeSession()) await this.nav.session();
+    } catch {
+      if (action === this.replayAction)
+        this.replayError.set('Không mở được buổi tập. Hãy thử lại.');
+    } finally {
+      if (action === this.replayAction) this.replayBusy.set(false);
     }
   }
 
@@ -136,7 +271,7 @@ export class FitnessHistoryPage implements OnInit {
       setId: set.id,
       exerciseId,
       timed: isTimedExercise(exerciseId),
-      weight: String(set.weight_kg),
+      weight: String(set.weight_kg / loadFactor(exerciseId)),
       amount: String(set.duration_seconds ?? set.reps),
     });
   }
@@ -154,7 +289,7 @@ export class FitnessHistoryPage implements OnInit {
     if (!edit || this.saving()) return;
     const amount = Number(edit.amount);
     const measurement = {
-      weightKg: edit.weight.trim() === '' ? NaN : Number(edit.weight),
+      weightKg: edit.weight.trim() === '' ? NaN : Number(edit.weight) * loadFactor(edit.exerciseId),
       reps: edit.timed ? 0 : amount,
       durationSeconds: edit.timed ? amount : undefined,
     };
@@ -166,7 +301,10 @@ export class FitnessHistoryPage implements OnInit {
     });
     if (issue) {
       const messages = {
-        weight: 'Nhập khối lượng từ 0 đến 500 kg.',
+        weight:
+          'Nhập mức tạ từ 0 đến ' +
+          workoutSetLimits.maxWeightKg / loadFactor(edit.exerciseId) +
+          ' kg.',
         reps: 'Nhập số lần nguyên từ 1 đến 100.',
         duration: 'Nhập số giây nguyên từ 1 đến 86.400.',
         rest: 'Dữ liệu nghỉ không hợp lệ.',
@@ -191,6 +329,7 @@ export class FitnessHistoryPage implements OnInit {
         })),
       );
       this.editor.set(null);
+      await this.refreshTrend();
     } catch {
       this.actionError.set('Không lưu được thay đổi. Thử lại.');
     } finally {
@@ -220,6 +359,7 @@ export class FitnessHistoryPage implements OnInit {
           .filter((group) => group.sessions.length > 0),
       );
       this.deleting.set(null);
+      await this.refreshTrend();
     } catch {
       this.actionError.set('Không xóa được buổi tập. Thử lại.');
     } finally {
@@ -229,7 +369,11 @@ export class FitnessHistoryPage implements OnInit {
 
   protected clearAction(): void {
     if (this.saving()) return;
+    ++this.replayAction;
+    this.replayBusy.set(false);
     this.editor.set(null);
+    this.replayPreview.set(null);
+    this.replayError.set(null);
     this.deleting.set(null);
     this.actionError.set(null);
   }

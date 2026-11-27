@@ -1,0 +1,93 @@
+@if (!open()) {
+  <button type="button" class="action" (click)="show()">Đổi bài tập</button>
+} @else {
+  <section class="replacement" aria-label="Đổi bài tập">
+    <h3>Vì sao bạn muốn đổi bài?</h3>
+    <div class="actions">
+      <button
+        type="button"
+        [attr.aria-pressed]="reason() === 'busy'"
+        (click)="changeReason('busy')"
+      >
+        Dụng cụ đang bận
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="reason() === 'missing'"
+        (click)="changeReason('missing')"
+      >
+        Nơi tập thiếu dụng cụ
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="reason() === 'pain'"
+        (click)="changeReason('pain')"
+      >
+        Đau khi tập
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="reason() === 'other'"
+        (click)="changeReason('other')"
+      >
+        Lý do khác
+      </button>
+    </div>
+    @if (originalGear().length > 1 && (reason() === 'busy' || reason() === 'missing')) {
+      <p>Dụng cụ chưa dùng được</p>
+      <div class="actions">
+        @for (gear of originalGear(); track gear) {
+          <button
+            type="button"
+            [attr.aria-pressed]="unavailable() === gear"
+            (click)="setUnavailable(gear)"
+          >
+            {{ equipmentLabel(gear) }}
+          </button>
+        }
+      </div>
+    }
+    @if (loading()) {
+      <p role="status">Đang xử lý…</p>
+    } @else if (reason() === 'pain') {
+      <p>Bạn có thể dừng bài này. Dùng nút Bỏ qua hiệp hoặc chuyển sang bài khác khi sẵn sàng.</p>
+    } @else if (choices().length) {
+      <p>Các bài dưới đây có cùng kiểu chuyển động và nhóm cơ chính với bài gốc.</p>
+      @if (!place()?.equipment) {
+        <p>Nơi tập chưa khai dụng cụ. Chỉ hiển thị bài không cần dụng cụ.</p>
+      }
+      @for (choice of choices(); track choice.id; let first = $first) {
+        <button
+          type="button"
+          class="choice"
+          [attr.aria-pressed]="selected() === choice.id"
+          (click)="selected.set(choice.id)"
+        >
+          <strong>{{ first ? 'Gợi ý · ' : '' }}{{ choice.name }}</strong
+          ><span>{{ choice.equipment }}</span>
+        </button>
+      }
+      <h3>Áp dụng cho</h3>
+      <div class="actions">
+        <button type="button" [attr.aria-pressed]="!atPlace()" (click)="atPlace.set(false)">
+          Chỉ buổi này
+        </button>
+        @if (place(); as where) {
+          <button type="button" [attr.aria-pressed]="atPlace()" (click)="atPlace.set(true)">
+            Buổi này và lần sau tại {{ where.name }}
+          </button>
+        }
+      </div>
+      <button type="button" class="apply" (click)="apply()">Áp dụng bài đã chọn</button>
+    } @else {
+      <p>
+        Chưa tìm thấy bài cùng mục đích với dụng cụ đã biết. Bạn có thể bỏ qua hiệp hoặc thêm bài
+        khác.
+      </p>
+    }
+    @if (error()) {
+      <p role="alert">{{ error() }}</p>
+    }
+    <button type="button" class="action" (click)="close()">Đóng</button>
+  </section>
+}

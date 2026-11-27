@@ -123,6 +123,12 @@ export interface WorkoutExerciseDetail {
   category: ExerciseCategory;
   sort_order: number;
   total_volume: number;
+  original_exercise_id?: string | null;
+  use_at_place?: number | null;
+  next_weight_kg?: number | null;
+  known_heavier_kg?: number | null;
+  planned_notes?: string | null;
+  completion_note?: string | null;
   planned_sets?: number | null;
   planned_min?: number | null;
   planned_max?: number | null;
@@ -146,6 +152,9 @@ export interface WorkoutSessionDetail {
   training_plan_day_id: string | null;
   training_day_name: string | null;
   mode: WorkoutMode;
+  origin?: 'plan_day' | 'free' | 'composed' | null;
+  place_id?: string | null;
+  source_session_id?: string | null;
   total_volume: number;
   duration_minutes: number | null;
   started_at: string;

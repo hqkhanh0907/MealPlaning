@@ -2,7 +2,9 @@
 
 Đặc tả đề xuất cho MealPlaning cá nhân, ngày 24/11/2026. Đối tượng là người trưởng thành khỏe mạnh muốn tập sức mạnh hoặc tăng cơ. Ca minh họa giả định người dùng có thể thực hiện các động tác đã chọn. Người dùng có thể loại một động tác hoặc tự dùng giáo án riêng.
 
-## Quyết định của app hiện tại
+Bản 0.3.0 dùng [đặc tả Tập luyện và bảng thay đổi tiêu chí](workout-coaching-v1.md).
+
+## Hành vi trước bản 0.3.0
 
 Khi chưa có giáo án hoạt động, app chọn toàn thân ba buổi. Hồ sơ có tuổi, chiều cao, cân nặng và giới tính. Các phép tính dinh dưỡng dùng những trường đó. Kinh nghiệm gym tự khai quy thành ba mức theo thời gian đã tập. [Khởi tạo giáo án](../../src/app/core/repositories/training-plan.repository.ts) · [Quy đổi kinh nghiệm](../../src/app/features/onboarding/onboarding-calculation.ts) · [Tính dinh dưỡng](../../src/app/core/services/profile/recalc-targets.ts)
 

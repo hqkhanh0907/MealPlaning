@@ -1,0 +1,136 @@
+<ion-header
+  ><ion-toolbar>
+    <ion-buttons slot="start"
+      ><ion-button (click)="nav.back()" aria-label="Quay lại" data-testid="workout-back"
+        ><ion-icon slot="icon-only" name="arrow-back-outline" aria-hidden="true" /></ion-button
+    ></ion-buttons>
+    <ion-title>Hôm nay</ion-title>
+  </ion-toolbar></ion-header
+>
+<ion-content class="fitness-page">
+  @if (fitness.loading()) {
+    <p class="status-banner" role="status">Đang tải dữ liệu tập luyện…</p>
+  }
+
+  @if (fitness.errorMessage(); as error) {
+    <div class="status-banner status-banner--error">
+      <p role="alert">{{ error }}</p>
+      @if (!fitness.loading() && !fitness.progress()) {
+        <ion-button fill="outline" (click)="fitness.initialize()">Thử lại</ion-button>
+      }
+    </div>
+  }
+
+  @if (fitness.successMessage(); as success) {
+    <p class="status-banner status-banner--success" role="status">{{ success }}</p>
+  }
+
+  @if (fitness.lastCancelledSessionId() && !fitness.activeSession()) {
+    <div class="undo-snackbar">
+      <span class="undo-snackbar__msg" role="status">Đã hủy buổi tập.</span>
+      <button
+        type="button"
+        class="undo-snackbar__action"
+        (click)="void fitness.undoCancelWorkout()"
+        aria-label="Hoàn tác hủy buổi tập"
+      >
+        Hoàn tác
+      </button>
+      <button
+        type="button"
+        class="undo-snackbar__dismiss"
+        (click)="fitness.dismissCancelUndo()"
+        aria-label="Đóng"
+      >
+        ✕
+      </button>
+    </div>
+  }
+  @if (fitness.activeSession(); as current) {
+    <section class="fitness-card today-workout">
+      <p class="eyebrow">Buổi tập đang diễn ra</p>
+      <h2>{{ current.training_day_name || 'Tập tự do' }}</h2>
+      <p>{{ current.exercises.length }} bài tập</p>
+      <ion-button expand="block" data-testid="resume-workout" (click)="nav.session()"
+        >Tiếp tục buổi tập</ion-button
+      >
+    </section>
+  } @else if (!fitness.activePlan() && !fitness.loading() && !fitness.errorMessage()) {
+    <section class="fitness-card today-workout">
+      <h2>Bắt đầu tập luyện</h2>
+      <p>Chọn giáo án theo lịch và dụng cụ của bạn, hoặc tự thêm bài cho buổi hôm nay.</p>
+      <ion-button expand="block" data-testid="find-workout-plan" routerLink="/training/plans"
+        >Tìm giáo án phù hợp</ion-button
+      >
+      <ion-button expand="block" fill="outline" data-testid="start-free" (click)="start(false)"
+        >Bắt đầu tập tự do</ion-button
+      >
+    </section>
+  }
+  @if (!fitness.activeSession() && fitness.activePlan()) {
+    <section class="fitness-card today-workout" aria-labelledby="today-workout-title">
+      <header class="section-header">
+        <div>
+          <h2 id="today-workout-title">Buổi tập hôm nay</h2>
+        </div>
+      </header>
+
+      @if (fitness.todayDay(); as day) {
+        @if (day.is_rest_day === 1) {
+          <div class="empty-workout">
+            <ion-icon name="calendar-outline" aria-hidden="true" />
+            <strong>{{ day.name }}</strong>
+            <ion-button (click)="start(false)" fill="outline" aria-label="Bắt đầu buổi tự do">
+              Tập tự do
+            </ion-button>
+          </div>
+        } @else {
+          <div class="today-plan">
+            <div>
+              <strong>{{ day.name }}</strong>
+              <span>{{ day.exercises.length }} bài · theo giáo án</span>
+            </div>
+            <ion-button
+              (click)="start(true)"
+              fill="solid"
+              aria-label="Bắt đầu buổi tập theo giáo án"
+            >
+              <ion-icon slot="start" name="flash-outline" />
+              Bắt đầu
+            </ion-button>
+          </div>
+
+          <div class="planned-exercise-list">
+            @for (exercise of day.exercises; track exercise.id) {
+              <article class="planned-exercise">
+                <strong>{{ exercise.exercise_name_vi || exercise.exercise_name }}</strong>
+                <span
+                  >{{ exercise.sets }} × {{ exercise.reps_min }}–{{ exercise.reps_max }}
+                  {{ timed(exercise.exercise_id) ? 'giây' : 'lần' }} · nghỉ
+                  {{ exercise.rest_seconds }} giây</span
+                >
+                @if (exercise.notes) {
+                  <small>{{ exercise.notes }}</small>
+                }
+                @if (fitness.lastPerformance(exercise.exercise_id); as last) {
+                  <small>Lần trước: {{ last }}</small>
+                }
+                <small>{{ purpose(exercise) }}</small>
+              </article>
+            }
+          </div>
+        }
+      } @else {
+        <div class="empty-workout">
+          <ion-icon name="calendar-outline" aria-hidden="true" />
+          <strong>Giáo án trống hôm nay</strong>
+        </div>
+      }
+      @if (fitness.todayDay()?.is_rest_day !== 1) {
+        <ion-button fill="outline" data-testid="start-free" (click)="start(false)"
+          >Bắt đầu tập tự do</ion-button
+        >
+      }
+    </section>
+  }
+</ion-content>

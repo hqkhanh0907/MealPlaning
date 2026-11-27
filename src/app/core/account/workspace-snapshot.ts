@@ -38,5 +38,16 @@ export function prepareWorkspace(db: Database): Promise<void> {
       });
     }
   }
+  statements.push(
+    {
+      statement: `UPDATE sync_workspace SET change_version = change_version + 1 WHERE id = 1
+        AND EXISTS (SELECT 1 FROM app_config WHERE key = 'workout_preference_upload_pending')`,
+      values: [],
+    },
+    {
+      statement: "DELETE FROM app_config WHERE key = 'workout_preference_upload_pending'",
+      values: [],
+    },
+  );
   return db.executeAtomically(statements);
 }

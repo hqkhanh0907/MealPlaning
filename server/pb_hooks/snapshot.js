@@ -1,25 +1,114 @@
 const schema = require("./sync-schema.json");
-const schemaVersion = 12;
+const schemaVersion = 13;
+const coachingColumns = {
+  workout_session: ["origin", "place_id", "source_session_id"],
+  workout_exercise: ["original_exercise_id", "use_at_place", "next_weight_kg", "planned_notes", "completion_note"],
+};
+
+function workoutWireVersion(snapshot, version) {
+  if (version === schemaVersion) return snapshot;
+  if (version !== 12) invalid("Unsupported data version.");
+  const tables = { ...snapshot.tables };
+  delete tables.workout_preference;
+  for (const table of Object.keys(coachingColumns)) {
+    tables[table] = tables[table].map(row => {
+      const copy = { ...row };
+      for (const column of coachingColumns[table]) delete copy[column];
+      return copy;
+    });
+  }
+  return { schemaVersion: version, tables };
+}
+
+function preserveWorkoutCoaching(target, base) {
+  if (!base) return;
+  target.tables.workout_preference = base.tables.workout_preference.map(row => ({...row}));
+  const exerciseIds = new Set(target.tables.exercise.map(row => row.id));
+  const changedSets = new Set();
+  const oldSets = new Map(base.tables.workout_set.map(row => [row.id, row]));
+  for (const set of target.tables.workout_set) {
+    const old = oldSets.get(set.id);
+    if (!old || ["workout_exercise_id", "weight_kg", "reps", "duration_seconds", "legacy_unit_unknown", "status", "effort", "set_number"]
+        .some(key => set[key] !== old[key])) {
+      changedSets.add(set.workout_exercise_id);
+      if (old) changedSets.add(old.workout_exercise_id);
+    }
+    oldSets.delete(set.id);
+  }
+  for (const deleted of oldSets.values()) changedSets.add(deleted.workout_exercise_id);
+  for (const table of Object.keys(coachingColumns)) {
+    const before = new Map(base.tables[table].map(row => [row.id, row]));
+    for (const row of target.tables[table]) {
+      const source = before.get(row.id);
+      if (!source || (table === "workout_exercise" && row.exercise_id !== source.exercise_id)) continue;
+      for (const key of coachingColumns[table]) row[key] = source[key] ?? null;
+      if (table !== "workout_exercise") continue;
+      if (changedSets.has(row.id)) row.next_weight_kg = null;
+      if (row.original_exercise_id !== null && !exerciseIds.has(row.original_exercise_id)) {
+        row.original_exercise_id = null;
+        row.use_at_place = null;
+      }
+    }
+  }
+}
+
+
+function storedWorkoutEnvelope(snapshot) {
+  const wire = workoutWireVersion(snapshot, 12);
+  const extension = {workout_preference: snapshot.tables.workout_preference};
+  for (const table of Object.keys(coachingColumns)) {
+    extension[table] = [];
+    for (const row of snapshot.tables[table]) {
+      const fields = {id: row.id};
+      for (const key of coachingColumns[table]) if (row[key] !== null) fields[key] = row[key];
+      if (Object.keys(fields).length > 1) extension[table].push(fields);
+    }
+  }
+  return {...wire, workoutCoaching13: extension};
+}
+
+function restoreStoredWorkout(data) {
+  const snapshot = normalize(data);
+  const ext = data.workoutCoaching13;
+  if (data.schemaVersion !== 12 || !ext) return snapshot;
+  for (const table of Object.keys(coachingColumns)) {
+    const rows = new Map(ext[table].map(row => [row.id, row]));
+    for (const target of snapshot.tables[table]) {
+      const source = rows.get(target.id);
+      if (source) for (const key of coachingColumns[table]) target[key] = source[key] ?? null;
+    }
+  }
+  snapshot.tables.workout_preference = ext.workout_preference;
+  return normalize(snapshot);
+}
 
 function invalid(message) {
   throw new Error(message);
 }
 
 function rowsWithKeys(input) {
-  if (!input || input.schemaVersion !== schemaVersion || !input.tables) {
+  if (!input || (input.schemaVersion !== schemaVersion && input.schemaVersion !== 12) || !input.tables) {
     invalid("Unsupported data version.");
   }
   const tableNames = Object.keys(schema);
-  if (Object.keys(input.tables).length !== tableNames.length) invalid("Invalid table set.");
+  const legacy = input.schemaVersion === 12;
+  const expected = legacy ? tableNames.filter(name => name !== "workout_preference") : tableNames;
+  if (Object.keys(input.tables).length !== expected.length || expected.some(name => !Array.isArray(input.tables[name]))) invalid("Invalid table set.");
   const tables = {};
   const byId = {};
   for (const table of tableNames) {
     const { key, cols, required } = schema[table];
-    const rows = input.tables[table];
+    const rows = legacy && table === 'workout_preference' ? [] : input.tables[table];
     if (!Array.isArray(rows) || rows.length > 16000) invalid("Invalid rows: " + table);
     const columns = Object.keys(cols);
     const index = new Map();
+    const added = input.schemaVersion === 12 ? coachingColumns[table] : null;
     const clean = rows.map((row) => {
+      if (added && row && !Array.isArray(row) && typeof row === "object") {
+        if (added.some(key => Object.prototype.hasOwnProperty.call(row, key))) invalid("Invalid legacy row: " + table);
+        row = { ...row };
+        for (const key of added) row[key] = null;
+      }
       if (!row || Array.isArray(row) || typeof row !== "object" ||
           Object.keys(row).length !== columns.length) invalid("Invalid row: " + table);
       const copy = {};
@@ -68,6 +157,10 @@ function normalize(input, legacyWorkoutTotals = false) {
   const dates = new Set();
   const loggedFields = ["calories", "protein", "carbs", "fat", "fiber", "completed_at"];
 
+  for (const preference of tables.workout_preference) {
+    if (preference.key !== "fitness_default_place" && preference.key !== "fitness_finder_schedule" &&
+        !/^fitness_exercise_place:.+$/.test(preference.key)) invalid("Invalid workout preference key.");
+  }
   for (const day of tables.day_plan) {
     if (dates.has(day.date)) invalid("Duplicate meal plan date.");
     dates.add(day.date);
@@ -99,7 +192,14 @@ function normalize(input, legacyWorkoutTotals = false) {
     const id = exercise.workout_session_id;
     sessionVolumes.set(id, (sessionVolumes.get(id) || 0) + exercise.total_volume);
   }
+  for (const exercise of tables.workout_exercise) {
+    if ((exercise.use_at_place !== null && exercise.use_at_place !== 1) ||
+        (exercise.next_weight_kg !== null && (exercise.next_weight_kg < 0 || exercise.next_weight_kg > 500))) {
+      invalid("Invalid workout preference.");
+    }
+  }
   for (const session of tables.workout_session) {
+    if (session.origin !== null && !["free", "composed", "plan_day"].includes(session.origin)) invalid("Invalid workout origin.");
     session.total_volume = sessionVolumes.get(session.id) || 0;
   }
   return snapshot;
@@ -261,4 +361,4 @@ function mergeSnapshots(base, incoming, current, choices) {
   return { snapshot: normalize({ schemaVersion, tables }) };
 }
 
-module.exports = { mergeSnapshots, normalize, schemaVersion };
+module.exports = { mergeSnapshots, normalize, schemaVersion, workoutWireVersion, preserveWorkoutCoaching, storedWorkoutEnvelope, restoreStoredWorkout };

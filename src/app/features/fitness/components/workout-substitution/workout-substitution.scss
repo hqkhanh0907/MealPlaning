@@ -1,0 +1,32 @@
+.replacement {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+}
+.replacement h3,
+.replacement p {
+  margin: 0.25rem 0;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.action,
+.replacement button {
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--ion-color-light);
+  color: var(--ion-text-color);
+}
+.replacement [aria-pressed='true'],
+.replacement .apply {
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast);
+}
+.choice {
+  display: grid;
+  gap: 0.2rem;
+  text-align: start;
+}

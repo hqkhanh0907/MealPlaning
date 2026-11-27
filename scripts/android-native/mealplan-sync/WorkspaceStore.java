@@ -41,6 +41,8 @@ final class WorkspaceStore implements AutoCloseable {
         }
     }
 
+    int schemaVersion() { return schema.version; }
+
     State state() throws Exception {
         try (Cursor cursor = database.rawQuery(
             "SELECT revision, change_version, clean_version, pending, pending_version FROM sync_workspace WHERE id = 1",

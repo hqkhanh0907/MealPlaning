@@ -24,7 +24,7 @@
 #   - done: Retrospective has been completed
 
 generated: 2026-05-07
-last_updated: 2026-05-15
+last_updated: 2026-11-27
 project: HealthMate AI (MealPlaning)
 project_key: NOKEY
 tracking_system: file-system
@@ -206,6 +206,13 @@ development_status:
   4-0-nutrition-store-foundation: done
   4-1-shared-components: done
   epic-4-retrospective: optional
+
+workout_delivery:
+  scope: docs/2-requirements/workout-coaching-v1.md
+  next: Verify Android, CI, server backup and release sync
+  plan_selection: verification
+  session_logging: verification
+  history_and_release: verification
 
 # Epic-2 closure metadata
 epic_2_closure:

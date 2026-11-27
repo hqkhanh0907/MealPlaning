@@ -8,7 +8,13 @@ import {
 } from './exercise-guide.types';
 import { exerciseGuideText } from './exercise-guide-texts';
 import { isTimedExercise } from './exercise-measures';
-import { muscleLabels, type PlannedExerciseWithExercise } from './fitness.types';
+import { loadFactor, loadLabel } from './workout-coaching';
+import {
+  muscleLabels,
+  setValueLabel,
+  type WorkoutSet,
+  type PlannedExerciseWithExercise,
+} from './fitness.types';
 
 export type { ExerciseGuide } from './exercise-guide.types';
 export { guidedExerciseIds } from './exercise-guide-texts';
@@ -41,9 +47,14 @@ export function exerciseGuide(exerciseId: string): ExerciseGuide | undefined {
       stacked: entry.frames.length > 1 && entry.width > entry.height,
       ...(illustrationNote ? { note: illustrationNote } : {}),
     },
-    ...(text.loadTotalOfTwo ? { loadLabel: 'Tổng hai tạ (kg)' } : {}),
+    ...(text.loadTotalOfTwo ? { loadLabel: loadLabel(exerciseId) } : {}),
     ...(reviewed.perSide ? { perSide: true as const } : {}),
   };
+}
+
+export function displayWorkoutSet(exerciseId: string, set: WorkoutSet): string {
+  if (set.legacy_unit_unknown || loadFactor(exerciseId) === 1) return setValueLabel(set);
+  return setValueLabel({ ...set, weight_kg: set.weight_kg / 2 }).replace(' kg', ' kg mỗi tay');
 }
 
 export function exerciseInstructions(exerciseId: string): string | undefined {

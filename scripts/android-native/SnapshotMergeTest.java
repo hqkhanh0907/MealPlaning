@@ -35,6 +35,18 @@ public final class SnapshotMergeTest {
         assertMerged(snapshot(9, 5), 9, 640);
     }
 
+    @Test
+    public void mergesPendingPreviousVersionWithMigratedVenueSettings() throws Exception {
+        base.put("schemaVersion", 12);
+        base.getJSONObject("tables").remove("workout_preference");
+        JSONObject local = snapshot(6, 5);
+        local.getJSONObject("tables").getJSONArray("workout_preference").put(new JSONObject()
+            .put("key", "fitness_default_place").put("value", "gym").put("updated_at", "2026-11-27"));
+        JSONObject merged = SnapshotMerge.merge(schema, base, local, server);
+        assertEquals("preserved venue", "gym", merged.getJSONObject("tables").getJSONArray("workout_preference")
+            .getJSONObject(0).getString("value"));
+    }
+
     @Test(expected = SnapshotMerge.Conflict.class)
     public void rejectsOverlappingSetChanges() throws Exception {
         SnapshotMerge.merge(schema, base, snapshot(6, 8), server);

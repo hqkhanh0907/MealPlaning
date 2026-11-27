@@ -26,7 +26,7 @@ routerAdd("GET", "/api/mealplan/workspace", (event) => {
   const api = require(__hooks + "/workspace.js");
   const operations = require(__hooks + "/operations.js");
   const metadata = event.request.url.query().get("metadata") === "1";
-  const result = operations.observe(event.app, () => api.read(event.app, event.auth.id, metadata));
+  const result = operations.observe(event.app, () => api.read(event.app, event.auth.id, metadata, Number(event.request.url.query().get("schema") || 12)));
   if (!metadata) operations.record(event.app, "download");
   return event.json(200, result);
 }, workspaceAccess);

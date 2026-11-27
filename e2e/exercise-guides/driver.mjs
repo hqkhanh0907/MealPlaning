@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
 export const ADB = (process.env.ADB || process.env.HOME + '/Library/Android/sdk/platform-tools/adb');
 export const SERIAL = process.env.ANDROID_SERIAL || 'emulator-5556';
 export const PKG = 'com.healthmate.ai';
@@ -17,20 +18,43 @@ export async function connect({ settleMs = 5000 } = {}) {
   }
   if (!socket) throw new Error('app webview not running');
   await sleep(settleMs);
-  if (!adb('forward', '--list').includes('tcp:' + PORT + ' localabstract:' + socket)) {
-    try { adb('forward', '--remove', 'tcp:' + PORT); } catch {}
+  const forwards = adb('forward', '--list');
+  if (!forwards.includes('tcp:' + PORT + ' localabstract:' + socket)) {
+    if (forwards.includes('tcp:' + PORT + ' ')) adb('forward', '--remove', 'tcp:' + PORT);
     adb('forward', 'tcp:' + PORT, 'localabstract:' + socket);
-    await sleep(800);
   }
-  const list = await (await fetch('http://localhost:' + PORT + '/json')).json();
-  const target = list.find((t) => t.type === 'page');
+  let target;
+  const deadline = Date.now() + 5000;
+  while (!target && Date.now() < deadline) {
+    try {
+      const response = await fetch('http://127.0.0.1:' + PORT + '/json', { signal: AbortSignal.timeout(1000) });
+      target = (await response.json()).find((t) => t.type === 'page');
+    } catch {}
+    if (!target) await sleep(100);
+  }
   if (!target) throw new Error('no webview page target');
   const ws = new WebSocket(target.webSocketDebuggerUrl);
   await new Promise((res, rej) => { ws.onopen = res; ws.onerror = () => rej(new Error('ws error')); });
   let seq = 0;
   const pending = new Map();
-  ws.addEventListener('message', (m) => { const d = JSON.parse(m.data); const p = pending.get(d.id); if (p) { pending.delete(d.id); p(d); } });
-  const send = (method, params = {}) => new Promise((res, rej) => { const id = ++seq; pending.set(id, res); ws.send(JSON.stringify({ id, method, params })); setTimeout(() => { if (pending.delete(id)) rej(new Error('cdp timeout ' + method)); }, 20000); });
+  ws.addEventListener('message', (message) => {
+    const reply = JSON.parse(message.data);
+    const command = pending.get(reply.id);
+    if (command) {
+      clearTimeout(command.timeout);
+      pending.delete(reply.id);
+      command.resolve(reply);
+    }
+  });
+  const send = (method, params = {}) => new Promise((resolve, reject) => {
+    const id = ++seq;
+    const timeout = setTimeout(() => {
+      pending.delete(id);
+      reject(new Error('cdp timeout ' + method));
+    }, 20000);
+    pending.set(id, { resolve, timeout });
+    ws.send(JSON.stringify({ id, method, params }));
+  });
   const client = { close: () => ws.close(), send };
   const ev = async (expression) => {
     const r = (await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })).result;
@@ -63,6 +87,10 @@ export async function connect({ settleMs = 5000 } = {}) {
     if (!ok) throw new Error('type not found: ' + selector);
     await sleep(150);
   };
-  const shot = (file) => { execFileSync('/bin/sh', ['-c', `${ADB} -s ${SERIAL} exec-out screencap -p > "${file}"`]); return file; };
+  const shot = (file) => {
+    const png = execFileSync(ADB, ['-s', SERIAL, 'exec-out', 'screencap', '-p'], { maxBuffer: 16e6 });
+    writeFileSync(file, png);
+    return file;
+  };
   return { client, ev, waitFor, clickText, click, type, shot, close: () => client.close() };
 }

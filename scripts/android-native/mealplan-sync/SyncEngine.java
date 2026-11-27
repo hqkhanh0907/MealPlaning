@@ -171,7 +171,7 @@ final class SyncEngine {
             if (latest < receiptRevision) throw new IOException("Workspace revision changed");
             if (response.optBoolean("merged") || latest > receiptRevision) {
                 vault.whileCurrent(account, () -> { progress.receiving(); return null; });
-                JSONObject remote = request(MealPlanApi.WORKSPACE, null);
+                JSONObject remote = request(MealPlanApi.WORKSPACE + "?schema=" + store.schemaVersion(), null);
                 long revision = remote.getLong("revision");
                 if (revision < latest) throw new IOException("Workspace revision changed");
                 JSONObject snapshot = remote.getJSONObject("snapshot");
@@ -187,7 +187,7 @@ final class SyncEngine {
         private void receive(WorkspaceStore store, WorkspaceStore.State local, boolean overwrite, long minimum) throws Exception {
             ensureActive();
             vault.whileCurrent(account, () -> { progress.receiving(); return null; });
-            JSONObject remote = request(MealPlanApi.WORKSPACE, null);
+            JSONObject remote = request(MealPlanApi.WORKSPACE + "?schema=" + store.schemaVersion(), null);
             long revision = remote.getLong("revision");
             if (revision < minimum) throw new IOException("Workspace revision changed");
             JSONObject snapshot = remote.getJSONObject("snapshot");

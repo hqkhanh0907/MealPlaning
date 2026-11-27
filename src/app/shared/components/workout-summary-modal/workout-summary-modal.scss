@@ -180,3 +180,28 @@
     opacity: 0.85;
   }
 }
+
+.wsm-choice {
+  margin: 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.wsm-choice h3,
+.wsm-choice p {
+  margin: 0.25rem 0;
+}
+.wsm-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.wsm-actions button {
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: var(--ion-color-light);
+  color: var(--ion-text-color);
+}
+.wsm-actions button:disabled {
+  opacity: 0.55;
+}

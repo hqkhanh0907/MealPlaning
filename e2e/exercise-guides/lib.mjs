@@ -26,9 +26,10 @@ export async function session(opts) {
     await sleep(400);
   };
   const ensureFreeEntry = async () => {
-    const active = () => ev("document.body.innerText.toUpperCase().includes('BUỔI TẬP ĐANG DIỄN RA')");
-    if (await active()) return;
-    try { await clickLabel('Bắt đầu buổi tự do'); await waitFor("document.body.innerText.toUpperCase().includes('BUỔI TẬP ĐANG DIỄN RA')", 10000, 'free session'); } catch { /* training day: the first picked exercise starts the free session */ }
+    if (await ev("location.pathname === '/training/session'")) return;
+    await click('[data-testid=workout-tab-today]');
+    await click('[data-testid=start-free]');
+    await waitFor("location.pathname === '/training/session'", 10000, 'free session');
   };
   const page = (n = 1500) => ev("[...document.querySelectorAll('.ion-page:not(.ion-page-hidden) ion-content')].at(-1).innerText.replace(/\\n+/g,' | ').slice(0," + n + ")");
   const GUIDE = "[...document.querySelectorAll('ion-modal')].find(m=>m.querySelector('.guide'))";
@@ -85,10 +86,15 @@ export async function session(opts) {
       online: navigator.onLine,
     };
   })()`);
-  const openGuide = async () => { await click('.set-entry header ion-button'); await waitFor("!!(" + GUIDE + ")", 8000, 'guide open'); await sleep(500); await waitFor("(()=>{const i=[...(" + GUIDE + ").querySelectorAll('.frames img')];return i.every(x=>x.complete)})()", 6000, 'img settle').catch(() => {}); };
+  const openGuide = async () => {
+    await c.clickText('Xem kỹ thuật', '.set-entry header ion-button');
+    await waitFor("!!(" + GUIDE + ")", 8000, 'guide open');
+    await sleep(500);
+    await waitFor("(()=>{const i=[...(" + GUIDE + ").querySelectorAll('.frames img')];return i.every(x=>x.complete)})()", 6000, 'img settle').catch(() => {});
+  };
   const closeGuide = async () => { await ev("(()=>{const m=" + GUIDE + ";[...m.querySelectorAll('ion-button')].find(b=>b.textContent.trim()==='Đóng').click()})()"); await waitFor("!(" + GUIDE + ")", 8000, 'guide close'); await sleep(250); };
   const pickExercise = async (e) => {
-    await click('ion-button[aria-label="Thêm bài tập tự do"]').catch(() => tapText('Thêm bài tập'));
+    await click('[aria-label="Thêm bài tập tự do"]').catch(() => tapText('Thêm bài tập'));
     await waitFor("!!document.querySelector('#eps-search-input')", 8000, 'picker');
     await sleep(350);
     const pickRow = "(()=>{const b=[...document.querySelectorAll('.eps-row')].find(x=>x.querySelector('.eps-row__name').textContent.trim()===" + q(e.nameVi) + ");if(!b)return false;b.click();return true})()";

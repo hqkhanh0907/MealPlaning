@@ -1,0 +1,8 @@
+.library-error {
+  position: absolute;
+  inset: auto var(--space-md) var(--space-md);
+  z-index: 2;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: var(--space-md);
+}

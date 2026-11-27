@@ -1,7 +1,9 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/tabs/fitness" text=""></ion-back-button>
+      <ion-button (click)="nav.back()" aria-label="Quay lại" data-testid="workout-back"
+        ><ion-icon slot="icon-only" name="arrow-back-outline"
+      /></ion-button>
     </ion-buttons>
     <ion-title>Lịch sử tập luyện</ion-title>
   </ion-toolbar>
@@ -25,6 +27,74 @@
       <p>Hoàn thành một buổi tập để xem lại các hiệp đã ghi.</p>
     </div>
   } @else {
+    <section class="trend" aria-labelledby="trend-title">
+      <h2 id="trend-title">Tiến bộ qua các tuần</h2>
+      @if (trendError()) {
+        <p role="alert">Chưa tải được số liệu tiến bộ.</p>
+        <ion-button fill="outline" (click)="refreshTrend()">Tải lại số liệu</ion-button>
+      } @else if (progress(); as stats) {
+        <p>
+          <strong>{{ formatVolume(stats.currentWeekVolume) }}</strong> tuần này ·
+          {{ formatVolume(stats.previousWeekVolume) }} tuần trước
+        </p>
+        <ion-button
+          fill="clear"
+          (click)="trendOpen.set(!trendOpen())"
+          [attr.aria-expanded]="trendOpen()"
+          >{{ trendOpen() ? 'Thu gọn' : 'Xem xu hướng 8 tuần' }}</ion-button
+        >
+        @if (trendOpen()) {
+          <ol class="week-volume" aria-label="Khối lượng theo tuần">
+            @for (week of weeks(); track week.date) {
+              <li>
+                <time [attr.datetime]="week.date">{{ formatSessionDate(week.date) }}</time>
+                <meter
+                  min="0"
+                  [max]="maxVolume()"
+                  [value]="week.volume"
+                  aria-label="Khối lượng đã ghi"
+                ></meter
+                ><strong>{{ formatVolume(week.volume) }}</strong>
+              </li>
+            }
+          </ol>
+          <p>{{ stats.workoutStreakWeeks }} tuần tập liên tiếp trong 12 tuần gần nhất.</p>
+          @if (stats.weeklyAvgWeightKg !== null) {
+            <p>
+              {{
+                stats.weightSource === 'profile'
+                  ? 'Cân nặng trong hồ sơ'
+                  : 'Cân nặng trung bình 7 ngày'
+              }}
+              · {{ formatVolume(stats.weeklyAvgWeightKg) }}
+            </p>
+          }
+          @if (stats.volumeByMuscle.length) {
+            <h3>Khối lượng tuần này theo nhóm cơ</h3>
+            <ul>
+              @for (point of stats.volumeByMuscle; track point.muscle_group) {
+                <li>{{ point.label }} · {{ formatVolume(point.volume) }}</li>
+              }
+            </ul>
+          }
+          @if (stats.strength.length) {
+            <h3>Sức mạnh ước tính (Epley)</h3>
+            <p>Từ hiệp 1–10 lần đánh dấu Tối đa trong 12 tuần. Hiệp một lần dùng mức tạ đã ghi.</p>
+            <ul>
+              @for (point of stats.strength; track point.exercise_id) {
+                <li>
+                  {{ point.exercise_name_vi || point.exercise_name }} ·
+                  {{ formatVolume(point.estimated_1rm) }}
+                </li>
+              }
+            </ul>
+          }
+        }
+      }
+    </section>
+    @if (replayError(); as error) {
+      <p role="alert">{{ error }}</p>
+    }
     <section class="history-list" aria-label="Các buổi tập đã hoàn thành">
       @for (group of groups(); track trackByGroup($index, group)) {
         <div class="week-block">
@@ -73,6 +143,9 @@
                     @for (exercise of session.exercises; track exercise.id) {
                       <section class="session-exercise">
                         <h3>{{ exercise.exercise_name_vi || exercise.exercise_name }}</h3>
+                        @if (exercise.completion_note; as note) {
+                          <p>Ghi chú cuối buổi · {{ note }}</p>
+                        }
                         @if (unitNote(exercise.exercise_id); as unit) {
                           <p class="session-exercise__unit">Đơn vị ghi: {{ unit }}</p>
                         }
@@ -84,7 +157,7 @@
                                 @if (set.status === 'skipped') {
                                   <span class="session-set--skipped">Đã bỏ qua</span>
                                 } @else {
-                                  <span>{{ setValue(set) }}</span>
+                                  <span>{{ setValue(exercise.exercise_id, set) }}</span>
                                   @if (
                                     canEditSet(exercise.exercise_id, set) &&
                                     editor()?.setId !== set.id
@@ -119,7 +192,10 @@
                                               inputmode="decimal"
                                               min="0"
                                               step="any"
-                                              [max]="limits.maxWeightKg"
+                                              [max]="
+                                                limits.maxWeightKg /
+                                                loadFactor(exercise.exercise_id)
+                                              "
                                               [value]="edit.weight"
                                               [disabled]="saving()"
                                               (input)="updateEditor('weight', $event)"
@@ -181,6 +257,49 @@
                       </section>
                     } @empty {
                       <p>Không có chi tiết bài tập.</p>
+                    }
+                    @if (session.mode === 'free' && session.exercises.length) {
+                      @if (replayPreview(); as preview) {
+                        @if (preview.id === session.id) {
+                          <section class="session-replay" aria-label="Xem trước buổi tập lại">
+                            <h3>Xem trước buổi tập lại</h3>
+                            <p>{{ preview.place }}</p>
+                            <ol>
+                              @for (item of preview.exercises; track $index) {
+                                <li>
+                                  {{ item.name }}
+                                  @if (item.note) {
+                                    <small>· {{ item.note }}</small>
+                                  }
+                                </li>
+                              }
+                            </ol>
+                            @if (activeWorkout()) {
+                              <p>Bạn đang có một buổi tập dang dở.</p>
+                              <ion-button (click)="nav.session()"
+                                >Tiếp tục buổi đang tập</ion-button
+                              >
+                            } @else {
+                              <ion-button
+                                data-testid="start-replay"
+                                [disabled]="replayBusy()"
+                                (click)="startReplay()"
+                                >Bắt đầu tập lại</ion-button
+                              >
+                            }
+                            <ion-button fill="clear" (click)="clearAction()">Đóng</ion-button>
+                          </section>
+                        }
+                      }
+                      @if (replayPreview()?.id !== session.id) {
+                        <ion-button
+                          fill="outline"
+                          data-testid="replay-workout"
+                          [disabled]="replayBusy()"
+                          (click)="prepareReplay(session)"
+                          >Tập lại</ion-button
+                        >
+                      }
                     }
                     @if (deleting() === session.id) {
                       <div class="session-delete" role="group" aria-label="Xóa buổi tập">

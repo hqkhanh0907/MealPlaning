@@ -19,10 +19,6 @@ export default [
         loadChildren: () => import('../features/management/management.routes'),
       },
       {
-        path: 'fitness',
-        loadChildren: () => import('../features/fitness/fitness.routes'),
-      },
-      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',

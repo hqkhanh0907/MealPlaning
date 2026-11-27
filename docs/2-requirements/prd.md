@@ -453,195 +453,58 @@ PlannedDish {
 
 ## 4. Nhóm 3: Fitness
 
-### F-08: Training Plan System
+### F-08: Giáo án và dụng cụ
 
-Chọn giáo án mẫu hoặc dùng giáo án AI. Lưu bản cá nhân sau khi chỉnh ngày tập và bài tập.
+Người dùng giữ giáo án đang hoạt động. Nếu chưa chọn, Hôm nay mở tìm giáo án hoặc tập tự do. Giáo án hỏi lịch, phút mỗi buổi, dụng cụ ở nơi mặc định và động tác cần tránh. Xem [quyết định và bảng đối chiếu](workout-coaching-v1.md).
 
-**Programs (Evidence-based):**
+**Tiêu chí chấp nhận**
 
-| Program | Level | Frequency | Cơ sở khoa học |
-|---------|-------|-----------|----------------|
-| **Full Body** | Beginner | 3x/tuần | Schoenfeld 2016 — Beginner respond tốt với full body frequency |
-| **Upper/Lower** | Intermediate | 4x/tuần | ACSM Guidelines — Split cho phép tăng volume mỗi nhóm cơ |
-| **PPL** (Push/Pull/Legs) | Advanced | 5-6x/tuần | Schoenfeld 2019 — High frequency + high volume cho advanced |
-| **AI Custom** | Tất cả | Tùy chỉnh | AI tạo plan dựa trên nguyên lý khoa học (periodization, progressive overload, volume landmarks) |
+- Bốn mẫu có mã riêng. Đề xuất dùng lịch, dụng cụ theo bài và ước tính phút của buổi dài nhất.
+- Người tập xem các ngày, bài, hiệp, khoảng lặp hoặc giây và thời gian nghỉ trước khi chọn.
+- Bản đổi lịch hoặc rút gọn ghi rõ thay đổi. Sau xác nhận, app lưu riêng, mở lại đúng và giữ các buổi đã ghi.
+- Thư viện có ít nhất 50 bài. Người tập lọc theo dụng cụ và xem kỹ thuật ngoại tuyến trước khi bắt đầu.
+- Khi nhiều mẫu đạt, người tập so sánh theo số buổi. Khi thiếu mẫu, app cho xem buổi soạn riêng hoặc tập tự do.
 
-**PPL giải thích:**
-- **Push Day:** Ngực + Vai + Triceps (Bench Press, Shoulder Press, Tricep Extension...)
-- **Pull Day:** Lưng + Biceps (Deadlift, Row, Bicep Curl...)
-- **Legs Day:** Chân + Mông (Squat, Leg Press, Lunge...)
+### F-09: Ghi buổi tập
 
-**Tùy chỉnh giáo án cá nhân**
+Hôm nay mở màn tập riêng. Quay lại đưa người tập về Hôm nay. App giữ bài, hiệp và dữ liệu đang nhập trên máy.
 
-- Mở từng ngày trong lịch tuần để xem bài, số hiệp, số lần lặp và thời gian nghỉ.
-- Đổi ngày tập hoặc thay bài rồi lưu giáo án cá nhân. Lưu bản cá nhân riêng với mẫu gốc.
-- Áp dụng thay đổi cho những buổi bắt đầu sau khi lưu. Giữ số liệu của các buổi đã ghi.
+**Tiêu chí chấp nhận**
 
-**Dữ liệu Training Plan:**
+- Buổi theo giáo án dùng danh sách bài của ngày đã chọn. Buổi tự do cho phép thêm bài từ thư viện.
+- Ô tạ ưu tiên mức đã xác nhận, rồi mức đã ghi của cùng bài. Người tập có thể sửa hoặc xóa. Số lần mặc định trống.
+- Dùng số giây cho bài tính thời gian. Giữ đơn vị mỗi bên hoặc mỗi tay khi áp dụng.
+- Người tập xem kỹ thuật rồi tiếp tục hiệp đang ghi. Sau khi ghi, bộ đếm nghỉ tự chạy. Mức gắng sức là tùy chọn.
+- Chỉ buổi có hiệp đã ghi mới hoàn tất. Tổng khối lượng dùng tạ ngoài nhân số lần, loại hiệp bỏ và bài tính giây.
+- Hủy buổi cho phép chọn giáo án khác. Có thể hoàn tác khi chưa có buổi hoạt động khác.
+- Lịch sử hiện bài, hiệp thực tế và hiệp bỏ. Tập lại buổi tự do hoặc buổi soạn riêng mở bản mới.
+- Khi cần thay bài, app đối chiếu mục đích, dụng cụ và phạm vi thay đổi. Người tập quyết định có áp dụng.
+- Đo thời gian ghi một hiệp theo mục 7.2. Tách thời gian thao tác trên máy khỏi phép đo với người tập.
 
-```
-TrainingPlan {
-  id: string
-  name: string                    // "PPL 6 ngày"
-  type: 'full_body' | 'upper_lower' | 'ppl' | 'ai_custom'
-  frequency: number               // Số ngày/tuần
-  days: TrainingDay[]
-  created_at: timestamp
-}
+### F-10: Tiến bộ
 
-TrainingDay {
-  day_of_week: number             // 0=CN, 1=T2...
-  name: string                    // "Push Day"
-  exercises: PlannedExercise[]
-}
+Lịch sử hiển thị số liệu từ các buổi đã hoàn thành và cho mở từng buổi.
 
-PlannedExercise {
-  exercise_id: string
-  sets: number                    // 3-4 sets
-  reps_min: number                // 8
-  reps_max: number                // 12
-  rest_seconds: number            // 90-120s
-  notes?: string                  // "Tăng 2.5kg mỗi tuần"
-}
-```
+**Tiêu chí chấp nhận**
 
-**Tiêu chí chấp nhận:**
-- [ ] 3 preset programs hoạt động đúng
-- [ ] Mở được từng ngày tập và xem bài, số hiệp, số lần lặp và thời gian nghỉ
-- [ ] Đổi ngày hoặc thay bài, lưu giáo án và mở lại đúng nội dung
-- [ ] Buổi tập mới dùng giáo án đã lưu. Buổi cũ giữ nguyên số liệu
-- [ ] Exercise database ≥ 50 bài tập phổ biến
+- Với ba bài chính, hiển thị 1RM ước tính từ hiệp đánh dấu Tối đa có 1–10 lần. Một lần dùng mức tạ đã ghi.
+- So khối lượng tuần này với tuần trước. Biểu đồ tám tuần có số cụ thể, kể cả tuần không ghi khối lượng.
+- Số tuần tập liên tiếp cập nhật từ hiệp đã ghi. Cửa sổ hiển thị tối đa 12 tuần.
+- Hiện trung bình cân nặng bảy ngày nếu có nhật ký. Nếu chỉ có cân nặng từ hồ sơ, ghi đúng nguồn.
+- Trên Android, người tập mở biểu đồ, đọc giá trị và xem các buổi khi cuộn.
 
----
+### F-11: Soạn buổi và hỗ trợ điều chỉnh
 
-### F-09: Workout Logger
+Luồng chính dùng bộ lọc cục bộ. AI là lựa chọn bổ sung khi người dùng muốn soạn một bản nháp tuần và có kết nối.
 
-**Mô tả:** Ghi log chi tiết buổi tập tại gym. Hỗ trợ guided mode (theo plan) và free mode (tập tự do).
+**Tiêu chí chấp nhận**
 
-**2 Mode:**
-
-| Mode | Mô tả |
-|------|-------|
-| **Guided** | Theo training plan — hiện từng bài tập, user nhập weight thực tế |
-| **Free** | Tự chọn bài tập, nhập set/rep/weight |
-
-**Thông tin mỗi set:**
-
-| Field | Bắt buộc | Mô tả |
-|-------|:--------:|-------|
-| Weight (kg) | ✅ | Trọng lượng tạ |
-| Reps | ✅ | Số lần lặp |
-| Rest timer | ✅ | Đếm ngược thời gian nghỉ (tự động bắt đầu sau mỗi set) |
-| Effort emoji | Optional | 😊 Easy (RIR 4+) / 💪 Just Right (RIR 2-3) / 😤 Hard (RIR 1) / 🔥 Maxed (RIR 0) |
-| Notes | Optional | Ghi chú tự do ("Đau vai", "Form chưa tốt"...) |
-
-**Effort Emoji → RIR mapping (V1 simplified):**
-
-| Emoji | Nghĩa | RIR tương đương | Khi nào dùng |
-|-------|-------|:---:|---|
-| 😊 | Dễ | 4+ | Còn sức nhiều, có thể thêm 4+ rep |
-| 💪 | Vừa | 2-3 | Tốt, còn 2-3 rep trong tank |
-| 😤 | Nặng | 1 | Gần max, chỉ còn 1 rep |
-| 🔥 | Max | 0 | Không thể thêm rep nào |
-
-**Dữ liệu Workout:**
-
-```
-WorkoutSession {
-  id: string
-  date: string
-  training_day_name: string       // "Push Day"
-  mode: 'guided' | 'free'
-  exercises: WorkoutExercise[]
-  duration_minutes: number        // Auto-track
-  total_volume: number            // Tổng tạ × số lần lặp của hiệp đã ghi
-  started_at: timestamp
-  completed_at: timestamp
-}
-
-WorkoutExercise {
-  exercise_id: string
-  sets: WorkoutSet[]
-}
-
-WorkoutSet {
-  set_number: number
-  weight_kg: number
-  reps: number
-  status: 'logged' | 'skipped'
-  effort?: 'easy' | 'just_right' | 'hard' | 'maxed'
-  rest_seconds: number
-  notes?: string
-}
-```
-
-**Tiêu chí chấp nhận:**
-- [ ] Guided mode: hiện bài tập theo plan, nhập weight nhanh
-- [ ] Free mode: chọn bài tập từ database
-- [ ] Rest timer tự động đếm ngược
-- [ ] Effort emoji optional (không bắt buộc)
-- [ ] Hoàn thành buổi tập khi có ít nhất một hiệp đã ghi. Tổng khối lượng chỉ tính hiệp đã ghi
-- [ ] Có thể chọn giáo án khác sau khi hủy buổi tập
-- [ ] Mở buổi đã tập để xem bài, tạ, số lần lặp và hiệp đã bỏ qua
-- [ ] Log nhanh ≤ 5 giây/set
-
----
-
-### F-10: Progress Charts
-
-Trong **v1 cá nhân**, người dùng xem lại buổi đã tập và số liệu đã ghi. Biểu đồ chi tiết thuộc phạm vi mở rộng.
-
-**4 Progress Metrics:**
-
-| Metric | Công thức / Cách tính | Hiển thị |
-|--------|----------------------|---------|
-| **Est. 1RM** | Epley: `weight × (1 + reps/30)` | Line chart theo tuần, cho từng bài tập compound (Bench, Squat, Deadlift) |
-| **Volume/Muscle Group** | `Σ(weight × reps)` nhóm theo Push/Pull/Legs | Bar chart so sánh tuần trước vs tuần này |
-| **Workout Streak** | Số ngày liên tiếp hoàn thành buổi tập | Number + flame icon 🔥 |
-| **Body Weight (Weekly Avg)** | Trung bình cân nặng 7 ngày gần nhất | Line chart xu hướng, giảm noise |
-
-**Tiêu chí chấp nhận:**
-- [ ] Est. 1RM chart chính xác theo Epley formula
-- [ ] Volume chart so sánh tuần hiện tại vs tuần trước
-- [ ] Streak cập nhật real-time
-- [ ] Weight chart hiện weekly average (không daily noise)
-- [ ] Charts responsive, smooth scroll
-
----
-
-### F-11: AI Training Plan
-
-Trong **v1 cá nhân**, AI hỗ trợ tạo giáo án khi có mạng. Giáo án mẫu và thao tác chỉnh tay đáp ứng luồng tập chính.
-
-Sau v1 cá nhân, AI đề xuất lịch dựa trên mục tiêu, trình độ và dữ liệu đã tập.
-
-**Nguyên lý khoa học AI phải tuân thủ:**
-
-| Nguyên lý | Nguồn | Áp dụng |
-|-----------|-------|---------|
-| **Progressive Overload** | Helms 2016 | Tăng dần weight/volume theo thời gian |
-| **Volume Landmarks** | Schoenfeld 2019 | MEV → MRV cho mỗi nhóm cơ (10-20 sets/tuần) |
-| **Frequency** | Schoenfeld 2016 | ≥ 2x/tuần mỗi nhóm cơ cho optimal |
-| **RPE/Autoregulation** | Zourdos 2016 | Điều chỉnh intensity theo feedback effort |
-| **Periodization** | ACSM | Mesocycle: Accumulation → Deload |
-| **Deload Protocol** | Helms 2016 | Mỗi 4-6 tuần: giảm volume 40-60% |
-
-**AI behavior:**
-
-| Tình huống | AI hành động |
-|-----------|-------------|
-| User mới bắt đầu | Gợi ý Full Body 3x/tuần, weight nhẹ, focus form |
-| Plateau 3+ tuần | Đề xuất deload → tăng frequency hoặc volume |
-| User bỏ tập nhiều ngày | Nhắc nhẹ, không guilt-trip, gợi ý giảm volume khi quay lại |
-| Effort luôn "Easy" | Gợi ý tăng weight |
-| Effort luôn "Maxed" | Cảnh báo over-training, gợi ý giảm intensity |
-
-**Tiêu chí chấp nhận:**
-- [ ] AI plan tuân thủ volume landmarks (10-20 sets/muscle group/tuần)
-- [ ] Progressive overload có trong plan (tăng weight/reps theo tuần)
-- [ ] Deload tự động sau 4-6 tuần training
-- [ ] AI điều chỉnh dựa trên effort emoji feedback
-- [ ] Không tạo plan bừa bãi — mọi gợi ý đều có cơ sở khoa học
+- Bản nháp AI dùng bài trong danh mục cho phép. App kiểm lại ngày, phút, dụng cụ và động tác sau khi nhận kết quả.
+- Chỉ xác nhận mới tạo giáo án AI đang hoạt động. Nếu bản nháp lỗi, giữ lựa chọn và lịch sử cũ.
+- Khi đạt mục tiêu của bài với cùng mức tạ và hiệp cuối Dễ, người tập có thể chọn mức cho lần tới.
+- Nếu nơi tập có lịch sử mức nặng hơn cho bài, điền gợi ý có thể sửa. Nếu chưa có, cho người tập nhập.
+- Người tập có thể ghi lý do buổi thiếu hiệp. App chỉ ghi nhận điều họ cung cấp.
+- V1 không đặt lịch giảm tải định kỳ hoặc hạn mức hiệp chung cho từng nhóm cơ.
 
 ---
 
@@ -850,10 +713,9 @@ Bước 2: Thông tin cơ bản
 
 ### 7.3 Data Privacy
 
-- Tất cả data lưu local trên device (SQLite)
-- Chỉ gửi data lên Gemini API khi user chủ động dùng tính năng AI
-- Không thu thập, không tracking, không bán data
-- Không yêu cầu đăng nhập / tạo tài khoản
+Với Tập luyện, app lưu nhật ký trong SQLite của tài khoản trên thiết bị. Khi có mạng, app đồng bộ giáo án, buổi tập và cài đặt nơi tập với server của MealPlaning. Ô nhập hiệp chưa lưu chỉ nằm trên thiết bị.
+
+Luồng đề xuất cục bộ và ghi hiệp hoạt động ngoại tuyến sau khi thiết lập tài khoản. App chỉ gửi dữ liệu tới Gemini khi người dùng chủ động dùng tính năng AI. V1 không thêm sự kiện theo dõi hành vi. Dữ liệu người dùng không dùng để bán. [Đồng bộ và quyền sở hữu dữ liệu](../../server/README.md)
 
 ---
 

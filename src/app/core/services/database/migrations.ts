@@ -10,6 +10,7 @@ import {
   buildWorkoutMeasuresMigration,
   buildWorkoutSetStatusMigration,
   buildWorkoutSetUpdatedAtMigration,
+  buildWorkoutCoachingMigration,
   SCHEMA_VERSION,
 } from './schema';
 import type { Migration } from './migration-runner';
@@ -37,6 +38,7 @@ export const MIGRATION_REGISTRY: readonly Migration[] = [
   buildProteinTargetModeMigration(),
   buildProfileBirthDateMigration(),
   buildRequiredBirthDateMigration(),
+  buildWorkoutCoachingMigration(),
 ];
 
 if (MIGRATION_REGISTRY[MIGRATION_REGISTRY.length - 1]?.version !== SCHEMA_VERSION) {

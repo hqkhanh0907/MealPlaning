@@ -1,3 +1,4 @@
+import { prepareWorkspace } from '../../account/workspace-snapshot';
 import { Database } from './database';
 import { MigrationRunner, type Migration } from './migration-runner';
 import { createTestDatabase, teardownTestDatabase } from './__test__/create-test-database';
@@ -65,13 +66,68 @@ describe('MigrationRunner', () => {
   });
 });
 
-async function removeBirthDateForOlderFixture(db: Database): Promise<void> {
+async function removeCoachingSchema(db: Database): Promise<void> {
+  await db.execute('DROP TABLE workout_preference');
+  await db.execute('DROP INDEX idx_we_movement_history');
+  for (const key of ['origin', 'place_id', 'source_session_id']) {
+    await db.execute('ALTER TABLE workout_session DROP COLUMN ' + key);
+  }
+  for (const key of [
+    'original_exercise_id',
+    'use_at_place',
+    'next_weight_kg',
+    'planned_notes',
+    'completion_note',
+  ]) {
+    await db.execute('ALTER TABLE workout_exercise DROP COLUMN ' + key);
+  }
+}
+
+async function removeNewerColumnsForFixture(db: Database): Promise<void> {
+  await removeCoachingSchema(db);
   await db.execute('DROP TRIGGER require_new_profile_birth_date');
   await db.execute('DROP TRIGGER retain_profile_birth_date');
   await db.execute('ALTER TABLE user_profile DROP COLUMN birth_date');
 }
 
 describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
+  it('migrates venue settings once and retains any pending upload on a clean account', async () => {
+    const db = await createTestDatabase();
+    try {
+      await prepareWorkspace(db);
+      await removeCoachingSchema(db);
+      await db.execute('PRAGMA user_version = 12');
+      const place = { id: 'home', name: 'Nhà', equipment: ['dumbbell'] };
+      await db.execute(
+        "INSERT INTO app_config(key,value) VALUES ('fitness_exercise_places',?),('fitness_default_place','home'),('fitness_finder_schedule',?),('unrelated','local')",
+        [JSON.stringify({ version: 1, places: [place] }), '{"days":[1,4]}'],
+      );
+      await db.execute(
+        "UPDATE sync_workspace SET change_version=8,clean_version=8,pending='previous-request',pending_version=8 WHERE id=1",
+      );
+      await new MigrationRunner(db, MIGRATION_REGISTRY).run();
+      await prepareWorkspace(db);
+      await prepareWorkspace(db);
+      expect(await db.query('SELECT key,value FROM workout_preference ORDER BY key')).toEqual([
+        { key: 'fitness_default_place', value: 'home' },
+        { key: 'fitness_exercise_place:home', value: JSON.stringify(place) },
+        { key: 'fitness_finder_schedule', value: '{"days":[1,4]}' },
+      ]);
+      expect(
+        await db.getOne(
+          'SELECT change_version,clean_version,pending,pending_version FROM sync_workspace WHERE id=1',
+        ),
+      ).toEqual({
+        change_version: 9,
+        clean_version: 8,
+        pending: 'previous-request',
+        pending_version: 8,
+      });
+    } finally {
+      teardownTestDatabase();
+    }
+  });
+
   it('preserves ambiguous timed entries from v7 without counting seconds as lifted kilograms', async () => {
     const db = await createTestDatabase();
     try {
@@ -82,7 +138,7 @@ describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
       await db.execute('ALTER TABLE workout_set DROP COLUMN legacy_unit_unknown');
       await db.execute('ALTER TABLE user_profile DROP COLUMN protein_target_mode');
       await db.execute('PRAGMA user_version = 7');
-      await removeBirthDateForOlderFixture(db);
+      await removeNewerColumnsForFixture(db);
       await db.execute('ALTER TABLE user_profile ADD COLUMN age INTEGER');
       await db.execute(`INSERT INTO exercise (id,name,muscle_group,category,source) VALUES
         ('ex_farmer_carry','Carry','forearms','compound','db'),('ex_back_squat','Squat','quads','compound','db')`);
@@ -125,7 +181,7 @@ describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
   it('migrates old energy goals and preserves manual targets and previous day plans', async () => {
     const liveDb = await createTestDatabase();
     try {
-      await removeBirthDateForOlderFixture(liveDb);
+      await removeNewerColumnsForFixture(liveDb);
       await liveDb.execute('ALTER TABLE user_profile ADD COLUMN age INTEGER');
       await liveDb.execute('ALTER TABLE user_profile DROP COLUMN calorie_target_mode');
       await liveDb.execute('PRAGMA user_version = 6');
@@ -177,7 +233,7 @@ describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
   it('keeps an age-only profile available until the user enters their birth date', async () => {
     const db = await createTestDatabase();
     try {
-      await removeBirthDateForOlderFixture(db);
+      await removeNewerColumnsForFixture(db);
       await db.execute('ALTER TABLE user_profile ADD COLUMN age INTEGER');
       await db.execute('ALTER TABLE user_profile ADD COLUMN birth_date TEXT');
       await db.execute('PRAGMA user_version = 10');
@@ -272,7 +328,7 @@ describe('MigrationRunner idempotency — runtime (Story 3.1)', () => {
     try {
       await db.execute('ALTER TABLE user_profile DROP COLUMN protein_target_mode');
       await db.execute('PRAGMA user_version = 8');
-      await removeBirthDateForOlderFixture(db);
+      await removeNewerColumnsForFixture(db);
       await db.execute('ALTER TABLE user_profile ADD COLUMN age INTEGER');
       for (const grams of [104, 137]) {
         await db.execute(

@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { Database } from '../services/database/database';
 
-const configKey = 'fitness_exercise_places';
-const configVersion = 1;
+const placePrefix = 'fitness_exercise_place:';
+const defaultKey = 'fitness_default_place';
 
 export interface ExercisePlace {
   id: string;
@@ -21,16 +21,39 @@ export class ExercisePlaceRepository {
   private readonly db = inject(Database);
   private pendingSave: Promise<void> = Promise.resolve();
 
-  async list(): Promise<readonly ExercisePlace[]> {
+  async getDefaultId(): Promise<string | null> {
     const row = await this.db.getOne<{ value: string }>(
-      'SELECT value FROM app_config WHERE key = ?',
-      [configKey],
+      'SELECT value FROM workout_preference WHERE key = ?',
+      [defaultKey],
     );
+    if (!row) return null;
+    return defaultExercisePlaces.some((place) => place.id === row.value) ? row.value : null;
+  }
 
+  async setDefaultId(id: string): Promise<void> {
+    if (!defaultExercisePlaces.some((place) => place.id === id))
+      throw new Error('Nơi tập không hợp lệ.');
+    await this.db.execute(
+      `INSERT INTO workout_preference (key, value, updated_at) VALUES (?, ?, datetime('now'))
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+       WHERE workout_preference.value IS NOT excluded.value`,
+      [defaultKey, id],
+    );
+  }
+
+  async list(): Promise<readonly ExercisePlace[]> {
+    const rows = await this.db.query<{ key: string; value: string }>(
+      'SELECT key, value FROM workout_preference WHERE key GLOB ?',
+      [placePrefix + '*'],
+    );
     const saved = new Map<string, ExercisePlace>();
-    for (const item of readPlaces(row?.value)) {
-      const place = readPlace(item);
-      if (place) saved.set(place.id, place);
+    for (const row of rows) {
+      try {
+        const place = readPlace(JSON.parse(row.value));
+        if (place && row.key === placePrefix + place.id) saved.set(place.id, place);
+      } catch {
+        continue;
+      }
     }
 
     return defaultExercisePlaces.map((place) => saved.get(place.id) ?? { ...place });
@@ -43,16 +66,15 @@ export class ExercisePlaceRepository {
     }
 
     const saved = this.pendingSave.then(async () => {
-      const current = await this.list();
-      const places = current.map((item) => (item.id === next.id ? next : item));
       await this.db.executeAtomically([
         {
-          statement: `INSERT INTO app_config (key, value, updated_at) VALUES (?, ?, datetime('now'))
-                      ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
-          values: [configKey, JSON.stringify({ version: configVersion, places })],
+          statement: `INSERT INTO workout_preference (key, value, updated_at) VALUES (?, ?, datetime('now'))
+                      ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+                      WHERE workout_preference.value IS NOT excluded.value`,
+          values: [placePrefix + next.id, JSON.stringify(next)],
         },
       ]);
-      return places;
+      return this.list();
     });
 
     this.pendingSave = saved.then(
@@ -61,26 +83,6 @@ export class ExercisePlaceRepository {
     );
     return saved;
   }
-}
-
-function readPlaces(raw: string | undefined): readonly unknown[] {
-  if (raw === undefined) return [];
-  try {
-    const value: unknown = JSON.parse(raw);
-    if (
-      value &&
-      typeof value === 'object' &&
-      'version' in value &&
-      value.version === configVersion &&
-      'places' in value &&
-      Array.isArray(value.places)
-    ) {
-      return value.places;
-    }
-  } catch {
-    return [];
-  }
-  return [];
 }
 
 function readPlace(value: unknown): ExercisePlace | null {

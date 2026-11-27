@@ -7,11 +7,13 @@ import {
   inject,
   Injector,
   input,
+  OnInit,
   Input,
   output,
   signal,
   viewChild,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { form, FormField, maxLength } from '@angular/forms/signals';
 import {
   IonContent,
@@ -27,6 +29,7 @@ import {
   addOutline,
   arrowBackOutline,
   closeOutline,
+  chevronForwardOutline,
   optionsOutline,
   searchOutline,
 } from 'ionicons/icons';
@@ -54,6 +57,7 @@ type FilterChip = 'muscle' | 'equipment' | 'place';
   selector: 'app-exercise-picker-sheet',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    NgTemplateOutlet,
     AppFormField,
     FormField,
     IonModal,
@@ -67,12 +71,20 @@ type FilterChip = 'muscle' | 'equipment' | 'place';
   templateUrl: './exercise-picker-sheet.html',
   styleUrl: './exercise-picker-sheet.scss',
 })
-export class ExercisePickerSheet {
+export class ExercisePickerSheet implements OnInit {
   private readonly places = inject(ExercisePlaceRepository);
   private readonly injector = inject(Injector);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly modal = viewChild<unknown, ElementRef<HTMLElement>>('pickerModal', {
     read: ElementRef,
   });
+
+  readonly embedded = input(false);
+  readonly leaveLibrary = output<void>();
+  protected readonly limit = signal(40);
+  protected readonly visibleResults = computed(() =>
+    this.embedded() ? this.results().slice(0, this.limit()) : this.results(),
+  );
 
   readonly exercises = input.required<readonly Exercise[]>();
   readonly closed = output<void>();
@@ -87,7 +99,7 @@ export class ExercisePickerSheet {
   protected readonly title = computed(
     () =>
       ({
-        results: 'Chọn bài tập',
+        results: this.embedded() ? 'Bài tập' : 'Chọn bài tập',
         filters: 'Lọc bài tập',
         place: 'Dụng cụ nơi tập',
       })[this.view()],
@@ -135,7 +147,24 @@ export class ExercisePickerSheet {
   protected readonly saveError = signal(false);
 
   constructor() {
-    addIcons({ addOutline, arrowBackOutline, closeOutline, optionsOutline, searchOutline });
+    addIcons({
+      addOutline,
+      arrowBackOutline,
+      closeOutline,
+      chevronForwardOutline,
+      optionsOutline,
+      searchOutline,
+    });
+  }
+
+  ngOnInit(): void {
+    if (this.embedded()) void this.loadPlaces();
+  }
+
+  backInLibrary(): boolean {
+    if (this.view() === 'results') return false;
+    this.back();
+    return true;
   }
 
   protected readonly canDismiss = async (): Promise<boolean> => {
@@ -227,8 +256,10 @@ export class ExercisePickerSheet {
   }
 
   protected pick(id: string): void {
-    if (!this.visible()) return;
-    this.visible.set(false);
+    if (!this.embedded()) {
+      if (!this.visible()) return;
+      this.visible.set(false);
+    }
     this.exerciseSelected.emit(id);
   }
 
@@ -246,7 +277,7 @@ export class ExercisePickerSheet {
     afterNextRender(
       {
         write: () => {
-          const modal = this.modal()?.nativeElement;
+          const modal = this.embedded() ? this.host.nativeElement : this.modal()?.nativeElement;
           void modal?.querySelector('ion-content')?.scrollToTop(0);
           modal?.querySelector<HTMLElement>(selector)?.focus({ preventScroll: true });
         },

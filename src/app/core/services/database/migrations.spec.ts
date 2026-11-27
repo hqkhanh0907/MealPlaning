@@ -5,6 +5,7 @@ import {
   buildInitialSchemaMigration,
   buildWorkoutSessionStatusMigration,
   buildWorkoutMeasuresMigration,
+  buildWorkoutCoachingMigration,
   buildProteinTargetModeMigration,
   buildProfileBirthDateMigration,
   buildRequiredBirthDateMigration,
@@ -16,8 +17,8 @@ import { MIGRATION_REGISTRY } from './migrations';
 
 describe('MIGRATION_REGISTRY', () => {
   it('exposes each migration through the current schema', () => {
-    expect(SCHEMA_VERSION).toBe(12);
-    expect(MIGRATION_REGISTRY.length).toBe(11);
+    expect(SCHEMA_VERSION).toBe(13);
+    expect(MIGRATION_REGISTRY.length).toBe(12);
     expect(MIGRATION_REGISTRY[0].version).toBe(1);
     expect(MIGRATION_REGISTRY[1].version).toBe(2);
     expect(MIGRATION_REGISTRY[2].version).toBe(3);
@@ -28,7 +29,8 @@ describe('MIGRATION_REGISTRY', () => {
     expect(MIGRATION_REGISTRY[7].version).toBe(8);
     expect(MIGRATION_REGISTRY[8].version).toBe(9);
     expect(MIGRATION_REGISTRY[9].version).toBe(10);
-    expect(MIGRATION_REGISTRY[10].version).toBe(SCHEMA_VERSION);
+    expect(MIGRATION_REGISTRY[10].version).toBe(12);
+    expect(MIGRATION_REGISTRY[11].version).toBe(SCHEMA_VERSION);
   });
 
   it('uses the canonical builders (v1, hybrid-policy v2, fiber snapshot v3, workout_set.updated_at v4, workout_session.status v5, workout_set.status v6)', () => {
@@ -48,6 +50,7 @@ describe('MIGRATION_REGISTRY', () => {
     expect(MIGRATION_REGISTRY[7].statements).toEqual(buildWorkoutMeasuresMigration().statements);
     expect(MIGRATION_REGISTRY[8].statements).toEqual(buildProteinTargetModeMigration().statements);
     expect(MIGRATION_REGISTRY[9].statements).toEqual(buildProfileBirthDateMigration().statements);
+    expect(MIGRATION_REGISTRY[11].statements).toEqual(buildWorkoutCoachingMigration().statements);
     expect(MIGRATION_REGISTRY[10].statements).toEqual(buildRequiredBirthDateMigration().statements);
   });
 

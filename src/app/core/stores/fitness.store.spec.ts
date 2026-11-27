@@ -16,6 +16,7 @@ import { TrainingPlanRepository } from '../repositories/training-plan.repository
 import { WorkoutRepository } from '../repositories/workout.repository';
 import type { AiTrainingPlanDraft } from '../models/fitness.types';
 import { FitnessAi } from '../services/ai/fitness-ai';
+import { ExercisePlaceRepository } from '../repositories/exercise-place.repository';
 import { AccountSession } from '../account/account-session';
 import { ReminderCoordinator } from '../services/notifications/reminder-coordinator';
 import { NetworkStore } from './network.store';
@@ -31,6 +32,7 @@ describe('FitnessStore', () => {
   let reminders: jasmine.SpyObj<ReminderCoordinator>;
   let workoutEnabled: ReturnType<typeof signal<boolean>>;
   let online = signal(true);
+  const profile = signal<UserProfile | null>(null);
 
   beforeEach(() => {
     exerciseRepo = jasmine.createSpyObj<ExerciseRepository>('ExerciseRepository', ['list']);
@@ -53,6 +55,8 @@ describe('FitnessStore', () => {
 
     workoutRepo = jasmine.createSpyObj<WorkoutRepository>('WorkoutRepository', [
       'getActiveSession',
+      'lastSets',
+      'completionSummary',
       'progressSummary',
       'startGuidedSession',
       'startFreeSession',
@@ -68,6 +72,11 @@ describe('FitnessStore', () => {
       'removeExerciseFromSession',
     ]);
     workoutRepo.getActiveSession.and.resolveTo(null);
+    workoutRepo.lastSets.and.resolveTo([]);
+    workoutRepo.completionSummary.and.callFake((id) => workoutRepo.getSession(id));
+    profile.set(null);
+    for (const key of Object.keys(localStorage))
+      if (key.startsWith('fitness:draft:')) localStorage.removeItem(key);
     workoutRepo.progressSummary.and.resolveTo(progressSummary());
     workoutRepo.startGuidedSession.and.resolveTo(workoutSession());
     workoutRepo.startFreeSession.and.resolveTo(workoutSession({ mode: 'free' }));
@@ -110,12 +119,13 @@ describe('FitnessStore', () => {
         FitnessStore,
         { provide: AccountSession, useValue: account },
         { provide: ReminderCoordinator, useValue: reminders },
+        { provide: ExercisePlaceRepository, useValue: { getDefaultId: async () => null } },
         { provide: ExerciseRepository, useValue: exerciseRepo },
         { provide: TrainingPlanRepository, useValue: planRepo },
         { provide: WorkoutRepository, useValue: workoutRepo },
         { provide: FitnessAi, useValue: fitnessAi },
         { provide: NetworkStore, useValue: { online } },
-        { provide: ProfileStore, useValue: { profile: signal<UserProfile | null>(null) } },
+        { provide: ProfileStore, useValue: { profile } },
       ],
     });
     store = TestBed.inject(FitnessStore);
@@ -135,6 +145,16 @@ describe('FitnessStore', () => {
     expect(store.todayDay()?.id).toBe('day-1');
     expect(store.currentWeekVolumeLabel()).toBe('5.000 kg');
     expect(store.loading()).toBeFalse();
+  });
+
+  it('shares an in-flight initialization and refreshes live session data on reentry', async () => {
+    await Promise.all([store.initialize(), store.initialize()]);
+    workoutRepo.getActiveSession.and.resolveTo(workoutSession());
+    await store.initialize();
+    expect(planRepo.ensurePresetPlans).toHaveBeenCalledTimes(1);
+    expect(exerciseRepo.list).toHaveBeenCalledTimes(1);
+    expect(workoutRepo.getActiveSession).toHaveBeenCalledTimes(2);
+    expect(store.activeSession()?.id).toBe('session-1');
   });
 
   it('updates workout reminders after changing the active plan when opted in', async () => {
@@ -176,15 +196,50 @@ describe('FitnessStore', () => {
 
     await store.logSet();
 
-    expect(workoutRepo.addSet).toHaveBeenCalledOnceWith('we-1', {
-      weightKg: 40,
-      reps: 8,
-      restSeconds: 90,
-      effort: 'just_right',
-      notes: null,
-    });
+    expect(workoutRepo.addSet).toHaveBeenCalledOnceWith(
+      'we-1',
+      {
+        weightKg: 40,
+        reps: 8,
+        restSeconds: 90,
+        effort: 'just_right',
+        notes: null,
+      },
+      jasmine.any(String),
+    );
     expect(store.restSeconds()).toBe(90);
     expect(store.successMessage()).toBe('Đã ghi hiệp tập.');
+  });
+
+  it('restores the selected exercise, the entered reps and an explicitly cleared load immediately', async () => {
+    const session = workoutSession({
+      exercises: [
+        workoutExercise(),
+        workoutExercise({ id: 'we-2', exercise_id: 'dumbbell-floor-press' }),
+      ],
+    });
+    workoutRepo.getActiveSession.and.resolveTo(session);
+    workoutRepo.lastSets.and.resolveTo([
+      {
+        exercise_id: 'dumbbell-floor-press',
+        place_id: null,
+        weight_kg: 20,
+        next_weight_kg: 24,
+        reps: 12,
+        duration_seconds: null,
+      },
+    ]);
+    await store.refresh();
+    store.selectWorkoutExercise('we-2');
+    expect(store.setDraft().weightKg).toBe('12');
+    expect(store.setDraft().reps).toBe('');
+    store.updateWeight('');
+    store.updateReps('7');
+    store.selectedWorkoutExerciseId.set(null);
+    await store.refresh();
+    expect(store.selectedWorkoutExerciseId()).toBe('we-2');
+    expect(store.setDraft().weightKg).toBe('');
+    expect(store.setDraft().reps).toBe('7');
   });
 
   it('rejects invalid set input before touching the repository', async () => {
@@ -210,6 +265,9 @@ describe('FitnessStore', () => {
     expect(workoutRepo.addSet).toHaveBeenCalledTimes(1);
     expect(workoutRepo.skipSet).not.toHaveBeenCalled();
 
+    expect(store.setDraft().reps).toBe('');
+    store.updateWeight('40');
+    store.updateReps('7');
     await store.logSet();
     expect(workoutRepo.addSet).toHaveBeenCalledTimes(2);
   });
@@ -314,13 +372,17 @@ describe('FitnessStore', () => {
 
     await store.repeatLastSet();
 
-    expect(workoutRepo.addSet).toHaveBeenCalledOnceWith('we-1', {
-      weightKg: 45,
-      reps: 8,
-      restSeconds: 75,
-      effort: null,
-      notes: null,
-    });
+    expect(workoutRepo.addSet).toHaveBeenCalledOnceWith(
+      'we-1',
+      {
+        weightKg: 45,
+        reps: 8,
+        restSeconds: 75,
+        effort: null,
+        notes: null,
+      },
+      jasmine.any(String),
+    );
   });
 
   it('dismissCompletedSummary clears the snapshot', () => {
@@ -389,19 +451,22 @@ describe('FitnessStore', () => {
     expect(store.restSeconds()).toBe(0);
   });
 
-  it('creates and activates an AI custom plan from current state', async () => {
+  it('previews an AI plan and activates only after acceptance', async () => {
+    profile.set({ birth_date: '1990-01-01' } as UserProfile);
     await store.initialize();
 
     await store.generateAiCustomPlan();
 
     expect(fitnessAi.generateTrainingPlan).toHaveBeenCalledWith({
-      profile: null,
+      profile: profile(),
       exercises: [exercise()],
       progress: progressSummary(),
     });
-    expect(planRepo.createAiPlan).toHaveBeenCalledOnceWith(aiPlanDraft());
-    expect(store.aiPlanRationale()).toBe('Giữ full-body volume vừa phải.');
-    expect(store.successMessage()).toBe('Đã tạo và kích hoạt giáo án AI custom.');
+    expect(planRepo.createAiPlan).not.toHaveBeenCalled();
+    expect(store.pendingAiPlan()).toEqual(aiPlanDraft());
+    await store.acceptAiPlan();
+    expect(planRepo.createAiPlan).toHaveBeenCalledOnceWith(aiPlanDraft(), 'plan-1');
+    expect(store.pendingAiPlan()).toBeNull();
   });
 
   it('blocks AI custom plan generation while offline', async () => {

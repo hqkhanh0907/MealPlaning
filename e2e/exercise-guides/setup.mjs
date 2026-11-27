@@ -16,7 +16,35 @@ export function networkState() {
     sdk: d.adb('shell', 'getprop', 'ro.build.version.sdk').trim(),
   };
 }
-export async function onboard(s) {
+export async function openTrainingScreen(s, screen) {
+  const route = await s.ev('location.pathname');
+  if (route === '/training/' + screen) return;
+  if (!route.startsWith('/training/')) {
+    await s.click('[data-testid=tab-fitness]');
+    await s.waitFor("location.pathname === '/training/today'", 15000, 'open workout module');
+  }
+  if (screen !== 'today' || route.startsWith('/training/')) {
+    await s.click('[data-testid=workout-tab-' + screen + ']');
+    await s.waitFor('location.pathname === ' + JSON.stringify('/training/' + screen), 15000, 'open ' + screen);
+  }
+}
+export async function resumeWorkout(s) {
+  const route = await s.ev('location.pathname');
+  if (route === '/training/session') return;
+  await openTrainingScreen(s, 'today');
+  await s.waitFor("document.querySelector('[data-testid=resume-workout]')?.getBoundingClientRect().width > 0", 20000, 'active session on Today');
+  await s.click('[data-testid=resume-workout]');
+  await s.waitFor("location.pathname === '/training/session'", 10000, 'resumed workout');
+}
+export async function useFullBodyPreset(s) {
+  await openTrainingScreen(s, 'plans');
+  if (!await s.ev("document.querySelector('.plan-grid')?.getBoundingClientRect().width > 0")) {
+    await s.click('[data-testid=manual-plans]');
+  }
+  await s.clickLabel('Chọn Full Body 3 buổi');
+  await s.waitFor("document.querySelector('[aria-label=\"Thứ 2: Full Body A\"]')?.getBoundingClientRect().width > 0", 15000, 'chosen Full Body plan');
+}
+export async function onboard(s, { openFitness = true } = {}) {
   const { ev, waitFor, tapText, click, type } = s;
   await waitFor("location.pathname.length>1", 30000, 'route');
   if ((await ev('location.pathname')) === '/account') {
@@ -35,10 +63,10 @@ export async function onboard(s) {
     await waitFor("!location.pathname.includes('onboarding')", 30000, 'leave onboarding');
     await sleep(1500);
   }
-  await click('[data-testid=tab-fitness]');
-  await waitFor("location.pathname.includes('fitness')", 10000, 'fitness tab');
+  if (!openFitness) return;
   const t0 = Date.now();
-  await waitFor("[...document.querySelectorAll('.ion-page:not(.ion-page-hidden) ion-content')].at(-1).innerText.includes('Đổi giáo án')", 90000, 'fitness data loaded');
+  await click('[data-testid=tab-fitness]');
+  await waitFor("location.pathname === '/training/today'", 30000, 'workout module');
+  await waitFor("document.querySelector('[data-testid=workout-tab-plans]')?.getBoundingClientRect().width > 0", 90000, 'workout tabs');
   s.fitnessReadyMs = Date.now() - t0;
-  await sleep(800);
 }

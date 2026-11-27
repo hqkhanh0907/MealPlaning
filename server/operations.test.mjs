@@ -84,7 +84,7 @@ function workout() {
     id: 'private-set', workout_exercise_id: 'private-workout-exercise',
     weight_kg: 40, reps: 6, set_number: 1, status: 'logged',
   });
-  return { schemaVersion: 12, tables };
+  return { schemaVersion: 13, tables };
 }
 
 test('operators see aggregate status and cannot access owner data', { skip: !pb }, async () => {

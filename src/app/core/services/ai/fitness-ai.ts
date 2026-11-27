@@ -4,6 +4,12 @@ import type {
   Exercise,
   FitnessProgressSummary,
 } from '../../models/fitness.types';
+import { expandEquipment } from '../../models/exercise-discovery';
+import {
+  workoutDraftIssue,
+  workoutExerciseUsable,
+  type WorkoutPreferences,
+} from '../../models/workout-plan-recommendation';
 import { normalizeTrainingPrescription } from '../../models/fitness-prescription';
 import type { UserProfile } from '../../models/user-profile.model';
 import { catalogForPrompt } from './prompts/ai-catalog';
@@ -19,6 +25,7 @@ export interface FitnessAiInput {
   readonly profile: UserProfile | null;
   readonly exercises: readonly Exercise[];
   readonly progress: FitnessProgressSummary | null;
+  readonly preferences?: WorkoutPreferences;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -26,16 +33,37 @@ export class FitnessAi {
   private readonly ai = inject(AiGeneration);
 
   async generateTrainingPlan(input: FitnessAiInput): Promise<AiTrainingPlanDraft> {
-    const candidates = catalogForPrompt(input.exercises);
+    const prefs = input.preferences;
+    if (
+      prefs &&
+      (prefs.age === null ||
+        prefs.age < 18 ||
+        prefs.equipment === null ||
+        !Array.isArray(prefs.avoid) ||
+        prefs.weekdays.length < 2)
+    ) {
+      throw new Error('Chọn điều kiện tập và ít nhất hai ngày để soạn giáo án tuần.');
+    }
+    const available = expandEquipment(prefs?.equipment ?? []);
+    const avoid = new Set<string>(Array.isArray(prefs?.avoid) ? prefs.avoid : []);
+    const candidates = catalogForPrompt(
+      prefs
+        ? input.exercises.filter((exercise) => workoutExerciseUsable(exercise.id, available, avoid))
+        : input.exercises,
+    );
     const exerciseIds = new Set(candidates.map((exercise) => exercise.id));
-    if (exerciseIds.size < 20) {
-      throw new Error('FitnessAi: exercise database is too small for AI plan generation.');
+    if (exerciseIds.size === 0) {
+      throw new Error('Chưa tìm thấy bài phù hợp để gửi yêu cầu soạn giáo án.');
     }
 
     const response = await this.ai.generateText<AiTrainingPlanResponse>(
       buildTrainingPlanPrompt({
         fitnessLevel: input.profile?.fitness_level ?? 'beginner',
-        goal: input.profile?.goal ?? 'maintain',
+        schedule: prefs && {
+          weekdays: prefs.weekdays,
+          minutes: prefs.minutes,
+          frequency: prefs.frequency,
+        },
         exercises: candidates,
         weeklyVolumeKg: input.progress?.currentWeekVolume ?? 0,
         workoutStreakWeeks: input.progress?.workoutStreakWeeks ?? 0,
@@ -49,6 +77,16 @@ export class FitnessAi {
       },
     );
 
+    if (
+      prefs &&
+      response.days.some((day) =>
+        day.exercises.some((exercise) => !exerciseIds.has(exercise.exercise_id)),
+      )
+    ) {
+      throw new Error(
+        'Bản nháp có bài nằm ngoài danh sách phù hợp. Hãy soạn lại hoặc chọn giáo án mẫu.',
+      );
+    }
     const days = response.days.map((day) => ({
       dayOfWeek: clampInt(day.day_of_week, 0, 6),
       name: day.name.trim(),
@@ -72,10 +110,25 @@ export class FitnessAi {
       throw new Error('AI chưa tạo đủ hai ngày tập có bài hợp lệ.');
     }
 
+    const frequency = days.filter((day) => !day.isRestDay && day.exercises.length).length;
+    if (
+      new Set(days.map((day) => day.dayOfWeek)).size !== 7 ||
+      days.some(
+        (day) =>
+          day.isRestDay !== (day.exercises.length === 0) ||
+          new Set(day.exercises.map((ex) => ex.exerciseId)).size !== day.exercises.length,
+      )
+    ) {
+      throw new Error('Bản nháp có ngày hoặc bài trùng. Hãy soạn lại hoặc chọn giáo án mẫu.');
+    }
+    if (prefs) {
+      const issue = workoutDraftIssue(prefs, days);
+      if (issue) throw new Error(issue);
+    }
     return {
       name: response.name.trim(),
       description: response.description.trim(),
-      frequency: clampInt(response.frequency, 2, 6),
+      frequency,
       rationale: response.rationale.trim(),
       days,
     };

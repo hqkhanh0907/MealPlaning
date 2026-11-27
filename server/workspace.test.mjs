@@ -35,7 +35,7 @@ function workout() {
     id: 'set-' + index, workout_exercise_id: 'exercise-a', weight_kg: 40, reps,
     set_number: index + 1, status: 'logged',
   })));
-  return { schemaVersion: 12, tables };
+  return { schemaVersion: 13, tables };
 }
 
 async function call(path, token, data) {
@@ -270,10 +270,44 @@ test('two devices synchronize owned workouts, including retries and conflict cho
     assert.equal(b.workout_set.find((set) => set.id === 'legacy').reps, 45);
     assert.equal(b.workout_set.find((set) => set.id === 'timed').duration_seconds, 30);
 
+    const coach = await signup('coach_demo', 'Demo');
+    const currentWorkout = workout();
+    const studio = {key: 'fitness_exercise_place:studio', value: JSON.stringify({id:'studio',name:'Studio',equipment:['cable']}), updated_at:'2026-11-27'};
+    currentWorkout.tables.workout_preference.push(studio);
+    currentWorkout.tables.workout_session[0].place_id = 'studio';
+    currentWorkout.tables.workout_session[0].origin = 'composed';
+    currentWorkout.tables.workout_exercise[0].next_weight_kg = 45;
+    await expectStatus(200, route, coach.token, { operationId: randomUUID(), baseRevision: 0, snapshot: currentWorkout });
+    const modern = await expectStatus(200, route + '?schema=13', coach.token);
+    assert.equal(modern.snapshot.tables.workout_session[0].place_id, 'studio');
+    const older = await expectStatus(200, route, coach.token);
+    assert.equal(older.snapshot.schemaVersion, 12);
+    assert.equal('place_id' in older.snapshot.tables.workout_session[0], false);
+    assert.equal('workout_preference' in older.snapshot.tables, false);
+    older.snapshot.tables.workout_set[0].reps += 1;
+    await expectStatus(200, route, coach.token, { operationId: randomUUID(), baseRevision: older.revision, snapshot: older.snapshot });
+    const roundTrip = await expectStatus(200, route + '?schema=13', coach.token);
+    assert.equal(roundTrip.snapshot.tables.workout_session[0].origin, 'composed');
+    assert.deepEqual(roundTrip.snapshot.tables.workout_preference, [studio]);
+    assert.equal(roundTrip.snapshot.tables.workout_exercise[0].next_weight_kg, null);
+    assert.equal(roundTrip.snapshot.tables.workout_session[0].place_id, 'studio');
+    assert.equal(roundTrip.snapshot.tables.workout_set[0].reps, older.snapshot.tables.workout_set[0].reps);
     const expiration = await signup('expire_test', 'Hết hạn');
     const digest = (value) => createHash('sha256').update(value).digest('hex');
     const localDb = new DatabaseSync(join(dir, 'data.db'));
     try {
+      const coachingStored = JSON.parse(localDb.prepare('SELECT snapshot FROM mealplan_workspaces WHERE owner=?').get(coach.id).snapshot);
+      assert.equal(coachingStored.schemaVersion, 12);
+      assert.equal('workout_preference' in coachingStored.tables, false);
+      assert.equal('place_id' in coachingStored.tables.workout_session[0], false);
+      assert.deepEqual(coachingStored.workoutCoaching13.workout_preference, [studio]);
+      const rollbackRow = localDb.prepare('SELECT revision,snapshot FROM mealplan_workspaces WHERE owner=?').get(coach.id);
+      localDb.prepare('INSERT INTO mealplan_workspace_history (owner,revision,snapshot) VALUES (?,?,?)').run(coach.id, rollbackRow.revision, rollbackRow.snapshot);
+      delete coachingStored.workoutCoaching13;
+      localDb.prepare('UPDATE mealplan_workspaces SET snapshot=?,revision=revision+1 WHERE owner=?').run(JSON.stringify(coachingStored), coach.id);
+      const resumed = await expectStatus(200, route + '?schema=13', coach.token);
+      assert.deepEqual(resumed.snapshot.tables.workout_preference, [studio]);
+      assert.equal(resumed.snapshot.tables.workout_session[0].place_id, 'studio');
       const oldSnapshot = structuredClone(unitCases);
       oldSnapshot.tables.workout_set.sort((left, right) => left.id < right.id ? -1 : 1);
       oldSnapshot.tables.workout_exercise[0].total_volume = 3080;

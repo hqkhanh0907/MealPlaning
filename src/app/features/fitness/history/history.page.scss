@@ -292,3 +292,43 @@ details[open] .session-card__summary {
 .session-card__details .session-action__error {
   color: var(--ion-color-danger-shade);
 }
+
+.trend {
+  margin: var(--space-lg) var(--space-lg) 0;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  h2,
+  h3 {
+    margin: 0;
+    font-size: var(--font-size-subtitle);
+  }
+  p,
+  li {
+    font-size: var(--font-size-body-sm);
+  }
+}
+.week-volume {
+  list-style: none;
+  padding: 0;
+  li {
+    display: grid;
+    grid-template-columns: minmax(5rem, auto) 1fr auto;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-block: var(--space-xs);
+  }
+  meter {
+    width: 100%;
+    accent-color: var(--primary-700);
+  }
+}
+.session-replay {
+  padding: var(--space-md);
+  background: var(--primary-50);
+  border-radius: var(--radius-md);
+  h3 {
+    margin-block-start: 0;
+  }
+}

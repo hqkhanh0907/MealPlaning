@@ -3,8 +3,6 @@ import { z } from 'zod';
 import { trainingPrescriptionLimits } from '../../../models/fitness-prescription';
 import { isTimedExercise, workoutNumber, type Exercise } from '../../../models/fitness.types';
 
-const DAY_NAMES = ['Push', 'Pull', 'Legs', 'Upper', 'Lower', 'Full Body'] as const;
-
 export const aiPlannedExerciseSchema = z
   .object({
     exercise_id: z.string().min(1),
@@ -56,7 +54,11 @@ export type AiTrainingPlanResponse = z.infer<typeof aiTrainingPlanResponseSchema
 
 export interface BuildTrainingPlanPromptInput {
   readonly fitnessLevel: FitnessLevel;
-  readonly goal: string;
+  readonly schedule?: {
+    readonly weekdays: readonly number[];
+    readonly minutes: number;
+    readonly frequency: number | null;
+  };
   readonly exercises: readonly Exercise[];
   readonly weeklyVolumeKg: number;
   readonly workoutStreakWeeks: number;
@@ -74,7 +76,13 @@ export function buildTrainingPlanPrompt(input: BuildTrainingPlanPromptInput): st
     'Tạo AI custom training plan 7 ngày cho người dùng.',
     '',
     `Level: ${input.fitnessLevel}`,
-    `Goal: ${input.goal}`,
+    ...(input.schedule
+      ? [
+          'Ngày rảnh (0 là Chủ nhật): ' + input.schedule.weekdays.join(', '),
+          'Thời gian tối đa mỗi buổi: ' + input.schedule.minutes + ' phút.',
+          ...(input.schedule.frequency ? ['Số buổi mong muốn: ' + input.schedule.frequency] : []),
+        ]
+      : []),
     `Tổng tạ × số lần đã ghi trong các buổi hoàn thành tuần này: ${workoutNumber.format(input.weeklyVolumeKg)} kg. Bài tính theo giây không góp vào tổng này.`,
     `Workout streak: ${input.workoutStreakWeeks} tuần`,
     '',
@@ -85,11 +93,10 @@ export function buildTrainingPlanPrompt(input: BuildTrainingPlanPromptInput): st
     '- 2-6 buổi/tuần, còn lại rest day.',
     '- Điều chỉnh số hiệp theo lịch và mức kinh nghiệm. Tổng khối lượng tuần không xác định mức tạ cho từng bài.',
     '- reps_min và reps_max dùng đơn vị unit của từng bài: seconds là giây, repetitions là số lần.',
-    '- Beginner ưu tiên Full Body 3x, kỹ thuật, volume thấp.',
-    '- Intermediate/advanced có thể dùng Upper/Lower hoặc PPL.',
-    '- Có progressive overload note cụ thể.',
+    '- Mức kinh nghiệm chỉ là bối cảnh. Đặt ngày và lượng tập trong giới hạn người dùng cung cấp.',
+    '- Để người tập chọn mức tạ. Ghi hướng dẫn kỹ thuật ngắn, tránh tự áp dụng tăng tạ hoặc tuần giảm tải.',
     '- Không dùng exercise_id ngoài danh sách.',
-    `- Tên ngày nên thuộc nhóm: ${DAY_NAMES.join(', ')} khi hợp lý.`,
+    '- Ghi lý do dựa trên lịch, dụng cụ và các bài có trong danh sách.',
   ].join('\n');
 }
 

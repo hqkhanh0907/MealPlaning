@@ -65,6 +65,90 @@
           </section>
         }
 
+        @for (ex of incompleteRows(); track ex.id) {
+          <section class="wsm-choice">
+            <h3>{{ ex.exercise_name_vi || ex.exercise_name }}</h3>
+            <p>Bạn ghi {{ loggedCount(ex) }} trong {{ ex.planned_sets }} hiệp dự kiến.</p>
+            @if (ex.completion_note) {
+              <p>Lý do đã ghi · {{ ex.completion_note }}</p>
+            } @else {
+              <p>Bạn muốn ghi lại lý do?</p>
+              <div class="wsm-actions">
+                @for (reason of ['Hết giờ', 'Tạ quá nặng', 'Đau khi tập']; track reason) {
+                  <button type="button" (click)="setNote(ex.id, reason)">{{ reason }}</button>
+                }
+              </div>
+              <div class="input-wrapper">
+                <label class="input-label" [attr.for]="'reason-' + ex.id">Lý do</label>
+                <input
+                  #noteField
+                  class="input-native"
+                  [id]="'reason-' + ex.id"
+                  type="text"
+                  maxlength="300"
+                  [value]="notes()[ex.id] || ''"
+                  (input)="setNote(ex.id, noteField.value)"
+                />
+              </div>
+              <div class="wsm-actions">
+                <button
+                  type="button"
+                  [disabled]="!notes()[ex.id]?.trim()"
+                  (click)="record(ex, notes()[ex.id])"
+                >
+                  Lưu lý do
+                </button>
+                <button type="button" (click)="skipNote(ex.id)">Bỏ qua</button>
+              </div>
+            }
+          </section>
+        }
+        @for (ex of progressionRows(); track ex.id) {
+          <section class="wsm-choice" aria-label="Mức tạ lần tới">
+            <h3>{{ ex.exercise_name_vi || ex.exercise_name }}</h3>
+            <p>
+              Bạn đạt ít nhất {{ ex.planned_max }} lần trong {{ ex.sets.length }} hiệp cùng mức tạ
+              và đánh dấu Dễ ở hiệp cuối.
+            </p>
+            @if (kept().has(ex.id)) {
+              <p>Đã chọn giữ mức tạ.</p>
+            } @else if (ex.next_weight_kg !== null && ex.next_weight_kg !== undefined) {
+              <p>
+                Đã lưu {{ nextValue(ex) }}
+                {{ loadLabel(ex.exercise_id) === 'Tạ mỗi tay (kg)' ? 'kg mỗi tay' : 'kg' }} cho lần
+                tới.
+              </p>
+            } @else {
+              @if (ex.known_heavier_kg !== null && ex.known_heavier_kg !== undefined) {
+                <p>Mức điền sẵn là mức cao hơn gần nhất bạn từng dùng tại đây.</p>
+              } @else {
+                <p>Nếu muốn tăng, nhập mức tạ có sẵn tại nơi tập.</p>
+              }
+              <div class="input-wrapper">
+                <label class="input-label" [attr.for]="'next-' + ex.id">{{
+                  loadLabel(ex.exercise_id)
+                }}</label>
+                <input
+                  #loadField
+                  class="input-native"
+                  [id]="'next-' + ex.id"
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  step="any"
+                  [value]="nextValue(ex)"
+                  (input)="enterLoad(ex, loadField.value)"
+                />
+              </div>
+              <div class="wsm-actions">
+                <button type="button" [disabled]="nextKg(ex) === null" (click)="confirm(ex)">
+                  Xác nhận tăng
+                </button>
+                <button type="button" (click)="keep(ex)">Giữ mức hiện tại</button>
+              </div>
+            }
+          </section>
+        }
         <button type="button" class="wsm-done" (click)="close()">Xong</button>
       }
     </ion-content>

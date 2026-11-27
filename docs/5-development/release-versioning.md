@@ -34,7 +34,7 @@ Run these steps before distribution:
 
 ## Current
 
-The `0.2.2` candidate uses Android version code `5`. The previous signed APK uses code `4`.
+Workout version `0.3.0` uses Android version code `6`. The preceding `0.2.2` build uses code `5`.
 
 ## History
 

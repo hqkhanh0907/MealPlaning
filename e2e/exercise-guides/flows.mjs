@@ -1,7 +1,8 @@
 import fs from 'node:fs';
+import { join } from 'node:path';
+import { output, shots } from './artifacts.mjs';
 import { session, illustrationNoteMatches, sleep, d } from './lib.mjs';
-import { freshOffline, networkState, onboard } from './setup.mjs';
-const shots = new URL('./shots/', import.meta.url).pathname; fs.mkdirSync(shots, { recursive: true });
+import { freshOffline, networkState, onboard, openTrainingScreen, resumeWorkout, useFullBodyPreset } from './setup.mjs';
 const exp = Object.fromEntries(JSON.parse(fs.readFileSync(new URL('./expected.json', import.meta.url))).map((e) => [e.id, e]));
 const nameOf = (id) => exp[id].nameVi;
 const framesOf = (id) => exp[id].guide.illustration.frames.map((f) => f.path);
@@ -16,7 +17,7 @@ const bind = () => ({ ev: s.ev, waitFor: s.waitFor, click: s.click, type: s.type
 let { ev, waitFor, click, type, tapText } = bind();
 const headerText = () => ev("document.querySelector('.set-entry header').innerText.replace(/\\n+/g,' | ')");
 async function logSet({ id, weight, amount, expectRow, labels, volume }) {
-  if (weight !== undefined) await type('#weight-kg', weight);
+  await type('#weight-kg', weight ?? '0');
   await type('#reps', amount);
   const before = await s.logger();
   await s.openGuide();
@@ -66,7 +67,8 @@ try {
   check('thiết bị ở chế độ máy bay, Wi-Fi và dữ liệu di động tắt', data.network.airplane === '1' && data.network.wifi === '0' && (await ev('navigator.onLine')) === false, data.network);
 
   // --- Bản xem trước giáo án
-  await tapText('Đổi giáo án'); await sleep(700);
+  await openTrainingScreen(s, 'plans');
+  await click('[data-testid=manual-plans]');
   const pvRow = await previewGuide(0, 'renegade-row', 'preview-two-dumbbells-pull.png');
   check('bản xem trước mẫu Hai tạ đơn và sàn mở đúng bài kéo hai tạ trên sàn', pvRow.id === 'renegade-row' && sameFrames(pvRow, 'renegade-row') && pvRow.frames.map((f) => f.caption).join() === 'Bắt đầu,Kết thúc', pvRow.frames);
   const pvPlank = await previewGuide(1, 'plank', 'preview-plank.png');
@@ -75,11 +77,12 @@ try {
   await tapText('Đóng', 0).catch(() => {});
 
   // --- Buổi theo giáo án Full Body A: tạ đòn, cáp, bài tính giây
+  await useFullBodyPreset(s);
   await click('[aria-label="Thứ 2: Full Body A"]'); await sleep(700);
   await tapText('Tập buổi này');
   await waitFor("document.querySelectorAll('.workout-tab').length===4", 10000, 'guided session');
   await s.selectTab(nameOf('squat'));
-  const squat = await logSet({ id: 'squat', weight: '50', amount: '8', expectRow: '50 kg × 8 lần', labels: ['Tạ (kg)', 'Số lần'], volume: '400 kg khối lượng' });
+  const squat = await logSet({ id: 'squat', weight: '50', amount: '8', expectRow: '50 kg × 8 lần', labels: ['Mức tạ (kg)', 'Số lần'], volume: '400 kg khối lượng' });
   await sleep(1000);
   const t0 = await s.logger(); const at0 = Date.now();
   check('ghi hiệp xong đồng hồ nghỉ chạy', t0.timerStatus === 'Đang nghỉ' && secs(t0.timer) <= 120 && secs(t0.timer) > 100, [t0.timerStatus, t0.timer]);
@@ -106,11 +109,11 @@ try {
   const sideId = ['bulgarian-split-squat', 'dumbbell-row', 'single-leg-romanian-deadlift'].find((id) => exp[id].guide.perSide && !exp[id].timed);
   data.unitCases = { totalId, sideId };
   const free = [
-    totalId && { id: totalId, weight: '20', amount: '8', row: '20 kg × 8 lần', volume: '160 kg khối lượng', labels: ['Tổng hai tạ (kg)', 'Số lần'] },
-    sideId && { id: sideId, weight: '16', amount: '8', row: '16 kg × 8 lần', volume: '128 kg khối lượng', labels: ['Số lần mỗi bên'] },
-    { id: 'leg-press', weight: '80', amount: '10', row: '80 kg × 10 lần', labels: ['Tạ (kg)', 'Số lần'] },
-    { id: 'push-up', amount: '12', row: '0 kg × 12 lần', labels: ['Tạ (kg)', 'Số lần'] },
-    { id: 'kettlebell-goblet-squat', weight: '16', amount: '10', row: '16 kg × 10 lần', labels: ['Tạ (kg)', 'Số lần'] },
+    totalId && { id: totalId, weight: '10', amount: '8', row: '10 kg mỗi tay × 8 lần', volume: '160 kg khối lượng', labels: ['Tạ mỗi tay (kg)', 'Số lần'] },
+    sideId && { id: sideId, weight: exp[sideId].guide.loadLabel ? '8' : '16', amount: '8', row: exp[sideId].guide.loadLabel ? '8 kg mỗi tay × 8 lần' : '16 kg × 8 lần', volume: '128 kg khối lượng', labels: ['Số lần mỗi bên'] },
+    { id: 'leg-press', weight: '80', amount: '10', row: '80 kg × 10 lần', labels: ['Mức tạ (kg)', 'Số lần'] },
+    { id: 'push-up', amount: '12', row: '0 kg × 12 lần', labels: ['Mức tạ (kg)', 'Số lần'] },
+    { id: 'kettlebell-goblet-squat', weight: '16', amount: '10', row: '16 kg × 10 lần', labels: ['Mức tạ (kg)', 'Số lần'] },
     { id: 'side-plank', amount: '20', row: '20 giây', labels: ['Tập mỗi bên (giây)'] },
   ].filter(Boolean);
   check('danh mục có bài ghi tổng hai tạ và bài ghi từng bên để thử', Boolean(totalId && sideId), data.unitCases);
@@ -170,8 +173,7 @@ try {
   s = await session({ settleMs: 8000 }); ({ ev, waitFor, click, type, tapText } = bind());
   await waitFor("location.pathname.includes('tabs')", 30000, 'relaunch');
   check('mở lại app khi vẫn ngoại tuyến', (await ev('navigator.onLine')) === false && networkState().airplane === '1');
-  await click('[data-testid=tab-fitness]'); await sleep(2000);
-  await s.clickLabel('Xem lịch sử buổi tập');
+  await openTrainingScreen(s, 'history');
   await waitFor("location.pathname.includes('history')", 10000, 'history');
   await sleep(1500);
   await ev("document.querySelectorAll('details').forEach(x=>x.open=true)"); await sleep(800);
@@ -184,14 +186,23 @@ try {
   }
   const plankRow = all.find((x) => x.name === nameOf('plank'));
   check('plank lưu đúng 30 giây', plankRow?.sets[0] === '30 giây', plankRow ?? null);
-  if (totalId) check('lịch sử ghi đơn vị tổng hai tạ', all.find((x) => x.name === nameOf(totalId))?.unit?.includes('Tổng hai tạ (kg)'), all.find((x) => x.name === nameOf(totalId)));
+  if (totalId) check('lịch sử ghi đơn vị tạ mỗi tay', all.find((x) => x.name === nameOf(totalId))?.unit?.includes('Tạ mỗi tay (kg)'), all.find((x) => x.name === nameOf(totalId)));
+  if (totalId) {
+    await ev(`(() => {
+      const exercise = [...document.querySelectorAll('.session-exercise')].find(section => section.querySelector('h3')?.textContent.trim() === ${JSON.stringify(nameOf(totalId))});
+      const button = [...exercise.querySelectorAll('ion-button')].find(item => item.textContent.trim() === 'Sửa');
+      button.click();
+    })()`);
+    await waitFor("document.querySelector('#history-set-weight')?.value === '10'", 8000, 'history edit in kg per hand');
+    check('sửa hiệp cũ hiển thị đúng 10 kg mỗi tay', await ev("document.querySelector('label[for=history-set-weight]').textContent.trim() === 'Tạ mỗi tay (kg)'"));
+    await s.clickText('Hủy', '.session-set-editor ion-button');
+  }
   const sidePlankRow = all.find((x) => x.name === nameOf('side-plank'));
   check('bài tính giây từng bên lưu giây và ghi đơn vị giây mỗi bên', sidePlankRow?.unit === 'Đơn vị ghi: Số giây mỗi bên' && sidePlankRow.sets[0] === '20 giây', sidePlankRow ?? null);
   if (sideId) check('lịch sử ghi đơn vị từng bên', all.find((x) => x.name === nameOf(sideId))?.unit?.includes('Số lần mỗi bên'), all.find((x) => x.name === nameOf(sideId)));
   check('lịch sử có đủ hai buổi vừa tập', history.length === 2 && history.some((h) => h.title === 'Full Body A') && history.some((h) => h.title === 'Tập tự do'), history.map((h) => [h.title, h.stats]));
   s.shot(shots + 'history.png');
-  await ev('history.back()'); await sleep(1500);
-  await click('[data-testid=tab-fitness]').catch(() => {}); await sleep(1500);
+  await openTrainingScreen(s, 'today');
 
   // --- Buổi đang tập sống sót khi hệ thống dựng lại màn hình (đổi cỡ chữ, màn hình nhỏ)
   await s.ensureFreeEntry();
@@ -205,8 +216,8 @@ try {
   d.adb('shell', 'wm', 'size', '720x1280'); d.adb('shell', 'wm', 'density', '320'); d.adb('shell', 'settings', 'put', 'system', 'font_scale', '1.3');
   await sleep(5000);
   s = await session({ settleMs: 6000 }); ({ ev, waitFor, click, type, tapText } = bind());
-  await waitFor("location.pathname.includes('tabs')", 30000, 'after display change');
-  await click('[data-testid=tab-fitness]').catch(() => {}); 
+  await waitFor("location.pathname.startsWith('/tabs/') || location.pathname.startsWith('/training/')", 30000, 'after display change');
+  await resumeWorkout(s);
   await waitFor("document.querySelectorAll('.workout-tab').length===2", 30000, 'session restored');
   await s.selectTab(nameOf('kettlebell-goblet-squat'));
   const restored = await s.logger();
@@ -227,8 +238,8 @@ try {
   d.adb('shell', 'wm', 'size', 'reset'); d.adb('shell', 'wm', 'density', 'reset'); d.adb('shell', 'settings', 'put', 'system', 'font_scale', '1.0');
   await sleep(5000);
   s = await session({ settleMs: 6000 }); ({ ev, waitFor, click, type, tapText } = bind());
-  await waitFor("location.pathname.includes('tabs')", 30000, 'after display reset');
-  await click('[data-testid=tab-fitness]').catch(() => {});
+  await waitFor("location.pathname.startsWith('/tabs/') || location.pathname.startsWith('/training/')", 30000, 'after display reset');
+  await resumeWorkout(s);
   await waitFor("document.querySelectorAll('.workout-tab').length===4", 30000, 'session restored again');
 
   // --- Mở lại hình khi vẫn ngoại tuyến, và ca âm
@@ -247,7 +258,7 @@ try {
 } finally {
   try { d.adb('shell', 'wm', 'size', 'reset'); d.adb('shell', 'wm', 'density', 'reset'); d.adb('shell', 'settings', 'put', 'system', 'font_scale', '1.0'); } catch {}
   const out = { ...data, passed: checks.filter((c) => c.ok).length, failed: checks.filter((c) => !c.ok).length, checks };
-  fs.writeFileSync(new URL('./flows-results.json', import.meta.url), JSON.stringify(out, null, 2));
+  fs.writeFileSync(join(output, 'flows-results.json'), JSON.stringify(out, null, 2));
   if (out.failed) process.exitCode = 1;
   console.log('SUMMARY passed', out.passed, 'failed', out.failed);
   s.close();

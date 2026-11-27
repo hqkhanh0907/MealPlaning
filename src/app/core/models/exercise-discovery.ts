@@ -25,7 +25,7 @@ const equipmentAlsoProvides = [
   ['hex-dumbbell', 'dumbbell'],
 ];
 
-function expandEquipment(keys: readonly string[]): Set<string> {
+export function expandEquipment(keys: readonly string[]): Set<string> {
   const equipment = new Set(keys);
   for (const [specific, standard] of equipmentAlsoProvides) {
     if (equipment.has(specific)) equipment.add(standard);

@@ -1,7 +1,7 @@
-const { mergeSnapshots, normalize } = require("./snapshot.js");
+const { mergeSnapshots, normalize, workoutWireVersion, preserveWorkoutCoaching, schemaVersion, storedWorkoutEnvelope, restoreStoredWorkout } = require("./snapshot.js");
 const HISTORY_REVISIONS = 32;
 
-function read(app, ownerId, metadataOnly = false) {
+function read(app, ownerId, metadataOnly = false, clientVersion = 12) {
   const rows = arrayOf(new DynamicModel({ revision: 0, snapshot: "" }));
   const query = metadataOnly ? "SELECT revision" : "SELECT revision, snapshot";
   app.db().newQuery(query + " FROM mealplan_workspaces WHERE owner = {:owner}")
@@ -9,7 +9,7 @@ function read(app, ownerId, metadataOnly = false) {
   const record = rows[0];
   return {
     revision: record?.revision ?? 0,
-    snapshot: record && !metadataOnly ? normalize(JSON.parse(record.snapshot)) : null,
+    snapshot: record && !metadataOnly ? workoutWireVersion(loadStored(app, ownerId, record.revision, record.snapshot), clientVersion) : null,
   };
 }
 
@@ -20,6 +20,17 @@ function storedSnapshot(app, ownerId, revision) {
     : "SELECT snapshot FROM mealplan_workspace_history WHERE owner = {:owner} AND revision = {:revision}";
   app.db().newQuery(lookup).bind({ owner: ownerId, ...(revision === undefined ? {} : { revision }) }).all(rows);
   return rows[0]?.snapshot;
+}
+
+function loadStored(app, ownerId, revision, raw) {
+  const data = JSON.parse(raw);
+  const snapshot = restoreStoredWorkout(data);
+  if (data.schemaVersion === schemaVersion || data.workoutCoaching13) return snapshot;
+  const rows = arrayOf(new DynamicModel({snapshot: ""}));
+  app.db().newQuery("SELECT snapshot FROM mealplan_workspace_history WHERE owner = {:owner} AND revision < {:revision} AND json_type(snapshot, '$.workoutCoaching13') = 'object' ORDER BY revision DESC LIMIT 1")
+    .bind({owner: ownerId, revision}).all(rows);
+  if (rows[0]) preserveWorkoutCoaching(snapshot, restoreStoredWorkout(JSON.parse(rows[0].snapshot)));
+  return snapshot;
 }
 
 function remember(app, ownerId, revision, snapshot) {
@@ -64,7 +75,8 @@ function write(app, ownerId, body) {
     throw new BadRequestError(error.message);
   }
   const resolution = conflictResolution(body.resolution, mergeIndependent);
-  const hashInput = mergeIndependent ? [baseRevision, snapshot, true] : [baseRevision, snapshot];
+  const wire = workoutWireVersion(snapshot, body.snapshot.schemaVersion);
+  const hashInput = mergeIndependent ? [baseRevision, wire, true] : [baseRevision, wire];
   if (resolution) hashInput.push(resolution);
   const requestHash = $security.sha256(JSON.stringify(hashInput));
   const receipts = arrayOf(new DynamicModel({ request_hash: "", revision: 0, merged: 0 }));
@@ -77,7 +89,7 @@ function write(app, ownerId, body) {
       if (receipt.request_hash !== requestHash) {
         // Pre-upgrade receipts used the previous workout totals when hashing otherwise identical data.
         const oldHash = mergeIndependent ? null
-          : $security.sha256(JSON.stringify([baseRevision, normalize(body.snapshot, true)]));
+          : $security.sha256(JSON.stringify([baseRevision, workoutWireVersion(normalize(body.snapshot, true), body.snapshot.schemaVersion)]));
         if (receipt.request_hash !== oldHash) throw new ApiError(409, "Operation content changed.");
       }
       response = reply(receipt.revision, operationId, receipt.merged === 1);
@@ -93,8 +105,10 @@ function write(app, ownerId, body) {
       const base = baseRevision === 0 ? null : storedSnapshot(tx, ownerId, baseRevision);
       if (baseRevision > 0 && !base) throw new ApiError(409, "Data changed on another device.");
       try {
+        const previous = base ? loadStored(tx, ownerId, baseRevision, base) : null;
+        if (body.snapshot.schemaVersion !== schemaVersion && previous) preserveWorkoutCoaching(snapshot, previous);
         const choices = resolution?.revision === revision ? resolution.choices : null;
-        const result = mergeSnapshots(base ? JSON.parse(base) : null, snapshot, JSON.parse(current), choices);
+        const result = mergeSnapshots(previous, snapshot, loadStored(tx, ownerId, revision, current), choices);
         if (result.items) {
           response = { conflict: { revision, items: result.items } };
           return;
@@ -104,11 +118,12 @@ function write(app, ownerId, body) {
         throw new ApiError(409, "Data changed on another device.");
       }
     }
+    if (!merged && current && body.snapshot.schemaVersion !== schemaVersion) preserveWorkoutCoaching(snapshot, loadStored(tx, ownerId, revision, current));
     if (existing) remember(tx, ownerId, revision, current);
     const record = existing || new Record(tx.findCollectionByNameOrId("mealplan_workspaces"));
     record.set("owner", ownerId);
     record.set("revision", revision + 1);
-    record.set("snapshot", snapshot);
+    record.set("snapshot", storedWorkoutEnvelope(snapshot));
     tx.save(record);
     tx.db().newQuery(
       "INSERT INTO mealplan_receipts (owner, operation, request_hash, revision, merged) VALUES ({:owner}, {:operation}, {:request_hash}, {:revision}, {:merged})",

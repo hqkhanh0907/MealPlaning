@@ -525,91 +525,6 @@
   }
 }
 
-.progress-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(122px, 100%), 1fr));
-  gap: var(--space-md);
-}
-
-.progress-summary article {
-  display: grid;
-  gap: var(--space-sm);
-  padding: var(--space-md);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-
-  ion-icon {
-    color: var(--primary-700);
-    font-size: var(--font-size-icon-xl);
-  }
-
-  strong {
-    color: var(--text-primary);
-    font-size: var(--font-size-title);
-    font-variant-numeric: tabular-nums;
-  }
-
-  span,
-  small {
-    color: var(--text-secondary);
-    font-size: var(--font-size-body-sm);
-    line-height: 1.4;
-  }
-}
-
-.chart-block {
-  margin-top: var(--space-lg);
-
-  h3 {
-    margin: 0 0 var(--space-md);
-    color: var(--text-primary);
-    font-size: var(--font-size-subtitle);
-    font-weight: 700;
-  }
-}
-
-.chart-row {
-  display: grid;
-  grid-template-columns: minmax(92px, 1fr) minmax(32px, 1fr) auto;
-  align-items: center;
-  gap: var(--space-sm);
-  margin-top: var(--space-sm);
-  color: var(--text-secondary);
-  font-size: var(--font-size-body-sm);
-
-  span {
-    overflow-wrap: anywhere;
-  }
-
-  strong {
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-  }
-}
-
-.chart-track {
-  height: 10px;
-  overflow: hidden;
-  border-radius: var(--radius-full);
-  background: var(--bg-muted);
-
-  i {
-    display: block;
-    width: var(--progress);
-    height: 100%;
-    border-radius: inherit;
-    background: var(--ion-color-primary);
-  }
-}
-
-.empty-copy {
-  margin: 0;
-  color: var(--text-tertiary);
-  font-size: var(--font-size-body-sm);
-  line-height: 1.5;
-}
-
 @media (max-width: 400px) {
   .fitness-card {
     padding: var(--space-md);
@@ -716,4 +631,31 @@
 
 .set-history__skipped-label {
   font-style: italic;
+}
+
+.last-performance {
+  color: var(--text-secondary);
+  font-size: var(--font-size-body-sm);
+  margin: var(--space-xs) 0 var(--space-md);
+}
+.input-wrapper:has(.clear-load) .input-native {
+  padding-inline-end: 3rem;
+}
+.clear-load {
+  position: absolute;
+  inset-inline-end: var(--space-xs);
+  top: 50%;
+  transform: translateY(-50%);
+  min-height: 44px;
+  min-width: 44px;
+  background: transparent;
+  color: var(--primary-700);
+  border: 0;
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+}
+
+.set-number {
+  margin: var(--space-sm) 0 var(--space-xs);
+  font-size: var(--font-size-body);
 }

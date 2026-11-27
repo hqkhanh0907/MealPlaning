@@ -72,7 +72,9 @@ final class SnapshotMerge {
 
     private static Map<String, JSONObject> rows(JSONObject snapshot, WorkspaceSchema.Table table) throws Exception {
         Map<String, JSONObject> result = new LinkedHashMap<>();
-        JSONArray rows = snapshot.getJSONObject("tables").getJSONArray(table.name());
+        JSONObject tables = snapshot.getJSONObject("tables");
+        if (snapshot.getInt("schemaVersion") == 12 && table.name().equals("workout_preference") && !tables.has(table.name())) return result;
+        JSONArray rows = tables.getJSONArray(table.name());
         for (int index = 0; index < rows.length(); index++) {
             JSONObject row = rows.getJSONObject(index);
             result.put(row.getString(table.key()), row);
@@ -84,8 +86,8 @@ final class SnapshotMerge {
         if (left == null || right == null) return left == right;
         for (String column : table.columns()) {
             if (TOTAL_VOLUME.equals(column) && hasWorkoutTotal(table)) continue;
-            Object a = left.opt(column);
-            Object b = right.opt(column);
+            Object a = left.isNull(column) ? JSONObject.NULL : left.opt(column);
+            Object b = right.isNull(column) ? JSONObject.NULL : right.opt(column);
             if (a instanceof Number && b instanceof Number) {
                 if (((Number) a).doubleValue() != ((Number) b).doubleValue()) return false;
             } else if (!java.util.Objects.equals(a, b)) return false;

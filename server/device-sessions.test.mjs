@@ -148,7 +148,7 @@ test('device sessions are owner-scoped and revocation spares other devices', { s
     assert.equal(rejected.data.code, 'session_revoked');
     const write = {
       operationId: randomUUID(), baseRevision: 0,
-      snapshot: { schemaVersion: 12, tables: Object.fromEntries(tableNames.map((table) => [table, []])) },
+      snapshot: { schemaVersion: 13, tables: Object.fromEntries(tableNames.map((table) => [table, []])) },
     };
     assert.equal((await request(200, workspace, first.accessToken, write)).revision, 1);
     assert.deepEqual(await request(200, workspace, other.accessToken), { revision: 0, snapshot: null });

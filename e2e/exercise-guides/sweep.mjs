@@ -1,17 +1,18 @@
 import fs from 'node:fs';
+import { join } from 'node:path';
+import { output, shots } from './artifacts.mjs';
 import { createHash } from 'node:crypto';
 import { session, compareGuide, sleep } from './lib.mjs';
 import { freshOffline, networkState, onboard } from './setup.mjs';
 const fixture = fs.readFileSync(new URL('./expected.json', import.meta.url));
 const exp = JSON.parse(fixture);
 const fixtureSha256 = createHash('sha256').update(fixture).digest('hex');
-const shots = new URL('./shots/', import.meta.url).pathname; fs.mkdirSync(shots, { recursive: true });
 const wantShot = new Set((process.env.SHOTS || '').split(',').filter(Boolean));
 const only = process.env.ONLY ? new Set(process.env.ONLY.split(',')) : null;
 const catalogue = new Map(exp.map((e) => [e.id, e]));
 const targetIds = only ?? new Set(catalogue.keys());
 const CHUNK = Number(process.env.CHUNK || 40);
-const resultsFile = new URL('./sweep-results.json', import.meta.url);
+const resultsFile = join(output, 'sweep-results.json');
 const previous = process.env.RESUME && fs.existsSync(resultsFile)
   ? JSON.parse(fs.readFileSync(resultsFile))
   : null;
@@ -66,7 +67,7 @@ try {
       const labels = (await s.logger()).labels;
       const wantAmount = e.timed ? (e.guide.perSide ? 'Tập mỗi bên (giây)' : 'Tập (giây)') : e.guide.perSide ? 'Số lần mỗi bên' : 'Số lần';
       if (!labels.includes(wantAmount)) row.problems.push('nhãn ô nhập lệch: ' + labels.join('/'));
-      if (labels.includes('Tổng hai tạ (kg)') !== Boolean(e.guide.loadLabel)) row.problems.push('nhãn tổng hai tạ lệch');
+      if (labels.includes('Tạ mỗi tay (kg)') !== Boolean(e.guide.loadLabel)) row.problems.push('nhãn tạ mỗi tay lệch');
       if (wantShot.has(e.id)) s.shot(shots + e.id + '.png');
       await s.closeGuide();
     } catch (err) {

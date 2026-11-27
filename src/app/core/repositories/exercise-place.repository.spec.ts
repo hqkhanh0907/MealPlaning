@@ -1,4 +1,5 @@
 import { Injector } from '@angular/core';
+import { prepareWorkspace } from '../account/workspace-snapshot';
 import { Database } from '../services/database/database';
 import {
   createTestDatabase,
@@ -6,8 +7,6 @@ import {
 } from '../services/database/__test__/create-test-database';
 import { WebDatabase } from '../services/database/web-database';
 import { defaultExercisePlaces, ExercisePlaceRepository } from './exercise-place.repository';
-
-const configKey = 'fitness_exercise_places';
 
 function repositoryFor(db: Database): ExercisePlaceRepository {
   return Injector.create({
@@ -25,6 +24,17 @@ describe('ExercisePlaceRepository', () => {
   });
 
   afterEach(teardownTestDatabase);
+
+  it('remembers the chosen default place across repository instances', async () => {
+    const [, gym] = defaultExercisePlaces;
+    expect(await repository.getDefaultId()).toBeNull();
+    await repository.setDefaultId(gym.id);
+    await expectAsync(repository.setDefaultId('missing')).toBeRejected();
+    expect(await repositoryFor(db).getDefaultId()).toBe(gym.id);
+    expect(
+      await db.getOne("SELECT value FROM workout_preference WHERE key='fitness_default_place'"),
+    ).toEqual({ value: gym.id });
+  });
 
   it('lists three unconfigured places with stable UUIDs', async () => {
     const places = await repository.list();
@@ -68,11 +78,36 @@ describe('ExercisePlaceRepository', () => {
 
     expect(result.map(({ name }) => name)).toEqual(['Phòng khách', 'Phòng tập', 'Ngoài trời']);
     expect(await repository.list()).toEqual(result);
+    const keys = await db.query<{ key: string }>('SELECT key FROM workout_preference ORDER BY key');
+    expect(keys.map((row) => row.key)).toEqual(
+      [home, gym].map((place) => 'fitness_exercise_place:' + place.id).sort(),
+    );
+  });
+
+  it('preserves another device’s venue change and increments the sync counter only for actual changes', async () => {
+    const [home, gym] = defaultExercisePlaces;
+    await prepareWorkspace(db);
+    const version = async (): Promise<number> =>
+      (await db.getOne<{ change_version: number }>(
+        'SELECT change_version FROM sync_workspace WHERE id=1',
+      ))!.change_version;
+    const initial = await version();
+    const remote = { ...gym, equipment: ['pull-up-bar'] };
+    await writePlace(gym.id, JSON.stringify(remote));
+    await repository.save({ ...home, equipment: [] });
+    await repository.setDefaultId(home.id);
+    const updated = await version();
+    expect(updated).toBe(initial + 3);
+    await repository.save({ ...home, equipment: [] });
+    await repository.setDefaultId(home.id);
+    expect(await version()).toBe(updated);
+    expect((await repository.list())[1]).toEqual(remote);
   });
 
   it('uses defaults for malformed or obsolete documents', async () => {
-    for (const raw of ['{', '{"version":0,"places":[]}', '{"version":1,"places":{}}']) {
-      await writeConfig(raw);
+    const [home, gym] = defaultExercisePlaces;
+    for (const raw of ['{', 'null', JSON.stringify({ ...gym, equipment: [] })]) {
+      await writePlace(home.id, raw);
       expect(await repository.list()).toEqual(defaultExercisePlaces);
     }
   });
@@ -80,12 +115,11 @@ describe('ExercisePlaceRepository', () => {
   it('recovers a malformed place while retaining valid siblings', async () => {
     const [home, gym, outdoors] = defaultExercisePlaces;
     const savedOutdoors = { ...outdoors, name: 'Công viên', equipment: ['pull-up-bar'] };
-    await writeConfig(
-      JSON.stringify({
-        version: 1,
-        places: [{ ...home, name: 'Invalid', equipment: ['dumbbell', null] }, savedOutdoors],
-      }),
+    await writePlace(
+      home.id,
+      JSON.stringify({ ...home, name: 'Invalid', equipment: ['dumbbell', null] }),
     );
+    await writePlace(outdoors.id, JSON.stringify(savedOutdoors));
 
     expect(await repository.list()).toEqual([home, gym, savedOutdoors]);
     const recovered = await repository.save({ ...home, equipment: [] });
@@ -104,11 +138,11 @@ describe('ExercisePlaceRepository', () => {
     expect((await repository.save(updated))[0]).toEqual(updated);
   });
 
-  async function writeConfig(value: string): Promise<void> {
+  async function writePlace(id: string, value: string): Promise<void> {
     await db.execute(
-      `INSERT INTO app_config (key, value) VALUES (?, ?)
+      `INSERT INTO workout_preference (key, value, updated_at) VALUES (?, ?, datetime('now'))
        ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
-      [configKey, value],
+      ['fitness_exercise_place:' + id, value],
     );
   }
 });

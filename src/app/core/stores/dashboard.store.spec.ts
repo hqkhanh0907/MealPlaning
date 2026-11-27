@@ -481,7 +481,6 @@ describe('DashboardStore', () => {
     expect(
       buildTrainingPlanPrompt({
         fitnessLevel: 'beginner',
-        goal: 'maintain',
         exercises: [],
         weeklyVolumeKg: store.workoutSummary().currentWeekVolume,
         workoutStreakWeeks: 1,

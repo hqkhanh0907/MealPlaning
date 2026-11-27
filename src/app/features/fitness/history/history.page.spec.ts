@@ -8,6 +8,9 @@ import {
   teardownTestDatabase,
 } from '../../../core/services/database/__test__/create-test-database';
 import { Database } from '../../../core/services/database/database';
+import { FitnessStore } from '../../../core/stores/fitness.store';
+import { WorkoutNavigation } from '../workout-navigation';
+import { exerciseGuideText } from '../../../core/models/exercise-guide-texts';
 import FitnessHistoryPage from './history.page';
 
 describe('FitnessHistoryPage._isoWeekStart (F-016)', () => {
@@ -115,7 +118,19 @@ describe('FitnessHistoryPage session details', () => {
   async function showHistory(sessions: WorkoutSessionDetail[]): Promise<HTMLElement> {
     const workoutRepo = jasmine.createSpyObj<WorkoutRepository>('WorkoutRepository', [
       'recentSessions',
+      'progressSummary',
+      'weeklyVolumes',
     ]);
+    workoutRepo.progressSummary.and.resolveTo({
+      currentWeekVolume: 510,
+      previousWeekVolume: 100,
+      workoutStreakWeeks: 1,
+      weightSource: null,
+      weeklyAvgWeightKg: null,
+      volumeByMuscle: [],
+      strength: [],
+    });
+    workoutRepo.weeklyVolumes.and.resolveTo([]);
     workoutRepo.recentSessions.and.resolveTo(sessions);
     await TestBed.configureTestingModule({
       imports: [FitnessHistoryPage],
@@ -123,6 +138,7 @@ describe('FitnessHistoryPage session details', () => {
     }).compileComponents();
     const fixture = TestBed.createComponent(FitnessHistoryPage);
     fixture.detectChanges();
+    await fixture.componentInstance.refresh();
     await fixture.whenStable();
     fixture.detectChanges();
     return fixture.nativeElement as HTMLElement;
@@ -151,6 +167,17 @@ describe('FitnessHistoryPage session details', () => {
     details.querySelector('summary')!.click();
 
     expect(details.textContent).toContain('Không có chi tiết bài tập.');
+  });
+
+  it('keeps guided sessions in the schedule and offers replay for independent sessions', async () => {
+    const host = await showHistory([
+      completedWorkout,
+      { ...completedWorkout, id: 'guided-day', mode: 'guided', origin: 'plan_day' },
+    ]);
+    const rows = host.querySelectorAll('.session-card');
+    expect(rows[0].querySelector('[data-testid="replay-workout"]')).not.toBeNull();
+    expect(rows[1].querySelector('[data-testid="replay-workout"]')).toBeNull();
+    expect(host.querySelector('.trend')?.textContent).toContain('100 kg tuần trước');
   });
 
   it('shows decimal kilograms for a workout above one tonne', async () => {
@@ -235,6 +262,42 @@ describe('FitnessHistoryPage changes to a finished workout', () => {
     fixture.detectChanges();
     return revise.calls.mostRecent().returnValue;
   }
+
+  it('previews the effective movement and respects leaving History during replay startup', async () => {
+    const fitness = TestBed.inject(FitnessStore);
+    const exerciseId = 'push-up';
+    const venue = {
+      placeId: 'home',
+      placeName: 'Ở nhà',
+      equipment: [],
+      movements: [{ sourceId: 'bench-press', exerciseId }],
+    };
+    spyOn(fitness, 'previewReplay').and.resolveTo(venue);
+    let finish!: () => void;
+    const pending = new Promise<void>((resolve) => (finish = resolve));
+    const replay = spyOn(fitness, 'replay').and.returnValue(pending);
+    const navigate = spyOn(TestBed.inject(WorkoutNavigation), 'session').and.resolveTo(true);
+    fixture.ngZone!.run(() =>
+      host.querySelector<HTMLElement>('[data-testid="replay-workout"]')!.click(),
+    );
+    await updateView();
+    const preview = host.querySelector('.session-replay')!;
+    expect(preview.textContent).toContain(venue.placeName);
+    expect(preview.querySelector('li')?.textContent).toContain(
+      exerciseGuideText(exerciseId)!.nameVi,
+    );
+    expect(preview.querySelector('li')?.textContent).not.toContain('Cần ');
+    fixture.ngZone!.run(() =>
+      host.querySelector<HTMLElement>('[data-testid="start-replay"]')!.click(),
+    );
+    expect(replay).toHaveBeenCalledWith(sessionId, venue);
+    fixture.componentInstance.ionViewWillLeave();
+    fitness.activeSession.set(await repository.getSession(sessionId));
+    finish();
+    await updateView();
+    expect(navigate).not.toHaveBeenCalled();
+    expect(host.querySelector('.session-replay')).toBeNull();
+  });
 
   it('changes one recorded set to 7 reps and preserves IDs, the other set, and the set notes', async () => {
     expect(host.querySelector('summary')?.textContent).toContain('440 kg');

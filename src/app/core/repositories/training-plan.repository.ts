@@ -16,8 +16,6 @@ import { ExerciseRepository } from './exercise.repository';
 import { parseLocalDate } from '../utils/local-date';
 import { normalizeTrainingPrescription } from '../models/fitness-prescription';
 
-const AI_CUSTOM_PLAN_ID = 'plan_ai_custom_current';
-
 const PLAN_SUMMARY = `
   SELECT tp.id, tp.name, tp.type, tp.frequency, tp.is_active, tp.description, tp.source,
          tp.created_at, tp.updated_at,
@@ -31,6 +29,42 @@ const PLAN_SUMMARY = `
 export class TrainingPlanRepository {
   private readonly db = inject(Database);
   private readonly exerciseRepo = inject(ExerciseRepository);
+
+  async getFinderSchedule(): Promise<{ weekdays: number[]; minutes: number } | null> {
+    const row = await this.db.getOne<{ value: string }>(
+      "SELECT value FROM workout_preference WHERE key = 'fitness_finder_schedule'",
+    );
+    if (!row) return null;
+    try {
+      const value: unknown = JSON.parse(row.value);
+      if (!value || typeof value !== 'object' || !('weekdays' in value) || !('minutes' in value))
+        return null;
+      const { weekdays, minutes } = value;
+      if (
+        !Array.isArray(weekdays) ||
+        !weekdays.length ||
+        !weekdays.every(
+          (d: unknown) => typeof d === 'number' && Number.isInteger(d) && d >= 0 && d <= 6,
+        ) ||
+        typeof minutes !== 'number' ||
+        !Number.isInteger(minutes) ||
+        minutes <= 0
+      )
+        return null;
+      return { weekdays: [...new Set<number>(weekdays)], minutes };
+    } catch {
+      return null;
+    }
+  }
+
+  async saveFinderSchedule(weekdays: readonly number[], minutes: number): Promise<void> {
+    await this.db.execute(
+      `INSERT INTO workout_preference (key, value, updated_at) VALUES ('fitness_finder_schedule', ?, datetime('now'))
+       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+       WHERE workout_preference.value IS NOT excluded.value`,
+      [JSON.stringify({ weekdays, minutes })],
+    );
+  }
 
   async ensurePresetPlans(): Promise<TrainingPlanSummary[]> {
     await this.exerciseRepo.ensureSeedExercises();
@@ -109,12 +143,7 @@ export class TrainingPlanRepository {
       }
     });
 
-    const plans = await this.listPlans();
-    if (!plans.some((plan) => plan.is_active === 1)) {
-      await this.activatePlan('full_body');
-      return this.listPlans();
-    }
-    return plans;
+    return this.listPlans();
   }
 
   async listPlans(): Promise<TrainingPlanSummary[]> {
@@ -131,7 +160,8 @@ export class TrainingPlanRepository {
       `SELECT id FROM training_plan
         WHERE type = ?
           AND source = CASE WHEN ? = 'ai_custom' THEN 'ai' ELSE 'preset' END
-        ORDER BY CASE WHEN id = 'plan_full_body_3x' THEN 0 ELSE 1 END, id
+        ORDER BY CASE WHEN id = 'plan_full_body_3x' THEN 0 ELSE 1 END,
+          CASE WHEN source = 'ai' THEN is_active ELSE 0 END DESC, created_at DESC, id
         LIMIT 1`,
       [type, type],
     );
@@ -143,6 +173,22 @@ export class TrainingPlanRepository {
   }
 
   async savePersonalPlan(sourcePlanId: string, draft: PersonalTrainingPlanDraft): Promise<string> {
+    return this.persistPersonalPlan(sourcePlanId, draft);
+  }
+
+  async savePresetPreview(
+    sourcePlanId: string,
+    draft: PersonalTrainingPlanDraft,
+    expectedActiveId: string | null,
+  ): Promise<string> {
+    return this.persistPersonalPlan(sourcePlanId, draft, expectedActiveId);
+  }
+
+  private async persistPersonalPlan(
+    sourcePlanId: string,
+    draft: PersonalTrainingPlanDraft,
+    expectedActiveId?: string | null,
+  ): Promise<string> {
     const name = draft.name.trim();
     if (!name || name.length > 80) {
       throw new Error('Nhập tên giáo án từ 1 đến 80 ký tự.');
@@ -172,8 +218,10 @@ export class TrainingPlanRepository {
 
     return this.db.withTransaction(async () => {
       await this.assertNoActiveWorkout();
+      await this.checkActiveSelection(expectedActiveId);
       const source = await this.db.getOne<Pick<TrainingPlanSummary, 'id' | 'type' | 'source'>>(
-        `SELECT id, type, source FROM training_plan WHERE id = ? AND is_active = 1`,
+        `SELECT id, type, source FROM training_plan WHERE id = ?
+         AND ${expectedActiveId === undefined ? 'is_active = 1' : "source = 'preset'"}`,
         [sourcePlanId],
       );
       if (!source) {
@@ -215,7 +263,10 @@ export class TrainingPlanRepository {
     });
   }
 
-  async createAiPlan(plan: AiTrainingPlanDraft): Promise<TrainingPlanSummary> {
+  async createAiPlan(
+    plan: AiTrainingPlanDraft,
+    expectedActiveId?: string | null,
+  ): Promise<TrainingPlanSummary> {
     await this.exerciseRepo.ensureSeedExercises();
     await this.assertNoActiveWorkout();
     const validExerciseIds = new Set(
@@ -230,23 +281,16 @@ export class TrainingPlanRepository {
       throw new Error('TrainingPlanRepository: AI plan must contain at least 2 training days.');
     }
 
+    const planId = uuidv4();
     await this.db.withTransaction(async () => {
       await this.assertNoActiveWorkout();
+      await this.checkActiveSelection(expectedActiveId);
       await this.db.execute(
         `INSERT INTO training_plan (
            id, name, type, frequency, is_active, description, source, updated_at
-         ) VALUES (?, ?, 'ai_custom', ?, 0, ?, 'ai', datetime('now'))
-         ON CONFLICT(id) DO UPDATE SET
-           name = excluded.name,
-           frequency = excluded.frequency,
-           description = excluded.description,
-           source = 'ai',
-           updated_at = datetime('now')`,
-        [AI_CUSTOM_PLAN_ID, plan.name, plan.frequency, plan.description],
+         ) VALUES (?, ?, 'ai_custom', ?, 0, ?, 'ai', datetime('now'))`,
+        [planId, plan.name, trainingDays.length, plan.description],
       );
-      await this.db.execute(`DELETE FROM training_plan_day WHERE training_plan_id = ?`, [
-        AI_CUSTOM_PLAN_ID,
-      ]);
 
       for (const [dayIndex, day] of plan.days.entries()) {
         const dayId = uuidv4();
@@ -256,7 +300,7 @@ export class TrainingPlanRepository {
            ) VALUES (?, ?, ?, ?, ?, ?)`,
           [
             dayId,
-            AI_CUSTOM_PLAN_ID,
+            planId,
             normalizeDayOfWeek(day.dayOfWeek),
             day.name,
             day.isRestDay ? 1 : 0,
@@ -270,7 +314,7 @@ export class TrainingPlanRepository {
           await this.insertPlanExercise(dayId, exercise, exerciseIndex);
         }
       }
-      await this.setActivePlan(AI_CUSTOM_PLAN_ID);
+      await this.setActivePlan(planId);
     });
 
     const created = await this.db.getOne<TrainingPlanSummary>(
@@ -278,7 +322,7 @@ export class TrainingPlanRepository {
        WHERE tp.id = ?
        GROUP BY tp.id
        LIMIT 1`,
-      [AI_CUSTOM_PLAN_ID],
+      [planId],
     );
     if (!created) {
       throw new Error('TrainingPlanRepository: failed to create AI custom plan.');
@@ -295,9 +339,20 @@ export class TrainingPlanRepository {
     }
   }
 
-  async activatePlanById(planId: string): Promise<void> {
+  private async checkActiveSelection(expectedId: string | null | undefined): Promise<void> {
+    if (expectedId === undefined) return;
+    const active = await this.db.getOne<{ id: string }>(
+      'SELECT id FROM training_plan WHERE is_active = 1 LIMIT 1',
+    );
+    if ((active?.id ?? null) !== expectedId) {
+      throw new Error('Giáo án đang dùng đã thay đổi. Hãy mở lại bản xem trước.');
+    }
+  }
+
+  async activatePlanById(planId: string, expectedActiveId?: string | null): Promise<void> {
     await this.db.withTransaction(async () => {
       await this.assertNoActiveWorkout();
+      await this.checkActiveSelection(expectedActiveId);
       const target = await this.db.getOne<{ id: string }>(
         `SELECT id FROM training_plan WHERE id = ? LIMIT 1`,
         [planId],

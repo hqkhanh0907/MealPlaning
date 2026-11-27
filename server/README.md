@@ -69,3 +69,9 @@ The database listener stays on loopback. Funnel forwards public HTTPS to the all
 Save the current Funnel JSON before changing routes. For rollback, restore the previous release symlink and restart the services. Restore the saved Funnel routes if the public change needs reversal. Keep a copy of the database before changing versions.
 
 Take an online SQLite backup with the backup command. Check its integrity and restore it to a separate directory for verification. Keep the production database in place during the restore check.
+
+### Workout schema 13
+
+The Android app syncs workout places, equipment, schedules, and confirmed load targets with its account. Unfinished set entries stay on the device. The server projects older clients to schema 12 and retains the workout fields when it accepts their writes.
+
+Before rolling back the server binary, take another verified backup of the current database. It contains workout changes made since deployment. The previous binary keeps 32 workspace revisions per account. After a prolonged rollback, recovering newer coaching fields can require that backup.
