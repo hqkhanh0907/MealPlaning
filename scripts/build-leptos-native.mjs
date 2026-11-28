@@ -24,6 +24,7 @@ const jniSymbols = [
   'Java_com_healthmate_ai_sync_MealPlanSyncPlugin_dashboardSummaryNative',
   'Java_com_healthmate_ai_sync_MealPlanSyncPlugin_calendarDaysNative',
   'Java_com_healthmate_ai_sync_GroqTransport_decodeContentNative',
+  'Java_com_healthmate_ai_sync_MealPlanProfilePlugin_profileNative',
 ];
 const abis = new Map([
   ['arm64-v8a', ['aarch64-linux-android', 'aarch64-linux-android']],

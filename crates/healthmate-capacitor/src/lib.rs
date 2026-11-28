@@ -9,6 +9,7 @@ mod android;
 pub mod calendar;
 #[cfg(target_os = "android")]
 mod groq;
+pub mod profile_data;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ReadError {

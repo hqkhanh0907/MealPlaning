@@ -56,6 +56,13 @@ public class MainActivity extends BridgeActivity {
     /import com\.healthmate\.ai\.sync\.MealPlanSyncPlugin;([\s\S]*?)^([ \t]*)registerPlugin\(MealPlanSyncPlugin\.class\);/m,
     'import com.healthmate.ai.sync.MealPlanSyncPlugin;\nimport com.healthmate.ai.sync.MealPlanGroqPlugin;$1$2registerPlugin(MealPlanSyncPlugin.class);\n$2registerPlugin(MealPlanGroqPlugin.class);');
 
+  for (const file of readdirSync(sources).sort()) {
+    if (!file.endsWith('Plugin.java') || ['MealPlanSyncPlugin.java', 'MealPlanGroqPlugin.java'].includes(file)) continue;
+    const plugin = file.slice(0, -'.java'.length);
+    const registration = 'registerPlugin(com.healthmate.ai.sync.' + plugin + '.class);';
+    replaceOnce(activity, registration, /(^[ \t]*registerPlugin\(MealPlanSyncPlugin\.class\);)/m, '$1\n        ' + registration);
+  }
+
   const gradle = join(app, 'build.gradle');
   replaceOnce(gradle, "sourceSets.androidTest.java.srcDir(rootProject.file('../crates/healthmate-capacitor/android-tests'))",
     /^(android\s*\{)/m, "$1\n    sourceSets.androidTest.java.srcDir(rootProject.file('../crates/healthmate-capacitor/android-tests'))");

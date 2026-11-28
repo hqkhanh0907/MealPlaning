@@ -1,5 +1,8 @@
 import { inject, Injectable } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import { v4 as uuidv4 } from 'uuid';
+import { ProfileData } from '../account/profile-data';
+import { localIsoDate } from '../utils/local-date';
 import { Database } from '../services/database/database';
 import { UserProfile } from '../models/user-profile.model';
 import {
@@ -44,12 +47,23 @@ const USER_PROFILE_UPDATE_COLUMNS = new Set<string>([
 @Injectable({ providedIn: 'root' })
 export class UserProfileRepository {
   private readonly db = inject(Database);
+  private readonly native = Capacitor.getPlatform() === 'android' ? inject(ProfileData) : null;
 
   async getProfile(): Promise<UserProfile | null> {
+    if (this.native) {
+      const result = await this.native.run<UserProfile | null>({ op: 'get' });
+      if (result.native) return result.value;
+    }
     return this.db.getOne<UserProfile>('SELECT * FROM user_profile LIMIT 1');
   }
 
   async getLatestWeightLog(): Promise<WeightLogEntry | null> {
+    if (this.native) {
+      const result = await this.native.run<WeightLogEntry | null>({
+        op: 'latestWeight',
+      });
+      if (result.native) return result.value;
+    }
     return this.db.getOne<WeightLogEntry>(
       `SELECT id, weight_kg, date, notes, created_at
          FROM weight_log
@@ -59,6 +73,13 @@ export class UserProfileRepository {
   }
 
   async getPreviousWeightLog(beforeDate: string): Promise<WeightLogEntry | null> {
+    if (this.native) {
+      const result = await this.native.run<WeightLogEntry | null>({
+        op: 'previousWeight',
+        beforeDate,
+      });
+      if (result.native) return result.value;
+    }
     return this.db.getOne<WeightLogEntry>(
       `SELECT id, weight_kg, date, notes, created_at
          FROM weight_log
@@ -81,6 +102,20 @@ export class UserProfileRepository {
     input: Omit<UserProfile, 'id' | 'created_at' | 'updated_at'>,
     today = new Date(),
   ): Promise<UserProfile> {
+    if (this.native) {
+      const data = Object.fromEntries(
+        Array.from(USER_PROFILE_UPDATE_COLUMNS, (key) => [
+          key,
+          input[key as UserProfileUpdateColumn] ?? null,
+        ]),
+      );
+      const result = await this.native.run<UserProfile>({
+        op: 'insert',
+        today: localIsoDate(today),
+        data,
+      });
+      if (result.native) return result.value;
+    }
     const existing = await this.getProfile();
     if (existing) {
       console.warn(
@@ -145,6 +180,15 @@ export class UserProfileRepository {
       fields.push([key as UserProfileUpdateColumn, value]);
     }
     if (fields.length === 0) return;
+
+    if (this.native) {
+      const result = await this.native.run<null>({
+        op: 'update',
+        today: localIsoDate(today),
+        data: Object.fromEntries(fields),
+      });
+      if (result.native) return;
+    }
 
     const current = await this.getProfile();
     if (!current) return;

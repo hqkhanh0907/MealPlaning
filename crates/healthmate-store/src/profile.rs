@@ -3,7 +3,7 @@ use healthmate_domain::dates::{NaiveDate, parse_local_date};
 use healthmate_domain::profile::{
     MeasurementProfile, ProfilePatch, update_measurement_targets, validate_profile_changes,
 };
-use rusqlite::{Connection, TransactionBehavior};
+use rusqlite::{Connection, Transaction, TransactionBehavior};
 use serde_json::{Map, Value, json};
 use uuid::Uuid;
 
@@ -55,11 +55,22 @@ fn merge_calculated(fields: &mut Map<String, Value>, patch: ProfilePatch) {
 
 pub fn save(db: &mut Connection, input: &Value) -> Result<String> {
     let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
-    if let Some(old) = get(&tx)? {
-        return Ok(old["id"]
+    let (id, _) = save_on(&tx, input, today(&tx)?, || Ok(()))?;
+    tx.commit()?;
+    Ok(id)
+}
+
+pub fn save_on(
+    tx: &Transaction<'_>,
+    input: &Value,
+    date: NaiveDate,
+    before_write: impl FnOnce() -> Result<()>,
+) -> Result<(String, bool)> {
+    if let Some(old) = get(tx)? {
+        let id = old["id"]
             .as_str()
-            .ok_or_else(|| Error::InvalidInput("Invalid profile id".into()))?
-            .into());
+            .ok_or_else(|| Error::InvalidInput("Invalid profile id".into()))?;
+        return Ok((id.to_owned(), false));
     }
     let mut all = write::fields(input, COLUMNS)?;
     for mode in ["calorie_target_mode", "protein_target_mode"] {
@@ -69,28 +80,42 @@ pub fn save(db: &mut Connection, input: &Value) -> Result<String> {
     }
     let initial: MeasurementProfile = serde_json::from_value(Value::Object(all.clone()))?;
     let patch: ProfilePatch = serde_json::from_value(Value::Object(all.clone()))?;
-    let date = today(&tx)?;
     validate_profile_changes(&patch, None, date).map_err(|s| Error::InvalidInput(s.into()))?;
     let computed = update_measurement_targets(&initial, ProfilePatch::default(), date)
         .map_err(|s| Error::InvalidInput(s.into()))?;
     merge_calculated(&mut all, computed);
     let id = Uuid::new_v4().to_string();
     all.insert("id".into(), json!(id));
-    write::insert(&tx, "user_profile", &all)?;
-    tx.commit()?;
-    Ok(id)
+    before_write()?;
+    write::insert(tx, "user_profile", &all)?;
+    Ok((id, true))
 }
 
 pub fn update(db: &mut Connection, input: &Value) -> Result<()> {
-    let mut all = write::fields(input, COLUMNS)?;
-    if all.is_empty() {
+    if input.as_object().is_some_and(Map::is_empty) {
         return Ok(());
     }
     let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
-    let Some(old) = get(&tx)? else { return Ok(()) };
+    update_on(&tx, input, today(&tx)?, || Ok(()))?;
+    tx.commit()?;
+    Ok(())
+}
+
+pub fn update_on(
+    tx: &Transaction<'_>,
+    input: &Value,
+    date: NaiveDate,
+    before_write: impl FnOnce() -> Result<()>,
+) -> Result<bool> {
+    let mut all = write::fields(input, COLUMNS)?;
+    if all.is_empty() {
+        return Ok(false);
+    }
+    let Some(old) = get(tx)? else {
+        return Ok(false);
+    };
     let profile: MeasurementProfile = serde_json::from_value(old.clone())?;
     let patch: ProfilePatch = serde_json::from_value(input.clone())?;
-    let date = today(&tx)?;
     validate_profile_changes(&patch, Some(&profile), date)
         .map_err(|s| Error::InvalidInput(s.into()))?;
     let computed = update_measurement_targets(&profile, patch, date)
@@ -99,9 +124,9 @@ pub fn update(db: &mut Connection, input: &Value) -> Result<()> {
     let id = old["id"]
         .as_str()
         .ok_or_else(|| Error::InvalidInput("Invalid profile id".into()))?;
-    write::update(&tx, "user_profile", id, &all)?;
-    tx.commit()?;
-    Ok(())
+    before_write()?;
+    write::update(tx, "user_profile", id, &all)?;
+    Ok(true)
 }
 
 pub fn weight_log(db: &Connection, before: Option<&str>) -> Result<Vec<Value>> {
