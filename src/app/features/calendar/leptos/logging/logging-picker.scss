@@ -1,0 +1,9 @@
+@use 'sass:meta';
+
+.leptos-logging-modal {
+  @include meta.load-css('../../components/logging-modal/logging-modal');
+
+  .logging-picker-body {
+    display: contents;
+  }
+}

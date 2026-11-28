@@ -1,0 +1,15 @@
+@use 'sass:meta';
+
+app-leptos-calendar-body {
+  display: block;
+}
+
+@scope (app-leptos-calendar-body) {
+  @include meta.load-css('../components/meal-slot-card/meal-slot-card');
+  @include meta.load-css('../components/empty-day-state/empty-day-state');
+  @include meta.load-css('../components/day-summary-card/day-summary-card');
+  @include meta.load-css('../components/day-row/day-row');
+  @include meta.load-css('../../../shared/components/calorie-ring/calorie-ring');
+  @include meta.load-css('../../../shared/components/macro-row/macro-row');
+  @include meta.load-css('../../../shared/components/status-pill/status-pill');
+}

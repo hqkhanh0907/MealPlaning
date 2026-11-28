@@ -1,0 +1,63 @@
+@if (failed()) {
+  <app-logging-modal
+    [isOpen]="isOpen()"
+    [mealLabel]="mealLabel()"
+    [allDishes]="allDishes()"
+    [recentDishes]="recentDishes()"
+    [loading]="loading()"
+    [aiSuggestions]="aiSuggestions()"
+    [aiLoading]="aiLoading()"
+    [aiDisabledReason]="aiDisabledReason()"
+    (dishSelected)="dishSelected.emit($event)"
+    (aiSuggestionsRequested)="aiSuggestionsRequested.emit()"
+    (createDishRequested)="createDishRequested.emit()"
+    (dismissed)="dismissed.emit()"
+  />
+} @else {
+  <ion-modal
+    class="leptos-logging-modal"
+    [isOpen]="isOpen()"
+    [breakpoints]="[0, 1]"
+    [initialBreakpoint]="1"
+    [handle]="true"
+    [handleBehavior]="'cycle'"
+    (didDismiss)="onDismiss()"
+  >
+    <ng-template>
+      <ion-header class="logging-modal__header">
+        <ion-toolbar>
+          <div class="logging-modal__title-row">
+            <div>
+              <p class="logging-modal__eyebrow">Thêm vào {{ mealLabel() }}</p>
+              <h2 class="logging-modal__title">Chọn món đã chuẩn bị</h2>
+            </div>
+            <button
+              type="button"
+              class="logging-modal__close"
+              aria-label="Đóng chọn món"
+              (click)="onDismiss()"
+            >
+              <ion-icon name="close-outline" aria-hidden="true" />
+            </button>
+          </div>
+          <app-search-toolbar
+            [query]="query()"
+            placeholder="Tìm món ăn"
+            ariaLabel="Tìm món ăn để thêm vào lịch"
+            (queryChange)="query.set($event)"
+          />
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="logging-modal__content">
+        <div
+          class="logging-picker-body"
+          [appLoggingBody]="data()"
+          [pickerQuery]="query()"
+          [initialServings]="servings()"
+          (pickerAction)="handleAction($event)"
+          (rendererFailed)="failed.set(true)"
+        ></div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+}

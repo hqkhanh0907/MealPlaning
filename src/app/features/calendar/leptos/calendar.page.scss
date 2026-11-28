@@ -1,0 +1,5 @@
+@use 'sass:meta';
+
+app-leptos-calendar {
+  @include meta.load-css('../calendar.page');
+}

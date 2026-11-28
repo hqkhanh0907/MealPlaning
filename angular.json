@@ -93,6 +93,7 @@
                 { "replace": "src/environments/environment.ts", "with": "src/environments/environment.prod.ts" },
                 { "replace": "src/environments/groq-development.ts", "with": "src/environments/groq.ts" },
                 { "replace": "src/app/features/management/management.routes.ts", "with": "src/app/features/management/leptos/management.routes.ts" },
+                { "replace": "src/app/features/calendar/calendar.routes.ts", "with": "src/app/features/calendar/leptos/calendar.routes.ts" },
                 { "replace": "src/app/features/dashboard/dashboard.routes.ts", "with": "src/app/features/dashboard/dashboard.leptos.routes.ts" },
                 { "replace": "src/app/account-entry.ts", "with": "src/app/features/account/leptos/entry.ts" },
                 { "replace": "src/app/onboarding-entry.ts", "with": "src/app/features/onboarding/leptos/onboarding.page.ts" }
