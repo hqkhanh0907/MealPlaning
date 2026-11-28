@@ -18,7 +18,7 @@ export const routes: Routes = [
   {
     path: 'onboarding',
     canActivate: [accountGuard, onboardingCompletedRedirectGuard],
-    loadComponent: () => import('./features/onboarding/onboarding.page'),
+    loadComponent: () => import('./onboarding-entry'),
   },
   {
     path: 'settings',

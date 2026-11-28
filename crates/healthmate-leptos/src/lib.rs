@@ -1,6 +1,8 @@
 #[cfg(target_arch = "wasm32")]
 mod browser;
 mod model;
+#[cfg(target_arch = "wasm32")]
+mod onboarding;
 mod photo;
 mod view;
 #[cfg(target_arch = "wasm32")]

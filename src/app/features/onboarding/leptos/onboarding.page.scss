@@ -1,0 +1,27 @@
+@use 'sass:meta';
+
+@scope (app-leptos-onboarding) to (app-onboarding, app-body-fields) {
+  @include meta.load-css('../onboarding.page');
+}
+
+app-leptos-onboarding > ion-content app-body-fields {
+  display: block;
+  @include meta.load-css('../../../shared/forms/body-fields/body-fields');
+}
+
+app-leptos-onboarding > ion-content app-birth-date-field {
+  @include meta.load-css('../../../shared/forms/birth-date-field/birth-date-field');
+
+  &.inline-age {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: var(--space-lg);
+    row-gap: var(--space-xs);
+  }
+
+  &.inline-age app-form-field {
+    flex: 1 1 12rem;
+    min-width: 0;
+  }
+}
