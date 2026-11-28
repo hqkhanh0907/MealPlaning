@@ -232,7 +232,9 @@
               [disabled]="dashboard.photoSaving()"
             >
               @for (meal of mealTypes; track meal) {
-                <option [value]="meal">{{ mealLabels[meal] }}</option>
+                <option [value]="meal" [selected]="meal === draft.mealType">
+                  {{ mealLabels[meal] }}
+                </option>
               }
             </select>
           </div>

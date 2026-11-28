@@ -1,0 +1,18 @@
+@if (useLegacyView()) {
+  <app-dashboard class="ion-page" />
+} @else {
+  <ion-header class="apple-nav-bar">
+    <ion-toolbar>
+      <ion-title>Tổng quan</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="openSettings()" aria-label="Cài đặt">
+          <ion-icon slot="icon-only" name="settings-outline" />
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content class="dashboard-page"><div #body></div></ion-content>
+  <ion-footer class="ion-no-border" [style.display]="dashboard.photoDraft() ? null : 'none'">
+    <div #footer></div>
+  </ion-footer>
+}

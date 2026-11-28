@@ -13,6 +13,7 @@
   ],
   "include": [
     "src/**/*.spec.ts",
+    "src/**/*.parity.ts",
     "src/**/*.d.ts"
   ]
 }

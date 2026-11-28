@@ -71,7 +71,7 @@ import { AppFormField } from '../../shared/forms/form-field/form-field';
   ],
 })
 export default class DashboardPage {
-  private readonly router = inject(Router);
+  protected readonly router = inject(Router);
   private readonly calendar = inject(CalendarStore);
   private readonly toastCtrl = inject(ToastController);
   protected readonly dashboard = inject(DashboardStore);
@@ -128,6 +128,10 @@ export default class DashboardPage {
     }
 
     event.preventDefault();
+    return this.navigateToPendingMeal(target);
+  }
+
+  protected async navigateToPendingMeal(target: PendingMealTarget): Promise<void> {
     this.calendar.pendingMealNavigation.set(target);
     let reachedCalendar = false;
     try {
@@ -144,7 +148,7 @@ export default class DashboardPage {
     this.insightError.set('');
     try {
       const insight = await this.dashboard.generateDailyAiInsight();
-      if (insight) this.focusResult(this.insightTitle);
+      if (insight) this.focusResult('insight');
     } catch (err) {
       this.insightError.set(aiErrorMessage(err, 'AI chưa tạo được nhận xét. Vui lòng thử lại.'));
     }
@@ -154,7 +158,7 @@ export default class DashboardPage {
     this.photoError.set('');
     try {
       await this.dashboard.analyzeMealPhoto();
-      this.focusResult(this.reviewTitle);
+      this.focusResult('photo');
     } catch (err) {
       if (err instanceof Error && /cancelled|canceled/i.test(err.message)) return;
       this.photoError.set(aiErrorMessage(err, 'Chưa phân tích được ảnh. Hãy thử lại.'));
@@ -204,7 +208,8 @@ export default class DashboardPage {
     }
   }
 
-  private focusResult(heading: () => ElementRef<HTMLElement> | undefined): void {
+  protected focusResult(result: 'insight' | 'photo'): void {
+    const heading = result === 'insight' ? this.insightTitle : this.reviewTitle;
     afterNextRender(
       () => {
         const element = heading()?.nativeElement;

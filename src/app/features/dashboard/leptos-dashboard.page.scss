@@ -1,0 +1,6 @@
+@use 'sass:meta';
+
+app-leptos-dashboard {
+  @include meta.load-css('./dashboard.page');
+  @include meta.load-css('../../shared/components/ai-offline-banner/ai-offline-banner');
+}

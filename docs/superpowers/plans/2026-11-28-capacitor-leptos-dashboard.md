@@ -29,4 +29,26 @@ Khanh chọn Capacitor + Leptos cho Android 17 ngày 28/11/2026. Màn hình đ�
 | So hai phiên bản | `npm run build:leptos` và phòng thử Android | So ảnh, cây giao diện và thao tác. Lưu bằng chứng bên ngoài repo |
 | Kiểm tra trước commit | Rust fmt, clippy, test, Angular guards và ChromeHeadless | Ghi kết quả thực tế cùng giới hạn còn lại |
 
-Giữ nguyên design token, kiểu chữ, nhãn và thứ tự nội dung từ màn hình hiện tại. Không đổi giao diện trong lát này. Chỉ chuyển đường mặc định sau khi so khớp trải nghiệm thực tế.
+Giữ nguyên design token, kiểu chữ, nhãn và thứ tự nội dung từ màn hình hiện tại. Chỉ chuyển đường mặc định sau khi so khớp trải nghiệm thực tế.
+
+## Chỉnh lỗi hiển thị khi so hai màn hình
+
+Với cùng bản nháp bữa trưa, Chrome hiển thị Bữa sáng trên trang Angular và Bữa trưa trên trang Leptos. Angular gán giá trị trước khi các lựa chọn xuất hiện. Trong cả hai trường hợp, thao tác lưu đọc bữa trưa từ bản nháp.
+
+Áp dụng nguyên tắc phản hồi chính xác của skill thiết kế: ô chọn phải hiển thị bữa sẽ nhận món. Gắn trạng thái chọn với bữa của bản nháp ngay khi tạo từng lựa chọn. Không đổi bữa mặc định, giờ phân loại hoặc giao dịch lưu. Kiểm bằng `npm run test:leptos` với cùng bản nháp và cùng thao tác sửa.
+
+## Kết quả của lát hiển thị
+
+| Phép kiểm | Kết quả |
+|---|---|
+| `cargo fmt --manifest-path crates/healthmate-leptos/Cargo.toml --check` | Đạt |
+| `cargo clippy` với `--all-targets -- -D warnings` và bản WASM với `--target wasm32-unknown-unknown` | Đạt |
+| `cargo test --manifest-path crates/healthmate-leptos/Cargo.toml --locked` | Bốn ca dựng nội dung đạt |
+| `npm test -- --watch=false --browsers=ChromeHeadless` | 1.095 ca đạt |
+| `npm run test:leptos` | Hai giao diện cùng nhận mô hình dữ liệu. So nội dung, liên kết, lỗi, bữa đích, thao tác sửa và phục hồi khi dữ liệu không hợp lệ |
+| `LEPTOS_PKG=target/leptos-web node crates/healthmate-leptos/tests/browser.mjs` | 32 phép kiểm bằng Chrome với Ionic thật đạt |
+| `npm run build:leptos` | Dựng từ Rust 1.100.1 và qua toàn bộ guard. WebView tải tệp WASM từ APK |
+
+Trên Android 17 ARM64, hai màn hình đọc cùng tài khoản ngoại tuyến có 480 kcal đã ăn và 1.100 kcal theo lịch. Đã đối chiếu 27 điều khiển và liên kết. Kết quả chụp đầu và cuối trang khớp từng pixel trong vùng ứng dụng. Khi nâng cấp APK, dữ liệu SQLite và tệp phiên mã hóa giữ nguyên.
+
+APK thử dùng minSdk 24 và targetSdk 36 của vỏ ứng dụng hiện tại. Việc chuyển cấu hình sản phẩm sang API 37 cần nghiệm thu riêng. Lát này dùng store và điều hướng Angular thật. Mã Leptos dựng nội dung và gửi thao tác trở lại ứng dụng. Nếu WebAssembly không tải được hoặc từ chối dữ liệu, ứng dụng hiển thị trang Angular.

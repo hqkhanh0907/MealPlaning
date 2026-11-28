@@ -82,6 +82,19 @@
               ],
               "outputHashing": "all"
             },
+            "leptos": {
+              "assets": [
+                { "glob": "**/*", "input": "src/assets", "output": "assets" },
+                { "glob": "sql-wasm*.wasm", "input": "node_modules/sql.js/dist", "output": "assets/sql.js" },
+                { "glob": "healthmate_dashboard*.js", "input": "target/leptos-web", "output": "assets/leptos" },
+                { "glob": "healthmate_dashboard*.wasm", "input": "target/leptos-web", "output": "assets/leptos" }
+              ],
+              "fileReplacements": [
+                { "replace": "src/environments/environment.ts", "with": "src/environments/environment.prod.ts" },
+                { "replace": "src/environments/groq-development.ts", "with": "src/environments/groq.ts" },
+                { "replace": "src/app/features/dashboard/dashboard.routes.ts", "with": "src/app/features/dashboard/dashboard.leptos.routes.ts" }
+              ]
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,
@@ -148,6 +161,14 @@
             "scripts": []
           },
           "configurations": {
+            "leptos-parity": {
+              "assets": [
+                { "glob": "**/*", "input": "src/assets", "output": "assets" },
+                { "glob": "sql-wasm*.wasm", "input": "node_modules/sql.js/dist", "output": "assets/sql.js" },
+                { "glob": "*.js", "input": "target/leptos-web", "output": "assets/leptos" },
+                { "glob": "*.wasm", "input": "target/leptos-web", "output": "assets/leptos" }
+              ]
+            },
             "ci": {
               "progress": false,
               "watch": false
