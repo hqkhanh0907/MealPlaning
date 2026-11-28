@@ -1,4 +1,4 @@
 [workspace]
 resolver = "3"
-members = ["crates/healthmate-server", "crates/healthmate-domain", "crates/healthmate-protocol", "crates/healthmate-store"]
-exclude = ["crates/healthmate-client-sync", "mobile"]
+members = ["crates/healthmate-client-sync", "crates/healthmate-server", "crates/healthmate-domain", "crates/healthmate-protocol", "crates/healthmate-store"]
+exclude = ["crates/healthmate-services", "crates/healthmate-android", "mobile"]

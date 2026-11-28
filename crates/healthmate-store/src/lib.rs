@@ -1,5 +1,17 @@
+pub mod calendar;
+pub mod dashboard;
+
 mod catalog;
+pub mod fitness;
+pub mod management;
+pub mod photo;
+
+pub mod meals;
+
+pub mod profile;
+mod query;
 mod schema;
+mod write;
 
 pub use catalog::seed_catalog;
 use rusqlite::Connection;

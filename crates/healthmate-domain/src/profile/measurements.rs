@@ -96,19 +96,20 @@ pub fn validate_profile_changes(
         Change::Set(value) => Some(value.as_deref()),
         Change::Unchanged => None,
     };
-    if old.is_none() || changed.is_some_and(|d| d != prior_birth) {
-        if let Some(error) = birth_date_error(changed.flatten().unwrap_or(""), today) {
-            return Err(error);
-        }
+    if (old.is_none() || changed.is_some_and(|d| d != prior_birth))
+        && let Some(error) = birth_date_error(changed.flatten().unwrap_or(""), today)
+    {
+        return Err(error);
     }
     for (key, new, prev) in [
         (Measurement::WeightKg, p.weight_kg, old.map(|s| s.weight_kg)),
         (Measurement::HeightCm, p.height_cm, old.map(|s| s.height_cm)),
     ] {
-        if new.is_some() && new != prev {
-            if let Some(e) = body_measurement_error(key, new) {
-                return Err(e);
-            }
+        if new.is_some()
+            && new != prev
+            && let Some(e) = body_measurement_error(key, new)
+        {
+            return Err(e);
         }
     }
     let invalid = "Mục tiêu dinh dưỡng không hợp lệ.";
@@ -148,10 +149,11 @@ pub fn validate_profile_changes(
         ),
         (Target::Fat, &p.target_fat, old.and_then(|s| s.target_fat)),
     ] {
-        if let Change::Set(new) = change {
-            if *new != prior && !valid_manual_target(key, *new) {
-                return Err(invalid);
-            }
+        if let Change::Set(new) = change
+            && *new != prior
+            && !valid_manual_target(key, *new)
+        {
+            return Err(invalid);
         }
     }
     Ok(())
@@ -211,10 +213,10 @@ pub fn update_measurement_targets(
             values.target_protein,
         ),
     ] {
-        if let Some(v) = new {
-            if v != before || target.is_some() {
-                *target = Some(v);
-            }
+        if let Some(v) = new
+            && (v != before || target.is_some())
+        {
+            *target = Some(v);
         }
     }
     Ok(patch)
