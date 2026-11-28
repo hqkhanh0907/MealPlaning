@@ -4,6 +4,10 @@
 
 **Ràng buộc chung**
 
+Ngày 28/11/2026, Khanh xác nhận HealthMate chưa có người dùng. Bản Rust được nghiệm thu từ một lần cài mới và một cơ sở dữ liệu máy chủ trống. Chuyển dữ liệu SQLite hoặc PocketBase từ các bản cũ nằm ngoài phạm vi.
+
+Hai triển khai vẫn dùng cùng đầu vào thử để so hành vi. Dữ liệu do bản Rust tạo phải mở lại được sau khi Android dừng tiến trình. Mỗi tài khoản chỉ được thấy dữ liệu của chính mình.
+
 - Làm trực tiếp trên main. Giữ thay đổi của các phiên khác.
 - Giữ hành vi sản phẩm và hợp đồng dữ liệu hiện có ở các điểm vào thực tế.
 - Dùng Rust 1.100.1, dữ liệu thử và nguồn phép kiểm có thể chạy lại.
