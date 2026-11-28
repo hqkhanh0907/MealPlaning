@@ -1,0 +1,17 @@
+[package]
+name = "healthmate-store"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.100.1"
+publish = false
+
+[dependencies]
+rusqlite = { version = "=0.43.0", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+sha2 = "0.10"
+uuid = { version = "1", features = ["v4"] }
+ryu-js = "1"
+
+[dev-dependencies]
+tempfile = "3"

@@ -101,3 +101,6 @@ tmp-qa/
 /docs/6-testing/screenshots/
 /docs/qa-annotated/
 src/environments/groq.local.ts
+
+# Rust build artifacts
+/target/
