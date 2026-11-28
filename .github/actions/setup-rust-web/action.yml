@@ -1,0 +1,15 @@
+name: Set up the HealthMate Rust web toolchain
+description: Install the pinned Rust and WebAssembly bindings generator on Linux x86-64.
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: rustup toolchain install 1.100.1 --profile minimal --component rustfmt,clippy --target wasm32-unknown-unknown
+    - name: Install the pinned WebAssembly bindings generator
+      shell: bash
+      run: |
+        archive="wasm-bindgen-0.2.130-x86_64-unknown-linux-musl"
+        curl -fsSL "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/0.2.130/$archive.tar.gz" -o "$RUNNER_TEMP/$archive.tar.gz"
+        echo "9687f3bb551b9f66f37ed32a40d7913a00f7962db653054e56857bc306c3227f  $RUNNER_TEMP/$archive.tar.gz" | sha256sum -c -
+        tar -xzf "$RUNNER_TEMP/$archive.tar.gz" -C "$RUNNER_TEMP" "$archive/wasm-bindgen"
+        echo "$RUNNER_TEMP/$archive" >> "$GITHUB_PATH"

@@ -22,14 +22,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: rustup toolchain install 1.100.1 --profile minimal --component rustfmt,clippy --target wasm32-unknown-unknown
-      - name: Install the pinned WebAssembly bindings generator
-        run: |
-          archive="wasm-bindgen-0.2.130-x86_64-unknown-linux-musl"
-          curl -fsSL "https://github.com/wasm-bindgen/wasm-bindgen/releases/download/0.2.130/$archive.tar.gz" -o "$RUNNER_TEMP/$archive.tar.gz"
-          echo "9687f3bb551b9f66f37ed32a40d7913a00f7962db653054e56857bc306c3227f  $RUNNER_TEMP/$archive.tar.gz" | sha256sum -c -
-          tar -xzf "$RUNNER_TEMP/$archive.tar.gz" -C "$RUNNER_TEMP" "$archive/wasm-bindgen"
-          echo "$RUNNER_TEMP/$archive" >> "$GITHUB_PATH"
+      - uses: ./.github/actions/setup-rust-web
       - run: cargo fmt --manifest-path crates/healthmate-leptos/Cargo.toml --check
       - run: cargo clippy --manifest-path crates/healthmate-leptos/Cargo.toml --locked --all-targets -- -D warnings
       - run: cargo clippy --manifest-path crates/healthmate-leptos/Cargo.toml --locked --target wasm32-unknown-unknown -- -D warnings

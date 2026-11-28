@@ -2,7 +2,19 @@
 
 Ngày 28/11/2026. Khanh đã chọn Capacitor + Leptos cho Android. Mốc Git là `193b7dcf`. Bảng cũng ghi riêng các tệp đang phát triển trên cây làm việc.
 
-**Ứng dụng mặc định vẫn chạy Angular/Ionic trong Capacitor.** `npm run build:prod` bắt đầu từ `src/main.ts`. Bản `npm run build:leptos` thay route Tổng quan và giữ các store Angular. `mobile/` là mẫu Day riêng. Hai APK so sánh trong phòng thử dùng một phần nghiệp vụ thu gọn. [Quyết định](2026-11-28-rust-migration.md) · [Phạm vi màn đầu tiên](2026-11-28-capacitor-leptos-dashboard.md) · [Cấu hình build](../../../angular.json)
+**Bản Android mặc định dùng Capacitor và Leptos.** `npm run android` dựng WASM, thư viện native và APK. `npm run build:prod` dựng giao diện sản phẩm. Lệnh `npm run build:angular` giữ màn Angular để đối chiếu. Một số store, biểu mẫu và hộp thoại vẫn chạy bằng TypeScript. `mobile/` là bản thử Day trước khi Khanh chọn stack.
+
+## Tiến độ sau kiểm kê
+
+| Phần | Bằng chứng trên main | Phạm vi còn lại |
+|---|---|---|
+| Máy chủ | API, phiên, trang quản trị và SQLite chạy trong `healthmate-server`. Hai bộ test kiểm tài khoản mới và đồng bộ hai máy. | Nghiệm thu dùng database mới. |
+| Đăng nhập và thiết lập | Route Leptos và hồ sơ tài khoản đã chạy trên Android 17. | Phân tách xác thực native và bridge của WebView. |
+| Tổng quan và Lịch ăn | Rust đọc SQLite theo chủ tài khoản. Các ca mất mạng và giao dịch đang mở có kiểm riêng. | Lệnh sửa lịch còn dùng repository TypeScript. |
+| Quản lý | Danh sách, bộ lọc và tính dinh dưỡng đã đối chiếu trên cùng dữ liệu. | Các repository ghi món và nguyên liệu tiếp tục chuyển từng phần. |
+| Tập luyện và Cài đặt | Ghi hiệp, sửa lịch sử, tập lại và lưu mục tiêu đã kiểm trên Android 17. | Các thao tác lưu buổi tập và một số hộp thoại vẫn dùng mã cũ. |
+
+Danh sách đường dẫn sau đây là bản kiểm kê tại mốc ban đầu. Các kế hoạch theo từng phần ghi lệnh kiểm và kết quả của các thay đổi về sau.
 
 **Phạm vi phía ứng dụng gồm 224 đường dẫn TypeScript dưới `src/`.** Có 215 đường dẫn dưới `src/app/`, gồm bốn tệp mới của Tổng quan Leptos. Chín đường dẫn còn lại gồm điểm vào, polyfill, khai báo kiểu và cấu hình. Các tệp dùng chung một hàng có cùng đích và cùng phép kiểm. Mọi đường dẫn tính từ gốc kho.
 

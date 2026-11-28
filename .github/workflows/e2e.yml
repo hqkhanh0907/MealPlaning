@@ -48,8 +48,8 @@ jobs:
       - name: Run architecture guards (PC-1, Style 2025, form-pattern, design-tokens)
         run: npm run check:guards
 
-      - name: Verify Android SDK settings against the Capacitor template
-        run: node --test scripts/android-sdk.test.mjs
+      - name: Verify the default Android build configuration
+        run: node --test scripts/android-sdk.test.mjs scripts/default-android-build.test.mjs
 
       - name: Run linter
         run: npm run lint
@@ -60,6 +60,7 @@ jobs:
       - name: Verify offline workout persistence on a fresh database
         run: cargo test --locked -p healthmate-store --test fitness_workout
 
+      - uses: ./.github/actions/setup-rust-web
       - name: Build web app
         run: npm run build
 
@@ -87,13 +88,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - uses: ./.github/actions/setup-rust-web
       - name: Build Android test APK
         run: |
-          sdkmanager 'platforms;android-37.0'
+          sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0' 'ndk;30.0.16248370'
+          rustup target add x86_64-linux-android --toolchain 1.100.1
           npm run build:prod
           npx cap add android
           npx cap sync android
-          android/gradlew -p android testDebugUnitTest assembleDebug
+          ANDROID_NDK_HOME="$ANDROID_HOME/ndk/30.0.16248370" android/gradlew -p android -PhealthmateAbis=x86_64 testDebugUnitTest assembleDebug
 
       - name: Enable KVM
         run: |

@@ -1,0 +1,28 @@
+def sourceRoot = rootProject.projectDir.parentFile
+def selectedRustAbis = providers.gradleProperty('healthmateAbis').getOrElse('')
+def outputDir = new File(sourceRoot, 'target/leptos-native/jniLibs')
+
+if (selectedRustAbis) {
+    android.defaultConfig.ndk.abiFilters.addAll(selectedRustAbis.split(',') as List)
+}
+
+def rustBuild = tasks.register('buildHealthMateRust', Exec) {
+    workingDir sourceRoot
+    inputs.property('abis', selectedRustAbis)
+    inputs.files(new File(sourceRoot, 'scripts/build-leptos-native.mjs'),
+        new File(sourceRoot, 'rust-toolchain.toml'),
+        new File(sourceRoot, 'schema/workspace.json'),
+        new File(sourceRoot, 'android/variables.gradle'),
+        new File(sourceRoot, 'node_modules/@capacitor-community/sqlite/android/build.gradle'))
+    for (def crate : ['healthmate-capacitor', 'healthmate-domain', 'healthmate-store']) {
+        inputs.files(fileTree(new File(sourceRoot, "crates/$crate")) {
+            exclude 'target/**', 'tests/**', 'android-tests/**', 'android-instrumentation/**', '**/*.md'
+        })
+    }
+    inputs.dir(new File(sourceRoot, 'src/assets/seed'))
+    outputs.dir(outputDir)
+    commandLine 'node', 'scripts/build-leptos-native.mjs'
+    if (selectedRustAbis) args '--abi', selectedRustAbis
+}
+
+tasks.named('preBuild').configure { dependsOn rustBuild }

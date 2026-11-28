@@ -64,6 +64,8 @@ public class MainActivity extends BridgeActivity {
   }
 
   const gradle = join(app, 'build.gradle');
+  replaceOnce(gradle, "apply from: rootProject.file('../scripts/android-native/rust.gradle')",
+    /^(apply plugin: 'com\.android\.application')/m, "$1\napply from: rootProject.file('../scripts/android-native/rust.gradle')");
   replaceOnce(gradle, "sourceSets.androidTest.java.srcDir(rootProject.file('../crates/healthmate-capacitor/android-tests'))",
     /^(android\s*\{)/m, "$1\n    sourceSets.androidTest.java.srcDir(rootProject.file('../crates/healthmate-capacitor/android-tests'))");
   replaceOnce(gradle, "rootProject.file('../target/leptos-native/jniLibs')",
