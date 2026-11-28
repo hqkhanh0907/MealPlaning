@@ -23,6 +23,11 @@ jobs:
           unzip -q "$RUNNER_TEMP/pocketbase.zip" -d "$RUNNER_TEMP/pocketbase"
           POCKETBASE_BIN="$RUNNER_TEMP/pocketbase/pocketbase" node --test server/*.test.mjs
 
+      - name: Verify Rust import from the PocketBase database
+        run: |
+          rustup toolchain install 1.100.1 --profile minimal
+          POCKETBASE_BIN="$RUNNER_TEMP/pocketbase/pocketbase" cargo test --locked -p healthmate-server imports_real_pocketbase -- --ignored
+
   test-and-build:
     runs-on: ubuntu-latest
     timeout-minutes: 15

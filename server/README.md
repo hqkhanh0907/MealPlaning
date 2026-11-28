@@ -1,77 +1,80 @@
-# MealPlaning backend
+# HealthMate server
 
-PocketBase 0.40.6 owns credentials and workspace revisions. Its username identity supports self-registration with no email. Better Auth's standard username registration still requires email and needs a separate database service.
+The Rust binary serves the Android API and a private operations page. SQLite stores accounts, device sessions, workspace revisions and operation receipts. Both listeners bind to loopback.
+
+| Command | Default listener | Responsibility |
+|---|---|---|
+| `healthmate-server serve-public` | `127.0.0.1:18090` | Public Android API with explicit route and method checks |
+| `healthmate-server serve-private` | `127.0.0.1:18089` | Operator authentication and service status |
+| `healthmate-server serve` | Both | Local integration testing |
+
+## Build and test
+
+Use Rust 1.100.1. From the repository root, run:
+
+````sh
+cargo test --locked --workspace
+cargo build --release --locked --bin healthmate-server
+crates/healthmate-server/tests/run-legacy-http.sh target/release/healthmate-server
+````
+
+The HTTP suite starts isolated servers and exercises two-device synchronization and revocation. The migration test uses a real PocketBase 0.40.6 process and temporary data. Set `POCKETBASE_BIN` to the executable before running:
+
+````sh
+cargo test --locked -p healthmate-server imports_real_pocketbase -- --ignored
+````
 
 ## Data ownership
 
-| Flow | Before | Online v1 |
-|---|---|---|
-| Open and set up | One local profile | Session selects the SQLite file. Setup writes the active profile. |
-| Settings and overview | Global local storage | Both query the active SQLite file. Logout resets the page and reminders. |
-| Ingredients, recipes and meal plans | Repositories write local tables | The workspace syncs edited rows and meal snapshots. |
-| Training plans and workouts | Repositories write local tables | The workspace syncs plans, sessions, exercises and sets. |
-| Workout history and totals | Repositories read logged sets | Both use the active workspace. The server also recalculates volumes. |
-| Unsaved set and timer | Local draft and store state | Draft keys include the account ID. A page restart resets timers. |
+SQLite on Android stores each account's local data and pending operation. The server derives ownership from authentication. It writes the new workspace and its receipt in one transaction. Replaying an operation with the same content returns its original revision.
 
-Each database change increments a counter inside its SQLite transaction. The sync client stores a frozen workspace with an operation ID before its first send. Each account keeps its own pending operation across logout.
+Two devices can merge independent changes. Overlapping changes return the items requiring a decision. The server checks parent references and derives workout totals. It projects older clients to workspace version 12 and retains version 13 coaching fields when accepting compatible older writes.
 
-    Android UI → domain and repositories → account SQLite
-                                              │
-                       account outbox ────────┘
-                                │
-                                ▼
-                       HTTPS read and write
-                                │
-                       authenticated owner
-                                │
-                  PocketBase workspace + receipt
+Device settings, AI logs and unfinished set drafts stay on the device. The private operations page exposes service health, release SHA and aggregate sync metrics. Its operator cannot read a user's journal or revoke a user's device.
 
-The server identifies the workspace from authentication and performs revision checks in one transaction. It commits the new workspace and operation receipt together. A retry with identical content returns the same revision. Competing writes against the same revision produce one success and one conflict.
+For an end-to-end check, record 40 kg × 6 and 40 kg × 5 with An offline. Confirm 440 kg before sync. After a lost response, the server must still have one session and two sets. Binh should see an empty history. On a second device, change An's second set to seven repetitions. Confirm 520 kg after both devices synchronize.
 
-The app uses whole-workspace revisions for v1. A conflicting device can use the server workspace or intentionally replace it with the local workspace. The application retains existing meal and workout rules. The server verifies parent references and derives workout totals.
+## Existing PocketBase installation
 
-AI logs, device settings and unsaved input drafts stay on the device. The public proxy accepts only named app endpoints. Workspace access uses the app user's authenticated session.
+Rehearse using an online SQLite backup of the existing `data.db`. Use a new output path for each rehearsal. The importer reads the backup in one transaction and refuses to overwrite an existing output. It imports password verifiers, device sessions, workspace history, receipts and operations counters. Existing mobile session tokens remain valid under the original expiry and revocation rules. Operators sign in again.
 
-## Local verification
+For the final cutover, stop writes to the old instance and take a fresh backup. Retain the old release, database and gateway configuration. Run the importer as the service user:
 
-Install the pinned PocketBase binary for your OS. Run these commands from the repo root.
+````sh
+healthmate-server import-pocketbase /path/to/pocketbase-backup.db /var/lib/mealplaning/healthmate.sqlite3
+````
 
-```sh
-POCKETBASE_BIN=/absolute/path/to/pocketbase node --test server/*.test.mjs
-npm run check:guards
-npm run lint
-npm test -- --watch=false --browsers=ChromeHeadless
-npm run build
-```
+Compare accounts, workspaces and revisions with the source. Test a device session and the private operations page before admitting traffic. A rollback to PocketBase after new writes requires reconciliation. Restoring the old backup alone discards those writes.
 
-On Android, use test accounts. An should record 40 kg × 6 and 40 kg × 5 offline. Confirm 440 kg before sync. After a lost response and retry, the server should store one session and two sets.
+## Fresh installations and operators
 
-Binh should see an empty history and no draft from An. Sign in as An on a second device. Edit the second set to seven reps in An's workout history. Sync both devices and confirm 520 kg. Check a meal snapshot after editing its recipe.
+Set `MEALPLAN_DB_PATH` to the private SQLite file. The operator command reads its password from standard input. Supply it using a protected input file or secret manager:
 
-## CachyOS operations
+````sh
+healthmate-server operator ops@example.org < /path/to/operator-password
+````
 
-Install the pinned Linux binary at `/opt/mealplaning/pocketbase`. Store each release under `/opt/mealplaning/releases/<commit>`. Include `server/` and a `release.env` file with `MEALPLAN_RELEASE=<commit>`.
+Provisioning the same operator rotates the password and revokes that operator's existing sessions. Store the database and credentials outside Git.
 
-Point `/opt/mealplaning/current` at the release. Start both units from `server/deploy/` as the dedicated user `mealplan`. The service state lives in `/var/lib/mealplaning`.
+## Release layout
 
-Create the first PocketBase superuser over SSH before starting the service. Store its credentials outside Git with root-only access. Open the operations page through an SSH tunnel.
+Install the release binary at `/opt/mealplaning/releases/<commit>/bin/healthmate-server`. Put `MEALPLAN_RELEASE=<commit>` in that release's `release.env`. Point `/opt/mealplaning/current` at the prepared release.
 
-```sh
+The two systemd unit files in `deploy/` run the same binary as `mealplan`. They require the database file at `/var/lib/mealplaning/healthmate.sqlite3`. Configure Funnel to forward only to the public listener. Open the operations page through an SSH tunnel to the private listener.
+
+````sh
 ssh -o BatchMode=yes -N -L 18091:127.0.0.1:18089 cachyos-root
-```
+````
 
-Apply all migrations before switching the release. Use the PocketBase console at `http://127.0.0.1:18091/_/` to create a record in `mealplan_operators`. Assign a unique email and password. Use that account at `http://127.0.0.1:18091/mealplan-admin.html`.
+On the workstation, open `http://127.0.0.1:18091/mealplan-admin.html`. The page uses server-rendered HTML. Refresh and sign-out work without JavaScript.
 
-The operations account can only read service health, the release SHA, latest successful sync requests, and filtered error counts. Counts cover the period since the operations migration. The database stores aggregate event codes and timestamps.
+## Backups
 
-The database listener stays on loopback. Funnel forwards public HTTPS to the allowlisted gateway on port 18090. The operations page, operator sign-in, and status endpoint require the private listener.
+Use a new destination for every backup and restore check. Set `MEALPLAN_DB_PATH` to the source for the backup command.
 
-Save the current Funnel JSON before changing routes. For rollback, restore the previous release symlink and restart the services. Restore the saved Funnel routes if the public change needs reversal. Keep a copy of the database before changing versions.
+````sh
+healthmate-server backup /path/to/new-backup.sqlite3
+healthmate-server restore /path/to/new-backup.sqlite3 /path/to/new-restore-check.sqlite3
+````
 
-Take an online SQLite backup with the backup command. Check its integrity and restore it to a separate directory for verification. Keep the production database in place during the restore check.
-
-### Workout schema 13
-
-The Android app syncs workout places, equipment, schedules, and confirmed load targets with its account. Unfinished set entries stay on the device. The server projects older clients to schema 12 and retains the workout fields when it accepts their writes.
-
-Before rolling back the server binary, take another verified backup of the current database. It contains workout changes made since deployment. The previous binary keeps 32 workspace revisions per account. After a prolonged rollback, recovering newer coaching fields can require that backup.
+The commands check SQLite integrity and foreign keys before publishing the new file. Verify the restored application through an isolated listener. Keep the active database intact throughout the restore check.

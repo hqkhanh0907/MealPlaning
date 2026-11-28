@@ -37,13 +37,14 @@ fn methods(path: &str, public: bool) -> Option<&'static str> {
         WORKSPACE => Some("GET, POST"),
         SIGNUP | LOGIN | SESSION | REFRESH | REVOKE | PROFILE | LOGOUT => Some("POST"),
         OP_LOGIN if !public => Some("POST"),
-        STATUS | "/mealplan-admin.html" | "/mealplan-admin.css" | "/mealplan-admin.js"
-            if !public =>
-        {
-            Some("GET")
-        }
+        "/mealplan-admin.html" if !public => Some("GET, POST"),
+        STATUS | "/mealplan-admin.css" if !public => Some("GET"),
         _ => None,
     }
+}
+
+pub(crate) fn allow_operator_login(state: &Server) -> Result<()> {
+    rate_limit(state, OP_LOGIN, false)
 }
 
 fn rate_limit(state: &Server, path: &str, public: bool) -> Result<()> {
@@ -143,16 +144,11 @@ async fn inner(state: Server, request: Request, public: bool, origin_ok: bool) -
     }
     rate_limit(&state, raw, public)?;
     let path = request.uri().path().to_owned();
+    if !public && path == "/mealplan-admin.html" {
+        return crate::admin::handle(state, request).await;
+    }
     if !public && method == Method::GET {
         let asset = match path.as_str() {
-            "/mealplan-admin.html" => Some((
-                "text/html; charset=utf-8",
-                include_str!("../../../server/pb_public/mealplan-admin.html"),
-            )),
-            "/mealplan-admin.js" => Some((
-                "text/javascript; charset=utf-8",
-                include_str!("../../../server/pb_public/mealplan-admin.js"),
-            )),
             "/mealplan-admin.css" => Some((
                 "text/css; charset=utf-8",
                 include_str!("../../../server/pb_public/mealplan-admin.css"),

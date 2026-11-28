@@ -1,6 +1,9 @@
+mod admin;
 mod auth;
 mod db;
 mod error;
+mod import;
+pub use import::import_pocketbase;
 mod operations;
 mod routes;
 mod workspace;

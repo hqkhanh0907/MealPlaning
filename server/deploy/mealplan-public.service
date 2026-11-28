@@ -1,16 +1,21 @@
 [Unit]
-Description=MealPlaning public API gateway
+Description=HealthMate public API gateway
 After=network.target mealplan-db.service
 Requires=mealplan-db.service
 
 [Service]
 User=mealplan
 Group=mealplan
-ExecStart=/usr/bin/node /opt/mealplaning/current/server/public-proxy.mjs
+WorkingDirectory=/opt/mealplaning/current
+Environment=MEALPLAN_DB_PATH=/var/lib/mealplaning/healthmate.sqlite3
+EnvironmentFile=/opt/mealplaning/current/release.env
+ExecStartPre=/usr/bin/test -f /var/lib/mealplaning/healthmate.sqlite3
+ExecStart=/opt/mealplaning/current/bin/healthmate-server serve-public
 NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectHome=yes
 ProtectSystem=strict
+ReadWritePaths=/var/lib/mealplaning
 Restart=on-failure
 RestartSec=2
 

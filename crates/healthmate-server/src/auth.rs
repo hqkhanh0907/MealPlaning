@@ -40,6 +40,9 @@ pub(crate) fn hash_password(value: &str) -> Result<String> {
 }
 
 fn matches(hash: &str, value: &str) -> bool {
+    if hash.starts_with("$2a$") || hash.starts_with("$2b$") || hash.starts_with("$2y$") {
+        return bcrypt::verify(value, hash).unwrap_or(false);
+    }
     PasswordHash::new(hash).is_ok_and(|parsed| {
         Argon2::default()
             .verify_password(value.as_bytes(), &parsed)

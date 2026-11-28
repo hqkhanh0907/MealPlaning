@@ -1,19 +1,20 @@
 [Unit]
-Description=MealPlaning database and API
+Description=HealthMate private API and operations
 After=network.target
 
 [Service]
 User=mealplan
 Group=mealplan
-WorkingDirectory=/opt/mealplaning/current/server
+WorkingDirectory=/opt/mealplaning/current
+Environment=MEALPLAN_DB_PATH=/var/lib/mealplaning/healthmate.sqlite3
 EnvironmentFile=/opt/mealplaning/current/release.env
-ExecStart=/opt/mealplaning/pocketbase serve --http=127.0.0.1:18089 --dir=/var/lib/mealplaning --hooksDir=pb_hooks --migrationsDir=pb_migrations --publicDir=pb_public --automigrate=false
-StateDirectory=mealplaning
-UMask=0077
+ExecStartPre=/usr/bin/test -f /var/lib/mealplaning/healthmate.sqlite3
+ExecStart=/opt/mealplaning/current/bin/healthmate-server serve-private
 NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectHome=yes
 ProtectSystem=strict
+ReadWritePaths=/var/lib/mealplaning
 Restart=on-failure
 RestartSec=2
 

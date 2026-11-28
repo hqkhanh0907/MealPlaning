@@ -1,4 +1,4 @@
-use healthmate_server::{Server, copy_database};
+use healthmate_server::{Server, copy_database, import_pocketbase};
 use std::{
     env,
     io::{self, Read},
@@ -18,22 +18,37 @@ async fn main() -> io::Result<()> {
         env::var_os("MEALPLAN_DB_PATH").unwrap_or_else(|| "healthmate.sqlite3".into()),
     );
     match args.as_slice() {
-        [] | [_] if args.is_empty() || args[0] == "serve" => {
+        [] | [_]
+            if args.is_empty()
+                || matches!(args[0].as_str(), "serve" | "serve-private" | "serve-public") =>
+        {
             let state = Server::open(file, env::var("MEALPLAN_RELEASE").unwrap_or_default())?;
-            let private =
-                TcpListener::bind((Ipv4Addr::LOCALHOST, port("MEALPLAN_DB_PORT", 18089)?)).await?;
-            let public =
-                TcpListener::bind((Ipv4Addr::LOCALHOST, port("MEALPLAN_API_PORT", 18090)?)).await?;
-            eprintln!(
-                "HealthMate private {} public {}",
-                private.local_addr()?,
-                public.local_addr()?
-            );
-            tokio::try_join!(
-                axum::serve(private, state.private_router()),
-                axum::serve(public, state.public_router())
-            )?;
-            Ok(())
+            let private = || async {
+                TcpListener::bind((Ipv4Addr::LOCALHOST, port("MEALPLAN_DB_PORT", 18089)?)).await
+            };
+            let public = || async {
+                TcpListener::bind((Ipv4Addr::LOCALHOST, port("MEALPLAN_API_PORT", 18090)?)).await
+            };
+            match args.first().map(String::as_str) {
+                Some("serve-private") => {
+                    axum::serve(private().await?, state.private_router()).await
+                }
+                Some("serve-public") => axum::serve(public().await?, state.public_router()).await,
+                _ => {
+                    let internal = private().await?;
+                    let gateway = public().await?;
+                    eprintln!(
+                        "HealthMate private {} public {}",
+                        internal.local_addr()?,
+                        gateway.local_addr()?
+                    );
+                    tokio::try_join!(
+                        axum::serve(internal, state.private_router()),
+                        axum::serve(gateway, state.public_router())
+                    )?;
+                    Ok(())
+                }
+            }
         }
         [cmd, email] if cmd == "operator" => {
             let mut password = String::new();
@@ -41,12 +56,18 @@ async fn main() -> io::Result<()> {
             Server::open(file, "")?
                 .provision_operator(email, password.trim_end_matches(['\r', '\n']))
         }
+        [cmd, source, dest] if cmd == "import-pocketbase" => {
+            for (table, rows) in import_pocketbase(Path::new(source), Path::new(dest))? {
+                println!("{table}: {rows}");
+            }
+            Ok(())
+        }
         [cmd, dest] if cmd == "backup" => copy_database(&file, Path::new(dest)),
         [cmd, source, dest] if cmd == "restore" => {
             copy_database(Path::new(source), Path::new(dest))
         }
         _ => Err(io::Error::other(
-            "Use serve, operator <email> (password on stdin), backup <new-file>, or restore <backup> <new-file>.",
+            "Use serve, operator <email> (password on stdin), backup <new-file>, restore <backup> <new-file>, or import-pocketbase <data.db> <new-file>.",
         )),
     }
 }

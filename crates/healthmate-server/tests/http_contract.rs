@@ -437,7 +437,7 @@ async fn exact_public_paths_cors_rate_and_body_limits_apply() {
         .await
         .unwrap();
     assert_eq!(private.status(), 200);
-    assert!(private.text().await.unwrap().contains("mealplan-admin.js"));
+    assert!(private.text().await.unwrap().contains("Đăng nhập vận hành"));
     let health = app
         .client
         .get(format!("{}/health", app.public))
@@ -531,4 +531,217 @@ fn refuses_an_unrelated_database() {
     drop(conn);
     assert!(Server::open(&file, "").is_err());
     assert!(copy_database(&file, Path::new("irrelevant")).is_err());
+}
+
+#[tokio::test]
+async fn operator_page_signs_in_refreshes_and_revokes_without_storing_a_browser_cookie() {
+    let app = App::new().await;
+    app.server
+        .provision_operator("ops@example.test", "synthetic-passphrase-42")
+        .unwrap();
+    let path = format!("{}/mealplan-admin.html", app.private);
+    let post = |body: String| {
+        app.client
+            .post(&path)
+            .header("content-type", "application/x-www-form-urlencoded")
+            .body(body)
+    };
+    let bad = post("action=login&email=ops%40example.test&password=wrong".into())
+        .send()
+        .await
+        .unwrap();
+    assert!(bad.status().is_client_error());
+    assert!(bad.text().await.unwrap().contains("Đăng nhập vận hành"));
+    let session =
+        post("action=login&email=ops%40example.test&password=synthetic-passphrase-42".into())
+            .send()
+            .await
+            .unwrap();
+    assert_eq!(session.status(), 200);
+    assert_eq!(session.headers()["cache-control"], "no-store");
+    assert!(session.headers().get("set-cookie").is_none());
+    let body = session.text().await.unwrap();
+    assert!(body.contains("Trạng thái hệ thống"));
+    assert!(!body.contains("synthetic-passphrase-42"));
+    let token = body
+        .split_once("name=\"token\" value=\"")
+        .unwrap()
+        .1
+        .split('"')
+        .next()
+        .unwrap();
+    let refresh = format!("action=refresh&token={token}");
+    let live = post(refresh.clone()).send().await.unwrap();
+    assert_eq!(live.status(), 200);
+    assert!(live.text().await.unwrap().contains("Xung đột dữ liệu"));
+    let closed = post(format!("action=logout&token={token}"))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(closed.status(), 200);
+    assert!(closed.text().await.unwrap().contains("Đã đăng xuất."));
+    let expired = post(refresh).send().await.unwrap();
+    assert!(expired.status().is_client_error());
+    let public = app
+        .client
+        .post(format!("{}/mealplan-admin.html", app.public))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(public.status(), 404);
+}
+
+#[tokio::test]
+#[ignore = "requires PocketBase 0.40.6 for the migration fixture"]
+async fn imports_real_pocketbase_credentials_workspace_and_device_session() {
+    use std::{
+        path::Path,
+        process::{Child, Command, Stdio},
+    };
+    struct Legacy(Child);
+    impl Drop for Legacy {
+        fn drop(&mut self) {
+            let _ = self.0.kill();
+            let _ = self.0.wait();
+        }
+    }
+    let fixture = tempfile::tempdir().unwrap();
+    let old = fixture.path().join("pb_data");
+    let legacy_bin =
+        std::env::var("POCKETBASE_BIN").expect("set POCKETBASE_BIN to PocketBase 0.40.6");
+    let cwd = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../server");
+    let dir = format!("--dir={}", old.display());
+    let reserve = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let addr = reserve.local_addr().unwrap();
+    drop(reserve);
+    let legacy = Legacy(
+        Command::new(&legacy_bin)
+            .current_dir(&cwd)
+            .args([
+                "serve",
+                &format!("--http={addr}"),
+                &dir,
+                "--hooksWatch=false",
+                "--hooksDir=pb_hooks",
+                "--migrationsDir=pb_migrations",
+            ])
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .unwrap(),
+    );
+    let client = Client::new();
+    let base = format!("http://{addr}");
+    let mut healthy = false;
+    for _ in 0..100 {
+        if let Ok(resp) = client.get(format!("{base}/health")).send().await
+            && resp.status() == 200
+        {
+            healthy = true;
+            break;
+        }
+        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    }
+    assert!(healthy, "PocketBase did not load HealthMate hooks");
+    let signup = client
+        .post(format!("{base}{REGISTER}"))
+        .json(&json!({"username":"an_import","name":"An","password":PASS,"passwordConfirm":PASS}))
+        .send()
+        .await
+        .unwrap()
+        .error_for_status()
+        .unwrap()
+        .json::<Value>()
+        .await
+        .unwrap();
+    let credentials = json!({"username":"an_import","password":PASS});
+    let old_session = client
+        .post(format!("{base}/api/mealplan/session"))
+        .json(&credentials)
+        .send()
+        .await
+        .unwrap()
+        .error_for_status()
+        .unwrap()
+        .json::<Value>()
+        .await
+        .unwrap();
+    let payload =
+        json!({"operationId":Uuid::new_v4().to_string(),"baseRevision":0,"snapshot":empty()});
+    let original = client
+        .post(format!("{base}{WS}"))
+        .header(
+            "Authorization",
+            old_session["accessToken"].as_str().unwrap(),
+        )
+        .json(&payload)
+        .send()
+        .await
+        .unwrap()
+        .error_for_status()
+        .unwrap()
+        .json::<Value>()
+        .await
+        .unwrap();
+    assert_eq!(original["revision"], 1);
+    drop(legacy);
+    let source = old.join("data.db");
+    let copy = fixture.path().join("healthmate.sqlite3");
+    let counts = healthmate_server::import_pocketbase(&source, &copy).unwrap();
+    assert!(counts.contains(&("mealplan_receipts", 1)));
+    assert!(healthmate_server::import_pocketbase(&source, &copy).is_err());
+    let server = Server::open(copy, RELEASE).unwrap();
+    let (public, task) = listen(server.public_router()).await;
+    let new_session = client
+        .post(format!("{public}/api/mealplan/session"))
+        .json(&credentials)
+        .send()
+        .await
+        .unwrap()
+        .error_for_status()
+        .unwrap()
+        .json::<Value>()
+        .await
+        .unwrap();
+    assert_eq!(new_session["ownerId"], signup["id"]);
+    let refreshed = client
+        .post(format!("{public}/api/mealplan/session/refresh"))
+        .json(&json!({"sessionToken":old_session["sessionToken"]}))
+        .send()
+        .await
+        .unwrap()
+        .error_for_status()
+        .unwrap()
+        .json::<Value>()
+        .await
+        .unwrap();
+    assert_eq!(refreshed["ownerId"], signup["id"]);
+    let token = refreshed["accessToken"].as_str().unwrap();
+    let replay = client
+        .post(format!("{public}{WS}"))
+        .header("Authorization", token)
+        .json(&payload)
+        .send()
+        .await
+        .unwrap()
+        .error_for_status()
+        .unwrap()
+        .json::<Value>()
+        .await
+        .unwrap();
+    assert_eq!(replay, original);
+    let stored = client
+        .get(format!("{public}{WS}?schema=13"))
+        .header("Authorization", token)
+        .send()
+        .await
+        .unwrap()
+        .error_for_status()
+        .unwrap()
+        .json::<Value>()
+        .await
+        .unwrap();
+    assert_eq!(stored["revision"], 1);
+    assert_eq!(stored["snapshot"], payload["snapshot"]);
+    task.abort();
 }
