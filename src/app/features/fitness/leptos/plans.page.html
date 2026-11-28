@@ -1,0 +1,144 @@
+<ion-header
+  ><ion-toolbar>
+    <ion-buttons slot="start"
+      ><ion-button (click)="nav.back()" aria-label="Quay lại" data-testid="workout-back"
+        ><ion-icon slot="icon-only" name="arrow-back-outline" aria-hidden="true" /></ion-button
+    ></ion-buttons>
+    <ion-title>Giáo án</ion-title>
+  </ion-toolbar></ion-header
+>
+<ion-content class="fitness-page">
+  @if (fitness.loading()) {
+    <p class="status-banner" role="status">Đang tải dữ liệu tập luyện…</p>
+  }
+
+  @if (fitness.errorMessage(); as error) {
+    <div class="status-banner status-banner--error">
+      <p role="alert">{{ error }}</p>
+      @if (!fitness.loading() && !fitness.progress()) {
+        <ion-button fill="outline" (click)="fitness.initialize()">Thử lại</ion-button>
+      }
+    </div>
+  }
+
+  @if (fitness.successMessage(); as success) {
+    <p class="status-banner status-banner--success" role="status">{{ success }}</p>
+  }
+  <div appFitnessView="week" [snapshot]="snapshot()" (fitnessAction)="dispatch($event)"></div>
+  @if ((!fitness.activePlan() || showFinder()) && (fitness.progress() || !fitness.loading())) {
+    <app-workout-plan-finder
+      (aiContextChanged)="updateAiContext($event)"
+      [visit]="visit()"
+      (planApplied)="applied($event)"
+      (composedRequested)="composed($event)"
+      (freeRequested)="free()"
+    />
+    @if (aiContext()) {
+      <ng-container [ngTemplateOutlet]="generatePlan" />
+    }
+  }
+  <section class="fitness-card">
+    <ion-button
+      data-testid="manual-plans"
+      fill="outline"
+      [attr.aria-expanded]="manualOpen()"
+      (click)="manualOpen.set(!manualOpen())"
+      >Tất cả giáo án</ion-button
+    >
+    @if (manualOpen()) {
+      <div class="plan-grid">
+        @for (plan of fitness.plans(); track plan.id) {
+          <article class="plan-card" [class.plan-card--active]="plan.is_active === 1">
+            <div>
+              <strong>{{ plan.name }}</strong>
+              <span>{{ plan.frequency }} buổi/tuần · {{ plan.planned_exercises }} bài</span>
+            </div>
+            <p>{{ plan.description }}</p>
+            <app-plan-preview [planId]="plan.id" />
+            <ion-button
+              fill="clear"
+              size="small"
+              (click)="fitness.activatePlan(plan.id)"
+              [disabled]="
+                fitness.activeSession() !== null || fitness.aiPlanLoading() || plan.is_active === 1
+              "
+              [attr.aria-label]="
+                fitness.activeSession() !== null
+                  ? 'Đang có buổi tập, hoàn thành trước khi đổi giáo án'
+                  : plan.is_active === 1
+                    ? plan.name + ' đang được chọn'
+                    : 'Chọn ' + plan.name
+              "
+            >
+              {{
+                fitness.activeSession() !== null && plan.is_active !== 1
+                  ? 'Hoàn thành buổi hiện tại'
+                  : plan.is_active === 1
+                    ? 'Đang dùng'
+                    : 'Chọn'
+              }}
+            </ion-button>
+          </article>
+        }
+      </div>
+    }
+  </section>
+  @if (editor(); as source) {
+    <app-plan-editor [plan]="source" (closed)="editor.set(null)" />
+  }
+</ion-content>
+<ng-template #generatePlan>
+  <div class="ai-plan-callout">
+    <div class="ai-plan-callout__text">
+      <strong>Soạn bản nháp bằng AI</strong>
+      @if (ai.textIssue(); as issue) {
+        <small>{{ issue }}</small>
+      } @else if (fitness.aiPlanRationale(); as rationale) {
+        <small>{{ rationale }}</small>
+      }
+    </div>
+    <ion-button
+      fill="outline"
+      size="small"
+      (click)="generateAi()"
+      [disabled]="!!ai.textIssue() || fitness.aiPlanLoading() || fitness.activeSession() !== null"
+      [attr.aria-label]="
+        fitness.activeSession() !== null
+          ? 'Đang có buổi tập, hoàn thành trước khi tạo giáo án AI'
+          : 'Tạo giáo án AI riêng'
+      "
+    >
+      <ion-icon slot="start" name="sparkles-outline" />
+      {{ fitness.aiPlanLoading() ? 'Đang soạn…' : 'Soạn bản nháp' }}
+    </ion-button>
+  </div>
+  @if (fitness.pendingAiPlan(); as draft) {
+    <section aria-label="Xem trước giáo án AI" class="fitness-card">
+      <h2>{{ draft.name }}</h2>
+      <p>{{ draft.description }}</p>
+      <p>{{ draft.rationale }}</p>
+      @for (day of draft.days; track day.dayOfWeek) {
+        @if (!day.isRestDay) {
+          <h3>{{ dayLabel(day.dayOfWeek) }} · {{ day.name }}</h3>
+          <ul>
+            @for (item of day.exercises; track $index) {
+              <li>
+                {{ exerciseName(item.exerciseId) }} · {{ item.sets }} × {{ item.repsMin }}–{{
+                  item.repsMax
+                }}
+                {{ timed(item.exerciseId) ? 'giây' : 'lần' }} · nghỉ {{ item.restSeconds }} giây
+              </li>
+            }
+          </ul>
+        }
+      }
+      <p>Kiểm tra ngày tập, thời lượng và dụng cụ của từng bài trước khi chọn.</p>
+      <ion-button
+        [disabled]="fitness.aiPlanLoading() || !!fitness.activeSession()"
+        (click)="acceptAi()"
+        >Dùng giáo án này</ion-button
+      >
+      <ion-button fill="clear" (click)="fitness.dismissAiPlan()">Bỏ bản nháp</ion-button>
+    </section>
+  }
+</ng-template>

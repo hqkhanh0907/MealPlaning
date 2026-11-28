@@ -1,0 +1,287 @@
+@if (embedded()) {
+  <ng-container [ngTemplateOutlet]="pickerBody" />
+} @else {
+  <ion-modal
+    class="leptos-exercise-picker-modal"
+    #pickerModal
+    [isOpen]="visible()"
+    [canDismiss]="canDismiss"
+    [attr.aria-label]="title()"
+    (ionModalDidPresent)="loadPlaces()"
+    (ionModalDidDismiss)="afterDismiss()"
+  >
+    <ng-template><ng-container [ngTemplateOutlet]="pickerBody" /></ng-template>
+  </ion-modal>
+}
+<ng-template #pickerBody>
+  <ion-header class="eps-header">
+    <ion-toolbar class="eps-toolbar">
+      @if (view() !== 'results' || embedded()) {
+        <button
+          slot="start"
+          type="button"
+          class="eps-icon-button"
+          data-picker-back
+          aria-label="Quay lại"
+          [disabled]="saving()"
+          (click)="view() === 'results' ? leaveLibrary.emit() : back()"
+        >
+          <ion-icon name="arrow-back-outline" aria-hidden="true" />
+        </button>
+      }
+      <ion-title class="eps-title" tabindex="-1">{{ title() }}</ion-title>
+      @if (view() === 'results' && !embedded()) {
+        <button
+          slot="end"
+          class="eps-icon-button eps-close"
+          type="button"
+          aria-label="Đóng bộ chọn bài tập"
+          (click)="close()"
+        >
+          <ion-icon name="close-outline" aria-hidden="true" />
+        </button>
+      }
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="eps-content">
+    @switch (view()) {
+      @case ('results') {
+        <div class="eps-search">
+          <div class="input-wrapper">
+            <label class="input-label" for="eps-search-input">Tìm bài tập</label>
+            <input
+              #search
+              id="eps-search-input"
+              class="input-native"
+              type="search"
+              [value]="query()"
+              (input)="query.set(search.value)"
+              autocomplete="off"
+              inputmode="search"
+            />
+          </div>
+          <button type="button" class="eps-button" data-picker-open-filters (click)="openFilters()">
+            <ion-icon name="options-outline" aria-hidden="true" />
+            Bộ lọc
+          </button>
+        </div>
+
+        @if (hasFilters()) {
+          <div class="eps-chips" role="group" aria-label="Bộ lọc đang bật">
+            @if (muscle(); as group) {
+              <button
+                type="button"
+                class="eps-chip"
+                data-filter-chip="muscle"
+                [attr.aria-label]="'Bỏ lọc nhóm cơ ' + muscleLabels[group]"
+                (click)="clearFilter('muscle')"
+              >
+                {{ muscleLabels[group] }}
+                <ion-icon name="close-outline" aria-hidden="true" />
+              </button>
+            }
+            @if (equipment(); as key) {
+              <button
+                type="button"
+                class="eps-chip"
+                data-filter-chip="equipment"
+                [attr.aria-label]="'Bỏ lọc dụng cụ ' + equipmentLabel(key)"
+                (click)="clearFilter('equipment')"
+              >
+                {{ equipmentLabel(key) }}
+                <ion-icon name="close-outline" aria-hidden="true" />
+              </button>
+            }
+            @if (place(); as currentPlace) {
+              <button
+                type="button"
+                class="eps-chip"
+                data-filter-chip="place"
+                [attr.aria-label]="'Bỏ lọc nơi tập ' + currentPlace.name"
+                (click)="clearFilter('place')"
+              >
+                {{ currentPlace.name }}
+                <ion-icon name="close-outline" aria-hidden="true" />
+              </button>
+            }
+          </div>
+        }
+
+        <div
+          appFitnessView="exercises"
+          [snapshot]="snapshot()"
+          (fitnessAction)="dispatch($event, search)"
+        ></div>
+      }
+      @case ('filters') {
+        <div class="eps-filters">
+          <fieldset>
+            <legend>Nơi tập</legend>
+            <div class="eps-chips">
+              <button
+                type="button"
+                class="eps-chip"
+                [attr.aria-pressed]="!placeId()"
+                (click)="placeId.set(null)"
+              >
+                Tất cả
+              </button>
+              @for (profile of profiles(); track profile.id) {
+                <button
+                  type="button"
+                  class="eps-chip"
+                  [attr.data-place-id]="profile.id"
+                  [attr.aria-pressed]="placeId() === profile.id"
+                  (click)="placeId.set(profile.id)"
+                >
+                  {{ profile.name }}
+                </button>
+              }
+            </div>
+            @if (placeLoadError()) {
+              <p class="eps-note" role="alert">Không mở được hồ sơ nơi tập.</p>
+              <button type="button" class="eps-button" (click)="loadPlaces()">Thử lại</button>
+            }
+            @if (place(); as currentPlace) {
+              <p class="eps-note">
+                @if (currentPlace.equipment === null) {
+                  Chưa khai báo dụng cụ.
+                } @else if (!currentPlace.equipment.length) {
+                  Không có dụng cụ.
+                } @else {
+                  {{ currentPlace.equipment.length }} loại dụng cụ.
+                }
+              </p>
+              <button
+                type="button"
+                class="eps-button"
+                data-place-edit
+                (click)="editPlace(currentPlace)"
+              >
+                Sửa tên và dụng cụ
+              </button>
+            }
+          </fieldset>
+          <fieldset>
+            <legend>Nhóm cơ</legend>
+            <div class="eps-chips">
+              <button
+                type="button"
+                class="eps-chip"
+                [attr.aria-pressed]="!muscle()"
+                (click)="muscle.set(null)"
+              >
+                Tất cả
+              </button>
+              @for (choice of muscleChoices; track choice[0]) {
+                <button
+                  type="button"
+                  class="eps-chip"
+                  [attr.data-muscle]="choice[0]"
+                  [attr.aria-pressed]="muscle() === choice[0]"
+                  (click)="muscle.set(choice[0])"
+                >
+                  {{ choice[1] }}
+                </button>
+              }
+            </div>
+          </fieldset>
+          <div class="input-wrapper">
+            <label class="input-label" for="eps-filter-equipment">Dụng cụ muốn tìm</label>
+            <select
+              #equipmentSelect
+              id="eps-filter-equipment"
+              class="input-native"
+              [value]="equipment() ?? ''"
+              (change)="equipment.set(equipmentSelect.value || null)"
+            >
+              <option value="">Tất cả</option>
+              @for (choice of equipmentChoices; track choice[0]) {
+                <option [value]="choice[0]" [attr.data-equipment-filter]="choice[0]">
+                  {{ choice[1] }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+      }
+      @case ('place') {
+        <fieldset
+          class="eps-filters eps-place-fields"
+          [disabled]="saving()"
+          aria-label="Hồ sơ nơi tập"
+        >
+          <app-form-field label="Tên nơi tập" inputId="eps-place-name">
+            <input id="eps-place-name" class="input-native" [formField]="placeForm.name" />
+          </app-form-field>
+          <div class="input-wrapper">
+            <label class="input-label" for="eps-inventory-search">Tìm dụng cụ</label>
+            <input
+              #inventoryInput
+              id="eps-inventory-search"
+              class="input-native"
+              type="search"
+              [value]="inventorySearch()"
+              (input)="inventorySearch.set(inventoryInput.value)"
+              autocomplete="off"
+              inputmode="search"
+            />
+          </div>
+          <fieldset>
+            <legend>Dụng cụ hiện có · {{ placeEquipment().size }}</legend>
+            <div class="eps-inventory">
+              @for (choice of inventory(); track choice[0]) {
+                <label class="eps-inventory__item">
+                  <input
+                    #inventoryChoice
+                    type="checkbox"
+                    [attr.data-inventory-key]="choice[0]"
+                    [checked]="placeEquipment().has(choice[0])"
+                    (change)="updateInventory(choice[0], inventoryChoice.checked)"
+                  />
+                  <span>{{ choice[1] }}</span>
+                </label>
+              } @empty {
+                <p class="eps-note">Không tìm thấy dụng cụ. Hãy đổi từ khóa.</p>
+              }
+            </div>
+          </fieldset>
+          @if (saveError()) {
+            <p class="eps-note" role="alert">Không lưu được nơi tập. Hãy thử lại.</p>
+          }
+        </fieldset>
+      }
+    }
+  </ion-content>
+
+  @if (view() === 'filters') {
+    <ion-footer class="eps-footer">
+      @if (hasFilters()) {
+        <button type="button" class="eps-button" data-picker-clear (click)="clearFilters()">
+          Bỏ bộ lọc
+        </button>
+      }
+      <button
+        type="button"
+        class="eps-button eps-button--primary"
+        data-picker-show-results
+        (click)="showResults()"
+      >
+        Xem {{ results().length }} bài tập
+      </button>
+    </ion-footer>
+  } @else if (view() === 'place') {
+    <ion-footer class="eps-footer">
+      <button
+        type="button"
+        class="eps-button eps-button--primary"
+        data-place-save
+        [disabled]="saving() || !placeName().name.trim() || placeForm().invalid()"
+        (click)="savePlace()"
+      >
+        {{ saving() ? 'Đang lưu…' : 'Lưu nơi tập' }}
+      </button>
+    </ion-footer>
+  }
+</ng-template>

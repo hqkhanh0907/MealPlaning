@@ -1,0 +1,12 @@
+<ion-header
+  ><ion-toolbar>
+    <ion-buttons slot="start"
+      ><ion-button (click)="nav.back()" aria-label="Quay lại" data-testid="workout-back"
+        ><ion-icon slot="icon-only" name="arrow-back-outline" aria-hidden="true" /></ion-button
+    ></ion-buttons>
+    <ion-title>Hôm nay</ion-title>
+  </ion-toolbar></ion-header
+>
+<ion-content class="fitness-page">
+  <div appFitnessView="today" [snapshot]="snapshot()" (fitnessAction)="dispatch($event)"></div>
+</ion-content>

@@ -100,7 +100,7 @@ fn percent(value: f64, target: f64) -> Option<f64> {
 }
 
 // Intl rounds the shortest decimal representation, so 1.05 kg displays as 1,1 kg.
-fn vi_decimal(value: f64, places: usize) -> String {
+pub fn vi_decimal(value: f64, places: usize) -> String {
     if value.is_nan() {
         return "NaN".into();
     }

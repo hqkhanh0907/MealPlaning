@@ -1,0 +1,19 @@
+<app-leptos-exercise-picker
+  class="ion-page"
+  [embedded]="true"
+  [exercises]="fitness.exercises()"
+  (exerciseSelected)="guideId.set($event)"
+  (leaveLibrary)="nav.back()"
+/>
+@if (guide(); as exercise) {
+  <app-exercise-guide-sheet
+    [exerciseId]="exercise.id"
+    [exerciseName]="exercise.name_vi || exercise.name"
+    (closed)="guideId.set(null)"
+  />
+}
+@if (fitness.errorMessage(); as error) {
+  <div class="library-error" role="alert">
+    {{ error }} <button type="button" (click)="fitness.initialize()">Thử lại</button>
+  </div>
+}

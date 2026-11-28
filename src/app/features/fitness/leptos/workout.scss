@@ -1,0 +1,7 @@
+@use 'sass:meta';
+@scope (app-leptos-workout-today, app-leptos-workout-plans, app-leptos-workout-session) to (app-rest-timer > *) {
+  @include meta.load-css('../fitness.page');
+  [appFitnessView] {
+    display: contents;
+  }
+}

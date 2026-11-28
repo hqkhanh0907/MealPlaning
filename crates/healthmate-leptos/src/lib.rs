@@ -4,6 +4,7 @@ mod account;
 mod browser;
 #[cfg(target_arch = "wasm32")]
 mod calendar;
+mod fitness;
 mod management;
 mod model;
 #[cfg(target_arch = "wasm32")]

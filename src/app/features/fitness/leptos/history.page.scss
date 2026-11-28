@@ -1,0 +1,8 @@
+@use 'sass:meta';
+app-leptos-workout-history {
+  display: block;
+  @include meta.load-css('../history/history.page');
+  [appFitnessView]:not(summary) {
+    display: contents;
+  }
+}

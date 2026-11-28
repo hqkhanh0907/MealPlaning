@@ -1,0 +1,10 @@
+@use 'sass:meta';
+app-leptos-exercise-picker {
+  display: contents;
+}
+:is(app-leptos-exercise-picker, ion-modal.leptos-exercise-picker-modal) {
+  @include meta.load-css('../../../shared/components/exercise-picker-sheet/exercise-picker-sheet');
+  [appFitnessView] {
+    display: contents;
+  }
+}

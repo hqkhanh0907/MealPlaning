@@ -1,0 +1,187 @@
+<ion-header
+  ><ion-toolbar>
+    <ion-buttons slot="start"
+      ><ion-button (click)="nav.back()" aria-label="Quay lại" data-testid="workout-back"
+        ><ion-icon slot="icon-only" name="arrow-back-outline" aria-hidden="true" /></ion-button
+    ></ion-buttons>
+    <ion-title>Buổi tập</ion-title>
+  </ion-toolbar></ion-header
+>
+<ion-content class="fitness-page">
+  @if (fitness.loading()) {
+    <p class="status-banner" role="status">Đang tải dữ liệu tập luyện…</p>
+  }
+
+  @if (fitness.errorMessage(); as error) {
+    <div class="status-banner status-banner--error">
+      <p role="alert">{{ error }}</p>
+      @if (!fitness.loading() && !fitness.progress()) {
+        <ion-button fill="outline" (click)="fitness.initialize()">Thử lại</ion-button>
+      }
+    </div>
+  }
+
+  @if (fitness.successMessage(); as success) {
+    <p class="status-banner status-banner--success" role="status">{{ success }}</p>
+  }
+  @if (fitness.activeSession(); as session) {
+    <section class="fitness-card active-workout" aria-labelledby="active-workout-title">
+      <header class="section-header">
+        <div>
+          <p class="eyebrow">Buổi tập đang diễn ra</p>
+          <h2 id="active-workout-title">
+            {{
+              session.training_day_name || (session.mode === 'free' ? 'Tập tự do' : 'Theo giáo án')
+            }}
+          </h2>
+        </div>
+        <div class="active-workout__actions">
+          <ion-button
+            fill="clear"
+            size="small"
+            color="medium"
+            (click)="confirmCancelSession()"
+            [disabled]="fitness.savingSet()"
+            aria-label="Hủy buổi tập"
+          >
+            <ion-icon slot="icon-only" name="close-circle-outline" />
+          </ion-button>
+        </div>
+      </header>
+
+      @if (session.exercises.length === 0) {
+        <div class="empty-workout">
+          <ion-icon name="barbell-outline" aria-hidden="true" />
+          <strong>Chưa có bài tập</strong>
+          <ion-button fill="solid" (click)="openPicker()">
+            <ion-icon slot="start" name="add-outline" />
+            Thêm bài tập
+          </ion-button>
+        </div>
+      } @else {
+        <div appFitnessView="tabs" [snapshot]="tabsJson()" (fitnessAction)="dispatch($event)"></div>
+        @if (fitness.selectedWorkoutExercise(); as selected) {
+          <article class="set-logger">
+            <div class="set-entry" #setEntry [attr.aria-busy]="fitness.savingSet()">
+              <header>
+                <div>
+                  <strong>{{ selected.exercise_name_vi || selected.exercise_name }}</strong>
+                  <ion-button fill="clear" size="small" (click)="guideOpen.set(true)"
+                    >Xem kỹ thuật</ion-button
+                  >
+                  @if (guideOpen()) {
+                    <app-exercise-guide-sheet
+                      [exerciseId]="selected.exercise_id"
+                      [exerciseName]="selected.exercise_name_vi || selected.exercise_name"
+                      (closed)="guideOpen.set(false)"
+                    />
+                  }
+                  @if (selected.planned_sets) {
+                    <span
+                      >{{ selected.planned_sets }} hiệp · {{ selected.planned_min }}–{{
+                        selected.planned_max
+                      }}
+                      {{ timed(selected.exercise_id) ? 'giây' : 'lần' }} · nghỉ
+                      {{ selected.planned_rest }} giây</span
+                    >
+                  }
+                  @if (!timed(selected.exercise_id)) {
+                    <span>{{ number.format(selected.total_volume) }} kg khối lượng</span>
+                  }
+                </div>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  color="medium"
+                  (click)="confirmRemoveExercise(selected.id)"
+                  aria-label="Xóa bài này khỏi buổi tập"
+                >
+                  <ion-icon slot="icon-only" name="trash-outline" />
+                </ion-button>
+              </header>
+
+              <app-workout-substitution />
+              @if (fitness.lastPerformance(selected.exercise_id); as last) {
+                <p class="last-performance">Lần trước: {{ last }}</p>
+              }
+              <div
+                appFitnessView="entry"
+                [snapshot]="snapshot()"
+                (fitnessAction)="dispatch($event)"
+              ></div>
+            </div>
+            <div
+              appFitnessView="effort"
+              [snapshot]="snapshot()"
+              (fitnessAction)="dispatch($event)"
+            ></div>
+            <div class="logger-actions" [attr.aria-busy]="fitness.savingSet()">
+              <div
+                appFitnessView="actions"
+                [snapshot]="snapshot()"
+                (fitnessAction)="dispatch($event)"
+              ></div>
+              <app-rest-timer
+                [seconds]="fitness.restSeconds()"
+                [restartKey]="fitness.lastLoggedSet()?.id ?? null"
+              />
+            </div>
+
+            <div
+              appFitnessView="rows"
+              [snapshot]="snapshot()"
+              (fitnessAction)="dispatch($event)"
+            ></div>
+          </article>
+        }
+        <div class="free-mode">
+          <button
+            type="button"
+            class="free-mode__toggle"
+            aria-label="Thêm bài tập tự do"
+            (click)="openPicker()"
+            [attr.aria-expanded]="pickerOpen()"
+          >
+            <ion-icon name="add-outline" aria-hidden="true" />
+            Thêm bài tập tự do
+          </button>
+        </div>
+      }
+    </section>
+  }
+  <app-leptos-exercise-picker
+    [isOpen]="pickerOpen()"
+    [exercises]="fitness.exercises()"
+    (exerciseSelected)="fitness.addExerciseToActive($event)"
+    (closed)="pickerOpen.set(false)"
+  />
+  <app-workout-summary-modal
+    [isOpen]="fitness.lastCompletedSession() !== null"
+    [session]="fitness.lastCompletedSession()"
+    (nextLoadChosen)="fitness.confirmNextLoad($event.exercise, $event.kg)"
+    (completionNoteChosen)="fitness.recordCompletionNote($event.exercise, $event.note)"
+    (closed)="dismissSummary()"
+  />
+  @if (!fitness.loading() && !fitness.activeSession() && !fitness.lastCompletedSession()) {
+    <section class="fitness-card">
+      <h2>Chưa có buổi đang tập</h2>
+      <ion-button (click)="nav.today()">Về Hôm nay</ion-button>
+    </section>
+  }
+</ion-content>
+@if (fitness.activeSession() && fitness.canCompleteWorkout() && !keyboardOpen()) {
+  <ion-footer class="active-workout-footer">
+    <ion-toolbar>
+      <ion-button
+        expand="block"
+        fill="solid"
+        size="default"
+        (click)="fitness.completeWorkout()"
+        aria-label="Hoàn thành buổi tập"
+      >
+        <ion-icon slot="start" name="checkmark-circle-outline" aria-hidden="true" />
+        Hoàn thành buổi tập
+      </ion-button>
+    </ion-toolbar>
+  </ion-footer>
+}
