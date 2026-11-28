@@ -1,0 +1,98 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Quản lý</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSettings()" aria-label="Mở cài đặt">
+        <ion-icon slot="icon-only" name="settings-outline" />
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <section class="management-shell">
+    <div
+      appManagementView="catalog"
+      [snapshot]="snapshot()"
+      (managementAction)="dispatch($event)"
+    ></div>
+
+    <app-confirm-dialog
+      [isOpen]="pendingIngredientDeleteId() !== null"
+      [title]="ingredientDeleteDialogTitle()"
+      [message]="ingredientDeleteMessage()"
+      [cancelLabel]="ingredientDeleteCancelLabel()"
+      [confirmLabel]="ingredientDeleteBlocked() ? 'Xem món' : 'Xóa'"
+      [confirmAriaLabel]="ingredientDeleteConfirmAriaLabel()"
+      [confirmVariant]="ingredientDeleteBlocked() ? 'primary' : 'danger'"
+      (cancelled)="closeIngredientDeleteDialog()"
+      (confirmed)="confirmIngredientDelete()"
+    />
+
+    <app-confirm-dialog
+      [isOpen]="pendingDishDeleteId() !== null"
+      [title]="dishDeleteDialogTitle()"
+      [message]="dishDeleteMessage()"
+      [cancelLabel]="dishDeleteCancelLabel()"
+      [confirmLabel]="dishDeleteBlocked() ? 'Đóng' : 'Xóa'"
+      [confirmAriaLabel]="dishDeleteConfirmAriaLabel()"
+      [confirmVariant]="dishDeleteBlocked() ? 'primary' : 'danger'"
+      (cancelled)="closeDishDeleteDialog()"
+      (confirmed)="confirmDishDelete()"
+    />
+
+    @if (ingredientOptionsItem(); as activeIngredient) {
+      <div
+        class="options-sheet-backdrop"
+        role="button"
+        tabindex="0"
+        aria-label="Đóng tuỳ chọn nguyên liệu"
+        (click)="handleIngredientBackdropClick($event)"
+        (keydown.enter)="closeIngredientOptions()"
+        (keydown.space)="closeIngredientOptions()"
+      >
+        <section class="options-sheet">
+          <h2>Tuỳ chọn cho {{ activeIngredient.name }}</h2>
+          <button
+            type="button"
+            class="options-sheet__action options-sheet__action--danger"
+            (click)="handleIngredientDeleteOption()"
+          >
+            <ion-icon name="trash-outline" />
+            <span>Xóa</span>
+          </button>
+          <button type="button" class="options-sheet__cancel" (click)="closeIngredientOptions()">
+            Đóng
+          </button>
+        </section>
+      </div>
+    }
+
+    @if (dishOptionsItem(); as activeDish) {
+      <div
+        class="options-sheet-backdrop"
+        role="button"
+        tabindex="0"
+        aria-label="Đóng tuỳ chọn món ăn"
+        (click)="handleDishBackdropClick($event)"
+        (keydown.enter)="closeDishOptions()"
+        (keydown.space)="closeDishOptions()"
+      >
+        <section class="options-sheet">
+          <h2>Tuỳ chọn cho {{ activeDish.name }}</h2>
+          <button
+            type="button"
+            class="options-sheet__action options-sheet__action--danger"
+            (click)="handleDishDeleteOption()"
+          >
+            <ion-icon name="trash-outline" />
+            <span>Xóa</span>
+          </button>
+          <button type="button" class="options-sheet__cancel" (click)="closeDishOptions()">
+            Đóng
+          </button>
+        </section>
+      </div>
+    }
+  </section>
+</ion-content>

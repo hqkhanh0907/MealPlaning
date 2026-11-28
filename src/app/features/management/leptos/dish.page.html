@@ -1,0 +1,256 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/management" text="" aria-label="Quay lại" />
+    </ion-buttons>
+    <ion-title>{{ isEdit() ? 'Sửa món' : 'Thêm món' }}</ion-title>
+    @if (isEdit()) {
+      <ion-buttons slot="end">
+        <button
+          type="button"
+          class="icon-button icon-button--danger"
+          aria-label="Xóa món ăn"
+          (click)="openDeleteDialog()"
+        >
+          <ion-icon name="trash-outline" aria-hidden="true" />
+        </button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="form-content">
+    @if (!isEdit()) {
+      <app-ai-offline-banner />
+    }
+
+    <div class="section-label">Thông tin cơ bản</div>
+
+    <app-form-field
+      label="Tên món ăn"
+      inputId="dish-field-name"
+      errorId="err-dish-name"
+      [invalid]="showErrors() && dishForm.name().errors().length > 0"
+      [errorMessage]="dishForm.name().errors()[0]?.message ?? ''"
+    >
+      <div class="dish-name-editor" [attr.data-name]="dishForm.name().value()">
+        <textarea
+          id="dish-field-name"
+          class="input-native dish-name-input"
+          #nameInput
+          rows="1"
+          wrap="soft"
+          enterkeyhint="done"
+          [formField]="dishForm.name"
+          [attr.aria-invalid]="showErrors() && dishForm.name().errors().length > 0 ? 'true' : null"
+          [attr.aria-describedby]="
+            showErrors() && dishForm.name().errors().length > 0 ? 'err-dish-name' : null
+          "
+          (beforeinput)="onNameBeforeInput($event)"
+          (paste)="onNamePaste($event)"
+        ></textarea>
+      </div>
+    </app-form-field>
+
+    @if (!isEdit()) {
+      @if (aiEntry() && !ai.textIssue()) {
+        <p class="section-hint">Nhập tên món rồi chọn Điền bằng AI.</p>
+      }
+      <button
+        type="button"
+        class="btn-ai-lookup"
+        data-testid="btn-ask-ai"
+        [disabled]="aiAutofillLoading() || !!ai.textIssue()"
+        (click)="onAskAi()"
+      >
+        @if (aiAutofillLoading()) {
+          <ion-spinner name="crescent" aria-hidden="true" />
+          <span>Đang hỏi AI…</span>
+        } @else {
+          <ion-icon name="sparkles-outline" aria-hidden="true" />
+          <span>{{ ai.textIssue() || 'Điền bằng AI' }}</span>
+        }
+      </button>
+    }
+
+    <div
+      appManagementView="dishNutrition"
+      [snapshot]="snapshot()"
+      (managementAction)="dispatch($event)"
+    ></div>
+
+    <app-form-field label="Mô tả" inputId="dish-field-description">
+      <textarea
+        id="dish-field-description"
+        class="input-native input-native--textarea"
+        rows="2"
+        [formField]="dishForm.description"
+      ></textarea>
+    </app-form-field>
+
+    <div class="form-row-2col">
+      <app-form-field label="Loại bữa" inputId="dish-field-meal-tag">
+        <button
+          type="button"
+          id="dish-field-meal-tag"
+          class="picker-trigger--floating"
+          (click)="openMealTagPicker()"
+        >
+          <span>{{ mealTagLabel }}</span>
+          <ion-icon name="chevron-down-outline" aria-hidden="true" />
+        </button>
+      </app-form-field>
+
+      <app-form-field
+        label="Số phần ăn"
+        inputId="dish-field-servings"
+        errorId="err-dish-servings"
+        [invalid]="showErrors() && dishForm.servings().errors().length > 0"
+        [errorMessage]="dishForm.servings().errors()[0]?.message ?? ''"
+      >
+        <input
+          id="dish-field-servings"
+          class="input-native"
+          type="number"
+          inputmode="decimal"
+          [formField]="dishForm.servings"
+          step="0.5"
+          [attr.aria-invalid]="
+            showErrors() && dishForm.servings().errors().length > 0 ? 'true' : null
+          "
+          [attr.aria-describedby]="
+            showErrors() && dishForm.servings().errors().length > 0 ? 'err-dish-servings' : null
+          "
+        />
+      </app-form-field>
+    </div>
+
+    <div
+      appManagementView="dishItems"
+      [snapshot]="snapshot()"
+      (managementAction)="dispatch($event)"
+    ></div>
+  </div>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <div class="sticky-save-bar">
+    <ion-button expand="block" class="save-button" [disabled]="saving()" (click)="onSave()">
+      {{ saving() ? 'Đang lưu...' : isEdit() ? 'Lưu thay đổi' : 'Lưu món ăn' }}
+    </ion-button>
+  </div>
+</ion-footer>
+
+<ion-modal
+  [isOpen]="activeGramRowId() !== null"
+  [breakpoints]="[0, 0.6, 0.85]"
+  [initialBreakpoint]="0.6"
+  [handle]="true"
+  (didDismiss)="closeGramSheet()"
+>
+  <ng-template>
+    <ion-header class="sheet-header">
+      <ion-toolbar>
+        <div class="sheet-title-row">
+          <h2 class="sheet-title">Nhập trọng lượng (g)</h2>
+          <button class="sheet-close" type="button" (click)="closeGramSheet()" aria-label="Đóng">
+            <ion-icon name="chevron-down-outline" />
+          </button>
+        </div>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="sheet-content amount-sheet">
+      @if (gramDraft(); as draft) {
+        <div class="sheet-card">
+          <div class="amount-sheet__header">
+            <div>
+              <div class="ingredient-item__name">{{ draftIngredientName(draft) }}</div>
+              <div class="ingredient-item__detail">{{ itemCalories(draft) }}</div>
+            </div>
+          </div>
+
+          <app-form-field label="Trọng lượng (g)" inputId="gram-draft-value">
+            <input
+              id="gram-draft-value"
+              class="input-native"
+              type="number"
+              inputmode="decimal"
+              [value]="draft.gram_weight"
+              step="1"
+              min="0"
+              (input)="updateGramDraftValue($event)"
+            />
+          </app-form-field>
+        </div>
+        <div class="sheet-actions">
+          <button type="button" class="btn-outline" (click)="closeGramSheet()">Hủy</button>
+          <button type="button" class="btn-cta" (click)="saveGramDraft()">
+            {{ draft.mode === 'create' ? 'Thêm' : 'Cập nhật' }}
+          </button>
+        </div>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<app-confirm-dialog
+  [isOpen]="pendingDeleteId() !== null"
+  [title]="
+    deleteReferenceLoading()
+      ? 'Đang kiểm tra...'
+      : deleteReferenceCount() > 0
+        ? 'Không thể xóa'
+        : 'Xóa món ăn?'
+  "
+  [message]="
+    deleteReferenceLoading()
+      ? 'Đang kiểm tra kế hoạch ăn đang dùng món này.'
+      : deleteReferenceCount() > 0
+        ? 'Món ăn này đang được dùng trong kế hoạch ăn nên chưa thể xóa.'
+        : 'Bạn có chắc muốn xóa món ăn này? Thao tác này không thể hoàn tác.'
+  "
+  [cancelLabel]="deleteReferenceCount() > 0 ? 'Đóng' : 'Giữ lại'"
+  [confirmLabel]="
+    deleteReferenceLoading() ? 'Đang kiểm tra...' : deleteReferenceCount() > 0 ? 'Đóng' : 'Xóa'
+  "
+  [confirmVariant]="deleteReferenceCount() > 0 || deleteReferenceLoading() ? 'primary' : 'danger'"
+  (cancelled)="closeDeleteDialog()"
+  [confirmDisabled]="deleteReferenceLoading()"
+  (confirmed)="confirmDelete()"
+/>
+
+<app-confirm-dialog
+  [isOpen]="discard.open()"
+  title="Bỏ thay đổi?"
+  message="Bạn có thay đổi chưa lưu. Nếu rời khỏi màn hình này, các thay đổi sẽ bị mất."
+  cancelLabel="Ở lại"
+  confirmLabel="Bỏ thay đổi"
+  confirmVariant="danger"
+  (cancelled)="discard.answer(false)"
+  (confirmed)="confirmDiscardChangesDialog()"
+/>
+
+<app-bottom-sheet-picker
+  #ingredientPicker
+  title="Chọn nguyên liệu"
+  [options]="ingredientOptions()"
+  [recentOptions]="recentIngredientOptions"
+  [searchable]="true"
+  (valueChange)="onIngredientSelected($event)"
+/>
+
+<app-bottom-sheet-picker
+  #mealTagPicker
+  title="Chọn loại bữa"
+  [value]="formSignal().meal_tag"
+  [options]="mealTagOptions"
+  (valueChange)="onMealTagSelected($event)"
+/>
+
+<app-dish-autofill-sheet
+  [isOpen]="aiAutofillSheetOpen()"
+  [result]="aiAutofillResult()"
+  (applied)="onAutofillApplied($event)"
+  (dismissed)="onAutofillSheetDismissed()"
+/>

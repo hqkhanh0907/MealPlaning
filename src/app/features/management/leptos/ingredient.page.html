@@ -1,0 +1,152 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/management" text="" aria-label="Quay lại" />
+    </ion-buttons>
+    <ion-title>{{ isEdit() ? 'Sửa nguyên liệu' : 'Thêm nguyên liệu' }}</ion-title>
+    @if (isEdit()) {
+      <ion-buttons slot="end">
+        <button
+          type="button"
+          class="icon-button icon-button--danger"
+          aria-label="Xóa nguyên liệu"
+          (click)="openDeleteDialog()"
+        >
+          <ion-icon name="trash-outline" aria-hidden="true" />
+        </button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="form-content">
+    @if (!isEdit()) {
+      <app-ai-offline-banner />
+      <button
+        type="button"
+        class="btn-ai-lookup"
+        data-testid="btn-ask-ai"
+        [disabled]="aiLoading() || !!ai.textIssue()"
+        (click)="onAskAi()"
+      >
+        @if (aiLoading()) {
+          <ion-spinner name="crescent" />
+          <span>Đang hỏi AI...</span>
+        } @else {
+          <ion-icon name="sparkles-outline" aria-hidden="true" />
+          <span>{{ ai.textIssue() || 'Điền bằng AI' }}</span>
+        }
+      </button>
+    }
+
+    <app-form-field
+      label="Tên nguyên liệu"
+      inputId="ingr-field-name"
+      errorId="err-ingr-name"
+      [invalid]="showErrors() && ingredientForm.name().errors().length > 0"
+      [errorMessage]="ingredientForm.name().errors()[0]?.message ?? ''"
+    >
+      <input
+        id="ingr-field-name"
+        class="input-native"
+        #nameInput
+        [formField]="ingredientForm.name"
+        [attr.aria-invalid]="
+          showErrors() && ingredientForm.name().errors().length > 0 ? 'true' : null
+        "
+        [attr.aria-describedby]="
+          showErrors() && ingredientForm.name().errors().length > 0 ? 'err-ingr-name' : null
+        "
+      />
+    </app-form-field>
+
+    <div
+      appManagementView="ingredient"
+      [snapshot]="snapshot()"
+      (managementAction)="dispatch($event)"
+    ></div>
+
+    @if (isEdit()) {
+      <button
+        type="button"
+        class="btn-outline btn-outline--full"
+        data-testid="open-dishes-using-sheet"
+        (click)="openDishesSheet()"
+      >
+        Xem các món đang dùng nguyên liệu này
+      </button>
+    }
+  </div>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <div class="sticky-save-bar">
+    <ion-button expand="block" class="save-button" [disabled]="saving()" (click)="onSave()">
+      {{ saving() ? 'Đang lưu...' : isEdit() ? 'Lưu thay đổi' : 'Lưu nguyên liệu' }}
+    </ion-button>
+  </div>
+</ion-footer>
+
+@if (isEdit() && ingredientId(); as id) {
+  <app-dishes-using-sheet
+    [ingredientId]="id"
+    [isOpen]="isDishesSheetOpen()"
+    (dishSelected)="onDishSelectedFromSheet($event)"
+    (closed)="onDishesSheetClosed()"
+  />
+}
+
+<app-confirm-dialog
+  [isOpen]="pendingDeleteId() !== null"
+  [title]="
+    deleteReferenceLoading()
+      ? 'Đang kiểm tra...'
+      : deleteReferenceCount() > 0
+        ? 'Không thể xóa'
+        : 'Xóa nguyên liệu?'
+  "
+  [message]="
+    deleteReferenceLoading()
+      ? 'Đang kiểm tra món ăn đang dùng nguyên liệu này.'
+      : deleteReferenceCount() > 0
+        ? 'Nguyên liệu này đang được dùng trong ' + deleteReferenceCount() + ' món ăn.'
+        : 'Bạn có chắc muốn xóa nguyên liệu này? Thao tác này không thể hoàn tác.'
+  "
+  [cancelLabel]="deleteReferenceCount() > 0 ? 'Đóng' : 'Giữ lại'"
+  [confirmLabel]="
+    deleteReferenceLoading() ? 'Đang kiểm tra...' : deleteReferenceCount() > 0 ? 'Đóng' : 'Xóa'
+  "
+  [confirmVariant]="deleteReferenceCount() > 0 || deleteReferenceLoading() ? 'primary' : 'danger'"
+  (cancelled)="closeDeleteDialog()"
+  [confirmDisabled]="deleteReferenceLoading()"
+  (confirmed)="confirmDelete()"
+/>
+
+<app-confirm-dialog
+  [isOpen]="discard.open()"
+  title="Bỏ thay đổi?"
+  message="Bạn có thay đổi chưa lưu. Nếu rời khỏi màn hình này, các thay đổi sẽ bị mất."
+  cancelLabel="Ở lại"
+  confirmLabel="Bỏ thay đổi"
+  confirmVariant="danger"
+  (cancelled)="discard.answer(false)"
+  (confirmed)="confirmDiscardChangesDialog()"
+/>
+
+<app-ai-lookup-sheet
+  [isOpen]="aiSheetOpen()"
+  [result]="aiResult()"
+  [mode]="aiSheetMode()"
+  [existingIngredientId]="aiExistingId()"
+  (saved)="onAiSheetSaved($event)"
+  (dismissed)="onAiSheetDismissed()"
+/>
+
+<app-bottom-sheet-picker
+  #categoryPicker
+  title="Chọn nhóm nguyên liệu"
+  [value]="formSignal().category"
+  [options]="categoryOptions"
+  (valueChange)="onCategorySelected($event)"
+/>

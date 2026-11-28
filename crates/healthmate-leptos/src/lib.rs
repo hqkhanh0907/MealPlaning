@@ -2,10 +2,13 @@
 mod account;
 #[cfg(target_arch = "wasm32")]
 mod browser;
+mod management;
 mod model;
 #[cfg(target_arch = "wasm32")]
 mod onboarding;
 mod photo;
+#[cfg(target_arch = "wasm32")]
+mod region;
 mod view;
 #[cfg(target_arch = "wasm32")]
 pub use browser::{DashboardHandle, mount_dashboard};

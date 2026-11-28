@@ -1,0 +1,23 @@
+@use 'sass:meta';
+app-leptos-catalog {
+  [appManagementView] {
+    display: contents;
+  }
+  @include meta.load-css('../management.page');
+  @include meta.load-css('../../../shared/components/search-toolbar/search-toolbar');
+  app-empty-state {
+    @include meta.load-css('../../../shared/components/empty-state/empty-state');
+    &.search-empty {
+      .empty-state {
+        align-items: flex-start;
+        gap: var(--space-xs);
+        min-height: 0;
+        padding: var(--space-md) 0;
+        text-align: start;
+      }
+      .empty-icon-shell {
+        display: none;
+      }
+    }
+  }
+}
