@@ -13,7 +13,7 @@
 
 Lõi Rust quản lý nghiệp vụ và SQLite theo tài khoản. Máy chủ Rust phải thực hiện giao thức workspace hiện tại. Giao thức theo từng hiệp trong APK thử chỉ kiểm chứng một cơ chế. Dùng chung phần chuẩn hóa và hòa giải workspace khi hai phía cần cùng quy tắc.
 
-Day là hướng ban đầu cho giao diện Android và Worker vì đã chạy chung lõi native và khôi phục công việc sau khi mất tiến trình. Việc chọn bộ giao diện cho bản phát hành còn phụ thuộc phép thử nhận ảnh đúng chủ sau khi mất tiến trình và khôi phục lịch lặp sau reboot. Capacitor cùng Leptos là phương án đã có bằng chứng cho hai chức năng này. Chọn đường tích hợp theo các kết quả đó trước khi gỡ ứng dụng hiện tại. Cấu hình Gradle, manifest, tài nguyên và mã cầu nối của thư viện vẫn dùng định dạng nền tảng.
+Khanh chọn Capacitor + Leptos ngày 28/11/2026. Giao diện Leptos chạy trong WebView của Capacitor. Các plugin Android xử lý vòng đời và gọi lõi Rust khi cần. Bản thử Day trong `mobile/` chỉ dùng để đối chiếu hành vi. Tài liệu quyết định nằm ở `docs/4-architecture/rust-android-17-feasibility.md`.
 
 ## Các phần triển khai và quyền sở hữu
 
@@ -21,7 +21,7 @@ Day là hướng ban đầu cho giao diện Android và Worker vì đã chạy c
 2. **Máy chủ.** `crates/healthmate-server/` sở hữu HTTP, xác thực mật khẩu, phiên thiết bị, biên nhận thao tác, lịch sử, phân quyền và quản trị. Đối chiếu toàn bộ đường dẫn công khai và riêng với các bộ kiểm trong `server/*.test.mjs`. Mỗi lần phát hành phải có đường sao lưu và khôi phục đã kiểm tra.
 3. **Nghiệp vụ.** `crates/healthmate-domain/` sở hữu tính dinh dưỡng, hồ sơ, khẩu phần và quy tắc tập luyện. Chuyển từng quy tắc cùng các trường hợp biên của TypeScript. Dùng cùng kết quả giữa giao diện, cơ sở dữ liệu và máy chủ khi có quy tắc chung.
 4. **Dữ liệu trên thiết bị.** `crates/healthmate-store/` sở hữu schema SQLite, khởi tạo, dữ liệu mẫu, repository, giao dịch, hàng chờ và trạng thái theo tài khoản. Kiểm tra lưu rồi mở lại, đổi tài khoản, mất phản hồi và hai thiết bị sửa cùng dữ liệu.
-5. **Ứng dụng Android.** `mobile/` sở hữu các màn hình tài khoản, thiết lập ban đầu, Tổng quan, Lịch ăn, Quản lý, Tập luyện và Cài đặt. Giữ nội dung tiếng Việt, tài nguyên hình ảnh, ngôn ngữ thiết kế và thao tác quay lại. Kiểm tra luồng nhập thực tế và khả năng đọc trên Android 17.
+5. **Ứng dụng Android.** `crates/healthmate-leptos/` sở hữu màn hình Rust. Triển khai Tổng quan trước. Sau khi đối chiếu trên Android 17, tiếp tục với tài khoản, thiết lập ban đầu, Lịch ăn, Quản lý, Tập luyện và Cài đặt. Giữ nhãn tiếng Việt, tài nguyên hình ảnh, design token và thao tác quay lại.
 6. **Dịch vụ thiết bị và AI.** Chuyển xử lý phiên, khóa Groq, yêu cầu AI, điều phối ảnh, lịch nhắc và Worker. Thử chọn ảnh khi tiến trình cũ đã mất và Bình đăng nhập trước khi ảnh trả về. Thử lịch ngày và tuần sau reboot trước khi mở lại ứng dụng.
 7. **Chuyển đường chạy.** Đổi CI, lệnh dựng APK, cấu hình hai dịch vụ và trang quản trị sau nghiệm thu. Bỏ mã cũ do dự án duy trì khi mọi điểm vào đã dùng phần Rust. Giữ tài sản tĩnh và ca kiểm thử độc lập còn giá trị.
 
