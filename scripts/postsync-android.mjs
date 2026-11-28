@@ -20,6 +20,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { installMealPlanSync } from './sync-android-native.mjs';
+import { configureAndroid17 } from './android-sdk.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
@@ -190,6 +191,7 @@ function patchAndroidGitignore() {
 
 function main() {
   if (process.env.CAPACITOR_PLATFORM_NAME && process.env.CAPACITOR_PLATFORM_NAME !== 'android') return;
+  if (existsSync(BUILD_GRADLE)) configureAndroid17(resolve(ROOT, 'android'));
   patchManifest();
   patchStyles();
   patchBuildGradle();

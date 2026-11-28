@@ -48,6 +48,9 @@ jobs:
       - name: Run architecture guards (PC-1, Style 2025, form-pattern, design-tokens)
         run: npm run check:guards
 
+      - name: Verify Android SDK settings against the Capacitor template
+        run: node --test scripts/android-sdk.test.mjs
+
       - name: Run linter
         run: npm run lint
 
@@ -82,6 +85,7 @@ jobs:
 
       - name: Build Android test APK
         run: |
+          sdkmanager 'platforms;android-37.0'
           npm run build:prod
           npx cap add android
           npx cap sync android
@@ -99,7 +103,7 @@ jobs:
           ADB: adb
           ANDROID_SERIAL: emulator-5554
         with:
-          api-level: 36
+          api-level: '37.0'
           arch: x86_64
           target: google_apis
           emulator-options: -no-snapshot -no-audio -no-window -no-boot-anim -gpu swiftshader_indirect -memory 3072
