@@ -34,6 +34,7 @@ jobs:
       - run: cargo clippy --manifest-path crates/healthmate-leptos/Cargo.toml --locked --all-targets -- -D warnings
       - run: cargo clippy --manifest-path crates/healthmate-leptos/Cargo.toml --locked --target wasm32-unknown-unknown -- -D warnings
       - run: cargo test --manifest-path crates/healthmate-leptos/Cargo.toml --locked
+      - run: cargo test --locked -p healthmate-domain --test dashboard_presentation -- --include-ignored
       - run: npm run test:leptos
       - run: node crates/healthmate-leptos/tests/browser.mjs
         env:

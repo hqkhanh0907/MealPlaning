@@ -1,3 +1,4 @@
+pub mod dashboard_presentation;
 pub mod dates;
 pub mod fitness;
 pub mod nutrition;

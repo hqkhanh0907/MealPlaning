@@ -45,11 +45,11 @@ fn hero(s: Screen) -> impl IntoView {
             <dl class="today-nutrition">
                 <div>
                     <dt>"Đã ăn"</dt>
-                    <dd>{move || s.read(|d| d.logged_calories)}" "<small>"kcal"</small></dd>
+                    <dd>{move || s.read(|d| ryu_js::Buffer::new().format(d.metrics.logged_calories).to_owned())}" "<small>"kcal"</small></dd>
                 </div>
                 <div>
                     <dt>"Theo lịch cả ngày"</dt>
-                    <dd>{move || s.read(|d| d.rounded_calories)}" "<small>"kcal"</small></dd>
+                    <dd>{move || s.read(|d| ryu_js::Buffer::new().format(d.metrics.rounded_calories).to_owned())}" "<small>"kcal"</small></dd>
                 </div>
             </dl>
             <div class="dashboard-hero__actions">
@@ -107,7 +107,7 @@ fn hero(s: Screen) -> impl IntoView {
 }
 
 fn nutrition(s: Screen) -> impl IntoView {
-    let macros = Memo::new(move |_| s.read(|d| d.macro_rows.clone()));
+    let macros = Memo::new(move |_| s.read(|d| d.metrics.macro_rows.clone()));
     view! {
         <section class="dashboard-card nutrition-card" aria-labelledby="nutrition-card-title">
             <header class="dashboard-card__header">
@@ -115,15 +115,15 @@ fn nutrition(s: Screen) -> impl IntoView {
             </header>
             <div class="nutrition-overview">
                 <div>
-                    <span>{move || s.read(|d| d.calorie_target_label.clone())}</span>
+                    <span>{move || s.read(|d| d.metrics.calorie_target_label.clone())}</span>
                     <small>
                         {move || {
                             s
                                 .read(|d| {
-                                    if d.has_calorie_target {
+                                    if d.metrics.has_calorie_target {
                                         format!(
                                             "Theo lịch đạt {} mục tiêu.",
-                                            d.calorie_percent_label,
+                                            d.metrics.calorie_percent_label,
                                         )
                                     } else {
                                         "Bạn vẫn có thể ghi bữa ăn.".into()
@@ -133,7 +133,7 @@ fn nutrition(s: Screen) -> impl IntoView {
                     </small>
                 </div>
             </div>
-            <Show when=move || s.read(|d| d.has_nutrition_data)>
+            <Show when=move || s.read(|d| d.metrics.has_nutrition_data)>
                 <div
                     class="macro-list"
                     aria-label="Dinh dưỡng của các món theo lịch hôm nay"
@@ -176,7 +176,8 @@ fn nutrition(s: Screen) -> impl IntoView {
     }
 }
 fn insights(s: Screen) -> impl IntoView {
-    let source = Memo::new(move |_| s.read(|d| (d.daily_ai_insight.clone(), d.insight.clone())));
+    let source =
+        Memo::new(move |_| s.read(|d| (d.daily_ai_insight.clone(), d.metrics.insight.clone())));
     move || {
         let (ai, local) = source.get();
         if let Some(a) = ai {
@@ -251,16 +252,9 @@ fn stats(s: Screen) -> impl IntoView {
                 <div>
                     <dt>{icon("flame-outline")}"Ngày liên tiếp ăn gần mục tiêu"</dt>
                     <dd>
-                        {move || {
-                            s
-                                .read(|d| {
-                                    d
-                                        .nutrition_streak_days
-                                        .map_or_else(|| "—".into(), |n| format!("{n} ngày"))
-                                })
-                        }}
+                        {move || s.read(|d| d.metrics.nutrition_streak_display.clone())}
                     </dd>
-                    <Show when=move || s.read(|d| d.nutrition_streak_days.is_some())>
+                    <Show when=move || s.read(|d| d.metrics.nutrition_streak_days.is_some())>
                         <small>
                             "Tính đến hôm qua, trong khoảng 80–120% mục tiêu kcal hiện tại."
                         </small>
@@ -268,12 +262,12 @@ fn stats(s: Screen) -> impl IntoView {
                 </div>
                 <div>
                     <dt>{icon("fitness-outline")}"Tuần tập liên tiếp"</dt>
-                    <dd>{move || s.read(|d| d.workout_streak_display.clone())}</dd>
+                    <dd>{move || s.read(|d| d.metrics.workout_streak_display.clone())}</dd>
                 </div>
                 <div>
                     <dt>{icon("scale-outline")}"Cân nặng gần nhất"</dt>
-                    <dd>{move || s.read(|d| d.weight_display.clone())}</dd>
-                    <small>{move || s.read(|d| d.weight_meta.clone())}</small>
+                    <dd>{move || s.read(|d| d.metrics.weight_display.clone())}</dd>
+                    <small>{move || s.read(|d| d.metrics.weight_meta.clone())}</small>
                 </div>
             </dl>
         </section>

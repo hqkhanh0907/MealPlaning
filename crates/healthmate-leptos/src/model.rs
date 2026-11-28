@@ -1,4 +1,5 @@
-use serde::{Deserialize, Serialize};
+use healthmate_domain::dashboard_presentation::{DashboardInput, DashboardPresentation, present};
+use serde::{Deserialize, Deserializer, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -38,30 +39,10 @@ pub struct PendingMeal {
 }
 
 #[derive(Clone, Debug, PartialEq, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct MacroRow {
-    pub metric: String,
-    pub label: String,
-    pub value_label: String,
-    pub target_label: String,
-    pub percent_label: String,
-    pub progress_css: String,
-    pub target: f64,
-}
-#[derive(Clone, Debug, PartialEq, Deserialize)]
 pub struct AiInsight {
     pub title: String,
     pub body: String,
     pub action: String,
-    pub tone: String,
-}
-#[derive(Clone, Debug, PartialEq, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Insight {
-    pub title: String,
-    pub body: String,
-    pub cta_label: String,
-    pub cta_route: String,
     pub tone: String,
 }
 
@@ -112,20 +93,10 @@ pub struct Dashboard {
     pub loading: bool,
     pub refresh_failed: bool,
     pub today_label: String,
-    pub logged_calories: i64,
-    pub rounded_calories: i64,
+    #[serde(deserialize_with = "dashboard_metrics")]
+    pub metrics: DashboardPresentation,
     pub pending_meal: Option<PendingMeal>,
-    pub calorie_target_label: String,
-    pub calorie_percent_label: String,
-    pub has_calorie_target: bool,
-    pub has_nutrition_data: bool,
-    pub macro_rows: Vec<MacroRow>,
     pub daily_ai_insight: Option<AiInsight>,
-    pub insight: Option<Insight>,
-    pub nutrition_streak_days: Option<u32>,
-    pub workout_streak_display: String,
-    pub weight_display: String,
-    pub weight_meta: String,
     pub online: bool,
     pub daily_ai_loading: bool,
     pub text_issue: Option<String>,
@@ -137,6 +108,10 @@ pub struct Dashboard {
     pub can_save_photo: bool,
     pub photo_error: String,
     pub photo_draft: Option<PhotoDraft>,
+}
+
+fn dashboard_metrics<'de, D: Deserializer<'de>>(raw: D) -> Result<DashboardPresentation, D::Error> {
+    DashboardInput::deserialize(raw).map(|input| present(&input))
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize)]

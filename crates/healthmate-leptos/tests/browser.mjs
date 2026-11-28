@@ -67,7 +67,7 @@ const browser = spawn(
 );
 const browserExit = new Promise((resolve) => browser.once('exit', resolve));
 let connection;
-async function exercise() {
+async function exercise(metricsExamples) {
   const eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
   const checks = [];
   function check(ok, description) {
@@ -88,6 +88,48 @@ async function exercise() {
   const handle = mountDashboard(body, footer, JSON.stringify(state), (action) =>
     actions.push(action),
   );
+  await settle();
+  const text = (element) => element?.textContent.trim().replace(/\s+/g, ' ');
+  for (const { name, input, expected } of metricsExamples) {
+    show({ ...state, metrics: input });
+    await settle();
+    const headlines = [...body.querySelectorAll('.today-nutrition dd')].map(text);
+    const stats = [...body.querySelectorAll('.stat-list dd')].map(text);
+    const macros = [...body.querySelectorAll('.macro-item')].map((row) => [
+      text(row.querySelector('.macro-item__header span')),
+      text(row.querySelector('.macro-item__header strong')),
+      ...[...row.querySelectorAll('.macro-item__meta span')].map(text),
+      row.querySelector('.progress-fill').style.getPropertyValue('--progress').trim(),
+    ]);
+    const expectedMacros = expected.hasNutritionData
+      ? expected.macroRows.map((row) => [
+          row.label,
+          row.percentLabel,
+          row.valueLabel,
+          (row.target > 0 ? 'Mục tiêu ' : '') + row.targetLabel,
+          row.progressCss,
+        ])
+      : [];
+    check(
+      eq(headlines, [expected.loggedCalories + ' kcal', expected.roundedCalories + ' kcal']) &&
+        eq(macros, expectedMacros) &&
+        eq(stats, [
+          expected.nutritionStreakDisplay,
+          expected.workoutStreakDisplay,
+          expected.weightDisplay,
+        ]) &&
+        text(body.querySelector('.stat-list div:last-child small')) === expected.weightMeta &&
+        text(body.querySelector('.nutrition-overview span')) === expected.calorieTargetLabel &&
+        text(body.querySelector('.nutrition-overview small')) ===
+          (expected.hasCalorieTarget
+            ? 'Theo lịch đạt ' + expected.caloriePercentLabel + ' mục tiêu.'
+            : 'Bạn vẫn có thể ghi bữa ăn.') &&
+        (text(body.querySelector('#ai-insight-title')) ?? null) ===
+          (expected.insight?.title ?? null),
+      'raw metrics produce Angular values: ' + name,
+    );
+  }
+  show(state);
   await settle();
   const pending = body.querySelector('a.today-primary-action');
   const sendClick = (el, props = {}) => {
@@ -185,7 +227,7 @@ async function exercise() {
   check(document.activeElement?.id === 'ai-insight-title', 'focus generated insight');
   name.focus();
   name.setSelectionRange(2, 2);
-  state.weightMeta = 'Thay đổi không liên quan';
+  state.metrics.weightSummary = { currentKg: 71.05, deltaKg: 0.05, source: 'weight_log' };
   show(state);
   await settle();
   check(
@@ -335,8 +377,16 @@ try {
     if (!loaded) await wait(75);
   }
   if (!loaded) throw Error('Browser fixture did not load');
+  const corpus = await readFile(
+    join(directory, '../healthmate-domain/tests/dashboard_presentation.jsonl'),
+    'utf8',
+  );
+  const examples = corpus
+    .trim()
+    .split('\n')
+    .map((line) => JSON.parse(line));
   const answer = await cdp('Runtime.evaluate', {
-    expression: '(' + exercise.toString() + ')()',
+    expression: '(' + exercise.toString() + ')(' + JSON.stringify(examples) + ')',
     awaitPromise: true,
     returnByValue: true,
     timeout: 35000,

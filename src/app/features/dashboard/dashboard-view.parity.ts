@@ -2,7 +2,19 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+import { ZERO_TOTALS } from '../../core/models/nutrition';
+import { DayPlanRepository } from '../../core/repositories/day-plan.repository';
+import { PhotoMealRepository } from '../../core/repositories/photo-meal.repository';
+import { UserProfileRepository } from '../../core/repositories/user-profile.repository';
+import { WorkoutRepository } from '../../core/repositories/workout.repository';
+import { FoodImageAi } from '../../core/services/ai/food-image-ai';
+import { InsightAi } from '../../core/services/ai/insight-ai';
+import { CameraCapture } from '../../core/services/camera/camera-capture';
+import { NutritionQuery } from '../../core/services/nutrition/nutrition-query';
 import { CalendarStore } from '../../core/stores/calendar.store';
+import { LocalDay } from '../../core/stores/local-day';
+import { NutritionStore } from '../../core/stores/nutrition.store';
+import { ProfileStore } from '../../core/stores/profile.store';
 import { DashboardStore } from '../../core/stores/dashboard.store';
 import { NetworkStore } from '../../core/stores/network.store';
 import { AiAvailability } from '../../shared/ai-availability';
@@ -21,77 +33,34 @@ function fixtureData() {
       fat: 5.5,
       fiber: 3,
       warning: null,
-      confidence: 'low',
+      confidence: 'low' as const,
     },
     grams: 135,
     included: true,
   };
-  const draft = {
+  const draft: NonNullable<ReturnType<DashboardStore['photoDraft']>> = {
     captureId: 'same-photo',
     date: '2026-11-28',
     mealType: 'lunch',
-    analysis: { imageQualityWarning: 'Ảnh hơi tối' },
+    analysis: {
+      overallConfidence: 'low',
+      imageQualityWarning: 'Ảnh hơi tối',
+      items: [portion.item],
+    },
     portions: [portion],
   };
-  const pending = { date: '2026-11-28', mealType: 'lunch', plannedDishId: 'lunch-1' };
-  const warning = {
-    title: 'Điều chỉnh kế hoạch',
-    body: 'Nội dung gợi ý.',
-    tone: 'warning',
-    ctaLabel: 'Điều chỉnh lịch ăn',
-    ctaRoute: '/tabs/calendar',
-  };
+  const pending = { date: '2026-11-28', mealType: 'lunch' as const, plannedDishId: 'lunch-1' };
   const aiInsight = {
     title: 'Nhận xét hôm nay',
     body: 'Nội dung nhận xét.',
     action: 'Thêm rau.',
     tone: 'info',
   };
-  const store = {
-    loading: signal(false),
-    refreshFailed: signal(false),
-    todayLabel: () => 'Thứ Bảy, 28/11',
-    loggedCalories: signal(200),
-    roundedCalories: () => 370,
-    pendingMeal: signal<typeof pending | null>(null),
-    calorieTargetLabel: () => '2.000 kcal',
-    caloriePercentLabel: () => '19%',
-    targets: () => ({ calories: 2000 }),
-    hasNutritionData: signal(false),
-    macroRows: () => [
-      {
-        metric: 'protein',
-        label: 'Protein',
-        valueLabel: '31 g',
-        target: 90,
-        targetLabel: '90 g',
-        percentLabel: '34%',
-        progressCss: '34%',
-      },
-    ],
-    insight: signal<typeof warning | null>(null),
-    dailyAiInsight: signal<typeof aiInsight | null>(null),
-    nutritionStreakDays: signal<number | null>(null),
-    workoutStreakDisplay: () => '2 tuần',
-    weightDisplay: () => '70 kg',
-    weightMeta: () => 'Dữ liệu từ hồ sơ cá nhân',
-    insightProvider: 'Groq',
-    dailyAiLoading: signal(false),
-    foodImageLoading: signal(false),
-    photoSaving: signal(false),
-    canSavePhoto: signal(true),
-    photoDraft: signal<typeof draft | null>(null),
-    setPhotoName: jasmine.createSpy('setPhotoName'),
-    setPhotoGrams: jasmine.createSpy('setPhotoGrams'),
-    setPhotoIncluded: jasmine.createSpy('setPhotoIncluded'),
-    refresh: jasmine.createSpy('refresh'),
-  };
   return {
-    store,
     draft,
     pending,
-    warning,
     aiInsight,
+    targets: signal({ ...ZERO_TOTALS, fiber: 25 }),
     online: signal(true),
     availability: {
       textIssue: signal<string | null>(null),
@@ -115,6 +84,17 @@ function screen(root: HTMLElement) {
       item.getAttribute('aria-label'),
       (item as HTMLButtonElement).disabled === true,
     ]),
+    nutrition: all('.nutrition-overview span,.nutrition-overview small').map((item) =>
+      clean(item.textContent),
+    ),
+    macros: all('.macro-item').map((item) => [
+      clean(item.querySelector('.macro-item__header')?.textContent ?? null),
+      clean(item.querySelector('.macro-item__meta')?.textContent ?? null),
+      item
+        .querySelector<HTMLElement>('.progress-fill')
+        ?.style.getPropertyValue('--progress')
+        .trim(),
+    ]),
     data: all('dt,dd,.macro-item__meta,p,li strong,li span,.stat-list small').map((item) =>
       clean(item.textContent),
     ),
@@ -136,17 +116,38 @@ describe('Angular and Leptos dashboard parity', () => {
   it('renders and edits the same live data in both implementations', async () => {
     await loadDashboardRenderer();
     const data = fixtureData();
-    const { store } = data;
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
         provideIonicAngular(),
-        { provide: DashboardStore, useValue: store },
+        DashboardStore,
         { provide: NetworkStore, useValue: { online: data.online } },
-        { provide: CalendarStore, useValue: {} },
+        { provide: CalendarStore, useValue: { invalidationTick: signal(0) } },
+        { provide: LocalDay, useValue: { iso: signal('2026-11-28') } },
+        { provide: ProfileStore, useValue: { profile: signal(null) } },
+        { provide: NutritionStore, useValue: { targets: data.targets } },
+        {
+          provide: InsightAi,
+          useValue: { providerName: 'Groq', generateDailyInsight: async () => data.aiInsight },
+        },
+        ...[
+          DayPlanRepository,
+          PhotoMealRepository,
+          UserProfileRepository,
+          WorkoutRepository,
+          FoodImageAi,
+          CameraCapture,
+          NutritionQuery,
+        ].map((provide) => ({ provide, useValue: {} })),
         { provide: AiAvailability, useValue: data.availability },
       ],
     });
+    const store = TestBed.inject(DashboardStore);
+    spyOn(store, 'refresh').and.resolveTo();
+    const setName = spyOn(store, 'setPhotoName');
+    const setGrams = spyOn(store, 'setPhotoGrams');
+    store.todayIso.set('2026-11-28');
+    store.loading.set(false);
     const original = TestBed.createComponent(DashboardPage);
     const migrated = TestBed.createComponent(LeptosDashboardPage);
     const html = (fixture: typeof original | typeof migrated): HTMLElement => fixture.nativeElement;
@@ -156,6 +157,9 @@ describe('Angular and Leptos dashboard parity', () => {
       await migrated.whenStable();
       TestBed.tick();
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      expect(html(migrated).querySelector('app-dashboard'))
+        .withContext(state + ': Leptos fallback')
+        .toBeNull();
       expect(screen(html(migrated)))
         .withContext(state)
         .toEqual(screen(html(original)));
@@ -168,12 +172,27 @@ describe('Angular and Leptos dashboard parity', () => {
     store.loading.set(false);
     await compare('refresh error');
     store.refreshFailed.set(false);
-    store.hasNutritionData.set(true);
+    store.loggedTotals.set({ ...ZERO_TOTALS, calories: 200.5 });
+    data.targets.set({ calories: 100, protein: 100, carbs: 0, fat: 0, fiber: 25 });
     store.nutritionStreakDays.set(0);
+    store.workoutSummary.set({ ...store.workoutSummary(), streakWeeks: 2 });
+    store.weightSummary.set({
+      currentKg: 70.05,
+      deltaKg: -0.05,
+      source: 'weight_log',
+      date: '2026-11-28',
+    });
     store.pendingMeal.set(data.pending);
-    store.insight.set(data.warning);
-    await compare('pending meal, nutrition, zero streak and local insight');
-    store.dailyAiInsight.set(data.aiInsight);
+    for (const [calories, protein] of [
+      [49.99, 40],
+      [50, 69.99],
+      [120, 70],
+      [120.01, 30],
+    ]) {
+      store.totals.set({ calories, protein, carbs: 20.5, fat: 4, fiber: 31 });
+      await compare(`raw plan ${calories} kcal, ${protein} g protein`);
+    }
+    await store.generateDailyAiInsight();
     data.online.set(false);
     data.availability.textIssue.set('Cần kết nối mạng để dùng AI');
     data.availability.photoIssue.set('Cần kết nối mạng để dùng AI');
@@ -191,11 +210,11 @@ describe('Angular and Leptos dashboard parity', () => {
       grams.value = '';
       grams.dispatchEvent(new Event('input', { bubbles: true }));
     }
-    expect(store.setPhotoName.calls.allArgs()).toEqual([
+    expect(setName.calls.allArgs()).toEqual([
       [0, 'Món đã sửa'],
       [0, 'Món đã sửa'],
     ]);
-    expect(store.setPhotoGrams.calls.allArgs()).toEqual([
+    expect(setGrams.calls.allArgs()).toEqual([
       [0, NaN],
       [0, NaN],
     ]);
@@ -209,7 +228,6 @@ describe('Angular and Leptos dashboard parity', () => {
         },
       ],
     });
-    store.canSavePhoto.set(false);
     await compare('invalid name and grams after an edit');
     store.photoDraft.set({
       ...data.draft,
@@ -217,7 +235,7 @@ describe('Angular and Leptos dashboard parity', () => {
     });
     store.photoSaving.set(true);
     await compare('excluded portion while saving');
-    store.loggedCalories.set(Infinity);
+    store.loggedTotals.set({ ...ZERO_TOTALS, calories: Infinity });
     migrated.detectChanges();
     await migrated.whenStable();
     TestBed.tick();

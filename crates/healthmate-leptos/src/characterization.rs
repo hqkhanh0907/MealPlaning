@@ -43,9 +43,10 @@ fn ready_keeps_semantic_links_and_missing_states() {
     assert!(a.contains("Bạn vẫn có thể ghi bữa ăn."));
     let mut v = fixture();
     v["pendingMeal"] = json!({"date":"2026-10-02","mealType":"lunch","plannedDishId":"dish-7"});
-    v["hasNutritionData"] = true.into();
-    v["macroRows"] = json!([{"metric":"protein","label":"Protein","target":90,"valueLabel":"50 g","targetLabel":"90 g","percentLabel":"56%","progressCss":"56%"}]);
-    v["nutritionStreakDays"] = 0.into();
+    v["metrics"]["totals"]["calories"] = 370.into();
+    v["metrics"]["totals"]["protein"] = 50.into();
+    v["metrics"]["targets"]["protein"] = 90.into();
+    v["metrics"]["nutritionStreakDays"] = 0.into();
     let (a, _) = output(v);
     assert!(a.contains("Bữa trưa chưa ghi"));
     assert!(a.contains("macro-item--protein"));
@@ -55,9 +56,10 @@ fn ready_keeps_semantic_links_and_missing_states() {
 #[test]
 fn insights_precedence_permissions_and_safe_text() {
     let mut v = fixture();
-    v["insight"] = json!({"title":"Nhận xét theo dữ liệu","body":"Ít năng lượng","ctaLabel":"Mở lịch","ctaRoute":"/tabs/calendar","tone":"warning"});
+    v["metrics"]["totals"]["calories"] = 121.into();
+    v["metrics"]["targets"]["calories"] = 100.into();
     let (a, _) = output(v.clone());
-    assert!(a.contains("Nhận xét theo dữ liệu"));
+    assert!(a.contains("Kế hoạch calo đang vượt mục tiêu"));
     assert!(a.contains("ai-card--warning"));
     v["dailyAiInsight"] = json!({"title":"<script>alert(0)</script>","body":"Đã tạo từ dữ liệu","action":"Kiểm tra","tone":"info"});
     v["online"] = false.into();
@@ -65,7 +67,7 @@ fn insights_precedence_permissions_and_safe_text() {
     v["photoError"] = "Lỗi ảnh thử".into();
     let (a, _) = output(v);
     assert!(!a.contains("<script>"));
-    assert!(!a.contains("Nhận xét theo dữ liệu"));
+    assert!(!a.contains("Kế hoạch calo đang vượt mục tiêu"));
     assert!(a.contains("Đã tạo từ dữ liệu"));
     assert!(a.contains("ai-offline-banner"));
     assert!(a.contains("Ghi món thủ công"));
