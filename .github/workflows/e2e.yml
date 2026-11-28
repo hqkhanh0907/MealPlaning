@@ -54,6 +54,9 @@ jobs:
       - name: Run unit tests
         run: npm test -- --watch=false --browsers=ChromeHeadless
 
+      - name: Compare SQLite upgrades with the original TypeScript migrations
+        run: cargo test --locked -p healthmate-store --test legacy_database -- --ignored
+
       - name: Build web app
         run: npm run build
 
