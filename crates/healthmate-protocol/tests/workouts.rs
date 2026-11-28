@@ -6,7 +6,7 @@ use serde_json::{Value, json};
 
 fn workout() -> Value {
     let schema: Value =
-        serde_json::from_str(include_str!("../../../server/pb_hooks/sync-schema.json")).unwrap();
+        serde_json::from_str(include_str!("../../../schema/workspace.json")).unwrap();
     let mut tables = serde_json::Map::new();
     for (name, _) in schema.as_object().unwrap() {
         tables.insert(name.clone(), json!([]));

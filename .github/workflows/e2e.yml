@@ -21,7 +21,7 @@ jobs:
           curl -fsSL https://github.com/pocketbase/pocketbase/releases/download/v0.40.6/pocketbase_0.40.6_linux_amd64.zip -o "$RUNNER_TEMP/pocketbase.zip"
           echo "0e1f609158ed945f809f8a02ae012aa0427129c66ebb63c1aee76f2c0309373f  $RUNNER_TEMP/pocketbase.zip" | sha256sum -c -
           unzip -q "$RUNNER_TEMP/pocketbase.zip" -d "$RUNNER_TEMP/pocketbase"
-          POCKETBASE_BIN="$RUNNER_TEMP/pocketbase/pocketbase" node --test server/*.test.mjs
+          POCKETBASE_BIN="$RUNNER_TEMP/pocketbase/pocketbase" node --test server/tests/pocketbase/*.test.mjs
 
       - name: Verify Rust import from the PocketBase database
         run: |

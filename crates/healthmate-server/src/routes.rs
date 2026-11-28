@@ -151,7 +151,7 @@ async fn inner(state: Server, request: Request, public: bool, origin_ok: bool) -
         let asset = match path.as_str() {
             "/mealplan-admin.css" => Some((
                 "text/css; charset=utf-8",
-                include_str!("../../../server/pb_public/mealplan-admin.css"),
+                include_str!("../../../server/resources/operations.css"),
             )),
             _ => None,
         };

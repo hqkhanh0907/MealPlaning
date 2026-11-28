@@ -1,5 +1,5 @@
 import type { Database, DatabaseStatement } from '../services/database/database';
-import tableSchema from '../../../../server/pb_hooks/sync-schema.json';
+import tableSchema from '../../../../schema/workspace.json';
 
 const TABLES = Object.keys(tableSchema);
 const mutationTable =

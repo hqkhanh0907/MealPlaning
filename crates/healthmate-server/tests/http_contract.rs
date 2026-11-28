@@ -106,7 +106,7 @@ fn item(value: &Value, key: &str) -> String {
 }
 fn empty() -> Value {
     let schema: Value =
-        serde_json::from_str(include_str!("../../../server/pb_hooks/sync-schema.json")).unwrap();
+        serde_json::from_str(include_str!("../../../schema/workspace.json")).unwrap();
     let tables: serde_json::Map<String, Value> = schema
         .as_object()
         .unwrap()
@@ -609,7 +609,7 @@ async fn imports_real_pocketbase_credentials_workspace_and_device_session() {
     let old = fixture.path().join("pb_data");
     let legacy_bin =
         std::env::var("POCKETBASE_BIN").expect("set POCKETBASE_BIN to PocketBase 0.40.6");
-    let cwd = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../server");
+    let cwd = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../server/tests/pocketbase");
     let dir = format!("--dir={}", old.display());
     let reserve = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
     let addr = reserve.local_addr().unwrap();

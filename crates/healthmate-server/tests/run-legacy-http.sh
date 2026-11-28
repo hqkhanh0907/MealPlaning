@@ -30,6 +30,6 @@ HEALTHMATE_SERVER_BIN=$(realpath "$1")
 POCKETBASE_BIN=$(realpath "$0")
 export HEALTHMATE_SERVER_BIN POCKETBASE_BIN
 test -x "$HEALTHMATE_SERVER_BIN"
-tests=$(dirname "$POCKETBASE_BIN")/../../../server
+tests=$(dirname "$POCKETBASE_BIN")/../../../server/tests/pocketbase
 exec node --test --test-name-pattern='two devices synchronize|device sessions are owner-scoped' \
     "$tests/workspace.test.mjs" "$tests/device-sessions.test.mjs"

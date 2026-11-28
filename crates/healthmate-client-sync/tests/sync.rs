@@ -87,7 +87,7 @@ fn parse(s: Option<&str>) -> Value {
 }
 fn empty() -> Value {
     let schema: Value =
-        serde_json::from_str(include_str!("../../../server/pb_hooks/sync-schema.json")).unwrap();
+        serde_json::from_str(include_str!("../../../schema/workspace.json")).unwrap();
     let tables = schema
         .as_object()
         .unwrap()

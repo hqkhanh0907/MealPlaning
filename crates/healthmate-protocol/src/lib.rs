@@ -47,9 +47,8 @@ struct Table {
 fn schema() -> &'static [Table] {
     static SCHEMA: OnceLock<Vec<Table>> = OnceLock::new();
     SCHEMA.get_or_init(|| {
-        let schema: Value =
-            serde_json::from_str(include_str!("../../../server/pb_hooks/sync-schema.json"))
-                .expect("valid bundled workspace schema");
+        let schema: Value = serde_json::from_str(include_str!("../../../schema/workspace.json"))
+            .expect("valid bundled workspace schema");
         schema
             .as_object()
             .expect("schema tables")

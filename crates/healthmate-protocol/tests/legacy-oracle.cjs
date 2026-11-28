@@ -1,5 +1,5 @@
-const protocol = require("../../../server/pb_hooks/snapshot.js");
-const schema = require("../../../server/pb_hooks/sync-schema.json");
+const protocol = require("../../../server/tests/pocketbase/pb_hooks/snapshot.js");
+const schema = require("../../../schema/workspace.json");
 
 function fresh() {
   return {schemaVersion: 13, tables: Object.fromEntries(Object.keys(schema).map(t => [t, []]))};

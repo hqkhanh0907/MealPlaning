@@ -25,7 +25,7 @@ export function installMealPlanSync(root) {
     readFileSync(join(root, 'src/app/core/services/database/schema.ts'), 'utf8'),
   )?.[1]);
   if (!Number.isSafeInteger(schemaVersion) || schemaVersion < 1) throw new Error('Missing SQLite schema version');
-  const tables = JSON.parse(readFileSync(join(root, 'server/pb_hooks/sync-schema.json'), 'utf8'));
+  const tables = JSON.parse(readFileSync(join(root, 'schema/workspace.json'), 'utf8'));
   const schema = JSON.stringify({ schemaVersion, tables });
   const assets = join(app, 'src/main/assets');
   mkdirSync(assets, { recursive: true });

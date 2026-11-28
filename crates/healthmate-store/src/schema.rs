@@ -46,7 +46,7 @@ pub fn initialize(db: &mut Connection) -> Result<()> {
         INSERT OR IGNORE INTO sync_workspace (id) VALUES (1);",
     )?;
     let tables: BTreeMap<String, IgnoredAny> =
-        serde_json::from_str(include_str!("../../../server/pb_hooks/sync-schema.json"))?;
+        serde_json::from_str(include_str!("../../../schema/workspace.json"))?;
     for table in tables.keys() {
         debug_assert!(table.bytes().all(|b| b.is_ascii_lowercase() || b == b'_'));
         for action in ["insert", "update", "delete"] {

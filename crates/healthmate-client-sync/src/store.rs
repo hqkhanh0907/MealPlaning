@@ -21,9 +21,8 @@ struct Table {
 fn schema() -> &'static [Table] {
     static TABLES: OnceLock<Vec<Table>> = OnceLock::new();
     TABLES.get_or_init(|| {
-        let def: Value =
-            serde_json::from_str(include_str!("../../../server/pb_hooks/sync-schema.json"))
-                .expect("workspace schema");
+        let def: Value = serde_json::from_str(include_str!("../../../schema/workspace.json"))
+            .expect("workspace schema");
         def.as_object()
             .expect("table definitions")
             .iter()
