@@ -7,6 +7,7 @@ use std::{fmt, path::Path, time::Duration};
 pub mod account_auth;
 #[cfg(target_os = "android")]
 mod android;
+pub mod bootstrap;
 pub mod calendar;
 pub mod catalog_read;
 #[cfg(target_os = "android")]
@@ -88,16 +89,20 @@ pub(crate) fn account_database_path(
     owner: &str,
     database: &str,
 ) -> Result<std::path::PathBuf, ReadError> {
-    let flavor = if database == format!("healthmate_{owner}") {
-        DatabaseFlavor::Production
-    } else if database == format!("healthmate_dev_{owner}") {
-        DatabaseFlavor::Development
-    } else {
-        return Err(ReadError::InvalidSession);
-    };
+    let flavor = account_flavor(owner, database)?;
     let path = account_path(directory, owner, flavor).map_err(|_| ReadError::InvalidSession)?;
     if !path.is_file() {
         return Err(ReadError::NotReady);
     }
     Ok(path)
+}
+
+fn account_flavor(owner: &str, database: &str) -> Result<DatabaseFlavor, ReadError> {
+    if database == format!("healthmate_{owner}") {
+        Ok(DatabaseFlavor::Production)
+    } else if database == format!("healthmate_dev_{owner}") {
+        Ok(DatabaseFlavor::Development)
+    } else {
+        Err(ReadError::InvalidSession)
+    }
 }

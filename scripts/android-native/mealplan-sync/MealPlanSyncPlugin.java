@@ -120,6 +120,46 @@ public final class MealPlanSyncPlugin extends Plugin {
     }
 
     private static native String dashboardSummaryNative(String directory, String owner, String dbName, String date) throws IOException;
+    private static native long initializeDatabaseNative(String directory, String owner, String dbName) throws IOException;
+
+    @PluginMethod public void initializeDatabase(PluginCall call) {
+        String owner = call.getString("ownerId");
+        String database = call.getString("database");
+        if (owner == null || database == null || call.getData().length() != 2) {
+            call.reject("Supply the current account and database", "database_invalid_request");
+            return;
+        }
+        CONTROL.execute(() -> {
+            try {
+                SessionVault.Session account = vault.read();
+                String issue = readSessionIssue("database", null, account);
+                if (issue != null || !owner.equals(account.ownerId) || !database.equals(account.dbName)) {
+                    call.reject("Account database changed", issue == null ? "database_session_changed" : issue);
+                    return;
+                }
+                vault.whileCurrent(account, () -> {
+                    SessionVault.Session current = vault.read();
+                    String changed = readSessionIssue("database", account, current);
+                    if (changed != null) {
+                        call.reject("Account database changed", changed);
+                        return null;
+                    }
+                    System.loadLibrary("sqlcipher");
+                    System.loadLibrary("healthmate_capacitor");
+                    String directory = context.getDatabasePath("healthmateSQLite.db").getParent();
+                    long version = initializeDatabaseNative(directory, current.ownerId, current.dbName);
+                    call.resolve(new JSObject().put("ownerId",current.ownerId).put("database",current.dbName).put("version",version));
+                    return null;
+                });
+            } catch (SessionVault.SessionChanged stale) {
+                call.reject("Account database changed", "database_session_changed");
+            } catch (UnsatisfiedLinkError unavailable) {
+                call.reject("Native database initialization unavailable", "database_native_unavailable");
+            } catch (Exception error) {
+                call.reject("Could not initialize the account database", "database_initialization_failed");
+            }
+        });
+    }
     private static native String calendarDaysNative(String directory, String owner, String dbName, String start, String end) throws IOException;
 
     private static native String catalogReadNative(String directory, String owner, String dbName, String command) throws IOException;

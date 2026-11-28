@@ -53,6 +53,7 @@ export class NativeDatabase extends Database {
 
   private async doInitialize(): Promise<void> {
     try {
+      const prepared = await this.prepareRustDatabase();
       const nativeConnection = new SQLiteDBConnection(this.name, DB_READONLY, CapacitorSQLite);
       const nativeState = await nativeConnection.isDBOpen().catch(() => null);
       // A WebView reload loses the JS connection map while Android keeps the open handle.
@@ -68,6 +69,7 @@ export class NativeDatabase extends Database {
 
       if (!nativeState?.result) await this.db.open();
       await this.db.execute('PRAGMA foreign_keys = ON;', false);
+      if (prepared) return;
       if (!nativeState) {
         try {
           await this.db.query('PRAGMA journal_mode = WAL;');
@@ -95,6 +97,28 @@ export class NativeDatabase extends Database {
       throw new Error(
         `Native database initialization failed: ${err instanceof Error ? err.message : String(err)}`,
       );
+    }
+  }
+
+  private async prepareRustDatabase(): Promise<boolean> {
+    if (!this.ownerId) return false;
+    try {
+      const reply = await nativeAccount.initializeDatabase({
+        ownerId: this.ownerId,
+        database: this.name,
+      });
+      if (
+        reply.ownerId !== this.ownerId ||
+        reply.database !== this.name ||
+        reply.version !== SCHEMA_VERSION
+      ) {
+        throw new Error('Unexpected database initialization result.');
+      }
+      return true;
+    } catch (error) {
+      const code = error && typeof error === 'object' && 'code' in error ? error.code : null;
+      if (code === 'UNIMPLEMENTED' || code === 'database_native_unavailable') return false;
+      throw error;
     }
   }
 

@@ -21,6 +21,7 @@ const aarName = `sqlcipher-android-${version}.aar`;
 const expectedHash = 'cc60b1a40d023bec06a1e56740db7172d2516668570140cd9de00ca90f84cd9f';
 const soname = 'libhealthmate_capacitor.so';
 const jniSymbols = [
+  'Java_com_healthmate_ai_sync_MealPlanSyncPlugin_initializeDatabaseNative',
   'Java_com_healthmate_ai_sync_MealPlanAccountPlugin_accountNative',
   'Java_com_healthmate_ai_sync_MealPlanSyncPlugin_catalogReadNative',
   'Java_com_healthmate_ai_sync_MealPlanSyncPlugin_dashboardSummaryNative',

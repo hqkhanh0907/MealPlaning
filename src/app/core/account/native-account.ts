@@ -40,6 +40,10 @@ export interface DeviceSessionSummary {
 }
 
 interface NativeAccount {
+  initializeDatabase(options: {
+    ownerId: string;
+    database: string;
+  }): Promise<{ ownerId: string; database: string; version: number }>;
   catalogRead(options: { ownerId: string; command: CatalogCommand }): Promise<NativeCatalogRead>;
   calendarDays(options: { start: string; end: string }): Promise<NativeCalendarDays>;
   dashboardSummary(options: { date: string }): Promise<NativeDashboardSummary>;
