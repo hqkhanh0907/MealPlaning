@@ -11,8 +11,11 @@ pub mod bootstrap;
 pub mod calendar;
 pub mod catalog_read;
 #[cfg(target_os = "android")]
+mod database_jni;
+#[cfg(target_os = "android")]
 mod groq;
 pub mod profile_data;
+pub mod workout_data;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ReadError {

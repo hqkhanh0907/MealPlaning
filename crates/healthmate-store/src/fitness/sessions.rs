@@ -42,16 +42,7 @@ impl SetInput {
             duration_seconds: self.duration_seconds.map(f64::from),
             rest_seconds: self.rest_seconds.into(),
         };
-        if let Some(issue) = fitness::workout_set_issue(movement, &input) {
-            use fitness::SetIssue::*;
-            return Err(invalid(match issue {
-                Weight => "WorkoutRepository: weight must be between 0 and 500kg.",
-                Duration => "Nhập thời gian tập từ 1 đến 86.400 giây.",
-                Reps => "WorkoutRepository: reps must be an integer between 1 and 100.",
-                Rest => "WorkoutRepository: rest_seconds must be between 0 and 600.",
-            }));
-        }
-        Ok(())
+        validate_set_measurements(movement, &input)
     }
     fn effort_text(&self) -> Option<&'static str> {
         self.effort.map(|v| match v {
@@ -61,6 +52,19 @@ impl SetInput {
             Effort::Maxed => "maxed",
         })
     }
+}
+
+pub fn validate_set_measurements(movement: &str, input: &fitness::WorkoutSetInput) -> Result<()> {
+    if let Some(issue) = fitness::workout_set_issue(movement, input) {
+        use fitness::SetIssue::*;
+        return Err(invalid(match issue {
+            Weight => "WorkoutRepository: weight must be between 0 and 500kg.",
+            Duration => "Nhập thời gian tập từ 1 đến 86.400 giây.",
+            Reps => "WorkoutRepository: reps must be an integer between 1 and 100.",
+            Rest => "WorkoutRepository: rest_seconds must be between 0 and 600.",
+        }));
+    }
+    Ok(())
 }
 
 fn hydrate(db: &Connection, mut session: Value) -> Result<Value> {
@@ -233,13 +237,17 @@ pub fn skip_set(
     reps: f64,
     id: Option<&str>,
 ) -> Result<Value> {
+    append(db, exercise_id, &skipped_set_input(kg, reps), id, None)
+}
+
+pub fn skipped_set_input(kg: f64, reps: f64) -> SetInput {
     let kg = if (0.0..=500.0).contains(&kg) { kg } else { 0.0 };
     let reps = if reps.fract() == 0.0 && (0.0..=100.0).contains(&reps) {
         reps as u32
     } else {
         0
     };
-    append(db, exercise_id, &SetInput::repetitions(kg, reps), id, None)
+    SetInput::repetitions(kg, reps)
 }
 fn append(
     db: &mut Connection,
@@ -249,6 +257,34 @@ fn append(
     completed: Option<&str>,
 ) -> Result<Value> {
     let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
+    let generated;
+    let id = match id {
+        Some(id) => id,
+        None => {
+            generated = Uuid::new_v4().to_string();
+            &generated
+        }
+    };
+    let (result, _) = append_set_on(
+        &tx,
+        exercise_id,
+        id,
+        completed,
+        |_| Ok(input.clone()),
+        || Ok(()),
+    )?;
+    tx.commit()?;
+    Ok(result)
+}
+
+pub fn append_set_on(
+    tx: &rusqlite::Transaction<'_>,
+    exercise_id: &str,
+    id: &str,
+    completed: Option<&str>,
+    build_input: impl FnOnce(&str) -> Result<SetInput>,
+    before_write: impl FnOnce() -> Result<()>,
+) -> Result<(Value, bool)> {
     let (session, movement) = tx
         .query_row(
             "SELECT workout_session_id,exercise_id FROM workout_exercise WHERE id=?1",
@@ -257,8 +293,6 @@ fn append(
         )
         .optional()?
         .ok_or_else(|| invalid("Không tìm thấy bài trong buổi tập."))?;
-    let generated = Uuid::new_v4().to_string();
-    let id = id.unwrap_or(&generated);
     let existing: Option<String> = tx
         .query_row(
             "SELECT workout_exercise_id FROM workout_set WHERE id=?1",
@@ -266,26 +300,28 @@ fn append(
             |r| r.get(0),
         )
         .optional()?;
+    let changed = existing.is_none();
     match existing {
         Some(other) if other != exercise_id => return Err(invalid("Hiệp đã thuộc bài tập khác.")),
         Some(_) => (),
         None => {
-            active_only(&tx, &session)?;
+            active_only(tx, &session)?;
+            let input = build_input(&movement)?;
             if completed.is_some() {
                 input.validate(&movement)?;
             }
+            before_write()?;
             tx.execute("INSERT INTO workout_set(id,workout_exercise_id,set_number,weight_kg,reps,rest_seconds,effort,notes,status,completed_at,duration_seconds)
                 SELECT ?1,?2,COALESCE(MAX(set_number),0)+1,?3,?4,?5,?6,?7,?8,?9,?10 FROM workout_set WHERE workout_exercise_id=?2",
                 params![id,exercise_id,input.weight_kg,input.reps,completed.map(|_|input.rest_seconds),input.effort_text(),input.notes,
                     if completed.is_some(){"logged"}else{"skipped"},completed,input.duration_seconds])?;
-            totals(&tx, &session)?;
+            totals(tx, &session)?;
         }
     }
-    let set = one(&tx, &format!("{SETS} WHERE ws.id=?1"), [id])?
+    let set = one(tx, &format!("{SETS} WHERE ws.id=?1"), [id])?
         .ok_or_else(|| invalid("Không tìm thấy hiệp vừa ghi."))?;
-    let session = required_session(&tx, &session)?;
-    tx.commit()?;
-    Ok(json!({"set":set,"session":session}))
+    let session = required_session(tx, &session)?;
+    Ok((json!({"set":set,"session":session}), changed))
 }
 pub(super) fn totals(db: &Connection, session: &str) -> Result<()> {
     db.execute("UPDATE workout_exercise SET total_volume=(SELECT COALESCE(SUM(ws.weight_kg*ws.reps),0) FROM workout_set ws
@@ -296,7 +332,17 @@ pub(super) fn totals(db: &Connection, session: &str) -> Result<()> {
 }
 pub fn complete_session(db: &mut Connection, id: &str, now_iso: &str) -> Result<()> {
     let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
-    active_only(&tx, id)?;
+    complete_session_on(&tx, id, Some(now_iso), || Ok(()))?;
+    tx.commit()?;
+    Ok(())
+}
+pub fn complete_session_on(
+    tx: &rusqlite::Transaction<'_>,
+    id: &str,
+    now_iso: Option<&str>,
+    before_write: impl FnOnce() -> Result<()>,
+) -> Result<()> {
+    active_only(tx, id)?;
     let logged:bool=tx.query_row("SELECT EXISTS(SELECT 1 FROM workout_set ws JOIN workout_exercise we ON we.id=ws.workout_exercise_id
         WHERE we.workout_session_id=?1 AND ws.status='logged')",[id],|r|r.get(0))?;
     if !logged {
@@ -304,11 +350,14 @@ pub fn complete_session(db: &mut Connection, id: &str, now_iso: &str) -> Result<
             "Cần ghi ít nhất một hiệp trước khi hoàn tất buổi tập.",
         ));
     }
-    totals(&tx, id)?;
-    let duration:i64=tx.query_row("SELECT MAX(1,CAST((ROUND(unixepoch(?1,'subsec')*1000)-ROUND(unixepoch(started_at,'subsec')*1000)+30000)/60000 AS INTEGER))
+    let now_iso = now_iso.ok_or_else(|| invalid("Invalid time value"))?;
+    let duration:Option<i64>=tx.query_row("SELECT MAX(1,CAST((ROUND(unixepoch(?1,'subsec')*1000)-ROUND(
+        CASE WHEN length(started_at)=10 OR upper(substr(started_at,-1))='Z' OR substr(started_at,11) GLOB '*[+-]*'
+        THEN unixepoch(started_at,'subsec') ELSE unixepoch(started_at,'utc','subsec') END *1000)+30000)/60000 AS INTEGER))
         FROM workout_session WHERE id=?2",params![now_iso,id],|r|r.get(0))?;
+    before_write()?;
+    totals(tx, id)?;
     tx.execute("UPDATE workout_session SET completed_at=?1,duration_minutes=?2,status='completed' WHERE id=?3",params![now_iso,duration,id])?;
-    tx.commit()?;
     Ok(())
 }
 
@@ -408,23 +457,46 @@ pub fn revise_completed_set(
     now_iso: &str,
 ) -> Result<Value> {
     let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
+    let (result, _) = revise_completed_set_on(
+        &tx,
+        session,
+        id,
+        now_iso,
+        |_| {
+            let mut input = SetInput::repetitions(kg, reps);
+            input.duration_seconds = duration;
+            Ok(input)
+        },
+        || Ok(()),
+    )?;
+    tx.commit()?;
+    Ok(result)
+}
+pub fn revise_completed_set_on(
+    tx: &rusqlite::Transaction<'_>,
+    session: &str,
+    id: &str,
+    now_iso: &str,
+    build_input: impl FnOnce(&str) -> Result<SetInput>,
+    before_write: impl FnOnce() -> Result<()>,
+) -> Result<(Value, bool)> {
     let row=tx.query_row("SELECT we.id,we.exercise_id,ws.weight_kg,ws.reps,ws.duration_seconds FROM workout_set ws JOIN workout_exercise we ON we.id=ws.workout_exercise_id
         JOIN workout_session s ON s.id=we.workout_session_id WHERE ws.id=?1 AND s.id=?2 AND s.status='completed' AND ws.status='logged' AND ws.legacy_unit_unknown=0",
         params![id,session],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?,r.get::<_,f64>(2)?,r.get::<_,u32>(3)?,r.get::<_,Option<u32>>(4)?))).optional()?;
     let (exercise, movement, old_kg, old_reps, old_duration) = row
         .filter(|r| fitness::is_timed_exercise(&r.1) == r.4.is_some())
         .ok_or_else(|| invalid("Không thể chỉnh hiệp này trong buổi đã hoàn tất."))?;
-    let mut input = SetInput::repetitions(kg, reps);
-    input.duration_seconds = duration;
+    let input = build_input(&movement)?;
+    let (kg, reps, duration) = (input.weight_kg, input.reps, input.duration_seconds);
     input.validate(&movement)?;
-    if old_kg != kg || old_reps != reps || old_duration != duration {
+    let changed = old_kg != kg || old_reps != reps || old_duration != duration;
+    if changed {
+        before_write()?;
         tx.execute("UPDATE workout_set SET weight_kg=?1,reps=?2,duration_seconds=?3,updated_at=?4 WHERE id=?5",params![kg,reps,duration,now_iso,id])?;
-        clear_next_weight(&tx, &exercise)?;
-        totals(&tx, session)?;
+        clear_next_weight(tx, &exercise)?;
+        totals(tx, session)?;
     }
-    let detail = required_session(&tx, session)?;
-    tx.commit()?;
-    Ok(detail)
+    Ok((required_session(tx, session)?, changed))
 }
 pub fn remove_exercise(db: &mut Connection, id: &str) -> Result<()> {
     let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
