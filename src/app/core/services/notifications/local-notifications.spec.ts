@@ -1,5 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { LocalNotifications, capLocalNotifications } from './local-notifications';
+import {
+  LocalNotifications,
+  capLocalNotifications,
+  REMINDER_PLANNER,
+  type ReminderPlan,
+  webReminderPlan,
+} from './local-notifications';
 import { notificationFlags } from './notification-preferences';
 
 describe('LocalNotifications', () => {
@@ -124,6 +130,16 @@ describe('LocalNotifications', () => {
       expect(cancelSpy).toHaveBeenCalledTimes(2);
       expect(scheduleSpy).toHaveBeenCalledTimes(1);
     });
+
+    it('retries the complete replacement after a schedule failure following cancellation', async () => {
+      const error = new Error('Android schedule failed');
+      scheduleSpy.and.returnValues(Promise.reject(error), Promise.resolve({ notifications: [] }));
+      const flags = { morning: true, lunch: false, evening: false, weekly: false };
+      await expectAsync(svc.sync(flags)).toBeRejectedWith(error);
+      await svc.sync(flags);
+      expect(cancelSpy).toHaveBeenCalledTimes(2);
+      expect(scheduleSpy.calls.argsFor(1)).toEqual(scheduleSpy.calls.argsFor(0));
+    });
   });
 
   describe('requestPermission()', () => {
@@ -141,5 +157,29 @@ describe('LocalNotifications', () => {
       requestSpy.and.returnValue(Promise.resolve({ display: 'prompt' }));
       expect(await svc.requestPermission()).toBeFalse();
     });
+  });
+});
+
+describe('Reminder reconciliation across the asynchronous Android planner', () => {
+  it('discards a plan when the account changes while the module loads', async () => {
+    let release!: (result: ReminderPlan) => void;
+    const delayed = new Promise<ReminderPlan>((resolve) => {
+      release = resolve;
+    });
+    TestBed.configureTestingModule({
+      providers: [{ provide: REMINDER_PLANNER, useValue: () => delayed }],
+    });
+    const service = TestBed.inject(LocalNotifications);
+    const cancel = spyOn(capLocalNotifications, 'cancel').and.resolveTo();
+    const schedule = spyOn(capLocalNotifications, 'schedule').and.resolveTo({ notifications: [] });
+    let current = true;
+    const input = { profile: null, granted: true, workoutEnabled: false, days: [] };
+    const queued = service.reconcile(input, () => current);
+    await Promise.resolve();
+    current = false;
+    release(webReminderPlan(input));
+    await queued;
+    expect(cancel).not.toHaveBeenCalled();
+    expect(schedule).not.toHaveBeenCalled();
   });
 });

@@ -1,3 +1,4 @@
+import { loadLeptosModule } from '../../core/leptos-module';
 import type { PendingMealTarget } from '../../core/stores/calendar.store';
 
 export type DashboardAction =
@@ -34,20 +35,6 @@ interface Renderer {
   ): DashboardHandle;
 }
 
-let renderer: Promise<Renderer> | undefined;
-
 export function loadDashboardRenderer(): Promise<Renderer> {
-  if (!renderer) {
-    const moduleUrl = new URL('assets/leptos/healthmate_dashboard.js', document.baseURI);
-    renderer = import(/* webpackIgnore: true */ /* @vite-ignore */ moduleUrl.href)
-      .then(async (module: Renderer) => {
-        await module.default();
-        return module;
-      })
-      .catch((error: unknown) => {
-        renderer = undefined;
-        throw error;
-      });
-  }
-  return renderer;
+  return loadLeptosModule() as Promise<Renderer>;
 }

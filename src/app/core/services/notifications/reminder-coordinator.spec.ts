@@ -5,8 +5,8 @@ import type { ActiveTrainingPlan, TrainingPlanDayWithExercises } from '../../mod
 import type { UserProfile } from '../../models/user-profile.model';
 import { TrainingPlanRepository } from '../../repositories/training-plan.repository';
 import { ProfileStore } from '../../stores/profile.store';
-import { LocalNotifications } from './local-notifications';
-import { notificationFlags, type SlotFlags } from './notification-preferences';
+import { LocalNotifications, webReminderPlan } from './local-notifications';
+import { notificationFlags } from './notification-preferences';
 import { ReminderCoordinator } from './reminder-coordinator';
 
 const ownerA = { id: 'reminderqa00001', username: 'reminder_a', name: 'An' };
@@ -27,9 +27,7 @@ const workout = (day: number): TrainingPlanDayWithExercises =>
   }) as TrainingPlanDayWithExercises;
 const plan = (...days: TrainingPlanDayWithExercises[]): ActiveTrainingPlan =>
   ({ days }) as ActiveTrainingPlan;
-type Scheduler = Pick<LocalNotifications, 'hasPermission'> & {
-  sync(flags: SlotFlags, weekdays?: readonly number[], isCurrent?: () => boolean): Promise<void>;
-};
+type Scheduler = Pick<LocalNotifications, 'hasPermission' | 'sync' | 'reconcile'>;
 
 function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
   let resolve!: (value: T) => void;
@@ -53,9 +51,11 @@ describe('ReminderCoordinator', () => {
     notifications = jasmine.createSpyObj<Scheduler>('LocalNotifications', [
       'hasPermission',
       'sync',
+      'reconcile',
     ]);
     notifications.hasPermission.and.resolveTo(true);
     notifications.sync.and.resolveTo();
+    notifications.reconcile.and.resolveTo();
     plans = jasmine.createSpyObj<TrainingPlanRepository>('TrainingPlanRepository', [
       'getActivePlan',
     ]);
@@ -116,9 +116,10 @@ describe('ReminderCoordinator', () => {
     await coordinator.refresh(true);
 
     expect(notifications.hasPermission).not.toHaveBeenCalled();
-    expect(notifications.sync.calls.allArgs()).toEqual([
-      [notificationFlags(profile), [0, 6], jasmine.any(Function)],
-    ]);
+    const [input, current] = notifications.reconcile.calls.mostRecent().args;
+    expect(current?.()).toBeTrue();
+    expect(input.days.length).toBe(8);
+    expect(webReminderPlan(input).notifications.map((n) => n.id)).toEqual([101, 104, 151, 157]);
   });
 
   it('does not initialize training data when disabled, signed out, missing a profile, or denied', async () => {
@@ -134,8 +135,12 @@ describe('ReminderCoordinator', () => {
     expect(createPlans).not.toHaveBeenCalled();
     expect(notifications.hasPermission).not.toHaveBeenCalled();
     expect(notifications.sync.calls.allArgs().map((args) => args.slice(0, 2))).toEqual([
-      [notificationFlags(profile), []],
-      ...Array.from({ length: 3 }, () => [notificationFlags(null), []]),
+      [notificationFlags(null), []],
+      [notificationFlags(null), []],
+    ]);
+    expect(notifications.reconcile.calls.allArgs().map(([input]) => input.granted)).toEqual([
+      true,
+      false,
     ]);
   });
 
@@ -145,9 +150,11 @@ describe('ReminderCoordinator', () => {
 
     expect(notifications.hasPermission).toHaveBeenCalledOnceWith();
     expect(plans.getActivePlan).toHaveBeenCalledOnceWith();
-    expect(notifications.sync.calls.allArgs()).toEqual([
-      [notificationFlags(profile), [], jasmine.any(Function)],
-    ]);
+    expect(
+      webReminderPlan(notifications.reconcile.calls.mostRecent().args[0]).notifications.map(
+        (n) => n.id,
+      ),
+    ).toEqual([101, 104]);
   });
 
   it('ignores an earlier permission result when a newer same-owner request denies scheduling', async () => {
@@ -160,9 +167,8 @@ describe('ReminderCoordinator', () => {
     await earlier;
 
     expect(createPlans).not.toHaveBeenCalled();
-    expect(notifications.sync.calls.allArgs()).toEqual([
-      [notificationFlags(null), [], jasmine.any(Function)],
-    ]);
+    expect(notifications.reconcile.calls.count()).toBe(1);
+    expect(notifications.reconcile.calls.mostRecent().args[0].granted).toBeFalse();
   });
 
   it('discards a pending plan result when the account changes', async () => {
@@ -177,9 +183,9 @@ describe('ReminderCoordinator', () => {
     queued.resolve(plan(workout(3)));
     await earlier;
 
-    expect(notifications.sync.calls.allArgs()).toEqual([
-      [notificationFlags(profile), [], jasmine.any(Function)],
-    ]);
+    expect(notifications.reconcile.calls.count()).toBe(1);
+    expect(notifications.reconcile.calls.mostRecent().args[0].days).toEqual([]);
+    expect(notifications.reconcile.calls.mostRecent().args[0].workoutEnabled).toBeFalse();
   });
 
   it('invalidates requests before sign-out and ignores refresh while alarms are being cleared', async () => {
@@ -198,6 +204,7 @@ describe('ReminderCoordinator', () => {
 
     expect(createPlans).not.toHaveBeenCalled();
     expect(notifications.sync).toHaveBeenCalledTimes(1);
+    expect(notifications.reconcile).not.toHaveBeenCalled();
     expect(notifications.sync.calls.mostRecent().args[0]).toEqual(notificationFlags(null));
     expect(coordinator.workoutEnabled()).toBeTrue();
   });

@@ -13,6 +13,8 @@ mod photo;
 #[cfg(target_arch = "wasm32")]
 mod region;
 #[cfg(target_arch = "wasm32")]
+mod reminder_rules;
+#[cfg(target_arch = "wasm32")]
 mod settings;
 mod view;
 #[cfg(target_arch = "wasm32")]

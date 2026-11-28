@@ -5,6 +5,7 @@ pub mod nutrition;
 pub mod profile;
 pub mod progress;
 pub mod recommendation;
+pub mod reminders;
 
 fn js_round(value: f64) -> f64 {
     let floor = value.floor();
