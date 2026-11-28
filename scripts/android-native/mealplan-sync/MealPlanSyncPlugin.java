@@ -118,6 +118,8 @@ public final class MealPlanSyncPlugin extends Plugin {
     private static native String dashboardSummaryNative(String directory, String owner, String dbName, String date) throws IOException;
     private static native String calendarDaysNative(String directory, String owner, String dbName, String start, String end) throws IOException;
 
+    private static native String catalogReadNative(String directory, String owner, String dbName, String command) throws IOException;
+
     private interface AccountRead {
         String load(String directory, SessionVault.Session session) throws IOException;
     }
@@ -154,6 +156,19 @@ public final class MealPlanSyncPlugin extends Plugin {
         }
         requestRead(call, "Dashboard", (directory, session) ->
             dashboardSummaryNative(directory, session.ownerId, session.dbName, date));
+    }
+
+    @PluginMethod public void catalogRead(PluginCall call) {
+        String owner = call.getString("ownerId");
+        JSONObject command = call.getObject("command");
+        if (owner == null || command == null || call.getData().length() != 2) {
+            call.reject("Supply an account and a catalog command", "catalog_invalid_request");
+            return;
+        }
+        requestRead(call, "Catalog", (directory, session) -> {
+            if (!session.ownerId.equals(owner)) throw new SecurityException("Catalog account changed");
+            return catalogReadNative(directory, session.ownerId, session.dbName, command.toString());
+        });
     }
 
     @PluginMethod public void calendarDays(PluginCall call) {

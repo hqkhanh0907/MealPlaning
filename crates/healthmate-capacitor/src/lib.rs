@@ -7,6 +7,7 @@ use std::{fmt, path::Path, time::Duration};
 #[cfg(target_os = "android")]
 mod android;
 pub mod calendar;
+pub mod catalog_read;
 #[cfg(target_os = "android")]
 mod groq;
 pub mod profile_data;

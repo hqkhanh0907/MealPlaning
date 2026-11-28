@@ -1,3 +1,4 @@
+import type { CatalogCommand, NativeCatalogRead } from './catalog-read';
 import { registerPlugin } from '@capacitor/core';
 import { type WorkoutConflictResolution, type WorkoutSyncConflict } from './workout-sync-conflict';
 import type { NativeDashboardSummary } from './dashboard-read';
@@ -39,6 +40,7 @@ export interface DeviceSessionSummary {
 }
 
 interface NativeAccount {
+  catalogRead(options: { ownerId: string; command: CatalogCommand }): Promise<NativeCatalogRead>;
   calendarDays(options: { start: string; end: string }): Promise<NativeCalendarDays>;
   dashboardSummary(options: { date: string }): Promise<NativeDashboardSummary>;
   configure(options: {

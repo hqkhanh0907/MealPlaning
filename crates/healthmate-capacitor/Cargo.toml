@@ -12,6 +12,7 @@ crate-type = ["rlib", "cdylib"]
 healthmate-store = { path = "../healthmate-store" }
 healthmate-domain = { path = "../healthmate-domain" }
 serde_json = "1"
+unicode-normalization = "0.1"
 
 [target.'cfg(not(target_os = "android"))'.dependencies]
 rusqlite = { version = "=0.43.0", features = ["bundled"] }

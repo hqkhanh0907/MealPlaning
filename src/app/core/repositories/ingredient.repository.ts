@@ -1,5 +1,7 @@
 import { inject, Injectable } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import { v4 as uuidv4 } from 'uuid';
+import { CatalogRead, type CatalogCommand, type CatalogValue } from '../account/catalog-read';
 import type { IngredientModel } from '../models/management.model';
 import { Database } from '../services/database/database';
 import { normalize as normalizeForMatch } from '../utils/fuzzy-match';
@@ -33,26 +35,36 @@ const INGREDIENT_UPDATE_COLUMNS = new Set<string>([
 @Injectable({ providedIn: 'root' })
 export class IngredientRepository {
   private readonly db = inject(Database);
+  private readonly native = Capacitor.getPlatform() === 'android' ? inject(CatalogRead) : null;
+
+  private read<C extends CatalogCommand>(
+    command: C,
+    local: () => Promise<CatalogValue<C>>,
+  ): Promise<CatalogValue<C>> {
+    return this.native ? this.native.run(this.db, command, local) : local();
+  }
 
   async list(): Promise<IngredientListItem[]> {
-    return this.db.query<IngredientRow>(
-      'SELECT * FROM ingredient ORDER BY name COLLATE NOCASE ASC',
+    return this.read({ op: 'list' }, () =>
+      this.db.query<IngredientRow>('SELECT * FROM ingredient ORDER BY name COLLATE NOCASE ASC'),
     );
   }
 
   async searchByName(query: string): Promise<IngredientListItem[]> {
-    const term = normalizeForMatch(query);
-    const rows = await this.db.query<IngredientRow & { direct_match: number }>(
-      'SELECT *, name LIKE ? AS direct_match FROM ingredient ORDER BY name COLLATE NOCASE ASC',
-      [`%${query}%`],
-    );
-    const matches: IngredientListItem[] = [];
-    for (const { direct_match, ...ingredient } of rows) {
-      if (direct_match || (term && normalizeForMatch(ingredient.name).includes(term))) {
-        matches.push(ingredient);
+    return this.read({ op: 'searchByName', query }, async () => {
+      const term = normalizeForMatch(query);
+      const rows = await this.db.query<IngredientRow & { direct_match: number }>(
+        'SELECT *, name LIKE ? AS direct_match FROM ingredient ORDER BY name COLLATE NOCASE ASC',
+        [`%${query}%`],
+      );
+      const matches: IngredientListItem[] = [];
+      for (const { direct_match, ...ingredient } of rows) {
+        if (direct_match || (term && normalizeForMatch(ingredient.name).includes(term))) {
+          matches.push(ingredient);
+        }
       }
-    }
-    return matches;
+      return matches;
+    });
   }
 
   /**
@@ -60,8 +72,9 @@ export class IngredientRepository {
    * Used by the ingredient picker in dish-edit to surface "Gần đây".
    */
   async findRecentlyUsed(limit: number): Promise<IngredientListItem[]> {
-    return this.db.query<IngredientRow>(
-      `SELECT i.*
+    return this.read({ op: 'findRecentlyUsed', limit }, () =>
+      this.db.query<IngredientRow>(
+        `SELECT i.*
        FROM ingredient i
        INNER JOIN (
          SELECT di.ingredient_id,
@@ -72,16 +85,19 @@ export class IngredientRepository {
        ) recent ON recent.ingredient_id = i.id
        ORDER BY recent.last_used DESC
        LIMIT ?`,
-      [limit],
+        [limit],
+      ),
     );
   }
 
   async getById(id: string): Promise<IngredientListItem | null> {
-    const ingredient = await this.db.getOne<IngredientRow>(
-      'SELECT * FROM ingredient WHERE id = ?',
-      [id],
-    );
-    return ingredient ?? null;
+    return this.read({ op: 'getById', id }, async () => {
+      const ingredient = await this.db.getOne<IngredientRow>(
+        'SELECT * FROM ingredient WHERE id = ?',
+        [id],
+      );
+      return ingredient ?? null;
+    });
   }
 
   /**
@@ -93,40 +109,40 @@ export class IngredientRepository {
     if (ids.length === 0) {
       return [];
     }
-    const placeholders = ids.map(() => '?').join(',');
-    const rows = await this.db.query<IngredientRow>(
-      `SELECT * FROM ingredient WHERE id IN (${placeholders})`,
-      [...ids],
-    );
-    const byId = new Map(rows.map((row) => [row.id, row]));
-    const ordered: IngredientListItem[] = [];
-    for (const id of ids) {
-      const row = byId.get(id);
-      if (row) ordered.push(row);
-    }
-    return ordered;
+    return this.read({ op: 'findByIds', ids }, async () => {
+      const placeholders = ids.map(() => '?').join(',');
+      const rows = await this.db.query<IngredientRow>(
+        `SELECT * FROM ingredient WHERE id IN (${placeholders})`,
+        [...ids],
+      );
+      const byId = new Map(rows.map((row) => [row.id, row]));
+      const ordered: IngredientListItem[] = [];
+      for (const id of ids) {
+        const row = byId.get(id);
+        if (row) ordered.push(row);
+      }
+      return ordered;
+    });
   }
 
   /**
    * Tìm ingredient có tên trùng (case-insensitive + bỏ dấu) với `name`.
    * Dùng cho F-02 trước khi insert ingredient mới từ AI để tránh duplicate.
-   *
-   * Implementation: load list của tất cả ingredient + so sánh normalized
-   * client-side (SQLite không có hàm Vietnamese-aware built-in). Volume
-   * thực tế ~vài trăm row, cost negligible. Stop ở match đầu tiên.
    */
   async findByExactName(name: string): Promise<IngredientListItem | null> {
     const normalizedTarget = normalizeForMatch(name);
     if (normalizedTarget === '') {
       return null;
     }
-    const all = await this.db.query<IngredientRow>('SELECT * FROM ingredient');
-    for (const row of all) {
-      if (normalizeForMatch(row.name) === normalizedTarget) {
-        return row;
+    return this.read({ op: 'findByExactName', name }, async () => {
+      const all = await this.db.query<IngredientRow>('SELECT * FROM ingredient');
+      for (const row of all) {
+        if (normalizeForMatch(row.name) === normalizedTarget) {
+          return row;
+        }
       }
-    }
-    return null;
+      return null;
+    });
   }
 
   async insert(data: CreateIngredientInput): Promise<IngredientListItem> {
@@ -189,10 +205,12 @@ export class IngredientRepository {
   }
 
   async countDishReferences(id: string): Promise<number> {
-    const row = await this.db.getOne<{ ref_count: number }>(
-      'SELECT COUNT(*) AS ref_count FROM dish_ingredient WHERE ingredient_id = ?',
-      [id],
-    );
-    return row?.ref_count ?? 0;
+    return this.read({ op: 'countDishReferences', id }, async () => {
+      const row = await this.db.getOne<{ ref_count: number }>(
+        'SELECT COUNT(*) AS ref_count FROM dish_ingredient WHERE ingredient_id = ?',
+        [id],
+      );
+      return row?.ref_count ?? 0;
+    });
   }
 }
