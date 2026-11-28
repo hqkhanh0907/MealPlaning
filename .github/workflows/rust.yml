@@ -34,3 +34,5 @@ jobs:
       - run: rustup toolchain install 1.100.1 --profile minimal --component rustfmt
       - run: cargo fmt --all -- --check
       - run: cargo test --locked --workspace
+      - run: cargo build --locked --bin healthmate-server
+      - run: crates/healthmate-server/tests/run-legacy-http.sh target/debug/healthmate-server
