@@ -116,19 +116,32 @@ public final class MealPlanSyncPlugin extends Plugin {
     }
 
     private static native String dashboardSummaryNative(String directory, String owner, String dbName, String date) throws IOException;
+    private static native String calendarDaysNative(String directory, String owner, String dbName, String start, String end) throws IOException;
+
+    private interface AccountRead {
+        String load(String directory, SessionVault.Session session) throws IOException;
+    }
 
     static String dashboardSessionIssue(SessionVault.Session expected, SessionVault.Session current) {
+        return readSessionIssue("dashboard", expected, current);
+    }
+
+    private static String readSessionIssue(String scope, SessionVault.Session expected, SessionVault.Session current) {
         if (current == null || current.generation.isEmpty()) {
-            return expected == null ? "dashboard_session_required" : "dashboard_session_changed";
+            return scope + (expected == null ? "_session_required" : "_session_changed");
         }
         if (expected != null && (!expected.ownerId.equals(current.ownerId) ||
-            !expected.generation.equals(current.generation) || !expected.dbName.equals(current.dbName))) return "dashboard_session_changed";
-        if ("session_revoked".equals(current.reason)) return "dashboard_session_revoked";
-        return expected != null && !expected.reason.equals(current.reason) ? "dashboard_session_changed" : null;
+            !expected.generation.equals(current.generation) || !expected.dbName.equals(current.dbName))) return scope + "_session_changed";
+        if ("session_revoked".equals(current.reason)) return scope + "_session_revoked";
+        return expected != null && !expected.reason.equals(current.reason) ? scope + "_session_changed" : null;
     }
 
     static String bindDashboardOwner(SessionVault.Session expected, SessionVault.Session current, JSObject snapshot) {
-        String issue = dashboardSessionIssue(expected, current);
+        return bindReadOwner("dashboard", expected, current, snapshot);
+    }
+
+    private static String bindReadOwner(String scope, SessionVault.Session expected, SessionVault.Session current, JSObject snapshot) {
+        String issue = readSessionIssue(scope, expected, current);
         if (issue == null) snapshot.put("ownerId", current.ownerId);
         return issue;
     }
@@ -139,43 +152,60 @@ public final class MealPlanSyncPlugin extends Plugin {
             call.reject("Supply a calendar date only", "dashboard_invalid_date");
             return;
         }
+        requestRead(call, "Dashboard", (directory, session) ->
+            dashboardSummaryNative(directory, session.ownerId, session.dbName, date));
+    }
+
+    @PluginMethod public void calendarDays(PluginCall call) {
+        String start = call.getString("start");
+        String end = call.getString("end");
+        if (start == null || end == null || call.getData().length() != 2) {
+            call.reject("Supply start and end dates only", "calendar_invalid_date");
+            return;
+        }
+        requestRead(call, "Calendar", (directory, session) ->
+            calendarDaysNative(directory, session.ownerId, session.dbName, start, end));
+    }
+
+    private void requestRead(PluginCall call, String label, AccountRead query) {
+        String scope = label.toLowerCase(java.util.Locale.ROOT);
         try {
             SessionVault.Session expected = vault.read();
-            String issue = dashboardSessionIssue(null, expected);
+            String issue = readSessionIssue(scope, null, expected);
             if (issue != null) {
-                call.reject("Dashboard session unavailable", issue);
+                call.reject(label + " session unavailable", issue);
                 return;
             }
-            DASHBOARD.execute(() -> readDashboard(call, expected, date));
+            DASHBOARD.execute(() -> readSnapshot(call, expected, scope, label, query));
         } catch (Exception unavailable) {
-            call.reject("Could not read the local session", "dashboard_session_required");
+            call.reject("Could not read the local session", scope + "_session_required");
         }
     }
 
-    private void readDashboard(PluginCall call, SessionVault.Session expected, String date) {
+    private void readSnapshot(PluginCall call, SessionVault.Session expected, String scope, String label, AccountRead query) {
         try {
             String directory = context.getDatabasePath("healthmateSQLite.db").getParent();
             System.loadLibrary("sqlcipher");
             System.loadLibrary("healthmate_capacitor");
-            JSObject snapshot = new JSObject(dashboardSummaryNative(directory, expected.ownerId, expected.dbName, date));
+            JSObject snapshot = new JSObject(query.load(directory, expected));
             vault.whileCurrent(expected, () -> {
-                String issue = bindDashboardOwner(expected, vault.read(), snapshot);
+                String issue = bindReadOwner(scope, expected, vault.read(), snapshot);
                 if (issue == null) call.resolve(snapshot);
-                else call.reject("Dashboard session unavailable", issue);
+                else call.reject(label + " session unavailable", issue);
                 return null;
             });
         } catch (SessionVault.SessionChanged stale) {
-            call.reject("The active session changed", "dashboard_session_changed");
+            call.reject("The active session changed", scope + "_session_changed");
         } catch (IllegalArgumentException invalid) {
-            call.reject("Invalid dashboard date", "dashboard_invalid_date");
+            call.reject("Invalid " + scope + " date", scope + "_invalid_date");
         } catch (SecurityException invalid) {
-            call.reject("Invalid account database binding", "dashboard_session_changed");
+            call.reject("Invalid account database binding", scope + "_session_changed");
         } catch (FileNotFoundException unavailable) {
-            call.reject("Account database not ready", "dashboard_database_unavailable");
+            call.reject("Account database not ready", scope + "_database_unavailable");
         } catch (UnsatisfiedLinkError unavailable) {
-            call.reject("Dashboard native library unavailable", "dashboard_native_unavailable");
+            call.reject(label + " native library unavailable", scope + "_native_unavailable");
         } catch (Exception failure) {
-            call.reject("Could not read local dashboard", "dashboard_read_failed");
+            call.reject("Could not read local " + scope, scope + "_read_failed");
         }
     }
 

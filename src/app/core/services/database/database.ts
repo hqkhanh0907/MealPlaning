@@ -12,6 +12,8 @@ export interface DatabaseStatement {
 }
 
 export abstract class Database {
+  abstract readonly hasActiveTransaction: boolean;
+
   /**
    * Initialize the database: open connection, run schema DDL + migrations.
    * Must be called once at app startup before any queries.

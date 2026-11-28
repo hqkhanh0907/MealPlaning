@@ -1,4 +1,7 @@
 import { inject, Injectable } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
+import { AccountSession } from '../account/account-session';
+import { NATIVE_CALENDAR_READ } from '../account/calendar-read';
 import { v4 as uuidv4 } from 'uuid';
 import {
   MEAL_TYPES,
@@ -52,6 +55,8 @@ interface PlannedDishWithEffectiveAndSlot extends PlannedDishWithEffective {
 @Injectable({ providedIn: 'root' })
 export class DayPlanRepository {
   private readonly db = inject(Database);
+  private readonly readNative = inject(NATIVE_CALENDAR_READ);
+  private readonly session = Capacitor.getPlatform() === 'android' ? inject(AccountSession) : null;
   private readonly pendingByDate = new Map<string, Promise<DayPlan>>();
 
   getOrCreateForDate(date: string): Promise<DayPlan> {
@@ -95,6 +100,21 @@ export class DayPlanRepository {
    * day has not been created yet (UI shows empty state — Story 3.7).
    */
   async findByDate(date: string): Promise<DayPlanWithSlots | null> {
+    return this.forCurrentAccount((owner) => this.findDay(date, owner));
+  }
+
+  private async findDay(date: string, owner: string | null): Promise<DayPlanWithSlots | null> {
+    if (owner !== null && !this.db.hasActiveTransaction) {
+      const creating = this.pendingByDate.get(date);
+      if (creating) await creating;
+      let days = await this.readNative(date, date, owner);
+      const pending = this.pendingByDate.get(date);
+      if (days !== null && pending && pending !== creating) {
+        await pending;
+        days = await this.readNative(date, date, owner);
+      }
+      if (days !== null && !this.db.hasActiveTransaction) return days[0] ?? null;
+    }
     const existing = await this.db.getOne<DayPlan>('SELECT * FROM day_plan WHERE date = ?', [date]);
     const pending = this.pendingByDate.get(date);
     const dayPlan = pending ? await pending : existing;
@@ -110,6 +130,16 @@ export class DayPlanRepository {
    * synthesized (caller decides how to render gaps).
    */
   async findByDateRange(start: string, end: string): Promise<DayPlanWithSlots[]> {
+    return this.forCurrentAccount(async (owner) => {
+      if (owner !== null && !this.db.hasActiveTransaction) {
+        const native = await this.readNative(start, end, owner);
+        if (native !== null && !this.db.hasActiveTransaction) return native;
+      }
+      return this.findRangeInDatabase(start, end);
+    });
+  }
+
+  private async findRangeInDatabase(start: string, end: string): Promise<DayPlanWithSlots[]> {
     const dayPlans = await this.db.query<DayPlan>(
       'SELECT * FROM day_plan WHERE date BETWEEN ? AND ? ORDER BY date ASC',
       [start, end],
@@ -122,6 +152,15 @@ export class DayPlanRepository {
   }
 
   // -- internals --------------------------------------------------------------
+
+  private async forCurrentAccount<T>(read: (owner: string | null) => Promise<T>): Promise<T> {
+    if (!this.session) return read(null);
+    const account = this.session.current();
+    if (!account) throw new Error('A current calendar account is required.');
+    const result = await read(account.id);
+    if (this.session.current() !== account) throw new Error('Calendar account changed.');
+    return result;
+  }
 
   private async assembleDayPlan(dayPlan: DayPlan): Promise<DayPlanWithSlots> {
     const slots = await this.db.query<MealSlot>(

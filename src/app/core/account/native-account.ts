@@ -1,6 +1,7 @@
 import { registerPlugin } from '@capacitor/core';
 import { type WorkoutConflictResolution, type WorkoutSyncConflict } from './workout-sync-conflict';
 import type { NativeDashboardSummary } from './dashboard-read';
+import type { NativeCalendarDays } from './calendar-read';
 
 export type SyncStatus =
   | 'idle'
@@ -38,6 +39,7 @@ export interface DeviceSessionSummary {
 }
 
 interface NativeAccount {
+  calendarDays(options: { start: string; end: string }): Promise<NativeCalendarDays>;
   dashboardSummary(options: { date: string }): Promise<NativeDashboardSummary>;
   configure(options: {
     origin: string;

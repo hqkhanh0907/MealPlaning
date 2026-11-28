@@ -20,7 +20,11 @@ const version = '4.10.0';
 const aarName = `sqlcipher-android-${version}.aar`;
 const expectedHash = 'cc60b1a40d023bec06a1e56740db7172d2516668570140cd9de00ca90f84cd9f';
 const soname = 'libhealthmate_capacitor.so';
-const jniSymbol = 'Java_com_healthmate_ai_sync_MealPlanSyncPlugin_dashboardSummaryNative';
+const jniSymbols = [
+  'Java_com_healthmate_ai_sync_MealPlanSyncPlugin_dashboardSummaryNative',
+  'Java_com_healthmate_ai_sync_MealPlanSyncPlugin_calendarDaysNative',
+  'Java_com_healthmate_ai_sync_GroqTransport_decodeContentNative',
+];
 const abis = new Map([
   ['arm64-v8a', ['aarch64-linux-android', 'aarch64-linux-android']],
   ['armeabi-v7a', ['armv7-linux-androideabi', 'armv7a-linux-androideabi']],
@@ -113,15 +117,13 @@ function verify(library, provider, readelf) {
   )
     throw Error('Rust must share the Capacitor SQLCipher runtime');
   const dynamicSymbols = text('--dyn-syms', '--wide', library);
-  if (
-    !dynamicSymbols
-      .split('\n')
-      .some(
-        (l) =>
-          l.includes('GLOBAL') && !l.includes(' UND ') && l.trimEnd().endsWith(' ' + jniSymbol),
-      )
-  )
-    throw Error('JNI dashboard method missing');
+  const exports = dynamicSymbols
+    .split('\n')
+    .filter((line) => line.includes('GLOBAL') && !line.includes(' UND '));
+  for (const symbol of jniSymbols) {
+    if (!exports.some((line) => line.trimEnd().endsWith(' ' + symbol)))
+      throw Error('Missing JNI method: ' + symbol);
+  }
   const providerSymbols = new Set(
     text('--dyn-syms', '--wide', provider)
       .split('\n')

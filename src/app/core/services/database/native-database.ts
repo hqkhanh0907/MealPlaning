@@ -34,6 +34,9 @@ export class NativeDatabase extends Database {
   private db: SQLiteDBConnection | null = null;
   private initPromise: Promise<void> | null = null;
   private transactionDepth = 0;
+  override get hasActiveTransaction(): boolean {
+    return this.transactionDepth > 0;
+  }
   private workspaceTransaction = false;
 
   constructor(

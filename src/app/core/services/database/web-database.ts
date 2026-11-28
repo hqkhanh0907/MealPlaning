@@ -13,6 +13,9 @@ import { MIGRATION_REGISTRY } from './migrations';
 export class WebDatabase extends Database {
   private db: SqlJsDatabase | null = null;
   private transactionDepth = 0;
+  override get hasActiveTransaction(): boolean {
+    return this.transactionDepth > 0;
+  }
 
   override async initialize(): Promise<void> {
     try {

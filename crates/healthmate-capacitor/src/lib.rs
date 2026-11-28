@@ -6,6 +6,7 @@ use std::{fmt, path::Path, time::Duration};
 
 #[cfg(target_os = "android")]
 mod android;
+pub mod calendar;
 #[cfg(target_os = "android")]
 mod groq;
 
@@ -36,17 +37,30 @@ pub fn read_dashboard(
     date: &str,
 ) -> Result<Value, ReadError> {
     parse_local_date(date).ok_or(ReadError::InvalidDate)?;
-    let flavor = if database == format!("healthmate_{owner}") {
-        DatabaseFlavor::Production
-    } else if database == format!("healthmate_dev_{owner}") {
-        DatabaseFlavor::Development
-    } else {
-        return Err(ReadError::InvalidSession);
-    };
-    let path = account_path(directory, owner, flavor).map_err(|_| ReadError::InvalidSession)?;
-    if !path.is_file() {
-        return Err(ReadError::NotReady);
-    }
+    read_account(directory, owner, database, |db| {
+        let mut data =
+            healthmate_store::dashboard::summary(db, date).map_err(|_| ReadError::Query)?;
+        let latest = db.query_row(
+            "SELECT date,total_volume FROM workout_session WHERE completed_at IS NOT NULL ORDER BY date DESC,completed_at DESC LIMIT 1",
+            [],
+            |row| {
+                let date: String = row.get(0)?;
+                let volume: f64 = row.get(1)?;
+                Ok(json!({"date":date, "total_volume":volume}))
+            },
+        ).optional().map_err(|_| ReadError::Query)?;
+        data["lastSession"] = latest.unwrap_or(Value::Null);
+        Ok(data)
+    })
+}
+
+pub(crate) fn read_account<T>(
+    directory: &Path,
+    owner: &str,
+    database: &str,
+    read: impl FnOnce(&Connection) -> Result<T, ReadError>,
+) -> Result<T, ReadError> {
+    let path = account_database_path(directory, owner, database)?;
     let mut db = Connection::open_with_flags(
         path,
         OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
@@ -61,12 +75,26 @@ pub fn read_dashboard(
     if version != SCHEMA_VERSION {
         return Err(ReadError::NotReady);
     }
-    let mut data = healthmate_store::dashboard::summary(&tx, date).map_err(|_| ReadError::Query)?;
-    let latest=tx.query_row("SELECT date,total_volume FROM workout_session WHERE completed_at IS NOT NULL ORDER BY date DESC,completed_at DESC LIMIT 1",[],|row|{
-        let date:String=row.get(0)?;let volume:f64=row.get(1)?;
-        Ok(json!({"date":date,"total_volume":volume}))
-    }).optional().map_err(|_|ReadError::Query)?;
-    data["lastSession"] = latest.unwrap_or(Value::Null);
+    let result = read(&tx)?;
     tx.commit().map_err(|_| ReadError::Query)?;
-    Ok(data)
+    Ok(result)
+}
+
+pub(crate) fn account_database_path(
+    directory: &Path,
+    owner: &str,
+    database: &str,
+) -> Result<std::path::PathBuf, ReadError> {
+    let flavor = if database == format!("healthmate_{owner}") {
+        DatabaseFlavor::Production
+    } else if database == format!("healthmate_dev_{owner}") {
+        DatabaseFlavor::Development
+    } else {
+        return Err(ReadError::InvalidSession);
+    };
+    let path = account_path(directory, owner, flavor).map_err(|_| ReadError::InvalidSession)?;
+    if !path.is_file() {
+        return Err(ReadError::NotReady);
+    }
+    Ok(path)
 }
