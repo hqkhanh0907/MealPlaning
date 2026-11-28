@@ -50,6 +50,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+      - uses: android-actions/setup-android@v3
       - name: Package the API 37 application with its ARM64 Rust library
         run: |
           sdkmanager 'platforms;android-37.0' 'ndk;30.0.16248370'
