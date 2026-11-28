@@ -53,19 +53,23 @@ public final class MealPlanSyncPlugin extends Plugin {
         });
     }
 
+    private static JSObject publicSession(SessionVault.Session account) {
+        return account.publicData(!MealPlanAccountPlugin.available());
+    }
+
     @PluginMethod public void session(PluginCall call) {
         boolean renew = Boolean.TRUE.equals(call.getBoolean("renew", false));
         run(call, renew ? NETWORK : CONTROL, () -> {
             SessionVault.Session account = vault.read();
             if (account == null) return new JSObject();
-            if (!renew) return account.publicData();
+            if (!renew) return publicSession(account);
             try {
-                return new SessionAuthorizer(vault).get(account, null).publicData();
+                return publicSession(new SessionAuthorizer(vault).get(account, null));
             } catch (SessionAuthorizer.Reauthentication expired) {
-                return vault.whileCurrent(account, () -> vault.read().publicData());
+                return vault.whileCurrent(account, () -> publicSession(vault.read()));
             } catch (IOException offline) {
                 return vault.whileCurrent(account, () -> {
-                    JSObject result = vault.read().publicData();
+                    JSObject result = publicSession(vault.read());
                     result.put("reason", "offline");
                     return result;
                 });
@@ -242,11 +246,18 @@ public final class MealPlanSyncPlugin extends Plugin {
     }
 
     @PluginMethod public void clear(PluginCall call) {
+        final long ticket;
+        try {
+            ticket = vault.beginClear(call.getString("ownerId"), call.getString("generation"));
+        } catch (Exception stale) {
+            call.reject("Account session changed", "account_changed");
+            return;
+        }
         run(call, CONTROL, () -> {
             SessionVault.Session account = null;
-            try { account = vault.clear(); }
+            try { account = vault.clearAfter(ticket, () -> new SyncProgress(context).cancel()); }
+            catch (SessionVault.SessionChanged changed) { throw changed; }
             catch (Exception invalid) { Log.w("MealPlanSync", "cleared unavailable session"); }
-            new SyncProgress(context).cancel();
             if (account != null) {
                 SessionVault.Session signedOut = account;
                 NETWORK.execute(() -> revoke(signedOut));

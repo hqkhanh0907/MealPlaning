@@ -4,6 +4,7 @@ use rusqlite::{Connection, OpenFlags, OptionalExtension};
 use serde_json::{Value, json};
 use std::{fmt, path::Path, time::Duration};
 
+pub mod account_auth;
 #[cfg(target_os = "android")]
 mod android;
 pub mod calendar;

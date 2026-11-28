@@ -60,7 +60,7 @@ interface NativeAccount {
     ownerId: string;
   }): Promise<{ devices?: DeviceSessionSummary[]; reason?: string }>;
   revokeDeviceSession(options: { ownerId: string; id: string }): Promise<{ reason?: string }>;
-  clear(): Promise<void>;
+  clear(options?: { ownerId?: string; generation?: string }): Promise<void>;
   enqueue(options: { guard?: boolean; ownerId: string }): Promise<void>;
   syncNow(options: { ownerId: string }): Promise<NativeSyncState>;
   status(): Promise<NativeSyncState>;

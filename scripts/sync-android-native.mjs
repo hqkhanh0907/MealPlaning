@@ -66,6 +66,12 @@ public class MainActivity extends BridgeActivity {
   const gradle = join(app, 'build.gradle');
   replaceOnce(gradle, "apply from: rootProject.file('../scripts/android-native/rust.gradle')",
     /^(apply plugin: 'com\.android\.application')/m, "$1\napply from: rootProject.file('../scripts/android-native/rust.gradle')");
+  replaceOnce(gradle, 'com.squareup.okhttp3:okhttp-tls:5.5.1', /(^dependencies\s*\{)/m,
+    "$1\n    androidTestImplementation 'com.squareup.okhttp3:okhttp-tls:5.5.1'");
+  replaceOnce(gradle, "sourceSets.androidTest.java.srcDir(rootProject.file('../crates/healthmate-capacitor/android-instrumentation'))",
+    /^(android\s*\{)/m, "$1\n    sourceSets.androidTest.java.srcDir(rootProject.file('../crates/healthmate-capacitor/android-instrumentation'))");
+  replaceOnce(gradle, 'com.squareup.okhttp3:okhttp:5.5.1', /(^dependencies\s*\{)/m,
+    "$1\n    implementation 'com.squareup.okhttp3:okhttp:5.5.1'");
   replaceOnce(gradle, "sourceSets.androidTest.java.srcDir(rootProject.file('../crates/healthmate-capacitor/android-tests'))",
     /^(android\s*\{)/m, "$1\n    sourceSets.androidTest.java.srcDir(rootProject.file('../crates/healthmate-capacitor/android-tests'))");
   replaceOnce(gradle, "rootProject.file('../target/leptos-native/jniLibs')",

@@ -24,6 +24,7 @@ final class SessionVault {
     private static final String GROQ_REVISION = "groqRevision";
     private static final int NONCE_BYTES = 12;
     private static final Object LOCK = new Object();
+    private static long authenticationTicket;
     private final AtomicFile file;
 
     SessionVault(Context context) {
@@ -58,11 +59,15 @@ final class SessionVault {
         }
 
         JSObject publicData() {
+            return publicData(false);
+        }
+
+        JSObject publicData(boolean allowLegacyAccessToken) {
             JSObject result = new JSObject();
             result.put("ownerId", ownerId);
             result.put("username", data.optString("username"));
             result.put("fullName", data.optString("fullName"));
-            result.put("accessToken", accessToken);
+            if (allowLegacyAccessToken) result.put("accessToken", accessToken);
             result.put("accessExpiresAt", accessExpiresAt);
             result.put("reason", reason);
             result.put("reauthenticationRequired", !reason.isEmpty());
@@ -74,15 +79,35 @@ final class SessionVault {
         synchronized (LOCK) { return readLocked(); }
     }
 
-    Session replace(JSONObject input) throws Exception {
+    long beginAuthentication() {
+        synchronized (LOCK) { return ++authenticationTicket; }
+    }
+
+    void requireAuthentication(long ticket) throws SessionChanged {
         synchronized (LOCK) {
-            Session previous;
-            try { previous = readLocked(); }
-            catch (Exception unreadable) { previous = null; }
-            JSONObject data = replacementData(input, previous);
-            writeLocked(data);
-            return new Session(data);
+            if (ticket != authenticationTicket) throw new SessionChanged();
         }
+    }
+
+    Session replaceAfterAuthentication(long ticket, JSONObject input) throws Exception {
+        synchronized (LOCK) {
+            if (ticket != authenticationTicket) throw new SessionChanged();
+            return replaceLocked(input);
+        }
+    }
+
+    Session replace(JSONObject input) throws Exception {
+        synchronized (LOCK) { return replaceLocked(input); }
+    }
+
+    private Session replaceLocked(JSONObject input) throws Exception {
+        ++authenticationTicket;
+        Session previous;
+        try { previous = readLocked(); }
+        catch (Exception unreadable) { previous = null; }
+        JSONObject data = replacementData(input, previous);
+        writeLocked(data);
+        return new Session(data);
     }
 
     static JSONObject replacementData(JSONObject input, Session previous) throws Exception {
@@ -113,8 +138,28 @@ final class SessionVault {
 
     Session clear() throws Exception {
         synchronized (LOCK) {
+            ++authenticationTicket;
             try { return readLocked(); }
             finally { file.delete(); }
+        }
+    }
+
+    long beginClear(String owner, String generation) throws Exception {
+        synchronized (LOCK) {
+            if (owner != null || generation != null) {
+                Session current = readLocked();
+                if (current == null || !current.ownerId.equals(owner) ||
+                    (generation != null && !current.generation.equals(generation))) throw new SessionChanged();
+            }
+            return ++authenticationTicket;
+        }
+    }
+
+    Session clearAfter(long ticket, Runnable cleared) throws Exception {
+        synchronized (LOCK) {
+            requireAuthentication(ticket);
+            try { return clear(); }
+            finally { cleared.run(); }
         }
     }
 
