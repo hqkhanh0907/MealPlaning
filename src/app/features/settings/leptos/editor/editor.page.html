@@ -1,0 +1,15 @@
+<ion-header
+  ><ion-toolbar
+    ><ion-buttons slot="start" [class.body-back-slot]="kind === 'body'">
+      @if (kind === 'body') {
+        <ion-back-button [icon]="arrow" defaultHref="/settings" text="" aria-label="Quay lại" />
+      } @else {
+        <ion-back-button defaultHref="/settings" text="" aria-label="Quay lại" />
+      }</ion-buttons
+    ><ion-title>{{ title }}</ion-title></ion-toolbar
+  ></ion-header
+>
+<ion-content [class.ion-padding]="kind !== 'name'"><div #body></div></ion-content>
+<ion-footer [class.name-footer]="kind === 'name'" [class.ion-no-border]="kind !== 'name'"
+  ><div #footer></div
+></ion-footer>

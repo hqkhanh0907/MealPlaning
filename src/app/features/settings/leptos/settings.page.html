@@ -1,0 +1,14 @@
+<ion-header
+  ><ion-toolbar
+    ><ion-buttons slot="start"
+      ><ion-back-button defaultHref="/" text="" aria-label="Quay lại" /></ion-buttons
+    ><ion-title>Cài đặt</ion-title></ion-toolbar
+  ></ion-header
+>
+<ion-content class="settings-content">
+  <div appSettingsSection="account" [snapshot]="accountData()" (action)="run($event)"></div>
+  @if (accountSession.current() && accountSession.required) {
+    <app-leptos-settings-devices />
+  }
+  <div appSettingsSection="preferences" [snapshot]="prefsData()" (action)="run($event)"></div>
+</ion-content>

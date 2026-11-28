@@ -1,0 +1,20 @@
+@use 'sass:meta';
+app-leptos-settings {
+  @include meta.load-css('../settings.page');
+  app-workout-conflict {
+    display: block;
+    @include meta.load-css('../workout-conflict/workout-conflict');
+  }
+  [appSettingsSection] {
+    display: contents;
+  }
+  [appSettingsSection] .settings-hint {
+    color: var(--text-tertiary);
+    font-size: var(--font-size-body-sm);
+  }
+  [appSettingsSection='account']:has(ion-list)
+    + [appSettingsSection='preferences']
+    > .settings-list:first-child {
+    padding-block-start: var(--space-md);
+  }
+}

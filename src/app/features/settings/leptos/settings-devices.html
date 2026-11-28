@@ -1,0 +1,10 @@
+<div appSettingsSection="devices" [snapshot]="data()" (action)="run($event)"></div>
+<app-confirm-dialog
+  [isOpen]="selected() !== null"
+  title="Thu hồi phiên?"
+  message="Thiết bị này sẽ cần đăng nhập lại để tiếp tục đồng bộ."
+  cancelLabel="Hủy"
+  confirmLabel="Thu hồi"
+  (cancelled)="cancel()"
+  (confirmed)="revoke()"
+/>

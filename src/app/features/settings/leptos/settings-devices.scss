@@ -1,0 +1,9 @@
+@use 'sass:meta';
+
+app-leptos-settings-devices {
+  display: block;
+  max-inline-size: 36rem;
+  margin: 0 auto var(--space-xl);
+  padding: 0 var(--space-lg);
+  @include meta.load-css('../device-sessions/device-sessions-panel');
+}

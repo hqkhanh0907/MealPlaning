@@ -1,0 +1,37 @@
+@use 'sass:meta';
+app-leptos-settings-editor[data-settings-editor='name'] {
+  @include meta.load-css('../../name-edit/name-edit.page');
+}
+:where(app-leptos-settings-editor)[data-settings-editor='activity'] {
+  @include meta.load-css('../../activity-edit/activity-edit.page');
+}
+:where(app-leptos-settings-editor)[data-settings-editor='goals'] {
+  @include meta.load-css('../../goals-edit/goals-edit.page');
+}
+app-leptos-settings-editor[data-settings-editor='body'] {
+  --input-bg: var(--bg-card);
+}
+@scope (app-leptos-settings-editor[data-settings-editor='body']) to (app-body-fields) {
+  @include meta.load-css('../../body-edit/body-edit.page');
+  :scope > ion-header {
+    box-shadow: none;
+  }
+}
+app-leptos-settings-editor app-body-fields {
+  display: block;
+  @include meta.load-css('../../../../shared/forms/body-fields/body-fields');
+}
+app-leptos-settings-editor app-birth-date-field {
+  @include meta.load-css('../../../../shared/forms/birth-date-field/birth-date-field');
+  &.inline-age {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: var(--space-lg);
+    row-gap: var(--space-xs);
+  }
+  &.inline-age app-form-field {
+    flex: 1 1 12rem;
+    min-width: 0;
+  }
+}
