@@ -167,11 +167,19 @@ describe('Angular and Leptos dashboard parity', () => {
     await compare('today without plan');
     store.loading.set(true);
     await compare('loading');
+    store.weightSummary.set({
+      currentKg: 75,
+      source: 'weight_log',
+      date: '2026-11-28',
+      deltaKg: -0,
+    });
     store.refreshFailed.set(true);
     await compare('loading takes precedence');
     store.loading.set(false);
     await compare('refresh error');
     store.refreshFailed.set(false);
+    await compare('a small loss still shows a negative zero');
+    expect(html(migrated).textContent).toContain('-0 kg so với lần cân trước');
     store.loggedTotals.set({ ...ZERO_TOTALS, calories: 200.5 });
     data.targets.set({ calories: 100, protein: 100, carbs: 0, fat: 0, fiber: 25 });
     store.nutritionStreakDays.set(0);

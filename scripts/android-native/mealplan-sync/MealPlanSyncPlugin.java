@@ -7,6 +7,7 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -18,6 +19,7 @@ public final class MealPlanSyncPlugin extends Plugin {
     private static final String ALLOWED_ORIGIN = "https://cachyos-x8664.tailb306f9.ts.net";
     private static final ExecutorService CONTROL = Executors.newSingleThreadExecutor();
     private static final ExecutorService NETWORK = Executors.newFixedThreadPool(3);
+    private static final ExecutorService DASHBOARD = Executors.newSingleThreadExecutor();
     private Context context;
     private SessionVault vault;
 
@@ -111,6 +113,70 @@ public final class MealPlanSyncPlugin extends Plugin {
             SessionVault.Session account = vault.read();
             return account == null ? SyncEngine.idle() : new SyncStatus(context, account.ownerId).details(false);
         });
+    }
+
+    private static native String dashboardSummaryNative(String directory, String owner, String dbName, String date) throws IOException;
+
+    static String dashboardSessionIssue(SessionVault.Session expected, SessionVault.Session current) {
+        if (current == null || current.generation.isEmpty()) {
+            return expected == null ? "dashboard_session_required" : "dashboard_session_changed";
+        }
+        if (expected != null && (!expected.ownerId.equals(current.ownerId) ||
+            !expected.generation.equals(current.generation) || !expected.dbName.equals(current.dbName))) return "dashboard_session_changed";
+        if ("session_revoked".equals(current.reason)) return "dashboard_session_revoked";
+        return expected != null && !expected.reason.equals(current.reason) ? "dashboard_session_changed" : null;
+    }
+
+    static String bindDashboardOwner(SessionVault.Session expected, SessionVault.Session current, JSObject snapshot) {
+        String issue = dashboardSessionIssue(expected, current);
+        if (issue == null) snapshot.put("ownerId", current.ownerId);
+        return issue;
+    }
+
+    @PluginMethod public void dashboardSummary(PluginCall call) {
+        String date = call.getString("date");
+        if (date == null || call.getData().length() != 1) {
+            call.reject("Supply a calendar date only", "dashboard_invalid_date");
+            return;
+        }
+        try {
+            SessionVault.Session expected = vault.read();
+            String issue = dashboardSessionIssue(null, expected);
+            if (issue != null) {
+                call.reject("Dashboard session unavailable", issue);
+                return;
+            }
+            DASHBOARD.execute(() -> readDashboard(call, expected, date));
+        } catch (Exception unavailable) {
+            call.reject("Could not read the local session", "dashboard_session_required");
+        }
+    }
+
+    private void readDashboard(PluginCall call, SessionVault.Session expected, String date) {
+        try {
+            String directory = context.getDatabasePath("healthmateSQLite.db").getParent();
+            System.loadLibrary("sqlcipher");
+            System.loadLibrary("healthmate_capacitor");
+            JSObject snapshot = new JSObject(dashboardSummaryNative(directory, expected.ownerId, expected.dbName, date));
+            vault.whileCurrent(expected, () -> {
+                String issue = bindDashboardOwner(expected, vault.read(), snapshot);
+                if (issue == null) call.resolve(snapshot);
+                else call.reject("Dashboard session unavailable", issue);
+                return null;
+            });
+        } catch (SessionVault.SessionChanged stale) {
+            call.reject("The active session changed", "dashboard_session_changed");
+        } catch (IllegalArgumentException invalid) {
+            call.reject("Invalid dashboard date", "dashboard_invalid_date");
+        } catch (SecurityException invalid) {
+            call.reject("Invalid account database binding", "dashboard_session_changed");
+        } catch (FileNotFoundException unavailable) {
+            call.reject("Account database not ready", "dashboard_database_unavailable");
+        } catch (UnsatisfiedLinkError unavailable) {
+            call.reject("Dashboard native library unavailable", "dashboard_native_unavailable");
+        } catch (Exception failure) {
+            call.reject("Could not read local dashboard", "dashboard_read_failed");
+        }
     }
 
     @PluginMethod public void syncNow(PluginCall call) { transfer(call, null); }

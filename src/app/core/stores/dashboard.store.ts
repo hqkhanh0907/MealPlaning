@@ -1,6 +1,9 @@
 import { percentOfNutritionTarget, ZERO_TOTALS, type NutritionTotals } from '../models/nutrition';
 import { addCalendarDays, localIsoDate, parseLocalDate } from '../utils/local-date';
 import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
+import { AccountSession } from '../account/account-session';
+import { readAccountDashboard } from '../account/dashboard-read';
 import { v4 as uuid } from 'uuid';
 import type { MealType } from '../models/meal-plan.types';
 import { validPhotoGrams, validPhotoName, type PhotoMealReviewPortion } from '../models/photo-meal';
@@ -77,6 +80,8 @@ const MACRO_LABELS: Record<MacroMetric, string> = {
 
 @Injectable({ providedIn: 'root' })
 export class DashboardStore {
+  private readonly nativeSession =
+    Capacitor.getPlatform() === 'android' ? inject(AccountSession) : null;
   private readonly calendarStore = inject(CalendarStore);
   private readonly localDay = inject(LocalDay);
   private readonly nutritionStore = inject(NutritionStore);
@@ -277,6 +282,7 @@ export class DashboardStore {
 
   constructor() {
     effect(() => {
+      this.nativeSession?.current();
       this.calendarStore.invalidationTick();
       this.localDay.iso();
       this.profileStore.profile();
@@ -290,12 +296,35 @@ export class DashboardStore {
 
   async refresh(now: Date = new Date()): Promise<void> {
     const seq = ++this.refreshSeq;
+    const identity = this.nativeSession?.current();
+    const stillCurrent = (): boolean =>
+      seq === this.refreshSeq && identity === this.nativeSession?.current();
     const date = localIsoDate(now);
     this.todayIso.set(date);
     this.loading.set(true);
     this.refreshFailed.set(false);
 
     try {
+      if (this.nativeSession) {
+        if (!identity) throw new Error('A current dashboard account is required.');
+        const snapshot = await readAccountDashboard(date, identity.id);
+        if (!stillCurrent()) return;
+        if (snapshot) {
+          this.totals.set(snapshot.totals);
+          this.loggedTotals.set(snapshot.loggedTotals);
+          this.weightSummary.set(
+            snapshot.weight.negativeZeroDelta
+              ? { ...snapshot.weight, deltaKg: -0 }
+              : snapshot.weight,
+          );
+          this.nutritionStreakDays.set(snapshot.streakDays);
+          this.workoutSummary.set(
+            toDashboardWorkoutSummary(snapshot.workout, snapshot.lastSession),
+          );
+          this.pendingMeal.set(snapshot.pendingMeal);
+          return;
+        }
+      }
       const [totals, logged, weightSummary, nutritionStreakDays, workoutSummary, pendingMeal] =
         await Promise.all([
           this.nutritionQuery.dailyTotals(date),
@@ -306,7 +335,7 @@ export class DashboardStore {
           this.findPendingMeal(date),
         ]);
 
-      if (seq !== this.refreshSeq) return;
+      if (!stillCurrent()) return;
       this.totals.set(totals);
       this.loggedTotals.set(logged.find((day) => day.date === date) ?? ZERO_TOTALS);
       this.weightSummary.set(weightSummary);
@@ -314,9 +343,9 @@ export class DashboardStore {
       this.workoutSummary.set(workoutSummary);
       this.pendingMeal.set(pendingMeal);
     } catch {
-      if (seq === this.refreshSeq) this.refreshFailed.set(true);
+      if (stillCurrent()) this.refreshFailed.set(true);
     } finally {
-      if (seq === this.refreshSeq) {
+      if (stillCurrent()) {
         this.loading.set(false);
       }
     }

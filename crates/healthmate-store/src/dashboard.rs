@@ -101,10 +101,16 @@ fn summary_in(db: &Connection, today: NaiveDate, date: &str) -> Result<Value> {
     )?;
     let weight = if let Some(row) = weight_rows.first() {
         let current = row["weight_kg"].as_f64();
-        let delta = weight_rows.get(1).and_then(|r| {
-            Some((((current? - r["weight_kg"].as_f64()?) * 10.) + 0.5).floor() / 10.)
-        });
-        json!({"currentKg":current,"source":"weight_log","date":row["date"],"deltaKg":delta})
+        let difference = weight_rows
+            .get(1)
+            .and_then(|r| Some(current? - r["weight_kg"].as_f64()?));
+        let delta = difference.map(|change| (change * 10. + 0.5).floor() / 10.);
+        let mut weight =
+            json!({"currentKg":current,"source":"weight_log","date":row["date"],"deltaKg":delta});
+        if delta == Some(0.) && difference.is_some_and(|value| value < 0.) {
+            weight["negativeZeroDelta"] = true.into();
+        }
+        weight
     } else {
         json!({"currentKg":profile.as_ref().map(|v|&v["weight_kg"]), "source":profile.as_ref().map(|_|"profile"),"date":null,"deltaKg":null})
     };

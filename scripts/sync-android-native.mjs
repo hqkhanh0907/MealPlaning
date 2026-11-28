@@ -57,6 +57,8 @@ public class MainActivity extends BridgeActivity {
     'import com.healthmate.ai.sync.MealPlanSyncPlugin;\nimport com.healthmate.ai.sync.MealPlanGroqPlugin;$1$2registerPlugin(MealPlanSyncPlugin.class);\n$2registerPlugin(MealPlanGroqPlugin.class);');
 
   const gradle = join(app, 'build.gradle');
+  replaceOnce(gradle, "rootProject.file('../target/leptos-native/jniLibs')",
+    /^(android\s*\{)/m, "$1\n    sourceSets.main.jniLibs.srcDir(rootProject.file('../target/leptos-native/jniLibs'))\n    sourceSets.test.java.srcDir(rootProject.file('../crates/healthmate-capacitor/android-tests'))");
   const pluginGradle = readFileSync(join(root, 'node_modules/@capacitor-community/sqlite/android/build.gradle'), 'utf8');
   const sqlCipher = /net\.zetetic:sqlcipher-android:[^'"\s]+/.exec(pluginGradle)?.[0];
   const sqlite = /androidx\.sqlite:sqlite:[^'"\s]+/.exec(pluginGradle)?.[0];

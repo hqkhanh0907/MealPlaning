@@ -66,6 +66,7 @@ export default class LeptosDashboardPage extends DashboardPage {
   private readonly viewJson = computed(() => {
     const d = this.dashboard;
     const draft = d.photoDraft();
+    const weight = d.weightSummary();
     return JSON.stringify({
       loading: d.loading(),
       refreshFailed: d.refreshFailed(),
@@ -74,7 +75,7 @@ export default class LeptosDashboardPage extends DashboardPage {
         totals: d.totals(),
         loggedTotals: d.loggedTotals(),
         targets: d.targets(),
-        weightSummary: d.weightSummary(),
+        weightSummary: { ...weight, negativeZeroDelta: Object.is(weight.deltaKg, -0) },
         nutritionStreakDays: d.nutritionStreakDays(),
         workoutStreakWeeks: d.workoutSummary().streakWeeks,
       },

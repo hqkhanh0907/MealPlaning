@@ -17,6 +17,8 @@ pub struct DashboardInput {
 pub struct WeightSummary {
     pub current_kg: Option<f64>,
     pub delta_kg: Option<f64>,
+    #[serde(default)]
+    pub negative_zero_delta: bool,
     pub source: Option<WeightSource>,
 }
 
@@ -255,7 +257,14 @@ fn weight_labels(summary: WeightSummary) -> (String, String) {
         Some(delta) => format!(
             "{}{} kg so với lần cân trước",
             if delta > 0.0 { "+" } else { "" },
-            vi_decimal(delta, 1)
+            vi_decimal(
+                if delta == 0.0 && summary.negative_zero_delta {
+                    -0.0
+                } else {
+                    delta
+                },
+                1
+            )
         ),
         None if summary.source == Some(WeightSource::WeightLog) => {
             "Chưa có mốc cân trước đó".into()
