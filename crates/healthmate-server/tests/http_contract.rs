@@ -611,20 +611,33 @@ async fn imports_real_pocketbase_credentials_workspace_and_device_session() {
         std::env::var("POCKETBASE_BIN").expect("set POCKETBASE_BIN to PocketBase 0.40.6");
     let cwd = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../server/tests/pocketbase");
     let dir = format!("--dir={}", old.display());
+    let pocketbase = || {
+        let mut command = Command::new(&legacy_bin);
+        command.current_dir(&cwd).args([
+            dir.as_str(),
+            "--hooksWatch=false",
+            "--hooksDir=pb_hooks",
+            "--migrationsDir=pb_migrations",
+        ]);
+        command
+    };
+    // PocketBase opens the browser on first serve if there is no superuser.
+    let setup = pocketbase()
+        .args(["superuser", "upsert", "admin@example.test"])
+        .arg(Uuid::new_v4().to_string())
+        .output()
+        .expect("run PocketBase superuser setup");
+    assert!(
+        setup.status.success(),
+        "PocketBase superuser setup failed: {}",
+        String::from_utf8_lossy(&setup.stderr)
+    );
     let reserve = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
     let addr = reserve.local_addr().unwrap();
     drop(reserve);
     let legacy = Legacy(
-        Command::new(&legacy_bin)
-            .current_dir(&cwd)
-            .args([
-                "serve",
-                &format!("--http={addr}"),
-                &dir,
-                "--hooksWatch=false",
-                "--hooksDir=pb_hooks",
-                "--migrationsDir=pb_migrations",
-            ])
+        pocketbase()
+            .args(["serve", &format!("--http={addr}")])
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .spawn()
