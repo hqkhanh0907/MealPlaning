@@ -51,6 +51,7 @@ jobs:
         run: |
           sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0' 'ndk;30.0.16248370'
           rustup target add aarch64-linux-android --toolchain 1.100.1
-          ANDROID_NDK_HOME="$ANDROID_HOME/ndk/30.0.16248370" npm run android:leptos -- --abi arm64-v8a
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/30.0.16248370"
+          npm run android:leptos -- --abi arm64-v8a
           unzip -t android/app/build/outputs/apk/debug/app-debug.apk lib/arm64-v8a/libhealthmate_capacitor.so
-          android/gradlew -p android testDebugUnitTest
+          android/gradlew -p android -PhealthmateAbis=arm64-v8a testDebugUnitTest
