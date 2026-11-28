@@ -33,7 +33,10 @@ fn parse<T: DeserializeOwned>(json: &str) -> Result<T, JsValue> {
     serde_json::from_str(json)
         .map_err(|e| js_sys::Error::new(&format!("Invalid view snapshot: {e}")).into())
 }
-pub(crate) fn mount<T: Clone + PartialEq + Send + Sync + DeserializeOwned + 'static, V: IntoView + 'static>(
+pub(crate) fn mount<
+    T: Clone + PartialEq + Send + Sync + DeserializeOwned + 'static,
+    V: IntoView + 'static,
+>(
     root: HtmlElement,
     json: &str,
     callback: js_sys::Function,
