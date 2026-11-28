@@ -6,6 +6,8 @@ use std::{fmt, path::Path, time::Duration};
 
 #[cfg(target_os = "android")]
 mod android;
+#[cfg(target_os = "android")]
+mod groq;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ReadError {

@@ -48,6 +48,25 @@ final class GroqTransport {
 
     GroqTransport(Connections connections) { this.connections = connections; }
 
+    private static native String decodeContentNative(byte[] bytes);
+
+    private static final class NativeDecoder {
+        static final boolean AVAILABLE = load();
+
+        private static boolean load() {
+            try {
+                System.loadLibrary("healthmate_capacitor");
+                // Older packaged libraries can load successfully but lack this decoder symbol.
+                decodeContentNative(new byte[0]);
+                return true;
+            } catch (UnsatisfiedLinkError unsupported) {
+                return false;
+            }
+        }
+    }
+
+    static boolean usesRustDecoder() { return NativeDecoder.AVAILABLE; }
+
     static String normalizeKey(String value) throws Failure {
         String key = value == null ? "" : value.trim();
         if (key.isEmpty() || key.length() > MAX_KEY_LENGTH ||
@@ -119,7 +138,13 @@ final class GroqTransport {
                 if (output.size() + read > MAX_RESPONSE_BYTES) throw new Failure("groq_invalid_response");
                 output.write(buffer, 0, read);
             }
-            JSONObject result = new JSONObject(new String(output.toByteArray(), StandardCharsets.UTF_8));
+            byte[] bytes = output.toByteArray();
+            if (usesRustDecoder()) {
+                String content = decodeContentNative(bytes);
+                if (content == null) throw new Failure("groq_invalid_response");
+                return content;
+            }
+            JSONObject result = new JSONObject(new String(bytes, StandardCharsets.UTF_8));
             Object content = result.getJSONArray("choices").getJSONObject(0).getJSONObject("message").get("content");
             if (content instanceof String text && !text.trim().isEmpty()) return text;
             throw new Failure("groq_invalid_response");
