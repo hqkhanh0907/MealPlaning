@@ -1,0 +1,5 @@
+@use 'sass:meta';
+
+app-leptos-account {
+  @include meta.load-css('../account.page');
+}

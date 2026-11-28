@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { type CanActivateFn, Router, Routes } from '@angular/router';
 import { onboardingGuard, onboardingCompletedRedirectGuard } from './core/guards/onboarding-guard';
 import { AccountSession } from './core/account/account-session';
+import { loadAccountPage } from './account-entry';
 
 const accountGuard: CanActivateFn = () => {
   const session = inject(AccountSession);
@@ -13,7 +14,7 @@ const accountGuard: CanActivateFn = () => {
 export const routes: Routes = [
   {
     path: 'account',
-    loadComponent: () => import('./features/account/account.page'),
+    loadComponent: loadAccountPage,
   },
   {
     path: 'onboarding',

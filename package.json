@@ -41,7 +41,7 @@
     "prewatch": "node scripts/prepare-groq-config.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:leptos": "node scripts/build-leptos.mjs && ng test --configuration leptos-parity --include=src/app/features/dashboard/dashboard-view.parity.ts --include=src/app/features/onboarding/leptos/onboarding.parity.ts --watch=false --browsers=ChromeHeadless",
+    "test:leptos": "node scripts/build-leptos.mjs && ng test --configuration leptos-parity --include=\"src/app/**/*.parity.ts\" --watch=false --browsers=ChromeHeadless",
     "lint": "ng lint",
     "lint:fix": "ng lint --fix",
     "format": "prettier --write \"src/**/*.{ts,html,scss,json}\"",

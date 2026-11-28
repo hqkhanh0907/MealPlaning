@@ -1,4 +1,6 @@
 #[cfg(target_arch = "wasm32")]
+mod account;
+#[cfg(target_arch = "wasm32")]
 mod browser;
 mod model;
 #[cfg(target_arch = "wasm32")]
